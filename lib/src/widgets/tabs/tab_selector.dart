@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
@@ -192,6 +192,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
   Booru? booruFilter;
   TagType? tagTypeFilter;
   bool duplicateFilter = false, duplicateBooruFilter = true, emptyFilter = false;
+  bool? isMultiBooruMode;
   bool selectMode = false;
 
   static const double tabHeight = 72 + 8;
@@ -213,6 +214,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
       count++;
     }
     if (duplicateFilter) {
+      count++;
+    }
+    if (isMultiBooruMode != null) {
       count++;
     }
     if (emptyFilter) {
@@ -347,6 +351,11 @@ class _TabManagerPageState extends State<TabManagerPage> {
       });
     }
 
+    if (isMultiBooruMode != null) {
+      filteredTabs =
+          filteredTabs.where((tab) => isMultiBooruMode == false ? (tab.secondaryBoorus?.isEmpty ?? true) : tab.secondaryBoorus?.isNotEmpty == true).toList();
+    }
+
     if (emptyFilter) {
       filteredTabs = filteredTabs.where((tab) => tab.tags.trim().isEmpty).toList();
     }
@@ -417,6 +426,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
         duplicateBooruFilterChanged: (bool newValue) {
           duplicateBooruFilter = newValue;
         },
+        isMultiBooruMode: isMultiBooruMode,
+        isMultiBooruModeChanged: (bool? newValue) {
+          isMultiBooruMode = newValue;
+        },
         emptyFilter: emptyFilter,
         emptyFilterChanged: (bool newValue) {
           emptyFilter = newValue;
@@ -429,12 +442,19 @@ class _TabManagerPageState extends State<TabManagerPage> {
         sortingMode = TabSortingMode.alphabet;
       }
     }
-    if (result == 'clear' || (loadedFilter == null && booruFilter == null && tagTypeFilter == null && duplicateFilter == false && emptyFilter == false)) {
+    if (result == 'clear' ||
+        (loadedFilter == null &&
+            booruFilter == null &&
+            tagTypeFilter == null &&
+            duplicateFilter == false &&
+            isMultiBooruMode == null &&
+            emptyFilter == false)) {
       loadedFilter = null;
       booruFilter = null;
       tagTypeFilter = null;
       duplicateFilter = false;
       duplicateBooruFilter = true;
+      isMultiBooruMode = null;
       emptyFilter = false;
 
       if (!sortingMode.isNone) {
@@ -714,7 +734,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
       ),
       scrollable: false,
       content: Container(
-        height: MediaQuery.of(context).size.height * 0.75,
+        height: MediaQuery.sizeOf(context).height * 0.75,
         width: double.maxFinite,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
@@ -1216,7 +1236,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
                   10,
                   10,
                   10,
-                  10 + MediaQuery.of(context).padding.bottom,
+                  10 + MediaQuery.paddingOf(context).bottom,
                 ),
                 width: double.infinity,
                 child: Row(

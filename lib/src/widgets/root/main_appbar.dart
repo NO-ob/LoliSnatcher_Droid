@@ -112,7 +112,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final double barHeight = _scrollOffset * (widget.defaultHeight + MediaQuery.of(context).padding.top);
+    final double barHeight = _scrollOffset * (widget.defaultHeight + MediaQuery.paddingOf(context).top);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),

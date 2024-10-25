@@ -28,8 +28,14 @@ class MoebooruHandler extends BooruHandler {
     try {
       final int? count = int.tryParse(parsedResponse.findAllElements('posts').first.getAttribute('count') ?? '0');
       totalCount.value = count ?? 0;
-    } catch (e) {
-      Logger.Inst().log('$e', className, 'searchCount', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        '$e',
+        className,
+        'searchCount',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     return parsedResponse.findAllElements('post').toList();

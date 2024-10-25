@@ -75,8 +75,14 @@ class R34USHandler extends BooruHandler {
         Logger.Inst().log('$className url response is: ${response.data}', className, 'getPostData', LogTypes.booruHandlerFetchFailed);
         errorString = response.statusCode.toString();
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'getPostData', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'getPostData',
+        LogTypes.exception,
+        s: s,
+      );
       errorString = e.toString();
     }
     return item;

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/clear_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 
 class TabManagerFiltersDialog extends StatefulWidget {
   const TabManagerFiltersDialog({
@@ -17,6 +20,8 @@ class TabManagerFiltersDialog extends StatefulWidget {
     required this.duplicateFilterChanged,
     required this.duplicateBooruFilter,
     required this.duplicateBooruFilterChanged,
+    required this.isMultiBooruMode,
+    required this.isMultiBooruModeChanged,
     required this.emptyFilter,
     required this.emptyFilterChanged,
     super.key,
@@ -32,6 +37,8 @@ class TabManagerFiltersDialog extends StatefulWidget {
   final ValueChanged<bool> duplicateFilterChanged;
   final bool duplicateBooruFilter;
   final ValueChanged<bool> duplicateBooruFilterChanged;
+  final bool? isMultiBooruMode;
+  final ValueChanged<bool?> isMultiBooruModeChanged;
   final bool emptyFilter;
   final ValueChanged<bool> emptyFilterChanged;
 
@@ -44,6 +51,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
   Booru? booruFilter;
   TagType? tagTypeFilter;
   bool duplicateFilter = false, duplicateBooruFilter = true, emptyFilter = false;
+  bool? isMultiBooruMode;
 
   @override
   void initState() {
@@ -54,6 +62,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
     tagTypeFilter = widget.tagTypeFilter;
     duplicateFilter = widget.duplicateFilter;
     duplicateBooruFilter = widget.duplicateBooruFilter;
+    isMultiBooruMode = widget.isMultiBooruMode;
     emptyFilter = widget.emptyFilter;
   }
 
@@ -64,15 +73,23 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
         'Tab Filters',
         style: TextStyle(fontSize: 20),
       ),
-      titlePadding: const EdgeInsets.fromLTRB(32, 16, 16, 0),
-      contentPadding: const EdgeInsets.all(16),
-      buttonPadding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+      titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+      contentPadding: EdgeInsets.zero,
+      buttonPadding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
       contentItems: [
         SettingsBooruDropdown(
           title: 'Booru',
           value: booruFilter,
           drawBottomBorder: false,
           nullable: true,
+          itemBuilder: (item, isCurrent) => _BooruDropdownItem(
+            key: ValueKey(item),
+            item: item,
+            isCurrent: isCurrent,
+          ),
+          itemFilter: (booru) {
+            return SearchHandler.instance.list.where((t) => t.selectedBooru.value.name == booru?.name).isNotEmpty;
+          },
           onChanged: (Booru? newValue) {
             booruFilter = newValue;
             setState(() {});
@@ -113,7 +130,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
                 context: context,
                 builder: (context) {
                   return const SettingsDialog(
-                    title: Text('Tag Type Tab Filter'),
+                    title: Text('Tag Type Filter'),
                     contentItems: [
                       Text('Filter tabs which contain at least one tag of selected type'),
                     ],
@@ -126,22 +143,10 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             null,
             ...TagType.values,
           ],
-          itemBuilder: (item) => Row(
-            children: [
-              if (item != null && item.isNone == false)
-                Container(
-                  height: 24,
-                  width: 6,
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(
-                    color: item.getColour(),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-              Text(item == null ? 'Any' : item.locName),
-            ],
+          itemBuilder: (item) => _TagTypeDropdownItem(
+            key: ValueKey(item),
+            item: item,
           ),
-          itemTitleBuilder: (item) => item == null ? 'Any' : item.locName,
         ),
         SettingsToggle(
           title: 'Duplicates',
@@ -178,8 +183,18 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
                 )
               : const SizedBox.shrink(),
         ),
+        SettingsToggleTristate(
+          title: 'Multibooru',
+          value: isMultiBooruMode,
+          onChanged: (bool? newValue) {
+            isMultiBooruMode = newValue;
+            setState(() {});
+          },
+          reverse: true,
+          drawBottomBorder: false,
+        ),
         SettingsToggle(
-          title: 'Empty tags',
+          title: 'Empty search query',
           value: emptyFilter,
           onChanged: (bool newValue) {
             emptyFilter = newValue;
@@ -200,10 +215,94 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             widget.tagTypeFilterChanged(tagTypeFilter);
             widget.duplicateFilterChanged(duplicateFilter);
             widget.duplicateBooruFilterChanged(duplicateBooruFilter);
+            widget.isMultiBooruModeChanged(isMultiBooruMode);
             widget.emptyFilterChanged(emptyFilter);
             Navigator.of(context).pop('apply');
           },
         ),
+      ],
+    );
+  }
+}
+
+class _BooruDropdownItem extends StatelessWidget {
+  const _BooruDropdownItem({
+    required this.item,
+    required this.isCurrent,
+    super.key,
+  });
+
+  final Booru? item;
+  final bool isCurrent;
+
+  @override
+  Widget build(BuildContext context) {
+    if (item == null) {
+      return const SizedBox.shrink();
+    }
+
+    final int tabCount = SearchHandler.instance.list.where((t) => t.selectedBooru.value.name == item?.name).length;
+    final String? tabCountStr = tabCount > 0 ? ' ($tabCount)' : null;
+
+    return Container(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      height: kMinInteractiveDimension,
+      decoration: isCurrent
+          ? BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+            )
+          : null,
+      child: TabBooruSelectorItem(
+        booru: item!,
+        extraText: tabCountStr,
+      ),
+    );
+  }
+}
+
+class _TagTypeDropdownItem extends StatelessWidget {
+  const _TagTypeDropdownItem({
+    required this.item,
+    super.key,
+  });
+
+  final TagType? item;
+
+  @override
+  Widget build(BuildContext context) {
+    String title = item == null ? 'Any' : item!.locName;
+
+    final bool showColor = item == null ? false : !item!.isNone;
+
+    if (showColor) {
+      final int tabCount = SearchHandler.instance.list.where((t) {
+        final List<String> tags = t.tags.toLowerCase().trim().split(' ');
+        for (final tag in tags) {
+          if (TagHandler.instance.getTag(tag).tagType == item) {
+            return true;
+          }
+        }
+        return false;
+      }).length;
+
+      if (tabCount > 0) {
+        title += ' ($tabCount)';
+      }
+    }
+
+    return Row(
+      children: [
+        if (showColor)
+          Container(
+            height: 24,
+            width: 6,
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: item!.getColour(),
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+        Text(title),
       ],
     );
   }

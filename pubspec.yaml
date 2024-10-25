@@ -2,92 +2,96 @@ name: lolisnatcher
 description: Booru Client with the ability to batch download Images.
 publish_to: none
 
-version: 2.4.0+188 # remember to update the values in constants.dart after changing them here
+version: 2.4.1+189 # remember to update the values in constants.dart after changing them here
 
 environment:
-  sdk: ">=3.1.4 <4.0.0"
-  flutter: ^3.19.2
+  sdk: ">=3.5.3 <4.0.0"
+  flutter: ^3.24.3
 
 dependencies:
   flutter:
     sdk: flutter
-
-  alice_lightweight: ^3.6.0
-  app_links: ^4.0.1
-  auto_size_text: ^3.0.0
-  awesome_notifications: ^0.9.3+1
-  chewie: ^1.8.1
-  crypto: ^3.0.3
-  cupertino_icons: ^1.0.6
-  dart_vlc: ^0.4.0 # TODO move to media_kit (see relevant PR)
-  dio: ^5.4.3+1
+  alice_lightweight: ^3.9.0
+  app_links: ^6.3.2
+  auto_size_text_plus: ^3.0.2
+  awesome_notifications: ^0.10.0
+  chewie: ^1.8.5
+  crypto: ^3.0.6
+  cupertino_icons: ^1.0.8
+  dio: ^5.7.0
   dynamic_color: ^1.7.0
+  external_video_player_launcher: ^0.0.3
   fast_marquee:
     git:
-      # url: "https://github.com/hacker1024/fast_marquee.git" # original
-      url: "https://github.com/NANI-SORE/fast_marquee.git"
+      url: https://github.com/NANI-SORE/fast_marquee.git
       ref: 828e79014ed5fd73062d6a24db14b6c114ac175b # master - forked to add richtext
-  flash: ^3.1.0
-  flex_color_picker: ^3.4.1
+  flash: ^3.1.1
+  flex_color_picker: ^3.6.0
   flutter_displaymode: ^0.6.0
   flutter_improved_scrolling: ^0.0.3
-  flutter_inappwebview: ^6.0.0
+  flutter_inappwebview: ^6.1.5
   flutter_inner_drawer:
     git:
-      url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"
-      ref: 781d16e05e987e3873c1f1562465079f10e390e7 # master
+      url: https://github.com/NANI-SORE/flutter_inner_drawer.git
+      ref: a12cffc2d54e1e0350904d0f841203935d20e465 # master
   flutter_linkify: ^6.0.0
-  flutter_socks_proxy: ^0.0.3
+  flutter_socks_proxy:
+    git: https://github.com/jiangtian616/socks_proxy
   font_awesome_flutter: ^10.7.0
   get: ^4.6.6
   google_fonts: ^6.2.1
   html: ^0.15.4
-  http_proxy: ^1.2.1
-  huge_listview: ^2.0.11
-  image: ^4.1.7
+  http_proxy: # ^1.2.2
+    git:
+      url: https://github.com/NANI-SORE/http_proxy.git
+      ref: ce01861ac45b12e9d974cb447ea91ef68a90427d # master - forked to fix build errors and remove allowing all bad certs
+  huge_listview: ^2.0.12
+  image: ^4.3.0
   intl: ^0.19.0
   keyboard_actions: ^4.2.0
-  logger_fork: ^1.2.0
-  logger_flutter_fork: ^1.3.1
-  # local_auth: ^2.1.7
-  path_provider: ^2.1.3
+  # local_auth: ^2.3.0
+  material_color_utilities: ^0.12.0
+  media_kit: ^1.1.11
+  media_kit_video: ^1.2.5
+  media_kit_libs_video: ^1.0.5
+  native_dio_adapter: ^1.3.0
+  path_provider: ^2.1.4
   permission_handler: ^11.3.1
-  photo_view: # ^0.12.0
-    # path: "../forks/photo_view"
+  photo_view:
     git:
-      url: "https://github.com/NANI-SORE/photo_view.git"
-      ref: 562c040a52c60c4f647dd779197382c23e87cebf # master
+      url: https://github.com/NANI-SORE/photo_view.git
+      ref: 410b4c26d7b4747e88ca2227a88fe7ad707679f1 # master
   preload_page_view: ^0.2.0
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
-  share_plus: ^8.0.3 # not used directly, but is part of some deps (i.e. alice)
-  sqflite_common_ffi: ^2.3.3
-  sqflite: ^2.3.3
+  share_plus: ^10.1.0 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
+  sqflite_common_ffi: ^2.3.4
+  sqflite: ^2.4.0
   statsfl: ^2.3.0
-  system_network_proxy: # ^1.0.2
-    git:
-      url: "https://github.com/honjow/system_network_proxy.git"
-      ref: 2be220557ac039118c2039bd58ef1a16b3c8aeae
-      path: system_network_proxy
+  talker_dio_logger: ^4.4.1
+  talker_flutter: ^4.4.1
+  talker_logger: ^4.4.1
+  talker: ^4.4.1
   transparent_image: ^2.0.1
-  url_launcher: ^6.2.6
-  uuid: ^4.4.0
-  vibration: ^1.8.4
-  video_player: ^2.8.6
+  url_launcher: ^6.3.1
+  uuid: ^4.5.1
+  vibration: ^2.0.1
+  video_player: ^2.9.2
   waterfall_flow: ^3.0.3
   xml: ^6.5.0
 
 
 
 dependency_overrides:
-  http: "1.2.1"
+  android_intent_plus: ^5.2.0
+  material_color_utilities: ^0.12.0 # flutter_test conflict
 
 
 
 dev_dependencies:
-  flutter_lints: ^3.0.2
   flutter_test:
     sdk: flutter
+  flutter_lints: ^5.0.0
 
 
 

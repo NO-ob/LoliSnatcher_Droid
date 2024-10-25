@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -71,7 +72,7 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -146,14 +147,14 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Widget shareButton() {
+    if (!BooruType.saveable.contains(selectedBooru?.type)) {
+      return const SizedBox.shrink();
+    }
+
     return SettingsButton(
       name: 'Share Booru config',
       icon: const Icon(Icons.share),
       action: () {
-        if (selectedBooru?.type == BooruType.Favourites || selectedBooru?.type == BooruType.Downloads) {
-          return;
-        }
-
         showDialog(
           context: context,
           builder: (context) {
@@ -161,7 +162,7 @@ class _BooruPageState extends State<BooruPage> {
               title: const Text('Share Booru'),
               contentItems: [
                 Text(
-                  "Booru Config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}.",
+                  "Booru config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}.",
                 ),
                 const Text(''),
                 const Text('Should login/apikey data be included?'),
@@ -216,19 +217,25 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Widget editButton() {
+    if (!BooruType.saveable.contains(selectedBooru?.type)) {
+      return const SizedBox.shrink();
+    }
+
     return SettingsButton(
       name: 'Edit Booru config',
       icon: const Icon(Icons.edit),
       // do nothing if no selected or selected "Favourites/Dowloads"
       // TODO update all tabs with old booru with a new one
       // TODO if you open edit after already editing - it will open old instance + possible exception due to old data
-      page: (selectedBooru != null && selectedBooru?.type != BooruType.Favourites && selectedBooru?.type != BooruType.Downloads)
-          ? () => BooruEdit(selectedBooru!)
-          : null,
+      page: (selectedBooru != null && BooruType.saveable.contains(selectedBooru?.type)) ? () => BooruEdit(selectedBooru!) : null,
     );
   }
 
   Widget deleteButton() {
+    if (!BooruType.saveable.contains(selectedBooru?.type)) {
+      return const SizedBox.shrink();
+    }
+
     return SettingsButton(
       name: 'Delete ${selectedBooru?.name} Booru config',
       icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
@@ -238,16 +245,6 @@ class _BooruPageState extends State<BooruPage> {
           FlashElements.showSnackbar(
             context: context,
             title: const Text('No Booru Selected!', style: TextStyle(fontSize: 20)),
-            leadingIcon: Icons.warning_amber,
-            leadingIconColor: Colors.red,
-            sideColor: Colors.red,
-          );
-          return;
-        }
-        if (selectedBooru?.type == BooruType.Favourites || selectedBooru?.type == BooruType.Downloads) {
-          FlashElements.showSnackbar(
-            context: context,
-            title: const Text("Can't delete this Booru!", style: TextStyle(fontSize: 20)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -298,7 +295,7 @@ class _BooruPageState extends State<BooruPage> {
                     if (await settingsHandler.deleteBooru(tempSelected)) {
                       FlashElements.showSnackbar(
                         context: context,
-                        title: const Text('Booru Deleted!', style: TextStyle(fontSize: 20)),
+                        title: const Text('Booru deleted!', style: TextStyle(fontSize: 20)),
                         leadingIcon: Icons.delete_forever,
                         leadingIconColor: Colors.red,
                         sideColor: Colors.yellow,
@@ -334,13 +331,17 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Widget webviewButton() {
-    // TODO add help button and explain how to properly setup cookies
-    return SettingsButton(
-      name: 'Open webview to get cookies',
-      subtitle: const Text('[BETA]'),
-      icon: const Icon(Icons.public),
-      page: () => InAppWebviewView(initialUrl: selectedBooru!.baseURL!),
-    );
+    if (BooruType.saveable.contains(selectedBooru?.type) && Tools.isOnPlatformWithWebviewSupport) {
+      // TODO add help button and explain how to properly setup cookies?
+      return SettingsButton(
+        name: 'Open webview',
+        subtitle: const Text('To login or obtain cookies'),
+        icon: const Icon(Icons.public),
+        page: () => InAppWebviewView(initialUrl: selectedBooru!.baseURL!),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
   Widget addFromClipboardButton() {
@@ -393,7 +394,7 @@ class _BooruPageState extends State<BooruPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -404,8 +405,7 @@ class _BooruPageState extends State<BooruPage> {
             children: [
               SettingsTextInput(
                 controller: defaultTagsController,
-                title: 'Default Tags',
-                hintText: 'Tags searched when app opens',
+                title: 'Default tags',
                 inputType: TextInputType.text,
                 clearable: true,
                 pasteable: true,
@@ -413,8 +413,9 @@ class _BooruPageState extends State<BooruPage> {
               ),
               SettingsTextInput(
                 controller: limitController,
-                title: 'Items per Page',
-                hintText: 'Items to fetch per page 10-100',
+                title: 'Items fetched per page',
+                hintText: '10-100',
+                subtitle: const Text('Some Boorus may ignore this setting'),
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['limit']!['default']!.toString(),
@@ -470,7 +471,13 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                 children: [
                   const TextSpan(text: 'Change to: '),
                   TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  WidgetSpan(child: Favicon(selectedBooru)),
+                  WidgetSpan(
+                    child: switch (selectedBooru.type) {
+                      BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
+                      BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
+                      _ => Favicon(selectedBooru),
+                    },
+                  ),
                   const TextSpan(text: '?'),
                 ],
               ),
@@ -489,7 +496,13 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                 children: [
                   const TextSpan(text: 'Tap [Yes] to change to: '),
                   TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  WidgetSpan(child: Favicon(selectedBooru)),
+                  WidgetSpan(
+                    child: switch (selectedBooru.type) {
+                      BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
+                      BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
+                      _ => Favicon(selectedBooru),
+                    },
+                  ),
                 ],
               ),
             ),

@@ -44,7 +44,7 @@ class TabRow extends StatelessWidget {
           fontSize: 16,
           fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
           fontWeight: fontWeight ?? FontWeight.normal,
-          color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onBackground,
+          color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
         ),
       );
 
@@ -58,7 +58,7 @@ class TabRow extends StatelessWidget {
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
               fontWeight: fontWeight ?? FontWeight.normal,
-              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onBackground,
+              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
             );
 
             spans.add(
@@ -86,7 +86,7 @@ class TabRow extends StatelessWidget {
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
               fontWeight: fontWeight ?? FontWeight.normal,
-              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onBackground,
+              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
             ),
           );
         } else if (withColoredTags) {
@@ -108,7 +108,7 @@ class TabRow extends StatelessWidget {
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
               fontWeight: fontWeight ?? FontWeight.normal,
-              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onBackground,
+              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
               backgroundColor: isColored ? tagData.tagType.getColour().withOpacity(0.66) : null,
             );
 
@@ -151,15 +151,15 @@ class TabRow extends StatelessWidget {
         child: Row(
           children: [
             if (withFavicon) ...[
-              if (isNotEmptyBooru) ...[
-                if (tab.selectedBooru.value.type == BooruType.Downloads)
-                  const Icon(Icons.file_download_outlined, size: 20)
-                else if (tab.selectedBooru.value.type == BooruType.Favourites)
-                  const Icon(Icons.favorite, color: Colors.red, size: 20)
-                else
-                  Favicon(tab.selectedBooru.value, color: color),
-              ] else
+              if (isNotEmptyBooru)
+                switch (tab.selectedBooru.value.type) {
+                  BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
+                  BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
+                  _ => Favicon(tab.selectedBooru.value, color: color),
+                }
+              else
                 const Icon(CupertinoIcons.question, size: 20),
+              //
               const SizedBox(width: 4),
             ],
             marquee,

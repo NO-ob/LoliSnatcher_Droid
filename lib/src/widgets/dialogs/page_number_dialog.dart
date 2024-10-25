@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:get/get.dart';
+
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/pulse_widget.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class PageNumberDialog extends StatelessWidget {
@@ -23,7 +26,10 @@ class PageNumberDialog extends StatelessWidget {
     final int possibleMaxPageNum = total != 0 ? (total / settingsHandler.limit).round() : 0;
 
     return SettingsBottomSheet(
-      title: const Text('Page changer'),
+      title: const Text(
+        'Page changer',
+        style: TextStyle(fontSize: 20),
+      ),
       contentItems: [
         SettingsTextInput(
           title: 'Page #',
@@ -38,7 +44,7 @@ class PageNumberDialog extends StatelessWidget {
           numberMax: double.infinity,
         ),
         SettingsTextInput(
-          title: 'Delay between loadings',
+          title: 'Delay between loadings (ms)',
           hintText: 'Delay in ms',
           onlyInput: true,
           controller: delayController,
@@ -63,6 +69,19 @@ class PageNumberDialog extends StatelessWidget {
               pageNumberController.text = possibleMaxPageNum.toString();
             },
           ),
+        Obx(
+          () => searchHandler.isRunningAutoSearch.value
+              ? const SettingsButton(
+                  name: 'Search currently running!',
+                  icon: PulseWidget(
+                    child: Icon(
+                      Icons.warning_amber,
+                      color: Colors.yellow,
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
       ],
       actionButtons: [
         ElevatedButton(
@@ -75,17 +94,34 @@ class PageNumberDialog extends StatelessWidget {
           },
         ),
         const SizedBox(width: 10),
-        ElevatedButton(
-          child: const Text('Search until page'),
-          onPressed: () {
-            if (pageNumberController.text.isNotEmpty) {
-              searchHandler.searchCurrentTabUntilPageNumber(
-                (int.tryParse(pageNumberController.text) ?? 0) - 1,
-                customDelay: int.tryParse(delayController.text) ?? 200,
-              );
-              Navigator.of(context).pop();
-            }
-          },
+        Obx(
+          () => ElevatedButton(
+            onPressed: searchHandler.isRunningAutoSearch.value
+                ? null
+                : () {
+                    if (pageNumberController.text.isNotEmpty) {
+                      searchHandler.searchCurrentTabUntilPageNumber(
+                        (int.tryParse(pageNumberController.text) ?? 0) - 1,
+                        customDelay: int.tryParse(delayController.text) ?? 200,
+                      );
+                      Navigator.of(context).pop();
+                    }
+                  },
+            child: const Text('Search until page'),
+          ),
+        ),
+        Obx(
+          () => searchHandler.isRunningAutoSearch.value
+              ? Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      searchHandler.isRunningAutoSearch.value = false;
+                    },
+                    child: const Text('Stop search'),
+                  ),
+                )
+              : const SizedBox.shrink(),
         ),
       ],
     );

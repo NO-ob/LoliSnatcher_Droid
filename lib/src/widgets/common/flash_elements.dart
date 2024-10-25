@@ -78,15 +78,15 @@ class FlashElements {
       return;
     }
 
-    final BuildContext contextToUse = context ?? NavigationHandler.instance.navigatorKey.currentContext!;
+    final BuildContext contextToUse = (context != null && context.mounted) ? context : NavigationHandler.instance.navigatorKey.currentContext!;
     // TODO can this cause an exception? maybe change to WidgetsBinding ?
-    final MediaQueryData mediaQueryData = MediaQuery.of(contextToUse);
+    final screenSize = MediaQuery.sizeOf(contextToUse);
     // Get theme here instead of inside the dialogs themselves, since the dialog could close after the page is changed
     // therefore causing an exception, because this context is not available anymore
     final ThemeData themeData = Theme.of(contextToUse);
 
     final bool isDesktop = !ignoreDesktopCheck && (SettingsHandler.instance.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux);
-    final bool isTooWide = mediaQueryData.size.width > 500;
+    final bool isTooWide = screenSize.width > 500;
     final bool isDark = themeData.brightness == Brightness.dark;
 
     final FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
@@ -104,7 +104,7 @@ class FlashElements {
             backgroundColor: Colors.transparent,
             surfaceTintColor: Colors.transparent,
             content: DefaultTextStyle(
-              style: TextStyle(color: themeData.colorScheme.onBackground),
+              style: TextStyle(color: themeData.colorScheme.onSurface),
               child: GestureDetector(
                 onTap: tapToClose ? () => controller.dismiss() : null,
                 child: FlashBar(
@@ -125,7 +125,7 @@ class FlashElements {
                         padding: const EdgeInsets.all(12),
                         child: Icon(
                           leadingIcon,
-                          color: leadingIconColor ?? themeData.colorScheme.onBackground,
+                          color: leadingIconColor ?? themeData.colorScheme.onSurface,
                           size: leadingIconSize,
                         ),
                       ),
@@ -177,7 +177,7 @@ class FlashElements {
             ).drive(animatable);
           },
           child: DefaultTextStyle(
-            style: TextStyle(color: themeData.colorScheme.onBackground),
+            style: TextStyle(color: themeData.colorScheme.onSurface),
             child: GestureDetector(
               onTap: tapToClose ? () => controller.dismiss() : null,
               child: FlashBar(
@@ -186,7 +186,7 @@ class FlashElements {
                 indicatorColor: sideColor,
                 controller: controller,
                 margin: (isDesktop && isTooWide)
-                    ? EdgeInsets.symmetric(horizontal: mediaQueryData.size.width / 4, vertical: 0)
+                    ? EdgeInsets.symmetric(horizontal: screenSize.width / 4, vertical: 0)
                     : const EdgeInsets.symmetric(horizontal: 20, vertical: kToolbarHeight * 1.1),
                 behavior: !isDesktop ? FlashBehavior.floating : FlashBehavior.fixed,
                 clipBehavior: Clip.antiAlias,
@@ -201,13 +201,13 @@ class FlashElements {
                 ),
                 shadowColor: Colors.black.withOpacity(0.4),
                 elevation: 8,
-                backgroundColor: themeData.colorScheme.background,
+                backgroundColor: themeData.colorScheme.surface,
                 icon: overrideLeadingIconWidget ??
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Icon(
                         leadingIcon,
-                        color: leadingIconColor ?? themeData.colorScheme.onBackground,
+                        color: leadingIconColor ?? themeData.colorScheme.onSurface,
                         size: leadingIconSize,
                       ),
                     ),
@@ -238,7 +238,7 @@ Widget _defaultPrimaryAction(
         onPressed: () => controller.dismiss(),
         icon: Icon(
           Icons.close,
-          color: themeData.colorScheme.onBackground,
+          color: themeData.colorScheme.onSurface,
         ),
       ),
     ),

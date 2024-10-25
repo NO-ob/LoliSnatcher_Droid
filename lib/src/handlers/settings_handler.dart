@@ -27,10 +27,13 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
 
 /// This class is used loading from and writing settings to files
 class SettingsHandler extends GetxController {
   static SettingsHandler get instance => Get.find<SettingsHandler>();
+
+  static bool get isDesktopPlatform => Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
   DBHandler dbHandler = DBHandler();
 
@@ -79,7 +82,8 @@ class SettingsHandler extends GetxController {
   String extPathOverride = '';
   String drawerMascotPathOverride = '';
   String zoomButtonPosition = 'Right';
-  String changePageButtonsPosition = (Platform.isWindows || Platform.isLinux) ? 'Right' : 'Disabled';
+  String changePageButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
+  String scrollGridButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
   String lastSyncIp = '';
   String lastSyncPort = '';
   // TODO move it to boorus themselves to have different user agents for different boorus?
@@ -88,6 +92,8 @@ class SettingsHandler extends GetxController {
   String proxyAddress = '';
   String proxyUsername = '';
   String proxyPassword = '';
+  String altVideoPlayerVO = isDesktopPlatform ? 'libmpv' : 'gpu'; // mediakit default: gpu - android, libmpv - desktop
+  String altVideoPlayerHWDEC = isDesktopPlatform ? 'auto' : 'auto-safe'; // mediakit default: auto-safe - android, auto - desktop
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
@@ -104,7 +110,7 @@ class SettingsHandler extends GetxController {
   double mousewheelScrollSpeed = 10;
 
   int currentColumnCount(BuildContext context) {
-    return MediaQuery.of(context).orientation == Orientation.portrait ? portraitColumns : landscapeColumns;
+    return MediaQuery.orientationOf(context) == Orientation.portrait ? portraitColumns : landscapeColumns;
   }
 
   Duration cacheDuration = Duration.zero;
@@ -118,6 +124,7 @@ class SettingsHandler extends GetxController {
     ['open', 'Open in Browser'],
     ['reloadnoscale', 'Reload w/out scaling'],
     ['toggle_quality', 'Toggle Quality'],
+    ['external_player', 'External player'],
   ];
   List<List<String>> buttonOrder = [
     ['autoscroll', 'Slideshow'],
@@ -128,6 +135,7 @@ class SettingsHandler extends GetxController {
     ['open', 'Open in Browser'],
     ['reloadnoscale', 'Reload w/out scaling'],
     ['toggle_quality', 'Toggle Quality'],
+    ['external_player', 'External player'],
   ];
 
   bool jsonWrite = false;
@@ -153,11 +161,15 @@ class SettingsHandler extends GetxController {
   bool downloadNotifications = true;
   bool allowRotation = false;
   bool enableHeroTransitions = true;
+  bool disableCustomPageTransitions = false;
   bool incognitoKeyboard = false;
   bool hideNotes = false;
   bool startVideosMuted = false;
   bool snatchOnFavourite = false;
-  bool useDoubleTapDragZoom = true;
+  bool favouriteOnSnatch = false;
+  bool disableVibration = false;
+  bool useAltVideoPlayer = isDesktopPlatform;
+  bool altVideoPlayerHwAccel = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -202,6 +214,10 @@ class SettingsHandler extends GetxController {
     'proxyAddress',
     'proxyUsername',
     'proxyPassword',
+    'useAltVideoPlayer',
+    'altVideoPlayerVO',
+    'altVideoPlayerHWDEC',
+    'altVideoPlayerHwAccel',
     'theme',
     'themeMode',
     'isAmoled',
@@ -226,386 +242,433 @@ class SettingsHandler extends GetxController {
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
   // TODO move it in another file?
-  Map<String, Map<String, dynamic>> map = {
-    // stringFromList
-    'previewMode': {
-      'type': 'stringFromList',
-      'default': 'Sample',
-      'options': <String>['Sample', 'Thumbnail'],
-    },
-    'previewDisplay': {
-      'type': 'stringFromList',
-      'default': 'Square',
-      'options': <String>['Square', 'Rectangle', 'Staggered'],
-    },
-    'shareAction': {
-      'type': 'stringFromList',
-      'default': 'Ask',
-      'options': <String>['Ask', 'Post URL', 'File URL', 'File', 'Hydrus'],
-    },
-    'videoCacheMode': {
-      'type': 'stringFromList',
-      'default': 'Stream',
-      'options': <String>['Stream', 'Cache', 'Stream+Cache'],
-    },
-    'galleryMode': {
-      'type': 'stringFromList',
-      'default': 'Full Res',
-      'options': <String>['Sample', 'Full Res'],
-    },
-    'snatchMode': {
-      'type': 'stringFromList',
-      'default': 'Full Res',
-      'options': <String>['Sample', 'Full Res'],
-    },
-    'galleryScrollDirection': {
-      'type': 'stringFromList',
-      'default': 'Horizontal',
-      'options': <String>['Horizontal', 'Vertical'],
-    },
-    'galleryBarPosition': {
-      'type': 'stringFromList',
-      'default': 'Top',
-      'options': <String>['Top', 'Bottom'],
-    },
-    'zoomButtonPosition': {
-      'type': 'stringFromList',
-      'default': 'Right',
-      'options': <String>['Disabled', 'Left', 'Right'],
-    },
-    'changePageButtonsPosition': {
-      'type': 'stringFromList',
-      'default': (Platform.isWindows || Platform.isLinux) ? 'Right' : 'Disabled',
-      'options': <String>['Disabled', 'Left', 'Right'],
-    },
-    'proxyType': {
-      'type': 'stringFromList',
-      'default': 'direct',
-      'options': <String>[
-        'direct',
-        'system',
-        'http',
-        'socks5',
-        'socks4',
-      ],
-    },
+  Map<String, Map<String, dynamic>> get map => {
+        // stringFromList
+        'previewMode': {
+          'type': 'stringFromList',
+          'default': 'Sample',
+          'options': <String>['Thumbnail', 'Sample'],
+        },
+        'previewDisplay': {
+          'type': 'stringFromList',
+          'default': 'Square',
+          'options': <String>['Square', 'Rectangle', 'Staggered'],
+        },
+        'shareAction': {
+          'type': 'stringFromList',
+          'default': 'Ask',
+          'options': <String>['Ask', 'Post URL', 'File URL', 'File', 'Hydrus'],
+        },
+        'videoCacheMode': {
+          'type': 'stringFromList',
+          'default': 'Stream',
+          'options': <String>['Stream', 'Cache', 'Stream+Cache'],
+        },
+        'galleryMode': {
+          'type': 'stringFromList',
+          'default': 'Full Res',
+          'options': <String>['Sample', 'Full Res'],
+        },
+        'snatchMode': {
+          'type': 'stringFromList',
+          'default': 'Full Res',
+          'options': <String>['Sample', 'Full Res'],
+        },
+        'galleryScrollDirection': {
+          'type': 'stringFromList',
+          'default': 'Horizontal',
+          'options': <String>['Horizontal', 'Vertical'],
+        },
+        'galleryBarPosition': {
+          'type': 'stringFromList',
+          'default': 'Top',
+          'options': <String>['Top', 'Bottom'],
+        },
+        'zoomButtonPosition': {
+          'type': 'stringFromList',
+          'default': 'Right',
+          'options': <String>['Disabled', 'Left', 'Right'],
+        },
+        'changePageButtonsPosition': {
+          'type': 'stringFromList',
+          'default': isDesktopPlatform ? 'Right' : 'Disabled',
+          'options': <String>['Disabled', 'Left', 'Right'],
+        },
+        'scrollGridButtonsPosition': {
+          'type': 'stringFromList',
+          'default': isDesktopPlatform ? 'Right' : 'Disabled',
+          'options': <String>['Disabled', 'Left', 'Right'],
+        },
+        'altVideoPlayerVO': {
+          'type': 'stringFromList',
+          'default': isDesktopPlatform ? 'libmpv' : 'gpu', // mediakit default: gpu - android, libmpv - desktop
+          'options': <String>[
+            'gpu',
+            'gpu-next',
+            'libmpv',
+            'mediacodec_embed',
+            'sdl',
+          ],
+        },
+        'altVideoPlayerHWDEC': {
+          'type': 'stringFromList',
+          'default': isDesktopPlatform ? 'auto' : 'auto-safe', // mediakit default: auto-safe - android, auto - desktop
+          'options': <String>[
+            'auto',
+            'auto-safe',
+            'auto-copy',
+            'mediacodec',
+            'mediacodec-copy',
+            'vulkan',
+            'vulkan-copy',
+          ],
+        },
+        'proxyType': {
+          'type': 'stringFromList',
+          'default': 'direct',
+          'options': <String>[
+            'direct',
+            'system',
+            'http',
+            'socks5',
+            'socks4',
+          ],
+        },
 
-    // string
-    'defTags': {
-      'type': 'string',
-      'default': 'rating:safe',
-    },
-    'prefBooru': {
-      'type': 'string',
-      'default': '',
-    },
-    'extPathOverride': {
-      'type': 'string',
-      'default': '',
-    },
-    'drawerMascotPathOverride': {
-      'type': 'string',
-      'default': '',
-    },
-    'lastSyncIp': {
-      'type': 'string',
-      'default': '',
-    },
-    'lastSyncPort': {
-      'type': 'string',
-      'default': '',
-    },
-    'customUserAgent': {
-      'type': 'string',
-      'default': '',
-    },
-    'proxyAddress': {
-      'type': 'string',
-      'default': '',
-    },
-    'proxyUsername': {
-      'type': 'string',
-      'default': '',
-    },
-    'proxyPassword': {
-      'type': 'string',
-      'default': '',
-    },
+        // string
+        'defTags': {
+          'type': 'string',
+          'default': 'rating:safe',
+        },
+        'prefBooru': {
+          'type': 'string',
+          'default': '',
+        },
+        'extPathOverride': {
+          'type': 'string',
+          'default': '',
+        },
+        'drawerMascotPathOverride': {
+          'type': 'string',
+          'default': '',
+        },
+        'lastSyncIp': {
+          'type': 'string',
+          'default': '',
+        },
+        'lastSyncPort': {
+          'type': 'string',
+          'default': '',
+        },
+        'customUserAgent': {
+          'type': 'string',
+          'default': '',
+        },
+        'proxyAddress': {
+          'type': 'string',
+          'default': '',
+        },
+        'proxyUsername': {
+          'type': 'string',
+          'default': '',
+        },
+        'proxyPassword': {
+          'type': 'string',
+          'default': '',
+        },
 
-    // stringList
-    'hatedTags': {
-      'type': 'stringList',
-      'default': <String>[],
-    },
-    'lovedTags': {
-      'type': 'stringList',
-      'default': <String>[],
-    },
-    'enabledLogTypes': {
-      'type': 'logTypesList',
-      'default': <LogTypes>[],
-    },
+        // stringList
+        'hatedTags': {
+          'type': 'stringList',
+          'default': <String>[],
+        },
+        'lovedTags': {
+          'type': 'stringList',
+          'default': <String>[],
+        },
+        'enabledLogTypes': {
+          'type': 'logTypesList',
+          'default': <LogTypes>[],
+        },
 
-    // int
-    'limit': {
-      'type': 'int',
-      'default': Constants.defaultItemLimit,
-      'upperLimit': 100,
-      'lowerLimit': 10,
-    },
-    'portraitColumns': {
-      'type': 'int',
-      'default': 2,
-      'upperLimit': 100,
-      'lowerLimit': 1,
-    },
-    'landscapeColumns': {
-      'type': 'int',
-      'default': 4,
-      'upperLimit': 100,
-      'lowerLimit': 1,
-    },
-    'preloadCount': {
-      'type': 'int',
-      'default': 1,
-      'upperLimit': 3,
-      'lowerLimit': 0,
-    },
-    'snatchCooldown': {
-      'type': 'int',
-      'default': 250,
-      'upperLimit': 10000,
-      'lowerLimit': 0,
-    },
-    'volumeButtonsScrollSpeed': {
-      'type': 'int',
-      'default': 200,
-      'upperLimit': 1000000,
-      'lowerLimit': 0,
-    },
-    'mousewheelScrollSpeed': {
-      'type': 'double',
-      'default': 10.0,
-      'upperLimit': 20.0,
-      'lowerLimit': 0.1,
-    },
-    'galleryAutoScrollTime': {
-      'type': 'int',
-      'default': 4000,
-      'upperLimit': 100000,
-      'lowerLimit': 100,
-    },
-    'cacheSize': {
-      'type': 'int',
-      'default': 3,
-      'upperLimit': 10,
-      'lowerLimit': 0,
-    },
+        // int
+        'limit': {
+          'type': 'int',
+          'default': Constants.defaultItemLimit,
+          'upperLimit': 100,
+          'lowerLimit': 10,
+        },
+        'portraitColumns': {
+          'type': 'int',
+          'default': 2,
+          'upperLimit': 100,
+          'lowerLimit': 1,
+        },
+        'landscapeColumns': {
+          'type': 'int',
+          'default': 4,
+          'upperLimit': 100,
+          'lowerLimit': 1,
+        },
+        'preloadCount': {
+          'type': 'int',
+          'default': 1,
+          'upperLimit': 3,
+          'lowerLimit': 0,
+        },
+        'snatchCooldown': {
+          'type': 'int',
+          'default': 250,
+          'upperLimit': 10000,
+          'lowerLimit': 0,
+        },
+        'volumeButtonsScrollSpeed': {
+          'type': 'int',
+          'default': 200,
+          'upperLimit': 1000000,
+          'lowerLimit': 0,
+        },
+        'mousewheelScrollSpeed': {
+          'type': 'double',
+          'default': 10.0,
+          'upperLimit': 20.0,
+          'lowerLimit': 0.1,
+        },
+        'galleryAutoScrollTime': {
+          'type': 'int',
+          'default': 4000,
+          'upperLimit': 100000,
+          'lowerLimit': 100,
+        },
+        'cacheSize': {
+          'type': 'int',
+          'default': 3,
+          'upperLimit': 10,
+          'lowerLimit': 0,
+        },
 
-    // double
+        // double
 
-    // bool
-    'jsonWrite': {
-      'type': 'bool',
-      'default': false,
-    },
-    'autoPlayEnabled': {
-      'type': 'bool',
-      'default': true,
-    },
-    'loadingGif': {
-      'type': 'bool',
-      'default': false,
-    },
-    'thumbnailCache': {
-      'type': 'bool',
-      'default': true,
-    },
-    'mediaCache': {
-      'type': 'bool',
-      'default': false,
-    },
-    'autoHideImageBar': {
-      'type': 'bool',
-      'default': false,
-    },
-    'dbEnabled': {
-      'type': 'bool',
-      'default': true,
-    },
-    'indexesEnabled': {
-      'type': 'bool',
-      'default': false,
-    },
-    'searchHistoryEnabled': {
-      'type': 'bool',
-      'default': true,
-    },
-    'filterHated': {
-      'type': 'bool',
-      'default': false,
-    },
-    'filterFavourites': {
-      'type': 'bool',
-      'default': false,
-    },
-    'filterSnatched': {
-      'type': 'bool',
-      'default': false,
-    },
-    'filterAi': {
-      'type': 'bool',
-      'default': false,
-    },
-    'useVolumeButtonsForScroll': {
-      'type': 'bool',
-      'default': false,
-    },
-    'shitDevice': {
-      'type': 'bool',
-      'default': false,
-    },
-    'disableVideo': {
-      'type': 'bool',
-      'default': false,
-    },
-    'enableDrawerMascot': {
-      'type': 'bool',
-      'default': false,
-    },
-    'allowSelfSignedCerts': {
-      'type': 'bool',
-      'default': false,
-    },
-    'disableImageScaling': {
-      'type': 'bool',
-      'default': false,
-    },
-    'gifsAsThumbnails': {
-      'type': 'bool',
-      'default': false,
-    },
-    'desktopListsDrag': {
-      'type': 'bool',
-      'default': false,
-    },
-    'wakeLockEnabled': {
-      'type': 'bool',
-      'default': true,
-    },
-    'tagTypeFetchEnabled': {
-      'type': 'bool',
-      'default': true,
-    },
-    'downloadNotifications': {
-      'type': 'bool',
-      'default': true,
-    },
-    'allowRotation': {
-      'type': 'bool',
-      'default': false,
-    },
-    'enableHeroTransitions': {
-      'type': 'bool',
-      'default': true,
-    },
-    'incognitoKeyboard': {
-      'type': 'bool',
-      'default': false,
-    },
-    'hideNotes': {
-      'type': 'bool',
-      'default': false,
-    },
-    'startVideosMuted': {
-      'type': 'bool',
-      'default': false,
-    },
-    'snatchOnFavourite': {
-      'type': 'bool',
-      'default': false,
-    },
-    'useDoubleTapDragZoom': {
-      'type': 'bool',
-      'default': true,
-    },
+        // bool
+        'jsonWrite': {
+          'type': 'bool',
+          'default': false,
+        },
+        'autoPlayEnabled': {
+          'type': 'bool',
+          'default': true,
+        },
+        'loadingGif': {
+          'type': 'bool',
+          'default': false,
+        },
+        'thumbnailCache': {
+          'type': 'bool',
+          'default': true,
+        },
+        'mediaCache': {
+          'type': 'bool',
+          'default': false,
+        },
+        'autoHideImageBar': {
+          'type': 'bool',
+          'default': false,
+        },
+        'dbEnabled': {
+          'type': 'bool',
+          'default': true,
+        },
+        'indexesEnabled': {
+          'type': 'bool',
+          'default': false,
+        },
+        'searchHistoryEnabled': {
+          'type': 'bool',
+          'default': true,
+        },
+        'filterHated': {
+          'type': 'bool',
+          'default': false,
+        },
+        'filterFavourites': {
+          'type': 'bool',
+          'default': false,
+        },
+        'filterSnatched': {
+          'type': 'bool',
+          'default': false,
+        },
+        'filterAi': {
+          'type': 'bool',
+          'default': false,
+        },
+        'useVolumeButtonsForScroll': {
+          'type': 'bool',
+          'default': false,
+        },
+        'shitDevice': {
+          'type': 'bool',
+          'default': false,
+        },
+        'disableVideo': {
+          'type': 'bool',
+          'default': false,
+        },
+        'enableDrawerMascot': {
+          'type': 'bool',
+          'default': false,
+        },
+        'allowSelfSignedCerts': {
+          'type': 'bool',
+          'default': false,
+        },
+        'disableImageScaling': {
+          'type': 'bool',
+          'default': false,
+        },
+        'gifsAsThumbnails': {
+          'type': 'bool',
+          'default': false,
+        },
+        'desktopListsDrag': {
+          'type': 'bool',
+          'default': false,
+        },
+        'wakeLockEnabled': {
+          'type': 'bool',
+          'default': true,
+        },
+        'tagTypeFetchEnabled': {
+          'type': 'bool',
+          'default': true,
+        },
+        'downloadNotifications': {
+          'type': 'bool',
+          'default': true,
+        },
+        'allowRotation': {
+          'type': 'bool',
+          'default': false,
+        },
+        'enableHeroTransitions': {
+          'type': 'bool',
+          'default': true,
+        },
+        'disableCustomPageTransitions': {
+          'type': 'bool',
+          'default': false,
+        },
+        'incognitoKeyboard': {
+          'type': 'bool',
+          'default': false,
+        },
+        'hideNotes': {
+          'type': 'bool',
+          'default': false,
+        },
+        'startVideosMuted': {
+          'type': 'bool',
+          'default': false,
+        },
+        'snatchOnFavourite': {
+          'type': 'bool',
+          'default': false,
+        },
+        'favouriteOnSnatch': {
+          'type': 'bool',
+          'default': false,
+        },
+        'disableVibration': {
+          'type': 'bool',
+          'default': false,
+        },
+        'useAltVideoPlayer': {
+          'type': 'bool',
+          'default': isDesktopPlatform,
+        },
+        'altVideoPlayerHwAccel': {
+          'type': 'bool',
+          'default': true,
+        },
 
-    // other
-    'buttonOrder': {
-      'type': 'other',
-      'default': <List<String>>[
-        ['autoscroll', 'Slideshow'],
-        ['snatch', 'Save'],
-        ['favourite', 'Favourite'],
-        ['info', 'Display Info'],
-        ['share', 'Share'],
-        ['open', 'Open in Browser'],
-        ['reloadnoscale', 'Reload w/out scaling'],
-        ['toggle_quality', 'Toggle Quality'],
-      ],
-    },
-    'cacheDuration': {
-      'type': 'duration',
-      'default': Duration.zero,
-      'options': <Map<String, dynamic>>[
-        {'label': 'Never', 'value': Duration.zero},
-        {'label': '30 minutes', 'value': const Duration(minutes: 30)},
-        {'label': '1 hour', 'value': const Duration(hours: 1)},
-        {'label': '6 hours', 'value': const Duration(hours: 6)},
-        {'label': '12 hours', 'value': const Duration(hours: 12)},
-        {'label': '1 day', 'value': const Duration(days: 1)},
-        {'label': '2 days', 'value': const Duration(days: 2)},
-        {'label': '1 week', 'value': const Duration(days: 7)},
-        {'label': '1 month', 'value': const Duration(days: 30)},
-      ],
-    },
+        // other
+        'buttonOrder': {
+          'type': 'other',
+          'default': <List<String>>[
+            ['autoscroll', 'Slideshow'],
+            ['snatch', 'Save'],
+            ['favourite', 'Favourite'],
+            ['info', 'Display Info'],
+            ['share', 'Share'],
+            ['open', 'Open in Browser'],
+            ['reloadnoscale', 'Reload w/out scaling'],
+            ['toggle_quality', 'Toggle Quality'],
+            ['external_player', 'External player'],
+          ],
+        },
+        'cacheDuration': {
+          'type': 'duration',
+          'default': Duration.zero,
+          'options': <Map<String, dynamic>>[
+            {'label': 'Never', 'value': Duration.zero},
+            {'label': '30 minutes', 'value': const Duration(minutes: 30)},
+            {'label': '1 hour', 'value': const Duration(hours: 1)},
+            {'label': '6 hours', 'value': const Duration(hours: 6)},
+            {'label': '12 hours', 'value': const Duration(hours: 12)},
+            {'label': '1 day', 'value': const Duration(days: 1)},
+            {'label': '2 days', 'value': const Duration(days: 2)},
+            {'label': '1 week', 'value': const Duration(days: 7)},
+            {'label': '1 month', 'value': const Duration(days: 30)},
+          ],
+        },
 
-    // theme
-    'appMode': {
-      'type': 'appMode',
-      'default': AppMode.defaultValue,
-      'options': AppMode.values,
-    },
-    'handSide': {
-      'type': 'handSide',
-      'default': HandSide.defaultValue,
-      'options': HandSide.values,
-    },
-    'theme': {
-      'type': 'theme',
-      'default': ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
-      'options': <ThemeItem>[
-        ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
-        ThemeItem(name: 'Purple', primary: Colors.deepPurple[600], accent: Colors.deepPurple[800]),
-        ThemeItem(name: 'Blue', primary: Colors.lightBlue, accent: Colors.lightBlue[600]),
-        ThemeItem(name: 'Teal', primary: Colors.teal, accent: Colors.teal[600]),
-        ThemeItem(name: 'Red', primary: Colors.red[700], accent: Colors.red[800]),
-        ThemeItem(name: 'Green', primary: Colors.green, accent: Colors.green[700]),
-        ThemeItem(name: 'Custom', primary: null, accent: null),
-      ],
-    },
-    'themeMode': {
-      'type': 'themeMode',
-      'default': ThemeMode.dark,
-      'options': ThemeMode.values,
-    },
-    'useDynamicColor': {
-      'type': 'rxbool',
-      'default': false.obs,
-    },
-    'isAmoled': {
-      'type': 'rxbool',
-      'default': false.obs,
-    },
-    'customPrimaryColor': {
-      'type': 'rxcolor',
-      'default': Colors.pink[200],
-    },
-    'customAccentColor': {
-      'type': 'rxcolor',
-      'default': Colors.pink[600],
-    },
-  };
+        // theme
+        'appMode': {
+          'type': 'appMode',
+          'default': AppMode.defaultValue,
+          'options': AppMode.values,
+        },
+        'handSide': {
+          'type': 'handSide',
+          'default': HandSide.defaultValue,
+          'options': HandSide.values,
+        },
+        'theme': {
+          'type': 'theme',
+          'default': ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
+          'options': <ThemeItem>[
+            ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
+            ThemeItem(name: 'Purple', primary: Colors.deepPurple[600], accent: Colors.deepPurple[800]),
+            ThemeItem(name: 'Blue', primary: Colors.lightBlue, accent: Colors.lightBlue[600]),
+            ThemeItem(name: 'Teal', primary: Colors.teal, accent: Colors.teal[600]),
+            ThemeItem(name: 'Red', primary: Colors.red[700], accent: Colors.red[800]),
+            ThemeItem(name: 'Green', primary: Colors.green, accent: Colors.green[700]),
+            ThemeItem(name: 'Halloween', primary: const Color(0xFF0B192C), accent: const Color(0xFFEB5E28)),
+            ThemeItem(name: 'Custom', primary: null, accent: null),
+          ],
+        },
+        'themeMode': {
+          'type': 'themeMode',
+          'default': ThemeMode.dark,
+          'options': ThemeMode.values,
+        },
+        'useDynamicColor': {
+          'type': 'rxbool',
+          'default': false.obs,
+        },
+        'isAmoled': {
+          'type': 'rxbool',
+          'default': false.obs,
+        },
+        'customPrimaryColor': {
+          'type': 'rxcolor',
+          'default': Colors.pink[200],
+        },
+        'customAccentColor': {
+          'type': 'rxcolor',
+          'default': Colors.pink[600],
+        },
+      };
 
   dynamic validateValue(String name, dynamic value, {bool toJSON = false}) {
     final Map<String, dynamic>? settingParams = map[name];
@@ -784,9 +847,15 @@ class SettingsHandler extends GetxController {
         default:
           return value;
       }
-    } catch (err) {
+    } catch (e, s) {
       // return default value on exceptions
-      Logger.Inst().log('value validation error: $err', 'SettingsHandler', 'validateValue', null);
+      Logger.Inst().log(
+        'value validation error: $e',
+        'SettingsHandler',
+        'validateValue',
+        null,
+        s: s,
+      );
       return settingParams['default'];
     }
   }
@@ -817,8 +886,14 @@ class SettingsHandler extends GetxController {
         }
       }
       return true;
-    } catch (err) {
-      Logger.Inst().log('loadDatabase error: $err', 'SettingsHandler', 'loadDatabase', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'loadDatabase error: $e',
+        'SettingsHandler',
+        'loadDatabase',
+        LogTypes.exception,
+        s: s,
+      );
       return false;
     }
   }
@@ -837,8 +912,14 @@ class SettingsHandler extends GetxController {
         }
       }
       return true;
-    } catch (err) {
-      Logger.Inst().log('indexDatabase error: $err', 'SettingsHandler', 'indexDatabase', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'indexDatabase error: $e',
+        'SettingsHandler',
+        'indexDatabase',
+        LogTypes.exception,
+        s: s,
+      );
       return false;
     }
   }
@@ -934,6 +1015,8 @@ class SettingsHandler extends GetxController {
         return zoomButtonPosition;
       case 'changePageButtonsPosition':
         return changePageButtonsPosition;
+      case 'scrollGridButtonsPosition':
+        return scrollGridButtonsPosition;
       case 'disableImageScaling':
         return disableImageScaling;
       case 'gifsAsThumbnails':
@@ -981,6 +1064,8 @@ class SettingsHandler extends GetxController {
         return allowRotation;
       case 'enableHeroTransitions':
         return enableHeroTransitions;
+      case 'disableCustomPageTransitions':
+        return disableCustomPageTransitions;
       case 'incognitoKeyboard':
         return incognitoKeyboard;
       case 'hideNotes':
@@ -989,8 +1074,18 @@ class SettingsHandler extends GetxController {
         return startVideosMuted;
       case 'snatchOnFavourite':
         return snatchOnFavourite;
-      case 'useDoubleTapDragZoom':
-        return useDoubleTapDragZoom;
+      case 'favouriteOnSnatch':
+        return favouriteOnSnatch;
+      case 'disableVibration':
+        return disableVibration;
+      case 'useAltVideoPlayer':
+        return useAltVideoPlayer;
+      case 'altVideoPlayerHwAccel':
+        return altVideoPlayerHwAccel;
+      case 'altVideoPlayerVO':
+        return altVideoPlayerVO;
+      case 'altVideoPlayerHWDEC':
+        return altVideoPlayerHWDEC;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -1133,6 +1228,9 @@ class SettingsHandler extends GetxController {
       case 'changePageButtonsPosition':
         changePageButtonsPosition = validatedValue;
         break;
+      case 'scrollGridButtonsPosition':
+        scrollGridButtonsPosition = validatedValue;
+        break;
       case 'disableImageScaling':
         disableImageScaling = validatedValue;
         break;
@@ -1196,6 +1294,9 @@ class SettingsHandler extends GetxController {
       case 'enableHeroTransitions':
         enableHeroTransitions = validatedValue;
         break;
+      case 'disableCustomPageTransitions':
+        disableCustomPageTransitions = validatedValue;
+        break;
       case 'incognitoKeyboard':
         incognitoKeyboard = validatedValue;
         break;
@@ -1208,8 +1309,24 @@ class SettingsHandler extends GetxController {
       case 'snatchOnFavourite':
         snatchOnFavourite = validatedValue;
         break;
-      case 'useDoubleTapDragZoom':
-        useDoubleTapDragZoom = validatedValue;
+      case 'favouriteOnSnatch':
+        favouriteOnSnatch = validatedValue;
+        break;
+      case 'disableVibration':
+        disableVibration = validatedValue;
+        break;
+      case 'useAltVideoPlayer':
+        useAltVideoPlayer = validatedValue;
+        break;
+      case 'altVideoPlayerHwAccel':
+        altVideoPlayerHwAccel = validatedValue;
+        break;
+      case 'altVideoPlayerVO':
+        altVideoPlayerVO = validatedValue;
+        break;
+      case 'altVideoPlayerHWDEC':
+        altVideoPlayerHWDEC = validatedValue;
+        break;
 
       // theme stuff
       case 'appMode':
@@ -1284,6 +1401,7 @@ class SettingsHandler extends GetxController {
       'galleryAutoScrollTime': validateValue('galleryAutoScrollTime', null, toJSON: true),
       'zoomButtonPosition': validateValue('zoomButtonPosition', null, toJSON: true),
       'changePageButtonsPosition': validateValue('changePageButtonsPosition', null, toJSON: true),
+      'scrollGridButtonsPosition': validateValue('scrollGridButtonsPosition', null, toJSON: true),
       'disableImageScaling': validateValue('disableImageScaling', null, toJSON: true),
       'gifsAsThumbnails': validateValue('gifsAsThumbnails', null, toJSON: true),
       'desktopListsDrag': validateValue('desktopListsDrag', null, toJSON: true),
@@ -1296,11 +1414,17 @@ class SettingsHandler extends GetxController {
       'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
       'allowRotation': validateValue('allowRotation', null, toJSON: true),
       'enableHeroTransitions': validateValue('enableHeroTransitions', null, toJSON: true),
+      'disableCustomPageTransitions': validateValue('disableCustomPageTransitions', null, toJSON: true),
       'incognitoKeyboard': validateValue('incognitoKeyboard', null, toJSON: true),
       'hideNotes': validateValue('hideNotes', null, toJSON: true),
       'startVideosMuted': validateValue('startVideosMuted', null, toJSON: true),
       'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),
-      'useDoubleTapDragZoom': validateValue('useDoubleTapDragZoom', null, toJSON: true),
+      'favouriteOnSnatch': validateValue('favouriteOnSnatch', null, toJSON: true),
+      'disableVibration': validateValue('disableVibration', null, toJSON: true),
+      'useAltVideoPlayer': validateValue('useAltVideoPlayer', null, toJSON: true),
+      'altVideoPlayerHwAccel': validateValue('altVideoPlayerHwAccel', null, toJSON: true),
+      'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
+      'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
 
       //TODO
       'buttonOrder': buttonOrder.map((e) => e[0]).toList(),
@@ -1339,8 +1463,14 @@ class SettingsHandler extends GetxController {
     Map<String, dynamic> json = {};
     try {
       json = jsonDecode(jsonString);
-    } catch (e) {
-      Logger.Inst().log('Failed to parse settings config $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse settings config $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     // TODO add error handling for invalid values
@@ -1370,8 +1500,14 @@ class SettingsHandler extends GetxController {
         ),
       ); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
       buttonOrder = btnOrder;
-    } catch (e) {
-      Logger.Inst().log('Failed to parse button order $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse button order $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     try {
@@ -1391,8 +1527,14 @@ class SettingsHandler extends GetxController {
           hatedTags.add(hateTags.elementAt(i));
         }
       }
-    } catch (e) {
-      Logger.Inst().log('Failed to parse hated tags $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse hated tags $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     try {
@@ -1412,8 +1554,14 @@ class SettingsHandler extends GetxController {
           lovedTags.add(loveTags.elementAt(i));
         }
       }
-    } catch (e) {
-      Logger.Inst().log('Failed to parse loved tags $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse loved tags $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     final List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
@@ -1421,8 +1569,14 @@ class SettingsHandler extends GetxController {
       // TODO something causes rare exception which causes settings to reset
       try {
         setByString(key, json[key]);
-      } catch (e) {
-        Logger.Inst().log('Failed to set value for key $key', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          'Failed to set value for key $key',
+          'SettingsHandler',
+          'loadFromJSON',
+          LogTypes.exception,
+          s: s,
+        );
       }
       // print('key $key val ${json[key]} type ${json[key].runtimeType}');
     }
@@ -1480,7 +1634,7 @@ class SettingsHandler extends GetxController {
             // print(files[i].toString());
             final File booruFile = files[i] as File;
             final Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
-            final bool isAllowed = booruFromFile.type != BooruType.Favourites && booruFromFile.type != BooruType.Downloads;
+            final bool isAllowed = BooruType.saveable.contains(booruFromFile.type);
             if (isAllowed) {
               tempList.add(booruFromFile);
             } else {
@@ -1498,8 +1652,14 @@ class SettingsHandler extends GetxController {
         tempList.add(Booru('Favourites', BooruType.Favourites, '', '', ''));
         tempList.add(Booru('Downloads', BooruType.Downloads, '', '', ''));
       }
-    } catch (e) {
-      Logger.Inst().log('Failed to load boorus $e', 'SettingsHandler', 'loadBoorus', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to load boorus $e',
+        'SettingsHandler',
+        'loadBoorus',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     booruList.value = tempList.where((element) => !booruList.contains(element)).toList(); // filter due to possibility of duplicates
@@ -1903,8 +2063,14 @@ class SettingsHandler extends GetxController {
     try {
       await getPerms();
       await loadSettings();
-    } catch (e) {
-      Logger.Inst().log(e.toString(), 'SettingsHandler', 'initialize', LogTypes.settingsError);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'SettingsHandler',
+        'initialize',
+        LogTypes.settingsError,
+        s: s,
+      );
       FlashElements.showSnackbar(
         title: const Text(
           'Initialization Error!',
@@ -1924,9 +2090,7 @@ class SettingsHandler extends GetxController {
     // print(toJSON());
     // print(jsonEncode(toJSON()));
 
-    alice = Alice(
-      darkTheme: false, // TODO on true - throws theme exception when opening inspector?
-    );
+    alice = Alice();
 
     unawaited(checkUpdate(withMessage: false));
     isInit.value = true;
@@ -1941,6 +2105,9 @@ class SettingsHandler extends GetxController {
     try {
       postInitMessage.value = 'Setting up proxy...';
       await initProxy();
+      if (useAltVideoPlayer || isDesktopPlatform) {
+        MediaKitVideoPlayer.registerWith();
+      }
       postInitMessage.value = 'Loading Database...';
       await loadDatabase();
       await indexDatabase();
@@ -1949,9 +2116,15 @@ class SettingsHandler extends GetxController {
         await loadBoorus();
       }
       await externalAction();
-    } catch (e) {
+    } catch (e, s) {
       postInitMessage.value = 'Error!';
-      Logger.Inst().log(e.toString(), 'SettingsHandler', 'postInit', LogTypes.settingsError);
+      Logger.Inst().log(
+        e.toString(),
+        'SettingsHandler',
+        'postInit',
+        LogTypes.settingsError,
+        s: s,
+      );
       FlashElements.showSnackbar(
         title: const Text(
           'Post Initialization Error!',

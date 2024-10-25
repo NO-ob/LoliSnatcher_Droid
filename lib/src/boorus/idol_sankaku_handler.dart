@@ -92,7 +92,7 @@ class IdolSankakuHandler extends SankakuHandler {
         serverId: current['id'].toString(),
         rating: current['rating'],
         score: current['total_score'].toString(),
-        sources: [current['source']],
+        sources: (current['source'] != null && current['source'] is String) ? [current['source']] : null,
         md5String: current['md5'],
         postDate: postDate,
         postDateFormat: postDateFormat,

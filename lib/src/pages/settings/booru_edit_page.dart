@@ -65,17 +65,16 @@ class _BooruEditState extends State<BooruEdit> {
 
   @override
   void initState() {
-    //Load settings from the Booru instance parsed to the widget and populate the text fields
+    super.initState();
     if (widget.booru.name != 'New') {
-      booruNameController.text = widget.booru.name!;
-      booruURLController.text = widget.booru.baseURL!;
-      booruFaviconController.text = widget.booru.faviconURL!;
-      booruAPIKeyController.text = widget.booru.apiKey!;
-      booruUserIDController.text = widget.booru.userID!;
-      booruDefTagsController.text = widget.booru.defTags!;
+      booruNameController.text = widget.booru.name ?? '';
+      booruURLController.text = widget.booru.baseURL ?? '';
+      booruFaviconController.text = widget.booru.faviconURL ?? '';
+      booruAPIKeyController.text = widget.booru.apiKey ?? '';
+      booruUserIDController.text = widget.booru.userID ?? '';
+      booruDefTagsController.text = widget.booru.defTags ?? '';
       selectedBooruType = BooruType.values.contains(widget.booru.type) ? widget.booru.type! : selectedBooruType;
     }
-    super.initState();
   }
 
   @override
@@ -83,7 +82,7 @@ class _BooruEditState extends State<BooruEdit> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text('Booru Editor'),
+        title: const Text('Booru editor'),
         actions: const [],
       ),
       body: Center(
@@ -96,14 +95,12 @@ class _BooruEditState extends State<BooruEdit> {
             SettingsTextInput(
               controller: booruNameController,
               title: 'Name',
-              hintText: 'Enter Booru Name',
               clearable: true,
               pasteable: true,
             ),
             SettingsTextInput(
               controller: booruURLController,
               title: 'URL',
-              hintText: 'Enter Booru URL',
               inputType: TextInputType.url,
               clearable: true,
               pasteable: true,
@@ -116,7 +113,7 @@ class _BooruEditState extends State<BooruEdit> {
                   selectedBooruType = newValue ?? BooruType.values.first;
                 });
               },
-              title: 'Booru Type',
+              title: 'Type',
               itemTitleBuilder: (BooruType? type) => type?.alias ?? '',
               expendableByScroll: true,
             ),
@@ -130,7 +127,7 @@ class _BooruEditState extends State<BooruEdit> {
             ),
             SettingsTextInput(
               controller: booruDefTagsController,
-              title: 'Default Tags',
+              title: 'Default tags',
               hintText: 'Default search for booru',
               clearable: true,
               pasteable: true,
@@ -163,8 +160,9 @@ class _BooruEditState extends State<BooruEdit> {
               pasteable: true,
               hintText: '(Can be blank)',
               clearable: true,
+              obscureable: shouldObscureApiKey(),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+            SizedBox(height: MediaQuery.sizeOf(context).height * 0.2),
           ],
         ),
       ),
@@ -182,6 +180,13 @@ class _BooruEditState extends State<BooruEdit> {
     }
   }
 
+  bool shouldObscureApiKey() {
+    switch (selectedBooruType) {
+      default:
+        return true;
+    }
+  }
+
   String getUserIDTitle() {
     switch (selectedBooruType) {
       case BooruType.Sankaku:
@@ -195,22 +200,26 @@ class _BooruEditState extends State<BooruEdit> {
   }
 
   Widget webviewButton() {
-    return SettingsButton(
-      name: 'Open webview to get cookies',
-      icon: const Icon(Icons.public),
-      action: () {
-        if (booruURLController.text.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => InAppWebviewView(
-                initialUrl: booruURLController.text,
+    if (Tools.isOnPlatformWithWebviewSupport) {
+      return SettingsButton(
+        name: 'Open webview',
+        subtitle: const Text('To login or obtain cookies'),
+        icon: const Icon(Icons.public),
+        action: () {
+          if (booruURLController.text.isNotEmpty) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => InAppWebviewView(
+                  initialUrl: booruURLController.text,
+                ),
               ),
-            ),
-          );
-        }
-      },
-    );
+            );
+          }
+        },
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
   void sanitizeBooruName() {
@@ -219,7 +228,7 @@ class _BooruEditState extends State<BooruEdit> {
     setState(() {});
   }
 
-  Widget testButton() {
+  SettingsButton testButton() {
     return SettingsButton(
       name: 'Test Booru',
       icon: isTesting ? const CircularProgressIndicator() : const Icon(Icons.public),
@@ -343,7 +352,7 @@ class _BooruEditState extends State<BooruEdit> {
   /// allowing the user to save the booru config otherwise an empty container is returned
   Widget saveButton() {
     return SettingsButton(
-      name: "Save Booru${booruType == null ? ' (Run Test First)' : ''}",
+      name: "Save Booru${booruType == null ? ' (Will run Test)' : ''}",
       icon: Icon(
         Icons.save,
         color: booruType == null ? Colors.red : Colors.green,
@@ -354,11 +363,12 @@ class _BooruEditState extends State<BooruEdit> {
         if (booruType == null) {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text('Run Test First!', style: TextStyle(fontSize: 20)),
-            leadingIcon: Icons.warning_amber,
+            title: const Text('Running Booru test', style: TextStyle(fontSize: 20)),
+            leadingIcon: Icons.refresh,
             leadingIconColor: Colors.yellow,
             sideColor: Colors.yellow,
           );
+          testButton().action!();
           return;
         }
 
@@ -396,16 +406,16 @@ class _BooruEditState extends State<BooruEdit> {
               }
 
               if (alreadyExists) {
-                booruExistsReason = 'This Booru Config already exists';
+                booruExistsReason = 'This Booru config already exists';
               } else if (sameNameExists) {
-                booruExistsReason = 'Booru Config with same name already exists';
+                booruExistsReason = 'Booru config with same name already exists';
               } else if (sameURLExists) {
-                booruExistsReason = 'Booru Config with same URL already exists';
+                booruExistsReason = 'Booru config with same URL already exists';
               }
             } else {
               if (alreadyExists) {
                 booruExists = true;
-                booruExistsReason = 'This Booru Config already exists';
+                booruExistsReason = 'This Booru config already exists';
               }
 
               final bool oldEditBooruExists =
@@ -437,7 +447,7 @@ class _BooruEditState extends State<BooruEdit> {
           FlashElements.showSnackbar(
             context: context,
             title: const Text(
-              'Booru Config Saved!',
+              'Booru config saved!',
               style: TextStyle(fontSize: 20),
             ),
             content: widget.booru.name == 'New'
@@ -577,11 +587,11 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
                 FlashElements.showSnackbar(
                   context: context,
                   title: const Text(
-                    'Access Key Requested',
+                    'Access key requested',
                     style: TextStyle(fontSize: 20),
                   ),
                   content: const Text(
-                    'Tap okay on hydrus then apply. You can test afterwards',
+                    'Tap okay on hydrus then apply. You can run test afterwards',
                     style: TextStyle(fontSize: 16),
                   ),
                   leadingIcon: Icons.warning_amber,
@@ -606,7 +616,7 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
                 );
               }
             },
-            child: const Text('Get Hydrus Api Key'),
+            child: const Text('Get Hydrus Api key'),
           ),
         ),
         Container(

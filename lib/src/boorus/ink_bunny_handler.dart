@@ -40,8 +40,14 @@ class InkBunnyHandler extends BooruHandler {
       } else {
         Logger.Inst().log("Inkbunny couldn't get session token", 'InkBunnyHandler', 'getSessionToken', LogTypes.booruHandlerInfo);
       }
-    } catch (e) {
-      Logger.Inst().log('Exception getting session token: $url $e', 'InkBunnyHandler', 'getSessionToken', LogTypes.booruHandlerInfo);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Exception getting session token: $url $e',
+        'InkBunnyHandler',
+        'getSessionToken',
+        LogTypes.booruHandlerInfo,
+        s: s,
+      );
     }
     _gettingToken = false;
     return sessionToken.isNotEmpty;
@@ -60,8 +66,14 @@ class InkBunnyHandler extends BooruHandler {
       } else {
         Logger.Inst().log('Inkbunny failed to set ratings', className, 'setRatingOptions', LogTypes.booruHandlerInfo);
       }
-    } catch (e) {
-      Logger.Inst().log('Exception setting ratings $e', className, 'setRatingOptions', LogTypes.booruHandlerInfo);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Exception setting ratings $e',
+        className,
+        'setRatingOptions',
+        LogTypes.booruHandlerInfo,
+        s: s,
+      );
     }
     return true;
   }
@@ -85,8 +97,14 @@ class InkBunnyHandler extends BooruHandler {
       } else {
         Logger.Inst().log('InkBunnyHandler failed to get submissions', className, 'getSubmissionResponse', LogTypes.booruHandlerFetchFailed);
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'getSubmissionResponse', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'getSubmissionResponse',
+        LogTypes.exception,
+        s: s,
+      );
     }
     Logger.Inst().log('returning null', className, 'getSubmissionResponse', LogTypes.booruHandlerInfo);
     return {};
@@ -243,8 +261,14 @@ class InkBunnyHandler extends BooruHandler {
       } else {
         Logger.Inst().log(e.toString(), className, 'tagSearch', LogTypes.exception);
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'tagSearch', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'tagSearch',
+        LogTypes.exception,
+        s: s,
+      );
     }
     return searchTags;
   }

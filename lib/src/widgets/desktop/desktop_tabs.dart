@@ -78,12 +78,11 @@ class _DesktopTabsState extends State<DesktopTabs> {
       child: Row(
         children: [
           if (isNotEmptyBooru)
-            if (tab.selectedBooru.value.type == BooruType.Downloads)
-              const Icon(Icons.file_download_outlined, size: 20)
-            else if (tab.selectedBooru.value.type == BooruType.Favourites)
-              const Icon(Icons.favorite, color: Colors.red, size: 20)
-            else
-              Favicon(tab.selectedBooru.value)
+            switch (tab.selectedBooru.value.type) {
+              BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
+              BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
+              _ => Favicon(tab.selectedBooru.value),
+            }
           else
             const Icon(CupertinoIcons.question, size: 20),
           const SizedBox(width: 3),

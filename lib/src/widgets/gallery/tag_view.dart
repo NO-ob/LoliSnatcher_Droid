@@ -29,6 +29,7 @@ import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class _TagInfoIcon {
@@ -63,6 +64,7 @@ class _TagViewState extends State<TagView> {
   final GlobalKey searchKey = GlobalKey(debugLabel: 'tagsSearchKey');
 
   CancelToken? cancelToken;
+  bool loadingUpdate = false, failedUpdate = false;
 
   @override
   void initState() {
@@ -82,7 +84,7 @@ class _TagViewState extends State<TagView> {
       parseSortGroupTags();
     });
 
-    reloadItemData();
+    reloadItemData(initial: true);
   }
 
   @override
@@ -94,15 +96,27 @@ class _TagViewState extends State<TagView> {
     super.dispose();
   }
 
-  Future<void> reloadItemData() async {
-    // TODO wip, currently no boorus which support this
-    // I planned to use it for r34xxx, but they don't(?) have any api for detailed single item info with typed tags
-    if (searchHandler.currentBooruHandler.hasLoadItemSupport && searchHandler.currentBooruHandler.shouldUpdateIteminTagView) {
+  bool get supportsItemUpdate => searchHandler.currentBooruHandler.hasLoadItemSupport && searchHandler.currentBooruHandler.shouldUpdateIteminTagView;
+
+  Future<void> reloadItemData({
+    bool initial = false,
+    bool force = false,
+  }) async {
+    if (supportsItemUpdate && (!item.isUpdated || force)) {
+      loadingUpdate = true;
+      failedUpdate = false;
+      setState(() {});
       cancelToken = CancelToken();
-      await searchHandler.currentBooruHandler.loadItem(
+      final res = await searchHandler.currentBooruHandler.loadItem(
         item: item,
         cancelToken: cancelToken,
+        withCapcthaCheck: !initial,
       );
+      if (res[1] == false) {
+        failedUpdate = true;
+      }
+      loadingUpdate = false;
+      setState(() {});
       parseSortGroupTags();
     }
   }
@@ -271,26 +285,68 @@ class _TagViewState extends State<TagView> {
       subtitle: Text(searchController.text.isEmpty ? '${tags.length}' : '${filteredTags.length} / ${tags.length}'),
       trailingIcon: Container(
         margin: const EdgeInsets.only(left: 10),
-        child: Transform(
-          alignment: Alignment.center,
-          transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-          child: IconButton(
-            icon: Icon(
-              (sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha,
-              color: Theme.of(context).iconTheme.color,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (supportsItemUpdate) ...[
+              if (loadingUpdate)
+                IconButton(
+                  onPressed: () {
+                    cancelToken?.cancel();
+                  },
+                  icon: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                        ),
+                      ),
+                      Icon(
+                        Icons.close,
+                        color: Theme.of(context).iconTheme.color,
+                        size: 24,
+                      ),
+                    ],
+                  ),
+                )
+              else
+                IconButton(
+                  onPressed: () {
+                    reloadItemData(force: true);
+                  },
+                  icon: Icon(
+                    failedUpdate ? Icons.error_outline : Icons.refresh,
+                    color: failedUpdate ? Colors.red : Theme.of(context).iconTheme.color,
+                    size: 28,
+                  ),
+                ),
+            ],
+            //
+            Transform(
+              alignment: Alignment.center,
+              transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
+              child: IconButton(
+                icon: Icon(
+                  (sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                onPressed: () {
+                  if (sortTags == true) {
+                    sortTags = false;
+                  } else if (sortTags == false) {
+                    sortTags = null;
+                  } else {
+                    sortTags = true;
+                  }
+                  sortAndGroupTagsList();
+                  setState(() {});
+                },
+              ),
             ),
-            onPressed: () {
-              if (sortTags == true) {
-                sortTags = false;
-              } else if (sortTags == false) {
-                sortTags = null;
-              } else {
-                sortTags = true;
-              }
-              sortAndGroupTagsList();
-              setState(() {});
-            },
-          ),
+          ],
         ),
       ),
       drawBottomBorder: false,
@@ -386,7 +442,7 @@ class _TagViewState extends State<TagView> {
                 .map(
                   (link) => ListTile(
                     onLongPress: () async {
-                      ServiceHandler.vibrate();
+                      await ServiceHandler.vibrate();
                       await showDialog(
                         context: context,
                         builder: (context) {
@@ -476,7 +532,7 @@ class _TagViewState extends State<TagView> {
           contentItems: [
             SizedBox(
               height: 60,
-              width: MediaQuery.of(context).size.width,
+              width: MediaQuery.sizeOf(context).width,
               child: ListTile(
                 title: MarqueeText(
                   key: ValueKey(tag),
@@ -643,6 +699,31 @@ class _TagViewState extends State<TagView> {
                   Navigator.of(context).pop();
                 },
               ),
+            ListTile(
+              leading: Icon(
+                Icons.edit,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              title: const Text('Edit Tag'),
+              onTap: () async {
+                Navigator.of(context).pop();
+                final item = tagHandler.getTag(tag);
+                await showDialog(
+                  context: context,
+                  builder: (context) => TagsManagerListItemDialog(
+                    tag: item,
+                    onChangedType: (TagType? newValue) {
+                      if (newValue != null && item.tagType != newValue) {
+                        item.tagType = newValue;
+                        tagHandler.putTag(item, dbEnabled: settingsHandler.dbEnabled);
+                        parseSortGroupTags();
+                      }
+                    },
+                  ),
+                );
+                parseSortGroupTags();
+              },
+            ),
             //
             ListTile(
               leading: Icon(
@@ -676,10 +757,10 @@ class _TagViewState extends State<TagView> {
 
     final List<_TagInfoIcon> tagIconAndColor = [];
     if (isAi) {
-      tagIconAndColor.add(_TagInfoIcon(FontAwesomeIcons.robot, Theme.of(context).colorScheme.onBackground));
+      tagIconAndColor.add(_TagInfoIcon(FontAwesomeIcons.robot, Theme.of(context).colorScheme.onSurface));
     }
     if (isSound) {
-      tagIconAndColor.add(_TagInfoIcon(Icons.volume_up_rounded, Theme.of(context).colorScheme.onBackground));
+      tagIconAndColor.add(_TagInfoIcon(Icons.volume_up_rounded, Theme.of(context).colorScheme.onSurface));
     }
     if (isHated) {
       tagIconAndColor.add(_TagInfoIcon(CupertinoIcons.eye_slash, Colors.red));
@@ -749,7 +830,7 @@ class _TagViewState extends State<TagView> {
                           child: Icon(
                             Icons.search,
                             size: 10,
-                            color: Theme.of(context).colorScheme.onBackground,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                     ],
@@ -781,7 +862,7 @@ class _TagViewState extends State<TagView> {
                 ),
                 GestureDetector(
                   onLongPress: () async {
-                    ServiceHandler.vibrate();
+                    await ServiceHandler.vibrate();
                     if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
                       Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                     }
@@ -801,7 +882,7 @@ class _TagViewState extends State<TagView> {
                               Icons.circle,
                               size: 6,
                               color: hasTabWithTag.isOnlyTag
-                                  ? Theme.of(context).colorScheme.onBackground
+                                  ? Theme.of(context).colorScheme.onSurface
                                   : (hasTabWithTag.isOnlyTagDifferentBooru ? Colors.yellow : Colors.blue),
                             ),
                           ),
@@ -831,12 +912,12 @@ class _TagViewState extends State<TagView> {
                                   });
                                   controller.dismiss();
                                 },
-                                icon: Icon(Icons.arrow_forward_rounded, color: Theme.of(context).colorScheme.onBackground),
+                                icon: Icon(Icons.arrow_forward_rounded, color: Theme.of(context).colorScheme.onSurface),
                               ),
                               const SizedBox(width: 4),
                               IconButton(
                                 onPressed: () => controller.dismiss(),
-                                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onBackground),
+                                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
                               ),
                             ],
                           );
@@ -903,7 +984,7 @@ class _TagViewState extends State<TagView> {
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: MediaQuery.of(context).viewInsets.bottom,
+                height: MediaQuery.viewInsetsOf(context).bottom,
               ),
             ),
           ],
@@ -1211,16 +1292,14 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                           const SizedBox(width: 8),
                           IconButton(
                             onPressed: loadPreview,
-                            icon: const Icon(
-                              Icons.refresh,
-                            ),
+                            icon: const Icon(Icons.refresh),
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
                         height: 180,
-                        width: MediaQuery.of(context).size.width,
+                        width: MediaQuery.sizeOf(context).width,
                         child: ListView.builder(
                           shrinkWrap: true,
                           scrollDirection: Axis.horizontal,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -21,9 +23,7 @@ import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/gallery/viewer_tutorial.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 class GalleryViewPage extends StatefulWidget {
@@ -77,20 +77,6 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     super.dispose();
   }
 
-  void toggleToolbar(bool isLongTap) {
-    final bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
-    viewerHandler.displayAppbar.value = newAppbarVisibility;
-
-    if (isLongTap) {
-      ServiceHandler.vibrate();
-    }
-
-    // enable volume buttons if current page is a video AND appbar is set to visible
-    final bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isVideo;
-    final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
-    ServiceHandler.setVolumeButtons(isVolumeAllowed);
-  }
-
   void setVolumeListener() {
     volumeListener?.cancel();
     volumeListener = searchHandler.volumeStream?.listen(volumeCallback);
@@ -137,7 +123,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       backgroundColor: Colors.transparent,
       body: PhotoViewGestureDetectorScope(
         // vertical to prevent swipe-to-dismiss when zoomed
-        axis: Axis.vertical, // photo_view doesn't support locking both axises, so we use custom fork to fix this
+        // axis: Axis.vertical, // photo_view doesn't support locking both axises, so we use custom fork to fix this
+        axis: Axis.values,
         child: Dismissible(
           direction: settingsHandler.galleryScrollDirection == 'Vertical' ? DismissDirection.horizontal : DismissDirection.vertical,
           // background: Container(color: Colors.black.withOpacity(0.3)),
@@ -177,10 +164,18 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                       settingsHandler.snatchCooldown,
                       false,
                     );
+                    if (settingsHandler.favouriteOnSnatch) {
+                      await searchHandler.toggleItemFavourite(
+                        searchHandler.viewedIndex.value,
+                        forcedValue: true,
+                      );
+                    }
                   } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {
                     // favorite on F
                     if (settingsHandler.dbEnabled) {
-                      await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
+                      await searchHandler.toggleItemFavourite(
+                        searchHandler.viewedIndex.value,
+                      );
                     }
                   } else if (event.physicalKey == PhysicalKeyboardKey.escape) {
                     // exit on escape if in focus
@@ -201,9 +196,12 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                         );
                       }
 
+                      final int preloadCount = settingsHandler.preloadCount;
+                      final bool isSankaku = [BooruType.Sankaku, BooruType.IdolSankaku].any((t) => t == searchHandler.currentBooru.type);
+
                       return PreloadPageView.builder(
                         controller: controller,
-                        preloadPagesCount: settingsHandler.preloadCount,
+                        preloadPagesCount: preloadCount,
                         // allowImplicitScrolling: true,
                         scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
                         physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
@@ -224,11 +222,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                             if (settingsHandler.disableVideo) {
                               itemWidget = const Center(child: Text('Video Disabled', style: TextStyle(fontSize: 20)));
                             } else {
-                              if (Platform.isAndroid || Platform.isIOS) {
+                              if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
                                 itemWidget = VideoViewer(item, enableFullscreen: true, key: item.key);
-                              } else if (Platform.isWindows || Platform.isLinux) {
-                                // itemWidget = VideoViewerPlaceholder(item: item);
-                                itemWidget = VideoViewerDesktop(item, key: item.key);
                               } else {
                                 itemWidget = VideoViewerPlaceholder(item: item);
                               }
@@ -242,13 +237,22 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                               },
                             );
                           } else {
-                            itemWidget = UnknownViewerPlaceholder(item: item);
+                            itemWidget = GuessExtensionViewer(
+                              item: item,
+                              onMediaTypeGuessed: (MediaType mediaType) {
+                                item.mediaType.value = mediaType;
+                                setState(() {});
+                              },
+                            );
+                            // itemWidget = UnknownViewerPlaceholder(item: item);
                           }
 
-                          return Obx(() {
+                          final child = Obx(() {
                             final bool isViewed = index == searchHandler.viewedIndex.value;
-                            final bool isNear = (searchHandler.viewedIndex.value - index).abs() <= settingsHandler.preloadCount;
-                            // print('!! preloadpageview item build $index $isViewed $isNear !!');
+                            final int distanceFromCurrent = (searchHandler.viewedIndex.value - index).abs();
+                            // don't render more than 3 videos at once, chance to crash is too high otherwise
+                            // disabled video preload for sankaku because their videos cause crashes if loading/rendering(?) more than one at a time
+                            final bool isNear = distanceFromCurrent <= (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
                             if (!isViewed && !isNear) {
                               // don't render if out of preload range
                               return Center(child: Container(color: Colors.black));
@@ -259,15 +263,33 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                               // Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
                               child: GestureDetector(
                                 onTap: () {
-                                  toggleToolbar(false);
+                                  viewerHandler.toggleToolbar(false);
                                 },
                                 onLongPress: () {
-                                  toggleToolbar(true);
+                                  viewerHandler.toggleToolbar(true);
                                 },
                                 child: itemWidget,
                               ),
                             );
                           });
+
+                          if (settingsHandler.disableCustomPageTransitions) {
+                            return child;
+                          }
+
+                          return AnimatedBuilder(
+                            animation: controller,
+                            builder: (context, child) {
+                              return slidePageTransition(
+                                context,
+                                controller,
+                                settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
+                                index,
+                                child,
+                              );
+                            },
+                            child: child,
+                          );
                         },
                         onPageChanged: (int index) {
                           ServiceHandler.disableSleep();
@@ -316,4 +338,28 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       ),
     );
   }
+}
+
+Widget slidePageTransition(
+  BuildContext context,
+  PreloadPageController pageController,
+  Axis direction,
+  int index,
+  Widget? child,
+) {
+  double delta = 0;
+  if (pageController.hasClients && pageController.position.haveDimensions) {
+    final position = (pageController.page! - index).clamp(-1.0, 1.0);
+    final width = pageController.position.viewportDimension;
+    delta = position * width / 2;
+  }
+  return ClipRect(
+    child: Transform.translate(
+      offset: Offset(
+        direction == Axis.horizontal ? delta : 0,
+        direction == Axis.vertical ? delta : 0,
+      ),
+      child: child,
+    ),
+  );
 }

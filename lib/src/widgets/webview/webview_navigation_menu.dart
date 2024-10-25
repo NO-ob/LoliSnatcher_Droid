@@ -74,7 +74,7 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
       },
     );
     if (url != null) {
-      if (!url.startsWith('https')) {
+      if (!url.startsWith('https') && !url.startsWith('http')) {
         url = 'https://$url';
       }
       await controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));

@@ -32,6 +32,7 @@ class ImageWriter {
     Booru booru,
     void Function(int, int)? onProgress,
     bool ignoreExists,
+    void Function(CancelToken)? onCancelTokenCreate,
   ) async {
     final String fileName = getFilename(item, booru);
     await setPaths();
@@ -60,6 +61,11 @@ class ImageWriter {
 
       final String url = ((settingsHandler.snatchMode == 'Sample' && item.sampleURL.isNotEmpty) ? item.sampleURL : item.fileURL);
 
+      final cancelToken = CancelToken();
+      if (onCancelTokenCreate != null) {
+        onCancelTokenCreate(cancelToken);
+      }
+
       if (Platform.isAndroid && settingsHandler.extPathOverride.isNotEmpty) {
         await DioNetwork.downloadCustom(
           url,
@@ -73,6 +79,7 @@ class ImageWriter {
           ),
           headers: headers,
           onReceiveProgress: onProgress,
+          cancelToken: cancelToken,
         );
       } else {
         await DioNetwork.download(
@@ -84,6 +91,7 @@ class ImageWriter {
           ),
           headers: headers,
           onReceiveProgress: onProgress,
+          cancelToken: cancelToken,
         );
       }
 
@@ -125,11 +133,23 @@ class ImageWriter {
           }
         }
       } catch (e, s) {
-        Logger.newLog(m: 'Image Writer Image not found after DL', e: e, s: s, t: LogTypes.imageInfo);
+        Logger.Inst().log(
+          e.toString(),
+          'ImageWriter',
+          'write',
+          LogTypes.exception,
+          s: s,
+        );
         return e;
       }
     } catch (e, s) {
-      Logger.newLog(m: 'Image Writer Exception', e: e, s: s, t: LogTypes.imageInfo);
+      Logger.Inst().log(
+        e.toString(),
+        'ImageWriter',
+        'write',
+        LogTypes.exception,
+        s: s,
+      );
       return e;
     }
     return fileName;
@@ -173,9 +193,10 @@ class ImageWriter {
     int cooldown,
     void Function(int, int)? onProgress,
     bool ignoreExists,
+    void Function(CancelToken)? onCancelTokenCreate,
   ) async* {
     int snatchedCounter = 1;
-    final List<BooruItem> existsList = [], failedList = [];
+    final List<BooruItem> existsList = [], failedList = [], cancelledList = [];
     for (int i = 0; i < snatched.length; i++) {
       await Future.delayed(Duration(milliseconds: cooldown), () async {
         final snatchResult = await write(
@@ -183,11 +204,16 @@ class ImageWriter {
           booru,
           onProgress,
           ignoreExists,
+          onCancelTokenCreate,
         );
         if (snatchResult == null) {
           existsList.add(snatched[i]);
         } else if (snatchResult is! String) {
-          failedList.add(snatched[i]);
+          if (snatchResult is DioException && snatchResult.type == DioExceptionType.cancel) {
+            cancelledList.add(snatched[i]);
+          } else {
+            failedList.add(snatched[i]);
+          }
         }
       });
       snatchedCounter++;
@@ -200,6 +226,7 @@ class ImageWriter {
       'snatched': snatchedCounter,
       'exists': existsList,
       'failed': failedList,
+      'cancelled': cancelledList,
     };
   }
 
@@ -353,20 +380,27 @@ class ImageWriter {
         final List<FileSystemEntity> files = await cacheDir.list(recursive: true, followLinks: false).toList();
         for (final FileSystemEntity file in files) {
           if (file is File) {
-            final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
-            final DateTime lastModified = await file.lastModified();
-            if (isStaleClearActive) {
-              final bool isStale = (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < timeNow;
-              if (isNotExcludedExt && isStale) {
-                await file.delete();
+            try {
+              final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
+              final DateTime lastModified = await file.lastModified();
+              if (isStaleClearActive) {
+                final bool isStale = (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < timeNow;
+                if (isNotExcludedExt && isStale) {
+                  await file.delete();
+                }
+              } else {
+                // delete files that are too big and older than 30 days, even when stale cache clearing is disabled
+                final bool isTooBig = await file.length() > fileSizeToKeep;
+                final bool isMonthOld = lastModified.millisecondsSinceEpoch < timeMonthAgo;
+                if (isNotExcludedExt && isTooBig && isMonthOld) {
+                  await file.delete();
+                }
               }
-            } else {
-              // delete files that are too big and older than 30 days, even when stale cache clearing is disabled
-              final bool isTooBig = await file.length() > fileSizeToKeep;
-              final bool isMonthOld = lastModified.millisecondsSinceEpoch < timeMonthAgo;
-              if (isNotExcludedExt && isTooBig && isMonthOld) {
+            } catch (e) {
+              print('Image Writer Exception :: clear stale cache :: $e');
+              try {
                 await file.delete();
-              }
+              } catch (_) {}
             }
           }
         }
@@ -406,16 +440,23 @@ class ImageWriter {
           files.sort((a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
 
           for (final File file in files) {
-            final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
-            final bool stillOverflows = toDeleteSize < overflowSize;
-            if (isNotExcludedExt && stillOverflows) {
-              final fileSize = await file.length();
-              if (fileSize <= fileSizeToKeep) {
-                // if file is smaller than fileSizeToKeep, we delete it
-                // otherwise leave it to be deleted by clearStaleCache after a month or manually by user
-                toDelete.add(file);
-                toDeleteSize += fileSize;
+            try {
+              final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
+              final bool stillOverflows = toDeleteSize < overflowSize;
+              if (isNotExcludedExt && stillOverflows) {
+                final fileSize = await file.length();
+                if (fileSize <= fileSizeToKeep) {
+                  // if file is smaller than fileSizeToKeep, we delete it
+                  // otherwise leave it to be deleted by clearStaleCache after a month or manually by user
+                  toDelete.add(file);
+                  toDeleteSize += fileSize;
+                }
               }
+            } catch (e) {
+              print('Image Writer Exception :: clear cache overflow :: $e');
+              try {
+                await file.delete();
+              } catch (_) {}
             }
           }
         }

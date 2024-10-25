@@ -192,8 +192,14 @@ class TagHandler extends GetxController {
           await loadTagsFile();
         }
       }
-    } catch (e) {
-      Logger.Inst().log('Error loading tags: $e', 'TagHandler', 'loadTags', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Error loading tags: $e',
+        'TagHandler',
+        'loadTags',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     return true;
@@ -224,22 +230,24 @@ class TagHandler extends GetxController {
             preferTypeIfNone: preferTagTypeIfNone,
             dbEnabled: dbEnabled,
           );
-        } catch (e) {
+        } catch (e, s) {
           Logger.Inst().log(
             'Error parsing tag: $rawTag',
             'TagHandler',
             'loadFromJSON',
             LogTypes.exception,
+            s: s,
           );
         }
       }
       return true;
-    } catch (e) {
+    } catch (e, s) {
       Logger.Inst().log(
         'Error loading tags from JSON: $e',
         'TagHandler',
         'loadFromJSON',
         LogTypes.exception,
+        s: s,
       );
       return false;
     }
@@ -273,8 +281,14 @@ class TagHandler extends GetxController {
         writer.write(jsonEncode(toList()));
         await writer.flush();
         await writer.close();
-      } catch (e) {
-        Logger.Inst().log('FAILED TO WRITE TAG FILE: $e', 'TagHandler', 'saveTags', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          'FAILED TO WRITE TAG FILE: $e',
+          'TagHandler',
+          'saveTags',
+          LogTypes.exception,
+          s: s,
+        );
       }
     }
     tagSaveActive = false;

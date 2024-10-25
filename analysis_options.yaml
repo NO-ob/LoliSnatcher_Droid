@@ -185,7 +185,6 @@ linter:
     use_named_constants: true
     use_raw_strings: true
     use_rethrow_when_possible: true
-    use_setters_to_change_properties: true
     use_string_buffers: false
     use_string_in_part_of_directives: true
     use_super_parameters: true

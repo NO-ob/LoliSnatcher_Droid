@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
@@ -78,6 +80,7 @@ class _FaviconState extends State<Favicon> {
       if (error is DioException && error.response != null && Tools.isGoodStatusCode(error.response!.statusCode) == false) {
         if (manualReloadTapped && (error.response!.statusCode == 403 || error.response!.statusCode == 503)) {
           await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
+          unawaited(restartLoading());
           manualReloadTapped = false;
         }
         errorCode = error.response!.statusCode.toString();
@@ -120,8 +123,14 @@ class _FaviconState extends State<Favicon> {
           updateState();
         }
       },
-      onError: (e, stack) {
-        Logger.Inst().log('Failed to load favicon: ${widget.booru.faviconURL}', 'Favicon', 'build', LogTypes.imageLoadingError);
+      onError: (e, s) {
+        Logger.Inst().log(
+          'Failed to load favicon: ${widget.booru.faviconURL}',
+          'Favicon',
+          'build',
+          LogTypes.imageLoadingError,
+          s: s,
+        );
         onError(e);
       },
     );
@@ -175,7 +184,7 @@ class _FaviconState extends State<Favicon> {
               errorBuilder: (_, Object exception, ___) {
                 return FaviconError(
                   iconSize: size,
-                  color: widget.color ?? Theme.of(context).colorScheme.onBackground,
+                  color: widget.color ?? Theme.of(context).colorScheme.onSurface,
                   code: errorCode,
                   onRestart: () {
                     manualReloadTapped = true;
@@ -184,20 +193,17 @@ class _FaviconState extends State<Favicon> {
                 );
               },
             )
-          else ...[
-            if (isFailed)
-              FaviconError(
-                iconSize: size,
-                color: Colors.grey,
-                code: errorCode,
-                onRestart: () {
-                  manualReloadTapped = true;
-                  restartLoading();
-                },
-              )
-            else
-              const SizedBox.shrink(),
-          ],
+          else if (isFailed)
+            FaviconError(
+              iconSize: size,
+              color: Colors.grey,
+              code: errorCode,
+              onRestart: () {
+                manualReloadTapped = true;
+                restartLoading();
+              },
+            ),
+          //
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: (isLoaded || isFailed)

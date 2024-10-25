@@ -42,7 +42,7 @@ class _NetworkPageState extends State<NetworkPage> {
     proxyPasswordController.text = settingsHandler.proxyPassword;
   }
 
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -66,7 +66,7 @@ class _NetworkPageState extends State<NetworkPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -82,8 +82,9 @@ class _NetworkPageState extends State<NetworkPage> {
                     allowSelfSignedCerts = newValue;
                   });
                 },
-                title: 'Enable Self Signed SSL Certificates',
+                title: 'Enable self signed SSL certificates',
               ),
+              const SettingsButton(name: '', enabled: false),
               SettingsDropdown<ProxyType>(
                 value: proxyType,
                 items: (settingsHandler.map['proxyType']!['options'] as List<String>).map(ProxyType.fromName).toList(),
@@ -96,7 +97,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 subtitle: const Text('Does not apply to streaming video mode, use caching video mode instead'),
                 itemBuilder: (item) => Text(item?.name.capitalizeFirst ?? ''),
               ),
-              if (proxyType != ProxyType.direct && proxyType != ProxyType.system) ...[
+              if (!proxyType.isDirect && !proxyType.isSystem) ...[
                 SettingsTextInput(
                   controller: proxyAddressController,
                   title: 'Address',
@@ -117,12 +118,13 @@ class _NetworkPageState extends State<NetworkPage> {
                   forceLabelOnTop: true,
                   resetText: () => '',
                   pasteable: true,
+                  obscureable: true,
                 ),
               ],
               const SettingsButton(name: '', enabled: false),
               SettingsTextInput(
                 controller: userAgentController,
-                title: 'Custom User Agent',
+                title: 'Custom user agent',
                 forceLabelOnTop: true,
                 resetText: () => '',
                 pasteable: true,
@@ -134,7 +136,7 @@ class _NetworkPageState extends State<NetworkPage> {
                       context: context,
                       builder: (context) {
                         return const SettingsDialog(
-                          title: Text('Custom User Agent'),
+                          title: Text('Custom user agent'),
                           contentItems: [
                             Text('Keep empty to use default value'),
                             Text('Default: ${Tools.appUserAgent}'),
@@ -147,13 +149,14 @@ class _NetworkPageState extends State<NetworkPage> {
                   },
                 ),
               ),
-              SettingsButton(
-                name: 'Tap here to use suggested browser user agent:',
-                subtitle: const Text(Constants.defaultBrowserUserAgent),
-                action: () {
-                  userAgentController.text = Constants.defaultBrowserUserAgent;
-                },
-              ),
+              if (userAgentController.text != Constants.defaultBrowserUserAgent)
+                SettingsButton(
+                  name: 'Tap here to use suggested browser user agent:',
+                  subtitle: const Text(Constants.defaultBrowserUserAgent),
+                  action: () {
+                    userAgentController.text = Constants.defaultBrowserUserAgent;
+                  },
+                ),
               const SettingsButton(name: '', enabled: false),
               const SettingsButton(
                 name: 'Cookie cleaner',
@@ -164,7 +167,11 @@ class _NetworkPageState extends State<NetworkPage> {
                 nullable: true,
                 onChanged: (newValue) async {
                   selectedBooru = newValue;
-                  selectedBooruCookies = await CookieManager.instance().getCookies(url: WebUri(selectedBooru!.baseURL!));
+                  if (newValue != null) {
+                    selectedBooruCookies = await CookieManager.instance().getCookies(url: WebUri(selectedBooru!.baseURL!));
+                  } else {
+                    selectedBooruCookies = [];
+                  }
                   setState(() {});
                 },
                 title: 'Booru',
@@ -198,7 +205,7 @@ class _NetworkPageState extends State<NetworkPage> {
                   color: Colors.red,
                 ),
                 action: () async {
-                  if (selectedBooru == null) {
+                  if (selectedBooru != null) {
                     await CookieManager.instance().deleteCookies(url: WebUri(selectedBooru!.baseURL!));
                     FlashElements.showSnackbar(
                       context: context,
@@ -231,6 +238,12 @@ enum ProxyType {
   http,
   socks5,
   socks4;
+
+  bool get isDirect => this == direct;
+  bool get isSystem => this == system;
+  bool get isHttp => this == http;
+  bool get isSocks5 => this == socks5;
+  bool get isSocks4 => this == socks4;
 
   static ProxyType fromName(String name) {
     return ProxyType.values.firstWhereOrNull((e) => e.name == name) ?? direct;

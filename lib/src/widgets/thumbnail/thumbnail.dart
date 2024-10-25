@@ -115,7 +115,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
     final double? prevThumbWidth = thumbWidth, prevThumbHeight = thumbHeight;
 
-    final double widthLimit = constraints.maxWidth * MediaQuery.of(context).devicePixelRatio * 1;
+    final double widthLimit = constraints.maxWidth * MediaQuery.devicePixelRatioOf(context) * 1;
     double thumbRatio = 1;
     final bool hasSizeData = widget.item.fileHeight != null && widget.item.fileWidth != null;
 
@@ -228,11 +228,17 @@ class _ThumbnailState extends State<Thumbnail> {
       onChunk: (event) {
         onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
       },
-      onError: (e, stack) {
+      onError: (e, s) {
         if (e is! DioException) {
           failedRendering = true;
         }
-        Logger.Inst().log('Error loading thumbnail: ${widget.item.sampleURL} ${widget.item.thumbnailURL}', 'Thumbnail', 'build', LogTypes.imageLoadingError);
+        Logger.Inst().log(
+          'Error loading thumbnail: ${widget.item.sampleURL} ${widget.item.thumbnailURL}',
+          'Thumbnail',
+          'build',
+          LogTypes.imageLoadingError,
+          s: s,
+        );
         onError(e, delayed: true);
       },
     );
@@ -249,11 +255,17 @@ class _ThumbnailState extends State<Thumbnail> {
             updateState();
           }
         },
-        onError: (e, stack) {
+        onError: (e, s) {
           if (e is! DioException) {
             failedRendering = true;
           }
-          Logger.Inst().log('Error loading extra thumbnail: ${widget.item.thumbnailURL}', 'Thumbnail', 'build', LogTypes.imageLoadingError);
+          Logger.Inst().log(
+            'Error loading extra thumbnail: ${widget.item.thumbnailURL}',
+            'Thumbnail',
+            'build',
+            LogTypes.imageLoadingError,
+            s: s,
+          );
         },
       );
       extraImageStream!.addListener(extraImageListener!);
