@@ -79,8 +79,14 @@ class DBHandler {
       if (!await columnExists('Tag', 'updatedAt')) {
         await db?.execute('ALTER TABLE Tag ADD COLUMN updatedAt INTEGER;');
       }
-    } catch (e) {
-      Logger.Inst().log('Error updating table', 'DBHandler', 'updateTable', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Error updating table',
+        'DBHandler',
+        'updateTable',
+        LogTypes.exception,
+        s: s,
+      );
     }
     return true;
   }
@@ -154,7 +160,7 @@ class DBHandler {
     return resultStr;
   }
 
-  Future<Map<String, int>> updateMultipleBooruItems(List<BooruItem> items) async {
+  Future<Map<String, int>> updateMultipleBooruItems(List<BooruItem> items, BooruUpdateMode mode) async {
     final List<String> itemIDs = await getItemIDs(items.map((item) => item.postURL).toList());
 
     int saved = 0, exist = 0;
@@ -178,9 +184,20 @@ class DBHandler {
         itemID = result?.toString();
         await updateTags(item.tagsList, itemID);
         saved++;
+      } else if (mode == BooruUpdateMode.local) {
+        await db?.rawUpdate(
+          'UPDATE BooruItem SET isSnatched = ?, isFavourite = ? WHERE id = ?',
+          [Tools.boolToInt(item.isSnatched.value == true), Tools.boolToInt(item.isFavourite.value == true), itemID],
+        );
+      } else if (mode == BooruUpdateMode.urlUpdate) {
+        await db?.rawUpdate(
+          'UPDATE BooruItem SET thumbnailURL = ?,sampleURL = ?,fileURL = ? WHERE id = ?',
+          [item.thumbnailURL, item.sampleURL, item.fileURL, itemID],
+        );
       } else {
         exist++;
       }
+      await Future.delayed(const Duration(milliseconds: 1));
     }
     await deleteUntracked();
 
@@ -572,12 +589,11 @@ class DBHandler {
     return;
   }
 
-  Future<List<String>> getTabRestore() async {
+  Future<String?> getTabRestore() async {
     final result = await db?.rawQuery('SELECT id, restore FROM TabRestore ORDER BY id DESC LIMIT 1;');
-    final List<String> restoreItem = []; // id, restoreString
+    String? restoreItem;
     if (result != null && result.isNotEmpty) {
-      restoreItem.add(result[0]['id'].toString());
-      restoreItem.add(result[0]['restore'].toString());
+      restoreItem = result[0]['restore'].toString();
     }
     return restoreItem;
   }

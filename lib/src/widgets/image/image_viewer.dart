@@ -208,7 +208,7 @@ class ImageViewerState extends State<ImageViewer> {
     }
 
     final int? prevWidthLimit = widthLimit;
-    widthLimit = settingsHandler.disableImageScaling ? null : (constraints.maxWidth * MediaQuery.of(context).devicePixelRatio * 2).round();
+    widthLimit = settingsHandler.disableImageScaling ? null : (constraints.maxWidth * MediaQuery.devicePixelRatioOf(context) * 2).round();
     if (prevWidthLimit != widthLimit) {
       updateState(postFrame: true);
     }
@@ -449,7 +449,7 @@ class ImageViewerState extends State<ImageViewer> {
                               loadingBuilder: (context, event) {
                                 return const SizedBox.shrink();
                               },
-                              errorBuilder: (context, error, stackTrace) {
+                              errorBuilder: (_, error, __) {
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
                                   onError(error);
                                 });
@@ -464,8 +464,6 @@ class ImageViewerState extends State<ImageViewer> {
                               basePosition: Alignment.center,
                               controller: viewController,
                               scaleStateController: scaleController,
-                              enableDoubleTapZoom: true,
-                              enableTapDragZoom: settingsHandler.useDoubleTapDragZoom,
                             ),
                           ),
                         )

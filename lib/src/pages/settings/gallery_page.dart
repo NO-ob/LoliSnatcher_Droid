@@ -13,18 +13,17 @@ class GalleryPage extends StatefulWidget {
 
 class _GalleryPageState extends State<GalleryPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+
   bool autoHideImageBar = false,
-      autoPlay = true,
-      startVideosMuted = false,
       hideNotes = false,
       allowRotation = false,
       loadingGif = false,
       useVolumeButtonsForScroll = false,
       shitDevice = false,
-      disableVideo = false,
       wakeLockEnabled = true,
       enableHeroTransitions = true,
-      useDoubleTapDragZoom = true;
+      disableCustomPageTransitions = false,
+      disableVibration = false;
   late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
 
   List<List<String>>? buttonOrder;
@@ -50,8 +49,6 @@ class _GalleryPageState extends State<GalleryPage> {
 
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
     changePageButtonsPosition = settingsHandler.changePageButtonsPosition;
-    autoPlay = settingsHandler.autoPlayEnabled;
-    startVideosMuted = settingsHandler.startVideosMuted;
     hideNotes = settingsHandler.hideNotes;
     allowRotation = settingsHandler.allowRotation;
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
@@ -59,15 +56,15 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
     preloadController.text = settingsHandler.preloadCount.toString();
     shitDevice = settingsHandler.shitDevice;
-    disableVideo = settingsHandler.disableVideo;
     loadingGif = settingsHandler.loadingGif;
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
     enableHeroTransitions = settingsHandler.enableHeroTransitions;
-    useDoubleTapDragZoom = settingsHandler.useDoubleTapDragZoom;
+    disableCustomPageTransitions = settingsHandler.disableCustomPageTransitions;
+    disableVibration = settingsHandler.disableVibration;
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -80,17 +77,16 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.shareAction = shareAction;
     settingsHandler.zoomButtonPosition = zoomButtonPosition;
     settingsHandler.changePageButtonsPosition = changePageButtonsPosition;
-    settingsHandler.autoPlayEnabled = autoPlay;
-    settingsHandler.startVideosMuted = startVideosMuted;
     settingsHandler.hideNotes = hideNotes;
     settingsHandler.allowRotation = allowRotation;
     settingsHandler.loadingGif = loadingGif;
     settingsHandler.shitDevice = shitDevice;
-    settingsHandler.disableVideo = disableVideo;
     settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     settingsHandler.wakeLockEnabled = wakeLockEnabled;
     settingsHandler.enableHeroTransitions = enableHeroTransitions;
-    settingsHandler.useDoubleTapDragZoom = useDoubleTapDragZoom;
+    settingsHandler.disableCustomPageTransitions = disableCustomPageTransitions;
+    settingsHandler.disableVibration = disableVibration;
+
     if (int.parse(scrollSpeedController.text) < 100) {
       scrollSpeedController.text = '100';
     }
@@ -120,19 +116,18 @@ class _GalleryPageState extends State<GalleryPage> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Gallery'),
+          title: const Text('Viewer'),
         ),
         body: Center(
           child: ListView(
             children: [
               SettingsTextInput(
                 controller: preloadController,
-                title: 'Gallery View Preload',
-                hintText: 'Images to preload',
+                title: 'Preload amount',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['preloadCount']!['default']!.toString(),
@@ -153,7 +148,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   }
                 },
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: galleryMode,
                 items: settingsHandler.map['galleryMode']!['options'],
                 onChanged: (String? newValue) {
@@ -161,28 +156,9 @@ class _GalleryPageState extends State<GalleryPage> {
                     galleryMode = newValue ?? settingsHandler.map['galleryMode']!['default'];
                   });
                 },
-                title: 'Gallery Quality',
-                trailingIcon: IconButton(
-                  icon: const Icon(Icons.help_outline),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Gallery Quality'),
-                          contentItems: [
-                            Text('The gallery quality changes the resolution of images in the gallery viewer.'),
-                            Text(''),
-                            Text(' - Sample - Medium resolution'),
-                            Text(' - Full Res - Full resolution'),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
+                title: 'Image quality',
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: galleryScrollDirection,
                 items: settingsHandler.map['galleryScrollDirection']!['options'],
                 onChanged: (String? newValue) {
@@ -190,45 +166,9 @@ class _GalleryPageState extends State<GalleryPage> {
                     galleryScrollDirection = newValue ?? settingsHandler.map['galleryScrollDirection']!['default'];
                   });
                 },
-                title: 'Gallery Scroll Direction',
+                title: 'Viewer scroll direction',
               ),
-              SettingsDropdown(
-                value: shareAction,
-                items: (settingsHandler.map['shareAction']!['options'] as List<String>).where((element) => hasHydrus || element != 'Hydrus').toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
-                  });
-                },
-                title: 'Default Share Action',
-                trailingIcon: IconButton(
-                  icon: const Icon(Icons.help_outline),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return SettingsDialog(
-                          title: const Text('Share Actions'),
-                          contentItems: [
-                            const Text('- Ask - always ask what to share'),
-                            const Text('- Post URL'),
-                            const Text('- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)'),
-                            const Text('- File - shares viewed file itself'),
-                            if (hasHydrus) const Text('- Hydrus - sends the post url to Hydrus for import'),
-                            const Text(''),
-                            const Text(
-                              '[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time.',
-                            ),
-                            const Text(''),
-                            const Text('[Tip]: You can open Share Actions Menu by long pressing Share button.'),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: galleryBarPosition,
                 items: settingsHandler.map['galleryBarPosition']!['options'],
                 onChanged: (String? newValue) {
@@ -236,9 +176,9 @@ class _GalleryPageState extends State<GalleryPage> {
                     galleryBarPosition = newValue ?? settingsHandler.map['galleryBarPosition']!['default'];
                   });
                 },
-                title: 'Gallery Bar Position',
+                title: 'Viewer toolbar position',
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: zoomButtonPosition,
                 items: settingsHandler.map['zoomButtonPosition']!['options'],
                 onChanged: (String? newValue) {
@@ -246,9 +186,9 @@ class _GalleryPageState extends State<GalleryPage> {
                     zoomButtonPosition = newValue ?? settingsHandler.map['zoomButtonPosition']!['default'];
                   });
                 },
-                title: 'Zoom Button Position',
+                title: 'Zoom button position',
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: changePageButtonsPosition,
                 items: settingsHandler.map['changePageButtonsPosition']!['options'],
                 onChanged: (String? newValue) {
@@ -256,7 +196,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     changePageButtonsPosition = newValue ?? settingsHandler.map['changePageButtonsPosition']!['default'];
                   });
                 },
-                title: 'Change Page Buttons Position',
+                title: 'Change page buttons position',
               ),
               SettingsToggle(
                 value: autoHideImageBar,
@@ -265,7 +205,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     autoHideImageBar = newValue;
                   });
                 },
-                title: 'Auto Hide Gallery Bar',
+                title: 'Hide toolbar when opening viewer',
               ),
               SettingsToggle(
                 value: hideNotes,
@@ -275,15 +215,6 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: 'Hide translation notes by default',
-              ),
-              SettingsToggle(
-                value: useDoubleTapDragZoom,
-                onChanged: (newValue) {
-                  setState(() {
-                    useDoubleTapDragZoom = newValue;
-                  });
-                },
-                title: 'Use Double Tap-Hold-Drag zoom gesture',
               ),
               SettingsToggle(
                 value: allowRotation,
@@ -296,55 +227,84 @@ class _GalleryPageState extends State<GalleryPage> {
                 subtitle: const Text('Double tap to reset (only works on images)'),
               ),
 
-              Container(
-                margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                child: Column(
-                  children: [
-                    SettingsButton(
-                      name: 'Toolbar Buttons Order',
-                      drawBottomBorder: false,
-                      trailingIcon: IconButton(
-                        icon: const Icon(Icons.help_outline),
+              Material(
+                color: Colors.transparent,
+                child: ExpansionTile(
+                  title: Row(
+                    children: [
+                      const Expanded(child: Text('Toolbar buttons order')),
+                      IconButton(
+                        icon: Icon(
+                          Icons.help_outline,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                         onPressed: () {
                           showDialog(
                             context: context,
                             builder: (context) {
                               return const SettingsDialog(
-                                title: Text('Buttons Order'),
+                                title: Text('Buttons order'),
                                 contentItems: [
                                   Text('Long press to change item order.'),
-                                  Text('First 4 buttons from this list will be always visible on Toolbar.'),
-                                  Text('Other buttons will be in overflow (three dots) menu.'),
+                                  Text('At least 4 buttons from this list will be always visible on Toolbar.'),
+                                  Text('Other buttons will go into overflow (three dots) menu.'),
                                 ],
                               );
                             },
                           );
                         },
                       ),
+                    ],
+                  ),
+                  shape: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                      width: borderWidth,
                     ),
+                  ),
+                  collapsedShape: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context).dividerColor,
+                      width: borderWidth,
+                    ),
+                  ),
+                  iconColor: Theme.of(context).colorScheme.onSurface,
+                  children: [
                     ReorderableListView(
-                      padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+                      padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
+                      buildDefaultDragHandles: false,
                       children: [
                         for (int index = 0; index < buttonOrder!.length; index++)
-                          ListTile(
-                            onTap: () {
-                              FlashElements.showSnackbar(
-                                context: context,
-                                title: const Text(
-                                  'Long Press to move items',
-                                  style: TextStyle(fontSize: 20),
+                          ReorderableDelayedDragStartListener(
+                            key: ValueKey('item-#$index'),
+                            index: index,
+                            child: ListTile(
+                              onTap: () {
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: const Text(
+                                    'Long press to move items',
+                                    style: TextStyle(fontSize: 20),
+                                  ),
+                                  leadingIcon: Icons.warning_amber,
+                                  leadingIconColor: Colors.yellow,
+                                  sideColor: Colors.yellow,
+                                );
+                              },
+                              key: Key('$index'),
+                              tileColor: index.isOdd ? oddItemColor : evenItemColor,
+                              title: Text(buttonOrder![index][1]),
+                              trailing: ReorderableDragStartListener(
+                                key: Key('draghandle-#$index'),
+                                index: index,
+                                child: const IconButton(
+                                  onPressed: null,
+                                  icon: Icon(Icons.drag_handle),
                                 ),
-                                leadingIcon: Icons.warning_amber,
-                                leadingIconColor: Colors.yellow,
-                                sideColor: Colors.yellow,
-                              );
-                            },
-                            key: Key('$index'),
-                            tileColor: index.isOdd ? oddItemColor : evenItemColor,
-                            title: Text(buttonOrder![index][1]),
-                            trailing: const Icon(Icons.menu),
+                              ),
+                            ),
                           ),
                       ],
                       onReorder: (int oldIndex, int newIndex) {
@@ -357,30 +317,40 @@ class _GalleryPageState extends State<GalleryPage> {
                         });
                       },
                     ),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
 
-              SettingsToggle(
-                value: disableVideo,
-                onChanged: (newValue) {
+              SettingsDropdown(
+                value: shareAction,
+                items: (settingsHandler.map['shareAction']!['options'] as List<String>).where((element) => hasHydrus || element != 'Hydrus').toList(),
+                onChanged: (String? newValue) {
                   setState(() {
-                    disableVideo = newValue;
+                    shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
                   });
                 },
-                title: 'Disable Video',
-                drawTopBorder: true, // instead of border in reorder list
+                title: 'Default share action',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Disable Video'),
+                        return SettingsDialog(
+                          title: const Text('Share actions'),
                           contentItems: [
-                            Text('Useful on low end devices that crash when trying to load videos.'),
-                            Text("Replaces video with text that says 'Video disabled'."),
+                            const Text('- Ask - always ask what to share'),
+                            const Text('- Post URL'),
+                            const Text('- File URL - shares direct link to the original file (may not work with some sites)'),
+                            const Text('- File - shares the file itself, may take some time to load, progress will be shown on the Share button'),
+                            if (hasHydrus) const Text('- Hydrus - sends the post url to Hydrus for import'),
+                            const Text(''),
+                            const Text(
+                              '[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network.',
+                            ),
+                            const Text(''),
+                            const Text('[Tip]: You can open Share actions menu by long pressing Share button.'),
                           ],
                         );
                       },
@@ -388,35 +358,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   },
                 ),
               ),
-              SettingsToggle(
-                value: autoPlay,
-                onChanged: (newValue) {
-                  setState(() {
-                    autoPlay = newValue;
-                  });
-                },
-                title: 'Auto play videos',
-              ),
-              SettingsToggle(
-                value: startVideosMuted,
-                onChanged: (newValue) {
-                  setState(() {
-                    startVideosMuted = newValue;
-                  });
-                },
-                title: 'Start videos muted',
-              ),
 
-              // TODO rework into loading element variant (small, verbose, gif...) or remove completely, this gif is like 20% of the app's size
-              SettingsToggle(
-                value: loadingGif,
-                onChanged: (newValue) {
-                  setState(() {
-                    loadingGif = newValue;
-                  });
-                },
-                title: 'Kanna loading Gif',
-              ),
               SettingsToggle(
                 value: shitDevice,
                 onChanged: (newValue) {
@@ -425,13 +367,13 @@ class _GalleryPageState extends State<GalleryPage> {
                     if (shitDevice) {
                       preloadController.text = '0';
                       galleryMode = 'Sample';
-                      autoPlay = false;
+                      settingsHandler.autoPlayEnabled = false;
                       settingsHandler.disableImageScaling = false;
                       settingsHandler.previewMode = 'Thumbnail';
                     }
                   });
                 },
-                title: 'Low Performance Mode',
+                title: 'Low performance mode',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -439,15 +381,16 @@ class _GalleryPageState extends State<GalleryPage> {
                       context: context,
                       builder: (context) {
                         return const SettingsDialog(
-                          title: Text('Low Performance Mode'),
+                          title: Text('Low performance mode'),
                           contentItems: [
-                            Text('Recommended for old devices and devices with RAM < 2GB.'),
+                            Text('Recommended for old devices and devices with RAM ~2GB.'),
                             Text(''),
                             Text('- Disables loading progress information'),
                             Text('- Sets optimal settings for:'),
-                            Text('   - Gallery Quality'),
-                            Text('   - Gallery Preload'),
-                            Text('   - Video Auto Play'),
+                            Text('   - Image quality'),
+                            Text('   - Preview quality'),
+                            Text('   - Preload amount'),
+                            Text('   - Video autoplay'),
                             Text("   - Don't scale images"),
                           ],
                         );
@@ -465,7 +408,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     useVolumeButtonsForScroll = newValue;
                   });
                 },
-                title: 'Use Volume Buttons for Scrolling',
+                title: 'Use volume buttons for scrolling',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -473,16 +416,16 @@ class _GalleryPageState extends State<GalleryPage> {
                       context: context,
                       builder: (context) {
                         return const SettingsDialog(
-                          title: Text('Volume Buttons Scrolling'),
+                          title: Text('Volume buttons scrolling'),
                           contentItems: [
-                            Text('Allows to scroll through previews grid and gallery items using volume buttons'),
+                            Text('Allows to scroll through previews grid and viewer items using volume buttons'),
                             Text(''),
                             Text(' - Volume Down - next item'),
                             Text(' - Volume Up - previous item'),
                             Text(''),
                             Text('On videos:'),
-                            Text(' - App Bar visible - controls volume'),
-                            Text(' - App Bar hidden - controls scrolling'),
+                            Text(' - Toolbar visible - controls volume'),
+                            Text(' - Toolbar hidden - controls scrolling'),
                           ],
                         );
                       },
@@ -492,8 +435,7 @@ class _GalleryPageState extends State<GalleryPage> {
               ),
               SettingsTextInput(
                 controller: scrollSpeedController,
-                title: 'Buttons Scroll Speed',
-                hintText: 'Scroll Speed',
+                title: 'Volume buttons scroll speed',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['volumeButtonsScrollSpeed']!['default']!.toString(),
@@ -517,8 +459,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
               SettingsTextInput(
                 controller: galleryAutoScrollController,
-                title: 'Slideshow Timeout (in ms)',
-                hintText: 'Slideshow Timeout (in ms)',
+                title: 'Slideshow duration (in ms)',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['galleryAutoScrollTime']!['default']!.toString(),
@@ -560,7 +501,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     wakeLockEnabled = newValue;
                   });
                 },
-                title: 'Prevent Device From Sleeping',
+                title: 'Prevent device from sleeping',
               ),
               SettingsToggle(
                 value: enableHeroTransitions,
@@ -569,10 +510,30 @@ class _GalleryPageState extends State<GalleryPage> {
                     enableHeroTransitions = newValue;
                   });
                 },
-                title: 'Gallery Transitions',
+                title: 'Viewer open/close animation',
+              ),
+              SettingsToggle(
+                value: disableCustomPageTransitions,
+                onChanged: (newValue) {
+                  setState(() {
+                    disableCustomPageTransitions = newValue;
+                  });
+                },
+                title: 'Viewer page change animation',
                 subtitle: Text(
-                  'Animation during opening/closing of gallery is ${enableHeroTransitions ? 'enabled' : 'disabled'}',
+                  disableCustomPageTransitions ? 'Using default animation' : 'Using custom animation',
                 ),
+              ),
+
+              // TODO rework into loading element variant (small, verbose, gif...) or remove completely, this gif is like 20% of the app's size
+              SettingsToggle(
+                value: loadingGif,
+                onChanged: (newValue) {
+                  setState(() {
+                    loadingGif = newValue;
+                  });
+                },
+                title: 'Kanna loading Gif',
               ),
             ],
           ),

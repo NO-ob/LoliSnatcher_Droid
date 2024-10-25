@@ -61,6 +61,10 @@ class Tools {
   }
 
   static String getFileExt(String fileURL) {
+    if (fileURL.contains('paheal') && fileURL.contains('file_ext')) {
+      return Uri.parse(fileURL).queryParameters['file_ext'] ?? 'png';
+    }
+
     final int queryLastIndex = fileURL.lastIndexOf('?'); // if has GET query parameters
     final int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
     final String fileExt = fileURL.substring(fileURL.lastIndexOf('.') + 1, lastIndex);
@@ -107,7 +111,7 @@ class Tools {
 
     if (!isTestMode) {
       try {
-        final cookiesStr = await getCookies(WebUri(booru.baseURL!));
+        final cookiesStr = await getCookies(booru.baseURL!);
         if (cookiesStr.isNotEmpty) {
           headers['Cookie'] = cookiesStr;
         }
@@ -168,10 +172,12 @@ class Tools {
 
   static const String appUserAgent = 'LoliSnatcher_Droid/${Constants.appVersion}';
   static String get browserUserAgent {
-    return isTestMode ? appUserAgent : (SettingsHandler.instance.customUserAgent.isNotEmpty ? SettingsHandler.instance.customUserAgent : appUserAgent);
+    return (isTestMode || SettingsHandler.instance.customUserAgent.isEmpty) ? appUserAgent : SettingsHandler.instance.customUserAgent;
   }
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
+
+  static bool get isOnPlatformWithWebviewSupport => Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isMacOS;
 
   static const String captchaCheckHeader = 'LSCaptchaCheck';
 
@@ -180,13 +186,15 @@ class Tools {
       return false;
     }
 
-    if (response?.statusCode == 503 || response?.statusCode == 403) {
+    final String host = uri.host;
+
+    if (isOnPlatformWithWebviewSupport && (response?.statusCode == 503 || response?.statusCode == 403)) {
       captchaScreenActive = true;
       await Navigator.push(
         NavigationHandler.instance.navigatorKey.currentContext!,
         MaterialPageRoute(
           builder: (context) => InAppWebviewView(
-            initialUrl: '${uri.scheme}://${uri.host}',
+            initialUrl: '${uri.scheme}://$host',
             userAgent: customUserAgent,
             title: 'Captcha check',
             subtitle:
@@ -200,18 +208,23 @@ class Tools {
     return false;
   }
 
-  static Future<String> getCookies(WebUri uri) async {
+  static Future<String> getCookies(String uri) async {
     String cookieString = '';
-    if (Platform.isAndroid || Platform.isIOS) {
-      // TODO add when there is desktop support?
+    if (isOnPlatformWithWebviewSupport) {
       try {
         final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: uri);
+        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(uri));
         for (final Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
-      } catch (e) {
-        Logger.Inst().log(e.toString(), 'Tools', 'getCookies', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'Tools',
+          'getCookies',
+          LogTypes.exception,
+          s: s,
+        );
       }
     }
 

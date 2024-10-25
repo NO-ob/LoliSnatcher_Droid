@@ -27,7 +27,7 @@ class ChangePageButtons extends StatelessWidget {
     final int direction = isPrev ? -1 : 1;
 
     return LongPressRepeater(
-      onStart: () {
+      onStart: () async {
         changePage(direction);
       },
       fasterAfter: 20,

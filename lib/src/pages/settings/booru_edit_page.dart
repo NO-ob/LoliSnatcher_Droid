@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 
+import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -66,17 +66,16 @@ class _BooruEditState extends State<BooruEdit> {
 
   @override
   void initState() {
-    //Load settings from the Booru instance parsed to the widget and populate the text fields
+    super.initState();
     if (widget.booru.name != 'New') {
-      booruNameController.text = widget.booru.name!;
-      booruURLController.text = widget.booru.baseURL!;
-      booruFaviconController.text = widget.booru.faviconURL!;
-      booruAPIKeyController.text = widget.booru.apiKey!;
-      booruUserIDController.text = widget.booru.userID!;
-      booruDefTagsController.text = widget.booru.defTags!;
+      booruNameController.text = widget.booru.name ?? '';
+      booruURLController.text = widget.booru.baseURL ?? '';
+      booruFaviconController.text = widget.booru.faviconURL ?? '';
+      booruAPIKeyController.text = widget.booru.apiKey ?? '';
+      booruUserIDController.text = widget.booru.userID ?? '';
+      booruDefTagsController.text = widget.booru.defTags ?? '';
       selectedBooruType = BooruType.values.contains(widget.booru.type) ? widget.booru.type! : selectedBooruType;
     }
-    super.initState();
   }
 
   @override
@@ -164,8 +163,9 @@ class _BooruEditState extends State<BooruEdit> {
               pasteable: true,
               hintText: AppLocalizations.of(context).booruEdit_canBeBlankHint,
               clearable: true,
+              obscureable: shouldObscureApiKey(),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+            SizedBox(height: MediaQuery.sizeOf(context).height * 0.2),
           ],
         ),
       ),
@@ -183,6 +183,13 @@ class _BooruEditState extends State<BooruEdit> {
     }
   }
 
+  bool shouldObscureApiKey() {
+    switch (selectedBooruType) {
+      default:
+        return true;
+    }
+  }
+
   String getUserIDTitle() {
     switch (selectedBooruType) {
       case BooruType.Sankaku:
@@ -196,22 +203,27 @@ class _BooruEditState extends State<BooruEdit> {
   }
 
   Widget webviewButton() {
-    return SettingsButton(
-      name: AppLocalizations.of(context).booruEdit_openWebview,
-      icon: const Icon(Icons.public),
-      action: () {
-        if (booruURLController.text.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => InAppWebviewView(
-                initialUrl: booruURLController.text,
+    if (Tools.isOnPlatformWithWebviewSupport) {
+      return SettingsButton(
+        name: AppLocalizations.of(context).booruEdit_openWebview,
+        subtitle: const Text('To login or obtain cookies'),
+        icon: const Icon(Icons.public),
+        action: () {
+          if (booruURLController.text.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InAppWebviewView(
+                  initialUrl: booruURLController.text,
+                ),
               ),
-            ),
-          );
-        }
-      },
-    );
+            );
+          }
+        },
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
   void sanitizeBooruName() {
@@ -220,7 +232,7 @@ class _BooruEditState extends State<BooruEdit> {
     setState(() {});
   }
 
-  Widget testButton() {
+  SettingsButton testButton() {
     return SettingsButton(
       name: 'Test Booru',
       icon: isTesting ? const CircularProgressIndicator() : const Icon(Icons.public),
@@ -360,6 +372,7 @@ class _BooruEditState extends State<BooruEdit> {
             leadingIconColor: Colors.yellow,
             sideColor: Colors.yellow,
           );
+          testButton().action!();
           return;
         }
 
@@ -607,7 +620,7 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
                 );
               }
             },
-            child: Text(AppLocalizations.of(context).booruEdit_accessKeyWidget_title),
+            child: const Text('Get Hydrus Api key'),
           ),
         ),
         Container(

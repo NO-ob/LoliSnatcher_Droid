@@ -53,8 +53,9 @@ class VideoViewerState extends State<VideoViewer> {
   final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
   int lastViewedIndex = -1;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
-  bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false, didAutoplay = false;
+  bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false, didAutoplay = false, forceCache = false;
   List<String> stopReason = [];
+  Timer? bufferingTimer;
 
   StreamSubscription? indexListener;
 
@@ -81,27 +82,30 @@ class VideoViewerState extends State<VideoViewer> {
     isStopped = false;
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
+    unawaited(getSize());
+
     if (!settingsHandler.mediaCache) {
       // Media caching disabled - don't cache videos
-      unawaited(getSize());
       unawaited(initPlayer());
       return;
     }
-    switch (settingsHandler.videoCacheMode) {
+
+    final usedVideoCacheMode = forceCache ? 'Cache' : settingsHandler.videoCacheMode;
+
+    switch (usedVideoCacheMode) {
       case 'Cache':
         // Cache to device from custom request
         break;
 
+      // Load and stream from default player network request, cache to device from custom request
+      // TODO: change video handler to allow viewing and caching from single network request
       case 'Stream+Cache':
-        // Load and stream from default player network request, cache to device from custom request
-        // TODO: change video handler to allow viewing and caching from single network request
         unawaited(initPlayer());
         break;
 
+      // Only stream, notice the return
       case 'Stream':
       default:
-        // Only stream, notice the return
-        unawaited(getSize());
         unawaited(initPlayer());
         return;
     }
@@ -143,9 +147,11 @@ class VideoViewerState extends State<VideoViewer> {
     return;
   }
 
+  static const int maxSize = 1024 * 1024 * 200;
   void onSize(int size) {
+    total.value = size;
     // TODO find a way to stop loading based on size when caching is enabled
-    const int maxSize = 1024 * 1024 * 200;
+
     // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
       killLoading(['File is zero bytes']);
@@ -197,7 +203,13 @@ class VideoViewerState extends State<VideoViewer> {
           if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
         ]);
       } else {
-        killLoading(['Loading Error: $error']);
+        killLoading([
+          'Loading Error: $error',
+          if (!settingsHandler.useAltVideoPlayer) ...[
+            '',
+            'Try enabling "Use alternative video player backend" in Settings->Video if you often encounter playback issues',
+          ],
+        ]);
       }
       // print('Dio request cancelled: $error');
     }
@@ -257,6 +269,8 @@ class VideoViewerState extends State<VideoViewer> {
   void killLoading(List<String> reason) {
     disposables();
 
+    bufferingTimer?.cancel();
+
     total.value = 0;
     received.value = 0;
     startedAt.value = 0;
@@ -277,6 +291,8 @@ class VideoViewerState extends State<VideoViewer> {
   @override
   void dispose() {
     disposables();
+
+    bufferingTimer?.cancel();
 
     indexListener?.cancel();
     indexListener = null;
@@ -328,6 +344,7 @@ class VideoViewerState extends State<VideoViewer> {
   void resetZoom() {
     if (!isVideoInited) return;
     scaleController.scaleState = PhotoViewScaleState.initial;
+    viewerHandler.setZoomed(widget.key, false);
   }
 
   void scrollZoomImage(double value) {
@@ -362,6 +379,7 @@ class VideoViewerState extends State<VideoViewer> {
     if (chewieController == null) return;
 
     if (isVideoInited) {
+      bufferingTimer?.cancel();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         viewerHandler.setLoaded(widget.key, true);
       });
@@ -461,7 +479,27 @@ class VideoViewerState extends State<VideoViewer> {
       await chewieController!.setVolume(0);
     }
 
+    if (!forceCache) {
+      bufferingTimer?.cancel();
+      bufferingTimer = Timer(
+        const Duration(seconds: 10),
+        () {
+          // force restart with cache mode, but only if file size isn't loaded yet or it's small enough (<25mb) (big videos may take a while to buffer)
+          if (!isVideoInited && (total.value == 0 || total.value < maxSize / 8)) {
+            forceCache = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              killLoading([]);
+              initVideo(false);
+              updateState();
+            });
+          }
+        },
+      );
+    }
+
     await Future.wait([videoController!.initialize()]);
+
+    forceCache = false;
 
     // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
     updateState();
@@ -537,10 +575,11 @@ class VideoViewerState extends State<VideoViewer> {
     }
 
     final double aspectRatio = videoController?.value.aspectRatio ?? 16 / 9;
-    final double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
+    final screenSize = MediaQuery.sizeOf(context);
+    final double screenRatio = screenSize.width / screenSize.height;
     final Size childSize = Size(
-      aspectRatio > screenRatio ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.height * aspectRatio,
-      aspectRatio < screenRatio ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width / aspectRatio,
+      aspectRatio > screenRatio ? screenSize.width : screenSize.height * aspectRatio,
+      aspectRatio < screenRatio ? screenSize.height : screenSize.width / aspectRatio,
     );
 
     const double fullOpacity = Constants.imageDefaultOpacity;
@@ -548,6 +587,7 @@ class VideoViewerState extends State<VideoViewer> {
     return Hero(
       tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
       child: Material(
+        color: Colors.black,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -566,7 +606,7 @@ class VideoViewerState extends State<VideoViewer> {
                   ? const SizedBox.shrink()
                   : MediaLoading(
                       item: widget.booruItem,
-                      hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
+                      hasProgress: settingsHandler.mediaCache && (forceCache || settingsHandler.videoCacheMode != 'Stream'),
                       isFromCache: isFromCache,
                       isDone: isVideoInited,
                       isTooBig: isTooBig > 0,
@@ -611,8 +651,6 @@ class VideoViewerState extends State<VideoViewer> {
                               controller: viewController,
                               scaleStateController: scaleController,
                               enableRotation: settingsHandler.allowRotation,
-                              enableDoubleTapZoom: false,
-                              enableTapDragZoom: settingsHandler.useDoubleTapDragZoom,
                               child: Chewie(controller: chewieController!),
                             ),
                           ),

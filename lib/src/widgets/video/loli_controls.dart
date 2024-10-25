@@ -676,7 +676,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     if (_doubleTapInfo == null || !controller.value.isInitialized) return;
 
     // Detect on which side we tapped
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
     final double screenMiddle = screenWidth / 2;
     final double sidesLimit = screenWidth / 6;
     final double tapPositionWidth = _doubleTapInfo!.localPosition.dx;

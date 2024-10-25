@@ -3,13 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/dialogs/add_new_tab_dialog.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/page_number_dialog.dart';
 import 'package:lolisnatcher/src/widgets/history/history.dart';
 
 class TabButtons extends StatelessWidget {
-  const TabButtons(this.withArrows, this.alignment, {super.key});
+  const TabButtons(
+    this.withArrows,
+    this.alignment, {
+    super.key,
+  });
+
   final bool withArrows;
   final WrapAlignment? alignment;
 
@@ -17,6 +24,15 @@ class TabButtons extends StatelessWidget {
     return SettingsPageOpen(
       context: context,
       page: () => const HistoryList(),
+    ).open();
+  }
+
+  Future<void> showLongTapAddDialog(BuildContext context) async {
+    await ServiceHandler.vibrate();
+    await SettingsPageOpen(
+      context: context,
+      asBottomSheet: true,
+      page: () => const AddNewTabDialog(),
     ).open();
   }
 
@@ -69,18 +85,18 @@ class TabButtons extends StatelessWidget {
       );
 
       // Add new tab
-      final Widget addButton = IconButton(
-        icon: const Icon(Icons.add_circle_outline),
-        color: iconColor,
-        onPressed: () {
-          final String defaultText = searchHandler.currentBooru.defTags?.isNotEmpty == true ? searchHandler.currentBooru.defTags! : settingsHandler.defTags;
-          // add new tab and switch to it
-          searchHandler.searchTextController.text = defaultText;
-          searchHandler.addTabByString(defaultText, switchToNew: true);
-
-          // add new tab to the list end
-          // searchHandler.addTabByString(defaultText);
-        },
+      final Widget addButton = GestureDetector(
+        onLongPress: () => showLongTapAddDialog(context),
+        child: IconButton(
+          icon: const Icon(Icons.add_circle_outline),
+          color: iconColor,
+          onPressed: () {
+            final String defaultText = searchHandler.currentBooru.defTags?.isNotEmpty == true ? searchHandler.currentBooru.defTags! : settingsHandler.defTags;
+            // add new tab to the list end and switch to it
+            searchHandler.searchTextController.text = defaultText;
+            searchHandler.addTabByString(defaultText, switchToNew: true);
+          },
+        ),
       );
 
       // Show search history
@@ -106,7 +122,7 @@ class TabButtons extends StatelessWidget {
       );
 
       // For thin screens, show buttons in 2 rows
-      if (MediaQuery.of(context).size.width < 370) {
+      if (MediaQuery.sizeOf(context).width < 370) {
         return Column(
           children: [
             Wrap(

@@ -52,8 +52,8 @@ class TabSecondaryBooruSelector extends StatelessWidget {
             height: kMinInteractiveDimension,
             child: TabBooruSelectorItem(booru: item),
           ),
-          labelText: 'Secondary Boorus',
-          selectionBuilder: (List<Booru> value) => Column(
+          labelText: 'Select secondary boorus:',
+          selectedItemBuilder: (List<Booru> value) => Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -273,6 +273,19 @@ class MainActivity: FlutterActivity() {
                 } else {
                     result.success(false);
                 }
+            } else if(call.method == "copyFileToSafDir") {
+                val sourcePath = call.argument<String>("sourcePath");
+                val fileName = call.argument<String>("fileName");
+                val uri = call.argument<String>("uri");
+                val mime = call.argument<String>("mime");
+                if (sourcePath != null && fileName != null && uri != null && mime != null) {
+                    Executors.newSingleThreadExecutor().execute {
+                        val success = copyFileToSafDir(sourcePath,fileName,uri,mime)
+                        result.success(success)
+                    }
+                } else {
+                    result.success(false)
+                }
             } else if (call.method == "testSAF"){
                 val uri: String? = call.argument("uri");
                 val permissions =
@@ -581,6 +594,30 @@ class MainActivity: FlutterActivity() {
                     outputStream.close()
                     return true
                 }
+            }
+        }
+        return false
+    }
+
+    @Throws(IOException::class)
+    private fun copyFileToSafDir(sourcePath: String, fileName: String, uriString: String, mime: String): Boolean {
+        val file = File(sourcePath, fileName)
+        if (!file.exists()) return false
+        val uri: Uri = Uri.parse(uriString)
+        if (uri != null && uri != Uri.EMPTY) {
+            val documentTree = DocumentFile.fromTreeUri(context, uri)
+            if (documentTree != null) {
+                // create a stream to copy file to saf dir
+                val targetFile = documentTree.createFile(mime, fileName)
+                if (targetFile == null) {
+                    return false
+                }
+                val outputStream = contentResolver.openOutputStream(targetFile.uri)
+                val inputStream = FileInputStream(file)
+                inputStream.copyTo(outputStream!!)
+                inputStream.close()
+                outputStream.close()
+                return true
             }
         }
         return false

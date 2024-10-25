@@ -8,6 +8,9 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class ThumbnailCardBuild extends StatelessWidget {
@@ -30,8 +33,10 @@ class ThumbnailCardBuild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final SearchHandler searchHandler = SearchHandler.instance;
+    final settingsHandler = SettingsHandler.instance;
+    final searchHandler = SearchHandler.instance;
+    final viewerHandler = ViewerHandler.instance;
+    final snatchHandler = SnatchHandler.instance;
 
     // print('ThumbnailCardBuild: $index');
 
@@ -46,39 +51,62 @@ class ThumbnailCardBuild extends StatelessWidget {
         child: Obx(() {
           // print('ThumbnailCardBuild obx: $index');
           final bool isSelected = searchHandler.currentTab.selected.contains(item);
-          final bool isCurrent = settingsHandler.appMode.value.isDesktop && (searchHandler.viewedIndex.value == index);
+          final bool isCurrent = (settingsHandler.appMode.value.isDesktop || viewerHandler.inViewer.value) && searchHandler.viewedIndex.value == index;
+          final bool isCurrentlyBeingSnatched =
+              snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;
 
-          return Ink(
-            decoration: (isCurrent || isSelected)
-                ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    color: isCurrent ? Colors.red : Theme.of(context).colorScheme.secondary,
-                    border: Border.all(
-                      color: isCurrent ? Colors.red : Theme.of(context).colorScheme.secondary,
-                      width: max(2, MediaQuery.of(context).devicePixelRatio),
-                    ),
-                  )
-                : null,
-            child: InkWell(
-              enableFeedback: true,
-              borderRadius: BorderRadius.circular(4),
-              highlightColor: Theme.of(context).colorScheme.secondary.withOpacity(0.4),
-              splashColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
-              onTap: () {
-                onTap?.call(index, item);
-              },
-              onDoubleTap: () {
-                onDoubleTap?.call(index, item);
-              },
-              onLongPress: () {
-                onLongPress?.call(index, item);
-              },
-              onSecondaryTap: () {
-                onSecondaryTap?.call(index, item);
-              },
-              // TODO make inkwell ripple work with thumbnail (currently can't just use stack because thumbnail must be clickable too (i.e. checkbox))
-              child: ThumbnailBuild(item: item),
-            ),
+          final bool showBorder = isCurrent || isSelected || isCurrentlyBeingSnatched;
+          final Color borderColor = isCurrentlyBeingSnatched ? Colors.transparent : Theme.of(context).colorScheme.secondary;
+          final double borderRadius = isCurrentlyBeingSnatched ? 10 : 4;
+          final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
+          final double borderWidth = defaultBorderWidth * (isCurrentlyBeingSnatched ? 3 : 1);
+
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              Ink(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  border: showBorder
+                      ? Border.all(
+                          color: borderColor,
+                          width: borderWidth,
+                        )
+                      : null,
+                ),
+                child: InkWell(
+                  enableFeedback: true,
+                  borderRadius: BorderRadius.circular(4),
+                  highlightColor: Theme.of(context).colorScheme.secondary.withOpacity(0.4),
+                  splashColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                  onTap: () {
+                    onTap?.call(index, item);
+                  },
+                  onDoubleTap: () {
+                    onDoubleTap?.call(index, item);
+                  },
+                  onLongPress: () {
+                    onLongPress?.call(index, item);
+                  },
+                  onSecondaryTap: () {
+                    onSecondaryTap?.call(index, item);
+                  },
+                  // TODO make inkwell ripple work with thumbnail (currently can't just use stack because thumbnail must be clickable too (i.e. checkbox))
+                  child: ThumbnailBuild(item: item),
+                ),
+              ),
+              if (isCurrentlyBeingSnatched)
+                Positioned.fill(
+                  child: AnimatedProgressIndicator(
+                    value: snatchHandler.currentProgress,
+                    animationDuration: const Duration(milliseconds: 50),
+                    indicatorStyle: IndicatorStyle.square,
+                    valueColor: Theme.of(context).progressIndicatorTheme.color,
+                    strokeWidth: borderWidth,
+                    borderRadius: borderRadius,
+                  ),
+                ),
+            ],
           );
         }),
       ),

@@ -71,8 +71,14 @@ class HydrusHandler extends BooruHandler {
           prevTags = tags;
           return fetched;
         }
-      } catch (e) {
-        Logger.Inst().log(e.toString(), 'HydrusHandler', 'Search', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'HydrusHandler',
+          'Search',
+          LogTypes.exception,
+          s: s,
+        );
         return fetched;
       }
     } else {
@@ -162,8 +168,14 @@ class HydrusHandler extends BooruHandler {
           Logger.Inst().log('Getting metadata failed', 'HydrusHandler', 'getResultsPage', LogTypes.booruHandlerInfo);
         }
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), 'HydrusHandler', 'getResultsPage', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'HydrusHandler',
+        'getResultsPage',
+        LogTypes.exception,
+        s: s,
+      );
     }
     return fetched;
   }
@@ -192,7 +204,7 @@ class HydrusHandler extends BooruHandler {
           'filterable_tags': item.tagsList,
         },
       );
-    } catch (e) {
+    } catch (e, s) {
       FlashElements.showSnackbar(
         duration: null,
         title: const Text(
@@ -214,7 +226,13 @@ class HydrusHandler extends BooruHandler {
         sideColor: Colors.red,
       );
 
-      Logger.Inst().log(e.toString(), 'HydrusHandler', 'addURL', LogTypes.exception);
+      Logger.Inst().log(
+        e.toString(),
+        'HydrusHandler',
+        'addURL',
+        LogTypes.exception,
+        s: s,
+      );
     }
     return fetched;
   }
@@ -238,8 +256,14 @@ class HydrusHandler extends BooruHandler {
         Logger.Inst().log('Key Request Failed: ${response.statusCode}', 'HydrusHandler', 'getAccessKey', LogTypes.booruHandlerInfo);
         Logger.Inst().log(response.data, 'HydrusHandler', 'getAccessKey', LogTypes.booruHandlerInfo);
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), 'HydrusHandler', 'getAccessKey', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'HydrusHandler',
+        'getAccessKey',
+        LogTypes.exception,
+        s: s,
+      );
     }
     return '';
   }

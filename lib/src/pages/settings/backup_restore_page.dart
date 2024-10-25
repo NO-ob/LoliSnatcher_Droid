@@ -4,8 +4,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 
+import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
@@ -74,7 +74,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -90,7 +90,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
     if (!Platform.isAndroid) {
       return PopScope(
         canPop: false,
-        onPopInvoked: _onPopInvoked,
+        onPopInvokedWithResult: _onPopInvoked,
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
@@ -115,7 +115,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -156,7 +156,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 (backupPath.isNotEmpty
                     ? [
                         SettingsButton(
-                          name: 'Backup Settings',
+                          name: 'Backup settings',
                           action: () async {
                             try {
                               final File file = File('${await ServiceHandler.getConfigDir()}settings.json');
@@ -180,7 +180,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           drawTopBorder: true,
                         ),
                         SettingsButton(
-                          name: 'Restore Settings',
+                          name: 'Restore settings',
                           subtitle: const Text('settings.json'),
                           action: () async {
                             try {
@@ -207,11 +207,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         ),
                         const SettingsButton(name: '', enabled: false),
                         SettingsButton(
-                          name: 'Backup Boorus',
+                          name: 'Backup boorus',
                           action: () async {
                             try {
-                              final List<Booru> booruList =
-                                  settingsHandler.booruList.where((e) => e.type != BooruType.Favourites && e.type != BooruType.Downloads).toList();
+                              final List<Booru> booruList = settingsHandler.booruList.where((e) => BooruType.saveable.contains(e.type)).toList();
                               if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'boorus.json')) {
                                 final bool res = await detectedDuplicateFile('boorus.json');
                                 if (!res) {
@@ -250,7 +249,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                       final Booru booru = Booru.fromMap(json[i]);
                                       final bool alreadyExists =
                                           settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
-                                      final bool isAllowed = booru.type != BooruType.Favourites && booru.type != BooruType.Downloads;
+                                      final bool isAllowed = BooruType.saveable.contains(booru.type);
                                       if (!alreadyExists && isAllowed) {
                                         final File booruFile = File('${configBoorusDir.path}${booru.name}.json');
                                         final writer = booruFile.openWrite();
@@ -322,6 +321,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           action: () async {
                             try {
                               final File file = File('${await ServiceHandler.getConfigDir()}store.db');
+                              if (!await file.exists()) {
+                                showSnackbar(context, 'Database not found!', true);
+                                return;
+                              }
                               if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
                                 final bool res = await detectedDuplicateFile('store.db');
                                 if (!res) {
@@ -330,7 +333,12 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 }
                               }
                               if (backupPath.isNotEmpty) {
-                                await ServiceHandler.writeImage(await file.readAsBytes(), 'store', 'application/x-sqlite3', 'db', backupPath);
+                                await ServiceHandler.copyFileToSafDir(
+                                  await ServiceHandler.getConfigDir(),
+                                  'store.db',
+                                  backupPath,
+                                  'application/x-sqlite3',
+                                );
                                 showSnackbar(context, AppLocalizations.of(context).backupRestore_databaseSaved, false);
                               } else {
                                 showSnackbar(context, AppLocalizations.of(context).backupRestore_backupNoAccess, true);
@@ -367,12 +375,14 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                     AppLocalizations.of(context).backupRestore_databaseRestoreError('False result when db file with SAF'),
                                     true,
                                   );
+                                  searchHandler.canBackup.value = true;
                                   return;
                                 }
 
                                 final File newFile = File('${await ServiceHandler.getConfigDir()}store.db');
                                 if (!(await newFile.exists())) {
                                   showSnackbar(context, AppLocalizations.of(context).backupRestore_databaseRestoreError('New db file does not exist'), true);
+                                  searchHandler.canBackup.value = true;
                                   return;
                                 }
 
@@ -387,6 +397,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                               }
                             } catch (e) {
                               showSnackbar(context, AppLocalizations.of(context).backupRestore_databaseRestoreError(e.toString()), true);
+                              searchHandler.canBackup.value = true;
                             }
                           },
                         ),

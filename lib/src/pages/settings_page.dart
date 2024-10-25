@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/about_page.dart';
@@ -24,6 +24,7 @@ import 'package:lolisnatcher/src/pages/settings/save_cache_page.dart';
 import 'package:lolisnatcher/src/pages/settings/tags_filters_page.dart';
 import 'package:lolisnatcher/src/pages/settings/theme_page.dart';
 import 'package:lolisnatcher/src/pages/settings/user_interface_page.dart';
+import 'package:lolisnatcher/src/pages/settings/video_page.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -34,7 +35,7 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  Future<void> _onPopInvoked(BuildContext context, bool didPop) async {
+  Future<void> _onPopInvoked(BuildContext context, bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -62,7 +63,7 @@ class SettingsPage extends StatelessWidget {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async => _onPopInvoked(context, didPop),
+      onPopInvokedWithResult: (didPop, result) async => _onPopInvoked(context, didPop, result),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -98,6 +99,11 @@ class SettingsPage extends StatelessWidget {
                 name: AppLocalizations.of(context).title_gallery,
                 icon: const Icon(Icons.view_carousel),
                 page: () => const GalleryPage(),
+              ),
+              SettingsButton(
+                name: 'Video',
+                icon: const Icon(Icons.video_settings),
+                page: () => const VideoSettingsPage(),
               ),
               SettingsButton(
                 name: AppLocalizations.of(context).title_snatchingCaching,

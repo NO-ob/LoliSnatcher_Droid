@@ -73,7 +73,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: Theme.of(context).colorScheme.onBackground.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
             width: 1,
           ),
         ),
@@ -106,8 +106,8 @@ class _GalleryButtonsState extends State<GalleryButtons> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isVerticalDirection = MediaQuery.of(context).orientation == Orientation.portrait;
-    final double distanceFromSide = MediaQuery.of(context).size.width * 0.05;
+    final bool isVerticalDirection = MediaQuery.orientationOf(context) == Orientation.portrait;
+    final double distanceFromSide = MediaQuery.sizeOf(context).width * 0.05;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),
@@ -123,7 +123,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: ColoredBox(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.33),
+                        color: Theme.of(context).colorScheme.surface.withOpacity(0.33),
                         child: isVerticalDirection
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -142,7 +142,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: ColoredBox(
-                        color: Theme.of(context).colorScheme.background.withOpacity(0.33),
+                        color: Theme.of(context).colorScheme.surface.withOpacity(0.33),
                         child: isVerticalDirection
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -30,7 +30,7 @@ class StaggeredBuilder extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
 
-    final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
     final bool isDesktop = settingsHandler.appMode.value.isDesktop;
 
@@ -46,7 +46,12 @@ class StaggeredBuilder extends StatelessWidget {
             addAutomaticKeepAlives: false,
             cacheExtent: 200,
             itemCount: searchHandler.currentFetched.length,
-            padding: EdgeInsets.fromLTRB(10, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 10, 80),
+            padding: EdgeInsets.fromLTRB(
+              10,
+              2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.paddingOf(context).top)),
+              10,
+              180,
+            ),
             gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
               crossAxisCount: columnCount,
               mainAxisSpacing: 4,

@@ -130,9 +130,18 @@ class R34HentaiHandler extends ShimmieHandler {
     if (!hasCookies) {
       return false;
     } else {
-      // TODO here could be a check if the cookies are still valid/not expired, but webview lib doesn't support expire dates for cookies? are they just dropping them if expired on next read?
-      // or maybe do a network request to check if the cookies are still valid?
-      return true;
+      final handler = _R34HentaiHandlerDummy(booru, limit);
+      final res = await handler.search(
+        'rating:explicit',
+        0,
+      );
+
+      if (res is List && res.isEmpty) {
+        await signOut(fromError: true);
+        return false;
+      } else {
+        return true;
+      }
     }
   }
 
@@ -169,6 +178,21 @@ class R34HentaiHandler extends ShimmieHandler {
     );
 
     return success;
+  }
+}
+
+// copy of original to avoid recursion when checking isSignedIn
+class _R34HentaiHandlerDummy extends R34HentaiHandler {
+  _R34HentaiHandlerDummy(super.booru, super.limit);
+
+  @override
+  Future<bool> searchSetup() async {
+    return true;
+  }
+
+  @override
+  Future<void> afterParseResponse(List<BooruItem> newItems) async {
+    failedItems.clear();
   }
 }
 

@@ -13,7 +13,7 @@ class LoliDropdown<T> extends StatelessWidget {
     required this.onChanged,
     required this.items,
     required this.itemBuilder,
-    required this.selectionBuilder,
+    required this.selectedItemBuilder,
     required this.labelText,
     this.labelColor,
     this.labelStyle,
@@ -30,7 +30,7 @@ class LoliDropdown<T> extends StatelessWidget {
   final List<T> items;
   final Widget Function(T?) itemBuilder;
 
-  final Widget Function(T?) selectionBuilder;
+  final Widget Function(T?) selectedItemBuilder;
   final String labelText;
   final Color? labelColor;
   final TextStyle? labelStyle;
@@ -39,6 +39,61 @@ class LoliDropdown<T> extends StatelessWidget {
   final bool withBorder;
   final bool clearable;
   final bool expandableByScroll;
+
+  Future<bool> showDialog(BuildContext context) async {
+    final dynamic res = await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      isScrollControlled: true,
+      isDismissible: true,
+      useSafeArea: true,
+      builder: (BuildContext context) {
+        if (expandableByScroll) {
+          return GestureDetector(
+            onTap: () => Navigator.of(context).pop(false),
+            child: ColoredBox(
+              color: Colors.transparent,
+              child: DraggableScrollableSheet(
+                minChildSize: 0.3,
+                initialChildSize: 0.7,
+                maxChildSize: 1,
+                shouldCloseOnMinExtent: true,
+                builder: (context, controller) {
+                  return LoliDropdownBottomSheet<T>(
+                    controller: controller,
+                    value: value,
+                    onChanged: onChanged,
+                    items: items,
+                    itemBuilder: itemBuilder,
+                    labelText: labelText,
+                    itemExtent: itemExtent,
+                    clearable: clearable,
+                  );
+                },
+              ),
+            ),
+          );
+        } else {
+          return LoliDropdownBottomSheet<T>(
+            value: value,
+            onChanged: onChanged,
+            items: items,
+            itemBuilder: itemBuilder,
+            labelText: labelText,
+            itemExtent: itemExtent,
+            clearable: clearable,
+          );
+        }
+      },
+    );
+
+    if (res is bool) {
+      return res;
+    } else {
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,60 +112,7 @@ class LoliDropdown<T> extends StatelessWidget {
       child: InkWell(
         borderRadius: withBorder ? const BorderRadius.all(Radius.circular(radius)) : null,
         onTap: () async {
-          if (expandableByScroll) {
-            await showModalBottomSheet(
-              context: context,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              isScrollControlled: true,
-              isDismissible: true,
-              useSafeArea: true,
-              builder: (BuildContext context) {
-                return GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: ColoredBox(
-                    color: Colors.transparent,
-                    child: DraggableScrollableSheet(
-                      minChildSize: 0.3,
-                      initialChildSize: 0.7,
-                      maxChildSize: 1,
-                      shouldCloseOnMinExtent: true,
-                      builder: (context, controller) {
-                        return LoliDropdownBottomSheet<T>(
-                          controller: controller,
-                          value: value,
-                          onChanged: onChanged,
-                          items: items,
-                          itemBuilder: itemBuilder,
-                          labelText: labelText,
-                          itemExtent: itemExtent,
-                          clearable: clearable,
-                        );
-                      },
-                    ),
-                  ),
-                );
-              },
-            );
-          } else {
-            await showModalBottomSheet(
-              context: context,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              isScrollControlled: true,
-              isDismissible: true,
-              useSafeArea: true,
-              builder: (BuildContext context) => LoliDropdownBottomSheet<T>(
-                value: value,
-                onChanged: onChanged,
-                items: items,
-                itemBuilder: itemBuilder,
-                labelText: labelText,
-                itemExtent: itemExtent,
-                clearable: clearable,
-              ),
-            );
-          }
+          await showDialog(context);
         },
         child: InputDecorator(
           decoration: InputDecoration(
@@ -154,7 +156,7 @@ class LoliDropdown<T> extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Expanded(child: selectionBuilder.call(value)),
+              Expanded(child: selectedItemBuilder.call(value)),
               const SizedBox(width: 8),
               Icon(
                 Icons.arrow_drop_down,
@@ -233,7 +235,7 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
     } else {
       widget.onChanged(item);
     }
-    Navigator.pop(context);
+    Navigator.of(context).pop(true);
   }
 
   Widget itemBuilder(BuildContext context, int index) {
@@ -281,13 +283,16 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
     final bool isLeftHanded = SettingsHandler.instance.handSide.value.isLeft;
 
     List<Widget> actions = [
-      const CancelButton(withIcon: true),
+      const CancelButton(
+        withIcon: true,
+        returnData: false,
+      ),
       if (widget.clearable && widget.value != null)
         ClearButton(
           withIcon: true,
           action: () {
             widget.onChanged(null);
-            Navigator.pop(context);
+            Navigator.of(context).pop(true);
           },
         ),
     ];
@@ -349,7 +354,7 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
                 ),
               ],
             ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom + 12),
+            SizedBox(height: MediaQuery.paddingOf(context).bottom + 12),
           ],
         ),
       ),
@@ -365,7 +370,7 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
     required this.onChanged,
     required this.items,
     required this.itemBuilder,
-    required this.selectionBuilder,
+    required this.selectedItemBuilder,
     required this.labelText,
     this.labelColor,
     this.labelStyle,
@@ -378,12 +383,53 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
   final void Function(List<T>) onChanged;
   final List<T> items;
   final Widget Function(T) itemBuilder;
-  final Widget Function(List<T>) selectionBuilder;
+  final Widget Function(List<T>) selectedItemBuilder;
   final String labelText;
   final Color? labelColor;
   final TextStyle? labelStyle;
   final Widget Function()? labelBuilder;
   final bool withBorder;
+
+  Future<bool> showDialog(BuildContext context) async {
+    final dynamic res = await showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      isScrollControlled: true,
+      isDismissible: true,
+      useSafeArea: true,
+      builder: (BuildContext context) {
+        return GestureDetector(
+          onTap: () => Navigator.of(context).pop(false),
+          child: ColoredBox(
+            color: Colors.transparent,
+            child: DraggableScrollableSheet(
+              minChildSize: 0.3,
+              initialChildSize: 0.7,
+              maxChildSize: 1,
+              shouldCloseOnMinExtent: true,
+              builder: (context, controller) {
+                return LoliMultiselectDropdownBottomSheet<T>(
+                  controller: controller,
+                  value: value,
+                  onChanged: onChanged,
+                  items: items,
+                  itemBuilder: itemBuilder,
+                  labelText: labelText,
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+
+    if (res is bool) {
+      return res;
+    } else {
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -402,38 +448,7 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
       child: InkWell(
         borderRadius: withBorder ? const BorderRadius.all(Radius.circular(radius)) : null,
         onTap: () async {
-          await showModalBottomSheet(
-            context: context,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            isScrollControlled: true,
-            isDismissible: true,
-            useSafeArea: true,
-            builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: ColoredBox(
-                  color: Colors.transparent,
-                  child: DraggableScrollableSheet(
-                    minChildSize: 0.3,
-                    initialChildSize: 0.7,
-                    maxChildSize: 1,
-                    shouldCloseOnMinExtent: true,
-                    builder: (context, controller) {
-                      return LoliMultiselectDropdownBottomSheet<T>(
-                        controller: controller,
-                        value: value,
-                        onChanged: onChanged,
-                        items: items,
-                        itemBuilder: itemBuilder,
-                        labelText: labelText,
-                      );
-                    },
-                  ),
-                ),
-              );
-            },
-          );
+          await showDialog(context);
         },
         child: InputDecorator(
           decoration: InputDecoration(
@@ -477,7 +492,7 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Expanded(child: selectionBuilder.call(value)),
+              Expanded(child: selectedItemBuilder.call(value)),
               const SizedBox(width: 8),
               Icon(
                 Icons.arrow_drop_down,
@@ -537,7 +552,10 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
     final isAllSelected = value.length == widget.items.length;
 
     List<Widget> actions = [
-      const CancelButton(withIcon: true),
+      const CancelButton(
+        withIcon: true,
+        returnData: false,
+      ),
       ClearButton(
         withIcon: true,
         action: () {
@@ -567,7 +585,7 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
         withIcon: true,
         action: () {
           widget.onChanged(value);
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         },
       ),
     ];
@@ -621,6 +639,8 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
                   itemCount: widget.items.length,
                   itemBuilder: (context, index) {
                     final item = widget.items[index];
+                    final int selectedIndex = value.indexOf(item);
+                    final bool isSelected = selectedIndex != -1;
 
                     return Material(
                       color: Colors.transparent,
@@ -631,13 +651,21 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
                             Expanded(
                               child: widget.itemBuilder(item),
                             ),
+                            if (isSelected)
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  left: 8,
+                                  right: 4,
+                                ),
+                                child: Text((selectedIndex + 1).toString()),
+                              ),
                             Padding(
-                              padding: const EdgeInsets.only(
-                                left: 8,
+                              padding: EdgeInsets.only(
+                                left: isSelected ? 4 : 8,
                                 right: 16,
                               ),
                               child: Checkbox(
-                                value: value.contains(item),
+                                value: isSelected,
                                 onChanged: (_) => onItemSelect(item),
                               ),
                             ),
@@ -666,7 +694,7 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
                 ),
               ],
             ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom + 12),
+            SizedBox(height: MediaQuery.paddingOf(context).bottom + 12),
           ],
         ),
       ),

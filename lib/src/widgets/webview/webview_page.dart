@@ -33,7 +33,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
   Completer<InAppWebViewController> controller = Completer<InAppWebViewController>();
   late final InAppWebViewSettings settings;
 
-  late PullToRefreshController pullToRefreshController;
+  PullToRefreshController? pullToRefreshController;
   int loadingPercentage = 0;
   bool hideSubtitle = false;
 
@@ -48,24 +48,27 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
       cacheEnabled: false,
       useHybridComposition: true,
       allowsInlineMediaPlayback: true,
+      useShouldInterceptAjaxRequest: false,
     );
 
-    pullToRefreshController = PullToRefreshController(
-      settings: PullToRefreshSettings(
-        color: Colors.blue,
-      ),
-      onRefresh: () async {
-        if (Platform.isAndroid) {
-          await controller.future.then((controller) {
-            controller.reload();
-          });
-        } else if (Platform.isIOS) {
-          await controller.future.then((controller) async {
-            await controller.loadUrl(urlRequest: URLRequest(url: await controller.getUrl()));
-          });
-        }
-      },
-    );
+    if (Platform.isAndroid || Platform.isIOS) {
+      pullToRefreshController = PullToRefreshController(
+        settings: PullToRefreshSettings(
+          color: Colors.blue,
+        ),
+        onRefresh: () async {
+          if (Platform.isAndroid) {
+            await controller.future.then((controller) {
+              controller.reload();
+            });
+          } else if (Platform.isIOS) {
+            await controller.future.then((controller) async {
+              await controller.loadUrl(urlRequest: URLRequest(url: await controller.getUrl()));
+            });
+          }
+        },
+      );
+    }
   }
 
   @override
@@ -85,7 +88,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
       ),
       body: Stack(
         children: [
-          if (Platform.isAndroid || Platform.isIOS)
+          if (Tools.isOnPlatformWithWebviewSupport)
             InAppWebView(
               initialUrlRequest: URLRequest(url: WebUri(widget.initialUrl)),
               initialSettings: settings,
@@ -130,10 +133,10 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
           //
           if (widget.subtitle != null && !hideSubtitle)
             Positioned(
-              bottom: MediaQuery.of(context).padding.bottom + 8,
+              bottom: MediaQuery.paddingOf(context).bottom + 8,
               left: 8,
               child: Container(
-                width: MediaQuery.of(context).size.width - 16,
+                width: MediaQuery.sizeOf(context).width - 16,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,

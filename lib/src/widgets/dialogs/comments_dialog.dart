@@ -400,9 +400,12 @@ class _CommentsHeader extends StatelessWidget {
               SizedBox(
                 height: height,
                 width: width,
-                child: ThumbnailBuild(
-                  item: item,
-                  selectable: false,
+                child: HeroMode(
+                  enabled: false,
+                  child: ThumbnailBuild(
+                    item: item,
+                    selectable: false,
+                  ),
                 ),
               ),
             ],

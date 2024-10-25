@@ -9,6 +9,7 @@ class TagsManagerListItem extends StatelessWidget {
     this.isSelected = false,
     this.onSelect,
     this.onTap,
+    this.debug = false,
     super.key,
   });
 
@@ -16,11 +17,12 @@ class TagsManagerListItem extends StatelessWidget {
   final bool isSelected;
   final void Function(bool?)? onSelect;
   final void Function()? onTap;
+  final bool debug;
 
   @override
   Widget build(BuildContext context) {
     final bool isStale = tag.updatedAt < DateTime.now().subtract(const Duration(days: 3)).millisecondsSinceEpoch;
-    final String staleText = isStale ? ' (stale)' : '';
+    final String staleText = (isStale && debug) ? ' (stale)' : '';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),

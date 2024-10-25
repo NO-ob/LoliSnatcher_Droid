@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:fast_marquee/fast_marquee.dart';
 
 // Based on code from: https://github.com/nt4f04uNd/nt4f04unds_widgets/blob/f14e448d23d347f17c05549972e638d61cf300b4/lib/src/widgets/marquee.dart
@@ -91,10 +91,10 @@ class MarqueeText extends StatelessWidget {
       startAfter: startAfter,
       pauseAfterRound: pauseAfterRound,
       style: style?.copyWith(
-            color: style?.color ?? Theme.of(context).colorScheme.onBackground,
+            color: style?.color ?? Theme.of(context).colorScheme.onSurface,
           ) ??
           defaultStyle.copyWith(
-            color: Theme.of(context).colorScheme.onBackground,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
     );
   }
@@ -132,10 +132,10 @@ class MarqueeText extends StatelessWidget {
           maxLines: 1,
           stepGranularity: stepGranularity,
           style: style?.copyWith(
-                color: style?.color ?? Theme.of(context).colorScheme.onBackground,
+                color: style?.color ?? Theme.of(context).colorScheme.onSurface,
               ) ??
               defaultStyle.copyWith(
-                color: Theme.of(context).colorScheme.onBackground,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
           overflowReplacement: marqueeRich(context),
         ),
@@ -151,10 +151,10 @@ class MarqueeText extends StatelessWidget {
         maxLines: 1,
         stepGranularity: stepGranularity,
         style: style?.copyWith(
-              color: style?.color ?? Theme.of(context).colorScheme.onBackground,
+              color: style?.color ?? Theme.of(context).colorScheme.onSurface,
             ) ??
             defaultStyle.copyWith(
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
         overflowReplacement: marquee(context),
       ),

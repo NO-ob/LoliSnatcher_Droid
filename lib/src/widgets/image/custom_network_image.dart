@@ -103,7 +103,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         return true;
       }
     } catch (e) {
-      print(e);
+      print('CustomNetworkImage Exception :: delete cache file :: $e');
       return false;
     }
     return false;
@@ -191,6 +191,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
                 },
                 cancelToken: cancelToken,
               );
+        _httpClient.close();
 
         if (Tools.isGoodStatusCode(response.statusCode) == false) {
           throw NetworkImageLoadException(

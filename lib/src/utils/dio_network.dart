@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -15,28 +14,14 @@ class DioNetwork {
 
   static Dio getClient({String? baseUrl}) {
     final dio = Dio();
+    // dio.httpClientAdapter = NativeAdapter();
     dio.options.baseUrl = baseUrl ?? '';
     // dio.options.connectTimeout = Duration(seconds: 10);
     // dio.options.receiveTimeout = Duration(seconds: 30);
     // dio.options.sendTimeout = Duration(seconds: 10);
 
     if (Tools.isTestMode || SettingsHandler.instance.isDebug.value) {
-      dio.interceptors.add(
-        CustomPrettyDioLogger(
-          request: true,
-          requestBody: true,
-          requestHeader: true,
-          responseBody: true,
-          responseHeader: true,
-          logPrint: (Object object) {
-            if (Tools.isTestMode || SettingsHandler.instance.isDebug.value) {
-              return print(object);
-            }
-          },
-        ),
-      );
-    }
-    if (!Tools.isTestMode && SettingsHandler.instance.isDebug.value) {
+      dio.interceptors.add(Logger.dioInterceptor!);
       dio.interceptors.add(SettingsHandler.instance.alice.getDioInterceptor());
     }
     return dio;
@@ -82,7 +67,7 @@ class DioNetwork {
           }
 
           final String oldCookie = response.requestOptions.headers['Cookie'] as String? ?? '';
-          final String newCookie = await Tools.getCookies(WebUri.uri(response.requestOptions.uri));
+          final String newCookie = await Tools.getCookies(response.requestOptions.uri.toString());
           final headers = {
             ...response.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
@@ -114,7 +99,7 @@ class DioNetwork {
           }
 
           final String oldCookie = error.requestOptions.headers['Cookie'] as String? ?? '';
-          final String newCookie = await Tools.getCookies(WebUri.uri(error.requestOptions.uri));
+          final String newCookie = await Tools.getCookies(error.requestOptions.uri.toString());
           final headers = {
             ...error.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
@@ -170,13 +155,15 @@ class DioNetwork {
     final client = customInterceptor != null ? customInterceptor(getClient()) : getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
 
-    return client.get(
+    final res = await client.get(
       urlAndQuery['url'],
       queryParameters: urlAndQuery['query'],
       options: mergeOptions(options, headers),
       cancelToken: cancelToken,
       onReceiveProgress: onReceiveProgress,
     );
+    client.close();
+    return res;
   }
 
   static Future<Response> post(
@@ -193,7 +180,7 @@ class DioNetwork {
     final client = customInterceptor != null ? customInterceptor(getClient()) : getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
 
-    return client.post(
+    final res = await client.post(
       urlAndQuery['url'],
       data: data,
       queryParameters: urlAndQuery['query'],
@@ -202,6 +189,8 @@ class DioNetwork {
       onReceiveProgress: onReceiveProgress,
       onSendProgress: onSendProgress,
     );
+    client.close();
+    return res;
   }
 
   static Future<Response> head(
@@ -218,13 +207,15 @@ class DioNetwork {
     final client = customInterceptor != null ? customInterceptor(getClient()) : getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
 
-    return client.head(
+    final res = await client.head(
       urlAndQuery['url'],
       data: data,
       queryParameters: urlAndQuery['query'],
       options: mergeOptions(options, headers),
       cancelToken: cancelToken,
     );
+    client.close();
+    return res;
   }
 
   static Future<Response> download(
@@ -242,7 +233,7 @@ class DioNetwork {
     final client = customInterceptor != null ? customInterceptor(getClient()) : getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
 
-    return client.download(
+    final res = await client.download(
       urlAndQuery['url'],
       savePath,
       data: data,
@@ -252,6 +243,8 @@ class DioNetwork {
       onReceiveProgress: onReceiveProgress,
       deleteOnError: deleteOnError,
     );
+    client.close();
+    return res;
   }
 
   static Future<Response> downloadCustom(
@@ -289,6 +282,8 @@ class DioNetwork {
         e.response!.data = null;
       }
       rethrow;
+    } finally {
+      client.close();
     }
 
     response.headers = Headers.fromMap(response.data!.headers);

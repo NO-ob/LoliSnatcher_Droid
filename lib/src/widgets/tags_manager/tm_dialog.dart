@@ -87,6 +87,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
       builder: (context) {
         return TagsManagerListItemDialog(
           tag: item,
+          debug: true,
           onDelete: () {
             selected.removeWhere((e) => e == item);
             deleteItem(item);

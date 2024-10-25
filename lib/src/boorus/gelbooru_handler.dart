@@ -61,8 +61,14 @@ class GelbooruHandler extends BooruHandler {
 
     try {
       parseSearchCount(parsedResponse);
-    } catch (e) {
-      Logger.Inst().log('Error parsing search count: $e', className, 'parseListFromResponse::parseSearchCount', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Error parsing search count: $e',
+        className,
+        'parseListFromResponse::parseSearchCount',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     return (parsedResponse['post'] ?? []) as List;
@@ -103,7 +109,7 @@ class GelbooruHandler extends BooruHandler {
         serverId: current['id']?.toString(),
         rating: current['rating']?.toString(),
         score: current['score']?.toString(),
-        sources: (current['source'].runtimeType == String) ? [current['source']!] : null,
+        sources: (current['source'] != null && current['source'] is String) ? [current['source']] : null,
         md5String: current['md5']?.toString(),
         postDate: current['created_at']?.toString(), // Fri Jun 18 02:13:45 -0500 2021
         postDateFormat: 'EEE MMM dd HH:mm:ss  yyyy', // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
@@ -204,8 +210,14 @@ class GelbooruHandler extends BooruHandler {
           }
         }
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'tagSearch', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'tagSearch',
+        LogTypes.exception,
+        s: s,
+      );
     }
     return tagObjects;
   }
