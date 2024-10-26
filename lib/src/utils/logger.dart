@@ -114,7 +114,7 @@ class Logger {
       ? TalkerDioLogger(
           talker: _talkerInstance,
           settings: const TalkerDioLoggerSettings(
-            printResponseData: true,
+            printResponseData: false,
             printRequestData: true,
             printErrorData: true,
             printResponseHeaders: true,
