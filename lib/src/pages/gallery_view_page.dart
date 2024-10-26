@@ -350,8 +350,8 @@ Widget slidePageTransition(
   double delta = 0;
   if (pageController.hasClients && pageController.position.haveDimensions) {
     final position = (pageController.page! - index).clamp(-1.0, 1.0);
-    final width = pageController.position.viewportDimension;
-    delta = position * width / 2;
+    final viewport = pageController.position.viewportDimension;
+    delta = position * viewport / 2;
   }
   return ClipRect(
     child: Transform.translate(
