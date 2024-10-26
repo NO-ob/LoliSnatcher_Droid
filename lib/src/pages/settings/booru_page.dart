@@ -17,7 +17,7 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 // TODO move all buttons to separate widgets/unified functions to be used in other places?
@@ -472,11 +472,7 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                   const TextSpan(text: 'Change to: '),
                   TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                   WidgetSpan(
-                    child: switch (selectedBooru.type) {
-                      BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
-                      BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
-                      _ => Favicon(selectedBooru),
-                    },
+                    child: BooruFavicon(selectedBooru),
                   ),
                   const TextSpan(text: '?'),
                 ],
@@ -487,7 +483,7 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                 children: [
                   const TextSpan(text: 'Tap [No] to keep current: '),
                   TextSpan(text: initBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  WidgetSpan(child: Favicon(initBooru)),
+                  WidgetSpan(child: BooruFavicon(initBooru)),
                 ],
               ),
             ),
@@ -497,11 +493,7 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                   const TextSpan(text: 'Tap [Yes] to change to: '),
                   TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                   WidgetSpan(
-                    child: switch (selectedBooru.type) {
-                      BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
-                      BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
-                      _ => Favicon(selectedBooru),
-                    },
+                    child: BooruFavicon(selectedBooru),
                   ),
                 ],
               ),

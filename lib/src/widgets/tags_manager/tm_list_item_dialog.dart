@@ -7,7 +7,7 @@ import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
 
 class TagsManagerListItemDialog extends StatefulWidget {
@@ -109,7 +109,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
               Navigator.of(context).pop(true);
             },
             leading: const Icon(Icons.add_circle_outline),
-            trailing: Favicon(SearchHandler.instance.currentBooruHandler.booru),
+            trailing: BooruFavicon(SearchHandler.instance.currentBooruHandler.booru),
             title: const Text('Add a tab'),
           ),
         ],

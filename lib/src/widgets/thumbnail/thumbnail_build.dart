@@ -13,7 +13,7 @@ import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/pulse_widget.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class ThumbnailBuild extends StatelessWidget {
@@ -118,11 +118,11 @@ class ThumbnailBuild extends StatelessWidget {
                             color: Colors.black.withOpacity(0.66),
                             borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5)),
                           ),
-                          child: Favicon(booru, size: 16),
+                          child: BooruFavicon(booru, size: 16),
                         );
-                      } else {
-                        return const SizedBox.shrink();
                       }
+
+                      return const SizedBox.shrink();
                     },
                   ),
                 ],
