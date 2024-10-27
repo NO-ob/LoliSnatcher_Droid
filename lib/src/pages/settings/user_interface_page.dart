@@ -45,6 +45,14 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     mouseSpeedController.text = settingsHandler.mousewheelScrollSpeed.toString();
   }
 
+  @override
+  void dispose() {
+    columnsLandscapeController.dispose();
+    columnsPortraitController.dispose();
+    mouseSpeedController.dispose();
+    super.dispose();
+  }
+
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {

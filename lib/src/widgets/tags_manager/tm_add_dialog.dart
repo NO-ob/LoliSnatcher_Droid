@@ -17,6 +17,12 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
   TagType _type = TagType.none;
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SettingsDialog(
       title: const Text('Add Tag'),

@@ -239,6 +239,13 @@ class _TabManagerPageState extends State<TabManagerPage> {
     });
   }
 
+  @override
+  void dispose() {
+    scrollController.dispose();
+    filterTextController.dispose();
+    super.dispose();
+  }
+
   void getTabs() {
     tabs = searchHandler.list;
     filteredTabs = tabs;

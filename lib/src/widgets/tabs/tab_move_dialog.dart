@@ -34,6 +34,12 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
   }
 
   @override
+  void dispose() {
+    indexController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     int? controllerNumber = int.tryParse(indexController.text);
     if (controllerNumber != null) {

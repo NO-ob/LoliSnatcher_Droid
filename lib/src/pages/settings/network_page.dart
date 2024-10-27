@@ -42,6 +42,15 @@ class _NetworkPageState extends State<NetworkPage> {
     proxyPasswordController.text = settingsHandler.proxyPassword;
   }
 
+  @override
+  void dispose() {
+    userAgentController.dispose();
+    proxyAddressController.dispose();
+    proxyUsernameController.dispose();
+    proxyPasswordController.dispose();
+    super.dispose();
+  }
+
   Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;

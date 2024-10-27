@@ -54,6 +54,13 @@ class _BooruPageState extends State<BooruPage> {
     initPrefBooru = selectedBooru;
   }
 
+  @override
+  void dispose() {
+    defaultTagsController.dispose();
+    limitController.dispose();
+    super.dispose();
+  }
+
   void copyBooruLink(bool withSensitiveData) {
     Navigator.of(context).pop(true); // remove dialog
     final String link = selectedBooru?.toLink(withSensitiveData) ?? '';

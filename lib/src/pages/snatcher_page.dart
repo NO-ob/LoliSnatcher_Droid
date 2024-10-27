@@ -39,6 +39,14 @@ class _SnatcherPageState extends State<SnatcherPage> {
   }
 
   @override
+  void dispose() {
+    snatcherTagsController.dispose();
+    snatcherAmountController.dispose();
+    snatcherSleepController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

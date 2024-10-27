@@ -69,6 +69,8 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
   @override
   void dispose() {
+    snatchCooldownController.dispose();
+    cacheSizeController.dispose();
     isolate?.kill(priority: Isolate.immediate);
     isolate = null;
     super.dispose();

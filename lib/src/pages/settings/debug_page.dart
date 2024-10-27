@@ -38,8 +38,9 @@ class _DebugPageState extends State<DebugPage> {
   final TextEditingController sessionStrController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    sessionStrController.dispose();
+    super.dispose();
   }
 
   Future<dynamic> showTagsManager(BuildContext context) async {

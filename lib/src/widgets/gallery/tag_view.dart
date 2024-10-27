@@ -91,6 +91,7 @@ class _TagViewState extends State<TagView> {
   void dispose() {
     cancelToken?.cancel();
     searchHandler.searchTextController.removeListener(onMainSearchTextChanged);
+    searchController.dispose();
     searchFocusNode.removeListener(searchFocusListener);
     itemSubscription.cancel();
     super.dispose();

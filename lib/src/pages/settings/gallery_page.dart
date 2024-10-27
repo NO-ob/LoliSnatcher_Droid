@@ -28,9 +28,9 @@ class _GalleryPageState extends State<GalleryPage> {
 
   List<List<String>>? buttonOrder;
 
-  TextEditingController preloadController = TextEditingController();
-  TextEditingController scrollSpeedController = TextEditingController();
-  TextEditingController galleryAutoScrollController = TextEditingController();
+  final TextEditingController preloadController = TextEditingController();
+  final TextEditingController scrollSpeedController = TextEditingController();
+  final TextEditingController galleryAutoScrollController = TextEditingController();
 
   @override
   void initState() {
@@ -61,6 +61,14 @@ class _GalleryPageState extends State<GalleryPage> {
     enableHeroTransitions = settingsHandler.enableHeroTransitions;
     disableCustomPageTransitions = settingsHandler.disableCustomPageTransitions;
     disableVibration = settingsHandler.disableVibration;
+  }
+
+  @override
+  void dispose() {
+    preloadController.dispose();
+    scrollSpeedController.dispose();
+    galleryAutoScrollController.dispose();
+    super.dispose();
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk

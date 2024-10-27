@@ -30,6 +30,12 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
     _controller.text = widget.tag;
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   void onSubmit(String text) {
     if (text.trim() != '') {
       widget.onEdit(text.trim().toLowerCase());

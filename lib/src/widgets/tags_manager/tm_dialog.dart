@@ -35,6 +35,12 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
     getTags();
   }
 
+  @override
+  void dispose() {
+    filterSearchController.dispose();
+    super.dispose();
+  }
+
   void getTags() {
     tags = tagHandler.tagMap.values.toList();
 

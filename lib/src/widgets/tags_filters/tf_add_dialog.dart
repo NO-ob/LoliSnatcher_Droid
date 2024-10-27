@@ -22,6 +22,12 @@ class TagsFiltersAddDialog extends StatefulWidget {
 class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
   final TextEditingController _controller = TextEditingController();
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   void onSubmit(String text) {
     if (text.trim() != '') {
       widget.onAdd(text.trim().toLowerCase());

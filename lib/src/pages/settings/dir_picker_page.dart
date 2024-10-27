@@ -30,6 +30,12 @@ class _DirPickerState extends State<DirPicker> {
     path = widget.path;
   }
 
+  @override
+  void dispose() {
+    newDirNameController.dispose();
+    super.dispose();
+  }
+
   Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;

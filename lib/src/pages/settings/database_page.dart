@@ -54,6 +54,14 @@ class _DatabasePageState extends State<DatabasePage> {
     }
   }
 
+  @override
+  void dispose() {
+    scrollController.dispose();
+    sankakuSearchController.dispose();
+    cancelToken?.cancel();
+    super.dispose();
+  }
+
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {

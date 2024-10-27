@@ -7,18 +7,29 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/pulse_widget.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
-class PageNumberDialog extends StatelessWidget {
+class PageNumberDialog extends StatefulWidget {
   const PageNumberDialog({super.key});
 
   @override
+  State<PageNumberDialog> createState() => _PageNumberDialogState();
+}
+
+class _PageNumberDialogState extends State<PageNumberDialog> {
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+
+  final TextEditingController pageNumberController = TextEditingController();
+  final TextEditingController delayController = TextEditingController();
+
+  @override
+  void dispose() {
+    pageNumberController.dispose();
+    delayController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final SearchHandler searchHandler = SearchHandler.instance;
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-
-    // TODO is this okay to use controllers like this in stateless or should we convert to stateful?
-    final TextEditingController pageNumberController = TextEditingController();
-    final TextEditingController delayController = TextEditingController();
-
     pageNumberController.text = searchHandler.currentBooruHandler.pageNum.toString();
     delayController.text = 200.toString();
 
@@ -42,6 +53,14 @@ class PageNumberDialog extends StatelessWidget {
           numberStep: 1,
           numberMin: -1,
           numberMax: double.infinity,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a number';
+            } else if (int.tryParse(value) == null) {
+              return 'Please enter a valid number';
+            }
+            return null;
+          },
         ),
         SettingsTextInput(
           title: 'Delay between loadings (ms)',
@@ -54,6 +73,14 @@ class PageNumberDialog extends StatelessWidget {
           numberStep: 100,
           numberMin: 0,
           numberMax: 10000,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a number';
+            } else if (int.tryParse(value) == null) {
+              return 'Please enter a valid number';
+            }
+            return null;
+          },
         ),
         SettingsButton(
           name: 'Current page #${searchHandler.pageNum.value}',

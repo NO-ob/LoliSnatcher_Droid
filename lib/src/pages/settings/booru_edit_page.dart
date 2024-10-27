@@ -78,6 +78,17 @@ class _BooruEditState extends State<BooruEdit> {
   }
 
   @override
+  void dispose() {
+    booruNameController.dispose();
+    booruURLController.dispose();
+    booruFaviconController.dispose();
+    booruAPIKeyController.dispose();
+    booruUserIDController.dispose();
+    booruDefTagsController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,

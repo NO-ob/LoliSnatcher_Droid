@@ -56,6 +56,12 @@ class _HistoryListState extends State<HistoryList> {
     });
   }
 
+  @override
+  void dispose() {
+    filterSearchController.dispose();
+    super.dispose();
+  }
+
   Future<void> getHistory() async {
     isLoading = true;
     setState(() {});
