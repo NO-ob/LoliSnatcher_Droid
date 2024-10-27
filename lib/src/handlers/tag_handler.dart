@@ -217,7 +217,11 @@ class TagHandler extends GetxController {
     return;
   }
 
-  Future<bool> loadFromJSON(String jsonString, {bool preferTagTypeIfNone = false}) async {
+  Future<bool> loadFromJSON(
+    String jsonString, {
+    bool preferTagTypeIfNone = false,
+    void Function(int progress, int total)? onProgress,
+  }) async {
     try {
       final bool dbEnabled = SettingsHandler.instance.dbEnabled;
 
@@ -229,6 +233,15 @@ class TagHandler extends GetxController {
             tagObject,
             preferTypeIfNone: preferTagTypeIfNone,
             dbEnabled: dbEnabled,
+          );
+          if (onProgress != null) {
+            onProgress(jsonList.indexOf(rawTag), jsonList.length);
+          }
+          Logger.Inst().log(
+            'Parsed tag: $rawTag',
+            'TagHandler',
+            'loadFromJSON',
+            LogTypes.tagHandlerInfo,
           );
         } catch (e, s) {
           Logger.Inst().log(
