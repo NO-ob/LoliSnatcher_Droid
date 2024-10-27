@@ -57,12 +57,17 @@ class SearchHandler extends GetxController {
     String searchText, {
     bool switchToNew = false,
     Booru? customBooru,
+    List<Booru>? secondaryBoorus,
     TabAddMode addMode = TabAddMode.end,
   }) {
     final Rx<Booru> booru = (customBooru ?? currentBooru).obs;
 
     // Add new tab depending on the add mode
-    final SearchTab newTab = SearchTab(booru, null, searchText);
+    final SearchTab newTab = SearchTab(
+      booru,
+      secondaryBoorus?.obs,
+      searchText,
+    );
     int newIndex = 0;
     switch (addMode) {
       case TabAddMode.prev:
@@ -304,7 +309,7 @@ class SearchHandler extends GetxController {
   void changeCurrentTabPageNumber(int newPageNum) {
     final SearchTab newTab = SearchTab(
       currentBooru.obs,
-      currentTab.secondaryBoorus,
+      currentSecondaryBoorus,
       currentTab.tags,
     );
     newTab.booruHandler.pageNum = newPageNum;
@@ -379,6 +384,7 @@ class SearchHandler extends GetxController {
   SearchTab get currentTab => list[currentIndex];
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   Booru get currentBooru => currentTab.selectedBooru.value;
+  RxList<Booru>? get currentSecondaryBoorus => currentTab.secondaryBoorus;
   List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
   void filterCurrentFetched() {
     if (list.isNotEmpty) {
@@ -496,7 +502,7 @@ class SearchHandler extends GetxController {
       if (settingsHandler.booruList.isNotEmpty) {
         final SearchTab newTab = SearchTab(
           settingsHandler.booruList[0].obs,
-          currentTab.secondaryBoorus,
+          currentSecondaryBoorus,
           text,
         );
         list.add(newTab);
@@ -504,7 +510,7 @@ class SearchHandler extends GetxController {
     } else {
       final SearchTab newTab = SearchTab(
         (newBooru ?? currentBooru).obs,
-        currentTab.secondaryBoorus,
+        currentSecondaryBoorus,
         text,
       );
       list[currentIndex] = newTab;
@@ -519,7 +525,11 @@ class SearchHandler extends GetxController {
 
     // write to history
     if (text != '' && settingsHandler.searchHistoryEnabled) {
-      settingsHandler.dbHandler.updateSearchHistory(text, currentBooru.type?.name, currentBooru.name);
+      settingsHandler.dbHandler.updateSearchHistory(
+        text,
+        currentBooru.type?.name,
+        currentBooru.name,
+      );
     }
   }
 

@@ -4,7 +4,9 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 
 class AddNewTabDialog extends StatefulWidget {
   const AddNewTabDialog({
@@ -37,10 +39,23 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   Booru? booru;
-  bool switchToNew = true;
+  bool addSecondaryBoorus = false, switchToNew = true;
+  List<Booru> secondaryBoorus = [];
   TabAddMode addMode = TabAddMode.end; // prev, next, end
   _Querymode queryMode = _Querymode.defaultTags;
   TextEditingController customTagsController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    secondaryBoorus = searchHandler.currentSecondaryBoorus ?? [];
+  }
+
+  @override
+  void dispose() {
+    customTagsController.dispose();
+    super.dispose();
+  }
 
   String get usedQuery {
     final usedBooru = booru ?? searchHandler.currentBooru;
@@ -61,6 +76,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
     searchHandler.addTabByString(
       usedQuery,
       customBooru: booru,
+      secondaryBoorus: (addSecondaryBoorus && secondaryBoorus.isNotEmpty) ? [...secondaryBoorus] : null,
       switchToNew: switchToNew,
       addMode: addMode,
     );
@@ -126,6 +142,70 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                   : Text(
                       usedQuery.isEmpty ? '[empty]' : usedQuery,
                     ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: addSecondaryBoorus
+                    ? ListTile(
+                        shape: Border(
+                          bottom: BorderSide(
+                            color: Theme.of(context).dividerColor,
+                            width: borderWidth,
+                          ),
+                        ),
+                        title: LoliMultiselectDropdown(
+                          value: secondaryBoorus,
+                          onChanged: (List<Booru> value) {
+                            setState(() {
+                              secondaryBoorus = value;
+                            });
+                          },
+                          items: settingsHandler.booruList,
+                          itemBuilder: (item) => Container(
+                            padding: const EdgeInsets.only(left: 16),
+                            height: kMinInteractiveDimension,
+                            child: TabBooruSelectorItem(booru: item),
+                          ),
+                          labelText: 'Secondary boorus to include',
+                          selectedItemBuilder: (List<Booru> value) => Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Wrap(
+                                spacing: 4,
+                                runSpacing: 4,
+                                children: [
+                                  for (final item in value)
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.secondaryContainer,
+                                        borderRadius: BorderRadius.circular(100),
+                                      ),
+                                      child: TabBooruSelectorItem(
+                                        booru: item,
+                                        compact: true,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : SettingsToggle(
+                        value: addSecondaryBoorus,
+                        onChanged: (v) {
+                          setState(() {
+                            addSecondaryBoorus = v;
+                          });
+                        },
+                        title: secondaryBoorus.isEmpty ? 'Add secondary boorus' : 'Keep secondary boorus',
+                        subtitle: const Text('aka Multibooru mode'),
+                      ),
+              ),
             ),
             SettingsToggle(
               value: switchToNew,

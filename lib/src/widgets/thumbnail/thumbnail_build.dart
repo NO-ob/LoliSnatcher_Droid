@@ -96,7 +96,7 @@ class ThumbnailBuild extends StatelessWidget {
                   const Spacer(),
                   Builder(
                     builder: (context) {
-                      if (searchHandler.currentTab.secondaryBoorus?.isNotEmpty == true) {
+                      if (searchHandler.currentSecondaryBoorus?.isNotEmpty == true) {
                         final handler = searchHandler.currentBooruHandler as MergebooruHandler;
                         final fetchedMap = handler.fetchedMap;
 
