@@ -342,7 +342,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             ),
                             SettingsButton(
                               name: 'Restore database',
-                              subtitle: const Text('store.db (may take a while, will restart the app on success)'),
+                              subtitle: const Text('store.db (May take a while depending on the size of the database, will restart the app on success)'),
                               action: () async {
                                 inProgress = true;
                                 setState(() {});
@@ -431,7 +431,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             SettingsButton(
                               name: 'Restore Tags',
                               subtitle: const Text(
-                                'tags.json (may take a while, restoring tags through database restore is recommended if you have 10K+ tags)',
+                                "tags.json (May take a while if you have 10k+ tags. If you did a database restore, you don't need to do this as it's already included in the database)",
                               ),
                               action: () async {
                                 inProgress = true;
