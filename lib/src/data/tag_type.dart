@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:get/get.dart';
+
 enum TagType {
   artist,
   character,
@@ -10,8 +12,9 @@ enum TagType {
 
   bool get isArtist => this == TagType.artist;
   bool get isCharacter => this == TagType.character;
-  bool get isSpecies => this == TagType.species;
+  bool get isCopyright => this == TagType.copyright;
   bool get isMeta => this == TagType.meta;
+  bool get isSpecies => this == TagType.species;
   bool get isNone => this == TagType.none;
 
   static TagType fromString(String string) {
@@ -63,6 +66,15 @@ enum TagType {
         return Colors.orange;
       default:
         return Colors.transparent;
+    }
+  }
+
+  String get locName {
+    switch (this) {
+      case none:
+        return 'None/General';
+      default:
+        return name.capitalizeFirst!;
     }
   }
 }

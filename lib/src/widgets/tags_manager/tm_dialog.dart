@@ -35,6 +35,12 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
     getTags();
   }
 
+  @override
+  void dispose() {
+    filterSearchController.dispose();
+    super.dispose();
+  }
+
   void getTags() {
     tags = tagHandler.tagMap.values.toList();
 
@@ -87,6 +93,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
       builder: (context) {
         return TagsManagerListItemDialog(
           tag: item,
+          debug: true,
           onDelete: () {
             selected.removeWhere((e) => e == item);
             deleteItem(item);

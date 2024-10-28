@@ -76,10 +76,6 @@ class NyanPalsHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    if (booru.baseURL!.contains('rule34.xxx')) {
-      return '${booru.baseURL}/autocomplete.php?q=$input'; // doesn't allow limit, but sorts by popularity
-    } else {
-      return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10';
-    }
+    return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10';
   }
 }

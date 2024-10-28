@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:flex_color_picker/flex_color_picker.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';
@@ -26,7 +27,6 @@ class _ThemePageState extends State<ThemePage> {
 
   late ThemeItem theme;
   late ThemeMode themeMode;
-  late bool useMaterial3;
   late bool useDynamicColor;
   late bool isAmoled;
   late bool enableMascot;
@@ -42,7 +42,6 @@ class _ThemePageState extends State<ThemePage> {
     super.initState();
     theme = settingsHandler.theme.value;
     themeMode = settingsHandler.themeMode.value;
-    useMaterial3 = settingsHandler.useMaterial3.value;
     useDynamicColor = settingsHandler.useDynamicColor.value;
     isAmoled = settingsHandler.isAmoled.value;
     enableMascot = settingsHandler.enableDrawerMascot;
@@ -69,14 +68,17 @@ class _ThemePageState extends State<ThemePage> {
   }
 
   //called when page is closed or to debounce theme change, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop, {bool? withRestate}) async {
+  Future<void> _onPopInvoked(
+    bool didPop,
+    _, {
+    bool? withRestate,
+  }) async {
     if (didPop) {
       return;
     }
 
     settingsHandler.theme.value = theme;
     settingsHandler.themeMode.value = themeMode;
-    settingsHandler.useMaterial3.value = useMaterial3;
     settingsHandler.useDynamicColor.value = useDynamicColor;
     settingsHandler.isAmoled.value = isAmoled;
     settingsHandler.enableDrawerMascot = enableMascot;
@@ -110,7 +112,7 @@ class _ThemePageState extends State<ThemePage> {
     Debounce.debounce(
       tag: 'theme_change',
       callback: () async {
-        await _onPopInvoked(false, withRestate: withRestate);
+        await _onPopInvoked(false, null, withRestate: withRestate);
         setState(() {});
       },
       duration: const Duration(milliseconds: 500),
@@ -173,7 +175,7 @@ class _ThemePageState extends State<ThemePage> {
       constraints: BoxConstraints(
         minHeight: 480,
         minWidth: 300,
-        maxWidth: min(MediaQuery.of(context).size.width * 0.9, 400),
+        maxWidth: min(MediaQuery.sizeOf(context).width * 0.9, 400),
       ),
     );
   }
@@ -182,7 +184,7 @@ class _ThemePageState extends State<ThemePage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -191,101 +193,65 @@ class _ThemePageState extends State<ThemePage> {
         body: Center(
           child: ListView(
             children: [
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: themeMode,
                 items: ThemeMode.values,
                 onChanged: (ThemeMode? newValue) {
                   themeMode = newValue!;
                   updateTheme();
                 },
-                title: 'Theme Mode',
-                itemBuilder: (ThemeMode? item) {
-                  final String prettyValue = item!.name.capitalizeFirst!;
+                title: 'Theme mode',
+                itemTitleBuilder: (item) => item?.name.capitalizeFirst ?? '?',
+                itemLeadingBuilder: (ThemeMode? item) {
                   const double size = 40;
 
-                  switch (prettyValue) {
-                    case 'Dark':
-                      return Row(
-                        children: [
-                          const SizedBox(
-                            width: size,
-                            child: Icon(Icons.dark_mode),
-                          ),
-                          Text(prettyValue),
-                        ],
-                      );
-                    case 'Light':
-                      return Row(
-                        children: [
-                          const SizedBox(
-                            width: size,
-                            child: Icon(Icons.light_mode),
-                          ),
-                          Text(prettyValue),
-                        ],
-                      );
-                    case 'System':
-                      return Row(
-                        children: [
-                          SizedBox(
-                            width: size,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                ClipPath(
-                                  clipper: _SunClipper(),
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(right: 8),
-                                    child: Icon(Icons.light_mode),
-                                  ),
-                                ),
-                                ClipPath(
-                                  clipper: _MoonClipper(),
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(left: 5),
-                                    child: Icon(Icons.dark_mode),
-                                  ),
-                                ),
-                              ],
+                  return SizedBox(
+                    width: size,
+                    height: size,
+                    child: switch (item) {
+                      ThemeMode.dark => const Icon(Icons.dark_mode),
+                      ThemeMode.light => const Icon(Icons.light_mode),
+                      ThemeMode.system => Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            ClipPath(
+                              clipper: _SunClipper(),
+                              child: const Padding(
+                                padding: EdgeInsets.only(right: 8),
+                                child: Icon(Icons.light_mode),
+                              ),
                             ),
-                          ),
-                          Text(prettyValue),
-                        ],
-                      );
-                    default:
-                      return Text(prettyValue);
-                  }
+                            ClipPath(
+                              clipper: _MoonClipper(),
+                              child: const Padding(
+                                padding: EdgeInsets.only(left: 5),
+                                child: Icon(Icons.dark_mode),
+                              ),
+                            ),
+                          ],
+                        ),
+                      _ => const SizedBox.shrink(),
+                    },
+                  );
                 },
               ),
-              SettingsToggle(
-                value: isAmoled,
-                onChanged: (bool newValue) {
-                  isAmoled = newValue;
-                  updateTheme();
-                },
-                title: 'AMOLED',
-              ),
-              SettingsToggle(
-                value: useMaterial3,
-                onChanged: (bool newValue) {
-                  useMaterial3 = newValue;
-                  // dynamic color is exclusive to material theme
-                  if (newValue == false) {
-                    useDynamicColor = false;
-                  }
-                  setState(() {});
-                  updateTheme();
-                },
-                title: 'Material3 [Preview]',
-              ),
-              if (useMaterial3 && currentSdk >= 31)
+              if (themeMode == ThemeMode.system || themeMode == ThemeMode.dark)
+                SettingsToggle(
+                  value: isAmoled,
+                  onChanged: (bool newValue) {
+                    isAmoled = newValue;
+                    updateTheme();
+                  },
+                  title: 'Black background',
+                ),
+              if (currentSdk >= 31)
                 SettingsToggle(
                   value: useDynamicColor,
                   onChanged: (bool newValue) {
                     useDynamicColor = newValue;
                     updateTheme();
                   },
-                  title: 'Use Dynamic Color',
+                  title: 'Use dynamic color',
                   subtitle: Platform.isAndroid ? const Text('Android 12+ only') : null,
                 ),
               if (!useDynamicColor)
@@ -346,13 +312,24 @@ class _ThemePageState extends State<ThemePage> {
                         ),
                         const SizedBox(width: 10),
                         Text(value ?? ''),
+                        switch (value) {
+                          'Halloween' => const Padding(
+                              padding: EdgeInsets.only(left: 8),
+                              child: FaIcon(FontAwesomeIcons.ghost),
+                            ),
+                          'Custom' => const Padding(
+                              padding: EdgeInsets.only(left: 8),
+                              child: Icon(Icons.build),
+                            ),
+                          _ => const SizedBox.shrink(),
+                        },
                       ],
                     );
                   },
                 ),
               if (theme.name == 'Custom' && !useDynamicColor)
                 SettingsButton(
-                  name: 'Primary Color',
+                  name: 'Primary color',
                   subtitle: Text(
                     '${ColorTools.materialNameAndCode(primaryPickerColor!)} '
                     'aka ${ColorTools.nameThatColor(primaryPickerColor!)}',
@@ -385,7 +362,7 @@ class _ThemePageState extends State<ThemePage> {
                 ),
               if (theme.name == 'Custom' && !useDynamicColor)
                 SettingsButton(
-                  name: 'Secondary Color',
+                  name: 'Secondary color',
                   subtitle: Text(
                     '${ColorTools.materialNameAndCode(accentPickerColor!)} '
                     'aka ${ColorTools.nameThatColor(accentPickerColor!)}',
@@ -418,9 +395,8 @@ class _ThemePageState extends State<ThemePage> {
                 ),
               if (theme.name == 'Custom' && !useDynamicColor)
                 SettingsButton(
-                  name: 'Reset Custom Colors',
+                  name: 'Reset custom colors',
                   icon: const Icon(Icons.refresh),
-                  drawTopBorder: true,
                   action: () {
                     final ThemeItem theme = settingsHandler.map['theme']!['default'];
                     primaryPickerColor = theme.primary;
@@ -435,13 +411,12 @@ class _ThemePageState extends State<ThemePage> {
                   enableMascot = newValue;
                   updateTheme();
                 },
-                title: 'Enable Drawer Mascot',
+                title: 'Enable drawer mascot',
               ),
               SettingsButton(
-                name: 'Set Custom Mascot',
-                subtitle: Text(mascotPathOverride.isEmpty ? '...' : 'Current: $mascotPathOverride'),
+                name: 'Set custom mascot',
+                subtitle: mascotPathOverride.isEmpty ? null : Text('Current: $mascotPathOverride'),
                 icon: const Icon(Icons.image_search_outlined),
-                drawTopBorder: true,
                 action: () async {
                   mascotPathOverride = await ServiceHandler.getImageSAFUri();
                   needToWriteMascot = true;
@@ -450,9 +425,8 @@ class _ThemePageState extends State<ThemePage> {
               ),
               if (mascotPathOverride.isNotEmpty)
                 SettingsButton(
-                  name: 'Remove Custom Mascot',
+                  name: 'Remove custom mascot',
                   icon: const Icon(Icons.delete_forever),
-                  drawTopBorder: true,
                   action: () async {
                     final File file = File(mascotPathOverride);
                     if (await file.exists()) {

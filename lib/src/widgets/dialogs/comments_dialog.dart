@@ -108,6 +108,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
                   'No comments',
                   style: TextStyle(fontSize: 20),
                 ),
+                SizedBox(height: 50),
               ],
             ),
           ),
@@ -385,6 +386,12 @@ class _CommentsHeader extends StatelessWidget {
           height = width / maxRatio;
         }
 
+        if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+          final double sizeDiff = height / (min(MediaQuery.sizeOf(context).height * 0.4, height));
+          height /= sizeDiff;
+          width /= sizeDiff;
+        }
+
         return Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -393,9 +400,12 @@ class _CommentsHeader extends StatelessWidget {
               SizedBox(
                 height: height,
                 width: width,
-                child: ThumbnailBuild(
-                  item: item,
-                  selectable: false,
+                child: HeroMode(
+                  enabled: false,
+                  child: ThumbnailBuild(
+                    item: item,
+                    selectable: false,
+                  ),
                 ),
               ),
             ],

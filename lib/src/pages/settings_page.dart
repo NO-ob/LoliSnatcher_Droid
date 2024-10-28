@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -15,10 +18,12 @@ import 'package:lolisnatcher/src/pages/settings/database_page.dart';
 import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
 import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
 import 'package:lolisnatcher/src/pages/settings/network_page.dart';
+import 'package:lolisnatcher/src/pages/settings/privacy_page.dart';
 import 'package:lolisnatcher/src/pages/settings/save_cache_page.dart';
 import 'package:lolisnatcher/src/pages/settings/tags_filters_page.dart';
 import 'package:lolisnatcher/src/pages/settings/theme_page.dart';
 import 'package:lolisnatcher/src/pages/settings/user_interface_page.dart';
+import 'package:lolisnatcher/src/pages/settings/video_page.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -29,7 +34,7 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  Future<void> _onPopInvoked(BuildContext context, bool didPop) async {
+  Future<void> _onPopInvoked(BuildContext context, bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -57,7 +62,7 @@ class SettingsPage extends StatelessWidget {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async => _onPopInvoked(context, didPop),
+      onPopInvokedWithResult: (didPop, result) async => _onPopInvoked(context, didPop, result),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -90,9 +95,14 @@ class SettingsPage extends StatelessWidget {
                 page: () => const ThemePage(),
               ),
               SettingsButton(
-                name: 'Gallery',
+                name: 'Viewer',
                 icon: const Icon(Icons.view_carousel),
                 page: () => const GalleryPage(),
+              ),
+              SettingsButton(
+                name: 'Video',
+                icon: const Icon(Icons.video_settings),
+                page: () => const VideoSettingsPage(),
               ),
               SettingsButton(
                 name: 'Snatching & Caching',
@@ -119,6 +129,15 @@ class SettingsPage extends StatelessWidget {
                 icon: const Icon(Icons.network_check),
                 page: () => const NetworkPage(),
               ),
+              if (Platform.isAndroid)
+                SettingsButton(
+                  name: 'Privacy',
+                  icon: const FaIcon(
+                    FontAwesomeIcons.userShield,
+                    size: 20,
+                  ),
+                  page: () => const PrivacyPage(),
+                ),
               SettingsButton(
                 name: 'LoliSync',
                 icon: const Icon(Icons.sync),

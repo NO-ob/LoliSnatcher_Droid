@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -24,8 +23,12 @@ class _NetworkPageState extends State<NetworkPage> {
   bool allowSelfSignedCerts = false;
   Booru? selectedBooru;
   List<Cookie> selectedBooruCookies = [];
+  ProxyType proxyType = ProxyType.direct;
 
-  final TextEditingController userAgentController = TextEditingController();
+  final TextEditingController userAgentController = TextEditingController(),
+      proxyAddressController = TextEditingController(),
+      proxyUsernameController = TextEditingController(),
+      proxyPasswordController = TextEditingController();
 
   @override
   void initState() {
@@ -33,22 +36,35 @@ class _NetworkPageState extends State<NetworkPage> {
 
     allowSelfSignedCerts = settingsHandler.allowSelfSignedCerts;
     userAgentController.text = settingsHandler.customUserAgent;
+    proxyType = ProxyType.fromName(settingsHandler.proxyType);
+    proxyAddressController.text = settingsHandler.proxyAddress;
+    proxyUsernameController.text = settingsHandler.proxyUsername;
+    proxyPasswordController.text = settingsHandler.proxyPassword;
   }
 
-  Future<void> _onPopInvoked(bool didPop) async {
+  @override
+  void dispose() {
+    userAgentController.dispose();
+    proxyAddressController.dispose();
+    proxyUsernameController.dispose();
+    proxyPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
 
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     settingsHandler.customUserAgent = userAgentController.text;
+    settingsHandler.proxyType = proxyType.name;
+    settingsHandler.proxyAddress = proxyAddressController.text;
+    settingsHandler.proxyUsername = proxyUsernameController.text;
+    settingsHandler.proxyPassword = proxyPasswordController.text;
     final bool result = await settingsHandler.saveSettings(restate: false);
 
-    if (allowSelfSignedCerts) {
-      HttpOverrides.global = MyHttpOverrides();
-    } else {
-      HttpOverrides.global = null;
-    }
+    await initProxy();
 
     if (result) {
       Navigator.of(context).pop();
@@ -59,7 +75,7 @@ class _NetworkPageState extends State<NetworkPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -75,15 +91,52 @@ class _NetworkPageState extends State<NetworkPage> {
                     allowSelfSignedCerts = newValue;
                   });
                 },
-                title: 'Enable Self Signed SSL Certificates',
+                title: 'Enable self signed SSL certificates',
               ),
+              const SettingsButton(name: '', enabled: false),
+              SettingsDropdown<ProxyType>(
+                value: proxyType,
+                items: (settingsHandler.map['proxyType']!['options'] as List<String>).map(ProxyType.fromName).toList(),
+                onChanged: (ProxyType? newValue) {
+                  setState(() {
+                    proxyType = newValue ?? ProxyType.direct;
+                  });
+                },
+                title: 'Proxy',
+                subtitle: const Text('Does not apply to streaming video mode, use caching video mode instead'),
+                itemBuilder: (item) => Text(item?.name.capitalizeFirst ?? ''),
+              ),
+              if (!proxyType.isDirect && !proxyType.isSystem) ...[
+                SettingsTextInput(
+                  controller: proxyAddressController,
+                  title: 'Address',
+                  forceLabelOnTop: true,
+                  resetText: () => '',
+                  pasteable: true,
+                ),
+                SettingsTextInput(
+                  controller: proxyUsernameController,
+                  title: 'Username',
+                  forceLabelOnTop: true,
+                  resetText: () => '',
+                  pasteable: true,
+                ),
+                SettingsTextInput(
+                  controller: proxyPasswordController,
+                  title: 'Password',
+                  forceLabelOnTop: true,
+                  resetText: () => '',
+                  pasteable: true,
+                  obscureable: true,
+                ),
+              ],
               const SettingsButton(name: '', enabled: false),
               SettingsTextInput(
                 controller: userAgentController,
-                title: 'Custom User Agent',
-                clearable: true,
+                title: 'Custom user agent',
                 forceLabelOnTop: true,
                 resetText: () => '',
+                pasteable: true,
                 drawBottomBorder: false,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
@@ -92,7 +145,7 @@ class _NetworkPageState extends State<NetworkPage> {
                       context: context,
                       builder: (context) {
                         return const SettingsDialog(
-                          title: Text('Custom User Agent'),
+                          title: Text('Custom user agent'),
                           contentItems: [
                             Text('Keep empty to use default value'),
                             Text('Default: ${Tools.appUserAgent}'),
@@ -105,13 +158,14 @@ class _NetworkPageState extends State<NetworkPage> {
                   },
                 ),
               ),
-              SettingsButton(
-                name: 'Tap here to use suggested browser user agent:',
-                subtitle: const Text(Constants.defaultBrowserUserAgent),
-                action: () {
-                  userAgentController.text = Constants.defaultBrowserUserAgent;
-                },
-              ),
+              if (userAgentController.text != Constants.defaultBrowserUserAgent)
+                SettingsButton(
+                  name: 'Tap here to use suggested browser user agent:',
+                  subtitle: const Text(Constants.defaultBrowserUserAgent),
+                  action: () {
+                    userAgentController.text = Constants.defaultBrowserUserAgent;
+                  },
+                ),
               const SettingsButton(name: '', enabled: false),
               const SettingsButton(
                 name: 'Cookie cleaner',
@@ -122,7 +176,11 @@ class _NetworkPageState extends State<NetworkPage> {
                 nullable: true,
                 onChanged: (newValue) async {
                   selectedBooru = newValue;
-                  selectedBooruCookies = await CookieManager.instance().getCookies(url: WebUri(selectedBooru!.baseURL!));
+                  if (newValue != null) {
+                    selectedBooruCookies = await CookieManager.instance().getCookies(url: WebUri(selectedBooru!.baseURL!));
+                  } else {
+                    selectedBooruCookies = [];
+                  }
                   setState(() {});
                 },
                 title: 'Booru',
@@ -156,7 +214,7 @@ class _NetworkPageState extends State<NetworkPage> {
                   color: Colors.red,
                 ),
                 action: () async {
-                  if (selectedBooru == null) {
+                  if (selectedBooru != null) {
                     await CookieManager.instance().deleteCookies(url: WebUri(selectedBooru!.baseURL!));
                     FlashElements.showSnackbar(
                       context: context,
@@ -180,5 +238,23 @@ class _NetworkPageState extends State<NetworkPage> {
         ),
       ),
     );
+  }
+}
+
+enum ProxyType {
+  direct,
+  system,
+  http,
+  socks5,
+  socks4;
+
+  bool get isDirect => this == direct;
+  bool get isSystem => this == system;
+  bool get isHttp => this == http;
+  bool get isSocks5 => this == socks5;
+  bool get isSocks4 => this == socks4;
+
+  static ProxyType fromName(String name) {
+    return ProxyType.values.firstWhereOrNull((e) => e.name == name) ?? direct;
   }
 }

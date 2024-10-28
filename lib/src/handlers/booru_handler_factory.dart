@@ -71,7 +71,11 @@ class BooruHandlerFactory {
           break;
         case BooruType.Shimmie:
           pageNum = 0;
-          booruHandler = ShimmieHandler(booru, limit);
+          if (booru.baseURL?.contains('paheal.net') ?? false) {
+            booruHandler = ShimmieHtmlHandler(booru, limit);
+          } else {
+            booruHandler = ShimmieHandler(booru, limit);
+          }
           break;
         case BooruType.Philomena:
           pageNum = 0;

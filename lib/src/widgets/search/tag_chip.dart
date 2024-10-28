@@ -7,11 +7,13 @@ class TagChip extends StatelessWidget {
   TagChip({
     required this.tagString,
     this.trailing,
+    this.color,
     super.key,
   });
 
   final String tagString;
   final Widget? trailing;
+  final Color? color;
 
   final SearchHandler searchHandler = SearchHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
@@ -47,7 +49,7 @@ class TagChip extends StatelessWidget {
 
     // color tag bg with their tag type corresponding color
     // (no type == blue here for cosmetic purposes, everywhere else they have no color)
-    Color chipColour = tagHandler.getTag(stringContent).getColour();
+    Color chipColour = color ?? tagHandler.getTag(stringContent).getColour();
     chipColour = chipColour == Colors.transparent ? Colors.blue : chipColour;
 
     // replace all _ with spaces and trim

@@ -61,9 +61,10 @@ class BooruItem {
   String fileURL, sampleURL, thumbnailURL, postURL;
   List<String> tagsList;
   late Rx<MediaType> mediaType;
-  RxnString possibleExt = RxnString(null);
+  Rxn<MediaType> possibleMediaType = Rxn<MediaType>(null);
   RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
   RxBool isNoScale = false.obs, toggleQuality = false.obs;
+  bool isUpdated = false;
 
   String? fileExt, serverId, rating, score, uploaderName, description, md5String, postDate, postDateFormat;
   String fileNameExtras;

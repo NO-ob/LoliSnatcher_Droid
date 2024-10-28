@@ -7,10 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 
 // Experimental: attempt to do chrome-like tabs list for desktop view
 
@@ -78,14 +77,14 @@ class _DesktopTabsState extends State<DesktopTabs> {
       child: Row(
         children: [
           if (isNotEmptyBooru)
-            if (tab.selectedBooru.value.type == BooruType.Downloads)
-              const Icon(Icons.file_download_outlined, size: 20)
-            else if (tab.selectedBooru.value.type == BooruType.Favourites)
-              const Icon(Icons.favorite, color: Colors.red, size: 20)
-            else
-              Favicon(tab.selectedBooru.value)
+            BooruFavicon(
+              tab.selectedBooru.value,
+            )
           else
-            const Icon(CupertinoIcons.question, size: 20),
+            const Icon(
+              CupertinoIcons.question,
+              size: 20,
+            ),
           const SizedBox(width: 3),
           MarqueeText(
             key: ValueKey(tagText),

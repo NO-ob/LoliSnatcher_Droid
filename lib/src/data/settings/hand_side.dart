@@ -1,23 +1,27 @@
 enum HandSide {
-  right,
-  left;
+  left,
+  right;
 
   @override
   String toString() {
     switch (this) {
-      case HandSide.right:
-        return 'Right';
       case HandSide.left:
         return 'Left';
+      case HandSide.right:
+        return 'Right';
     }
   }
 
   static HandSide fromString(String name) {
     switch (name) {
-      case 'Right':
-        return HandSide.right;
       case 'Left':
+      case 'left':
+      case 'l':
         return HandSide.left;
+      case 'Right':
+      case 'right':
+      case 'r':
+        return HandSide.right;
     }
     return HandSide.right;
   }

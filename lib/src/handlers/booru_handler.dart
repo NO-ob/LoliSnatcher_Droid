@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart' as getx;
 import 'package:html/parser.dart';
 
@@ -74,6 +72,11 @@ abstract class BooruHandler {
         continue;
       }
 
+      final bool isDuplicate = filteredItems.any((e) => e.fileURL == item.fileURL || (e.serverId != null && e.serverId == item.serverId));
+      if (isDuplicate) {
+        continue;
+      }
+
       filteredItems.add(item);
     }
 
@@ -137,8 +140,14 @@ abstract class BooruHandler {
     Uri uri;
     try {
       uri = Uri.parse(url);
-    } catch (e) {
-      Logger.Inst().log('invalid url: $url', className, 'Search', LogTypes.booruHandlerFetchFailed);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'invalid url: $url',
+        className,
+        'Search',
+        LogTypes.booruHandlerFetchFailed,
+        s: s,
+      );
       errorString = 'Invalid URL ($url)';
       return fetched;
     }
@@ -165,8 +174,14 @@ abstract class BooruHandler {
         Logger.Inst().log('response: ${response.data}', className, 'Search', LogTypes.booruHandlerFetchFailed);
         errorString = response.statusCode.toString();
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'Search', LogTypes.booruHandlerFetchFailed);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'Search',
+        LogTypes.booruHandlerFetchFailed,
+        s: s,
+      );
       if (e is DioException) {
         errorString = e.response?.statusCode != null ? '${e.response?.statusCode} - ${e.response?.statusMessage}' : (e.message ?? e.toString());
       } else {
@@ -202,8 +217,14 @@ abstract class BooruHandler {
     List posts = [];
     try {
       posts = await parseListFromResponse(response);
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'parseListFromResponse', LogTypes.booruHandlerRawFetched);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'parseListFromResponse',
+        LogTypes.booruHandlerRawFetched,
+        s: s,
+      );
       Logger.Inst().log(response.data, className, 'parseListFromResponse', LogTypes.booruHandlerRawFetched);
       Logger.Inst().log(response.data.runtimeType, className, 'parseListFromResponse', LogTypes.booruHandlerRawFetched);
       errorString = e.toString();
@@ -219,8 +240,14 @@ abstract class BooruHandler {
           if (item != null) {
             newItems.add(item);
           }
-        } catch (e) {
-          Logger.Inst().log('$e $post', className, 'parseItemFromResponse', LogTypes.booruHandlerRawFetched);
+        } catch (e, s) {
+          Logger.Inst().log(
+            '$e $post',
+            className,
+            'parseItemFromResponse',
+            LogTypes.booruHandlerRawFetched,
+            s: s,
+          );
           failedItems.add([post, e]);
         }
       }
@@ -277,8 +304,14 @@ abstract class BooruHandler {
     Uri uri;
     try {
       uri = Uri.parse(url);
-    } catch (e) {
-      Logger.Inst().log('invalid url: $url', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'invalid url: $url',
+        className,
+        'tagSearch',
+        LogTypes.booruHandlerFetchFailed,
+        s: s,
+      );
       return tags;
     }
     Logger.Inst().log('$url $uri', className, 'tagSearch', LogTypes.booruHandlerSearchURL);
@@ -301,8 +334,14 @@ abstract class BooruHandler {
                 tags.add(parsedTag);
               }
             }
-          } catch (e) {
-            Logger.Inst().log('$e $rawTag', className, 'parseTagSuggestion', LogTypes.booruHandlerRawFetched);
+          } catch (e, s) {
+            Logger.Inst().log(
+              '$e $rawTag',
+              className,
+              'parseTagSuggestion',
+              LogTypes.booruHandlerRawFetched,
+              s: s,
+            );
           }
         }
       } else {
@@ -310,8 +349,14 @@ abstract class BooruHandler {
         Logger.Inst().log('status: ${response.statusCode}', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log('response: ${response.data}', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'tagSearch',
+        LogTypes.booruHandlerFetchFailed,
+        s: s,
+      );
     }
     return tags;
   }
@@ -323,7 +368,16 @@ abstract class BooruHandler {
       if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    return DioNetwork.get(uri.toString(), headers: headers, cancelToken: cancelToken);
+    return DioNetwork.get(
+      uri.toString(),
+      headers: headers,
+      options: fetchTagSuggestionsOptions(),
+      cancelToken: cancelToken,
+    );
+  }
+
+  Options? fetchTagSuggestionsOptions() {
+    return null;
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -362,8 +416,14 @@ abstract class BooruHandler {
     Uri uri;
     try {
       uri = Uri.parse(url);
-    } catch (e) {
-      Logger.Inst().log('invalid url: $url', className, 'getComments', LogTypes.booruHandlerFetchFailed);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'invalid url: $url',
+        className,
+        'getComments',
+        LogTypes.booruHandlerFetchFailed,
+        s: s,
+      );
       return comments;
     }
     Logger.Inst().log('$url $uri', className, 'getComments', LogTypes.booruHandlerSearchURL);
@@ -380,8 +440,14 @@ abstract class BooruHandler {
             if (parsedComment != null) {
               comments.add(parsedComment);
             }
-          } catch (e) {
-            Logger.Inst().log('$e $rawComment', className, 'parseCommentsList', LogTypes.booruHandlerRawFetched);
+          } catch (e, s) {
+            Logger.Inst().log(
+              '$e $rawComment',
+              className,
+              'parseCommentsList',
+              LogTypes.booruHandlerRawFetched,
+              s: s,
+            );
           }
         }
       } else {
@@ -389,8 +455,14 @@ abstract class BooruHandler {
         Logger.Inst().log('status: ${response.statusCode}', className, 'getComments', LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log('response: ${response.data}', className, 'getComments', LogTypes.booruHandlerFetchFailed);
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'getComments', LogTypes.booruHandlerFetchFailed);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'getComments',
+        LogTypes.booruHandlerFetchFailed,
+        s: s,
+      );
     }
     return comments;
   }
@@ -408,8 +480,13 @@ abstract class BooruHandler {
     return DioNetwork.get(
       uri.toString(),
       headers: headers,
+      options: fetchCommentsOptions(),
       cancelToken: cancelToken,
     );
+  }
+
+  Options? fetchCommentsOptions() {
+    return null;
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -435,7 +512,7 @@ abstract class BooruHandler {
   // TODO fetch and overwrite current item data when entering tag view with a newer / more complete data
   bool get shouldUpdateIteminTagView => false;
 
-  Future loadItem({required BooruItem item, CancelToken? cancelToken}) async {
+  Future loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
     return null;
   }
 
@@ -455,8 +532,14 @@ abstract class BooruHandler {
     Uri uri;
     try {
       uri = Uri.parse(url);
-    } catch (e) {
-      Logger.Inst().log('invalid url: $url', className, 'getNotes', LogTypes.booruHandlerFetchFailed);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'invalid url: $url',
+        className,
+        'getNotes',
+        LogTypes.booruHandlerFetchFailed,
+        s: s,
+      );
       return notes;
     }
     Logger.Inst().log('$url $uri', className, 'getNotes', LogTypes.booruHandlerSearchURL);
@@ -473,8 +556,14 @@ abstract class BooruHandler {
             if (parsedNote != null) {
               notes.add(parsedNote);
             }
-          } catch (e) {
-            Logger.Inst().log('$e $rawNote', className, 'parseNotesList', LogTypes.booruHandlerRawFetched);
+          } catch (e, s) {
+            Logger.Inst().log(
+              '$e $rawNote',
+              className,
+              'parseNotesList',
+              LogTypes.booruHandlerRawFetched,
+              s: s,
+            );
           }
         }
       } else {
@@ -482,8 +571,14 @@ abstract class BooruHandler {
         Logger.Inst().log('status: ${response.statusCode}', className, 'getNotes', LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log('response: ${response.data}', className, 'getNotes', LogTypes.booruHandlerFetchFailed);
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'getNotes', LogTypes.booruHandlerFetchFailed);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'getNotes',
+        LogTypes.booruHandlerFetchFailed,
+        s: s,
+      );
     }
     return notes;
   }
@@ -556,19 +651,7 @@ abstract class BooruHandler {
   }
 
   Future<String?> getCookies() async {
-    String cookieString = '';
-    if (Platform.isAndroid || Platform.isIOS) {
-      // TODO add when there is desktop support?
-      try {
-        final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(booru.baseURL!));
-        for (final Cookie cookie in cookies) {
-          cookieString += '${cookie.name}=${cookie.value}; ';
-        }
-      } catch (e) {
-        Logger.Inst().log(e.toString(), className, 'getCookies', LogTypes.exception);
-      }
-    }
+    String cookieString = await Tools.getCookies(booru.baseURL!);
 
     final Map<String, String> headers = getHeaders();
     if (headers['Cookie']?.isNotEmpty ?? false) {

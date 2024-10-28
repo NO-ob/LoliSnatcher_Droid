@@ -105,12 +105,18 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   void removeOverlay() {
-    if (_overlayEntry != null) {
-      if (_overlayEntry!.mounted) {
-        _overlayEntry!.remove();
-        _overlayEntry = null; // remove and destroy overlay object from memory
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        // delay to allow onTap to complete before removing overlay due to moving focus to onTap
+        await Future.delayed(const Duration(milliseconds: 50));
       }
-    }
+      if (_overlayEntry != null) {
+        if (_overlayEntry!.mounted) {
+          _overlayEntry!.remove();
+          _overlayEntry = null; // remove and destroy overlay object from memory
+        }
+      }
+    });
   }
 
   void updateOverlay() {
@@ -150,7 +156,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     const double buttonHeight = kMinInteractiveDimension;
 
     final buttonStyle = Theme.of(context).elevatedButtonTheme.style?.copyWith(
-          fixedSize: MaterialStateProperty.all<Size>(
+          fixedSize: WidgetStateProperty.all<Size>(
             const Size(buttonHeight, buttonHeight),
           ),
         );
@@ -168,7 +174,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           footerBuilder: (_) => PreferredSize(
             preferredSize: const Size.fromHeight(buttonHeight),
             child: Container(
-              color: Theme.of(context).colorScheme.background,
+              color: Theme.of(context).colorScheme.surface,
               height: buttonHeight,
               child: Row(
                 children: [
@@ -595,6 +601,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             textInputAction: TextInputAction.search,
             focusNode: searchHandler.searchBoxFocus,
             enableInteractiveSelection: true,
+            enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             onChanged: (text) {
               createOverlay();
             },
@@ -634,7 +641,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                         _overlayEntry!.markNeedsBuild();
                         setState(() {});
                       },
-                      icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onBackground),
+                      icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface),
                     )
                   : Container(
                       decoration: BoxDecoration(

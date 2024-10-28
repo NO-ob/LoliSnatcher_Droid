@@ -262,8 +262,8 @@ class _MediaLoadingState extends State<MediaLoading> {
             color: Colors.blue,
           ),
           style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(Colors.black54),
-            fixedSize: const MaterialStatePropertyAll(Size(double.infinity, 54)),
+            backgroundColor: WidgetStateProperty.all(Colors.black54),
+            fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
           ),
           label: LoadingText(
             text: (widget.isTooBig || widget.item.isHated) ? 'Load Anyway' : 'Restart Loading',
@@ -317,8 +317,8 @@ class _MediaLoadingState extends State<MediaLoading> {
                 color: Theme.of(context).colorScheme.error,
               ),
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.black54),
-                fixedSize: const MaterialStatePropertyAll(Size(double.infinity, 54)),
+                backgroundColor: WidgetStateProperty.all(Colors.black54),
+                fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
               ),
               label: LoadingText(
                 text: 'Stop Loading',
@@ -338,7 +338,7 @@ class _MediaLoadingState extends State<MediaLoading> {
         ? const LinearProgressIndicator()
         : AnimatedProgressIndicator(
             value: percentDone,
-            animationDuration: const Duration(milliseconds: 150),
+            animationDuration: const Duration(milliseconds: 100),
             indicatorStyle: IndicatorStyle.linear,
             valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
             minHeight: 6,

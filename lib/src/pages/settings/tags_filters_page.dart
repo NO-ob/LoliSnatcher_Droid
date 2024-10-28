@@ -50,12 +50,13 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
 
   @override
   void dispose() {
+    tagSearchController.dispose();
     tabController.removeListener(updateState);
     tabController.dispose();
     super.dispose();
   }
 
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -162,11 +163,11 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Filters Editor'),
+          title: const Text('Filters'),
           bottom: TabBar(
             controller: tabController,
             indicatorColor: Theme.of(context).colorScheme.secondary,
@@ -180,15 +181,24 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
             tabs: [
               const Tab(
                 text: 'Hated',
-                icon: Icon(CupertinoIcons.eye_slash, color: Colors.red),
+                icon: Icon(
+                  CupertinoIcons.eye_slash,
+                  color: Colors.red,
+                ),
               ),
               const Tab(
                 text: 'Loved',
-                icon: Icon(Icons.star, color: Colors.yellow),
+                icon: Icon(
+                  Icons.star,
+                  color: Colors.yellow,
+                ),
               ),
               Tab(
                 text: 'Settings',
-                icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onBackground),
+                icon: Icon(
+                  Icons.settings,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ],
           ),

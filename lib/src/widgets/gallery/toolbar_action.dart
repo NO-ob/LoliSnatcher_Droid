@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ToolbarAction extends StatelessWidget {
   const ToolbarAction({
     required this.icon,
-    required this.onTap,
+    this.onTap,
     this.onLongTap,
     this.subIcon,
     this.stackWidget,

@@ -8,12 +8,22 @@ import 'package:path_provider/path_provider.dart';
 import 'package:vibration/vibration.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
 //The ServiceHandler class calls kotlin functions in MainActivity.kt
 class ServiceHandler {
-  static void log(Object? e) {
+  static void log(
+    Object? e, {
+    StackTrace? s,
+  }) {
     if (kDebugMode) {
-      log(e);
+      Logger.Inst().log(
+        e.toString(),
+        'ServiceHandler',
+        'log',
+        LogTypes.exception,
+        s: s,
+      );
     }
   }
 
@@ -233,6 +243,27 @@ class ServiceHandler {
     return result;
   }
 
+  static Future<bool> copyFileToSafDir(
+    String sourcePath,
+    String fileName,
+    String safUri,
+    String mime,
+  ) async {
+    bool result = false;
+    try {
+      result = await platform.invokeMethod('copyFileToSafDir', {
+        'sourcePath': sourcePath,
+        'fileName': fileName,
+        'uri': safUri,
+        'mime': mime,
+      });
+    } catch (e) {
+      log(e);
+      result = false;
+    }
+    return result;
+  }
+
   static Future<String> getConfigDir() async {
     String result = '';
     if (Platform.isAndroid) {
@@ -442,19 +473,30 @@ class ServiceHandler {
   }
 
   // ignore: avoid_void_async
-  static void vibrate({
+  static Future<void> vibrate({
     bool flutterWay = false,
     int duration = 10,
     int amplitude = -1,
   }) async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      if (flutterWay) {
-        unawaited(HapticFeedback.vibrate());
-      } else {
-        if (await Vibration.hasVibrator() ?? false) {
-          unawaited(Vibration.vibrate(duration: duration, amplitude: amplitude));
+    if (SettingsHandler.instance.disableVibration) {
+      return;
+    }
+
+    try {
+      if (Platform.isAndroid || Platform.isIOS) {
+        if (flutterWay) {
+          await HapticFeedback.vibrate();
+        } else {
+          if (await Vibration.hasVibrator() ?? false) {
+            await Vibration.vibrate(
+              duration: duration,
+              amplitude: amplitude,
+            );
+          }
         }
       }
+    } catch (e, s) {
+      log(e, s: s);
     }
   }
 

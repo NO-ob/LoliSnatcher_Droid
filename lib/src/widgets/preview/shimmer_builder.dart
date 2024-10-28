@@ -10,9 +10,9 @@ class ShimmerWrap extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer(
       linearGradient: _shimmerGradient(
-        Color.lerp(Theme.of(context).colorScheme.background, Theme.of(context).colorScheme.onBackground, 0.15)!,
-        Color.lerp(Theme.of(context).colorScheme.onBackground, Theme.of(context).colorScheme.background, 0.75)!,
-        Color.lerp(Theme.of(context).colorScheme.background, Theme.of(context).colorScheme.onBackground, 0.15)!,
+        Color.lerp(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.onSurface, 0.15)!,
+        Color.lerp(Theme.of(context).colorScheme.onSurface, Theme.of(context).colorScheme.surface, 0.75)!,
+        Color.lerp(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.onSurface, 0.15)!,
       ),
       child: child,
     );
@@ -32,7 +32,7 @@ class ShimmerList extends StatelessWidget {
           final bool isDesktop = settingsHandler.appMode.value.isDesktop;
           final int previewCount = settingsHandler.limit;
           final int columnCount =
-              MediaQuery.of(layoutContext).orientation == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+              MediaQuery.orientationOf(layoutContext) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
           return GridView(
             physics: const NeverScrollableScrollPhysics(),
@@ -40,7 +40,12 @@ class ShimmerList extends StatelessWidget {
             addAutomaticKeepAlives: false,
             cacheExtent: 200,
             shrinkWrap: false,
-            padding: EdgeInsets.fromLTRB(10, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 10, 80),
+            padding: EdgeInsets.fromLTRB(
+              10,
+              2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.paddingOf(context).top)),
+              10,
+              80,
+            ),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: columnCount, childAspectRatio: displayType == 'Square' ? 1 : 9 / 16),
             children: List.generate(
               previewCount,

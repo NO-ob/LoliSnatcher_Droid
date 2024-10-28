@@ -87,8 +87,14 @@ class AGNPHHandler extends BooruHandler {
       } else {
         Logger.Inst().log('AGNPHHandler failed to get post', 'AGNPHHandler', 'getTagsLater', LogTypes.booruHandlerFetchFailed);
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), 'AGNPHHandler', 'getTagsLater', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'AGNPHHandler',
+        'getTagsLater',
+        LogTypes.exception,
+        s: s,
+      );
     }
   }
 

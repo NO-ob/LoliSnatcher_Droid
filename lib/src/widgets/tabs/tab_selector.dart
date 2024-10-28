@@ -5,13 +5,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -24,6 +26,24 @@ import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_filters_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_move_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
+
+enum TabSortingMode {
+  none,
+  alphabet,
+  alphabetReverse,
+  booru,
+  booruReverse;
+
+  bool get isNone => this == TabSortingMode.none;
+  bool get isAlphabet => this == TabSortingMode.alphabet;
+  bool get isAlphabetReverse => this == TabSortingMode.alphabetReverse;
+  bool get isBooru => this == TabSortingMode.booru;
+  bool get isBooruReverse => this == TabSortingMode.booruReverse;
+
+  bool get isAnyAlphabet => isAlphabet || isAlphabetReverse;
+  bool get isAnyBooru => isBooru || isBooruReverse;
+  bool get isAnyReverse => isAlphabetReverse || isBooruReverse;
+}
 
 class TabSelector extends StatelessWidget {
   const TabSelector({
@@ -161,14 +181,18 @@ class TabManagerPage extends StatefulWidget {
 class _TabManagerPageState extends State<TabManagerPage> {
   final SearchHandler searchHandler = SearchHandler.instance;
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final TagHandler tagHandler = TagHandler.instance;
 
   List<SearchTab> tabs = [], filteredTabs = [], selectedTabs = [];
   late final ScrollController scrollController;
 
   final TextEditingController filterTextController = TextEditingController();
-  bool? sortTabs, loadedFilter;
+  TabSortingMode sortingMode = TabSortingMode.none;
+  bool? loadedFilter;
   Booru? booruFilter;
+  TagType? tagTypeFilter;
   bool duplicateFilter = false, duplicateBooruFilter = true, emptyFilter = false;
+  bool? isMultiBooruMode;
   bool selectMode = false;
 
   static const double tabHeight = 72 + 8;
@@ -186,7 +210,13 @@ class _TabManagerPageState extends State<TabManagerPage> {
     if (booruFilter != null) {
       count++;
     }
+    if (tagTypeFilter != null) {
+      count++;
+    }
     if (duplicateFilter) {
+      count++;
+    }
+    if (isMultiBooruMode != null) {
       count++;
     }
     if (emptyFilter) {
@@ -207,6 +237,13 @@ class _TabManagerPageState extends State<TabManagerPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await jumpToCurrent();
     });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    filterTextController.dispose();
+    super.dispose();
   }
 
   void getTabs() {
@@ -289,6 +326,18 @@ class _TabManagerPageState extends State<TabManagerPage> {
           filteredTabs.where((t) => loadedFilter == true ? t.booruHandler.filteredFetched.isNotEmpty : t.booruHandler.filteredFetched.isEmpty).toList();
     }
 
+    if (tagTypeFilter != null) {
+      filteredTabs = filteredTabs.where((tab) {
+        final List<String> tags = tab.tags.toLowerCase().trim().split(' ');
+        for (final tag in tags) {
+          if (tagHandler.getTag(tag).tagType == tagTypeFilter) {
+            return true;
+          }
+        }
+        return false;
+      }).toList();
+    }
+
     if (duplicateFilter) {
       // tabs where booru and tags are the same
       final Map<String, List<SearchTab>> freqMap = {};
@@ -303,10 +352,15 @@ class _TabManagerPageState extends State<TabManagerPage> {
         }
       }
       filteredTabs = freqMap.entries.where((e) => e.value.length > 1).expand((e) => e.value).toList();
-      // restore tab order for sortTabs == null
+      // restore tab order for sortingMode == none
       filteredTabs.sort((a, b) {
         return searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b));
       });
+    }
+
+    if (isMultiBooruMode != null) {
+      filteredTabs =
+          filteredTabs.where((tab) => isMultiBooruMode == false ? (tab.secondaryBoorus?.isEmpty ?? true) : tab.secondaryBoorus?.isNotEmpty == true).toList();
     }
 
     if (emptyFilter) {
@@ -320,21 +374,32 @@ class _TabManagerPageState extends State<TabManagerPage> {
       }).toList();
     }
 
-    if (sortTabs != null) {
+    if (!sortingMode.isNone) {
       filteredTabs.sort(
         (a, b) {
           final cleanAtags = a.tags.toLowerCase().trim();
           final cleanBtags = b.tags.toLowerCase().trim();
 
-          if (cleanAtags != cleanBtags) {
-            if (sortTabs == true) {
-              return cleanAtags.compareTo(cleanBtags);
+          final aBooru = a.selectedBooru.value;
+          final bBooru = b.selectedBooru.value;
+
+          if (sortingMode.isAnyBooru && aBooru.name != bBooru.name) {
+            if (sortingMode.isAnyReverse) {
+              return bBooru.name!.compareTo(aBooru.name!);
             } else {
-              return cleanBtags.compareTo(cleanAtags);
+              return aBooru.name!.compareTo(bBooru.name!);
             }
-          } else {
-            return searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b));
           }
+
+          if (cleanAtags != cleanBtags) {
+            if (sortingMode.isAnyReverse && !sortingMode.isAnyBooru) {
+              return cleanBtags.compareTo(cleanAtags);
+            } else {
+              return cleanAtags.compareTo(cleanBtags);
+            }
+          }
+
+          return searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b));
         },
       );
     }
@@ -353,6 +418,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
         booruFilterChanged: (Booru? newValue) {
           booruFilter = newValue;
         },
+        tagTypeFilter: tagTypeFilter,
+        tagTypeFilterChanged: (TagType? newValue) {
+          tagTypeFilter = newValue;
+        },
         duplicateFilter: duplicateFilter,
         duplicateFilterChanged: (bool newValue) {
           duplicateFilter = newValue;
@@ -364,6 +433,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
         duplicateBooruFilterChanged: (bool newValue) {
           duplicateBooruFilter = newValue;
         },
+        isMultiBooruMode: isMultiBooruMode,
+        isMultiBooruModeChanged: (bool? newValue) {
+          isMultiBooruMode = newValue;
+        },
         emptyFilter: emptyFilter,
         emptyFilterChanged: (bool newValue) {
           emptyFilter = newValue;
@@ -373,18 +446,26 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
     if (result == 'apply') {
       if (duplicateFilter) {
-        sortTabs = true;
+        sortingMode = TabSortingMode.alphabet;
       }
     }
-    if (result == 'clear' || (loadedFilter == null && booruFilter == null && duplicateFilter == false && emptyFilter == false)) {
+    if (result == 'clear' ||
+        (loadedFilter == null &&
+            booruFilter == null &&
+            tagTypeFilter == null &&
+            duplicateFilter == false &&
+            isMultiBooruMode == null &&
+            emptyFilter == false)) {
       loadedFilter = null;
       booruFilter = null;
+      tagTypeFilter = null;
       duplicateFilter = false;
       duplicateBooruFilter = true;
+      isMultiBooruMode = null;
       emptyFilter = false;
 
-      if (sortTabs != null) {
-        sortTabs = null;
+      if (!sortingMode.isNone) {
+        sortingMode = TabSortingMode.none;
       }
     }
 
@@ -413,6 +494,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
               controller: filterTextController,
               inputType: TextInputType.text,
               clearable: true,
+              pasteable: true,
               onlyInput: true,
               drawBottomBorder: false,
               margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -481,12 +563,12 @@ class _TabManagerPageState extends State<TabManagerPage> {
     return ReorderableDelayedDragStartListener(
       key: ValueKey('item-${tab.id}'),
       index: index,
-      enabled: !selectMode && !isFilterActive && sortTabs == null,
+      enabled: !selectMode && !isFilterActive && sortingMode.isNone,
       child: TabManagerItem(
         tab: tab,
         index: index,
-        isFiltered: isFilterActive || sortTabs != null,
-        originalIndex: (isFilterActive || sortTabs != null) ? searchHandler.list.indexOf(tab) : null,
+        isFiltered: isFilterActive || !sortingMode.isNone,
+        originalIndex: (isFilterActive || !sortingMode.isNone) ? searchHandler.list.indexOf(tab) : null,
         isCurrent: isCurrent,
         filterText: filterTextController.text,
         onTap: selectMode
@@ -552,8 +634,8 @@ class _TabManagerPageState extends State<TabManagerPage> {
         TabManagerItem(
           tab: tab,
           index: index,
-          isFiltered: isFilterActive,
-          originalIndex: isFilterActive ? originalIndex : null,
+          isFiltered: isFilterActive || !sortingMode.isNone,
+          originalIndex: (isFilterActive || !sortingMode.isNone) ? originalIndex : null,
         ),
         const SizedBox(height: 20),
         ListTile(
@@ -659,7 +741,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
       ),
       scrollable: false,
       content: Container(
-        height: MediaQuery.of(context).size.height * 0.75,
+        height: MediaQuery.sizeOf(context).height * 0.75,
         width: double.maxFinite,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
@@ -751,33 +833,41 @@ class _TabManagerPageState extends State<TabManagerPage> {
             const SizedBox(height: 6),
             const Row(
               children: [
-                Icon(Icons.sort_by_alpha),
+                TabSortingIcon(TabSortingMode.none, withBorder: true),
                 SizedBox(width: 10),
                 Expanded(child: Text('Default tabs order')),
               ],
             ),
             const SizedBox(height: 6),
-            Row(
+            const Row(
               children: [
-                Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.rotationX(pi),
-                  child: const Icon(Icons.sort),
-                ),
-                const SizedBox(width: 10),
-                const Expanded(child: Text('Sort alphabetically')),
+                TabSortingIcon(TabSortingMode.alphabet, withBorder: true),
+                SizedBox(width: 10),
+                Expanded(child: Text('Sort alphabetically')),
               ],
             ),
             const SizedBox(height: 6),
-            Row(
+            const Row(
               children: [
-                Transform(
-                  alignment: Alignment.center,
-                  transform: Matrix4.rotationX(0),
-                  child: const Icon(Icons.sort),
-                ),
-                const SizedBox(width: 10),
-                const Expanded(child: Text('Sort alphabetically (reversed)')),
+                TabSortingIcon(TabSortingMode.alphabetReverse, withBorder: true),
+                SizedBox(width: 10),
+                Expanded(child: Text('Sort alphabetically (reversed)')),
+              ],
+            ),
+            const SizedBox(height: 6),
+            const Row(
+              children: [
+                TabSortingIcon(TabSortingMode.booru, withBorder: true),
+                SizedBox(width: 10),
+                Expanded(child: Text('Sort by booru name alphabetically')),
+              ],
+            ),
+            const SizedBox(height: 6),
+            const Row(
+              children: [
+                TabSortingIcon(TabSortingMode.booruReverse, withBorder: true),
+                SizedBox(width: 10),
+                Expanded(child: Text('Sort by booru name alphabetically (reversed)')),
               ],
             ),
             const SizedBox(height: 6),
@@ -861,15 +951,11 @@ class _TabManagerPageState extends State<TabManagerPage> {
                 style: Theme.of(context).appBarTheme.titleTextStyle,
                 children: [
                   const TextSpan(text: 'Tabs'),
-                  if (sortTabs != null) ...[
+                  if (isFilterActive) ...[
                     const TextSpan(text: ' | '),
-                    WidgetSpan(
+                    const WidgetSpan(
                       alignment: PlaceholderAlignment.middle,
-                      child: Transform(
-                        alignment: Alignment.center,
-                        transform: sortTabs == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-                        child: const Icon(Icons.sort, size: 18),
-                      ),
+                      child: Icon(Icons.filter_alt),
                     ),
                   ],
                 ],
@@ -908,91 +994,93 @@ class _TabManagerPageState extends State<TabManagerPage> {
             },
           ),
           const SizedBox(width: 8),
-          Transform(
-            alignment: Alignment.center,
-            transform: sortTabs == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-            child: GestureDetector(
-              onLongPress: () async {
-                if (!isFilterActive) {
-                  final currentTab = searchHandler.currentTab;
+          GestureDetector(
+            onLongPress: isFilterActive
+                ? null
+                : () async {
+                    final currentTab = searchHandler.currentTab;
 
-                  final res = await showDialog(
-                    context: context,
-                    builder: (context) {
-                      return SettingsDialog(
-                        title: Text(sortTabs != null ? 'Sort tabs' : 'Shuffle tabs'),
-                        contentItems: [
-                          Text(sortTabs != null ? 'Save tabs in current sorting order?' : 'Shuffle tabs order randomly?'),
-                          if (sortTabs != null) Text(sortTabs == true ? 'Alphabetically' : 'Alphabetically (reversed)'),
-                        ],
-                        actionButtons: [
-                          const CancelButton(withIcon: true),
-                          ElevatedButton.icon(
-                            label: Text(sortTabs != null ? 'Sort' : 'Shuffle'),
-                            icon: Transform(
-                              alignment: Alignment.center,
-                              transform: sortTabs == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-                              child: Icon(sortTabs != null ? Icons.sort : Icons.sort_by_alpha),
+                    final res = await showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text(sortingMode.isNone ? 'Shuffle tabs' : 'Sort tabs'),
+                          contentItems: [
+                            Text(sortingMode.isNone ? 'Shuffle tabs order randomly?' : 'Save tabs in current sorting order?'),
+                            if (!sortingMode.isNone)
+                              Text(
+                                '${sortingMode.isAnyBooru ? 'By Booru' : ''} Alphabetically ${sortingMode.isAnyReverse ? '(reversed)' : ''}'.trim(),
+                              ),
+                          ],
+                          actionButtons: [
+                            const CancelButton(withIcon: true),
+                            ElevatedButton.icon(
+                              label: Text(sortingMode.isNone ? 'Shuffle' : 'Sort'),
+                              icon: TabSortingIcon(sortingMode),
+                              onPressed: () {
+                                Navigator.of(context).pop('allow');
+                              },
                             ),
-                            onPressed: () {
-                              Navigator.of(context).pop('allow');
-                            },
-                          ),
-                        ],
+                          ],
+                        );
+                      },
+                    );
+
+                    if (res != 'allow') {
+                      return;
+                    }
+
+                    if (sortingMode.isNone) {
+                      // randomly shuffle all filtered tabs
+                      filteredTabs.shuffle();
+
+                      FlashElements.showSnackbar(
+                        context: context,
+                        duration: const Duration(seconds: 2),
+                        title: const Text('Tab randomly shuffled!', style: TextStyle(fontSize: 20)),
+                        leadingIcon: Icons.sort_by_alpha,
+                        sideColor: Colors.green,
                       );
-                    },
-                  );
+                    } else {
+                      FlashElements.showSnackbar(
+                        context: context,
+                        duration: const Duration(seconds: 2),
+                        title: const Text('Tab order saved!', style: TextStyle(fontSize: 20)),
+                        leadingIcon: Icons.sort,
+                        sideColor: Colors.green,
+                      );
+                    }
 
-                  if (res != 'allow') {
-                    return;
-                  }
+                    searchHandler.list.value = [...filteredTabs];
 
-                  if (sortTabs == null) {
-                    // randomly shuffle all filtered tabs
-                    filteredTabs.shuffle();
+                    final int newIndex = searchHandler.list.indexOf(currentTab);
+                    searchHandler.changeTabIndex(newIndex);
 
-                    FlashElements.showSnackbar(
-                      context: context,
-                      duration: const Duration(seconds: 2),
-                      title: const Text('Tab randomly shuffled!', style: TextStyle(fontSize: 20)),
-                      leadingIcon: Icons.sort_by_alpha,
-                      sideColor: Colors.green,
-                    );
-                  } else {
-                    FlashElements.showSnackbar(
-                      context: context,
-                      duration: const Duration(seconds: 2),
-                      title: const Text('Tab order saved!', style: TextStyle(fontSize: 20)),
-                      leadingIcon: Icons.sort,
-                      sideColor: Colors.green,
-                    );
-                  }
-
-                  searchHandler.list.value = [...filteredTabs];
-
-                  final int newIndex = searchHandler.list.indexOf(currentTab);
-                  searchHandler.changeTabIndex(newIndex);
-
-                  getTabs();
+                    getTabs();
+                  },
+            child: IconButton(
+              icon: TabSortingIcon(sortingMode),
+              tooltip: 'Sort tabs',
+              onPressed: () {
+                switch (sortingMode) {
+                  case TabSortingMode.none:
+                    sortingMode = TabSortingMode.alphabet;
+                    break;
+                  case TabSortingMode.alphabet:
+                    sortingMode = TabSortingMode.alphabetReverse;
+                    break;
+                  case TabSortingMode.alphabetReverse:
+                    sortingMode = TabSortingMode.booru;
+                    break;
+                  case TabSortingMode.booru:
+                    sortingMode = TabSortingMode.booruReverse;
+                    break;
+                  case TabSortingMode.booruReverse:
+                    sortingMode = TabSortingMode.none;
+                    break;
                 }
+                getTabs();
               },
-              child: IconButton(
-                icon: Icon((sortTabs == true || sortTabs == false) ? Icons.sort : Icons.sort_by_alpha),
-                tooltip: 'Sort tabs',
-                onPressed: () {
-                  if (sortTabs == true) {
-                    // reverse
-                    sortTabs = false;
-                  } else if (sortTabs == false) {
-                    // default
-                    sortTabs = null;
-                  } else {
-                    // alphabetically
-                    sortTabs = true;
-                  }
-                  getTabs();
-                },
-              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -1155,7 +1243,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
                   10,
                   10,
                   10,
-                  10 + MediaQuery.of(context).padding.bottom,
+                  10 + MediaQuery.paddingOf(context).bottom,
                 ),
                 width: double.infinity,
                 child: Row(
@@ -1262,7 +1350,11 @@ class TabManagerItem extends StatelessWidget {
         height: 72,
         width: double.maxFinite,
         child: Material(
-          color: Theme.of(context).cardColor,
+          color: Color.lerp(
+            Theme.of(context).cardColor,
+            Theme.of(context).brightness == Brightness.dark ? Colors.transparent : Colors.grey[200],
+            0.66,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: radius,
             side: isCurrent
@@ -1382,6 +1474,44 @@ class TabManagerItem extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class TabSortingIcon extends StatelessWidget {
+  const TabSortingIcon(
+    this.sortingMode, {
+    this.withBorder = false,
+    super.key,
+  });
+
+  final TabSortingMode sortingMode;
+  final bool withBorder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: withBorder ? const EdgeInsets.all(3) : null,
+      decoration: BoxDecoration(
+        borderRadius: withBorder ? BorderRadius.circular(10) : null,
+        border: withBorder ? Border.all(color: Theme.of(context).colorScheme.secondary, width: 2) : null,
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.rotationX((sortingMode.isAnyReverse || sortingMode.isNone) ? 0 : pi),
+            child: Icon(sortingMode.isNone ? Icons.sort_by_alpha : Icons.sort),
+          ),
+          if (sortingMode.isAnyBooru)
+            const Positioned(
+              bottom: -10,
+              child: Text('Booru', style: TextStyle(fontSize: 12)),
+            ),
+        ],
       ),
     );
   }

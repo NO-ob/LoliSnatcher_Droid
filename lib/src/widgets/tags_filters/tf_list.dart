@@ -43,8 +43,10 @@ class TagsFiltersList extends StatelessWidget {
         children: [
           SettingsTextInput(
             controller: tagSearchController,
-            title: 'Search Tags Filters (${isSearchActive ? '$filteredCount/$originalCount' : '$originalCount'})',
+            title: 'Search filters (${isSearchActive ? '$filteredCount/$originalCount' : '$originalCount'})',
             forceLabelOnTop: true,
+            clearable: true,
+            pasteable: true,
             onChanged: onSearchTextChanged,
           ),
           //
@@ -63,7 +65,12 @@ class TagsFiltersList extends StatelessWidget {
               controller: scrollController,
               child: ListView.builder(
                 controller: scrollController,
-                padding: EdgeInsets.fromLTRB(10, 5, 10, 15 + MediaQuery.of(context).padding.bottom),
+                padding: EdgeInsets.fromLTRB(
+                  10,
+                  5,
+                  10,
+                  15 + MediaQuery.paddingOf(context).bottom,
+                ),
                 shrinkWrap: false,
                 itemCount: filteredTagsList.length,
                 scrollDirection: Axis.vertical,

@@ -47,13 +47,13 @@ class SettingsButton extends StatelessWidget {
   final bool iconOnly;
   final bool dense;
 
+  bool get interactive => action != null || page != null;
+
   void onTapAction(BuildContext context) {
     if (action != null) {
       action?.call();
-    } else {
-      if (page != null) {
-        SettingsPageOpen(context: context, page: page!).open();
-      }
+    } else if (page != null) {
+      SettingsPageOpen(context: context, page: page!).open();
     }
   }
 
@@ -64,33 +64,28 @@ class SettingsButton extends StatelessWidget {
         onLongPress: onLongPress == null ? null : () => {onLongPress!()},
         child: IconButton(
           icon: icon ?? const Icon(null),
-          onPressed: () {
-            onTapAction(context);
-          },
+          onPressed: interactive ? () => onTapAction(context) : null,
         ),
       );
     }
 
-    return ListTile(
-      leading: icon,
-      title: Text(name),
-      subtitle: subtitle,
-      trailing: trailingIcon,
-      enabled: enabled,
-      dense: dense,
-      onTap: () {
-        onTapAction(context);
-      },
-      onLongPress: onLongPress == null
-          ? null
-          : () {
-              onLongPress!();
-            },
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        leading: icon,
+        title: Text(name),
+        subtitle: subtitle,
+        trailing: trailingIcon,
+        enabled: enabled,
+        dense: dense,
+        onTap: interactive ? () => onTapAction(context) : null,
+        onLongPress: onLongPress,
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
       ),
     );
   }
@@ -124,7 +119,7 @@ class SettingsPageOpen {
 
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    final bool isTooNarrow = MediaQuery.of(context).size.width < 550;
+    final bool isTooNarrow = MediaQuery.sizeOf(context).width < 550;
     final bool isDesktop = settingsHandler.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
     final bool useDesktopMode = (!isTooNarrow && isDesktop && !asBottomSheet) || useFloatingDialog;
 
@@ -156,7 +151,7 @@ class SettingsPageOpen {
           context: context,
           builder: (BuildContext context) {
             return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
               child: page(),
             );
           },
@@ -165,8 +160,7 @@ class SettingsPageOpen {
           backgroundColor: Colors.transparent,
         );
       } else {
-        result = await Navigator.push(
-          context,
+        result = await Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) => page(),
           ),
@@ -187,45 +181,233 @@ class SettingsToggle extends StatelessWidget {
     this.drawBottomBorder = true,
     this.leadingIcon,
     this.trailingIcon,
+    this.defaultValue,
     super.key,
   });
 
   final bool value;
-  final void Function(bool) onChanged;
+  final ValueChanged<bool> onChanged;
   final String title;
   final Widget? subtitle;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget? leadingIcon;
   final Widget? trailingIcon;
+  final bool? defaultValue;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Row(
-        children: [
-          if (leadingIcon != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: leadingIcon,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: Row(
+          children: [
+            if (leadingIcon != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: leadingIcon,
+              ),
+            MarqueeText(text: title),
+            const SizedBox(width: 4),
+            if (defaultValue != null && value != defaultValue)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: IconButton(
+                  icon: const Icon(Icons.restore),
+                  onPressed: () {
+                    onChanged(defaultValue!);
+                  },
+                ),
+              ),
+            trailingIcon ?? const SizedBox(width: 8),
+          ],
+        ),
+        subtitle: subtitle,
+        trailing: Switch(
+          value: value,
+          onChanged: onChanged,
+        ),
+        onTap: () => onChanged(!value),
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsToggleTristate extends StatelessWidget {
+  const SettingsToggleTristate({
+    required this.value,
+    required this.onChanged,
+    required this.title,
+    this.subtitle,
+    this.drawTopBorder = false,
+    this.drawBottomBorder = true,
+    this.leadingIcon,
+    this.trailingIcon,
+    this.defaultValue,
+    this.reverse = false,
+    super.key,
+  });
+
+  final bool? value;
+  final ValueChanged<bool?> onChanged;
+  final String title;
+  final Widget? subtitle;
+  final bool drawTopBorder;
+  final bool drawBottomBorder;
+  final Widget? leadingIcon;
+  final Widget? trailingIcon;
+  final bool? defaultValue;
+  final bool reverse;
+
+  void _onChangedToggle() {
+    if (reverse) {
+      onChanged(value == null ? true : (value == true ? false : null));
+    } else {
+      onChanged(value == null ? false : (value == false ? true : null));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: Row(
+          children: [
+            if (leadingIcon != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: leadingIcon,
+              ),
+            MarqueeText(text: title),
+            const SizedBox(width: 4),
+            if (defaultValue != null && value != defaultValue)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: IconButton(
+                  icon: const Icon(Icons.restore),
+                  onPressed: () {
+                    onChanged(defaultValue);
+                  },
+                ),
+              ),
+            trailingIcon ?? const SizedBox(width: 8),
+          ],
+        ),
+        subtitle: subtitle,
+        trailing: Checkbox(
+          value: value,
+          tristate: true,
+          onChanged: (_) => _onChangedToggle(),
+        ),
+        onTap: _onChangedToggle,
+        shape: Border(
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsSegmentedButton<T> extends StatelessWidget {
+  const SettingsSegmentedButton({
+    required this.value,
+    required this.values,
+    required this.itemTitleBuilder,
+    required this.onChanged,
+    required this.title,
+    this.subtitle,
+    this.drawTopBorder = false,
+    this.drawBottomBorder = true,
+    this.leadingIcon,
+    this.trailingIcon,
+    this.defaultValue,
+    super.key,
+  });
+
+  final T value;
+  final List<T> values;
+  final String Function(T) itemTitleBuilder;
+  final ValueChanged<T> onChanged;
+  final String title;
+  final Widget? subtitle;
+  final bool drawTopBorder;
+  final bool drawBottomBorder;
+  final Widget? leadingIcon;
+  final Widget? trailingIcon;
+  final T? defaultValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: Row(
+          children: [
+            if (leadingIcon != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: leadingIcon,
+              ),
+            MarqueeText(text: title),
+            const SizedBox(width: 4),
+            if (defaultValue != null && value != defaultValue)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: IconButton(
+                  icon: const Icon(Icons.restore),
+                  onPressed: () {
+                    onChanged(defaultValue as T);
+                  },
+                ),
+              ),
+            trailingIcon ?? const SizedBox(width: 8),
+          ],
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SegmentedButton(
+              onSelectionChanged: (value) => onChanged(value.first),
+              emptySelectionAllowed: false,
+              multiSelectionEnabled: false,
+              style: ButtonStyle(
+                padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+                  const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                ),
+              ),
+              segments: [
+                for (final T v in values)
+                  ButtonSegment(
+                    value: v,
+                    label: Text(itemTitleBuilder(v)),
+                  ),
+              ],
+              selected: {value},
             ),
-          MarqueeText(text: title),
-          trailingIcon ?? const SizedBox(width: 8),
-        ],
-      ),
-      subtitle: subtitle,
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-      ),
-      onTap: () {
-        onChanged(!value);
-      },
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+            if (subtitle != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: subtitle,
+              ),
+          ],
+        ),
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
       ),
     );
   }
@@ -242,9 +424,11 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.drawBottomBorder = true,
     this.trailingIcon,
     this.itemBuilder,
+    this.itemFilter,
     this.selectedItemBuilder,
     this.itemTitleBuilder,
     this.clearable = false,
+    this.onReset,
     this.itemExtent,
     this.expendableByScroll = false,
     super.key,
@@ -252,16 +436,18 @@ class SettingsDropdown<T> extends StatelessWidget {
 
   final T? value;
   final List<T> items;
-  final void Function(T?)? onChanged;
+  final ValueChanged<T?>? onChanged;
   final String title;
   final Widget? subtitle;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget? trailingIcon;
   final Widget Function(T?)? itemBuilder;
+  final bool Function(T?)? itemFilter;
   final Widget Function(T?)? selectedItemBuilder;
   final String Function(T?)? itemTitleBuilder;
   final bool clearable;
+  final VoidCallback? onReset;
   final double? itemExtent;
   final bool expendableByScroll;
 
@@ -275,46 +461,55 @@ class SettingsDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: LoliDropdown(
-        value: value,
-        onChanged: onChanged ?? (item) {},
-        items: items,
-        clearable: clearable,
-        expandableByScroll: expendableByScroll,
-        itemExtent: itemExtent,
-        itemBuilder: (item) {
-          final bool isCurrent = value == item;
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: LoliDropdown(
+          value: value,
+          onChanged: onChanged ?? (item) {},
+          items: items.where((item) => itemFilter?.call(item) ?? true).toList(),
+          clearable: clearable,
+          expandableByScroll: expendableByScroll,
+          itemExtent: itemExtent,
+          itemBuilder: (item) {
+            final bool isCurrent = value == item;
 
-          return Container(
-            padding: const EdgeInsets.only(left: 16, right: 16),
-            constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
-            alignment: Alignment.centerLeft,
-            decoration: isCurrent
-                ? BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
+            return Container(
+              padding: const EdgeInsets.only(left: 16, right: 16),
+              constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+              alignment: Alignment.centerLeft,
+              decoration: isCurrent
+                  ? BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                    )
+                  : null,
+              child: getItemWidget(item),
+            );
+          },
+          selectedItemBuilder: (item) =>
+              selectedItemBuilder?.call(item) ??
+              Row(
+                children: [
+                  getItemWidget(item),
+                ],
+              ),
+          labelText: title,
+        ),
+        subtitle: subtitle,
+        trailing: trailingIcon ??
+            (onReset != null
+                ? IconButton(
+                    onPressed: onReset,
+                    icon: const Icon(Icons.refresh_rounded),
                   )
-                : null,
-            child: getItemWidget(item),
-          );
-        },
-        selectionBuilder: (item) =>
-            selectedItemBuilder?.call(item) ??
-            Row(
-              children: [
-                getItemWidget(item),
-              ],
-            ),
-        labelText: title,
-      ),
-      subtitle: subtitle,
-      trailing: trailingIcon,
-      dense: false,
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+                : null),
+        dense: false,
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
       ),
     );
   }
@@ -325,7 +520,10 @@ class SettingsBooruDropdown extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.title,
+    this.itemBuilder,
+    this.itemFilter,
     this.subtitle,
+    this.placeholder,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.nullable = false,
@@ -334,24 +532,31 @@ class SettingsBooruDropdown extends StatelessWidget {
   });
 
   final Booru? value;
-  final void Function(Booru?)? onChanged;
+  final ValueChanged<Booru?>? onChanged;
   final String title;
+  final Widget Function(Booru?, bool)? itemBuilder;
+  final bool Function(Booru?)? itemFilter;
   final Widget? subtitle;
+  final String? placeholder;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final bool nullable;
   final Widget? trailingIcon;
 
-  Widget selectionBuilder(Booru? item) {
+  Widget _selectedItemBuilder(Booru? item) {
     if (item == null) {
-      return const Text('Select a Booru');
+      return Text(placeholder ?? 'Select a booru');
     }
 
     return TabBooruSelectorItem(booru: item);
   }
 
-  Widget itemBuilder(BuildContext context, Booru? item) {
+  Widget _itemBuilder(BuildContext context, Booru? item) {
     final bool isCurrent = value == item;
+
+    if (itemBuilder != null) {
+      return itemBuilder!(item, isCurrent);
+    }
 
     if (item == null) {
       return const SizedBox.shrink();
@@ -374,7 +579,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     return SettingsDropdown<Booru?>(
       value: value,
       items: [
-        ...SettingsHandler.instance.booruList,
+        ...SettingsHandler.instance.booruList.where((b) => itemFilter?.call(b) ?? true),
       ],
       onChanged: onChanged,
       title: title,
@@ -382,11 +587,115 @@ class SettingsBooruDropdown extends StatelessWidget {
       drawTopBorder: drawTopBorder,
       drawBottomBorder: drawBottomBorder,
       trailingIcon: trailingIcon,
-      itemBuilder: (item) => itemBuilder(context, item),
-      selectedItemBuilder: selectionBuilder,
+      itemBuilder: (item) => _itemBuilder(context, item),
+      selectedItemBuilder: _selectedItemBuilder,
       clearable: nullable,
       itemExtent: kMinInteractiveDimension,
       expendableByScroll: true,
+    );
+  }
+}
+
+class SettingsOptionsList<T> extends StatelessWidget {
+  const SettingsOptionsList({
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    required this.title,
+    this.subtitle,
+    this.drawTopBorder = false,
+    this.drawBottomBorder = true,
+    this.trailingIcon,
+    this.itemBuilder,
+    this.itemLeadingBuilder,
+    this.selectedItemBuilder,
+    this.itemTitleBuilder,
+    this.clearable = false,
+    this.onReset,
+    super.key,
+  });
+
+  final T? value;
+  final List<T> items;
+  final ValueChanged<T?> onChanged;
+  final String title;
+  final Widget? subtitle;
+  final bool drawTopBorder;
+  final bool drawBottomBorder;
+  final Widget? trailingIcon;
+  final Widget Function(T?)? itemBuilder;
+  final Widget? Function(T?)? itemLeadingBuilder;
+  final Widget Function(T?)? selectedItemBuilder;
+  final String Function(T?)? itemTitleBuilder;
+  final bool clearable;
+  final VoidCallback? onReset;
+
+  String getItemTitle(T? value) => itemTitleBuilder?.call(value) ?? value.toString();
+
+  Widget? getItemLeading(T? value) => itemLeadingBuilder?.call(value);
+
+  Widget getItemWidget(
+    BuildContext context,
+    T? value,
+    bool isSelected,
+    int index,
+  ) {
+    final Color baseColor = Theme.of(context).colorScheme.secondary;
+    final Color oddItemColor = baseColor.withOpacity(0.25);
+    final Color evenItemColor = baseColor.withOpacity(0.15);
+
+    return InkWell(
+      onTap: () => onChanged(value),
+      child: (isSelected ? selectedItemBuilder ?? itemBuilder : itemBuilder)?.call(value) ??
+          ListTile(
+            key: Key('$index'),
+            tileColor: index.isOdd ? oddItemColor : evenItemColor,
+            leading: getItemLeading(value),
+            title: Text(getItemTitle(value)),
+            trailing: isSelected ? const Icon(Icons.check, size: 24) : null,
+          ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Column(
+        children: [
+          ListTile(
+            title: Text(title),
+            subtitle: subtitle,
+            trailing: trailingIcon ??
+                (onReset != null
+                    ? IconButton(
+                        onPressed: onReset,
+                        icon: const Icon(Icons.refresh_rounded),
+                      )
+                    : null),
+            dense: false,
+            shape: Border(
+              top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+            ),
+          ),
+          ListTile(
+            title: Column(
+              children: [
+                for (final item in items)
+                  getItemWidget(
+                    context,
+                    item,
+                    value == item,
+                    items.indexOf(item),
+                  ),
+              ],
+            ),
+            shape: Border(
+              bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -400,6 +709,7 @@ class SettingsTextInput extends StatefulWidget {
     this.inputFormatters,
     this.validator,
     this.hintText = '',
+    this.subtitle,
     this.autofocus = false,
     this.onChanged,
     this.onSubmitted,
@@ -416,6 +726,10 @@ class SettingsTextInput extends StatefulWidget {
     this.trailingIcon,
     this.onlyInput = false,
     this.forceLabelOnTop = false,
+    this.copyable = false,
+    this.pasteable = false,
+    this.obscureable = false,
+    this.isObscuredByDefault = true,
     super.key,
   });
 
@@ -426,9 +740,10 @@ class SettingsTextInput extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
   final String hintText;
+  final Widget? subtitle;
   final bool autofocus;
-  final void Function(String)? onChanged;
-  final void Function(String)? onSubmitted;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final EdgeInsets margin;
@@ -442,24 +757,37 @@ class SettingsTextInput extends StatefulWidget {
   final Widget? trailingIcon;
   final bool onlyInput;
   final bool forceLabelOnTop;
+  final bool copyable;
+  final bool pasteable;
+  final bool obscureable;
+  final bool isObscuredByDefault;
 
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
 }
 
 class _SettingsTextInputState extends State<SettingsTextInput> {
-  bool isFocused = false;
+  bool isFocused = false, isObscured = false;
   late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
+
+    if (widget.obscureable) {
+      isObscured = widget.isObscuredByDefault;
+    }
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(focusListener);
   }
 
   void focusListener() {
     isFocused = _focusNode.hasFocus;
+    setState(() {});
+  }
+
+  void toggleObscure() {
+    isObscured = !isObscured;
     setState(() {});
   }
 
@@ -472,6 +800,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   void onChangedCallback(String value) {
     widget.onChanged?.call(value);
+    setState(() {});
   }
 
   void stepNumberDown() {
@@ -492,9 +821,9 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
     }
   }
 
-  Widget buildNumberButton(void Function() stepFunc, IconData icon) {
+  Widget buildNumberButton(VoidCallback stepFunc, IconData icon) {
     return LongPressRepeater(
-      onStart: () {
+      onStart: () async {
         stepFunc();
       },
       tick: 100,
@@ -532,7 +861,35 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
               onChangedCallback(widget.controller.text);
             },
           ),
-        if (widget.resetText != null)
+        if (widget.copyable && isFocused)
+          IconButton(
+            key: const Key('copy-button'),
+            icon: Icon(Icons.copy, color: Theme.of(context).colorScheme.onSurface),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: widget.controller.text));
+            },
+          ),
+        if (widget.pasteable && isFocused)
+          FutureBuilder(
+            future: Clipboard.getData(Clipboard.kTextPlain),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox.shrink();
+              }
+
+              return IconButton(
+                key: const Key('paste-button'),
+                icon: Icon(Icons.paste, color: Theme.of(context).colorScheme.onSurface),
+                onPressed: () async {
+                  final data = snapshot.data?.text;
+                  if (data?.isNotEmpty == true) {
+                    widget.controller.text = data!;
+                  }
+                },
+              );
+            },
+          ),
+        if (widget.resetText != null && widget.controller.text != widget.resetText!())
           IconButton(
             key: const Key('reset-button'),
             icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),
@@ -541,7 +898,17 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
               onChangedCallback(widget.controller.text);
             },
           ),
-        if (isFocused)
+        //
+        if (widget.obscureable)
+          IconButton(
+            key: const Key('obscure-button'),
+            icon: Icon(
+              isObscured ? Icons.visibility : Icons.visibility_off,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+            onPressed: toggleObscure,
+          )
+        else if (isFocused)
           IconButton(
             key: const Key('submit-button'),
             icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Theme.of(context).colorScheme.onSurface),
@@ -564,7 +931,6 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   @override
   Widget build(BuildContext context) {
-    // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
     final Widget field = Container(
       margin: widget.margin,
       child: TextFormField(
@@ -574,8 +940,11 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         keyboardType: widget.inputType,
         enableInteractiveSelection: true,
         inputFormatters: widget.inputFormatters,
+        obscureText: isObscured,
+        obscuringCharacter: '*',
         onChanged: onChangedCallback,
         onFieldSubmitted: widget.onSubmitted,
+        enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
         decoration: InputDecoration(
           labelText: widget.title,
           hintText: widget.hintText,
@@ -590,20 +959,24 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
       ),
     );
 
+    // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
     if (widget.onlyInput) {
       return field;
     }
 
-    return ListTile(
-      title: field,
-      // subtitle: field,
-      trailing: widget.trailingIcon,
-      dense: false,
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: widget.drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: widget.drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: field,
+        subtitle: widget.subtitle,
+        trailing: widget.trailingIcon,
+        dense: false,
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: widget.drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: widget.drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
       ),
     );
   }
@@ -695,52 +1068,54 @@ class SettingsBottomSheet extends StatelessWidget {
         color: backgroundColor ?? Theme.of(context).colorScheme.surface,
         borderRadius: borderRadius ?? const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (title != null)
-                Padding(
-                  padding: titlePadding ?? const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  child: title,
-                )
-              else
-                const SizedBox(height: 12),
-              if (showCloseButton)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 12, 16, 0),
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (title != null)
+                  Padding(
+                    padding: titlePadding ?? const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: title,
+                  )
+                else
+                  const SizedBox(height: 12),
+                if (showCloseButton)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 12, 16, 0),
+                    child: IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   ),
-                ),
-            ],
-          ),
-          if (content != null) content!,
-          if (contentItems != null)
-            Flexible(
-              child: Padding(
-                padding: contentPadding,
-                child: SingleChildScrollView(
-                  child: ListBody(
-                    children: contentItems ?? [],
+              ],
+            ),
+            if (content != null) content!,
+            if (contentItems != null)
+              Flexible(
+                child: Padding(
+                  padding: contentPadding,
+                  child: SingleChildScrollView(
+                    child: ListBody(
+                      children: contentItems ?? [],
+                    ),
                   ),
                 ),
               ),
-            ),
-          if (actionButtons != null)
-            Padding(
-              padding: buttonPadding ?? const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: actionButtons ?? [],
+            if (actionButtons != null)
+              Padding(
+                padding: buttonPadding ?? const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: actionButtons ?? [],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

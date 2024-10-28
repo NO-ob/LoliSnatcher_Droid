@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
+import 'package:get/get.dart' show FirstWhereExt;
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:xml/xml.dart';
 
@@ -111,10 +114,10 @@ class GelbooruAlikesHandler extends BooruHandler {
       if (booru.baseURL!.contains('realbooru.com')) {
         // the api is even shittier now and they don't even return correct file extensions
         // now we'll have to either rely on tags and make a bunch of requests for each item to get the real file ext
-        item.possibleExt.value = (tags.contains('gif') || tags.contains('animated_gif'))
-            ? 'animation'
+        item.possibleMediaType.value = (tags.contains('gif') || tags.contains('animated_gif'))
+            ? MediaType.animation
             : (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
-                ? 'video'
+                ? MediaType.video
                 : null;
         item.mediaType.value = MediaType.needsExtraRequest;
       }
@@ -280,4 +283,87 @@ class GelbooruAlikesHandler extends BooruHandler {
       height: int.tryParse(current.getAttribute('height') ?? '0') ?? 0,
     );
   }
+
+  @override
+  bool get hasLoadItemSupport => booru.baseURL!.contains('rule34.xxx');
+
+  @override
+  bool get shouldUpdateIteminTagView => booru.baseURL!.contains('rule34.xxx');
+
+  Future<String?> getCookiesForPost(String postUrl) async {
+    String cookieString = await Tools.getCookies(postUrl);
+
+    final Map<String, String> headers = getHeaders();
+    if (headers['Cookie']?.isNotEmpty ?? false) {
+      cookieString += headers['Cookie']!;
+    }
+
+    Logger.Inst().log('${booru.baseURL}: $cookieString', className, 'getCookies', LogTypes.booruHandlerSearchURL);
+
+    return cookieString.trim();
+  }
+
+  @override
+  Future loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
+    try {
+      final cookies = await getCookiesForPost(item.postURL);
+
+      final response = await DioNetwork.get(
+        item.postURL,
+        headers: {
+          ...getHeaders(),
+          if (booru.baseURL!.contains('rule34.xxx') && cookies?.isNotEmpty == true) 'Cookie': cookies,
+        },
+        options: Options(
+          sendTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+        cancelToken: cancelToken,
+        customInterceptor: withCapcthaCheck ? DioNetwork.captchaInterceptor : null,
+      );
+
+      if (response.statusCode != 200) {
+        return [item, false, 'Invalid status code ${response.statusCode}'];
+      } else {
+        final html = parse(response.data);
+        final sidebar = html.getElementById('tag-sidebar');
+        final copyrightTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright tag'));
+        addTagsWithType(copyrightTags, TagType.copyright);
+        final characterTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-character tag'));
+        addTagsWithType(characterTags, TagType.character);
+        final artistTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-artist tag'));
+        addTagsWithType(artistTags, TagType.artist);
+        final generalTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-general tag'));
+        addTagsWithType(generalTags, TagType.none);
+        final metaTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-meta tag'));
+        addTagsWithType(metaTags, TagType.meta);
+        item.isUpdated = true;
+        return [item, true, null];
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'loadItem',
+        LogTypes.exception,
+        s: s,
+      );
+      return [item, false, e.toString()];
+    }
+  }
+}
+
+List<String> tagsFromHtml(List<Element>? elements) {
+  if (elements == null || elements.isEmpty) {
+    return [];
+  }
+
+  final tags = <String>[];
+  for (final element in elements) {
+    final tag = element.getElementsByTagName('a').firstWhereOrNull((e) => e.text.isNotEmpty && e.text != '?');
+    if (tag != null) {
+      tags.add(tag.text.replaceAll(' ', '_'));
+    }
+  }
+  return tags;
 }

@@ -30,7 +30,13 @@ class _DirPickerState extends State<DirPicker> {
     path = widget.path;
   }
 
-  Future<void> _onPopInvoked(bool didPop) async {
+  @override
+  void dispose() {
+    newDirNameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -151,7 +157,7 @@ class _DirPickerState extends State<DirPicker> {
     }
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(

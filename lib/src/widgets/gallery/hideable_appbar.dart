@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dio/dio.dart';
+import 'package:external_video_player_launcher/external_video_player_launcher.dart';
 import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -172,14 +173,17 @@ class _HideableAppBarState extends State<HideableAppBar> {
       final bool isFavButton = btn[0] == 'favourite';
       final bool isFavAllowed = isFavButton ? settingsHandler.dbEnabled : true; // allow favourite button if db is enabled
 
-      return isScaleAllowed && isFavAllowed && isQualityAllowed;
+      final bool isExtPlayer = btn[0] == 'external_player';
+      final bool isExtPlayerAllowed = isExtPlayer ? (Platform.isAndroid && item.mediaType.value.isVideo) : true;
+
+      return isScaleAllowed && isFavAllowed && isQualityAllowed && isExtPlayerAllowed;
     }).toList();
 
     final List<Widget> actions = [];
     List<List<String>> overFlowList = [];
     List<List<String>> buttonList = [];
     // at least first 4 buttons will show on toolbar
-    final int listSplit = max(4, (MediaQuery.of(context).size.width / 100).floor());
+    final int listSplit = max(4, (MediaQuery.sizeOf(context).width / 100).floor());
     if (listSplit < filteredButtonOrder.length) {
       overFlowList = filteredButtonOrder.sublist(listSplit);
       buttonList = filteredButtonOrder.sublist(0, listSplit);
@@ -255,7 +259,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       key: ValueKey(name),
                       icon: buttonIcon(name),
                       subIcon: buttonSubicon(name),
-                      onTap: null,
                       stackWidget: buttonStackWidget(name),
                     ),
                     title: Text(buttonText(value)),
@@ -313,6 +316,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'toggle_quality':
         final bool isHq = settingsHandler.galleryMode == 'Full Res' ? !item.toggleQuality.value : item.toggleQuality.value;
         icon = isHq ? Icons.high_quality : Icons.high_quality_outlined;
+      case 'external_player':
+        icon = Icons.exit_to_app;
+        break;
     }
     return Icon(icon);
   }
@@ -347,6 +353,27 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   Widget? buttonStackWidget(String name) {
     switch (name) {
+      case 'snatch':
+        if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
+          return null;
+        }
+
+        final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+        final bool isBeingSnatched = snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;
+        if (!isBeingSnatched) {
+          return null;
+        } else {
+          return Padding(
+            padding: const EdgeInsets.all(2),
+            child: AnimatedProgressIndicator(
+              value: snatchHandler.currentProgress,
+              animationDuration: const Duration(milliseconds: 50),
+              indicatorStyle: IndicatorStyle.circular,
+              valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
+              minHeight: 4,
+            ),
+          );
+        }
       case 'autoscroll':
         if (autoScroll) {
           return RestartableProgressIndicator(
@@ -358,7 +385,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         if (sharedItem != null && shareProgress != 0) {
           return AnimatedProgressIndicator(
             value: shareProgress,
-            animationDuration: const Duration(milliseconds: 150),
+            animationDuration: const Duration(milliseconds: 50),
             indicatorStyle: IndicatorStyle.circular,
             valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
             minHeight: 4,
@@ -392,6 +419,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'toggle_quality':
         final bool isHq = settingsHandler.galleryMode == 'Full Res' ? !item.toggleQuality.value : item.toggleQuality.value;
         label = isHq ? 'Load Sample Quality' : 'Load High Quality';
+        break;
       default:
         // use default text
         label = defaultLabel;
@@ -429,6 +457,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
           settingsHandler.snatchCooldown,
           false,
         );
+
+        if (settingsHandler.favouriteOnSnatch) {
+          await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value, forcedValue: true);
+        }
         break;
       case 'favourite':
         await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
@@ -446,6 +478,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
         break;
       case 'toggle_quality':
         item.toggleQuality.toggle();
+        break;
+      case 'external_player':
+        ExternalVideoPlayerLauncher.launchOtherPlayer(item.fileURL, MIME.video, null);
+        break;
     }
   }
 
@@ -453,7 +489,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     // TODO long press slideshow button to set the timer
     switch (action) {
       case 'share':
-        ServiceHandler.vibrate();
+        await ServiceHandler.vibrate();
         // Ignore share setting on long press
         showShareDialog(showTip: false);
         break;
@@ -498,6 +534,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
                         settingsHandler.snatchCooldown,
                         true,
                       );
+                      if (settingsHandler.favouriteOnSnatch) {
+                        await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value, forcedValue: true);
+                      }
                       Navigator.of(context).pop();
                     },
                     leading: const Icon(Icons.file_download_outlined),
@@ -619,7 +658,13 @@ class _HideableAppBarState extends State<HideableAppBar> {
   Future<void> shareFileAction() async {
     final BooruItem item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
 
-    if (sharedItem != null) {
+    final bool alreadyLoading = sharedItem != null;
+    final bool alreadyLoadingSame = alreadyLoading && sharedItem == item;
+
+    if (alreadyLoading) {
+      final double thumbWidth = MediaQuery.sizeOf(context).shortestSide * (alreadyLoadingSame ? 0.3 : 0.2);
+      final double thumbHeight = thumbWidth / 9 * 16;
+
       final dialogRes = await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -628,25 +673,61 @@ class _HideableAppBarState extends State<HideableAppBar> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Already downloading file for sharing, do you want to abort and share a new file?'),
+                if (alreadyLoadingSame)
+                  const Text('Already downloading this file for sharing, do you want to abort?')
+                else
+                  const Text('Already downloading file for sharing, do you want to abort current file and share a new file?'),
                 const SizedBox(height: 10),
-                SizedBox(
-                  width: 100,
-                  height: 150,
-                  child: ThumbnailBuild(
-                    item: item,
-                    selectable: false,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        if (!alreadyLoadingSame) const Text('Current:'),
+                        SizedBox(
+                          width: thumbWidth,
+                          height: thumbHeight,
+                          child: ThumbnailBuild(
+                            item: sharedItem!,
+                            selectable: false,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (!alreadyLoadingSame) ...[
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 30,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        children: [
+                          const Text('New:'),
+                          SizedBox(
+                            width: thumbWidth,
+                            height: thumbHeight,
+                            child: ThumbnailBuild(
+                              item: item,
+                              selectable: false,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
             actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop('new');
-                },
-                child: const Text('Share new'),
-              ),
+              if (!alreadyLoadingSame)
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop('new');
+                  },
+                  child: const Text('Share new'),
+                ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop('abort');
@@ -866,7 +947,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     final double extraPadding = isOnTop ? 0 : MediaQuery.paddingOf(context).bottom;
 
     return PopScope(
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, _) {
         // clear currently loading item from cache to avoid creating broken files
         // TODO move sharing download routine to somewhere in global context?
         shareCancelToken?.cancel();

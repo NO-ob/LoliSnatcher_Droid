@@ -27,7 +27,6 @@ class ThemeBuilder extends StatelessWidget {
       final ThemeHandler themeHandler = ThemeHandler(
         theme: theme,
         themeMode: settingsHandler.themeMode.value,
-        useMaterial3: settingsHandler.useMaterial3.value,
         isAmoled: settingsHandler.isAmoled.value,
       );
 

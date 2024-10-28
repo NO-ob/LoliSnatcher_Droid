@@ -176,16 +176,18 @@ class _NotesRendererState extends State<NotesRenderer> {
     final viewScale = viewerHandler.viewState.value?.scale;
     screenToImageRatio = viewScale ?? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight));
 
+    final bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
+    final bool isUsingCustomAnim = !settingsHandler.disableCustomPageTransitions;
+
     final double page = widget.pageController?.hasClients == true ? (widget.pageController!.page ?? 0) : 0;
     pageOffset = ((page * 10000).toInt() % 10000) / 10000;
     pageOffset = pageOffset > 0.5 ? (1 - pageOffset) : (0 - pageOffset);
-    final bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
 
     offsetX = (screenWidth / 2) - (imageWidth / 2 * screenToImageRatio);
-    offsetX = isVertical ? offsetX : (offsetX + (pageOffset * screenWidth));
+    offsetX = isVertical ? offsetX : (offsetX + (pageOffset * screenWidth / (isUsingCustomAnim ? 2 : 1)));
 
     offsetY = (screenHeight / 2) - (imageHeight / 2 * screenToImageRatio);
-    offsetY = isVertical ? (offsetY + (pageOffset * screenHeight)) : offsetY;
+    offsetY = isVertical ? (offsetY + (pageOffset * screenHeight / (isUsingCustomAnim ? 2 : 1))) : offsetY;
 
     viewOffsetX = viewerHandler.viewState.value?.position.dx ?? 0;
     viewOffsetY = viewerHandler.viewState.value?.position.dy ?? 0;
@@ -291,7 +293,7 @@ class _NoteBuildState extends State<NoteBuild> {
   @override
   Widget build(BuildContext context) {
     // TODO don't render when box is out of the screen
-    // final screen = MediaQuery.of(context).size;
+    // final screen = MediaQuery.sizeOf(context);
     // if (widget.left < (0 - widget.width - 30) ||
     //     widget.top < (0 - widget.height - 30) ||
     //     widget.left > (screen.width + 30) ||
@@ -411,6 +413,7 @@ class NotesDialog extends StatelessWidget {
       content: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Material(
+          color: Colors.transparent,
           child: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(

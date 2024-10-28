@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';
 
@@ -11,7 +12,6 @@ class ThemeHandler {
   ThemeHandler({
     required this.theme,
     required this.themeMode,
-    required this.useMaterial3,
     required this.isAmoled,
   }) {
     final platformBrigtness = WidgetsBinding.instance.platformDispatcher.views.first.platformDispatcher.platformBrightness;
@@ -27,7 +27,6 @@ class ThemeHandler {
 
   final ThemeItem theme;
   final ThemeMode themeMode;
-  final bool useMaterial3;
   final bool isAmoled;
   ColorScheme? lightDynamic;
   ColorScheme? darkDynamic;
@@ -58,29 +57,24 @@ class ThemeHandler {
   ThemeData lightTheme() {
     final ColorScheme lightColorScheme = colorScheme();
 
-    return ThemeData.light(useMaterial3: useMaterial3).copyWith(
+    return ThemeData.light(useMaterial3: true).copyWith(
       brightness: Brightness.light,
       appBarTheme: appBarTheme(lightColorScheme),
-
       colorScheme: lightColorScheme,
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(lightColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(lightColorScheme),
-
       splashFactory: InkSparkle.splashFactory,
-      // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
-
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(lightColorScheme),
-      cardColor: Color.lerp(lightColorScheme.background, Colors.black, 0.04),
+      cardColor: Color.lerp(lightColorScheme.surface, Colors.black, 0.04),
       dividerColor: lightColorScheme.onSurface.withOpacity(0.12),
-      dialogBackgroundColor: lightColorScheme.background,
+      dialogBackgroundColor: lightColorScheme.surface,
       floatingActionButtonTheme: floatingActionButtonTheme(lightColorScheme),
       iconTheme: iconTheme(lightColorScheme),
       inputDecorationTheme: inputDecorationTheme(lightColorScheme),
       primaryIconTheme: iconTheme(lightColorScheme),
       primaryTextTheme: textTheme(),
-      buttonBarTheme: buttonBarTheme(),
       bannerTheme: bannerTheme(),
       cardTheme: cardTheme(lightColorScheme),
       pageTransitionsTheme: pageTransitionsTheme(),
@@ -98,32 +92,25 @@ class ThemeHandler {
   ThemeData darkTheme() {
     final ColorScheme darkColorScheme = colorScheme();
 
-    return ThemeData.dark(useMaterial3: useMaterial3).copyWith(
+    return ThemeData.dark(useMaterial3: true).copyWith(
       brightness: Brightness.dark,
       appBarTheme: appBarTheme(darkColorScheme),
-
-      scaffoldBackgroundColor: isAmoled ? Colors.black : null,
-      // canvasColor: isAmoled ? Colors.black : null,
-
+      scaffoldBackgroundColor: darkColorScheme.surface,
       colorScheme: darkColorScheme,
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(darkColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(darkColorScheme),
-
       splashFactory: InkSparkle.splashFactory,
-      // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
-
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(darkColorScheme),
-      cardColor: darkColorScheme.background,
+      cardColor: darkColorScheme.surface,
       dividerColor: darkColorScheme.onSurface.withOpacity(0.12),
-      dialogBackgroundColor: darkColorScheme.background,
+      dialogBackgroundColor: darkColorScheme.surface,
       floatingActionButtonTheme: floatingActionButtonTheme(darkColorScheme),
       iconTheme: iconTheme(darkColorScheme),
       inputDecorationTheme: inputDecorationTheme(darkColorScheme),
       primaryIconTheme: iconTheme(darkColorScheme),
       primaryTextTheme: textTheme(),
-      buttonBarTheme: buttonBarTheme(),
       bannerTheme: bannerTheme(),
       cardTheme: cardTheme(darkColorScheme),
       pageTransitionsTheme: pageTransitionsTheme(),
@@ -149,31 +136,24 @@ class ThemeHandler {
       }
     }
 
-    if (useMaterial3) {
-      return ColorScheme.fromSeed(
-        seedColor: theme.accent!,
-        primary: theme.primary,
-        onPrimary: primaryIsDark ? Colors.white : Colors.black,
-        secondary: theme.accent,
-        onSecondary: accentIsDark ? Colors.white : Colors.black,
-        error: Colors.redAccent,
-        onError: Colors.white,
-        brightness: isDark ? Brightness.dark : Brightness.light,
-      );
-    }
+    final brightness = isDark ? Brightness.dark : Brightness.light;
+    final SchemeTonalSpot scheme = SchemeTonalSpot(
+      sourceColorHct: Hct.fromInt(theme.accent!.value),
+      isDark: brightness == Brightness.dark,
+      contrastLevel: 0,
+    );
 
-    return ColorScheme(
-      primary: theme.primary!,
+    return ColorScheme.fromSeed(
+      seedColor: theme.accent!,
+      primary: theme.primary,
       onPrimary: primaryIsDark ? Colors.white : Colors.black,
-      secondary: theme.accent!,
+      secondary: theme.accent,
       onSecondary: accentIsDark ? Colors.white : Colors.black,
-      surface: isDark ? Colors.grey[900]! : Colors.grey[300]!,
-      onSurface: isDark ? Colors.white : Colors.black,
-      background: isDark ? (isAmoled ? Colors.black : Colors.grey[900]!) : Colors.white,
-      onBackground: isDark ? Colors.white : Colors.black,
+      surface: (isDark && isAmoled) ? Colors.black : Color(scheme.background),
+      onSurface: Color(scheme.onBackground),
       error: Colors.redAccent,
       onError: Colors.white,
-      brightness: isDark ? Brightness.dark : Brightness.light,
+      brightness: brightness,
     );
   }
 
@@ -196,7 +176,7 @@ class ThemeHandler {
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
-          fixedSize: const Size(double.infinity, kMinInteractiveDimension),
+          fixedSize: const Size(double.infinity, 44),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           splashFactory: InkSparkle.splashFactory,
@@ -243,7 +223,7 @@ class ThemeHandler {
       );
 
   IconThemeData iconTheme(ColorScheme colorScheme) => IconThemeData(
-        color: colorScheme.onBackground,
+        color: colorScheme.onSurface,
         opacity: 1,
         size: 22,
       );
@@ -289,27 +269,20 @@ class ThemeHandler {
         ),
       );
 
-  ButtonBarThemeData buttonBarTheme() => const ButtonBarThemeData(
-        buttonTextTheme: ButtonTextTheme.primary,
-        buttonMinWidth: 120,
-        buttonHeight: 48,
-        alignment: MainAxisAlignment.spaceBetween,
-      );
-
   MaterialBannerThemeData bannerTheme() => const MaterialBannerThemeData(
         backgroundColor: Colors.red,
         contentTextStyle: TextStyle(color: Colors.white),
       );
 
   CardTheme cardTheme(ColorScheme colorScheme) => CardTheme(
-        color: colorScheme.background,
+        color: colorScheme.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       );
 
   PageTransitionsTheme pageTransitionsTheme() => const PageTransitionsTheme(
         builders: <TargetPlatform, PageTransitionsBuilder>{
-          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.android: ZoomPageTransitionsBuilder(), // PredictiveBackPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
           TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
           TargetPlatform.linux: ZoomPageTransitionsBuilder(),
@@ -319,12 +292,12 @@ class ThemeHandler {
       );
 
   ScrollbarThemeData scrollbarTheme(ColorScheme colorScheme) => ScrollbarThemeData(
-        thickness: MaterialStateProperty.resolveWith((states) {
+        thickness: WidgetStateProperty.resolveWith((states) {
           if (Platform.isAndroid || Platform.isIOS) {
             return 8;
           } else {
-            final List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
-            for (final MaterialState state in states) {
+            final List<WidgetState> goodStates = [WidgetState.hovered, WidgetState.focused, WidgetState.pressed];
+            for (final WidgetState state in states) {
               if (goodStates.contains(state)) {
                 return 8;
               }
@@ -333,12 +306,12 @@ class ThemeHandler {
           }
         }),
         interactive: true,
-        thumbVisibility: MaterialStateProperty.resolveWith((states) {
+        thumbVisibility: WidgetStateProperty.resolveWith((states) {
           if (Platform.isAndroid || Platform.isIOS) {
             return true;
           } else {
-            final List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
-            for (final MaterialState state in states) {
+            final List<WidgetState> goodStates = [WidgetState.hovered, WidgetState.focused, WidgetState.pressed];
+            for (final WidgetState state in states) {
               if (goodStates.contains(state)) {
                 return true;
               }
@@ -346,11 +319,11 @@ class ThemeHandler {
             return false;
           }
         }),
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          final List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          final List<WidgetState> goodStates = [WidgetState.hovered, WidgetState.focused, WidgetState.pressed];
           Color color = isDark ? Colors.grey[300]! : Colors.grey[900]!;
           color = colorScheme.secondary;
-          for (final MaterialState state in states) {
+          for (final WidgetState state in states) {
             if (goodStates.contains(state)) {
               return color.withOpacity(0.75);
             }
@@ -368,32 +341,32 @@ class ThemeHandler {
       );
 
   CheckboxThemeData checkboxTheme(ColorScheme colorScheme) => CheckboxThemeData(
-        fillColor: MaterialStateProperty.resolveWith((states) {
-          final bool isHovered = states.contains(MaterialState.hovered);
-          if (states.contains(MaterialState.selected)) {
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          final bool isHovered = states.contains(WidgetState.hovered);
+          if (states.contains(WidgetState.selected)) {
             final Color color = colorScheme.secondary;
             return isHovered ? Color.lerp(color, Colors.black, 0.15)! : color;
           } else {
             return isHovered ? Colors.grey[600] : Colors.grey;
           }
         }),
-        checkColor: MaterialStateProperty.all(accentIsDark ? Colors.white : Colors.black),
+        checkColor: WidgetStateProperty.all(accentIsDark ? Colors.white : Colors.black),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );
 
   SwitchThemeData switchTheme(ColorScheme colorScheme) => SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((states) {
-          final bool isHovered = states.contains(MaterialState.hovered);
-          if (states.contains(MaterialState.selected)) {
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          final bool isHovered = states.contains(WidgetState.hovered);
+          if (states.contains(WidgetState.selected)) {
             final Color color = colorScheme.secondary;
             return isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
           } else {
             return isHovered ? Colors.grey[600] : Colors.grey[500];
           }
         }),
-        trackColor: MaterialStateProperty.resolveWith((states) {
-          final bool isHovered = states.contains(MaterialState.hovered);
-          if (states.contains(MaterialState.selected)) {
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          final bool isHovered = states.contains(WidgetState.hovered);
+          if (states.contains(WidgetState.selected)) {
             final Color color = Color.lerp(colorScheme.secondary, Colors.white, 0.3)!;
             return isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
           } else {
@@ -411,7 +384,7 @@ class ThemeHandler {
 
   DrawerThemeData drawerTheme(ColorScheme colorScheme) => DrawerThemeData(
         elevation: 0,
-        backgroundColor: colorScheme.background,
+        backgroundColor: colorScheme.surface,
         scrimColor: Colors.black.withOpacity(0.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
         endShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
@@ -427,7 +400,7 @@ class ThemeHandler {
 
   DropdownMenuThemeData dropdownMenuTheme(ColorScheme colorScheme) => DropdownMenuThemeData(
         menuStyle: MenuStyle(
-          backgroundColor: MaterialStatePropertyAll(colorScheme.background),
+          backgroundColor: WidgetStatePropertyAll(colorScheme.surface),
         ),
       );
 }

@@ -37,10 +37,31 @@ esac
 
 clear
 
-echo "Doing a ["$build_desc"] build - [flutter build $build_mode --$build_arg $build_extras]"
+echo "Doing a ["$build_desc"] build - [flutter build $build_mode --dart-define=$build_arg $build_extras]"
 # Generate empty secret vars config if it's not there
 sh gen_config.sh
-flutter build $build_mode --release --dart-define=$build_arg $build_extras
+
+# Check if fvm is installed
+fvmAvailalble=false
+if command -v fvm &> /dev/null; then
+	fvmAvailalble=true
+fi
+
+if [ "$fvmAvailalble" = true ]; then
+	if fvm flutter pub get && fvm flutter build $build_mode --release --dart-define=$build_arg $build_extras ; then
+		echo "Build succeeded"
+	else
+		echo "Build failed"
+		exit 1
+	fi
+else
+	if flutter pub get && flutter build $build_mode --release --dart-define=$build_arg $build_extras ; then
+		echo "Build succeeded"
+	else
+		echo "Build failed"
+		exit 1
+	fi
+fi
 
 get_version_and_build() {
     version_and_build=$(grep "version:" pubspec.yaml | awk '{print $2}')

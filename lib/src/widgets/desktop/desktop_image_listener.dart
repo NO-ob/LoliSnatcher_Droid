@@ -15,9 +15,7 @@ import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 /// This class will listen for the value of viewedItem in searchtabs
@@ -47,28 +45,32 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   // TODO fix key duplicate exception when entering exiting fullscreen
 
   //This function decides what media widget to return
-  Widget getImageWidget(BooruItem value) {
-    if (value.mediaType.value.isImageOrAnimation) {
-      return ImageViewer(value, key: value.key);
-    } else if (value.mediaType.value.isVideo) {
-      if (Platform.isAndroid || Platform.isIOS) {
-        return VideoViewer(value, enableFullscreen: true, key: value.key);
-      } else if (Platform.isWindows || Platform.isLinux) {
-        // return VideoViewerPlaceholder(item: value);
-        return VideoViewerDesktop(value, key: value.key);
+  Widget getImageWidget() {
+    if (item.mediaType.value.isImageOrAnimation) {
+      return ImageViewer(item, key: item.key);
+    } else if (item.mediaType.value.isVideo) {
+      if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
+        return VideoViewer(item, enableFullscreen: true, key: item.key);
       } else {
-        return VideoViewerPlaceholder(item: value);
+        return VideoViewerPlaceholder(item: item);
       }
-    } else if (value.mediaType.value.isNeedsExtraRequest) {
+    } else if (item.mediaType.value.isNeedsExtraRequest) {
       return GuessExtensionViewer(
-        item: value,
+        item: item,
         onMediaTypeGuessed: (MediaType mediaType) {
-          value.mediaType.value = mediaType;
+          item.mediaType.value = mediaType;
           updateState();
         },
       );
     } else {
-      return UnknownViewerPlaceholder(item: value);
+      return GuessExtensionViewer(
+        item: item,
+        onMediaTypeGuessed: (MediaType mediaType) {
+          item.mediaType.value = mediaType;
+          updateState();
+        },
+      );
+      // return UnknownViewerPlaceholder(item: item);
     }
   }
 
@@ -126,7 +128,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
       return const SizedBox.shrink();
     }
 
-    final Widget itemWidget = isDelayed ? const SizedBox.shrink() : getImageWidget(item);
+    final Widget itemWidget = isDelayed ? const SizedBox.shrink() : getImageWidget();
 
     return Stack(
       children: [

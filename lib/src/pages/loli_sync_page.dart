@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/pages/loli_sync_progress_page.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -59,7 +60,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   String selectedInterface = 'Auto';
   String? selectedAddress;
 
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -91,6 +92,11 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   @override
   void dispose() {
+    ipController.dispose();
+    portController.dispose();
+    favouritesSkipController.dispose();
+    startPortController.dispose();
+
     testSync.killSync();
     sub?.cancel();
     super.dispose();
@@ -197,6 +203,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           inputType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
           clearable: true,
+          pasteable: true,
         ),
         SettingsTextInput(
           controller: portController,
@@ -205,6 +212,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           inputType: TextInputType.number,
           inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
           clearable: true,
+          pasteable: true,
         ),
         SettingsToggle(
           value: favouritesv2,
@@ -217,7 +225,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               favouritesv2 = newValue;
             });
           },
-          title: 'Send Favourites',
+          title: 'Send favourites',
           subtitle: Text('Favorites: ${favCount ?? '...'}'),
           drawBottomBorder: !favouritesv2,
         ),
@@ -229,7 +237,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 favourites = newValue;
               });
             },
-            title: 'Send Favourites (Legacy)',
+            title: 'Send favourites (Legacy)',
             subtitle: Text('Favorites: ${favCount ?? '...'}'),
             drawBottomBorder: !favourites,
           ),
@@ -238,8 +246,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           child: (favouritesv2 || favourites)
               ? SettingsTextInput(
                   controller: favouritesSkipController,
-                  title: 'Start Favs Sync from #...',
-                  hintText: 'Start Favs Sync from #...',
+                  title: 'Sync favs from #...',
                   inputType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                   clearable: true,
@@ -255,9 +262,11 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                         context: context,
                         builder: (context) {
                           return const SettingsDialog(
-                            title: Text('Start Favs Sync from #...'),
+                            title: Text('Sync favs from #...'),
                             contentItems: [
-                              Text('Allows to set from where the sync should start from'),
+                              Text(
+                                'Allows to set from where the sync should start from, useful if you already synced all your favs before and want to sync only the newest items',
+                              ),
                               Text('If you want to sync from the beginning leave this field blank'),
                               Text(''),
                               Text('Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X'),
@@ -278,7 +287,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               settings = newValue;
             });
           },
-          title: 'Send Settings',
+          title: 'Send settings',
         ),
         SettingsToggle(
           value: booru,
@@ -287,7 +296,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               booru = newValue;
             });
           },
-          title: 'Send Booru Configs',
+          title: 'Send booru configs',
           subtitle: Text('Configs: ${settingsHandler.booruList.length}'),
         ),
         SettingsToggle(
@@ -297,14 +306,14 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               tabs = newValue;
             });
           },
-          title: 'Send Tabs',
+          title: 'Send tabs',
           subtitle: Text('Tabs: ${searchHandler.total}'),
           drawBottomBorder: !tabs,
         ),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: tabs
-              ? SettingsDropdown(
+              ? SettingsOptionsList(
                   value: tabsMode,
                   items: tabsModesList,
                   onChanged: (String? newValue) {
@@ -312,7 +321,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                       tabsMode = newValue!;
                     });
                   },
-                  title: 'Tabs Sync Mode',
+                  title: 'Tabs sync mode',
                   trailingIcon: IconButton(
                     icon: const Icon(Icons.help_outline),
                     onPressed: () {
@@ -320,7 +329,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                         context: context,
                         builder: (context) {
                           return const SettingsDialog(
-                            title: Text('Tabs Sync Mode'),
+                            title: Text('Tabs sync mode'),
                             contentItems: [
                               Text(
                                 'Merge: Merge the tabs from this device on the other device, tabs with unknown boorus and already existing tabs will be ignored',
@@ -343,14 +352,14 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               tags = newValue;
             });
           },
-          title: 'Send Tags',
+          title: 'Send tags',
           subtitle: Text('Tags: ${tagHandler.tagMap.entries.length}'),
           drawBottomBorder: !tags,
         ),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: tags
-              ? SettingsDropdown(
+              ? SettingsOptionsList(
                   value: tagsMode,
                   items: tagsModesList,
                   onChanged: (String? newValue) {
@@ -358,7 +367,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                       tagsMode = newValue!;
                     });
                   },
-                  title: 'Tags Sync Mode',
+                  title: 'Tags sync mode',
                   trailingIcon: IconButton(
                     icon: const Icon(Icons.help_outline),
                     onPressed: () {
@@ -366,12 +375,12 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                         context: context,
                         builder: (context) {
                           return const SettingsDialog(
-                            title: Text('Tabs Sync Mode'),
+                            title: Text('Tags sync mode'),
                             contentItems: [
                               Text("PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn't on this device it will be skipped"),
                               Text(''),
                               Text(
-                                'Overwrite: Tags will be added, if a tag and tag type exists on the other device it will be overwritten',
+                                'Overwrite: All tags will be added, if a tag and tag type exists on the other device it will be overwritten',
                               ),
                             ],
                           );
@@ -384,7 +393,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         ),
         const SettingsButton(name: '', enabled: false),
         SettingsButton(
-          name: 'Test Connection',
+          name: 'Test connection',
           icon: const Icon(Icons.wifi_tethering),
           action: sendTestRequest,
           trailingIcon: IconButton(
@@ -394,7 +403,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 context: context,
                 builder: (context) {
                   return const SettingsDialog(
-                    title: Text('Test Connection'),
+                    title: Text('Test connection'),
                     contentItems: [
                       Text('This will send a test request to the other device.'),
                       Text('There will be a notification stating if the request was successful or not.'),
@@ -406,7 +415,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           ),
         ),
         SettingsButton(
-          name: 'Start Sync',
+          name: 'Start sync',
           icon: const Icon(Icons.send_to_mobile),
           action: () async {
             final bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
@@ -468,9 +477,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Stats of this device:'),
-              Text("Favourites: ${favCount ?? '...'}"),
-              Text('Boorus: ${settingsHandler.booruList.length}'),
-              Text('Tabs: ${searchHandler.total}'),
+              Text("Favourites: ${favCount?.toFormattedString() ?? '...'}"),
+              Text('Boorus: ${settingsHandler.booruList.length.toFormattedString()}'),
+              Text('Tabs: ${searchHandler.total.toFormattedString()}'),
             ],
           ),
         ),
@@ -478,7 +487,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           child: const Text('Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed'),
         ),
-        SettingsDropdown(
+        SettingsOptionsList(
           value: selectedInterface,
           items: ipListNames,
           onChanged: (String? newValue) {
@@ -492,23 +501,24 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             }
             updateState();
           },
-          title: 'Available Network Interfaces',
+          title: 'Available network interfaces',
         ),
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: Text('Selected Interface IP: ${selectedAddress ?? 'none'}'),
+          child: Text('Selected interface IP: ${selectedAddress ?? 'none'}'),
         ),
         SettingsTextInput(
           controller: startPortController,
-          title: 'Start Server at Port',
-          hintText: "Server Port (will default to '8080' if empty)",
+          title: 'Server port',
+          hintText: "(will default to '8080' if empty)",
           inputType: TextInputType.number,
           inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
           clearable: true,
+          pasteable: true,
           forceLabelOnTop: true,
         ),
         SettingsButton(
-          name: 'Start Receiver Server',
+          name: 'Start receiver server',
           icon: const Icon(Icons.dns_outlined),
           action: () async {
             await SettingsPageOpen(
@@ -543,7 +553,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(

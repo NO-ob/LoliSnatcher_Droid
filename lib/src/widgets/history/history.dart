@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 import 'package:huge_listview/huge_listview.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -21,7 +20,7 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 
 // TODO split in smaller widgets
 
@@ -55,6 +54,12 @@ class _HistoryListState extends State<HistoryList> {
       await Future.delayed(const Duration(milliseconds: 100));
       await getHistory();
     });
+  }
+
+  @override
+  void dispose() {
+    filterSearchController.dispose();
+    super.dispose();
   }
 
   Future<void> getHistory() async {
@@ -277,7 +282,7 @@ class _HistoryListState extends State<HistoryList> {
   }
 
   Widget listBuild() {
-    final pageSize = MediaQuery.of(context).size.height ~/ 70;
+    final pageSize = MediaQuery.sizeOf(context).height ~/ 70;
 
     return HugeListView(
       scrollController: itemScrollController,
@@ -335,45 +340,44 @@ class _HistoryListState extends State<HistoryList> {
       },
     );
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-      height: 72,
-      child: ListTile(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-          side: const BorderSide(color: Colors.grey),
-        ),
-        onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
-        minLeadingWidth: 24,
-        leading: booru != null
-            ? (booru.type == BooruType.Downloads
-                ? const Icon(Icons.file_download_outlined, size: 20)
-                : (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 20) : Favicon(booru)))
-            : const Icon(CupertinoIcons.question, size: 20),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (currentEntry.isFavourite)
-              const Padding(
-                padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Icon(Icons.favorite, color: Colors.red),
-              ),
-            if (showCheckbox) checkbox,
-          ],
-        ),
-        title: SizedBox(
-          height: 16,
-          child: MarqueeText(
-            key: ValueKey(currentEntry.searchText),
-            text: currentEntry.searchText,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-            isExpanded: false,
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+        height: 72,
+        child: ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: const BorderSide(color: Colors.grey),
           ),
+          onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
+          minLeadingWidth: 24,
+          leading: BooruFavicon(booru!),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (currentEntry.isFavourite)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                  child: Icon(Icons.favorite, color: Colors.red),
+                ),
+              if (showCheckbox) checkbox,
+            ],
+          ),
+          title: SizedBox(
+            height: 16,
+            child: MarqueeText(
+              key: ValueKey(currentEntry.searchText),
+              text: currentEntry.searchText,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              isExpanded: false,
+            ),
+          ),
+          subtitle: Text(booru.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
         ),
-        subtitle: Text(booru?.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
       ),
     );
   }
@@ -393,6 +397,7 @@ class _HistoryListState extends State<HistoryList> {
               title: 'Filter Search History',
               inputType: TextInputType.text,
               clearable: true,
+              pasteable: true,
               margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
             ),
           ),
@@ -575,6 +580,7 @@ class _HistoryListState extends State<HistoryList> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Material(
+        color: Colors.transparent,
         child: SizedBox(
           width: double.maxFinite,
           child: areThereErrors ? errorsBuild() : listBuild(),

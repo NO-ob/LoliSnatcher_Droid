@@ -21,7 +21,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
 
   int _startedAt = 0;
   Timer? checkInterval;
-  bool isVisible = true;
+  bool isCollapsed = false;
   StreamSubscription<bool>? loadingListener;
 
   @override
@@ -91,7 +91,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           );
         } else {
           // .. has items loaded
-          if (isVisible) {
+          if (!isCollapsed) {
             final int pageNum = searchHandler.pageNum.value;
             return _ButtonWrapper(
               child: SettingsButton(
@@ -101,14 +101,14 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                 dense: true,
                 action: () {
                   searchHandler.retrySearch();
-                  if (!isVisible) {
-                    isVisible = !isVisible;
+                  if (isCollapsed) {
+                    isCollapsed = !isCollapsed;
                     updateState();
                   }
                 },
                 trailingIcon: IconButton(
                   onPressed: () {
-                    isVisible = !isVisible;
+                    isCollapsed = !isCollapsed;
                     updateState();
                   },
                   icon: const Icon(Icons.arrow_drop_down),
@@ -118,20 +118,20 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             );
           } else {
             return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+              padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
                       onPressed: () {
                         searchHandler.retrySearch();
-                        if (!isVisible) {
-                          isVisible = !isVisible;
+                        if (isCollapsed) {
+                          isCollapsed = !isCollapsed;
                           updateState();
                         }
                       },
@@ -142,12 +142,12 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                   const SizedBox(width: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
                       onPressed: () {
-                        isVisible = !isVisible;
+                        isCollapsed = !isCollapsed;
                         updateState();
                       },
                       iconSize: 28,
@@ -188,16 +188,73 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           if (searchHandler.errorString.isNotEmpty) {
             final String errorFormatted = searchHandler.errorString.isNotEmpty ? '\n${searchHandler.errorString}' : '';
             // ... if error happened
-            return _ButtonWrapper(
-              child: SettingsButton(
-                name: 'Error happened when Loading Page #${searchHandler.pageNum}: $errorFormatted',
-                subtitle: Text('$clickName Here to Retry'),
-                icon: const Icon(Icons.refresh),
-                dense: true,
-                action: searchHandler.retrySearch,
-                drawBottomBorder: false,
-              ),
-            );
+            if (!isCollapsed) {
+              return _ButtonWrapper(
+                child: SettingsButton(
+                  name: 'Error happened when Loading Page #${searchHandler.pageNum}: $errorFormatted',
+                  subtitle: Text('$clickName Here to Retry'),
+                  icon: const Icon(Icons.refresh),
+                  dense: true,
+                  action: () {
+                    searchHandler.retrySearch();
+                    if (isCollapsed) {
+                      isCollapsed = !isCollapsed;
+                      updateState();
+                    }
+                  },
+                  trailingIcon: IconButton(
+                    onPressed: () {
+                      isCollapsed = !isCollapsed;
+                      updateState();
+                    },
+                    icon: const Icon(Icons.arrow_drop_down),
+                  ),
+                  drawBottomBorder: false,
+                ),
+              );
+            } else {
+              return Padding(
+                padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          searchHandler.retrySearch();
+                          if (isCollapsed) {
+                            isCollapsed = !isCollapsed;
+                            updateState();
+                          }
+                        },
+                        iconSize: 28,
+                        icon: const Icon(Icons.refresh),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          isCollapsed = !isCollapsed;
+                          updateState();
+                        },
+                        iconSize: 28,
+                        icon: const Icon(Icons.arrow_drop_up),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                ),
+              );
+            }
           } else if (searchHandler.currentFetched.isEmpty) {
             // ... no items loaded
             return _ButtonWrapper(
@@ -235,8 +292,8 @@ class _ButtonWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+      color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
+      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
       child: child,
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   final TextEditingController columnsPortraitController = TextEditingController();
   final TextEditingController mouseSpeedController = TextEditingController();
 
-  late String previewMode, previewDisplay;
+  late String previewMode, previewDisplay, scrollGridButtonsPosition;
+  late bool disableVibration;
   late AppMode appMode;
   late HandSide handSide;
 
@@ -36,21 +38,33 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     columnsLandscapeController.text = settingsHandler.landscapeColumns.toString();
     appMode = settingsHandler.appMode.value;
     handSide = settingsHandler.handSide.value;
+    disableVibration = settingsHandler.disableVibration;
     previewDisplay = settingsHandler.previewDisplay;
     previewMode = settingsHandler.previewMode;
+    scrollGridButtonsPosition = settingsHandler.scrollGridButtonsPosition;
     mouseSpeedController.text = settingsHandler.mousewheelScrollSpeed.toString();
   }
 
+  @override
+  void dispose() {
+    columnsLandscapeController.dispose();
+    columnsPortraitController.dispose();
+    mouseSpeedController.dispose();
+    super.dispose();
+  }
+
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
 
     settingsHandler.appMode.value = appMode;
     settingsHandler.handSide.value = handSide;
+    settingsHandler.disableVibration = disableVibration;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
+    settingsHandler.scrollGridButtonsPosition = scrollGridButtonsPosition;
     if (int.parse(columnsLandscapeController.text) < 1) {
       columnsLandscapeController.text = 1.toString();
     }
@@ -70,7 +84,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -79,15 +93,48 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
         body: Center(
           child: ListView(
             children: [
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: appMode,
                 items: AppMode.values,
-                onChanged: (AppMode? newValue) {
+                onChanged: (AppMode? newValue) async {
+                  bool confirmation = false;
+                  if ((Platform.isAndroid || Platform.isIOS) && newValue?.isDesktop == true) {
+                    confirmation = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return const SettingsDialog(
+                              title: Text('App UI mode'),
+                              contentItems: [
+                                Text('Are you sure you want to use Desktop mode? It may cause problems on Mobile devices and is considered DEPRECATED.'),
+                              ],
+                              actionButtons: [
+                                CancelButton(),
+                                ConfirmButton(),
+                              ],
+                            );
+                          },
+                        ) ??
+                        false;
+                  } else {
+                    confirmation = true;
+                  }
+
+                  if (!confirmation) {
+                    return;
+                  }
+
                   setState(() {
                     appMode = newValue!;
                   });
                 },
-                title: 'App UI Mode',
+                title: 'App UI mode',
+                itemLeadingBuilder: (item) {
+                  return switch (item) {
+                    AppMode.Mobile => const Icon(Icons.phone_android_sharp),
+                    AppMode.Desktop => const Icon(Icons.desktop_windows_sharp),
+                    _ => const Icon(null),
+                  };
+                },
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -95,15 +142,15 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return const SettingsDialog(
-                          title: Text('App UI Mode'),
+                          title: Text('App UI mode'),
                           contentItems: [
                             Text('- Mobile - Normal Mobile UI'),
-                            Text('- Desktop - Ahoviewer Style UI'),
+                            Text('- Desktop - Ahoviewer Style UI [DEPRECATED, NEEDS REWORK]'),
                             SizedBox(height: 10),
                             Text(
                               '[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.',
                             ),
-                            Text('If you are on android versions smaller than 11 you can remove the appMode line from /LoliSnatcher/config/settings.json'),
+                            Text('If you are on android versions below 11 you can remove the appMode line from /LoliSnatcher/config/settings.json'),
                             Text('If you are on android 11 or higher you will have to wipe app data via system settings'),
                           ],
                         );
@@ -112,7 +159,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   },
                 ),
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: handSide,
                 items: HandSide.values,
                 onChanged: (HandSide? newValue) {
@@ -120,7 +167,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     handSide = newValue!;
                   });
                 },
-                title: 'Hand Side',
+                title: 'Hand side',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.back_hand_outlined),
                   onPressed: () {
@@ -128,7 +175,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return const SettingsDialog(
-                          title: Text('Hand Side'),
+                          title: Text('Hand side'),
                           contentItems: [
                             Text('Changes position of some UI elements according to selected side'),
                           ],
@@ -138,10 +185,19 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   },
                 ),
               ),
+              SettingsToggle(
+                value: disableVibration,
+                onChanged: (newValue) {
+                  setState(() {
+                    disableVibration = newValue;
+                  });
+                },
+                title: 'Disable vibration',
+                subtitle: const Text('(may still happen on some actions even when disabled)'),
+              ),
               SettingsTextInput(
                 controller: columnsPortraitController,
-                title: 'Preview Columns Portrait',
-                hintText: 'Columns in Portrait orientation',
+                title: 'Preview columns (portrait)',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 onChanged: (String? text) {
@@ -167,8 +223,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               ),
               SettingsTextInput(
                 controller: columnsLandscapeController,
-                title: 'Preview Columns Landscape',
-                hintText: 'Columns in Landscape orientation',
+                title: 'Preview columns (landscape)',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['landscapeColumns']!['default']!.toString(),
@@ -189,7 +244,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   }
                 },
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: previewMode,
                 items: settingsHandler.map['previewMode']!['options'],
                 onChanged: (String? newValue) {
@@ -197,7 +252,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
                   });
                 },
-                title: 'Preview Quality',
+                title: 'Preview quality',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -205,7 +260,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return const SettingsDialog(
-                          title: Text('Preview Quality'),
+                          title: Text('Preview quality'),
                           contentItems: [
                             Text('This setting changes the resolution of images in the preview grid'),
                             Text(' - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads'),
@@ -219,15 +274,31 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   },
                 ),
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: previewDisplay,
                 items: settingsHandler.map['previewDisplay']!['options'],
+                itemTitleBuilder: (item) => switch (item) {
+                  'Square' => '${item!} (1:1)',
+                  'Rectangle' => '${item!} (9:16)',
+                  _ => item ?? '?',
+                },
+                itemLeadingBuilder: (item) {
+                  return switch (item) {
+                    'Square' => const Icon(Icons.crop_square_outlined),
+                    'Rectangle' => Transform.rotate(
+                        angle: pi / 2,
+                        child: const Icon(Icons.crop_16_9),
+                      ),
+                    'Staggered' => const Icon(Icons.dashboard_outlined),
+                    _ => const Icon(null),
+                  };
+                },
                 onChanged: (String? newValue) {
                   setState(() {
                     previewDisplay = newValue ?? settingsHandler.map['previewDisplay']!['default'];
                   });
                 },
-                title: 'Preview Display',
+                title: 'Preview display',
               ),
               SettingsToggle(
                 value: settingsHandler.disableImageScaling,
@@ -290,6 +361,16 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       ),
                     ),
                 ],
+              ),
+              SettingsOptionsList(
+                value: scrollGridButtonsPosition,
+                items: settingsHandler.map['scrollGridButtonsPosition']!['options'],
+                onChanged: (String? newValue) {
+                  setState(() {
+                    scrollGridButtonsPosition = newValue ?? settingsHandler.map['scrollGridButtonsPosition']!['default'];
+                  });
+                },
+                title: 'Scroll previews buttons position',
               ),
               if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
                 SettingsTextInput(

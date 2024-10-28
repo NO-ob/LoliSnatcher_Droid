@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 
 class TabBooruSelector extends StatelessWidget {
   const TabBooruSelector({
@@ -75,7 +74,7 @@ class TabBooruSelector extends StatelessWidget {
               child: TabBooruSelectorItem(booru: item),
             );
           },
-          selectionBuilder: (value) {
+          selectedItemBuilder: (value) {
             if (value == null) {
               return const Text('Select a Booru');
             }
@@ -94,28 +93,25 @@ class TabBooruSelectorItem extends StatelessWidget {
     required this.booru,
     this.withFavicon = true,
     this.compact = false,
+    this.extraText,
     super.key,
   });
 
   final Booru booru;
   final bool withFavicon;
   final bool compact;
+  final String? extraText;
 
   @override
   Widget build(BuildContext context) {
-    final String name = ' ${booru.name}';
+    final String name = ' ${booru.name}${extraText?.isNotEmpty == true ? extraText : ''}';
 
     return Row(
       mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
       children: [
         //Booru Icon
         if (withFavicon) ...[
-          if (booru.type == BooruType.Downloads)
-            const Icon(Icons.file_download_outlined, size: 20)
-          else if (booru.type == BooruType.Favourites)
-            const Icon(Icons.favorite, color: Colors.red, size: 20)
-          else
-            Favicon(booru),
+          BooruFavicon(booru),
           const SizedBox(width: 4),
         ],
         //Booru name
