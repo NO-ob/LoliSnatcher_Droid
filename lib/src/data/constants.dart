@@ -3,7 +3,7 @@ class Constants {
 
   // TODO don't forget to update on every new release
   static const String appVersion = '2.4.1';
-  static const int appBuildNumber = 190;
+  static const int appBuildNumber = 191;
   //
 
   static const int defaultItemLimit = 20;
