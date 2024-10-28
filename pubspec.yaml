@@ -91,20 +91,24 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.1
   flutter_lints: ^5.0.0
 
 
 
-flutter_icons:
+flutter_launcher_icons:
   android: true
   image_path: "assets/images/iconFG.png"
+  image_path_android: "assets/images/app_icon.png"
   adaptive_icon_background: "assets/images/iconBG.png"
   adaptive_icon_foreground: "assets/images/iconFG.png"
+  adaptive_icon_monochrome: "assets/images/iconMonochrome.png"
 
 
 
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/app_icon.png
     - assets/images/drawer_icon.png
     - assets/images/loading.gif
