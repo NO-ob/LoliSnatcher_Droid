@@ -23,7 +23,7 @@ static void my_application_activate(GApplication* application) {
   // Use a header bar when running in GNOME as this is the common style used
   // by applications and is the setup most users will be using (e.g. Ubuntu
   // desktop).
-  // If running on X and not using GNOME then just use a traditional title bar
+  // If running on X and not using GNOME or KDE, just use a traditional title bar
   // in case the window manager does more exotic layout, e.g. tiling.
   // If running on Wayland assume the header bar will work (may need changing
   // if future cases occur).
@@ -32,7 +32,8 @@ static void my_application_activate(GApplication* application) {
   GdkScreen* screen = gtk_window_get_screen(window);
   if (GDK_IS_X11_SCREEN(screen)) {
     const gchar* wm_name = gdk_x11_screen_get_window_manager_name(screen);
-    if (g_strcmp0(wm_name, "GNOME Shell") != 0) {
+    // Don't use a header bar if the window manager is not GNOME or KDE
+    if (g_strcmp0(wm_name, "GNOME Shell") != 0 && g_strcmp0(wm_name, "KWin") != 0) {
       use_header_bar = FALSE;
     }
   }
