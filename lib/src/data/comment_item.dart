@@ -1,7 +1,9 @@
 import 'dart:convert';
 
-class CommentItem {
-  CommentItem({
+import 'package:equatable/equatable.dart';
+
+class CommentItem extends Equatable {
+  const CommentItem({
     this.id,
     this.title,
     this.content,
@@ -14,8 +16,22 @@ class CommentItem {
     this.createDateFormat,
   });
 
-  String? id, title, content, authorID, authorName, avatarUrl, postID, createDate, createDateFormat;
-  int? score;
+  final String? id, title, content, authorID, authorName, avatarUrl, postID, createDate, createDateFormat;
+  final int? score;
+
+  @override
+  List<Object?> get props => [
+        id,
+        title,
+        content,
+        authorID,
+        authorName,
+        avatarUrl,
+        score,
+        postID,
+        createDate,
+        createDateFormat,
+      ];
 
   Map<String, dynamic> toJson() {
     return {
