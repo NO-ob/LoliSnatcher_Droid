@@ -15,7 +15,7 @@ dependencies:
   app_links: ^6.3.3
   auto_size_text_plus: ^3.0.2
   awesome_notifications: ^0.10.0
-  chewie: ^1.8.7
+  chewie: 1.8.5 # versions higher than 1.8.5 require flutter 3.27
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
   dio: ^5.7.0
@@ -71,7 +71,7 @@ dependencies:
   sqflite: ^2.4.1
   statsfl: ^2.3.0
   talker_dio_logger: ^4.6.0
-  talker_flutter: ^4.6.0
+  talker_flutter: 4.5.4 # versions higher than 4.5.4 require flutter 3.27
   talker_logger: ^4.6.0
   talker: ^4.6.0
   transparent_image: ^2.0.1
