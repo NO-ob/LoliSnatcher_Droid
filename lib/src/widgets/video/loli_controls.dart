@@ -440,6 +440,17 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           _startHideTimer();
         }
       },
+      onLongPress: () async {
+        if (_latestValue.playbackSpeed == 1.0) {
+          return;
+        }
+
+        await controller.setPlaybackSpeed(1);
+
+        if (_latestValue.isPlaying) {
+          _startHideTimer();
+        }
+      },
       child: AnimatedOpacity(
         opacity: _hideStuff ? 0.0 : 1.0,
         duration: const Duration(milliseconds: 300),
@@ -494,7 +505,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             ),
             child: Icon(
               _latestValue.volume > 0 ? Icons.volume_up : (isGlobalMute ? Icons.volume_off : Icons.volume_mute),
-              color: Colors.white,
+              color: isGlobalMute ? Theme.of(context).colorScheme.secondary : Colors.white,
             ),
           ),
         ),
