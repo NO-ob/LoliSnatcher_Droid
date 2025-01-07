@@ -12,10 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
   alice_lightweight: ^3.9.0
-  app_links: ^6.3.2
+  app_links: ^6.3.3
   auto_size_text_plus: ^3.0.2
   awesome_notifications: ^0.10.0
-  chewie: ^1.8.5
+  chewie: ^1.8.7
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
   dio: ^5.7.0
@@ -36,17 +36,19 @@ dependencies:
       ref: a12cffc2d54e1e0350904d0f841203935d20e465 # master
   flutter_linkify: ^6.0.0
   flutter_socks_proxy:
-    git: https://github.com/jiangtian616/socks_proxy
-  font_awesome_flutter: ^10.7.0
+    git:
+      url: https://github.com/jiangtian616/socks_proxy
+      ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
+  font_awesome_flutter: ^10.8.0
   get: ^4.6.6
   google_fonts: ^6.2.1
-  html: ^0.15.4
+  html: ^0.15.5
   http_proxy: # ^1.2.2
     git:
       url: https://github.com/NANI-SORE/http_proxy.git
       ref: ce01861ac45b12e9d974cb447ea91ef68a90427d # master - forked to fix build errors and remove allowing all bad certs
   huge_listview: ^2.0.12
-  image: ^4.3.0
+  image: ^4.5.2
   intl: ^0.19.0
   keyboard_actions: ^4.2.0
   # local_auth: ^2.3.0
@@ -54,8 +56,8 @@ dependencies:
   media_kit: ^1.1.11
   media_kit_video: ^1.2.5
   media_kit_libs_video: ^1.0.5
-  native_dio_adapter: ^1.3.0
-  path_provider: ^2.1.4
+  native_dio_adapter: ^1.4.0
+  path_provider: ^2.1.5
   permission_handler: ^11.3.1
   photo_view:
     git:
@@ -64,26 +66,26 @@ dependencies:
   preload_page_view: ^0.2.0
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
-  share_plus: ^10.1.1 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
-  sqflite_common_ffi: ^2.3.4
-  sqflite: ^2.4.0
+  share_plus: ^10.1.3 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
+  sqflite_common_ffi: ^2.3.4+4
+  sqflite: ^2.4.1
   statsfl: ^2.3.0
-  talker_dio_logger: ^4.4.1
-  talker_flutter: ^4.4.1
-  talker_logger: ^4.4.1
-  talker: ^4.4.1
+  talker_dio_logger: ^4.6.0
+  talker_flutter: ^4.6.0
+  talker_logger: ^4.6.0
+  talker: ^4.6.0
   transparent_image: ^2.0.1
   url_launcher: ^6.3.1
   uuid: ^4.5.1
   vibration: ^2.0.1
   video_player: ^2.9.2
-  waterfall_flow: ^3.0.3
+  waterfall_flow: ^3.1.0
   xml: ^6.5.0
 
 
 
 dependency_overrides:
-  android_intent_plus: ^5.2.0
+  android_intent_plus: ^5.2.1
   material_color_utilities: ^0.12.0 # flutter_test conflict
 
 
@@ -91,7 +93,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.14.1
+  flutter_launcher_icons: ^0.14.2
   flutter_lints: ^5.0.0
 
 
