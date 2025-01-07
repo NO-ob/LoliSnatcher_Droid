@@ -81,6 +81,7 @@ class SettingsHandler extends GetxController {
   String galleryScrollDirection = 'Horizontal';
   String extPathOverride = '';
   String drawerMascotPathOverride = '';
+  String backupPath = '';
   String zoomButtonPosition = 'Right';
   String changePageButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
   String scrollGridButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
@@ -115,28 +116,19 @@ class SettingsHandler extends GetxController {
 
   Duration cacheDuration = Duration.zero;
 
-  List<List<String>> buttonList = [
+  static const List<List<String>> buttonList = [
     ['autoscroll', 'Slideshow'],
     ['snatch', 'Save'],
     ['favourite', 'Favourite'],
     ['info', 'Display Info'],
     ['share', 'Share'],
+    ['select', 'Select'],
     ['open', 'Open in Browser'],
     ['reloadnoscale', 'Reload w/out scaling'],
     ['toggle_quality', 'Toggle Quality'],
     ['external_player', 'External player'],
   ];
-  List<List<String>> buttonOrder = [
-    ['autoscroll', 'Slideshow'],
-    ['snatch', 'Save'],
-    ['favourite', 'Favourite'],
-    ['info', 'Display Info'],
-    ['share', 'Share'],
-    ['open', 'Open in Browser'],
-    ['reloadnoscale', 'Reload w/out scaling'],
-    ['toggle_quality', 'Toggle Quality'],
-    ['external_player', 'External player'],
-  ];
+  List<List<String>> buttonOrder = [...buttonList];
 
   bool jsonWrite = false;
   bool autoPlayEnabled = true;
@@ -207,6 +199,7 @@ class SettingsHandler extends GetxController {
     'appMode',
     'handSide',
     'extPathOverride',
+    'backupPath',
     'lastSyncIp',
     'lastSyncPort',
     'customUserAgent',
@@ -349,6 +342,10 @@ class SettingsHandler extends GetxController {
           'default': '',
         },
         'drawerMascotPathOverride': {
+          'type': 'string',
+          'default': '',
+        },
+        'backupPath': {
           'type': 'string',
           'default': '',
         },
@@ -594,17 +591,7 @@ class SettingsHandler extends GetxController {
         // other
         'buttonOrder': {
           'type': 'other',
-          'default': <List<String>>[
-            ['autoscroll', 'Slideshow'],
-            ['snatch', 'Save'],
-            ['favourite', 'Favourite'],
-            ['info', 'Display Info'],
-            ['share', 'Share'],
-            ['open', 'Open in Browser'],
-            ['reloadnoscale', 'Reload w/out scaling'],
-            ['toggle_quality', 'Toggle Quality'],
-            ['external_player', 'External player'],
-          ],
+          'default': <List<String>>[...buttonList],
         },
         'cacheDuration': {
           'type': 'duration',
@@ -1038,6 +1025,8 @@ class SettingsHandler extends GetxController {
         return extPathOverride;
       case 'drawerMascotPathOverride':
         return drawerMascotPathOverride;
+      case 'backupPath':
+        return backupPath;
       case 'enableDrawerMascot':
         return enableDrawerMascot;
       case 'lastSyncIp':
@@ -1252,6 +1241,9 @@ class SettingsHandler extends GetxController {
       case 'extPathOverride':
         extPathOverride = validatedValue;
         break;
+      case 'backupPath':
+        backupPath = validatedValue;
+        break;
       case 'lastSyncIp':
         lastSyncIp = validatedValue;
         break;
@@ -1435,6 +1427,7 @@ class SettingsHandler extends GetxController {
       'appMode': validateValue('appMode', null, toJSON: true),
       'handSide': validateValue('handSide', null, toJSON: true),
       'extPathOverride': validateValue('extPathOverride', null, toJSON: true),
+      'backupPath': validateValue('backupPath', null, toJSON: true),
       'lastSyncIp': validateValue('lastSyncIp', null, toJSON: true),
       'lastSyncPort': validateValue('lastSyncPort', null, toJSON: true),
       'customUserAgent': validateValue('customUserAgent', null, toJSON: true),
@@ -2155,12 +2148,6 @@ class EnvironmentConfig {
     'LS_IS_TESTING',
     defaultValue: false,
   );
-
-  //
-
-  static bool get hasSiSecret => siSecret1.isNotEmpty && siSecret2.isNotEmpty;
-  static const String siSecret1 = String.fromEnvironment('SI_SECRET_1', defaultValue: '');
-  static const String siSecret2 = String.fromEnvironment('SI_SECRET_2', defaultValue: '');
 }
 
 class TagsListData {

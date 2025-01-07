@@ -31,6 +31,12 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
   bool inProgress = false;
   int progress = 0, total = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    backupPath = settingsHandler.backupPath;
+  }
+
   void showSnackbar(BuildContext context, String text, bool isError) {
     FlashElements.showSnackbar(
       context: context,
@@ -91,6 +97,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       return;
     }
 
+    settingsHandler.backupPath = backupPath;
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (result) {
       Navigator.of(context).pop();
@@ -106,7 +113,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            title: const Text('Backup & Restore [BETA]'),
+            title: const Text('Backup & Restore'),
           ),
           body: Center(
             child: ListView(
@@ -131,7 +138,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Backup & Restore [BETA]'),
+          title: const Text('Backup & Restore'),
         ),
         body: Center(
           child: Stack(
@@ -145,6 +152,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           if (path.isNotEmpty) {
                             setState(() {
                               backupPath = path;
+                              settingsHandler.backupPath = path;
                             });
                           } else {
                             showSnackbar(context, 'Failed to get backup path!', true);
