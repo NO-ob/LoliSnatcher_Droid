@@ -57,24 +57,22 @@ android {
         namespace 'com.noaisu.loliSnatcher'
     }
 
-
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+    // ndkVersion flutter.ndkVersion
+    ndkVersion "27.2.12479018"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_9
-        targetCompatibility JavaVersion.VERSION_1_9
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_9
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
-
-    ndkVersion = "27.0.12077973"
 
     defaultConfig {
         applicationId packageName
@@ -111,6 +109,6 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0"
     implementation 'androidx.documentfile:documentfile:1.0.1'
 }
