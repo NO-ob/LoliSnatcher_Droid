@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
@@ -373,21 +372,19 @@ class _ThumbnailState extends State<Thumbnail> {
         final bool showShimmer = !(isLoaded || isLoadedExtra) && !isFailed;
         final bool useExtra = isThumbQuality == false && !widget.item.isHated;
 
-        const double fullOpacity = Constants.imageDefaultOpacity;
-
         return Stack(
           alignment: Alignment.center,
           children: [
             if (useExtra) // fetch small low quality thumbnail while loading a sample
               AnimatedOpacity(
                 // fade in image
-                opacity: !widget.isStandalone ? fullOpacity : (isLoadedExtra ? fullOpacity : 0),
+                opacity: (!widget.isStandalone || isLoadedExtra) ? 1 : 0,
                 duration: const Duration(milliseconds: 200),
                 child: AnimatedSwitcher(
                   duration: Duration(milliseconds: widget.isStandalone ? 100 : 0),
                   child: extraProvider != null
                       ? ImageFiltered(
-                          enabled: widget.item.isHated,
+                          enabled: settingsHandler.blurImages || widget.item.isHated,
                           imageFilter: ImageFilter.blur(
                             sigmaX: 10,
                             sigmaY: 10,
@@ -413,13 +410,13 @@ class _ThumbnailState extends State<Thumbnail> {
               ),
             AnimatedOpacity(
               // fade in image
-              opacity: widget.isStandalone ? (isLoaded ? fullOpacity : 0) : fullOpacity,
+              opacity: (!widget.isStandalone || isLoaded) ? 1 : 0,
               duration: const Duration(milliseconds: 300),
               child: AnimatedSwitcher(
                 duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
                 child: mainProvider != null
                     ? ImageFiltered(
-                        enabled: widget.item.isHated,
+                        enabled: settingsHandler.blurImages || widget.item.isHated,
                         imageFilter: ImageFilter.blur(
                           sigmaX: 10,
                           sigmaY: 10,

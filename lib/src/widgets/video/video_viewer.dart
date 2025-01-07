@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,6 @@ import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -582,8 +582,6 @@ class VideoViewerState extends State<VideoViewer> {
       aspectRatio < screenRatio ? screenSize.height : screenSize.width / aspectRatio,
     );
 
-    const double fullOpacity = Constants.imageDefaultOpacity;
-
     return Hero(
       tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
       child: Material(
@@ -639,8 +637,13 @@ class VideoViewerState extends State<VideoViewer> {
                       },
                       child: Stack(
                         children: [
-                          Opacity(
-                            opacity: fullOpacity,
+                          ImageFiltered(
+                            enabled: settingsHandler.blurImages,
+                            imageFilter: ImageFilter.blur(
+                              sigmaX: 20,
+                              sigmaY: 20,
+                              tileMode: TileMode.decal,
+                            ),
                             child: PhotoView.customChild(
                               childSize: childSize,
                               minScale: PhotoViewComputedScale.contained,

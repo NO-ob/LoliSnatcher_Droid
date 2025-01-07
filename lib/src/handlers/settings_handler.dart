@@ -60,9 +60,7 @@ class SettingsHandler extends GetxController {
   RxBool showFPS = false.obs;
   RxBool showPerf = false.obs;
   RxBool showImageStats = false.obs;
-  bool disableImageScaling = false;
-  bool gifsAsThumbnails = false;
-  bool desktopListsDrag = false;
+  bool blurImages = kDebugMode ? Constants.blurImagesDefaultDev : false;
 
   ////////////////////////////////////////////////////
 
@@ -162,6 +160,9 @@ class SettingsHandler extends GetxController {
   bool disableVibration = false;
   bool useAltVideoPlayer = isDesktopPlatform;
   bool altVideoPlayerHwAccel = true;
+  bool disableImageScaling = false;
+  bool gifsAsThumbnails = false;
+  bool desktopListsDrag = false;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 

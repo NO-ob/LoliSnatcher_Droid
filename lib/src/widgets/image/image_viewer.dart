@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,6 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -382,8 +382,6 @@ class ImageViewerState extends State<ImageViewer> {
   Widget build(BuildContext context) {
     // print('!!! Build media ${searchHandler.getItemIndex(widget.booruItem)} $isViewed !!!');
 
-    const double fullOpacity = Constants.imageDefaultOpacity;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -439,30 +437,38 @@ class ImageViewerState extends State<ImageViewer> {
                               scrollZoomImage(pointerSignal.scrollDelta.dy);
                             }
                           },
-                          child: AnimatedOpacity(
-                            opacity: isLoaded ? fullOpacity : 0,
-                            duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-                            child: PhotoView(
-                              imageProvider: mainProvider,
-                              gaplessPlayback: true,
-                              loadingBuilder: (context, event) {
-                                return const SizedBox.shrink();
-                              },
-                              errorBuilder: (_, error, __) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  onError(error);
-                                });
-                                return const SizedBox.shrink();
-                              },
-                              // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                              filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
-                              minScale: PhotoViewComputedScale.contained,
-                              maxScale: PhotoViewComputedScale.covered * 8,
-                              initialScale: PhotoViewComputedScale.contained,
-                              enableRotation: settingsHandler.allowRotation,
-                              basePosition: Alignment.center,
-                              controller: viewController,
-                              scaleStateController: scaleController,
+                          child: ImageFiltered(
+                            enabled: settingsHandler.blurImages,
+                            imageFilter: ImageFilter.blur(
+                              sigmaX: 20,
+                              sigmaY: 20,
+                              tileMode: TileMode.decal,
+                            ),
+                            child: AnimatedOpacity(
+                              opacity: isLoaded ? 1 : 0,
+                              duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                              child: PhotoView(
+                                imageProvider: mainProvider,
+                                gaplessPlayback: true,
+                                loadingBuilder: (context, event) {
+                                  return const SizedBox.shrink();
+                                },
+                                errorBuilder: (_, error, __) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    onError(error);
+                                  });
+                                  return const SizedBox.shrink();
+                                },
+                                // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                                filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
+                                minScale: PhotoViewComputedScale.contained,
+                                maxScale: PhotoViewComputedScale.covered * 8,
+                                initialScale: PhotoViewComputedScale.contained,
+                                enableRotation: settingsHandler.allowRotation,
+                                basePosition: Alignment.center,
+                                controller: viewController,
+                                scaleStateController: scaleController,
+                              ),
                             ),
                           ),
                         )
