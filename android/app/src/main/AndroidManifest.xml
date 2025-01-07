@@ -57,9 +57,9 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- Impeller preview - causes screen tearing on videos? -->
-        <!-- <meta-data
+        <!-- disable Impeller - causes screen tearing and rendering issues on videos and animations, possibly performance degradation? (flutter 3.27) -->
+        <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
-            android:value="true" /> -->
+            android:value="false" />
     </application>
 </manifest>
