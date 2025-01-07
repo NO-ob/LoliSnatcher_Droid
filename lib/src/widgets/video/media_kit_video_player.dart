@@ -1,6 +1,6 @@
 /// This file is a part of media_kit (https://github.com/media-kit/media-kit).
 ///
-/// Copyright © 2023 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
+/// Copyright © 2023 & onwards, Hitesh Kumar Saini saini123hitesh@gmail.com.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
 
@@ -140,6 +140,7 @@ class MediaKitVideoPlayer extends VideoPlayerPlatform {
         resource = dataSource.uri!;
         break;
 
+      // ignore: unreachable_switch_default
       default:
         throw UnsupportedError('${dataSource.sourceType} is not supported');
     }

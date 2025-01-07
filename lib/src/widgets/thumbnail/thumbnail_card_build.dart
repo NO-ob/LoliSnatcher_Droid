@@ -50,7 +50,7 @@ class ThumbnailCardBuild extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         child: Obx(() {
           // print('ThumbnailCardBuild obx: $index');
-          final bool isSelected = searchHandler.currentTab.selected.contains(item);
+          final bool isSelected = searchHandler.currentSelected.contains(item);
           final bool isCurrent = (settingsHandler.appMode.value.isDesktop || viewerHandler.inViewer.value) && searchHandler.viewedIndex.value == index;
           final bool isCurrentlyBeingSnatched =
               snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;

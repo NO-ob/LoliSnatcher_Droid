@@ -21,7 +21,7 @@ import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 class Thumbnail extends StatefulWidget {
   const Thumbnail({
     required this.item,
-    required this.isStandalone,
+    this.isStandalone = false,
     super.key,
   });
 
@@ -413,7 +413,7 @@ class _ThumbnailState extends State<Thumbnail> {
               ),
             AnimatedOpacity(
               // fade in image
-              opacity: !widget.isStandalone ? fullOpacity : (isLoaded ? fullOpacity : 0),
+              opacity: widget.isStandalone ? (isLoaded ? fullOpacity : 0) : fullOpacity,
               duration: const Duration(milliseconds: 300),
               child: AnimatedSwitcher(
                 duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),

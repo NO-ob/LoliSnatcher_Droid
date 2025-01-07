@@ -197,7 +197,7 @@ class _MobileHomeState extends State<MobileHome> {
                 ],
               ),
             ),
-            if (searchHandler.currentTab.selected.isNotEmpty)
+            if (searchHandler.currentSelected.isNotEmpty)
               Positioned(
                 right: -6,
                 top: 8,
@@ -213,7 +213,7 @@ class _MobileHomeState extends State<MobileHome> {
                     child: Center(
                       child: FittedBox(
                         child: Text(
-                          searchHandler.currentTab.selected.length.toFormattedString(),
+                          searchHandler.currentSelected.length.toFormattedString(),
                           style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
                         ),
                       ),
@@ -506,15 +506,15 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
       return;
     }
     // call a function to save the currently viewed image when the save button is pressed
-    if (searchHandler.currentTab.selected.isNotEmpty) {
+    if (searchHandler.currentSelected.isNotEmpty) {
       snatchHandler.queue(
-        [...searchHandler.currentTab.selected],
+        [...searchHandler.currentSelected],
         searchHandler.currentBooru,
         settingsHandler.snatchCooldown,
         isLongTap,
       );
       if (settingsHandler.favouriteOnSnatch) {
-        for (final item in searchHandler.currentTab.selected) {
+        for (final item in searchHandler.currentSelected) {
           final index = searchHandler.currentFetched.indexOf(item);
           if (index != -1) {
             unawaited(searchHandler.toggleItemFavourite(index, forcedValue: true));
@@ -522,7 +522,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
         }
       }
       await Future.delayed(const Duration(milliseconds: 100));
-      searchHandler.currentTab.selected.value = [];
+      searchHandler.currentTab.selected.clear();
     } else {
       FlashElements.showSnackbar(
         context: context,
@@ -796,7 +796,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           ),
                                         ),
                                         Obx(() {
-                                          final selected = searchHandler.currentTab.selected;
+                                          final selected = searchHandler.currentSelected;
                                           if (selected.isNotEmpty) {
                                             final int favSelectedCount = selected.where((item) => item.isFavourite.value == true).length;
                                             final int unfavSelectedCount = selected.where((item) => item.isFavourite.value == false).length;
@@ -821,7 +821,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                     name: 'Remove snatched status from selected (${downloadsSelectedCount.toFormattedString()})',
                                                     icon: const Icon(Icons.file_download_off_outlined),
                                                     action: () async {
-                                                      final onlySnatched = searchHandler.currentTab.selected.where((e) => e.isSnatched.value == true).toList();
+                                                      final onlySnatched = searchHandler.currentSelected.where((e) => e.isSnatched.value == true).toList();
                                                       if (onlySnatched.length > 20) {
                                                         // TODO confirm dialog
                                                       }
@@ -841,7 +841,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                     name: 'Favourite selected (${unfavSelectedCount.toFormattedString()})',
                                                     icon: const Icon(Icons.favorite, color: Colors.red),
                                                     action: () async {
-                                                      final onlyUnfavs = searchHandler.currentTab.selected.where((e) => e.isFavourite.value == false).toList();
+                                                      final onlyUnfavs = searchHandler.currentSelected.where((e) => e.isFavourite.value == false).toList();
                                                       if (onlyUnfavs.length > 20) {
                                                         // TODO confirm dialog
                                                       }
@@ -861,7 +861,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                     name: 'Unfavourite selected (${favSelectedCount.toFormattedString()})',
                                                     icon: const Icon(Icons.favorite_border),
                                                     action: () async {
-                                                      final onlyFavs = searchHandler.currentTab.selected.where((e) => e.isFavourite.value == true).toList();
+                                                      final onlyFavs = searchHandler.currentSelected.where((e) => e.isFavourite.value == true).toList();
                                                       if (onlyFavs.length > 20) {
                                                         // TODO confirm dialog
                                                       }

@@ -1109,8 +1109,10 @@ class SettingsBottomSheet extends StatelessWidget {
             if (actionButtons != null)
               Padding(
                 padding: buttonPadding ?? const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  alignment: WrapAlignment.center,
                   children: actionButtons ?? [],
                 ),
               ),

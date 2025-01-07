@@ -174,6 +174,7 @@ enum LogTypes {
       case LogTypes.settingsLoad:
       case LogTypes.tagHandlerInfo:
         return LogLevel.info;
+      // ignore: unreachable_switch_default
       default:
         return LogLevel.wtf;
     }

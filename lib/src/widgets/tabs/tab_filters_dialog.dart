@@ -148,6 +148,26 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             item: item,
           ),
         ),
+        SettingsDropdown<bool?>(
+          title: 'Multibooru',
+          value: isMultiBooruMode,
+          drawBottomBorder: false,
+          onChanged: (bool? newValue) {
+            isMultiBooruMode = newValue;
+            setState(() {});
+          },
+          items: const [
+            null,
+            true,
+            false,
+          ],
+          itemBuilder: (item) => item == null ? const Text('All') : Text(item ? 'Enabled' : 'Disabled'),
+          itemTitleBuilder: (item) => item == null
+              ? 'All'
+              : item
+                  ? 'Enabled'
+                  : 'Disabled',
+        ),
         SettingsToggle(
           title: 'Duplicates',
           subtitle: duplicateFilter ? const Text('Will also enable sorting') : null,
@@ -182,16 +202,6 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
                   ],
                 )
               : const SizedBox.shrink(),
-        ),
-        SettingsToggleTristate(
-          title: 'Multibooru',
-          value: isMultiBooruMode,
-          onChanged: (bool? newValue) {
-            isMultiBooruMode = newValue;
-            setState(() {});
-          },
-          reverse: true,
-          drawBottomBorder: false,
         ),
         SettingsToggle(
           title: 'Empty search query',

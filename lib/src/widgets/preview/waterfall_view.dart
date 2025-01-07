@@ -259,7 +259,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   Future<void> onLongPress(int index, BooruItem item) async {
     await ServiceHandler.vibrate();
 
-    if (searchHandler.currentTab.selected.contains(item)) {
+    if (searchHandler.currentSelected.contains(item)) {
       searchHandler.currentTab.selected.remove(item);
     } else {
       searchHandler.currentTab.selected.add(item);
@@ -388,6 +388,7 @@ class _WaterfallViewState extends State<WaterfallView> {
                         controller: searchHandler.gridScrollController,
                         // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
                         child: ShimmerWrap(
+                          enabled: !SettingsHandler.instance.shitDevice,
                           child: isStaggered
                               ? StaggeredBuilder(
                                   onTap: onTap,

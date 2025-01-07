@@ -597,7 +597,6 @@ class VideoViewerState extends State<VideoViewer> {
                   ? const SizedBox.shrink()
                   : Thumbnail(
                       item: widget.booruItem,
-                      isStandalone: false,
                     ),
             ),
             AnimatedSwitcher(

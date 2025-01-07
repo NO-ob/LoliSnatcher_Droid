@@ -385,6 +385,7 @@ class SearchHandler extends GetxController {
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   Booru get currentBooru => currentTab.selectedBooru.value;
   RxList<Booru>? get currentSecondaryBoorus => currentTab.secondaryBoorus;
+  List<BooruItem> get currentSelected => currentTab.selected;
   List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
   void filterCurrentFetched() {
     if (list.isNotEmpty) {

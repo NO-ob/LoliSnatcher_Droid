@@ -138,7 +138,7 @@ class ThumbnailBuild extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Obx(() {
-                    final selected = searchHandler.currentTab.selected;
+                    final selected = searchHandler.currentSelected;
 
                     Widget bottomLeftWidget = const SizedBox.shrink();
                     if (selected.isNotEmpty && selectable) {

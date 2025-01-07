@@ -405,7 +405,6 @@ class ImageViewerState extends State<ImageViewer> {
                 // TODO find a way to detect when main image is fully rendered to dispose this widget to free up memory
                 Thumbnail(
                   item: widget.booruItem,
-                  isStandalone: false,
                 ),
                 //
                 MediaLoading(

@@ -120,7 +120,6 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
             }
           },
         ),
-        const SizedBox(width: 10),
         Obx(
           () => ElevatedButton(
             onPressed: searchHandler.isRunningAutoSearch.value
@@ -139,14 +138,11 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
         ),
         Obx(
           () => searchHandler.isRunningAutoSearch.value
-              ? Padding(
-                  padding: const EdgeInsets.only(left: 10),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      searchHandler.isRunningAutoSearch.value = false;
-                    },
-                    child: const Text('Stop search'),
-                  ),
+              ? ElevatedButton(
+                  onPressed: () {
+                    searchHandler.isRunningAutoSearch.value = false;
+                  },
+                  child: const Text('Stop search'),
                 )
               : const SizedBox.shrink(),
         ),

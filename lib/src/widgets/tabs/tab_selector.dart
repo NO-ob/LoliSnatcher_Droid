@@ -22,7 +22,6 @@ import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
-import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_filters_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_move_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
@@ -752,10 +751,12 @@ class _TabManagerPageState extends State<TabManagerPage> {
           shrinkWrap: true,
           itemCount: selectedTabs.length,
           itemBuilder: (_, index) {
-            final int itemIndex = searchHandler.list.indexOf(selectedTabs[index]);
+            final item = selectedTabs[index];
+
+            final int itemIndex = searchHandler.list.indexOf(item);
 
             return TabManagerItem(
-              tab: selectedTabs[index],
+              tab: item,
               index: index,
               isFiltered: true,
               originalIndex: itemIndex,
@@ -1098,33 +1099,31 @@ class _TabManagerPageState extends State<TabManagerPage> {
           Expanded(
             child: Stack(
               children: [
-                ShimmerWrap(
-                  child: Scrollbar(
+                Scrollbar(
+                  controller: scrollController,
+                  thickness: 8,
+                  interactive: true,
+                  child: DesktopScrollWrap(
                     controller: scrollController,
-                    thickness: 8,
-                    interactive: true,
-                    child: DesktopScrollWrap(
-                      controller: scrollController,
-                      child: ReorderableListView.builder(
-                        scrollController: scrollController,
-                        itemExtent: tabHeight,
-                        onReorder: (oldIndex, newIndex) {
-                          if (oldIndex == newIndex) {
-                            return;
-                          } else if (oldIndex < newIndex) {
-                            newIndex -= 1;
-                          }
+                    child: ReorderableListView.builder(
+                      scrollController: scrollController,
+                      itemExtent: tabHeight,
+                      onReorder: (oldIndex, newIndex) {
+                        if (oldIndex == newIndex) {
+                          return;
+                        } else if (oldIndex < newIndex) {
+                          newIndex -= 1;
+                        }
 
-                          searchHandler.moveTab(oldIndex, newIndex);
-                          getTabs();
-                        },
-                        physics: getListPhysics(),
-                        buildDefaultDragHandles: false,
-                        proxyDecorator: proxyDecorator,
-                        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                        itemCount: totalFilteredTabs,
-                        itemBuilder: itemBuilder,
-                      ),
+                        searchHandler.moveTab(oldIndex, newIndex);
+                        getTabs();
+                      },
+                      physics: getListPhysics(),
+                      buildDefaultDragHandles: false,
+                      proxyDecorator: proxyDecorator,
+                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                      itemCount: totalFilteredTabs,
+                      itemBuilder: itemBuilder,
                     ),
                   ),
                 ),
@@ -1367,84 +1366,86 @@ class TabManagerItem extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             borderRadius: radius,
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 12,
-                  right: 12,
-                  top: 2,
-                  bottom: 6,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TabRow(
-                              tab: tab,
-                              filterText: filterText,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: 12,
+                right: 12,
+                top: 2,
+                bottom: 6,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TabRow(
+                            tab: tab,
+                            filterText: filterText,
+                          ),
+                        ),
+                        if (onOptionsTap != null) ...[
+                          const SizedBox(width: 4),
+                          optionsWidgetBuilder?.call(context, onOptionsTap) ??
+                              IconButton(
+                                onPressed: onOptionsTap,
+                                icon: const Icon(CupertinoIcons.slider_horizontal_3),
+                              ),
+                        ],
+                        if (onCloseTap != null) ...[
+                          if (onOptionsTap == null) const SizedBox(width: 4) else const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: onCloseTap,
+                            icon: const Icon(
+                              Icons.close,
                             ),
                           ),
-                          if (onOptionsTap != null) ...[
-                            const SizedBox(width: 4),
-                            optionsWidgetBuilder?.call(context, onOptionsTap) ??
-                                IconButton(
-                                  onPressed: onOptionsTap,
-                                  icon: const Icon(CupertinoIcons.slider_horizontal_3),
-                                ),
-                          ],
-                          if (onCloseTap != null) ...[
-                            if (onOptionsTap == null) const SizedBox(width: 4) else const SizedBox(width: 8),
-                            IconButton(
-                              onPressed: onCloseTap,
-                              icon: const Icon(
-                                Icons.close,
-                              ),
-                            ),
-                          ],
                         ],
-                      ),
+                      ],
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: Obx(
-                        () {
-                          final int totalCount = tab.booruHandler.totalCount.value;
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: subtitleStyle.fontSize,
+                            child: Builder(
+                              builder: (context) {
+                                final List<String> booruNames = [
+                                  if (tab.booruHandler is MergebooruHandler)
+                                    (tab.booruHandler as MergebooruHandler).booruList[0].name ?? ''
+                                  else
+                                    tab.booruHandler.booru.name ?? '',
+                                  //
+                                  if (tab.secondaryBoorus != null)
+                                    for (final booru in tab.secondaryBoorus!) booru.name ?? '',
+                                ];
+                                final String booruNamesStr = booruNames.join(', ');
 
+                                return MarqueeText(
+                                  key: ValueKey(booruNamesStr),
+                                  text: booruNamesStr.trim(),
+                                  style: subtitleStyle.copyWith(
+                                    height: 1,
+                                  ),
+                                  allowDownscale: false,
+                                  isExpanded: false,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Obx(() {
+                          final int totalCount = tab.booruHandler.totalCount.value;
                           return Row(
                             children: [
-                              Expanded(
-                                child: SizedBox(
-                                  height: subtitleStyle.fontSize,
-                                  child: Builder(
-                                    builder: (context) {
-                                      final List<String> booruNames = [
-                                        if (tab.booruHandler is MergebooruHandler)
-                                          (tab.booruHandler as MergebooruHandler).booruList[0].name ?? ''
-                                        else
-                                          tab.booruHandler.booru.name ?? '',
-                                        if (tab.secondaryBoorus != null)
-                                          for (final booru in tab.secondaryBoorus!) booru.name ?? '',
-                                      ];
-                                      final String booruNamesStr = booruNames.join(', ');
-
-                                      return MarqueeText(
-                                        text: booruNamesStr.trim(),
-                                        style: subtitleStyle,
-                                        allowDownscale: false,
-                                        isExpanded: false,
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
                               if (totalCount > 0) ...[
                                 Icon(
                                   Icons.image,
@@ -1462,14 +1463,14 @@ class TabManagerItem extends StatelessWidget {
                                   '#${(index! + 1).toFormattedString()}${originalIndex != null ? '|${(originalIndex! + 1).toFormattedString()}' : ''}',
                                   style: subtitleStyle,
                                 ),
-                              const SizedBox(width: 8),
                             ],
                           );
-                        },
-                      ),
+                        }),
+                        const SizedBox(width: 8),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

@@ -88,7 +88,7 @@ class DesktopHome extends StatelessWidget {
             page: () => const SettingsPage(),
           ),
           Obx(() {
-            if (searchHandler.list.isNotEmpty && searchHandler.currentTab.selected.isNotEmpty) {
+            if (searchHandler.list.isNotEmpty && searchHandler.currentSelected.isNotEmpty) {
               return Stack(
                 alignment: Alignment.center,
                 children: [
@@ -99,14 +99,14 @@ class DesktopHome extends StatelessWidget {
                     action: () async {
                       await getPerms();
                       // call a function to save the currently viewed image when the save button is pressed
-                      if (searchHandler.currentTab.selected.isNotEmpty) {
+                      if (searchHandler.currentSelected.isNotEmpty) {
                         snatchHandler.queue(
-                          searchHandler.currentTab.selected,
+                          searchHandler.currentSelected,
                           searchHandler.currentBooru,
                           settingsHandler.snatchCooldown,
                           false,
                         );
-                        searchHandler.currentTab.selected.value = [];
+                        searchHandler.currentTab.selected.clear();
                       } else {
                         FlashElements.showSnackbar(
                           context: context,
@@ -119,7 +119,7 @@ class DesktopHome extends StatelessWidget {
                       }
                     },
                   ),
-                  if (searchHandler.currentTab.selected.isNotEmpty)
+                  if (searchHandler.currentSelected.isNotEmpty)
                     Positioned(
                       right: 2,
                       bottom: 5,
@@ -133,7 +133,7 @@ class DesktopHome extends StatelessWidget {
                         ),
                         child: Center(
                           child: FittedBox(
-                            child: Text('${searchHandler.currentTab.selected.length}', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                            child: Text('${searchHandler.currentSelected.length}', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
                           ),
                         ),
                       ),

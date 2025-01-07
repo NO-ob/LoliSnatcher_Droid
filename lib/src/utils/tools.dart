@@ -198,7 +198,7 @@ class Tools {
             userAgent: customUserAgent,
             title: 'Captcha check',
             subtitle:
-                "Possible captcha detected, please solve it and press back after that. If there is no captcha then it's probably some other authentication issue. [Beta]",
+                "Possible captcha detected, please solve it and press back after that. If there is no captcha then it's probably some other authentication issue.",
           ),
         ),
       );

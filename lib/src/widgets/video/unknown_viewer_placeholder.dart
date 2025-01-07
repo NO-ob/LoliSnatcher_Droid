@@ -25,7 +25,6 @@ class UnknownViewerPlaceholder extends StatelessWidget {
           children: [
             Thumbnail(
               item: item,
-              isStandalone: false,
             ),
             LayoutBuilder(
               builder: (BuildContext layoutContext, BoxConstraints constraints) {

@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
@@ -225,11 +226,14 @@ class _BooruFaviconState extends State<BooruFavicon> {
             duration: const Duration(milliseconds: 200),
             child: (isLoaded || isFailed)
                 ? const SizedBox.shrink()
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(size / 5),
-                    child: ShimmerCard(
-                      isLoading: !isLoaded && !isFailed,
-                      child: !isLoaded && !isFailed ? null : const SizedBox.shrink(),
+                : ShimmerWrap(
+                    enabled: !SettingsHandler.instance.shitDevice,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(size / 5),
+                      child: ShimmerCard(
+                        isLoading: !isLoaded && !isFailed,
+                        child: !isLoaded && !isFailed ? null : const SizedBox.shrink(),
+                      ),
                     ),
                   ),
           ),
