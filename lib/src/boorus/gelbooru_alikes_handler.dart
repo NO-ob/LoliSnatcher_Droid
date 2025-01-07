@@ -26,6 +26,8 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   bool get hasSizeData => true;
 
+  bool get isR34xxx => booru.baseURL!.contains('rule34.xxx');
+
   // TODO ?
   //Realbooru api returns 0 for models but on the website shows them
   //listed as model on the tagsearch so I dont think the api shows tag types properly
@@ -142,7 +144,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   String makeURL(String tags) {
     // EXAMPLE: https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=rating:safe+sort:score+translated&limit=50&pid=0
     String baseUrl = booru.baseURL!;
-    if (baseUrl.contains('rule34.xxx')) {
+    if (isR34xxx) {
       // because requests to default url are protected by a captcha
       baseUrl = 'https://api.rule34.xxx';
     }
@@ -163,7 +165,7 @@ class GelbooruAlikesHandler extends BooruHandler {
 
     // EXAMPLE: https://safebooru.org/autocomplete.php?q=naga
     String baseUrl = booru.baseURL!;
-    if (baseUrl.contains('rule34.xxx')) {
+    if (isR34xxx) {
       baseUrl = 'https://api.rule34.xxx';
     }
     return '$baseUrl/autocomplete.php?q=$input'; // doesn't allow limit, but sorts by popularity
@@ -216,10 +218,91 @@ class GelbooruAlikesHandler extends BooruHandler {
   bool get hasCommentsSupport => true;
 
   @override
+  Future<List<CommentItem>> getComments(
+    String postID,
+    int pageNum, {
+    CancelToken? cancelToken,
+  }) async {
+    List<CommentItem> comments = [];
+    comments = await super.getComments(postID, pageNum, cancelToken: cancelToken);
+
+    if (isR34xxx && comments.isEmpty) {
+      // single comment not loading through api workaround
+      try {
+        final postUrl = makePostURL(postID);
+        final cookies = await getCookiesForPost(postUrl);
+        final res = await DioNetwork.get(
+          postUrl,
+          headers: {
+            ...getHeaders(),
+            if (isR34xxx && cookies?.isNotEmpty == true) 'Cookie': cookies,
+          },
+          options: Options(
+            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
+          ),
+          cancelToken: cancelToken,
+          customInterceptor: DioNetwork.captchaInterceptor,
+        );
+
+        if (res.statusCode == 200) {
+          final document = parse(res.data);
+          final container = document.querySelector('#comment-list');
+          if (container != null) {
+            final elements = container.children.where((e) => e.localName == 'div');
+            for (final c in elements) {
+              try {
+                final header = c.querySelector('.col1');
+                final content = c.querySelector('.col2');
+
+                if (header != null && content != null) {
+                  final String headerSecondRowText = header.querySelector('b')?.text ?? '';
+                  final scoreRegex = RegExp(r'Score: (\d+)', caseSensitive: false);
+                  final timeRegex = RegExp(r'Posted on (\d+-\d+-\d+ \d+:\d+:\d+)', caseSensitive: false);
+                  comments.add(
+                    CommentItem(
+                      id: c.attributes['id']?.trim(),
+                      title: header.querySelector('span')?.text.replaceAll('>> #', '').trim(),
+                      content: content.text.trim(),
+                      authorName: header.querySelector('a')?.text.trim(),
+                      postID: postID,
+                      score: scoreRegex.hasMatch(headerSecondRowText) ? int.tryParse(scoreRegex.firstMatch(headerSecondRowText)!.group(1)!) : null,
+                      createDate: timeRegex.hasMatch(headerSecondRowText) ? timeRegex.firstMatch(headerSecondRowText)!.group(1)!.trim() : null,
+                      createDateFormat: 'yyyy-MM-dd HH:mm:ss',
+                    ),
+                  );
+                }
+              } catch (e, s) {
+                Logger.Inst().log(
+                  'Failed to parse comment through alternative method',
+                  className,
+                  'getComments',
+                  LogTypes.booruHandlerFetchFailed,
+                  s: s,
+                );
+              }
+            }
+          }
+        }
+      } catch (e, s) {
+        Logger.Inst().log(
+          'Failed to fetch/parse comments through alternative method',
+          className,
+          'getComments',
+          LogTypes.booruHandlerFetchFailed,
+          s: s,
+        );
+      }
+    }
+
+    return comments;
+  }
+
+  @override
   String makeCommentsURL(String postID, int pageNum) {
     // EXAMPLE: https://safebooru.org/index.php?page=dapi&s=comment&q=index&post_id=1
     String baseUrl = booru.baseURL!;
-    if (baseUrl.contains('rule34.xxx')) {
+    if (isR34xxx) {
       baseUrl = 'https://api.rule34.xxx';
     }
 
@@ -243,8 +326,8 @@ class GelbooruAlikesHandler extends BooruHandler {
       authorName: current.getAttribute('creator'),
       postID: current.getAttribute('post_id'),
       // TODO broken on rule34xxx? returns current time
-      createDate: current.getAttribute('created_at'), // 2021-11-15 12:09
-      createDateFormat: 'yyyy-MM-dd HH:mm',
+      createDate: isR34xxx ? null : current.getAttribute('created_at'), // 2021-11-15 12:09
+      createDateFormat: isR34xxx ? null : 'yyyy-MM-dd HH:mm',
     );
   }
 
@@ -257,7 +340,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   String makeNotesURL(String postID) {
     // EXAMPLE: https://safebooru.org/index.php?page=dapi&s=note&q=index&post_id=645243
     String baseUrl = booru.baseURL!;
-    if (baseUrl.contains('rule34.xxx')) {
+    if (isR34xxx) {
       baseUrl = 'https://api.rule34.xxx';
     }
 
@@ -285,10 +368,10 @@ class GelbooruAlikesHandler extends BooruHandler {
   }
 
   @override
-  bool get hasLoadItemSupport => booru.baseURL!.contains('rule34.xxx');
+  bool get hasLoadItemSupport => isR34xxx;
 
   @override
-  bool get shouldUpdateIteminTagView => booru.baseURL!.contains('rule34.xxx');
+  bool get shouldUpdateIteminTagView => isR34xxx;
 
   Future<String?> getCookiesForPost(String postUrl) async {
     String cookieString = await Tools.getCookies(postUrl);
@@ -312,7 +395,7 @@ class GelbooruAlikesHandler extends BooruHandler {
         item.postURL,
         headers: {
           ...getHeaders(),
-          if (booru.baseURL!.contains('rule34.xxx') && cookies?.isNotEmpty == true) 'Cookie': cookies,
+          if (isR34xxx && cookies?.isNotEmpty == true) 'Cookie': cookies,
         },
         options: Options(
           sendTimeout: const Duration(seconds: 5),
