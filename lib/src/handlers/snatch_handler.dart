@@ -88,10 +88,11 @@ class SnatchHandler extends GetxController {
         final List<BooruItem> exists = data['exists'] ?? [];
         final List<BooruItem> failed = data['failed'] ?? [];
         final List<BooruItem> cancelled = data['cancelled'] ?? [];
+        final bool isLastMessage = data['exists'] != null && data['failed'] != null && data['cancelled'] != null;
 
         // last yield in stream will send fetch results counters
         // but show this message only when queue is empty => snatching is complete
-        if (SettingsHandler.instance.downloadNotifications) {
+        if (SettingsHandler.instance.downloadNotifications && isLastMessage) {
           if (current.value!.booruItems.length == 1) {
             FlashElements.showSnackbar(
               duration: const Duration(seconds: 2),
