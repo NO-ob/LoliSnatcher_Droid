@@ -507,9 +507,12 @@ class _HideableAppBarState extends State<HideableAppBar> {
           settingsHandler.snatchCooldown,
           false,
         );
-
         if (settingsHandler.favouriteOnSnatch) {
-          await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value, forcedValue: true);
+          await searchHandler.toggleItemFavourite(
+            searchHandler.viewedIndex.value,
+            forcedValue: true,
+            skipSnatching: true,
+          );
         }
         break;
       case 'favourite':
@@ -593,7 +596,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
                         true,
                       );
                       if (settingsHandler.favouriteOnSnatch) {
-                        await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value, forcedValue: true);
+                        await searchHandler.toggleItemFavourite(
+                          searchHandler.viewedIndex.value,
+                          forcedValue: true,
+                          skipSnatching: true,
+                        );
                       }
                       Navigator.of(context).pop();
                     },

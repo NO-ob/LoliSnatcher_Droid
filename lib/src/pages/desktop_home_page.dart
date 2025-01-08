@@ -106,6 +106,13 @@ class DesktopHome extends StatelessWidget {
                           settingsHandler.snatchCooldown,
                           false,
                         );
+                        if (settingsHandler.favouriteOnSnatch) {
+                          await searchHandler.updateFavForMultipleItems(
+                            searchHandler.currentSelected,
+                            newValue: true,
+                            skipSnatching: true,
+                          );
+                        }
                         searchHandler.currentTab.selected.clear();
                       } else {
                         FlashElements.showSnackbar(

@@ -505,7 +505,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
       );
       return;
     }
-    // call a function to save the currently viewed image when the save button is pressed
+
     if (searchHandler.currentSelected.isNotEmpty) {
       snatchHandler.queue(
         [...searchHandler.currentSelected],
@@ -514,12 +514,11 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
         isLongTap,
       );
       if (settingsHandler.favouriteOnSnatch) {
-        for (final item in searchHandler.currentSelected) {
-          final index = searchHandler.currentFetched.indexOf(item);
-          if (index != -1) {
-            unawaited(searchHandler.toggleItemFavourite(index, forcedValue: true));
-          }
-        }
+        await searchHandler.updateFavForMultipleItems(
+          searchHandler.currentSelected,
+          newValue: true,
+          skipSnatching: true,
+        );
       }
       await Future.delayed(const Duration(milliseconds: 100));
       searchHandler.currentTab.selected.clear();

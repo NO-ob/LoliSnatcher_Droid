@@ -168,6 +168,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                       await searchHandler.toggleItemFavourite(
                         searchHandler.viewedIndex.value,
                         forcedValue: true,
+                        skipSnatching: true,
                       );
                     }
                   } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {

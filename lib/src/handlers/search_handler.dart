@@ -425,7 +425,11 @@ class SearchHandler extends GetxController {
     return newItem;
   }
 
-  Future<bool?> toggleItemFavourite(int itemIndex, {bool? forcedValue}) async {
+  Future<bool?> toggleItemFavourite(
+    int itemIndex, {
+    bool? forcedValue,
+    bool skipSnatching = false,
+  }) async {
     final BooruItem item = currentFetched[itemIndex];
     if (item.isFavourite.value != null) {
       if (forcedValue == null) {
@@ -436,7 +440,7 @@ class SearchHandler extends GetxController {
       item.isFavourite.value = newValue;
 
       final SettingsHandler settingsHandler = SettingsHandler.instance;
-      if (settingsHandler.snatchOnFavourite && newValue && item.isSnatched.value != true) {
+      if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue && item.isSnatched.value != true) {
         SnatchHandler.instance.queue(
           [item],
           currentBooru,
@@ -461,9 +465,10 @@ class SearchHandler extends GetxController {
   Future<void> updateFavForMultipleItems(
     List<BooruItem> items, {
     required bool newValue,
+    bool skipSnatching = false,
   }) async {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    if (settingsHandler.snatchOnFavourite && newValue) {
+    if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue) {
       SnatchHandler.instance.queue(
         items.where((e) => e.isSnatched.value != true).toList(),
         currentBooru,
