@@ -182,7 +182,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
   void afterSearch() {
     // desktop view first load setter
-    if ((searchHandler.currentFetched.isNotEmpty && searchHandler.currentFetched.length < (settingsHandler.limit + 1)) && !isMobile) {
+    if ((searchHandler.currentFetched.isNotEmpty && searchHandler.currentFetched.length < (settingsHandler.itemLimit + 1)) && !isMobile) {
       if (searchHandler.viewedItem.value.fileURL.isEmpty) {
         // print("setting booruItem value");
         final BooruItem item = searchHandler.setViewedItem(0);

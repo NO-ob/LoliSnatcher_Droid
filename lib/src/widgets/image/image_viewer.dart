@@ -67,15 +67,19 @@ class ImageViewerState extends State<ImageViewer> {
 
   void onSize(int? size) {
     // TODO find a way to stop loading based on size when caching is enabled
-    const int maxSize = 1024 * 1024 * 200;
+    final int? maxSize = settingsHandler.preloadSizeLimit == 0 ? null : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
     if (size == null) {
       return;
     } else if (size == 0) {
       killLoading(['File is zero bytes']);
-    } else if ((size > maxSize) && isTooBig != 2) {
+    } else if (maxSize != null && (size > maxSize) && isTooBig != 2) {
       // TODO add check if resolution is too big
       isTooBig = 1;
-      killLoading(['File is too big', 'File size: ${Tools.formatBytes(size, 2)}', 'Limit: ${Tools.formatBytes(maxSize, 2)}']);
+      killLoading([
+        'File is too big',
+        'File size: ${Tools.formatBytes(size, 2)}',
+        'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
+      ]);
     }
 
     if (size > 0 && widget.booruItem.fileSize == null) {

@@ -46,7 +46,7 @@ Future<void> main() async {
   final TagHandler tagHandler = Get.put(TagHandler());
   await tagHandler.initialize();
   SettingsHandler.instance.tagTypeFetchEnabled = false;
-  SettingsHandler.instance.limit = itemLimit;
+  SettingsHandler.instance.itemLimit = itemLimit;
 
   group('booru tests', () {
     test('BooruOnRailsHandler', () async {

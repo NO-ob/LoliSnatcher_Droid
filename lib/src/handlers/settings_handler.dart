@@ -97,7 +97,7 @@ class SettingsHandler extends GetxController {
   List<String> hatedTags = [];
   List<String> lovedTags = [];
 
-  int limit = Constants.defaultItemLimit;
+  int itemLimit = Constants.defaultItemLimit;
   int portraitColumns = 2;
   int landscapeColumns = 4;
   int preloadCount = 1;
@@ -107,6 +107,7 @@ class SettingsHandler extends GetxController {
   int cacheSize = 3;
 
   double mousewheelScrollSpeed = 10;
+  double preloadSizeLimit = 0.2;
 
   int currentColumnCount(BuildContext context) {
     return MediaQuery.orientationOf(context) == Orientation.portrait ? portraitColumns : landscapeColumns;
@@ -232,7 +233,9 @@ class SettingsHandler extends GetxController {
     'isDebug',
     'desktopListsDrag',
     'incognitoKeyboard',
+    'backupPath',
   ];
+
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
   // TODO move it in another file?
@@ -426,12 +429,6 @@ class SettingsHandler extends GetxController {
           'upperLimit': 1000000,
           'lowerLimit': 0,
         },
-        'mousewheelScrollSpeed': {
-          'type': 'double',
-          'default': 10.0,
-          'upperLimit': 20.0,
-          'lowerLimit': 0.1,
-        },
         'galleryAutoScrollTime': {
           'type': 'int',
           'default': 4000,
@@ -446,6 +443,20 @@ class SettingsHandler extends GetxController {
         },
 
         // double
+        'mousewheelScrollSpeed': {
+          'type': 'double',
+          'default': 10.0,
+          'upperLimit': 20.0,
+          'lowerLimit': 0.1,
+          'step': 0.5,
+        },
+        'preloadSizeLimit': {
+          'type': 'double',
+          'default': 0.2,
+          'upperLimit': double.infinity,
+          'lowerLimit': 0.0,
+          'step': 0.1,
+        },
 
         // bool
         'jsonWrite': {
@@ -942,7 +953,7 @@ class SettingsHandler extends GetxController {
       case 'shareAction':
         return shareAction;
       case 'limit':
-        return limit;
+        return itemLimit;
       case 'portraitColumns':
         return portraitColumns;
       case 'landscapeColumns':
@@ -991,6 +1002,8 @@ class SettingsHandler extends GetxController {
         return volumeButtonsScrollSpeed;
       case 'mousewheelScrollSpeed':
         return mousewheelScrollSpeed;
+      case 'preloadSizeLimit':
+        return preloadSizeLimit;
       case 'disableVideo':
         return disableVideo;
       case 'shitDevice':
@@ -1124,7 +1137,7 @@ class SettingsHandler extends GetxController {
         shareAction = validatedValue;
         break;
       case 'limit':
-        limit = validatedValue;
+        itemLimit = validatedValue;
         break;
       case 'portraitColumns':
         portraitColumns = validatedValue;
@@ -1199,6 +1212,9 @@ class SettingsHandler extends GetxController {
         break;
       case 'mousewheelScrollSpeed':
         mousewheelScrollSpeed = validatedValue;
+        break;
+      case 'preloadSizeLimit':
+        preloadSizeLimit = validatedValue;
         break;
       case 'disableVideo':
         disableVideo = validatedValue;
@@ -1389,6 +1405,7 @@ class SettingsHandler extends GetxController {
       'useVolumeButtonsForScroll': validateValue('useVolumeButtonsForScroll', null, toJSON: true),
       'volumeButtonsScrollSpeed': validateValue('volumeButtonsScrollSpeed', null, toJSON: true),
       'mousewheelScrollSpeed': validateValue('mousewheelScrollSpeed', null, toJSON: true),
+      'preloadSizeLimit': validateValue('preloadSizeLimit', null, toJSON: true),
       'disableVideo': validateValue('disableVideo', null, toJSON: true),
       'shitDevice': validateValue('shitDevice', null, toJSON: true),
       'galleryAutoScrollTime': validateValue('galleryAutoScrollTime', null, toJSON: true),

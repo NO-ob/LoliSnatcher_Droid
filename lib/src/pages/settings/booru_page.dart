@@ -41,7 +41,7 @@ class _BooruPageState extends State<BooruPage> {
   void initState() {
     super.initState();
     defaultTagsController.text = settingsHandler.defTags;
-    limitController.text = settingsHandler.limit.toString();
+    limitController.text = settingsHandler.itemLimit.toString();
 
     if (settingsHandler.prefBooru.isNotEmpty) {
       selectedBooru = settingsHandler.booruList.firstWhereOrNull(
@@ -104,7 +104,7 @@ class _BooruPageState extends State<BooruPage> {
         return;
       }
     }
-    settingsHandler.limit = int.parse(limitController.text);
+    settingsHandler.itemLimit = int.parse(limitController.text);
     final bool result = await settingsHandler.saveSettings(restate: false);
     await settingsHandler.sortBooruList();
     if (result) {

@@ -147,18 +147,22 @@ class VideoViewerState extends State<VideoViewer> {
     return;
   }
 
-  static const int maxSize = 1024 * 1024 * 200;
   void onSize(int size) {
     total.value = size;
     // TODO find a way to stop loading based on size when caching is enabled
 
+    final int? maxSize = settingsHandler.preloadSizeLimit == 0 ? null : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
     // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
       killLoading(['File is zero bytes']);
-    } else if ((size > maxSize) && isTooBig != 2) {
+    } else if (maxSize != null && (size > maxSize) && isTooBig != 2) {
       // TODO add check if resolution is too big
       isTooBig = 1;
-      killLoading(['File is too big', 'File size: ${Tools.formatBytes(size, 2)}', 'Limit: ${Tools.formatBytes(maxSize, 2)}']);
+      killLoading([
+        'File is too big',
+        'File size: ${Tools.formatBytes(size, 2)}',
+        'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
+      ]);
     }
 
     if (size > 0 && widget.booruItem.fileSize == null) {
@@ -485,7 +489,8 @@ class VideoViewerState extends State<VideoViewer> {
         const Duration(seconds: 10),
         () {
           // force restart with cache mode, but only if file size isn't loaded yet or it's small enough (<25mb) (big videos may take a while to buffer)
-          if (!isVideoInited && (total.value == 0 || total.value < maxSize / 8)) {
+          const int maxForceCacheSize = 1024 * 1024 * 25;
+          if (!isVideoInited && (total.value == 0 || total.value < maxForceCacheSize)) {
             forceCache = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               killLoading([]);

@@ -34,7 +34,7 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
     delayController.text = 200.toString();
 
     final int total = searchHandler.currentBooruHandler.totalCount.value;
-    final int possibleMaxPageNum = total != 0 ? (total / settingsHandler.limit).round() : 0;
+    final int possibleMaxPageNum = total != 0 ? (total / settingsHandler.itemLimit).round() : 0;
 
     return SettingsBottomSheet(
       title: const Text(

@@ -842,6 +842,15 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (widget.resetText != null && widget.controller.text != widget.resetText!())
+          IconButton(
+            key: const Key('reset-button'),
+            icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),
+            onPressed: () {
+              widget.controller.text = widget.resetText!();
+              onChangedCallback(widget.controller.text);
+            },
+          ),
         if (widget.numberButtons && (isFocused || widget.alwaysShowNumberButtons))
           Container(
             key: const Key('number-button-down'),
@@ -887,15 +896,6 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
                   }
                 },
               );
-            },
-          ),
-        if (widget.resetText != null && widget.controller.text != widget.resetText!())
-          IconButton(
-            key: const Key('reset-button'),
-            icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),
-            onPressed: () {
-              widget.controller.text = widget.resetText!();
-              onChangedCallback(widget.controller.text);
             },
           ),
         //

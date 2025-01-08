@@ -40,7 +40,7 @@ class ShimmerList extends StatelessWidget {
           final SettingsHandler settingsHandler = SettingsHandler.instance;
           final String displayType = settingsHandler.previewDisplay;
           final bool isDesktop = settingsHandler.appMode.value.isDesktop;
-          final int previewCount = settingsHandler.limit;
+          final int previewCount = settingsHandler.itemLimit;
           final int columnCount =
               MediaQuery.orientationOf(layoutContext) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
