@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/custom_scroll_bar_thumb.dart';
+import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
@@ -537,11 +538,10 @@ class _HistoryListState extends State<HistoryList> {
                     ),
                   ),
                   actionButtons: [
-                    const CancelButton(),
-                    ElevatedButton.icon(
-                      label: const Text('Delete'),
-                      icon: const Icon(Icons.delete_forever),
-                      onPressed: () async {
+                    const CancelButton(withIcon: true),
+                    DeleteButton(
+                      withIcon: true,
+                      action: () async {
                         for (int i = 0; i < selectedEntries.length; i++) {
                           await deleteEntry(selectedEntries[i]);
                         }
@@ -555,8 +555,7 @@ class _HistoryListState extends State<HistoryList> {
 
                 showDialog(
                   context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) => deleteDialog,
+                  builder: (_) => deleteDialog,
                 );
               },
             ),

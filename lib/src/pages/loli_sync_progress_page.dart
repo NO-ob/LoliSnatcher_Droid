@@ -107,8 +107,16 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
             ),
           ],
           actionButtons: [
-            ElevatedButton(
-              child: const Text('Yes'),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.cancel),
+              label: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.exit_to_app),
+              label: const Text('Yes'),
               onPressed: () {
                 if (widget.type == 'sender') {
                   loliSync.killSync();
@@ -117,12 +125,6 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
                 }
                 ServiceHandler.enableSleep();
                 Navigator.of(context).pop(true);
-              },
-            ),
-            ElevatedButton(
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
               },
             ),
           ],

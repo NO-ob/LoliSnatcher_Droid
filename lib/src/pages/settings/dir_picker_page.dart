@@ -51,16 +51,18 @@ class _DirPickerState extends State<DirPicker> {
               Text('Do you want to close the picker without choosing a directory?'),
             ],
             actionButtons: [
-              ElevatedButton(
-                child: const Text('Yes'),
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-              ),
-              ElevatedButton(
-                child: const Text('No'),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.cancel_outlined),
+                label: const Text('No'),
                 onPressed: () {
                   Navigator.of(context).pop(false);
+                },
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.check_circle_outline_rounded),
+                label: const Text('Yes'),
+                onPressed: () {
+                  Navigator.of(context).pop(true);
                 },
               ),
             ],
@@ -257,9 +259,10 @@ class _DirPickerState extends State<DirPicker> {
                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[aA-zZ]'))],
                       ),
                       actionButtons: [
-                        const CancelButton(),
-                        ElevatedButton(
-                          child: const Text('Create'),
+                        const CancelButton(withIcon: true),
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.add),
+                          label: const Text('Create'),
                           onPressed: () {
                             mkdir();
                             Navigator.of(context).pop();

@@ -449,8 +449,9 @@ class NotesDialog extends StatelessWidget {
       // insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
       scrollable: false,
       actionButtons: [
-        ElevatedButton(
-          child: const Text('Close'),
+        ElevatedButton.icon(
+          icon: const Icon(Icons.keyboard_return_rounded),
+          label: const Text('Close'),
           onPressed: () {
             Navigator.of(context).pop(false);
           },

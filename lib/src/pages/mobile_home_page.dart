@@ -100,16 +100,17 @@ class _MobileHomeState extends State<MobileHome> {
           ],
           actionButtons: [
             ElevatedButton.icon(
+              icon: const Icon(Icons.cancel),
+              label: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            ElevatedButton.icon(
               label: const Text('Yes'),
               icon: const Icon(Icons.exit_to_app_sharp),
               onPressed: () {
                 Navigator.of(context).pop(true);
-              },
-            ),
-            ElevatedButton(
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
               },
             ),
           ],
@@ -460,6 +461,17 @@ class MainDrawer extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                       }),
+                      if (SettingsHandler.isDesktopPlatform)
+                        SettingsButton(
+                          name: 'Close the app',
+                          icon: const Icon(Icons.exit_to_app),
+                          action: () async {
+                            // twice to trigger drawer close
+                            await Navigator.of(context).maybePop();
+                            await Future.delayed(const Duration(milliseconds: 400));
+                            await Navigator.of(context).maybePop();
+                          },
+                        ),
                       //
                       if (settingsHandler.enableDrawerMascot) const MascotImage(),
                     ],

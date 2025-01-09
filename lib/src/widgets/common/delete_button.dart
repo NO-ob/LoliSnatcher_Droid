@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class CancelButton extends StatelessWidget {
-  const CancelButton({
-    this.text = 'Cancel',
+class DeleteButton extends StatelessWidget {
+  const DeleteButton({
+    this.text = 'Delete',
     this.action,
     this.returnData,
     this.withIcon = false,
@@ -21,8 +21,8 @@ class CancelButton extends StatelessWidget {
     if (withIcon) {
       return ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey[300],
-          foregroundColor: Colors.black,
+          backgroundColor: Colors.red,
+          foregroundColor: Colors.white,
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -35,15 +35,13 @@ class CancelButton extends StatelessWidget {
             Navigator.of(context).pop(returnData);
           }
         },
-        icon: Icon(withIcon ? (customIcon ?? Icons.keyboard_return_rounded) : null),
+        icon: Icon(withIcon ? (customIcon ?? Icons.delete_forever) : null),
         label: Text(text),
       );
     }
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[300],
-        foregroundColor: Colors.black,
         textStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,

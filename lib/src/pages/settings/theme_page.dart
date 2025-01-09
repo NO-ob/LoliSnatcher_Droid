@@ -165,7 +165,7 @@ class _ThemePageState extends State<ThemePage> {
         okIcon: Icons.save,
         dialogOkButtonType: ColorPickerActionButtonType.elevated,
         // closeButton: true,
-        closeIcon: Icons.cancel,
+        closeIcon: Icons.keyboard_return_rounded,
         dialogCancelButtonType: ColorPickerActionButtonType.elevated,
         dialogActionIcons: true,
         dialogActionButtons: true,

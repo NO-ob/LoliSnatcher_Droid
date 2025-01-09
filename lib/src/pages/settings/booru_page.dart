@@ -175,17 +175,19 @@ class _BooruPageState extends State<BooruPage> {
                 const Text('Should login/apikey data be included?'),
               ],
               actionButtons: [
-                const CancelButton(),
-                ElevatedButton(
-                  child: const Text('Yes'),
-                  onPressed: () {
-                    copyBooruLink(true);
-                  },
-                ),
-                ElevatedButton(
-                  child: const Text('No'),
+                const CancelButton(withIcon: true),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.cancel_outlined),
+                  label: const Text('No'),
                   onPressed: () {
                     copyBooruLink(false);
+                  },
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.check_circle_outline_rounded),
+                  label: const Text('Yes'),
+                  onPressed: () {
+                    copyBooruLink(true);
                   },
                 ),
               ],
@@ -282,7 +284,7 @@ class _BooruPageState extends State<BooruPage> {
                 Text('Delete Booru: ${selectedBooru?.name}?'),
               ],
               actionButtons: [
-                const CancelButton(),
+                const CancelButton(withIcon: true),
                 ElevatedButton.icon(
                   onPressed: () async {
                     // save current and select next available booru to avoid exception after deletion
@@ -327,7 +329,7 @@ class _BooruPageState extends State<BooruPage> {
                     Navigator.of(context).pop(true);
                   },
                   label: const Text('Delete Booru'),
-                  icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                  icon: const Icon(Icons.delete_forever),
                 ),
               ],
             );
@@ -507,15 +509,17 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
             ),
           ],
           actionButtons: [
-            const CancelButton(returnData: null),
-            ElevatedButton(
-              child: const Text('No'),
+            const CancelButton(withIcon: true),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.cancel_outlined),
+              label: const Text('No'),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
             ),
-            ElevatedButton(
-              child: const Text('Yes'),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.check_circle_outline_rounded),
+              label: const Text('Yes'),
               onPressed: () {
                 Navigator.of(context).pop(true);
               },

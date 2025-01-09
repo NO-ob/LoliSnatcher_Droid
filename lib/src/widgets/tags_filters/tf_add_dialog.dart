@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
@@ -73,22 +74,18 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
             onSubmitted: onSubmit,
           ),
         ),
-        //
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-          child: ListTile(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-              side: BorderSide(color: Theme.of(context).colorScheme.secondary),
-            ),
-            onTap: () => onSubmit(_controller.text),
-            leading: const Icon(Icons.save),
-            title: const Text('Add Filter'),
-          ),
-        ),
       ],
-      actionButtons: const [
-        CancelButton(),
+      actionButtons: [
+        const CancelButton(
+          text: 'Close',
+          withIcon: true,
+        ),
+        ConfirmButton(
+          text: 'Add',
+          withIcon: true,
+          customIcon: Icons.save,
+          action: () => onSubmit(_controller.text),
+        ),
       ],
     );
   }

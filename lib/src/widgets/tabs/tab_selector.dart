@@ -17,6 +17,7 @@ import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
@@ -766,10 +767,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
       ),
       actionButtons: [
         const CancelButton(withIcon: true),
-        ElevatedButton.icon(
-          label: const Text('Delete'),
-          icon: const Icon(Icons.delete_forever),
-          onPressed: () {
+        DeleteButton(
+          withIcon: true,
+          action: () {
             for (int i = 0; i < selectedTabs.length; i++) {
               final int index = searchHandler.list.indexOf(selectedTabs[i]);
               searchHandler.removeTabAt(tabIndex: index);
@@ -784,8 +784,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => deleteDialog,
+      builder: (_) => deleteDialog,
     );
   }
 

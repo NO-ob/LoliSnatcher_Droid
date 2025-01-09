@@ -321,8 +321,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                             ),
                           ],
                           actionButtons: [
-                            CancelButton(),
-                            ConfirmButton(),
+                            CancelButton(withIcon: true),
+                            ConfirmButton(withIcon: true),
                           ],
                         );
                       },

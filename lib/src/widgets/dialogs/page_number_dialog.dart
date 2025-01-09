@@ -111,8 +111,9 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
         ),
       ],
       actionButtons: [
-        ElevatedButton(
-          child: const Text('Jump to page'),
+        ElevatedButton.icon(
+          icon: const Icon(Icons.subdirectory_arrow_right_rounded),
+          label: const Text('Jump to page'),
           onPressed: () {
             if (pageNumberController.text.isNotEmpty) {
               searchHandler.changeCurrentTabPageNumber((int.tryParse(pageNumberController.text) ?? 0) - 1);
@@ -121,7 +122,9 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
           },
         ),
         Obx(
-          () => ElevatedButton(
+          () => ElevatedButton.icon(
+            icon: const Icon(Icons.search_rounded),
+            label: const Text('Search until page'),
             onPressed: searchHandler.isRunningAutoSearch.value
                 ? null
                 : () {
@@ -133,16 +136,16 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
                       Navigator.of(context).pop();
                     }
                   },
-            child: const Text('Search until page'),
           ),
         ),
         Obx(
           () => searchHandler.isRunningAutoSearch.value
-              ? ElevatedButton(
+              ? ElevatedButton.icon(
+                  icon: const Icon(Icons.cancel_outlined),
+                  label: const Text('Stop searching'),
                   onPressed: () {
                     searchHandler.isRunningAutoSearch.value = false;
                   },
-                  child: const Text('Stop search'),
                 )
               : const SizedBox.shrink(),
         ),
