@@ -9,6 +9,7 @@
 #include <app_links/app_links_plugin_c_api.h>
 #include <awesome_notifications/awesome_notifications_plugin_c_api.h>
 #include <dynamic_color/dynamic_color_plugin_c_api.h>
+#include <flutter_avif_windows/flutter_avif_windows_plugin.h>
 #include <flutter_inappwebview_windows/flutter_inappwebview_windows_plugin_c_api.h>
 #include <media_kit_libs_windows_video/media_kit_libs_windows_video_plugin_c_api.h>
 #include <media_kit_video/media_kit_video_plugin_c_api.h>
@@ -24,6 +25,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("AwesomeNotificationsPluginCApi"));
   DynamicColorPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("DynamicColorPluginCApi"));
+  FlutterAvifWindowsPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FlutterAvifWindowsPlugin"));
   FlutterInappwebviewWindowsPluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterInappwebviewWindowsPluginCApi"));
   MediaKitLibsWindowsVideoPluginCApiRegisterWithRegistrar(

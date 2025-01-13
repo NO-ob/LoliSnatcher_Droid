@@ -76,23 +76,43 @@ class _ThumbnailState extends State<Thumbnail> {
     // }
 
     cancelToken ??= CancelToken();
-    final ImageProvider provider = CustomNetworkImage(
-      isMain ? thumbURL : widget.item.thumbnailURL,
-      cancelToken: cancelToken,
-      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-      withCache: settingsHandler.thumbnailCache,
-      cacheFolder: isMain ? thumbFolder : 'thumbnails',
-      fileNameExtras: widget.item.fileNameExtras,
-      sendTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
-      receiveTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
-      onError: isMain ? onError : null,
-      onCacheDetected: (bool didDetectCache) {
-        if (isMain) {
-          isFromCache = didDetectCache;
-          updateState();
-        }
-      },
-    );
+    final String url = isMain ? thumbURL : widget.item.thumbnailURL;
+    final bool isAvif = url.contains('.avif');
+    final ImageProvider provider = isAvif
+        ? CustomNetworkAvifImage(
+            url,
+            cancelToken: cancelToken,
+            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            withCache: settingsHandler.thumbnailCache,
+            cacheFolder: isMain ? thumbFolder : 'thumbnails',
+            fileNameExtras: widget.item.fileNameExtras,
+            sendTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
+            receiveTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
+            onError: isMain ? onError : null,
+            onCacheDetected: (bool didDetectCache) {
+              if (isMain) {
+                isFromCache = didDetectCache;
+                updateState();
+              }
+            },
+          )
+        : CustomNetworkImage(
+            url,
+            cancelToken: cancelToken,
+            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            withCache: settingsHandler.thumbnailCache,
+            cacheFolder: isMain ? thumbFolder : 'thumbnails',
+            fileNameExtras: widget.item.fileNameExtras,
+            sendTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
+            receiveTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
+            onError: isMain ? onError : null,
+            onCacheDetected: (bool didDetectCache) {
+              if (isMain) {
+                isFromCache = didDetectCache;
+                updateState();
+              }
+            },
+          );
 
     // return empty image if no size rectrictions were calculated (propably happens because widget is not mounted)
     if (settingsHandler.disableImageScaling || (thumbWidth == null && thumbHeight == null)) {

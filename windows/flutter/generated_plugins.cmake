@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   awesome_notifications
   dynamic_color
+  flutter_avif_windows
   flutter_inappwebview_windows
   media_kit_libs_windows_video
   media_kit_video

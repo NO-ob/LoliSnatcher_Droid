@@ -239,24 +239,45 @@ class ImageViewerState extends State<ImageViewer> {
 
     ImageProvider provider;
     cancelToken = CancelToken();
-    provider = CustomNetworkImage(
-      useFullImage ? widget.booruItem.fileURL : widget.booruItem.sampleURL,
-      cancelToken: cancelToken,
-      headers: await Tools.getFileCustomHeaders(
-        searchHandler.currentBooru,
-        checkForReferer: true,
-      ),
-      withCache: settingsHandler.mediaCache,
-      cacheFolder: imageFolder,
-      fileNameExtras: widget.booruItem.fileNameExtras,
-      onError: onError,
-      onCacheDetected: (bool didDetectCache) {
-        if (didDetectCache) {
-          isFromCache = true;
-          updateState();
-        }
-      },
-    );
+    final String url = useFullImage ? widget.booruItem.fileURL : widget.booruItem.sampleURL;
+    final bool isAvif = url.contains('.avif');
+    provider = isAvif
+        ? CustomNetworkAvifImage(
+            url,
+            cancelToken: cancelToken,
+            headers: await Tools.getFileCustomHeaders(
+              searchHandler.currentBooru,
+              checkForReferer: true,
+            ),
+            withCache: settingsHandler.mediaCache,
+            cacheFolder: imageFolder,
+            fileNameExtras: widget.booruItem.fileNameExtras,
+            onError: onError,
+            onCacheDetected: (bool didDetectCache) {
+              if (didDetectCache) {
+                isFromCache = true;
+                updateState();
+              }
+            },
+          )
+        : CustomNetworkImage(
+            url,
+            cancelToken: cancelToken,
+            headers: await Tools.getFileCustomHeaders(
+              searchHandler.currentBooru,
+              checkForReferer: true,
+            ),
+            withCache: settingsHandler.mediaCache,
+            cacheFolder: imageFolder,
+            fileNameExtras: widget.booruItem.fileNameExtras,
+            onError: onError,
+            onCacheDetected: (bool didDetectCache) {
+              if (didDetectCache) {
+                isFromCache = true;
+                updateState();
+              }
+            },
+          );
 
     // scale image only if it's not an animation, scaling is allowed and item is not marked as noScale
     if (!widget.booruItem.mediaType.value.isAnimation && !settingsHandler.disableImageScaling && !widget.booruItem.isNoScale.value && (widthLimit ?? 0) > 0) {

@@ -54,18 +54,32 @@ class _BooruFaviconState extends State<BooruFavicon> {
 
   Future<ImageProvider> getImageProvider() async {
     cancelToken ??= CancelToken();
+    final String url = widget.booru.faviconURL!;
+    final bool isAvif = url.contains('.avif');
     return ResizeImage(
-      CustomNetworkImage(
-        widget.booru.faviconURL!,
-        withCache: true,
-        headers: await Tools.getFileCustomHeaders(widget.booru),
-        cacheFolder: 'favicons',
-        fileNameExtras: 'favicon_',
-        cancelToken: cancelToken,
-        sendTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 5),
-        onError: onError,
-      ),
+      isAvif
+          ? CustomNetworkAvifImage(
+              url,
+              withCache: true,
+              headers: await Tools.getFileCustomHeaders(widget.booru),
+              cacheFolder: 'favicons',
+              fileNameExtras: 'favicon_',
+              cancelToken: cancelToken,
+              sendTimeout: const Duration(seconds: 5),
+              receiveTimeout: const Duration(seconds: 5),
+              onError: onError,
+            )
+          : CustomNetworkImage(
+              url,
+              withCache: true,
+              headers: await Tools.getFileCustomHeaders(widget.booru),
+              cacheFolder: 'favicons',
+              fileNameExtras: 'favicon_',
+              cancelToken: cancelToken,
+              sendTimeout: const Duration(seconds: 5),
+              receiveTimeout: const Duration(seconds: 5),
+              onError: onError,
+            ),
       width: (size * 5).toInt(),
       height: (size * 5).toInt(),
     );

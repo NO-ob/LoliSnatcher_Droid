@@ -28,6 +28,7 @@ dependencies:
       ref: 828e79014ed5fd73062d6a24db14b6c114ac175b # master - forked to add richtext
   flash: ^3.1.1
   flex_color_picker: ^3.6.0
+  flutter_avif: ^3.0.0
   flutter_displaymode: ^0.6.0
   flutter_improved_scrolling: ^0.0.3
   flutter_inappwebview: ^6.1.5
@@ -71,10 +72,10 @@ dependencies:
   sqflite_common_ffi: ^2.3.4+4
   sqflite: ^2.4.1
   statsfl: ^2.3.0
-  talker_dio_logger: ^4.6.0
+  talker_dio_logger: ^4.6.1
   talker_flutter: 4.5.4 # versions higher than 4.5.4 require flutter 3.27
-  talker_logger: ^4.6.0
-  talker: ^4.6.0
+  talker_logger: ^4.6.1
+  talker: ^4.6.1
   transparent_image: ^2.0.1
   url_launcher: ^6.3.1
   uuid: ^4.5.1
