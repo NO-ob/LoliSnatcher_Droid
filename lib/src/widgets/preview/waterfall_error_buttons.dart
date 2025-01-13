@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -69,10 +69,13 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
 
   @override
   Widget build(BuildContext context) {
-    final String clickName = (Platform.isWindows || Platform.isLinux) ? 'Click' : 'Tap';
+    final String clickName = SettingsHandler.isDesktopPlatform ? 'Click' : 'Tap';
     final int nowMils = DateTime.now().millisecondsSinceEpoch;
     final int sinceStart = _startedAt == 0 ? 0 : Duration(milliseconds: nowMils - _startedAt).inSeconds;
-    final String sinceStartText = sinceStart > 0 ? 'Started $sinceStart ${Tools.pluralize('second', sinceStart)} ago' : '';
+    final bool isTakingTooLong = sinceStart > 5;
+    final String sinceStartText = sinceStart > 0
+        ? 'Started $sinceStart ${Tools.pluralize('second', sinceStart)} ago${isTakingTooLong ? '\n$clickName here to restart if search is taking too long or seems stuck' : ''}'
+        : '';
 
     return Obx(() {
       if (searchHandler.isLastPage.value) {
@@ -168,7 +171,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             child: SettingsButton(
               name: 'Loading Page #${searchHandler.pageNum}',
               subtitle: AnimatedOpacity(
-                opacity: sinceStartText.isNotEmpty ? 1.0 : 0.0,
+                opacity: sinceStartText.isNotEmpty ? 1 : 0,
                 duration: const Duration(milliseconds: 200),
                 child: Text(sinceStartText),
               ),
@@ -179,8 +182,13 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                   child: CircularProgressIndicator(),
                 ),
               ),
+              trailingIcon: isTakingTooLong ? const Icon(Icons.refresh) : null,
               dense: true,
-              action: searchHandler.retrySearch,
+              action: () {
+                stopTimer();
+                startTimer();
+                searchHandler.retrySearch();
+              },
               drawBottomBorder: false,
             ),
           );
