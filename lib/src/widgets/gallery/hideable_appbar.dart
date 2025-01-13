@@ -649,7 +649,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   void shareTextAction(String text) {
-    if (Platform.isWindows || Platform.isLinux) {
+    if (SettingsHandler.isDesktopPlatform) {
       Clipboard.setData(ClipboardData(text: Uri.encodeFull(text)));
       FlashElements.showSnackbar(
         context: context,

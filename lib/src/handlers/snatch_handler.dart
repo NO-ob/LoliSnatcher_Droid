@@ -264,6 +264,7 @@ class SnatchHandler extends GetxController {
       booruHandler.pageNum++;
       count = booruItems.length;
       // TODO error handling?
+      // TODO use tag filters
     }
     queue(booruItems, booru, cooldown, false);
   }

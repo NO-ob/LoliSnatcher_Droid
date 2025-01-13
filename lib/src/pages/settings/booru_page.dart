@@ -64,7 +64,7 @@ class _BooruPageState extends State<BooruPage> {
   void copyBooruLink(bool withSensitiveData) {
     Navigator.of(context).pop(true); // remove dialog
     final String link = selectedBooru?.toLink(withSensitiveData) ?? '';
-    if (Platform.isWindows || Platform.isLinux) {
+    if (SettingsHandler.isDesktopPlatform) {
       Clipboard.setData(ClipboardData(text: link));
       FlashElements.showSnackbar(
         context: context,

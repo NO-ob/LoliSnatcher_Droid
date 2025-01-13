@@ -372,7 +372,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 },
                 title: 'Scroll previews buttons position',
               ),
-              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+              if (SettingsHandler.isDesktopPlatform)
                 SettingsTextInput(
                   controller: mouseSpeedController,
                   title: 'Mouse Wheel Scroll Modifer',

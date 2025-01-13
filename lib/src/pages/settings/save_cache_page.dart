@@ -392,8 +392,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                             const Text(''),
                             const Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
                             const Text(''),
-                            if (Platform.isWindows || Platform.isLinux || Platform.isAndroid)
-                              const Text('[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.'),
+                            if (SettingsHandler.isDesktopPlatform) const Text('[Warning]: On desktop Stream mode can work incorrectly for some Boorus.'),
                           ],
                         );
                       },

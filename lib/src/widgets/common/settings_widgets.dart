@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -120,7 +119,7 @@ class SettingsPageOpen {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     final bool isTooNarrow = MediaQuery.sizeOf(context).width < 550;
-    final bool isDesktop = settingsHandler.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+    final bool isDesktop = settingsHandler.appMode.value.isDesktop || SettingsHandler.isDesktopPlatform;
     final bool useDesktopMode = (!isTooNarrow && isDesktop && !asBottomSheet) || useFloatingDialog;
 
     dynamic result;

@@ -1,6 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:io';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 enum AppMode {
   Desktop,
@@ -35,6 +35,6 @@ enum AppMode {
   }
 
   static AppMode get defaultValue {
-    return (Platform.isWindows || Platform.isLinux) ? AppMode.Desktop : AppMode.Mobile;
+    return SettingsHandler.isDesktopPlatform ? AppMode.Desktop : AppMode.Mobile;
   }
 }
