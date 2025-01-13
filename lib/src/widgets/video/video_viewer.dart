@@ -13,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -29,11 +30,15 @@ class VideoViewer extends StatefulWidget {
   const VideoViewer(
     this.booruItem, {
     this.enableFullscreen = true,
+    this.isStandalone = false,
+    this.customBooru,
     super.key,
   });
 
   final BooruItem booruItem;
   final bool enableFullscreen;
+  final bool isStandalone;
+  final Booru? customBooru;
 
   @override
   State<VideoViewer> createState() => VideoViewerState();
@@ -113,7 +118,10 @@ class VideoViewerState extends State<VideoViewer> {
     cancelToken = CancelToken();
     client = DioDownloader(
       widget.booruItem.fileURL,
-      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+      headers: await Tools.getFileCustomHeaders(
+        widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+        checkForReferer: true,
+      ),
       cancelToken: cancelToken,
       onProgress: onBytesAdded,
       onEvent: onEvent,
@@ -138,7 +146,10 @@ class VideoViewerState extends State<VideoViewer> {
     sizeCancelToken = CancelToken();
     sizeClient = DioDownloader(
       widget.booruItem.fileURL,
-      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+      headers: await Tools.getFileCustomHeaders(
+        widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+        checkForReferer: true,
+      ),
       cancelToken: sizeCancelToken,
       onEvent: onEvent,
       fileNameExtras: widget.booruItem.fileNameExtras,
@@ -227,13 +238,14 @@ class VideoViewerState extends State<VideoViewer> {
     viewController.outputStateStream.listen(onViewStateChanged);
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
-    isViewed = settingsHandler.appMode.value.isMobile
-        ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
-        : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    isViewed = widget.isStandalone ||
+        (settingsHandler.appMode.value.isMobile
+            ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
+            : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
-      final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
-      final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+      final bool isCurrentIndex = widget.isStandalone || value == searchHandler.getItemIndex(widget.booruItem);
+      final bool isCurrentItem = widget.isStandalone || searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
       if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
@@ -402,7 +414,7 @@ class VideoViewerState extends State<VideoViewer> {
       viewerHandler.isFullscreen.value = chewieController!.isFullScreen;
     }
 
-    if (searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)) {
+    if (widget.isStandalone || searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)) {
       if (chewieController!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
         ServiceHandler.setVolumeButtons(true); // in full screen or volumebuttons scroll setting is disabled
       } else {
@@ -427,7 +439,10 @@ class VideoViewerState extends State<VideoViewer> {
       videoController = VideoPlayerController.networkUrl(
         Uri.parse(widget.booruItem.fileURL),
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
-        httpHeaders: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+        httpHeaders: await Tools.getFileCustomHeaders(
+          widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+          checkForReferer: true,
+        ),
       );
     }
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
@@ -551,7 +566,7 @@ class VideoViewerState extends State<VideoViewer> {
     // print('!!! Build video mobile ${widget.index}!!!');
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
-    final int viewedIndex = searchHandler.viewedIndex.value;
+    final int viewedIndex = widget.isStandalone ? 0 : searchHandler.viewedIndex.value;
     final bool needsRestart = lastViewedIndex != viewedIndex;
 
     if (isVideoInited) {

@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -22,10 +23,14 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 class ImageViewer extends StatefulWidget {
   const ImageViewer(
     this.booruItem, {
+    this.isStandalone = false,
+    this.customBooru,
     super.key,
   });
 
   final BooruItem booruItem;
+  final bool isStandalone;
+  final Booru? customBooru;
 
   @override
   State<ImageViewer> createState() => ImageViewerState();
@@ -117,9 +122,10 @@ class ImageViewerState extends State<ImageViewer> {
     super.initState();
     viewerHandler.addViewed(widget.key);
 
-    isViewed = settingsHandler.appMode.value.isMobile
-        ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
-        : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    isViewed = widget.isStandalone ||
+        (settingsHandler.appMode.value.isMobile
+            ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
+            : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
@@ -246,7 +252,7 @@ class ImageViewerState extends State<ImageViewer> {
             url,
             cancelToken: cancelToken,
             headers: await Tools.getFileCustomHeaders(
-              searchHandler.currentBooru,
+              widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
               checkForReferer: true,
             ),
             withCache: settingsHandler.mediaCache,
@@ -264,7 +270,7 @@ class ImageViewerState extends State<ImageViewer> {
             url,
             cancelToken: cancelToken,
             headers: await Tools.getFileCustomHeaders(
-              searchHandler.currentBooru,
+              widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
               checkForReferer: true,
             ),
             withCache: settingsHandler.mediaCache,

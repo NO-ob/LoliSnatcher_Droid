@@ -104,9 +104,11 @@ class Tools {
 
   // unified http headers list generator for dio in thumb/media/video loaders
   static Future<Map<String, String>> getFileCustomHeaders(
-    Booru booru, {
+    Booru? booru, {
     bool checkForReferer = false,
   }) async {
+    if (booru == null) return {};
+
     // a few boorus don't work without a browser useragent
     final Map<String, String> headers = {'User-Agent': browserUserAgent};
     if (booru.baseURL?.contains('danbooru.donmai.us') ?? false) {
