@@ -652,6 +652,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                 padding: const EdgeInsets.only(top: 8),
                                                 child: CancelButton(
                                                   withIcon: true,
+                                                  customIcon: Icons.cancel_outlined,
                                                   action: snatchHandler.onCancel,
                                                 ),
                                               ),

@@ -46,7 +46,11 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
         ),
       ],
       actionButtons: [
-        const CancelButton(returnData: null),
+        const CancelButton(
+          text: 'Close',
+          withIcon: true,
+          returnData: null,
+        ),
         ElevatedButton.icon(
           label: const Text('Add'),
           icon: const Icon(Icons.add),
