@@ -44,7 +44,7 @@ class ChangePageButtons extends StatelessWidget {
           changePage(direction);
         },
         // visualDensity: VisualDensity.comfortable,
-        color: Theme.of(context).iconTheme.color?.withOpacity(0.5),
+        color: Theme.of(context).iconTheme.color?.withValues(alpha: 0.5),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:alice_lightweight/alice.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -818,7 +819,7 @@ class SettingsHandler extends GetxController {
         case 'rxcolor':
           if (toJSON) {
             // rxobject to int
-            return (value as Rx<Color?>).value?.value ?? Colors.pink.value; // Color => int
+            return (value as Rx<Color?>).value?.value32bit ?? Colors.pink.value32bit; // Color => int
           } else {
             // int to rxobject
             if (value is int) {

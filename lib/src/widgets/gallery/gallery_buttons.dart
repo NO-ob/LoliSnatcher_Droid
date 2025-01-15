@@ -73,7 +73,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -123,7 +123,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: ColoredBox(
-                        color: Theme.of(context).colorScheme.surface.withOpacity(0.33),
+                        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.33),
                         child: isVerticalDirection
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -142,7 +142,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: ColoredBox(
-                        color: Theme.of(context).colorScheme.surface.withOpacity(0.33),
+                        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.33),
                         child: isVerticalDirection
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

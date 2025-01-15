@@ -471,7 +471,7 @@ class VideoViewerState extends State<VideoViewer> {
         playedColor: accentColor,
         handleColor: darkenedAceentColor,
         backgroundColor: Colors.grey,
-        bufferedColor: Colors.white.withOpacity(0.66),
+        bufferedColor: Colors.white.withValues(alpha: 0.66),
       ),
       systemOverlaysOnEnterFullScreen: [],
       systemOverlaysAfterFullScreen: SystemUiOverlay.values,

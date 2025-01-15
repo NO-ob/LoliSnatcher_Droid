@@ -126,7 +126,7 @@ InlineSpan _parseElement(dom.Element element, TextStyle style, bool styleChanged
 
   if (isBordered) {
     final Paint paint = Paint()
-      ..color = Colors.black.withOpacity(0.75)
+      ..color = Colors.black.withValues(alpha: 0.75)
       ..style = PaintingStyle.fill
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 2.0;

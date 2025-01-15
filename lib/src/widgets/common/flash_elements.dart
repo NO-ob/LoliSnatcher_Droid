@@ -117,7 +117,7 @@ class FlashElements {
                     side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
                   ),
                   dismissDirections: const [],
-                  shadowColor: Colors.black.withOpacity(0.4),
+                  shadowColor: Colors.black.withValues(alpha: 0.4),
                   elevation: 8,
                   icon: overrideLeadingIconWidget ??
                       Padding(
@@ -198,7 +198,7 @@ class FlashElements {
                   ),
                   side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
                 ),
-                shadowColor: Colors.black.withOpacity(0.4),
+                shadowColor: Colors.black.withValues(alpha: 0.4),
                 elevation: 8,
                 backgroundColor: themeData.colorScheme.surface,
                 icon: overrideLeadingIconWidget ??

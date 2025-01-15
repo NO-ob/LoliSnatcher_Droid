@@ -340,7 +340,7 @@ class _MediaLoadingState extends State<MediaLoading> {
             value: percentDone,
             animationDuration: const Duration(milliseconds: 100),
             indicatorStyle: IndicatorStyle.linear,
-            valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
+            valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.66),
             minHeight: 6,
           );
 

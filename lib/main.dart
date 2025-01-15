@@ -198,12 +198,12 @@ class _MainAppState extends State<MainApp> {
 
       // TODO fix status bar coloring when in gallery view (AND depending on theme?)
       // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      //   statusBarColor: Theme.of(context).colorScheme.background.withOpacity(0.5),
+      //   statusBarColor: Theme.of(context).colorScheme.background.withValues(alpha: 0.5),
       //   statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       //   statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       //   systemStatusBarContrastEnforced: true,
 
-      //   systemNavigationBarColor: Theme.of(context).colorScheme.background.withOpacity(0.5),
+      //   systemNavigationBarColor: Theme.of(context).colorScheme.background.withValues(alpha: 0.5),
       //   systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       //   systemNavigationBarContrastEnforced: true,
       //   systemNavigationBarDividerColor: Colors.transparent,

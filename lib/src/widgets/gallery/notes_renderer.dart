@@ -11,6 +11,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/html_parse.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
@@ -370,11 +371,11 @@ class _NoteBuildContent extends StatelessWidget {
       height: height,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF300).withOpacity(0.25),
+          color: const Color(0xFFFFF300).withValues(alpha: 0.25),
           borderRadius: BorderRadius.circular(2),
           border: Border.all(
             width: 1,
-            color: const Color(0xFFFFF176).withOpacity(0.5),
+            color: const Color(0xFFFFF176).withValues(alpha: 0.5),
           ),
         ),
         child: (width > 30 && height > 30) // don't show if too small
@@ -448,13 +449,10 @@ class NotesDialog extends StatelessWidget {
       // titlePadding: const EdgeInsets.fromLTRB(6, 18, 2, 6),
       // insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
       scrollable: false,
-      actionButtons: [
-        ElevatedButton.icon(
-          icon: const Icon(Icons.keyboard_return_rounded),
-          label: const Text('Close'),
-          onPressed: () {
-            Navigator.of(context).pop(false);
-          },
+      actionButtons: const [
+        CancelButton(
+          text: 'Close',
+          withIcon: true,
         ),
       ],
     );

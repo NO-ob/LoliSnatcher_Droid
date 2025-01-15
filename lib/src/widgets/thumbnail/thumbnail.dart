@@ -418,7 +418,7 @@ class _ThumbnailState extends State<Thumbnail> {
                             height: double.infinity,
                             errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                               if (widget.isStandalone) {
-                                return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withOpacity(0.5));
+                                return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withValues(alpha: 0.5));
                               } else {
                                 return const SizedBox.shrink();
                               }
@@ -451,7 +451,7 @@ class _ThumbnailState extends State<Thumbnail> {
                           height: double.infinity,
                           errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                             if (widget.isStandalone) {
-                              return Icon(Icons.broken_image, size: 30, color: Colors.white.withOpacity(0.5));
+                              return Icon(Icons.broken_image, size: 30, color: Colors.white.withValues(alpha: 0.5));
                             } else {
                               return const SizedBox.shrink();
                             }
@@ -490,7 +490,7 @@ class _ThumbnailState extends State<Thumbnail> {
               Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(iconSize * 0.1),
                 ),
                 width: iconSize,

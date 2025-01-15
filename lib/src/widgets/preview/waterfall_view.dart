@@ -504,7 +504,7 @@ class WaterfallScrollButtons extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.33),
+          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.33),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -521,7 +521,7 @@ class WaterfallScrollButtons extends StatelessWidget {
                   child: Icon(
                     Icons.arrow_upward,
                     size: 30,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.5),
+                    color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -539,7 +539,7 @@ class WaterfallScrollButtons extends StatelessWidget {
                   child: Icon(
                     Icons.arrow_downward,
                     size: 30,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.5),
+                    color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
                   ),
                 ),
               ),

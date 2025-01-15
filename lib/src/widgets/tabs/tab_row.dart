@@ -108,7 +108,7 @@ class TabRow extends StatelessWidget {
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
               fontWeight: fontWeight ?? FontWeight.normal,
               color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
-              backgroundColor: isColored ? tagData.tagType.getColour().withOpacity(0.66) : null,
+              backgroundColor: isColored ? tagData.tagType.getColour().withValues(alpha: 0.66) : null,
             );
 
             spans.add(

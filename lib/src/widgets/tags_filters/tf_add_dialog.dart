@@ -77,7 +77,6 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
       ],
       actionButtons: [
         const CancelButton(
-          text: 'Close',
           withIcon: true,
         ),
         ConfirmButton(

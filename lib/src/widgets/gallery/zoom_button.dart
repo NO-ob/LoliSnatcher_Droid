@@ -15,7 +15,7 @@ class ZoomButton extends StatelessWidget {
       () => IconButton(
         icon: Icon(viewerHandler.isZoomed.value ? Icons.zoom_out : Icons.zoom_in),
         onPressed: viewerHandler.toggleZoom,
-        color: Theme.of(context).iconTheme.color?.withOpacity(0.5),
+        color: Theme.of(context).iconTheme.color?.withValues(alpha: 0.5),
         // visualDensity: VisualDensity.comfortable,
       ),
     );

@@ -257,7 +257,7 @@ class _TagViewState extends State<TagView> {
             Divider(
               height: 2,
               thickness: 2,
-              color: Colors.grey[800]!.withOpacity(0.66),
+              color: Colors.grey[800]!.withValues(alpha: 0.66),
             ),
             tagsButton(),
             Padding(
@@ -437,7 +437,7 @@ class _TagViewState extends State<TagView> {
           Divider(
             height: 2,
             thickness: 2,
-            color: Colors.grey[800]!.withOpacity(0.66),
+            color: Colors.grey[800]!.withValues(alpha: 0.66),
           ),
           infoText(Tools.pluralize('Source', sources.length), ' ', canCopy: false),
           Column(
@@ -936,7 +936,7 @@ class _TagViewState extends State<TagView> {
             ),
           ),
           Divider(
-            color: Colors.grey[800]!.withOpacity(0.66),
+            color: Colors.grey[800]!.withValues(alpha: 0.66),
             height: 1,
             thickness: 1,
           ),

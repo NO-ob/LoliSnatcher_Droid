@@ -357,7 +357,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   if (!settingsHandler.disableImageScaling)
                     Positioned.fill(
                       child: ColoredBox(
-                        color: Colors.black.withOpacity(0.4),
+                        color: Colors.black.withValues(alpha: 0.4),
                       ),
                     ),
                 ],

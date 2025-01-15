@@ -296,7 +296,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 cursor: SystemMouseCursors.click,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  child: Icon(Icons.cancel, size: 24, color: Colors.white.withOpacity(0.9)),
+                  child: Icon(Icons.cancel, size: 24, color: Colors.white.withValues(alpha: 0.9)),
                 ),
               ),
             ),
