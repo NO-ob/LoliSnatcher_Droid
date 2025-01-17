@@ -21,8 +21,7 @@ class ImageWriter {
     setPaths();
   }
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  String? path = '';
-  String? cacheRootPath = '';
+  String path = '', cacheRootPath = '';
 
   /// return null - file already exists
   /// return String - file saved
@@ -38,7 +37,7 @@ class ImageWriter {
     await setPaths();
 
     // Don't do anything if file already exists
-    final File image = File(path! + fileName);
+    final File image = File(path + fileName);
     // print(path! + fileName);
     final bool fileExists = await image.exists();
     // if (fileExists) return null;
@@ -69,7 +68,7 @@ class ImageWriter {
       if (Platform.isAndroid && settingsHandler.extPathOverride.isNotEmpty) {
         await DioNetwork.downloadCustom(
           url,
-          '${path!}/',
+          '$path/',
           fileNameWoutExt,
           item.fileExt!,
           item.mediaType.toJson(),
@@ -84,7 +83,7 @@ class ImageWriter {
       } else {
         await DioNetwork.download(
           url,
-          '${path!}/$fileName',
+          '$path/$fileName',
           options: Options(
             responseType: ResponseType.bytes,
             contentType: '*/*',
@@ -95,27 +94,42 @@ class ImageWriter {
         );
       }
 
-      if (settingsHandler.jsonWrite) {
-        if (Platform.isAndroid && settingsHandler.extPathOverride.isNotEmpty && await ServiceHandler.getAndroidSDKVersion() >= 31) {
-          final String? safPath = await ServiceHandler.createFileStreamFromSAFDirectory(
-            fileNameWoutExt,
-            'application/json',
-            'json',
-            '${path!}/',
-          );
-          if (safPath != null) {
-            await ServiceHandler.writeStreamToFileFromSAFDirectory(
-              safPath,
-              Uint8List.fromList(jsonEncode(item.toJson()).codeUnits),
+      try {
+        if (settingsHandler.jsonWrite) {
+          if (Platform.isAndroid && settingsHandler.extPathOverride.isNotEmpty && await ServiceHandler.getAndroidSDKVersion() >= 31) {
+            final String? safPath = await ServiceHandler.createFileStreamFromSAFDirectory(
+              fileNameWoutExt,
+              'application/json',
+              'json',
+              '$path/',
             );
-            await ServiceHandler.closeStreamToFileFromSAFDirectory(safPath);
+            if (safPath != null) {
+              await ServiceHandler.writeStreamToFileFromSAFDirectory(
+                safPath,
+                Uint8List.fromList(jsonEncode(item.toJson()).codeUnits),
+              );
+              await ServiceHandler.closeStreamToFileFromSAFDirectory(safPath);
+            }
+          } else if (Platform.isAndroid && await ServiceHandler.getAndroidSDKVersion() < 31) {
+            final File jsonFile = File('$path$fileNameWoutExt.json');
+            await jsonFile.writeAsString(
+              jsonEncode(item.toJson()),
+              mode: FileMode.write,
+              flush: true,
+            );
           }
-        } else {
-          final File jsonFile = File('${path!}$fileNameWoutExt.json');
-          await jsonFile.writeAsString(jsonEncode(item.toJson()), flush: true);
         }
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'ImageWriter',
+          'write',
+          LogTypes.exception,
+          s: s,
+        );
       }
-      print('Image written: ${path!}$fileName');
+
+      print('Image written: $path$fileName');
       item.isSnatched.value = true;
       if (settingsHandler.dbEnabled) {
         await settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
@@ -124,7 +138,7 @@ class ImageWriter {
       try {
         if (Platform.isAndroid) {
           if (settingsHandler.extPathOverride.isNotEmpty && await ServiceHandler.getAndroidSDKVersion() >= 31) {
-            final bool result = await ServiceHandler.existsFileFromSAFDirectory(path!, fileName);
+            final bool result = await ServiceHandler.existsFileFromSAFDirectory(path, fileName);
             if (!result) {
               throw Exception('SAF file not found');
             }
@@ -184,7 +198,7 @@ class ImageWriter {
   ) async {
     await setPaths();
     final String fileName = getFilename(item, booru);
-    return path! + fileName;
+    return path + fileName;
   }
 
   Stream<Map<String, dynamic>> writeMultiple(
@@ -240,7 +254,7 @@ class ImageWriter {
     File? image;
     try {
       await setPaths();
-      final String cachePath = '${cacheRootPath!}$typeFolder/';
+      final String cachePath = '$cacheRootPath$typeFolder/';
       // print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive: true);
 
@@ -263,7 +277,7 @@ class ImageWriter {
   }) async {
     try {
       await setPaths();
-      final String cachePath = '${cacheRootPath!}$typeFolder/';
+      final String cachePath = '$cacheRootPath$typeFolder/';
       final String fileName = sanitizeName(parseThumbUrlToName(fileURL), fileNameExtras: fileNameExtras);
       final File file = File(cachePath + fileName);
       if (await file.exists()) {
@@ -281,7 +295,7 @@ class ImageWriter {
   Future deleteCacheFolder(String typeFolder) async {
     try {
       await setPaths();
-      final String cachePath = '${cacheRootPath!}$typeFolder/';
+      final String cachePath = '$cacheRootPath$typeFolder/';
       final Directory folder = Directory(cachePath);
       if (await folder.exists()) {
         await folder.delete(recursive: true);
@@ -299,7 +313,7 @@ class ImageWriter {
     String cachePath;
     try {
       await setPaths();
-      cachePath = '${cacheRootPath!}$typeFolder/';
+      cachePath = '$cacheRootPath$typeFolder/';
 
       final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       final File cacheFile = File(cachePath + fileName);
@@ -328,7 +342,7 @@ class ImageWriter {
   }) async {
     await setPaths();
     String cachePath;
-    cachePath = '${cacheRootPath!}$typeFolder/';
+    cachePath = '$cacheRootPath$typeFolder/';
 
     final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
     return cachePath + fileName;
@@ -341,7 +355,7 @@ class ImageWriter {
     int totalSize = 0;
     try {
       await setPaths();
-      cacheDirPath = "${cacheRootPath!}${typeFolder ?? ''}/";
+      cacheDirPath = "$cacheRootPath${typeFolder ?? ''}/";
 
       final Directory cacheDir = Directory(cacheDirPath);
       if (await cacheDir.exists()) {
@@ -373,7 +387,7 @@ class ImageWriter {
     String cacheDirPath;
     try {
       await setPaths();
-      cacheDirPath = '${cacheRootPath!}/';
+      cacheDirPath = '$cacheRootPath/';
 
       final Directory cacheDir = Directory(cacheDirPath);
       if (await cacheDir.exists()) {
@@ -425,7 +439,7 @@ class ImageWriter {
     int currentCacheSize = 0;
     try {
       await setPaths();
-      cacheDirPath = '${cacheRootPath!}/';
+      cacheDirPath = '$cacheRootPath/';
 
       final Directory cacheDir = Directory(cacheDirPath);
       if (await cacheDir.exists()) {
@@ -510,7 +524,7 @@ class ImageWriter {
   }
 
   Future<bool> setPaths() async {
-    if (path == '') {
+    if (path.isEmpty) {
       if (settingsHandler.extPathOverride.isEmpty) {
         path = await ServiceHandler.getPicturesDir();
       } else {
@@ -518,9 +532,10 @@ class ImageWriter {
       }
     }
 
-    if (cacheRootPath == '') {
+    if (cacheRootPath.isEmpty) {
       cacheRootPath = await ServiceHandler.getCacheDir();
     }
+
     // print('path: $path');
     // print('cache path: $cacheRootPath');
     return true;

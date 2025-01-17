@@ -181,6 +181,7 @@ class SettingsToggle extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.defaultValue,
+    this.enabled = true,
     super.key,
   });
 
@@ -193,12 +194,14 @@ class SettingsToggle extends StatelessWidget {
   final Widget? leadingIcon;
   final Widget? trailingIcon;
   final bool? defaultValue;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: ListTile(
+        enabled: enabled,
         title: Row(
           children: [
             if (leadingIcon != null)
@@ -206,7 +209,14 @@ class SettingsToggle extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            MarqueeText(text: title),
+            Builder(
+              builder: (context) {
+                return MarqueeText(
+                  text: title,
+                  style: DefaultTextStyle.of(context).style,
+                );
+              },
+            ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
               Padding(
@@ -224,7 +234,7 @@ class SettingsToggle extends StatelessWidget {
         subtitle: subtitle,
         trailing: Switch(
           value: value,
-          onChanged: onChanged,
+          onChanged: enabled ? onChanged : null,
         ),
         onTap: () => onChanged(!value),
         shape: Border(
@@ -284,7 +294,14 @@ class SettingsToggleTristate extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            MarqueeText(text: title),
+            Builder(
+              builder: (context) {
+                return MarqueeText(
+                  text: title,
+                  style: DefaultTextStyle.of(context).style,
+                );
+              },
+            ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
               Padding(
@@ -355,7 +372,14 @@ class SettingsSegmentedButton<T> extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            MarqueeText(text: title),
+            Builder(
+              builder: (context) {
+                return MarqueeText(
+                  text: title,
+                  style: DefaultTextStyle.of(context).style,
+                );
+              },
+            ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
               Padding(
