@@ -23,7 +23,7 @@ class CustomScrollBarThumb extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: Theme.of(context).colorScheme.surface.withOpacity(0.8),
+            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
           ),
           child: title.isNotEmpty
               ? Text(

@@ -114,7 +114,7 @@ class Logger {
       ? TalkerDioLogger(
           talker: _talkerInstance,
           settings: const TalkerDioLoggerSettings(
-            printResponseData: true,
+            printResponseData: false,
             printRequestData: true,
             printErrorData: true,
             printResponseHeaders: true,
@@ -174,6 +174,7 @@ enum LogTypes {
       case LogTypes.settingsLoad:
       case LogTypes.tagHandlerInfo:
         return LogLevel.info;
+      // ignore: unreachable_switch_default
       default:
         return LogLevel.wtf;
     }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -85,7 +84,7 @@ class FlashElements {
     // therefore causing an exception, because this context is not available anymore
     final ThemeData themeData = Theme.of(contextToUse);
 
-    final bool isDesktop = !ignoreDesktopCheck && (SettingsHandler.instance.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux);
+    final bool isDesktop = !ignoreDesktopCheck && (SettingsHandler.instance.appMode.value.isDesktop || SettingsHandler.isDesktopPlatform);
     final bool isTooWide = screenSize.width > 500;
     final bool isDark = themeData.brightness == Brightness.dark;
 
@@ -118,7 +117,7 @@ class FlashElements {
                     side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
                   ),
                   dismissDirections: const [],
-                  shadowColor: Colors.black.withOpacity(0.4),
+                  shadowColor: Colors.black.withValues(alpha: 0.4),
                   elevation: 8,
                   icon: overrideLeadingIconWidget ??
                       Padding(
@@ -199,7 +198,7 @@ class FlashElements {
                   ),
                   side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
                 ),
-                shadowColor: Colors.black.withOpacity(0.4),
+                shadowColor: Colors.black.withValues(alpha: 0.4),
                 elevation: 8,
                 backgroundColor: themeData.colorScheme.surface,
                 icon: overrideLeadingIconWidget ??

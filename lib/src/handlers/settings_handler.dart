@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:alice_lightweight/alice.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
+import 'package:fvp/fvp.dart' as fvp;
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -14,6 +16,7 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 import 'package:lolisnatcher/src/data/settings/hand_side.dart';
+import 'package:lolisnatcher/src/data/settings/video_backend_mode.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
 import 'package:lolisnatcher/src/data/update_info.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
@@ -52,7 +55,7 @@ class SettingsHandler extends GetxController {
 
   // runtime settings vars
   bool hasHydrus = false;
-  RxList<LogTypes> enabledLogTypes = RxList.from([]);
+  RxList<LogTypes> enabledLogTypes = RxList.from(EnvironmentConfig.isTesting ? [...LogTypes.values] : []);
   RxString discordURL = RxString(Constants.discordURL);
 
   // debug toggles
@@ -60,9 +63,7 @@ class SettingsHandler extends GetxController {
   RxBool showFPS = false.obs;
   RxBool showPerf = false.obs;
   RxBool showImageStats = false.obs;
-  bool disableImageScaling = false;
-  bool gifsAsThumbnails = false;
-  bool desktopListsDrag = false;
+  bool blurImages = kDebugMode ? Constants.blurImagesDefaultDev : false;
 
   ////////////////////////////////////////////////////
 
@@ -81,6 +82,7 @@ class SettingsHandler extends GetxController {
   String galleryScrollDirection = 'Horizontal';
   String extPathOverride = '';
   String drawerMascotPathOverride = '';
+  String backupPath = '';
   String zoomButtonPosition = 'Right';
   String changePageButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
   String scrollGridButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
@@ -92,13 +94,14 @@ class SettingsHandler extends GetxController {
   String proxyAddress = '';
   String proxyUsername = '';
   String proxyPassword = '';
+  VideoBackendMode videoBackendMode = isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.normal;
   String altVideoPlayerVO = isDesktopPlatform ? 'libmpv' : 'gpu'; // mediakit default: gpu - android, libmpv - desktop
   String altVideoPlayerHWDEC = isDesktopPlatform ? 'auto' : 'auto-safe'; // mediakit default: auto-safe - android, auto - desktop
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
 
-  int limit = Constants.defaultItemLimit;
+  int itemLimit = Constants.defaultItemLimit;
   int portraitColumns = 2;
   int landscapeColumns = 4;
   int preloadCount = 1;
@@ -108,6 +111,7 @@ class SettingsHandler extends GetxController {
   int cacheSize = 3;
 
   double mousewheelScrollSpeed = 10;
+  double preloadSizeLimit = 0.2;
 
   int currentColumnCount(BuildContext context) {
     return MediaQuery.orientationOf(context) == Orientation.portrait ? portraitColumns : landscapeColumns;
@@ -115,28 +119,19 @@ class SettingsHandler extends GetxController {
 
   Duration cacheDuration = Duration.zero;
 
-  List<List<String>> buttonList = [
+  static const List<List<String>> buttonList = [
     ['autoscroll', 'Slideshow'],
     ['snatch', 'Save'],
     ['favourite', 'Favourite'],
     ['info', 'Display Info'],
     ['share', 'Share'],
+    ['select', 'Select'],
     ['open', 'Open in Browser'],
     ['reloadnoscale', 'Reload w/out scaling'],
     ['toggle_quality', 'Toggle Quality'],
     ['external_player', 'External player'],
   ];
-  List<List<String>> buttonOrder = [
-    ['autoscroll', 'Slideshow'],
-    ['snatch', 'Save'],
-    ['favourite', 'Favourite'],
-    ['info', 'Display Info'],
-    ['share', 'Share'],
-    ['open', 'Open in Browser'],
-    ['reloadnoscale', 'Reload w/out scaling'],
-    ['toggle_quality', 'Toggle Quality'],
-    ['external_player', 'External player'],
-  ];
+  List<List<String>> buttonOrder = [...buttonList];
 
   bool jsonWrite = false;
   bool autoPlayEnabled = true;
@@ -168,8 +163,10 @@ class SettingsHandler extends GetxController {
   bool snatchOnFavourite = false;
   bool favouriteOnSnatch = false;
   bool disableVibration = false;
-  bool useAltVideoPlayer = isDesktopPlatform;
   bool altVideoPlayerHwAccel = true;
+  bool disableImageScaling = false;
+  bool gifsAsThumbnails = false;
+  bool desktopListsDrag = false;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -207,6 +204,7 @@ class SettingsHandler extends GetxController {
     'appMode',
     'handSide',
     'extPathOverride',
+    'backupPath',
     'lastSyncIp',
     'lastSyncPort',
     'customUserAgent',
@@ -214,7 +212,7 @@ class SettingsHandler extends GetxController {
     'proxyAddress',
     'proxyUsername',
     'proxyPassword',
-    'useAltVideoPlayer',
+    'videoBackendMode',
     'altVideoPlayerVO',
     'altVideoPlayerHWDEC',
     'altVideoPlayerHwAccel',
@@ -238,7 +236,9 @@ class SettingsHandler extends GetxController {
     'isDebug',
     'desktopListsDrag',
     'incognitoKeyboard',
+    'backupPath',
   ];
+
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
   // TODO move it in another file?
@@ -299,6 +299,11 @@ class SettingsHandler extends GetxController {
           'default': isDesktopPlatform ? 'Right' : 'Disabled',
           'options': <String>['Disabled', 'Left', 'Right'],
         },
+        'videoBackendMode': {
+          'type': 'videoBackendMode',
+          'default': isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.defaultValue,
+          'options': VideoBackendMode.values,
+        },
         'altVideoPlayerVO': {
           'type': 'stringFromList',
           'default': isDesktopPlatform ? 'libmpv' : 'gpu', // mediakit default: gpu - android, libmpv - desktop
@@ -349,6 +354,10 @@ class SettingsHandler extends GetxController {
           'default': '',
         },
         'drawerMascotPathOverride': {
+          'type': 'string',
+          'default': '',
+        },
+        'backupPath': {
           'type': 'string',
           'default': '',
         },
@@ -428,12 +437,6 @@ class SettingsHandler extends GetxController {
           'upperLimit': 1000000,
           'lowerLimit': 0,
         },
-        'mousewheelScrollSpeed': {
-          'type': 'double',
-          'default': 10.0,
-          'upperLimit': 20.0,
-          'lowerLimit': 0.1,
-        },
         'galleryAutoScrollTime': {
           'type': 'int',
           'default': 4000,
@@ -448,6 +451,20 @@ class SettingsHandler extends GetxController {
         },
 
         // double
+        'mousewheelScrollSpeed': {
+          'type': 'double',
+          'default': 10.0,
+          'upperLimit': 20.0,
+          'lowerLimit': 0.1,
+          'step': 0.5,
+        },
+        'preloadSizeLimit': {
+          'type': 'double',
+          'default': 0.2,
+          'upperLimit': double.infinity,
+          'lowerLimit': 0.0,
+          'step': 0.1,
+        },
 
         // bool
         'jsonWrite': {
@@ -594,17 +611,7 @@ class SettingsHandler extends GetxController {
         // other
         'buttonOrder': {
           'type': 'other',
-          'default': <List<String>>[
-            ['autoscroll', 'Slideshow'],
-            ['snatch', 'Save'],
-            ['favourite', 'Favourite'],
-            ['info', 'Display Info'],
-            ['share', 'Share'],
-            ['open', 'Open in Browser'],
-            ['reloadnoscale', 'Reload w/out scaling'],
-            ['toggle_quality', 'Toggle Quality'],
-            ['external_player', 'External player'],
-          ],
+          'default': <List<String>>[...buttonList],
         },
         'cacheDuration': {
           'type': 'duration',
@@ -768,6 +775,17 @@ class SettingsHandler extends GetxController {
             }
           }
 
+        case 'videoBackendMode':
+          if (toJSON) {
+            return (value as VideoBackendMode).toString();
+          } else {
+            if (value is String) {
+              return VideoBackendMode.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
         case 'logTypesList':
           if (toJSON) {
             // rxobject to list<string>
@@ -819,7 +837,7 @@ class SettingsHandler extends GetxController {
         case 'rxcolor':
           if (toJSON) {
             // rxobject to int
-            return (value as Rx<Color?>).value?.value ?? Colors.pink.value; // Color => int
+            return (value as Rx<Color?>).value?.value32bit ?? Colors.pink.value32bit; // Color => int
           } else {
             // int to rxobject
             if (value is int) {
@@ -954,7 +972,7 @@ class SettingsHandler extends GetxController {
       case 'shareAction':
         return shareAction;
       case 'limit':
-        return limit;
+        return itemLimit;
       case 'portraitColumns':
         return portraitColumns;
       case 'landscapeColumns':
@@ -1003,6 +1021,8 @@ class SettingsHandler extends GetxController {
         return volumeButtonsScrollSpeed;
       case 'mousewheelScrollSpeed':
         return mousewheelScrollSpeed;
+      case 'preloadSizeLimit':
+        return preloadSizeLimit;
       case 'disableVideo':
         return disableVideo;
       case 'shitDevice':
@@ -1038,6 +1058,8 @@ class SettingsHandler extends GetxController {
         return extPathOverride;
       case 'drawerMascotPathOverride':
         return drawerMascotPathOverride;
+      case 'backupPath':
+        return backupPath;
       case 'enableDrawerMascot':
         return enableDrawerMascot;
       case 'lastSyncIp':
@@ -1078,8 +1100,8 @@ class SettingsHandler extends GetxController {
         return favouriteOnSnatch;
       case 'disableVibration':
         return disableVibration;
-      case 'useAltVideoPlayer':
-        return useAltVideoPlayer;
+      case 'videoBackendMode':
+        return videoBackendMode;
       case 'altVideoPlayerHwAccel':
         return altVideoPlayerHwAccel;
       case 'altVideoPlayerVO':
@@ -1134,7 +1156,7 @@ class SettingsHandler extends GetxController {
         shareAction = validatedValue;
         break;
       case 'limit':
-        limit = validatedValue;
+        itemLimit = validatedValue;
         break;
       case 'portraitColumns':
         portraitColumns = validatedValue;
@@ -1210,6 +1232,9 @@ class SettingsHandler extends GetxController {
       case 'mousewheelScrollSpeed':
         mousewheelScrollSpeed = validatedValue;
         break;
+      case 'preloadSizeLimit':
+        preloadSizeLimit = validatedValue;
+        break;
       case 'disableVideo':
         disableVideo = validatedValue;
         break;
@@ -1251,6 +1276,9 @@ class SettingsHandler extends GetxController {
         break;
       case 'extPathOverride':
         extPathOverride = validatedValue;
+        break;
+      case 'backupPath':
+        backupPath = validatedValue;
         break;
       case 'lastSyncIp':
         lastSyncIp = validatedValue;
@@ -1315,8 +1343,8 @@ class SettingsHandler extends GetxController {
       case 'disableVibration':
         disableVibration = validatedValue;
         break;
-      case 'useAltVideoPlayer':
-        useAltVideoPlayer = validatedValue;
+      case 'videoBackendMode':
+        videoBackendMode = validatedValue;
         break;
       case 'altVideoPlayerHwAccel':
         altVideoPlayerHwAccel = validatedValue;
@@ -1396,6 +1424,7 @@ class SettingsHandler extends GetxController {
       'useVolumeButtonsForScroll': validateValue('useVolumeButtonsForScroll', null, toJSON: true),
       'volumeButtonsScrollSpeed': validateValue('volumeButtonsScrollSpeed', null, toJSON: true),
       'mousewheelScrollSpeed': validateValue('mousewheelScrollSpeed', null, toJSON: true),
+      'preloadSizeLimit': validateValue('preloadSizeLimit', null, toJSON: true),
       'disableVideo': validateValue('disableVideo', null, toJSON: true),
       'shitDevice': validateValue('shitDevice', null, toJSON: true),
       'galleryAutoScrollTime': validateValue('galleryAutoScrollTime', null, toJSON: true),
@@ -1421,7 +1450,7 @@ class SettingsHandler extends GetxController {
       'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),
       'favouriteOnSnatch': validateValue('favouriteOnSnatch', null, toJSON: true),
       'disableVibration': validateValue('disableVibration', null, toJSON: true),
-      'useAltVideoPlayer': validateValue('useAltVideoPlayer', null, toJSON: true),
+      'videoBackendMode': validateValue('videoBackendMode', null, toJSON: true),
       'altVideoPlayerHwAccel': validateValue('altVideoPlayerHwAccel', null, toJSON: true),
       'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
       'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
@@ -1435,6 +1464,7 @@ class SettingsHandler extends GetxController {
       'appMode': validateValue('appMode', null, toJSON: true),
       'handSide': validateValue('handSide', null, toJSON: true),
       'extPathOverride': validateValue('extPathOverride', null, toJSON: true),
+      'backupPath': validateValue('backupPath', null, toJSON: true),
       'lastSyncIp': validateValue('lastSyncIp', null, toJSON: true),
       'lastSyncPort': validateValue('lastSyncPort', null, toJSON: true),
       'customUserAgent': validateValue('customUserAgent', null, toJSON: true),
@@ -1566,7 +1596,6 @@ class SettingsHandler extends GetxController {
 
     final List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
     for (final String key in leftoverKeys) {
-      // TODO something causes rare exception which causes settings to reset
       try {
         setByString(key, json[key]);
       } catch (e, s) {
@@ -1591,6 +1620,35 @@ class SettingsHandler extends GetxController {
         }
       });
     }
+
+    try {
+      final List<String> legacyKeys = [
+        'useAltVideoPlayer',
+      ];
+      for (final String key in legacyKeys) {
+        if (json.keys.contains(key)) {
+          switch (key) {
+            case 'useAltVideoPlayer':
+              setByString(
+                'videoBackendMode',
+                (json[key] is bool && json[key]) ? VideoBackendMode.mpv.name : videoBackendMode.name,
+              );
+              break;
+          }
+        }
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse legacy keys $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
+    }
+
+    // Force enable logging on test builds
+    enabledLogTypes.value = EnvironmentConfig.isTesting ? [...LogTypes.values] : enabledLogTypes;
 
     return true;
   }
@@ -2105,9 +2163,23 @@ class SettingsHandler extends GetxController {
     try {
       postInitMessage.value = 'Setting up proxy...';
       await initProxy();
-      if (useAltVideoPlayer || isDesktopPlatform) {
+
+      if (isDesktopPlatform) {
         MediaKitVideoPlayer.registerWith();
+      } else {
+        switch (videoBackendMode) {
+          case VideoBackendMode.normal:
+            MediaKitVideoPlayer.registerNative();
+            break;
+          case VideoBackendMode.mpv:
+            MediaKitVideoPlayer.registerWith();
+            break;
+          case VideoBackendMode.mdk:
+            fvp.registerWith();
+            break;
+        }
       }
+
       postInitMessage.value = 'Loading Database...';
       await loadDatabase();
       await indexDatabase();
@@ -2155,12 +2227,6 @@ class EnvironmentConfig {
     'LS_IS_TESTING',
     defaultValue: false,
   );
-
-  //
-
-  static bool get hasSiSecret => siSecret1.isNotEmpty && siSecret2.isNotEmpty;
-  static const String siSecret1 = String.fromEnvironment('SI_SECRET_1', defaultValue: '');
-  static const String siSecret2 = String.fromEnvironment('SI_SECRET_2', defaultValue: '');
 }
 
 class TagsListData {

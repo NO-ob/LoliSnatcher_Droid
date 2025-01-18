@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_avif/flutter_avif.dart';
 
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -68,7 +69,11 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as CustomNetworkImage, chunkEvents, decode),
+      codec: _loadAsync(
+        key as CustomNetworkImage,
+        chunkEvents,
+        decode,
+      ),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -252,4 +257,259 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
 
   @override
   String toString() => '${objectRuntimeType(this, 'CustomNetworkImage')}("$url", scale: $scale)';
+}
+
+@immutable
+class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNetworkImage> implements custom_network_image.CustomNetworkImage {
+  const CustomNetworkAvifImage(
+    this.url, {
+    this.scale = 1.0,
+    this.headers,
+    this.cancelToken,
+    this.withCache = false,
+    this.cacheFolder,
+    this.fileNameExtras = '',
+    this.onCacheDetected,
+    this.onError,
+    this.sendTimeout,
+    this.receiveTimeout,
+  }) : assert(!withCache || cacheFolder != null, 'cacheFolder must be set when withCache is true');
+
+  @override
+  final String url;
+
+  @override
+  final double scale;
+
+  @override
+  final Map<String, String>? headers;
+
+  final CancelToken? cancelToken;
+
+  final bool withCache;
+
+  final String? cacheFolder;
+
+  final String fileNameExtras;
+
+  final void Function(bool)? onCacheDetected;
+
+  final void Function(Object)? onError;
+
+  final Duration? sendTimeout;
+
+  final Duration? receiveTimeout;
+
+  @override
+  Future<CustomNetworkAvifImage> obtainKey(ImageConfiguration configuration) {
+    return SynchronousFuture<CustomNetworkAvifImage>(this);
+  }
+
+  @override
+  ImageStreamCompleter loadImage(
+    custom_network_image.CustomNetworkImage key,
+    ImageDecoderCallback decode,
+  ) {
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
+
+    return AvifImageStreamCompleter(
+      key: key,
+      codec: _loadAsync(
+        key as CustomNetworkAvifImage,
+        chunkEvents,
+        decode,
+      ),
+      scale: key.scale,
+      debugLabel: key.url,
+      informationCollector: () => <DiagnosticsNode>[
+        ErrorDescription('Url: $url'),
+      ],
+      chunkEvents: chunkEvents.stream,
+    );
+  }
+
+  static Dio get _httpClient {
+    final Dio client = DioNetwork.getClient();
+    return client;
+  }
+
+  Future<bool> deleteCacheFile() async {
+    final key = this;
+    final Uri resolved = Uri.base.resolve(key.url);
+    final String cacheFilePath = await ImageWriter().getCachePathString(
+      resolved.toString(),
+      cacheFolder ?? 'media',
+      clearName: cacheFolder != 'favicons',
+      fileNameExtras: fileNameExtras,
+    );
+    final File cacheFile = File(cacheFilePath);
+
+    try {
+      assert(key == this, 'The $runtimeType cannot be reused after disposing.');
+
+      if (await cacheFile.exists()) {
+        await cacheFile.delete();
+        return true;
+      }
+    } catch (e) {
+      print('CustomNetworkAvifImage Exception :: delete cache file :: $e');
+      return false;
+    }
+    return false;
+  }
+
+  Future<AvifCodec> _loadAsync(
+    CustomNetworkAvifImage key,
+    StreamController<ImageChunkEvent> chunkEvents,
+    ImageDecoderCallback decode,
+  ) async {
+    final Uri resolved = Uri.base.resolve(key.url);
+    final String cacheFilePath = await ImageWriter().getCachePathString(
+      resolved.toString(),
+      cacheFolder ?? 'media',
+      clearName: cacheFolder != 'favicons',
+      fileNameExtras: fileNameExtras,
+    );
+    File? cacheFile;
+    try {
+      assert(key == this, 'The $runtimeType cannot be reused after disposing.');
+
+      // file already cached
+      if (withCache) {
+        cacheFile = File(cacheFilePath);
+        int fileSize = 0;
+
+        if (await cacheFile.exists()) {
+          fileSize = await cacheFile.length();
+          if (fileSize == 0) {
+            await cacheFile.delete();
+            cacheFile = null;
+          } else {
+            chunkEvents.add(
+              ImageChunkEvent(
+                cumulativeBytesLoaded: fileSize,
+                expectedTotalBytes: fileSize <= 0 ? null : fileSize,
+              ),
+            );
+          }
+        } else {
+          cacheFile = null;
+        }
+      }
+
+      if (onCacheDetected != null) {
+        onCacheDetected?.call(cacheFile != null);
+      }
+
+      Response? response;
+      if (cacheFile == null) {
+        response = withCache
+            ? await _httpClient.downloadUri(
+                resolved,
+                cacheFilePath,
+                options: Options(
+                  headers: headers,
+                  sendTimeout: sendTimeout,
+                  receiveTimeout: receiveTimeout,
+                ),
+                onReceiveProgress: (int count, int total) {
+                  chunkEvents.add(
+                    ImageChunkEvent(
+                      cumulativeBytesLoaded: count,
+                      expectedTotalBytes: total <= 0 ? null : total,
+                    ),
+                  );
+                },
+                cancelToken: cancelToken,
+              )
+            : await _httpClient.getUri(
+                resolved,
+                options: Options(
+                  headers: headers,
+                  responseType: ResponseType.bytes,
+                  sendTimeout: sendTimeout,
+                  receiveTimeout: receiveTimeout,
+                ),
+                onReceiveProgress: (int count, int total) {
+                  chunkEvents.add(
+                    ImageChunkEvent(
+                      cumulativeBytesLoaded: count,
+                      expectedTotalBytes: total <= 0 ? null : total,
+                    ),
+                  );
+                },
+                cancelToken: cancelToken,
+              );
+        _httpClient.close();
+
+        if (Tools.isGoodStatusCode(response.statusCode) == false) {
+          throw NetworkImageLoadException(
+            statusCode: response.statusCode ?? 0,
+            uri: resolved,
+          );
+        }
+      }
+
+      if (withCache) {
+        if (cacheFile == null) {
+          cacheFile = File(cacheFilePath);
+        } else {
+          // remove file when download wasn't finished
+          // TODO problematic?
+          // if (cancelToken?.isCancelled == true) {
+          //   if (lastChunk != null) {
+          //     if (lastChunk!.expectedTotalBytes != 0 && lastChunk!.expectedTotalBytes != lastChunk!.cumulativeBytesLoaded) {
+          //       await cacheFile.delete();
+          //       throw Exception('CustomNetworkAvifImage cancelled: $resolved');
+          //     }
+          //   }
+          // }
+        }
+      }
+
+      final Uint8List bytes = cacheFile != null ? await cacheFile.readAsBytes() : response!.data;
+      if (bytes.lengthInBytes == 0) {
+        throw Exception('CustomNetworkAvifImage is an empty file: $resolved');
+      }
+
+      final fType = isAvifFile(bytes.sublist(0, 16));
+      if (fType == AvifFileType.unknown) {
+        throw Exception('CustomNetworkAvifImage is not an avif file: $resolved');
+      }
+      final codec = fType == AvifFileType.avif
+          ? SingleFrameAvifCodec(bytes: bytes)
+          : MultiFrameAvifCodec(
+              key: hashCode,
+              avifBytes: bytes,
+              overrideDurationMs: -1,
+            );
+      await codec.ready();
+      return codec;
+    } catch (e) {
+      if (onError != null) {
+        onError?.call(e);
+      }
+
+      scheduleMicrotask(() {
+        PaintingBinding.instance.imageCache.evict(key);
+      });
+      rethrow;
+    } finally {
+      await chunkEvents.close();
+    }
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is CustomNetworkAvifImage && other.url == url && other.scale == scale;
+  }
+
+  @override
+  int get hashCode => Object.hash(url, scale);
+
+  @override
+  String toString() => '${objectRuntimeType(this, 'CustomNetworkAvifImage')}("$url", scale: $scale)';
 }

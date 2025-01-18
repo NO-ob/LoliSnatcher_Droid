@@ -34,8 +34,8 @@ class _MainAppBarState extends State<MainAppBar> {
   final SnatchHandler snatchHandler = SnatchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-  double _scrollOffset = 1;
-  double _lastScrollPosition = 0;
+  final ValueNotifier<double> _scrollOffset = ValueNotifier(1);
+  final ValueNotifier<double> _lastScrollPosition = ValueNotifier(0);
 
   late StreamSubscription<double> scrollListener;
   late StreamSubscription<int> tabIndexListener;
@@ -55,42 +55,32 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   void updatePosition(double newOffset) {
-    final double prevOffset = _scrollOffset;
     final double viewportDimension = searchHandler.gridScrollController.position.viewportDimension;
-    final double scrollChange = ((_lastScrollPosition - newOffset) / viewportDimension) * 10;
+    final double scrollChange = ((_lastScrollPosition.value - newOffset) / viewportDimension) * 10;
 
     if (newOffset < 0 || (newOffset + 100) > searchHandler.gridScrollController.position.maxScrollExtent) {
       // do nothing when oversrolling
       return;
     }
 
-    _scrollOffset = max(0, min(1, _scrollOffset + scrollChange));
-    _lastScrollPosition = newOffset;
+    _scrollOffset.value = max(0, min(1, _scrollOffset.value + scrollChange));
+    _lastScrollPosition.value = newOffset;
 
     if (viewerHandler.inViewer.value) {
       // always show toolbar when in viewer
-      _scrollOffset = 1;
+      _scrollOffset.value = 1;
     }
 
     if (newOffset < (viewportDimension / 3)) {
       // always show toolbar when close to top
-      _scrollOffset = 1;
-    }
-
-    if (prevOffset != _scrollOffset) {
-      // print('Scroll Offset: $_scrollOffset');
-      WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
+      _scrollOffset.value = 1;
     }
   }
 
   void updateIndex(int newIndex) {
     if (searchHandler.gridScrollController.hasClients) {
-      _lastScrollPosition = searchHandler.currentTab.scrollPosition;
-      final double prevOffset = _scrollOffset;
-      _scrollOffset = 1;
-      if (prevOffset != 1) {
-        WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
-      }
+      _lastScrollPosition.value = searchHandler.currentTab.scrollPosition;
+      _scrollOffset.value = 1;
     }
   }
 
@@ -112,13 +102,19 @@ class _MainAppBarState extends State<MainAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    final double barHeight = _scrollOffset * (widget.defaultHeight + MediaQuery.paddingOf(context).top);
+    return ValueListenableBuilder<double>(
+      valueListenable: _scrollOffset,
+      builder: (context, value, child) {
+        final double barHeight = _scrollOffset.value * (widget.defaultHeight + MediaQuery.paddingOf(context).top);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.linear,
-      color: Colors.transparent,
-      height: barHeight,
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+          color: Colors.transparent,
+          height: barHeight,
+          child: child,
+        );
+      },
       child: AppBar(
         automaticallyImplyLeading: false,
         leading: widget.leading,

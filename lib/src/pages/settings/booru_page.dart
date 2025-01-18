@@ -18,7 +18,7 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 // TODO move all buttons to separate widgets/unified functions to be used in other places?
@@ -42,7 +42,7 @@ class _BooruPageState extends State<BooruPage> {
   void initState() {
     super.initState();
     defaultTagsController.text = settingsHandler.defTags;
-    limitController.text = settingsHandler.limit.toString();
+    limitController.text = settingsHandler.itemLimit.toString();
 
     if (settingsHandler.prefBooru.isNotEmpty) {
       selectedBooru = settingsHandler.booruList.firstWhereOrNull(
@@ -55,10 +55,17 @@ class _BooruPageState extends State<BooruPage> {
     initPrefBooru = selectedBooru;
   }
 
+  @override
+  void dispose() {
+    defaultTagsController.dispose();
+    limitController.dispose();
+    super.dispose();
+  }
+
   void copyBooruLink(bool withSensitiveData) {
     Navigator.of(context).pop(true); // remove dialog
     final String link = selectedBooru?.toLink(withSensitiveData) ?? '';
-    if (Platform.isWindows || Platform.isLinux) {
+    if (SettingsHandler.isDesktopPlatform) {
       Clipboard.setData(ClipboardData(text: link));
       FlashElements.showSnackbar(
         context: context,
@@ -98,7 +105,7 @@ class _BooruPageState extends State<BooruPage> {
         return;
       }
     }
-    settingsHandler.limit = int.parse(limitController.text);
+    settingsHandler.itemLimit = int.parse(limitController.text);
     final bool result = await settingsHandler.saveSettings(restate: false);
     await settingsHandler.sortBooruList();
     if (result) {
@@ -167,17 +174,19 @@ class _BooruPageState extends State<BooruPage> {
                 ),
               ],
               actionButtons: [
-                const CancelButton(),
-                ElevatedButton(
-                  child: Text(AppLocalizations.of(context).button_yes),
-                  onPressed: () {
-                    copyBooruLink(true);
-                  },
-                ),
-                ElevatedButton(
-                  child: Text(AppLocalizations.of(context).button_no),
+                const CancelButton(withIcon: true),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.cancel_outlined),
+                  label: Text(AppLocalizations.of(context).button_no),
                   onPressed: () {
                     copyBooruLink(false);
+                  },
+                ),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.check_circle_outline_rounded),
+                  label: Text(AppLocalizations.of(context).button_yes),
+                  onPressed: () {
+                    copyBooruLink(true);
                   },
                 ),
               ],
@@ -274,7 +283,7 @@ class _BooruPageState extends State<BooruPage> {
                 Text(AppLocalizations.of(context).booruPage_deleteDialogBody(selectedBooru?.name)),
               ],
               actionButtons: [
-                const CancelButton(),
+                const CancelButton(withIcon: true),
                 ElevatedButton.icon(
                   onPressed: () async {
                     // save current and select next available booru to avoid exception after deletion
@@ -319,7 +328,7 @@ class _BooruPageState extends State<BooruPage> {
                     Navigator.of(context).pop(true);
                   },
                   label: Text(AppLocalizations.of(context).booruPage_deleteBooru),
-                  icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                  icon: const Icon(Icons.delete_forever),
                 ),
               ],
             );
@@ -472,11 +481,7 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                   TextSpan(text: AppLocalizations.of(context).booruPage_changeTo),
                   TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                   WidgetSpan(
-                    child: switch (selectedBooru.type) {
-                      BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
-                      BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
-                      _ => Favicon(selectedBooru),
-                    },
+                    child: BooruFavicon(selectedBooru),
                   ),
                   const TextSpan(text: '?'),
                 ],
@@ -487,7 +492,7 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                 children: [
                   TextSpan(text: AppLocalizations.of(context).booruPage_keepCurrentBooru),
                   TextSpan(text: initBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  WidgetSpan(child: Favicon(initBooru)),
+                  WidgetSpan(child: BooruFavicon(initBooru)),
                 ],
               ),
             ),
@@ -497,26 +502,24 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                   TextSpan(text: AppLocalizations.of(context).booruPage_changeToNewBooru),
                   TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                   WidgetSpan(
-                    child: switch (selectedBooru.type) {
-                      BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
-                      BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
-                      _ => Favicon(selectedBooru),
-                    },
+                    child: BooruFavicon(selectedBooru),
                   ),
                 ],
               ),
             ),
           ],
           actionButtons: [
-            const CancelButton(returnData: null),
-            ElevatedButton(
-              child: Text(AppLocalizations.of(context).button_no),
+            const CancelButton(withIcon: true),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.cancel_outlined),
+              label: Text(AppLocalizations.of(context).button_no),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
             ),
-            ElevatedButton(
-              child: Text(AppLocalizations.of(context).button_yes),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.check_circle_outline_rounded),
+              label: Text(AppLocalizations.of(context).button_yes),
               onPressed: () {
                 Navigator.of(context).pop(true);
               },

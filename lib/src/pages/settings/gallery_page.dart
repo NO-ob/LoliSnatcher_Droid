@@ -28,9 +28,10 @@ class _GalleryPageState extends State<GalleryPage> {
 
   List<List<String>>? buttonOrder;
 
-  TextEditingController preloadController = TextEditingController();
-  TextEditingController scrollSpeedController = TextEditingController();
-  TextEditingController galleryAutoScrollController = TextEditingController();
+  final TextEditingController preloadAmountController = TextEditingController();
+  final TextEditingController preloadSizeController = TextEditingController();
+  final TextEditingController scrollSpeedController = TextEditingController();
+  final TextEditingController galleryAutoScrollController = TextEditingController();
 
   @override
   void initState() {
@@ -54,13 +55,23 @@ class _GalleryPageState extends State<GalleryPage> {
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
     scrollSpeedController.text = settingsHandler.volumeButtonsScrollSpeed.toString();
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
-    preloadController.text = settingsHandler.preloadCount.toString();
+    preloadAmountController.text = settingsHandler.preloadCount.toString();
+    preloadSizeController.text = settingsHandler.preloadSizeLimit.toString();
     shitDevice = settingsHandler.shitDevice;
     loadingGif = settingsHandler.loadingGif;
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
     enableHeroTransitions = settingsHandler.enableHeroTransitions;
     disableCustomPageTransitions = settingsHandler.disableCustomPageTransitions;
     disableVibration = settingsHandler.disableVibration;
+  }
+
+  @override
+  void dispose() {
+    preloadAmountController.dispose();
+    preloadSizeController.dispose();
+    scrollSpeedController.dispose();
+    galleryAutoScrollController.dispose();
+    super.dispose();
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
@@ -88,18 +99,24 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.disableVibration = disableVibration;
 
     if (int.parse(scrollSpeedController.text) < 100) {
-      scrollSpeedController.text = '100';
+      scrollSpeedController.text = 100.toString();
     }
     if (int.parse(galleryAutoScrollController.text) < 800) {
-      galleryAutoScrollController.text = '800';
+      galleryAutoScrollController.text = 800.toString();
     }
     settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
     settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
-    if (int.parse(preloadController.text) < 0) {
-      preloadController.text = 0.toString();
+
+    if ((int.tryParse(preloadAmountController.text) ?? 0) < 0) {
+      preloadAmountController.text = 0.toString();
     }
-    settingsHandler.preloadCount = int.parse(preloadController.text);
-    // Set settingshandler values here
+    settingsHandler.preloadCount = int.parse(preloadAmountController.text);
+
+    if ((double.tryParse(preloadSizeController.text) ?? 0) < 0) {
+      preloadSizeController.text = 0.toString();
+    }
+    settingsHandler.preloadSizeLimit = double.parse(preloadSizeController.text);
+
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (result) {
       Navigator.of(context).pop();
@@ -109,8 +126,8 @@ class _GalleryPageState extends State<GalleryPage> {
   @override
   Widget build(BuildContext context) {
     final Color baseColor = Theme.of(context).colorScheme.secondary;
-    final Color oddItemColor = baseColor.withOpacity(0.25);
-    final Color evenItemColor = baseColor.withOpacity(0.15);
+    final Color oddItemColor = baseColor.withValues(alpha: 0.25);
+    final Color evenItemColor = baseColor.withValues(alpha: 0.15);
 
     final bool hasHydrus = settingsHandler.hasHydrus;
 
@@ -126,7 +143,7 @@ class _GalleryPageState extends State<GalleryPage> {
           child: ListView(
             children: [
               SettingsTextInput(
-                controller: preloadController,
+                controller: preloadAmountController,
                 title: 'Preload amount',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
@@ -143,6 +160,30 @@ class _GalleryPageState extends State<GalleryPage> {
                     return 'Please enter a valid numeric value';
                   } else if (parse > 4) {
                     return 'Please enter a value less than 5';
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              SettingsTextInput(
+                controller: preloadSizeController,
+                title: 'Preload size limit',
+                subtitle: const Text('in GB, 0 for no limit'),
+                inputType: TextInputType.number,
+                resetText: () => settingsHandler.map['preloadSizeLimit']!['default']!.toString(),
+                numberButtons: true,
+                numberStep: settingsHandler.map['preloadSizeLimit']!['step']!,
+                numberMin: settingsHandler.map['preloadSizeLimit']!['lowerLimit']!,
+                numberMax: settingsHandler.map['preloadSizeLimit']!['upperLimit']!,
+                validator: (String? value) {
+                  final double? parse = double.tryParse(value ?? '');
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a value';
+                  } else if (parse == null) {
+                    return 'Please enter a valid numeric value';
+                  } else if (parse < settingsHandler.map['preloadSizeLimit']!['lowerLimit']! ||
+                      parse > settingsHandler.map['preloadSizeLimit']!['upperLimit']!) {
+                    return 'Please enter a value between ${settingsHandler.map['preloadSizeLimit']!['lowerLimit']!} and ${settingsHandler.map['preloadSizeLimit']!['upperLimit']!}';
                   } else {
                     return null;
                   }
@@ -365,7 +406,8 @@ class _GalleryPageState extends State<GalleryPage> {
                   setState(() {
                     shitDevice = newValue;
                     if (shitDevice) {
-                      preloadController.text = '0';
+                      preloadAmountController.text = '0';
+                      preloadSizeController.text = '0.2';
                       galleryMode = 'Sample';
                       settingsHandler.autoPlayEnabled = false;
                       settingsHandler.disableImageScaling = false;

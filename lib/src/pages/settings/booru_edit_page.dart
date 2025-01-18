@@ -50,13 +50,13 @@ class _BooruEditState extends State<BooruEdit> {
   String convertSiteUrlToApi() {
     final String url = booruURLController.text;
 
-    if (url.contains('chan.sankakucomplex.com')) {
+    if (url.contains('idol.sankakucomplex.com')) {
+      return 'https://iapi.sankakucomplex.com';
+      // booruFaviconController.text = "https://idol.sankakucomplex.com/favicon.ico";
+    } else if (url.contains('sankakucomplex.com')) {
       // Sankaku api override
       return 'https://capi-v2.sankakucomplex.com';
       // booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
-    } else if (url.contains('idol.sankakucomplex.com')) {
-      return 'https://iapi.sankakucomplex.com';
-      // booruFaviconController.text = "https://idol.sankakucomplex.com/favicon.ico";
     }
 
     return url;
@@ -76,6 +76,17 @@ class _BooruEditState extends State<BooruEdit> {
       booruDefTagsController.text = widget.booru.defTags ?? '';
       selectedBooruType = BooruType.values.contains(widget.booru.type) ? widget.booru.type! : selectedBooruType;
     }
+  }
+
+  @override
+  void dispose() {
+    booruNameController.dispose();
+    booruURLController.dispose();
+    booruFaviconController.dispose();
+    booruAPIKeyController.dispose();
+    booruUserIDController.dispose();
+    booruDefTagsController.dispose();
+    super.dispose();
   }
 
   @override

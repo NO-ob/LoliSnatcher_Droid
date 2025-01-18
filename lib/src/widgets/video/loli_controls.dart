@@ -156,7 +156,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           if (drawProgressBar)
             Container(
               height: barHeight / 1.5,
-              color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
+              color: Colors.black38, //Theme.of(context).backgroundColor.withValues(alpha: 0.33),
               child: Row(
                 children: [
                   const SizedBox(width: 10),
@@ -167,7 +167,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             ),
           Container(
             height: barHeight,
-            color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
+            color: Colors.black38, //Theme.of(context).backgroundColor.withValues(alpha: 0.33),
             // Split into two parts: play + position | other buttons in 3:2 split
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -357,7 +357,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
 
         return Container(
-          // color: Colors.yellow.withOpacity(0.66),
+          // color: Colors.yellow.withValues(alpha: 0.66),
           color: Colors.transparent,
           padding: EdgeInsets.only(
             top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) + barHeight + 16,
@@ -373,7 +373,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   child: GestureDetector(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black87, //Theme.of(context).dialogBackgroundColor.withOpacity(0.75),
+                        color: Colors.black87, //Theme.of(context).dialogBackgroundColor.withValues(alpha: 0.75),
                         borderRadius: BorderRadius.circular(48),
                       ),
                       child: Padding(
@@ -440,6 +440,17 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           _startHideTimer();
         }
       },
+      onLongPress: () async {
+        if (_latestValue.playbackSpeed == 1.0) {
+          return;
+        }
+
+        await controller.setPlaybackSpeed(1);
+
+        if (_latestValue.isPlaying) {
+          _startHideTimer();
+        }
+      },
       child: AnimatedOpacity(
         opacity: _hideStuff ? 0.0 : 1.0,
         duration: const Duration(milliseconds: 300),
@@ -494,7 +505,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             ),
             child: Icon(
               _latestValue.volume > 0 ? Icons.volume_up : (isGlobalMute ? Icons.volume_off : Icons.volume_mute),
-              color: Colors.white,
+              color: isGlobalMute ? Theme.of(context).colorScheme.secondary : Colors.white,
             ),
           ),
         ),

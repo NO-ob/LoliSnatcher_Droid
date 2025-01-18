@@ -1,19 +1,22 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 
-class Favicon extends StatefulWidget {
-  const Favicon(
+class BooruFavicon extends StatefulWidget {
+  const BooruFavicon(
     this.booru, {
-    this.size = iconSize,
+    this.size = defaultSize,
     this.color,
     super.key,
   });
@@ -22,24 +25,24 @@ class Favicon extends StatefulWidget {
   final double size;
   final Color? color;
 
-  static const double iconSize = 20;
+  static const double defaultSize = 20;
 
   @override
-  State<Favicon> createState() => _FaviconState();
+  State<BooruFavicon> createState() => _BooruFaviconState();
 }
 
-class _FaviconState extends State<Favicon> {
-  bool isFailed = false, isLoaded = false, manualReloadTapped = false;
+class _BooruFaviconState extends State<BooruFavicon> {
+  bool isIcon = false, isFailed = false, isLoaded = false, manualReloadTapped = false;
   CancelToken? cancelToken;
   ImageProvider? mainProvider;
   ImageStream? imageStream;
-  ImageStreamListener? imageListener;
+  late ImageStreamListener imageListener;
   String? errorCode;
 
   double get size => widget.size;
 
   @override
-  void didUpdateWidget(Favicon oldWidget) {
+  void didUpdateWidget(BooruFavicon oldWidget) {
     // force redraw on tab change
     if (oldWidget.booru.faviconURL != widget.booru.faviconURL) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -51,18 +54,32 @@ class _FaviconState extends State<Favicon> {
 
   Future<ImageProvider> getImageProvider() async {
     cancelToken ??= CancelToken();
+    final String url = widget.booru.faviconURL!;
+    final bool isAvif = url.contains('.avif');
     return ResizeImage(
-      CustomNetworkImage(
-        widget.booru.faviconURL!,
-        withCache: true,
-        headers: await Tools.getFileCustomHeaders(widget.booru),
-        cacheFolder: 'favicons',
-        fileNameExtras: 'favicon_',
-        cancelToken: cancelToken,
-        sendTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 5),
-        onError: onError,
-      ),
+      isAvif
+          ? CustomNetworkAvifImage(
+              url,
+              withCache: true,
+              headers: await Tools.getFileCustomHeaders(widget.booru),
+              cacheFolder: 'favicons',
+              fileNameExtras: 'favicon_',
+              cancelToken: cancelToken,
+              sendTimeout: const Duration(seconds: 5),
+              receiveTimeout: const Duration(seconds: 5),
+              onError: onError,
+            )
+          : CustomNetworkImage(
+              url,
+              withCache: true,
+              headers: await Tools.getFileCustomHeaders(widget.booru),
+              cacheFolder: 'favicons',
+              fileNameExtras: 'favicon_',
+              cancelToken: cancelToken,
+              sendTimeout: const Duration(seconds: 5),
+              receiveTimeout: const Duration(seconds: 5),
+              onError: onError,
+            ),
       width: (size * 5).toInt(),
       height: (size * 5).toInt(),
     );
@@ -94,6 +111,7 @@ class _FaviconState extends State<Favicon> {
   @override
   void initState() {
     super.initState();
+    imageListener = ImageStreamListener((imageInfo, syncCall) {});
     restartLoading();
   }
 
@@ -107,36 +125,44 @@ class _FaviconState extends State<Favicon> {
     }
     disposables();
 
+    isIcon = widget.booru.type == BooruType.Favourites || widget.booru.type == BooruType.Downloads || widget.booru.type == null;
+
     isFailed = false;
     errorCode = null;
 
     updateState();
 
-    mainProvider ??= await getImageProvider();
+    if (isIcon) {
+      isLoaded = true;
+      updateState();
+    } else {
+      mainProvider ??= await getImageProvider();
 
-    imageStream?.removeListener(imageListener!);
-    imageStream = mainProvider!.resolve(ImageConfiguration.empty);
-    imageListener = ImageStreamListener(
-      (imageInfo, syncCall) {
-        isLoaded = true;
-        if (!syncCall) {
-          updateState();
-        }
-      },
-      onError: (e, s) {
-        Logger.Inst().log(
-          'Failed to load favicon: ${widget.booru.faviconURL}',
-          'Favicon',
-          'build',
-          LogTypes.imageLoadingError,
-          s: s,
-        );
-        onError(e);
-      },
-    );
-    imageStream!.addListener(imageListener!);
+      imageStream?.removeListener(imageListener);
 
-    updateState();
+      imageStream = mainProvider!.resolve(ImageConfiguration.empty);
+      imageListener = ImageStreamListener(
+        (imageInfo, syncCall) {
+          isLoaded = true;
+          if (!syncCall) {
+            updateState();
+          }
+        },
+        onError: (e, s) {
+          Logger.Inst().log(
+            'Failed to load favicon: ${widget.booru.faviconURL}',
+            'Favicon',
+            'build',
+            LogTypes.imageLoadingError,
+            s: s,
+          );
+          onError(e);
+        },
+      );
+      imageStream?.addListener(imageListener);
+
+      updateState();
+    }
   }
 
   @override
@@ -146,9 +172,9 @@ class _FaviconState extends State<Favicon> {
   }
 
   void disposables() {
-    imageStream?.removeListener(imageListener!);
+    imageStream?.removeListener(imageListener);
     imageStream = null;
-    imageListener = null;
+    imageListener = ImageStreamListener((imageInfo, syncCall) {});
 
     mainProvider = null;
 
@@ -173,7 +199,13 @@ class _FaviconState extends State<Favicon> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if (mainProvider != null)
+          if (isIcon)
+            switch (widget.booru.type) {
+              BooruType.Favourites => Icon(Icons.favorite, color: Colors.red, size: size),
+              BooruType.Downloads => Icon(Icons.file_download_outlined, size: size),
+              _ => Icon(CupertinoIcons.question, size: size),
+            }
+          else if (mainProvider != null)
             Image(
               image: mainProvider!,
               width: size,
@@ -208,11 +240,14 @@ class _FaviconState extends State<Favicon> {
             duration: const Duration(milliseconds: 200),
             child: (isLoaded || isFailed)
                 ? const SizedBox.shrink()
-                : ClipRRect(
-                    borderRadius: BorderRadius.circular(size / 5),
-                    child: ShimmerCard(
-                      isLoading: !isLoaded && !isFailed,
-                      child: !isLoaded && !isFailed ? null : const SizedBox.shrink(),
+                : ShimmerWrap(
+                    enabled: !SettingsHandler.instance.shitDevice,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(size / 5),
+                      child: ShimmerCard(
+                        isLoading: !isLoaded && !isFailed,
+                        child: !isLoaded && !isFailed ? null : const SizedBox.shrink(),
+                      ),
                     ),
                   ),
           ),
@@ -233,7 +268,7 @@ class _FaviconState extends State<Favicon> {
 
 class FaviconError extends StatelessWidget {
   const FaviconError({
-    this.iconSize = Favicon.iconSize,
+    this.iconSize = BooruFavicon.defaultSize,
     this.color = Colors.grey,
     this.code,
     this.onRestart,

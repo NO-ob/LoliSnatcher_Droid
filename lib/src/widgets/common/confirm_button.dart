@@ -6,6 +6,7 @@ class ConfirmButton extends StatelessWidget {
     this.action,
     this.returnData = true,
     this.withIcon = false,
+    this.customIcon,
     super.key,
   });
 
@@ -13,6 +14,7 @@ class ConfirmButton extends StatelessWidget {
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
+  final IconData? customIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,7 @@ class ConfirmButton extends StatelessWidget {
             Navigator.of(context).pop(returnData);
           }
         },
-        icon: Icon(withIcon ? Icons.check : null),
+        icon: Icon(withIcon ? (customIcon ?? Icons.check) : null),
         label: Text(text),
       );
     }

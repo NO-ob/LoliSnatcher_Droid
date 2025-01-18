@@ -92,6 +92,11 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   @override
   void dispose() {
+    ipController.dispose();
+    portController.dispose();
+    favouritesSkipController.dispose();
+    startPortController.dispose();
+
     testSync.killSync();
     sub?.cancel();
     super.dispose();

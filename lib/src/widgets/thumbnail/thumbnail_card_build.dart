@@ -50,7 +50,7 @@ class ThumbnailCardBuild extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         child: Obx(() {
           // print('ThumbnailCardBuild obx: $index');
-          final bool isSelected = searchHandler.currentTab.selected.contains(item);
+          final bool isSelected = searchHandler.currentSelected.contains(item);
           final bool isCurrent = (settingsHandler.appMode.value.isDesktop || viewerHandler.inViewer.value) && searchHandler.viewedIndex.value == index;
           final bool isCurrentlyBeingSnatched =
               snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;
@@ -77,8 +77,8 @@ class ThumbnailCardBuild extends StatelessWidget {
                 child: InkWell(
                   enableFeedback: true,
                   borderRadius: BorderRadius.circular(4),
-                  highlightColor: Theme.of(context).colorScheme.secondary.withOpacity(0.4),
-                  splashColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                  highlightColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.4),
+                  splashColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
                   onTap: () {
                     onTap?.call(index, item);
                   },

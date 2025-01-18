@@ -6,9 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
-import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 
 class IdolSankakuHandler extends SankakuHandler {
@@ -33,7 +31,12 @@ class IdolSankakuHandler extends SankakuHandler {
   @override
   Map<String, String> getHeaders() {
     return {
-      'User-Agent': EnvironmentConfig.hasSiSecret ? 'SCChannelApp/4.0 (Android; idol)' : Constants.defaultBrowserUserAgent,
+      'Accept-Encoding': 'gzip',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Connection': 'Keep-Alive',
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      'User-Agent': 'SCChannelApp/4.2 (Android; idol)',
+      if (token.isNotEmpty) 'x-rails-token': token,
     };
   }
 
@@ -113,20 +116,12 @@ class IdolSankakuHandler extends SankakuHandler {
   String makeURL(String tags) {
     final tagsStr = tags.trim().isEmpty ? '' : 'tags=${tags.trim()}&';
 
-    final authPart = (booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true && login.isNotEmpty && passHash.isNotEmpty && appkey.isNotEmpty)
-        ? 'login=$login&password_hash=$passHash&appkey=$appkey&'
-        : '';
-
-    return '${booru.baseURL}/post/index.json?$authPart${tagsStr}limit=$limit&page=$pageNum';
+    return '${booru.baseURL}/post/index.json?${tagsStr}limit=$limit&page=$pageNum';
   }
 
   @override
   String makeTagURL(String input) {
-    final authPart = (booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true && login.isNotEmpty && passHash.isNotEmpty && appkey.isNotEmpty)
-        ? 'login=$login&password_hash=$passHash&appkey=$appkey&'
-        : '';
-
-    return '${booru.baseURL}/tag/index.json?${authPart}name=$input*&limit=10';
+    return '${booru.baseURL}/tag/index.json?name=$input*&limit=10';
   }
 
   @override
@@ -176,30 +171,25 @@ class IdolSankakuHandler extends SankakuHandler {
     return sha1.convert(utf8.encode(str)).toString();
   }
 
-  String login = '', appkey = '', passHash = '';
+  String token = '';
 
   @override
   Future<bool> canSignIn() async {
-    return EnvironmentConfig.hasSiSecret && booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true;
+    return booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true;
   }
 
   @override
   Future<bool> isSignedIn() async {
-    return login.isNotEmpty && appkey.isNotEmpty && passHash.isNotEmpty;
+    return token.isNotEmpty;
   }
 
   @override
   Future<bool> signIn() async {
-    login = '';
-    appkey = '';
-    passHash = '';
+    token = '';
 
     bool success = false;
 
     try {
-      appkey = generateSha1(EnvironmentConfig.siSecret1.replaceAll('[username]', booru.userID!.toLowerCase()));
-      passHash = generateSha1(EnvironmentConfig.siSecret2.replaceAll('[password]', booru.apiKey!));
-
       final res = await DioNetwork.post(
         '${booru.baseURL}/user/authenticate.json',
         headers: {
@@ -207,21 +197,19 @@ class IdolSankakuHandler extends SankakuHandler {
           'Cache-Control': 'no-store, no-cache, must-revalidate',
           'Connection': 'Keep-Alive',
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-          'User-Agent': 'SCChannelApp/4.0 (Android; idol)',
+          'User-Agent': 'SCChannelApp/4.2 (Android; idol)',
         },
         options: Options(
           contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
         ),
         data: {
-          'appkey': appkey,
           'login': booru.userID?.toLowerCase(),
-          'password_hash': passHash,
+          'password': booru.apiKey,
         },
       );
       if (res.statusCode == 200) {
-        login = res.data['current_user']?['name'];
-        appkey = generateSha1(EnvironmentConfig.siSecret1.replaceAll('[username]', login.toLowerCase()));
-        success = true;
+        token = res.data['access_token'] ?? '';
+        success = token.isNotEmpty;
       }
     } catch (e) {
       success = false;
@@ -231,8 +219,6 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   Future<void> signOut({bool fromError = false}) async {
-    login = '';
-    appkey = '';
-    passHash = '';
+    token = '';
   }
 }

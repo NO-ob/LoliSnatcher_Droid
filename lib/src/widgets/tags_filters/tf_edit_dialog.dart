@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
+import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
@@ -28,6 +30,12 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
   void initState() {
     super.initState();
     _controller.text = widget.tag;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void onSubmit(String text) {
@@ -78,35 +86,22 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
             onSubmitted: onSubmit,
           ),
         ),
-        //
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-          child: ListTile(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-              side: BorderSide(color: Theme.of(context).colorScheme.secondary),
-            ),
-            onTap: () => onSubmit(_controller.text),
-            leading: const Icon(Icons.save),
-            title: const Text('Save Filter'),
-          ),
-        ),
-        //
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-          child: ListTile(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5),
-              side: BorderSide(color: Theme.of(context).colorScheme.secondary),
-            ),
-            onTap: onDelete,
-            leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
-            title: const Text('Delete'),
-          ),
-        ),
       ],
-      actionButtons: const [
-        CancelButton(),
+      actionButtons: [
+        const CancelButton(
+          text: 'Close',
+          withIcon: true,
+        ),
+        DeleteButton(
+          withIcon: true,
+          action: onDelete,
+        ),
+        ConfirmButton(
+          text: 'Save',
+          withIcon: true,
+          customIcon: Icons.save,
+          action: () => onSubmit(_controller.text),
+        ),
       ],
     );
   }

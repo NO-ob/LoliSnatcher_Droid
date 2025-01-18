@@ -18,13 +18,20 @@ import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class Tools {
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
-  static String formatBytes(int bytes, int decimals, {bool withSpace = true}) {
+  static String formatBytes(
+    int bytes,
+    int decimals, {
+    bool withSpace = true,
+    bool withTrailingZeroes = true,
+  }) {
     if (bytes <= 0) {
       return '0 B';
     }
     const suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     final i = (log(bytes) / log(1024)).floor();
-    return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)}${withSpace ? ' ' : ''}${suffixes[i]}';
+
+    final num = bytes / pow(1024, i);
+    return '${num.toStringAsFixed(withTrailingZeroes ? decimals : (num.truncateToDouble() == num ? 0 : decimals))}${withSpace ? ' ' : ''}${suffixes[i]}';
   }
 
   static int parseFormattedBytes(String bytes) {
@@ -97,9 +104,11 @@ class Tools {
 
   // unified http headers list generator for dio in thumb/media/video loaders
   static Future<Map<String, String>> getFileCustomHeaders(
-    Booru booru, {
+    Booru? booru, {
     bool checkForReferer = false,
   }) async {
+    if (booru == null) return {};
+
     // a few boorus don't work without a browser useragent
     final Map<String, String> headers = {'User-Agent': browserUserAgent};
     if (booru.baseURL?.contains('danbooru.donmai.us') ?? false) {
@@ -198,7 +207,7 @@ class Tools {
             userAgent: customUserAgent,
             title: 'Captcha check',
             subtitle:
-                "Possible captcha detected, please solve it and press back after that. If there is no captcha then it's probably some other authentication issue. [Beta]",
+                "Possible captcha detected, please solve it and press back after that. If there is no captcha then it's probably some other authentication issue.",
           ),
         ),
       );

@@ -90,7 +90,7 @@ class TagsManagerList extends StatelessWidget {
                   );
                 },
                 thumbBackgroundColor: Theme.of(context).colorScheme.surface,
-                thumbDrawColor: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+                thumbDrawColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5),
                 startIndex: 0,
               ),
             ),

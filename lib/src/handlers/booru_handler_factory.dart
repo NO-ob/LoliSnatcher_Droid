@@ -32,7 +32,7 @@ class BooruHandlerFactory {
   int pageNum = -1;
 
   List getBooruHandler(List<Booru> boorus, int? customLimit) {
-    final int limit = customLimit ?? SettingsHandler.instance.limit;
+    final int limit = customLimit ?? SettingsHandler.instance.itemLimit;
 
     if (boorus.length == 1) {
       final Booru booru = boorus.first;

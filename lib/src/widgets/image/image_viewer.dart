@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +9,8 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -22,10 +23,14 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 class ImageViewer extends StatefulWidget {
   const ImageViewer(
     this.booruItem, {
+    this.isStandalone = false,
+    this.customBooru,
     super.key,
   });
 
   final BooruItem booruItem;
+  final bool isStandalone;
+  final Booru? customBooru;
 
   @override
   State<ImageViewer> createState() => ImageViewerState();
@@ -67,15 +72,19 @@ class ImageViewerState extends State<ImageViewer> {
 
   void onSize(int? size) {
     // TODO find a way to stop loading based on size when caching is enabled
-    const int maxSize = 1024 * 1024 * 200;
+    final int? maxSize = settingsHandler.preloadSizeLimit == 0 ? null : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
     if (size == null) {
       return;
     } else if (size == 0) {
       killLoading(['File is zero bytes']);
-    } else if ((size > maxSize) && isTooBig != 2) {
+    } else if (maxSize != null && (size > maxSize) && isTooBig != 2) {
       // TODO add check if resolution is too big
       isTooBig = 1;
-      killLoading(['File is too big', 'File size: ${Tools.formatBytes(size, 2)}', 'Limit: ${Tools.formatBytes(maxSize, 2)}']);
+      killLoading([
+        'File is too big',
+        'File size: ${Tools.formatBytes(size, 2)}',
+        'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
+      ]);
     }
 
     if (size > 0 && widget.booruItem.fileSize == null) {
@@ -113,9 +122,10 @@ class ImageViewerState extends State<ImageViewer> {
     super.initState();
     viewerHandler.addViewed(widget.key);
 
-    isViewed = settingsHandler.appMode.value.isMobile
-        ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
-        : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    isViewed = widget.isStandalone ||
+        (settingsHandler.appMode.value.isMobile
+            ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
+            : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
@@ -235,24 +245,45 @@ class ImageViewerState extends State<ImageViewer> {
 
     ImageProvider provider;
     cancelToken = CancelToken();
-    provider = CustomNetworkImage(
-      useFullImage ? widget.booruItem.fileURL : widget.booruItem.sampleURL,
-      cancelToken: cancelToken,
-      headers: await Tools.getFileCustomHeaders(
-        searchHandler.currentBooru,
-        checkForReferer: true,
-      ),
-      withCache: settingsHandler.mediaCache,
-      cacheFolder: imageFolder,
-      fileNameExtras: widget.booruItem.fileNameExtras,
-      onError: onError,
-      onCacheDetected: (bool didDetectCache) {
-        if (didDetectCache) {
-          isFromCache = true;
-          updateState();
-        }
-      },
-    );
+    final String url = useFullImage ? widget.booruItem.fileURL : widget.booruItem.sampleURL;
+    final bool isAvif = url.contains('.avif');
+    provider = isAvif
+        ? CustomNetworkAvifImage(
+            url,
+            cancelToken: cancelToken,
+            headers: await Tools.getFileCustomHeaders(
+              widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+              checkForReferer: true,
+            ),
+            withCache: settingsHandler.mediaCache,
+            cacheFolder: imageFolder,
+            fileNameExtras: widget.booruItem.fileNameExtras,
+            onError: onError,
+            onCacheDetected: (bool didDetectCache) {
+              if (didDetectCache) {
+                isFromCache = true;
+                updateState();
+              }
+            },
+          )
+        : CustomNetworkImage(
+            url,
+            cancelToken: cancelToken,
+            headers: await Tools.getFileCustomHeaders(
+              widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+              checkForReferer: true,
+            ),
+            withCache: settingsHandler.mediaCache,
+            cacheFolder: imageFolder,
+            fileNameExtras: widget.booruItem.fileNameExtras,
+            onError: onError,
+            onCacheDetected: (bool didDetectCache) {
+              if (didDetectCache) {
+                isFromCache = true;
+                updateState();
+              }
+            },
+          );
 
     // scale image only if it's not an animation, scaling is allowed and item is not marked as noScale
     if (!widget.booruItem.mediaType.value.isAnimation && !settingsHandler.disableImageScaling && !widget.booruItem.isNoScale.value && (widthLimit ?? 0) > 0) {
@@ -382,8 +413,6 @@ class ImageViewerState extends State<ImageViewer> {
   Widget build(BuildContext context) {
     // print('!!! Build media ${searchHandler.getItemIndex(widget.booruItem)} $isViewed !!!');
 
-    const double fullOpacity = Constants.imageDefaultOpacity;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -405,7 +434,6 @@ class ImageViewerState extends State<ImageViewer> {
                 // TODO find a way to detect when main image is fully rendered to dispose this widget to free up memory
                 Thumbnail(
                   item: widget.booruItem,
-                  isStandalone: false,
                 ),
                 //
                 MediaLoading(
@@ -440,30 +468,38 @@ class ImageViewerState extends State<ImageViewer> {
                               scrollZoomImage(pointerSignal.scrollDelta.dy);
                             }
                           },
-                          child: AnimatedOpacity(
-                            opacity: isLoaded ? fullOpacity : 0,
-                            duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-                            child: PhotoView(
-                              imageProvider: mainProvider,
-                              gaplessPlayback: true,
-                              loadingBuilder: (context, event) {
-                                return const SizedBox.shrink();
-                              },
-                              errorBuilder: (_, error, __) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  onError(error);
-                                });
-                                return const SizedBox.shrink();
-                              },
-                              // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                              filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
-                              minScale: PhotoViewComputedScale.contained,
-                              maxScale: PhotoViewComputedScale.covered * 8,
-                              initialScale: PhotoViewComputedScale.contained,
-                              enableRotation: settingsHandler.allowRotation,
-                              basePosition: Alignment.center,
-                              controller: viewController,
-                              scaleStateController: scaleController,
+                          child: ImageFiltered(
+                            enabled: settingsHandler.blurImages,
+                            imageFilter: ImageFilter.blur(
+                              sigmaX: 20,
+                              sigmaY: 20,
+                              tileMode: TileMode.decal,
+                            ),
+                            child: AnimatedOpacity(
+                              opacity: isLoaded ? 1 : 0,
+                              duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                              child: PhotoView(
+                                imageProvider: mainProvider,
+                                gaplessPlayback: true,
+                                loadingBuilder: (context, event) {
+                                  return const SizedBox.shrink();
+                                },
+                                errorBuilder: (_, error, __) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                    onError(error);
+                                  });
+                                  return const SizedBox.shrink();
+                                },
+                                // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                                filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
+                                minScale: PhotoViewComputedScale.contained,
+                                maxScale: PhotoViewComputedScale.covered * 8,
+                                initialScale: PhotoViewComputedScale.contained,
+                                enableRotation: settingsHandler.allowRotation,
+                                basePosition: Alignment.center,
+                                controller: viewController,
+                                scaleStateController: scaleController,
+                              ),
                             ),
                           ),
                         )

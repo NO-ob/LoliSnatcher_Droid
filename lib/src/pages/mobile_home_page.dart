@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -100,16 +101,17 @@ class _MobileHomeState extends State<MobileHome> {
           ],
           actionButtons: [
             ElevatedButton.icon(
+              icon: const Icon(Icons.cancel),
+              label: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            ElevatedButton.icon(
               label: const Text('Yes'),
               icon: const Icon(Icons.exit_to_app_sharp),
               onPressed: () {
                 Navigator.of(context).pop(true);
-              },
-            ),
-            ElevatedButton(
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
               },
             ),
           ],
@@ -197,7 +199,7 @@ class _MobileHomeState extends State<MobileHome> {
                 ],
               ),
             ),
-            if (searchHandler.currentTab.selected.isNotEmpty)
+            if (searchHandler.currentSelected.isNotEmpty)
               Positioned(
                 right: -6,
                 top: 8,
@@ -213,7 +215,7 @@ class _MobileHomeState extends State<MobileHome> {
                     child: Center(
                       child: FittedBox(
                         child: Text(
-                          searchHandler.currentTab.selected.length.toFormattedString(),
+                          searchHandler.currentSelected.length.toFormattedString(),
                           style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
                         ),
                       ),
@@ -376,7 +378,7 @@ class MainDrawer extends StatelessWidget {
                       }),
                       //
                       Obx(() {
-                        if (settingsHandler.isDebug.value && settingsHandler.enabledLogTypes.isNotEmpty) {
+                        if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) && settingsHandler.enabledLogTypes.isNotEmpty) {
                           return SettingsButton(
                             name: 'Open Logger',
                             icon: const Icon(Icons.print),
@@ -427,6 +429,15 @@ class MainDrawer extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                       }),
+                      if (kDebugMode)
+                        SettingsToggle(
+                          value: settingsHandler.blurImages,
+                          onChanged: (newValue) {
+                            settingsHandler.blurImages = newValue;
+                            searchHandler.rootRestate();
+                          },
+                          title: 'Blur [DEV]',
+                        ),
                       //
                       Obx(() {
                         if (settingsHandler.updateInfo.value != null && Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
@@ -460,6 +471,17 @@ class MainDrawer extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                       }),
+                      if (SettingsHandler.isDesktopPlatform)
+                        SettingsButton(
+                          name: 'Close the app',
+                          icon: const Icon(Icons.exit_to_app),
+                          action: () async {
+                            // twice to trigger drawer close
+                            await Navigator.of(context).maybePop();
+                            await Future.delayed(const Duration(milliseconds: 400));
+                            await Navigator.of(context).maybePop();
+                          },
+                        ),
                       //
                       if (settingsHandler.enableDrawerMascot) const MascotImage(),
                     ],
@@ -505,24 +527,23 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
       );
       return;
     }
-    // call a function to save the currently viewed image when the save button is pressed
-    if (searchHandler.currentTab.selected.isNotEmpty) {
+
+    if (searchHandler.currentSelected.isNotEmpty) {
       snatchHandler.queue(
-        [...searchHandler.currentTab.selected],
+        [...searchHandler.currentSelected],
         searchHandler.currentBooru,
         settingsHandler.snatchCooldown,
         isLongTap,
       );
       if (settingsHandler.favouriteOnSnatch) {
-        for (final item in searchHandler.currentTab.selected) {
-          final index = searchHandler.currentFetched.indexOf(item);
-          if (index != -1) {
-            unawaited(searchHandler.toggleItemFavourite(index, forcedValue: true));
-          }
-        }
+        await searchHandler.updateFavForMultipleItems(
+          searchHandler.currentSelected,
+          newValue: true,
+          skipSnatching: true,
+        );
       }
       await Future.delayed(const Duration(milliseconds: 100));
-      searchHandler.currentTab.selected.value = [];
+      searchHandler.currentTab.selected.clear();
     } else {
       FlashElements.showSnackbar(
         context: context,
@@ -602,7 +623,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
 
                                   return AnimatedProgressIndicator(
                                     value: snatchHandler.currentProgress,
-                                    valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.5),
+                                    valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.5),
                                     indicatorStyle: IndicatorStyle.linear,
                                     borderRadius: 0,
                                     animationDuration: const Duration(milliseconds: 100),
@@ -641,6 +662,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                 padding: const EdgeInsets.only(top: 8),
                                                 child: CancelButton(
                                                   withIcon: true,
+                                                  customIcon: Icons.cancel_outlined,
                                                   action: snatchHandler.onCancel,
                                                 ),
                                               ),
@@ -796,7 +818,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           ),
                                         ),
                                         Obx(() {
-                                          final selected = searchHandler.currentTab.selected;
+                                          final selected = searchHandler.currentSelected;
                                           if (selected.isNotEmpty) {
                                             final int favSelectedCount = selected.where((item) => item.isFavourite.value == true).length;
                                             final int unfavSelectedCount = selected.where((item) => item.isFavourite.value == false).length;
@@ -821,7 +843,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                     name: 'Remove snatched status from selected (${downloadsSelectedCount.toFormattedString()})',
                                                     icon: const Icon(Icons.file_download_off_outlined),
                                                     action: () async {
-                                                      final onlySnatched = searchHandler.currentTab.selected.where((e) => e.isSnatched.value == true).toList();
+                                                      final onlySnatched = searchHandler.currentSelected.where((e) => e.isSnatched.value == true).toList();
                                                       if (onlySnatched.length > 20) {
                                                         // TODO confirm dialog
                                                       }
@@ -841,7 +863,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                     name: 'Favourite selected (${unfavSelectedCount.toFormattedString()})',
                                                     icon: const Icon(Icons.favorite, color: Colors.red),
                                                     action: () async {
-                                                      final onlyUnfavs = searchHandler.currentTab.selected.where((e) => e.isFavourite.value == false).toList();
+                                                      final onlyUnfavs = searchHandler.currentSelected.where((e) => e.isFavourite.value == false).toList();
                                                       if (onlyUnfavs.length > 20) {
                                                         // TODO confirm dialog
                                                       }
@@ -861,7 +883,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                     name: 'Unfavourite selected (${favSelectedCount.toFormattedString()})',
                                                     icon: const Icon(Icons.favorite_border),
                                                     action: () async {
-                                                      final onlyFavs = searchHandler.currentTab.selected.where((e) => e.isFavourite.value == true).toList();
+                                                      final onlyFavs = searchHandler.currentSelected.where((e) => e.isFavourite.value == true).toList();
                                                       if (onlyFavs.length > 20) {
                                                         // TODO confirm dialog
                                                       }
@@ -933,7 +955,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                       child: updating
                           ? Container(
                               alignment: Alignment.center,
-                              color: Colors.black.withOpacity(0.66),
+                              color: Colors.black.withValues(alpha: 0.66),
                               child: const Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -975,8 +997,8 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
         children: [
           SettingsToggle(
             title: 'Multibooru mode',
-            value: searchHandler.currentTab.secondaryBoorus?.isNotEmpty ?? false,
-            drawBottomBorder: searchHandler.currentTab.secondaryBoorus?.isEmpty ?? true,
+            value: searchHandler.currentSecondaryBoorus?.isNotEmpty ?? false,
+            drawBottomBorder: searchHandler.currentSecondaryBoorus?.isEmpty ?? true,
             onChanged: (newValue) {
               if (settingsHandler.booruList.length < 2) {
                 FlashElements.showSnackbar(
@@ -1042,7 +1064,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
             },
           ),
           Obx(() {
-            final bool hasTabsAndTabHasSecondaryBoorus = searchHandler.list.isNotEmpty && (searchHandler.currentTab.secondaryBoorus?.isNotEmpty ?? false);
+            final bool hasTabsAndTabHasSecondaryBoorus = searchHandler.list.isNotEmpty && (searchHandler.currentSecondaryBoorus?.isNotEmpty ?? false);
 
             return AnimatedSize(
               duration: const Duration(milliseconds: 200),

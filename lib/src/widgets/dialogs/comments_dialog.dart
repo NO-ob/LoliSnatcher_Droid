@@ -41,22 +41,37 @@ class _CommentsDialogState extends State<CommentsDialog> {
 
   List<CommentItem> comments = [];
   ScrollController scrollController = ScrollController();
-  bool isLoading = true, notSupported = false;
+  bool isLoading = true, isCompleted = false, notSupported = false;
+  int page = 0;
 
   @override
   void initState() {
     super.initState();
-    getComments();
+    getComments(initial: true);
   }
 
-  Future<void> getComments() async {
+  Future<void> getComments({bool initial = false}) async {
+    page = initial ? 0 : page + 1;
+    if (initial) {
+      isCompleted = false;
+      notSupported = false;
+      comments.clear();
+    }
     isLoading = true;
-    if (widget.item.serverId != null) {
-      setState(() {}); // set state to update the loading indicator
-      final List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, 0);
-      comments = fetched;
-    } else {
-      notSupported = true;
+    if (!isCompleted) {
+      if (widget.item.serverId != null) {
+        setState(() {}); // set state to update the loading indicator
+        final List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, page);
+        if (fetched.isEmpty || comments.contains(fetched.first)) {
+          isCompleted = true;
+        }
+
+        if (!isCompleted) {
+          comments = [...comments, ...fetched];
+        }
+      } else {
+        notSupported = true;
+      }
     }
 
     // comments = [
@@ -116,47 +131,69 @@ class _CommentsDialogState extends State<CommentsDialog> {
     );
   }
 
+  bool onScroll(ScrollUpdateNotification notif) {
+    final bool isNotAtStart = notif.metrics.pixels > 0;
+    final bool isAtOrNearEdge = notif.metrics.atEdge || notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2));
+    final bool isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0;
+
+    if (!isLoading && !isCompleted) {
+      if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
+        getComments();
+      }
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bool areThereErrors = isLoading || notSupported || comments.isEmpty;
+    final bool areThereErrors = (isLoading && comments.isEmpty) || notSupported || comments.isEmpty;
 
     return SettingsPageDialog(
-      title: const Text('Comments'),
-      content: Scrollbar(
-        controller: scrollController,
-        child: RefreshIndicator(
-          triggerMode: RefreshIndicatorTriggerMode.anywhere,
-          strokeWidth: 4,
-          color: Theme.of(context).colorScheme.secondary,
-          onRefresh: () async {
-            await getComments();
-          },
-          child: DesktopScrollWrap(
-            controller: scrollController,
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+      title: Text('Comments ${comments.isEmpty ? '' : '(${comments.length})'}'.trim()),
+      content: NotificationListener<ScrollUpdateNotification>(
+        onNotification: onScroll,
+        child: Scrollbar(
+          controller: scrollController,
+          child: RefreshIndicator(
+            triggerMode: RefreshIndicatorTriggerMode.anywhere,
+            strokeWidth: 4,
+            color: Theme.of(context).colorScheme.secondary,
+            onRefresh: () async {
+              await getComments(initial: true);
+            },
+            child: DesktopScrollWrap(
               controller: scrollController,
-              physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-              itemCount: areThereErrors ? 2 : comments.length + 1,
-              scrollDirection: Axis.vertical,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _CommentsHeader(item: widget.item);
-                }
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                controller: scrollController,
+                physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                itemCount: areThereErrors ? 2 : comments.length + 1,
+                scrollDirection: Axis.vertical,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return _CommentsHeader(item: widget.item);
+                  }
 
-                return areThereErrors
-                    ? errorEntryBuild(context, index)
-                    : _CommentEntry(
-                        comment: comments[index - 1],
-                      );
-              },
+                  return areThereErrors
+                      ? errorEntryBuild(context, index)
+                      : _CommentEntry(
+                          comment: comments[index - 1],
+                        );
+                },
+              ),
             ),
           ),
         ),
       ),
       actions: [
+        if (isLoading && comments.isNotEmpty)
+          const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(),
+          ),
         IconButton(
-          onPressed: getComments,
+          onPressed: () => getComments(initial: true),
           icon: const Icon(Icons.refresh),
         ),
         if (widget.item.postURL.isNotEmpty)
@@ -307,7 +344,7 @@ class _CommentEntry extends StatelessWidget {
                                   formatDate(comment.createDate!, comment.createDateFormat!),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                                   ),
                                 ),
                               const SizedBox(width: 15),

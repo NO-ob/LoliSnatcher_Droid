@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
 
@@ -18,9 +20,9 @@ class TagsManagerListBottom extends StatelessWidget {
 
   final List<Tag> selected;
   final bool isFilterActive;
-  final void Function() onSelectAll;
-  final void Function() onDeselectAll;
-  final Future<void> Function() onDelete;
+  final VoidCallback onSelectAll;
+  final VoidCallback onDeselectAll;
+  final AsyncCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -75,19 +77,17 @@ class TagsManagerListBottom extends StatelessWidget {
                     ),
                   ),
                   actionButtons: [
-                    const CancelButton(),
-                    ElevatedButton.icon(
-                      label: const Text('Delete'),
-                      icon: const Icon(Icons.delete_forever),
-                      onPressed: onDelete,
+                    const CancelButton(withIcon: true),
+                    DeleteButton(
+                      withIcon: true,
+                      action: onDelete,
                     ),
                   ],
                 );
 
                 showDialog(
                   context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) => deleteDialog,
+                  builder: (_) => deleteDialog,
                 );
               },
             ),

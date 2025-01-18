@@ -69,6 +69,8 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
   @override
   void dispose() {
+    snatchCooldownController.dispose();
+    cacheSizeController.dispose();
     isolate?.kill(priority: Isolate.immediate);
     isolate = null;
     super.dispose();
@@ -279,13 +281,15 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 title: 'Favourite items on snatching',
               ),
               SettingsToggle(
-                value: jsonWrite,
+                value: (!Platform.isAndroid || extPathOverride.isNotEmpty) && jsonWrite,
                 onChanged: (newValue) {
                   setState(() {
                     jsonWrite = newValue;
                   });
                 },
+                enabled: !Platform.isAndroid || extPathOverride.isNotEmpty,
                 title: 'Write image data to JSON on save',
+                subtitle: (!Platform.isAndroid || extPathOverride.isNotEmpty) ? null : const Text('Requires custom storage directory'),
               ),
               SettingsButton(
                 name: 'Set storage directory',
@@ -390,8 +394,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                             const Text(''),
                             const Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
                             const Text(''),
-                            if (Platform.isWindows || Platform.isLinux || Platform.isAndroid)
-                              const Text('[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.'),
+                            if (SettingsHandler.isDesktopPlatform) const Text('[Warning]: On desktop Stream mode can work incorrectly for some Boorus.'),
                           ],
                         );
                       },

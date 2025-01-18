@@ -207,16 +207,17 @@ class InkBunnyHandler extends BooruHandler {
     bool random = false;
     final List<String> tagList = tags.split(' ');
     String tagStr = '';
+
     for (int i = 0; i < tagList.length; i++) {
-      if (tagList[i].contains('artist:')) {
-        artist = tagList[i].replaceAll('artist:', '');
-      } else if (tagList[i].contains('order:')) {
-        if (tagList[i] == 'order:random') {
+      if (tagList[i].contains('artist%3A')) {
+        artist = tagList[i].replaceAll('artist%3A', '');
+      } else if (tagList[i].contains('order%3A')) {
+        if (tagList[i] == 'order%3Arandom') {
           random = true;
         } else {
           // views, favs
-          if (tagList[i].split(':').length > 1) {
-            order = tagList[i].split(':')[1];
+          if (tagList[i].split('%3A').length > 1) {
+            order = tagList[i].split('%3A')[1];
           }
         }
       } else {

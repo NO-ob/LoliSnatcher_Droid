@@ -182,7 +182,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
   void afterSearch() {
     // desktop view first load setter
-    if ((searchHandler.currentFetched.isNotEmpty && searchHandler.currentFetched.length < (settingsHandler.limit + 1)) && !isMobile) {
+    if ((searchHandler.currentFetched.isNotEmpty && searchHandler.currentFetched.length < (settingsHandler.itemLimit + 1)) && !isMobile) {
       if (searchHandler.viewedItem.value.fileURL.isEmpty) {
         // print("setting booruItem value");
         final BooruItem item = searchHandler.setViewedItem(0);
@@ -259,7 +259,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   Future<void> onLongPress(int index, BooruItem item) async {
     await ServiceHandler.vibrate();
 
-    if (searchHandler.currentTab.selected.contains(item)) {
+    if (searchHandler.currentSelected.contains(item)) {
       searchHandler.currentTab.selected.remove(item);
     } else {
       searchHandler.currentTab.selected.add(item);
@@ -388,6 +388,7 @@ class _WaterfallViewState extends State<WaterfallView> {
                         controller: searchHandler.gridScrollController,
                         // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
                         child: ShimmerWrap(
+                          enabled: !SettingsHandler.instance.shitDevice,
                           child: isStaggered
                               ? StaggeredBuilder(
                                   onTap: onTap,
@@ -503,7 +504,7 @@ class WaterfallScrollButtons extends StatelessWidget {
       color: Colors.transparent,
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.33),
+          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.33),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
@@ -520,7 +521,7 @@ class WaterfallScrollButtons extends StatelessWidget {
                   child: Icon(
                     Icons.arrow_upward,
                     size: 30,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.5),
+                    color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -538,7 +539,7 @@ class WaterfallScrollButtons extends StatelessWidget {
                   child: Icon(
                     Icons.arrow_downward,
                     size: 30,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.5),
+                    color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
                   ),
                 ),
               ),

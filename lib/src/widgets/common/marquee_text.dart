@@ -57,11 +57,13 @@ class MarqueeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final child = RepaintBoundary(child: innerBox(context));
+
     if (isExpanded) {
-      return Expanded(child: innerBox(context));
+      return Expanded(child: child);
     }
 
-    return innerBox(context);
+    return child;
   }
 
   TextStyle get defaultStyle {
@@ -75,45 +77,6 @@ class MarqueeText extends StatelessWidget {
 
   double get fontSize => style?.fontSize ?? defaultStyle.fontSize!;
   double get lineHeight => fontSize * 1.2;
-
-  Widget marquee(BuildContext context) {
-    // This one can detect when text overflows by itself, but I'll leave AutoSize to resize text a bit when nearing overflow
-    return Marquee(
-      text: text,
-      blankSpace: blankSpace,
-      curve: curve,
-      velocity: velocity,
-      startPadding: startPadding,
-      fadingEdgeStartFraction: fadingEdgeStartFraction,
-      fadingEdgeEndFraction: fadingEdgeEndFraction,
-      reverse: reverse,
-      showFadingOnlyWhenScrolling: false,
-      startAfter: startAfter,
-      pauseAfterRound: pauseAfterRound,
-      style: style?.copyWith(
-            color: style?.color ?? Theme.of(context).colorScheme.onSurface,
-          ) ??
-          defaultStyle.copyWith(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-    );
-  }
-
-  Widget marqueeRich(BuildContext context) {
-    return Marquee.rich(
-      textSpan: textSpan,
-      blankSpace: blankSpace,
-      curve: curve,
-      velocity: velocity,
-      startPadding: startPadding,
-      fadingEdgeStartFraction: fadingEdgeStartFraction,
-      fadingEdgeEndFraction: fadingEdgeEndFraction,
-      reverse: reverse,
-      showFadingOnlyWhenScrolling: false,
-      startAfter: startAfter,
-      pauseAfterRound: pauseAfterRound,
-    );
-  }
 
   Widget innerBox(BuildContext context) {
     // allow text to shrink a bit, so that strings can exceed a few symbols in length before starting to scroll
@@ -137,7 +100,19 @@ class MarqueeText extends StatelessWidget {
               defaultStyle.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
               ),
-          overflowReplacement: marqueeRich(context),
+          overflowReplacement: Marquee.rich(
+            textSpan: textSpan,
+            blankSpace: blankSpace,
+            curve: curve,
+            velocity: velocity,
+            startPadding: startPadding,
+            fadingEdgeStartFraction: fadingEdgeStartFraction,
+            fadingEdgeEndFraction: fadingEdgeEndFraction,
+            reverse: reverse,
+            showFadingOnlyWhenScrolling: false,
+            startAfter: startAfter,
+            pauseAfterRound: pauseAfterRound,
+          ),
         ),
       );
     }
@@ -156,7 +131,25 @@ class MarqueeText extends StatelessWidget {
             defaultStyle.copyWith(
               color: Theme.of(context).colorScheme.onSurface,
             ),
-        overflowReplacement: marquee(context),
+        overflowReplacement: Marquee(
+          text: text,
+          blankSpace: blankSpace,
+          curve: curve,
+          velocity: velocity,
+          startPadding: startPadding,
+          fadingEdgeStartFraction: fadingEdgeStartFraction,
+          fadingEdgeEndFraction: fadingEdgeEndFraction,
+          reverse: reverse,
+          showFadingOnlyWhenScrolling: false,
+          startAfter: startAfter,
+          pauseAfterRound: pauseAfterRound,
+          style: style?.copyWith(
+                color: style?.color ?? Theme.of(context).colorScheme.onSurface,
+              ) ??
+              defaultStyle.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+        ),
       ),
     );
   }

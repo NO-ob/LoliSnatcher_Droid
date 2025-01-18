@@ -496,7 +496,7 @@ abstract class BooruHandler {
 
   /// [SHOULD BE OVERRIDDEN]
   FutureOr<CommentItem?> parseComment(dynamic responseItem, int index) {
-    return CommentItem();
+    return const CommentItem();
   }
 
   /// [SHOULD BE OVERRIDDEN]

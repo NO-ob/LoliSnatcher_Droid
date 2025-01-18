@@ -32,6 +32,12 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
   final CookieManager cookieManager = CookieManager.instance();
   final TextEditingController _urlController = TextEditingController();
 
+  @override
+  void dispose() {
+    _urlController.dispose();
+    super.dispose();
+  }
+
   Future<void> _onGoToInitial(InAppWebViewController controller) async {
     await controller.loadUrl(urlRequest: URLRequest(url: WebUri(widget.initialUrl)));
   }

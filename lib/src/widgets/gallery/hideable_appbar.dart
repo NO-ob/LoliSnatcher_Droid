@@ -221,6 +221,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
     // all buttons after that will be in overflow menu
     if (overFlowList.isNotEmpty) {
       final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'autoscroll') != -1;
+      final bool isSelectOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'select') != -1;
+
+      final bool isSelected = searchHandler.currentSelected.contains(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
 
       actions.add(
         PopupMenuButton(
@@ -231,9 +234,19 @@ class _HideableAppBarState extends State<HideableAppBar> {
                 RestartableProgressIndicator(
                   controller: autoScrollProgressController!,
                 ),
-              const Icon(
-                Icons.more_vert,
-                color: Colors.white,
+              Row(
+                children: [
+                  const Icon(
+                    Icons.more_vert,
+                    color: Colors.white,
+                  ),
+                  if (isSelected && isSelectOverflowed)
+                    const Icon(
+                      Icons.check_box,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                ],
               ),
             ],
           ),
@@ -310,6 +323,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'share':
         icon = Icons.share;
         break;
+      case 'select':
+        final bool isSelected = searchHandler.currentSelected.contains(item);
+        icon = isSelected ? Icons.check_box : Icons.check_box_outline_blank;
+        break;
       case 'reloadnoscale':
         icon = Icons.refresh;
         break;
@@ -324,6 +341,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   Widget buttonSubicon(String action) {
+    final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+
     switch (action) {
       case 'snatch':
         return Obx(() {
@@ -331,7 +350,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
             return const SizedBox.shrink();
           }
 
-          final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
           final booru = searchHandler.currentBooru;
 
           final bool isSnatched = item.isSnatched.value == true;
@@ -344,6 +362,34 @@ class _HideableAppBarState extends State<HideableAppBar> {
               child: SnatchedStatusIcon(item: item, booru: booru),
             );
           }
+        });
+
+      case 'select':
+        return Obx(() {
+          final bool isSelected = searchHandler.currentSelected.contains(item);
+          if (!isSelected) {
+            return const SizedBox.shrink();
+          }
+
+          return Positioned(
+            right: 4,
+            bottom: 0,
+            child: IgnorePointer(
+              ignoring: true,
+              child: Container(
+                height: 18,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Text(
+                  '${searchHandler.currentSelected.indexOf(item) + 1}',
+                  style: const TextStyle(fontSize: 11),
+                ),
+              ),
+            ),
+          );
         });
 
       default:
@@ -369,7 +415,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
               value: snatchHandler.currentProgress,
               animationDuration: const Duration(milliseconds: 50),
               indicatorStyle: IndicatorStyle.circular,
-              valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
+              valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.66),
               minHeight: 4,
             ),
           );
@@ -387,7 +433,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
             value: shareProgress,
             animationDuration: const Duration(milliseconds: 50),
             indicatorStyle: IndicatorStyle.circular,
-            valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
+            valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.66),
             minHeight: 4,
           );
         }
@@ -412,6 +458,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
         break;
       case 'favourite':
         label = item.isFavourite.value == true ? 'Unfavourite' : defaultLabel;
+        break;
+      case 'select':
+        final bool isSelected = searchHandler.currentSelected.contains(item);
+        label = isSelected ? 'Deselect' : defaultLabel;
         break;
       case 'reloadnoscale':
         label = item.isNoScale.value ? 'Reload with scaling' : defaultLabel;
@@ -457,9 +507,12 @@ class _HideableAppBarState extends State<HideableAppBar> {
           settingsHandler.snatchCooldown,
           false,
         );
-
         if (settingsHandler.favouriteOnSnatch) {
-          await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value, forcedValue: true);
+          await searchHandler.toggleItemFavourite(
+            searchHandler.viewedIndex.value,
+            forcedValue: true,
+            skipSnatching: true,
+          );
         }
         break;
       case 'favourite':
@@ -472,6 +525,14 @@ class _HideableAppBarState extends State<HideableAppBar> {
         break;
       case 'share':
         onShareClick();
+        break;
+      case 'select':
+        final bool isSelected = searchHandler.currentSelected.contains(item);
+        if (isSelected) {
+          searchHandler.currentTab.selected.remove(item);
+        } else {
+          searchHandler.currentTab.selected.add(item);
+        }
         break;
       case 'reloadnoscale':
         item.isNoScale.toggle();
@@ -535,7 +596,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
                         true,
                       );
                       if (settingsHandler.favouriteOnSnatch) {
-                        await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value, forcedValue: true);
+                        await searchHandler.toggleItemFavourite(
+                          searchHandler.viewedIndex.value,
+                          forcedValue: true,
+                          skipSnatching: true,
+                        );
                       }
                       Navigator.of(context).pop();
                     },
@@ -584,7 +649,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   void shareTextAction(String text) {
-    if (Platform.isWindows || Platform.isLinux) {
+    if (SettingsHandler.isDesktopPlatform) {
       Clipboard.setData(ClipboardData(text: Uri.encodeFull(text)));
       FlashElements.showSnackbar(
         context: context,

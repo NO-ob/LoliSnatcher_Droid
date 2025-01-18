@@ -148,25 +148,6 @@ class MainActivity: FlutterActivity() {
                     result.success(null);
                 }
 
-            } else if (call.method == "systemUIMode") {
-                val modeString: String? = call.argument("mode");
-                if (modeString.equals("immersive")) {
-                    window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
-                            // Set the content to appear under the system bars so that the
-                            // content doesn't resize when the system bars hide and show.
-                            or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                            // Hide the nav bar and status bar
-                            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                            or View.SYSTEM_UI_FLAG_FULLSCREEN)
-
-                } else if (modeString.equals("normal")) {
-                    window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
-
-                }
             } else if(call.method == "setVolumeButtons") {
                 val state: Boolean? = call.argument("setActive")
                 isSinkingVolume = !state!!

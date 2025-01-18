@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
@@ -21,7 +20,7 @@ import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 class Thumbnail extends StatefulWidget {
   const Thumbnail({
     required this.item,
-    required this.isStandalone,
+    this.isStandalone = false,
     super.key,
   });
 
@@ -77,23 +76,43 @@ class _ThumbnailState extends State<Thumbnail> {
     // }
 
     cancelToken ??= CancelToken();
-    final ImageProvider provider = CustomNetworkImage(
-      isMain ? thumbURL : widget.item.thumbnailURL,
-      cancelToken: cancelToken,
-      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-      withCache: settingsHandler.thumbnailCache,
-      cacheFolder: isMain ? thumbFolder : 'thumbnails',
-      fileNameExtras: widget.item.fileNameExtras,
-      sendTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
-      receiveTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
-      onError: isMain ? onError : null,
-      onCacheDetected: (bool didDetectCache) {
-        if (isMain) {
-          isFromCache = didDetectCache;
-          updateState();
-        }
-      },
-    );
+    final String url = isMain ? thumbURL : widget.item.thumbnailURL;
+    final bool isAvif = url.contains('.avif');
+    final ImageProvider provider = isAvif
+        ? CustomNetworkAvifImage(
+            url,
+            cancelToken: cancelToken,
+            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            withCache: settingsHandler.thumbnailCache,
+            cacheFolder: isMain ? thumbFolder : 'thumbnails',
+            fileNameExtras: widget.item.fileNameExtras,
+            sendTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
+            receiveTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
+            onError: isMain ? onError : null,
+            onCacheDetected: (bool didDetectCache) {
+              if (isMain) {
+                isFromCache = didDetectCache;
+                updateState();
+              }
+            },
+          )
+        : CustomNetworkImage(
+            url,
+            cancelToken: cancelToken,
+            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            withCache: settingsHandler.thumbnailCache,
+            cacheFolder: isMain ? thumbFolder : 'thumbnails',
+            fileNameExtras: widget.item.fileNameExtras,
+            sendTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
+            receiveTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
+            onError: isMain ? onError : null,
+            onCacheDetected: (bool didDetectCache) {
+              if (isMain) {
+                isFromCache = didDetectCache;
+                updateState();
+              }
+            },
+          );
 
     // return empty image if no size rectrictions were calculated (propably happens because widget is not mounted)
     if (settingsHandler.disableImageScaling || (thumbWidth == null && thumbHeight == null)) {
@@ -373,21 +392,19 @@ class _ThumbnailState extends State<Thumbnail> {
         final bool showShimmer = !(isLoaded || isLoadedExtra) && !isFailed;
         final bool useExtra = isThumbQuality == false && !widget.item.isHated;
 
-        const double fullOpacity = Constants.imageDefaultOpacity;
-
         return Stack(
           alignment: Alignment.center,
           children: [
             if (useExtra) // fetch small low quality thumbnail while loading a sample
               AnimatedOpacity(
                 // fade in image
-                opacity: !widget.isStandalone ? fullOpacity : (isLoadedExtra ? fullOpacity : 0),
+                opacity: (!widget.isStandalone || isLoadedExtra) ? 1 : 0,
                 duration: const Duration(milliseconds: 200),
                 child: AnimatedSwitcher(
                   duration: Duration(milliseconds: widget.isStandalone ? 100 : 0),
                   child: extraProvider != null
                       ? ImageFiltered(
-                          enabled: widget.item.isHated,
+                          enabled: settingsHandler.blurImages || widget.item.isHated,
                           imageFilter: ImageFilter.blur(
                             sigmaX: 10,
                             sigmaY: 10,
@@ -401,7 +418,7 @@ class _ThumbnailState extends State<Thumbnail> {
                             height: double.infinity,
                             errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                               if (widget.isStandalone) {
-                                return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withOpacity(0.5));
+                                return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withValues(alpha: 0.5));
                               } else {
                                 return const SizedBox.shrink();
                               }
@@ -413,13 +430,13 @@ class _ThumbnailState extends State<Thumbnail> {
               ),
             AnimatedOpacity(
               // fade in image
-              opacity: !widget.isStandalone ? fullOpacity : (isLoaded ? fullOpacity : 0),
+              opacity: (!widget.isStandalone || isLoaded) ? 1 : 0,
               duration: const Duration(milliseconds: 300),
               child: AnimatedSwitcher(
                 duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
                 child: mainProvider != null
                     ? ImageFiltered(
-                        enabled: widget.item.isHated,
+                        enabled: settingsHandler.blurImages || widget.item.isHated,
                         imageFilter: ImageFilter.blur(
                           sigmaX: 10,
                           sigmaY: 10,
@@ -434,7 +451,7 @@ class _ThumbnailState extends State<Thumbnail> {
                           height: double.infinity,
                           errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                             if (widget.isStandalone) {
-                              return Icon(Icons.broken_image, size: 30, color: Colors.white.withOpacity(0.5));
+                              return Icon(Icons.broken_image, size: 30, color: Colors.white.withValues(alpha: 0.5));
                             } else {
                               return const SizedBox.shrink();
                             }
@@ -473,7 +490,7 @@ class _ThumbnailState extends State<Thumbnail> {
               Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(iconSize * 0.1),
                 ),
                 width: iconSize,

@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 
 class TabBooruSelector extends StatelessWidget {
   const TabBooruSelector({
@@ -112,11 +111,7 @@ class TabBooruSelectorItem extends StatelessWidget {
       children: [
         //Booru Icon
         if (withFavicon) ...[
-          switch (booru.type) {
-            BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
-            BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
-            _ => Favicon(booru),
-          },
+          BooruFavicon(booru),
           const SizedBox(width: 4),
         ],
         //Booru name

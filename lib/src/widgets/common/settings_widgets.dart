@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -120,7 +119,7 @@ class SettingsPageOpen {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     final bool isTooNarrow = MediaQuery.sizeOf(context).width < 550;
-    final bool isDesktop = settingsHandler.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+    final bool isDesktop = settingsHandler.appMode.value.isDesktop || SettingsHandler.isDesktopPlatform;
     final bool useDesktopMode = (!isTooNarrow && isDesktop && !asBottomSheet) || useFloatingDialog;
 
     dynamic result;
@@ -182,6 +181,7 @@ class SettingsToggle extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.defaultValue,
+    this.enabled = true,
     super.key,
   });
 
@@ -194,12 +194,14 @@ class SettingsToggle extends StatelessWidget {
   final Widget? leadingIcon;
   final Widget? trailingIcon;
   final bool? defaultValue;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: ListTile(
+        enabled: enabled,
         title: Row(
           children: [
             if (leadingIcon != null)
@@ -207,7 +209,14 @@ class SettingsToggle extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            MarqueeText(text: title),
+            Builder(
+              builder: (context) {
+                return MarqueeText(
+                  text: title,
+                  style: DefaultTextStyle.of(context).style,
+                );
+              },
+            ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
               Padding(
@@ -225,7 +234,7 @@ class SettingsToggle extends StatelessWidget {
         subtitle: subtitle,
         trailing: Switch(
           value: value,
-          onChanged: onChanged,
+          onChanged: enabled ? onChanged : null,
         ),
         onTap: () => onChanged(!value),
         shape: Border(
@@ -285,7 +294,14 @@ class SettingsToggleTristate extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            MarqueeText(text: title),
+            Builder(
+              builder: (context) {
+                return MarqueeText(
+                  text: title,
+                  style: DefaultTextStyle.of(context).style,
+                );
+              },
+            ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
               Padding(
@@ -356,7 +372,14 @@ class SettingsSegmentedButton<T> extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            MarqueeText(text: title),
+            Builder(
+              builder: (context) {
+                return MarqueeText(
+                  text: title,
+                  style: DefaultTextStyle.of(context).style,
+                );
+              },
+            ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
               Padding(
@@ -427,6 +450,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.itemFilter,
     this.selectedItemBuilder,
     this.itemTitleBuilder,
+    this.itemSubtitleBuilder,
     this.clearable = false,
     this.onReset,
     this.itemExtent,
@@ -446,6 +470,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final bool Function(T?)? itemFilter;
   final Widget Function(T?)? selectedItemBuilder;
   final String Function(T?)? itemTitleBuilder;
+  final String Function(T?)? itemSubtitleBuilder;
   final bool clearable;
   final VoidCallback? onReset;
   final double? itemExtent;
@@ -455,8 +480,39 @@ class SettingsDropdown<T> extends StatelessWidget {
     return itemTitleBuilder?.call(value) ?? value.toString();
   }
 
+  String getSubtitle(T? value) {
+    return itemSubtitleBuilder?.call(value) ?? '';
+  }
+
   Widget getItemWidget(T? value) {
-    return itemBuilder?.call(value) ?? Text(getTitle(value));
+    final String subtitle = getSubtitle(value);
+    final bool hasSubtitle = subtitle.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: hasSubtitle ? const EdgeInsets.only(top: 8) : EdgeInsets.zero,
+          child: itemBuilder?.call(value) ?? Text(getTitle(value)),
+        ),
+        if (hasSubtitle)
+          Builder(
+            builder: (context) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                child: Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget getSelectedItemWidget(T? value) {
+    return selectedItemBuilder?.call(value) ?? itemBuilder?.call(value) ?? Text(getTitle(value));
   }
 
   @override
@@ -486,13 +542,7 @@ class SettingsDropdown<T> extends StatelessWidget {
               child: getItemWidget(item),
             );
           },
-          selectedItemBuilder: (item) =>
-              selectedItemBuilder?.call(item) ??
-              Row(
-                children: [
-                  getItemWidget(item),
-                ],
-              ),
+          selectedItemBuilder: getSelectedItemWidget,
           labelText: title,
         ),
         subtitle: subtitle,
@@ -641,8 +691,8 @@ class SettingsOptionsList<T> extends StatelessWidget {
     int index,
   ) {
     final Color baseColor = Theme.of(context).colorScheme.secondary;
-    final Color oddItemColor = baseColor.withOpacity(0.25);
-    final Color evenItemColor = baseColor.withOpacity(0.15);
+    final Color oddItemColor = baseColor.withValues(alpha: 0.25);
+    final Color evenItemColor = baseColor.withValues(alpha: 0.15);
 
     return InkWell(
       onTap: () => onChanged(value),
@@ -842,6 +892,15 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        if (widget.resetText != null && widget.controller.text != widget.resetText!())
+          IconButton(
+            key: const Key('reset-button'),
+            icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),
+            onPressed: () {
+              widget.controller.text = widget.resetText!();
+              onChangedCallback(widget.controller.text);
+            },
+          ),
         if (widget.numberButtons && (isFocused || widget.alwaysShowNumberButtons))
           Container(
             key: const Key('number-button-down'),
@@ -887,15 +946,6 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
                   }
                 },
               );
-            },
-          ),
-        if (widget.resetText != null && widget.controller.text != widget.resetText!())
-          IconButton(
-            key: const Key('reset-button'),
-            icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),
-            onPressed: () {
-              widget.controller.text = widget.resetText!();
-              onChangedCallback(widget.controller.text);
             },
           ),
         //
@@ -1109,8 +1159,10 @@ class SettingsBottomSheet extends StatelessWidget {
             if (actionButtons != null)
               Padding(
                 padding: buttonPadding ?? const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  alignment: WrapAlignment.center,
                   children: actionButtons ?? [],
                 ),
               ),

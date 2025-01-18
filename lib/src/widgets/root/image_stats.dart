@@ -113,7 +113,7 @@ class _ImageStatsState extends State<ImageStats> {
                   child: Container(
                     width: widget.width,
                     height: widget.height,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     child: RepaintBoundary(
                       child: Obx(
                         () => Column(

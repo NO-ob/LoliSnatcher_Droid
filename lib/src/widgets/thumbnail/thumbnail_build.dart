@@ -13,7 +13,7 @@ import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/pulse_widget.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class ThumbnailBuild extends StatelessWidget {
@@ -78,7 +78,7 @@ class ThumbnailBuild extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.66),
+                              color: Colors.black.withValues(alpha: 0.66),
                               borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5)),
                             ),
                             child: const Icon(
@@ -96,7 +96,7 @@ class ThumbnailBuild extends StatelessWidget {
                   const Spacer(),
                   Builder(
                     builder: (context) {
-                      if (searchHandler.currentTab.secondaryBoorus?.isNotEmpty == true) {
+                      if (searchHandler.currentSecondaryBoorus?.isNotEmpty == true) {
                         final handler = searchHandler.currentBooruHandler as MergebooruHandler;
                         final fetchedMap = handler.fetchedMap;
 
@@ -115,14 +115,14 @@ class ThumbnailBuild extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.66),
+                            color: Colors.black.withValues(alpha: 0.66),
                             borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5)),
                           ),
-                          child: Favicon(booru, size: 16),
+                          child: BooruFavicon(booru, size: 16),
                         );
-                      } else {
-                        return const SizedBox.shrink();
                       }
+
+                      return const SizedBox.shrink();
                     },
                   ),
                 ],
@@ -138,7 +138,7 @@ class ThumbnailBuild extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Obx(() {
-                    final selected = searchHandler.currentTab.selected;
+                    final selected = searchHandler.currentSelected;
 
                     Widget bottomLeftWidget = const SizedBox.shrink();
                     if (selected.isNotEmpty && selectable) {
@@ -148,7 +148,7 @@ class ThumbnailBuild extends StatelessWidget {
                       bottomLeftWidget = Container(
                         padding: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.66),
+                          color: Colors.black.withValues(alpha: 0.66),
                           borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
                         ),
                         child: Row(
@@ -248,7 +248,7 @@ class _ThumbnailBottomRightIcons extends StatelessWidget {
         child: Container(
           padding: isBottomRightEmpty ? EdgeInsets.zero : const EdgeInsets.all(3),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.66),
+            color: Colors.black.withValues(alpha: 0.66),
             borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
           ),
           child: Wrap(

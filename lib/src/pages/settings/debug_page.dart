@@ -14,6 +14,7 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -38,8 +39,9 @@ class _DebugPageState extends State<DebugPage> {
   final TextEditingController sessionStrController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    sessionStrController.dispose();
+    super.dispose();
   }
 
   Future<dynamic> showTagsManager(BuildContext context) async {
@@ -102,6 +104,17 @@ class _DebugPageState extends State<DebugPage> {
                 },
                 title: 'Show Image Stats',
               ),
+              if (kDebugMode)
+                SettingsToggle(
+                  value: settingsHandler.blurImages,
+                  onChanged: (newValue) {
+                    setState(() {
+                      settingsHandler.blurImages = newValue;
+                      ViewerHandler.instance.videoAutoMute = newValue;
+                    });
+                  },
+                  title: 'Blur images + mute videos [DEV only]',
+                ),
               SettingsToggle(
                 value: settingsHandler.desktopListsDrag,
                 onChanged: (newValue) {

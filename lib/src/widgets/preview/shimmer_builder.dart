@@ -3,11 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 class ShimmerWrap extends StatelessWidget {
-  const ShimmerWrap({required this.child, super.key});
+  const ShimmerWrap({
+    required this.child,
+    this.enabled = true,
+    super.key,
+  });
+
   final Widget child;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
+    if (!enabled) {
+      return child;
+    }
+
     return Shimmer(
       linearGradient: _shimmerGradient(
         Color.lerp(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.onSurface, 0.15)!,
@@ -30,7 +40,7 @@ class ShimmerList extends StatelessWidget {
           final SettingsHandler settingsHandler = SettingsHandler.instance;
           final String displayType = settingsHandler.previewDisplay;
           final bool isDesktop = settingsHandler.appMode.value.isDesktop;
-          final int previewCount = settingsHandler.limit;
+          final int previewCount = settingsHandler.itemLimit;
           final int columnCount =
               MediaQuery.orientationOf(layoutContext) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
@@ -253,25 +263,22 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
-      child: Container(
-        key: ValueKey<bool>(widget.isLoading),
-        child: widget.isLoading
-            ? ShaderMask(
-                blendMode: BlendMode.srcATop,
-                shaderCallback: (bounds) {
-                  return gradient.createShader(
-                    Rect.fromLTWH(
-                      -offsetWithinShimmer.dx,
-                      -offsetWithinShimmer.dy,
-                      shimmerSize.width,
-                      shimmerSize.height,
-                    ),
-                  );
-                },
-                child: widget.child,
-              )
-            : widget.child,
-      ),
+      child: widget.isLoading
+          ? ShaderMask(
+              blendMode: BlendMode.srcATop,
+              shaderCallback: (bounds) {
+                return gradient.createShader(
+                  Rect.fromLTWH(
+                    -offsetWithinShimmer.dx,
+                    -offsetWithinShimmer.dy,
+                    shimmerSize.width,
+                    shimmerSize.height,
+                  ),
+                );
+              },
+              child: widget.child,
+            )
+          : widget.child,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +13,8 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -29,11 +30,15 @@ class VideoViewer extends StatefulWidget {
   const VideoViewer(
     this.booruItem, {
     this.enableFullscreen = true,
+    this.isStandalone = false,
+    this.customBooru,
     super.key,
   });
 
   final BooruItem booruItem;
   final bool enableFullscreen;
+  final bool isStandalone;
+  final Booru? customBooru;
 
   @override
   State<VideoViewer> createState() => VideoViewerState();
@@ -113,7 +118,10 @@ class VideoViewerState extends State<VideoViewer> {
     cancelToken = CancelToken();
     client = DioDownloader(
       widget.booruItem.fileURL,
-      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+      headers: await Tools.getFileCustomHeaders(
+        widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+        checkForReferer: true,
+      ),
       cancelToken: cancelToken,
       onProgress: onBytesAdded,
       onEvent: onEvent,
@@ -138,7 +146,10 @@ class VideoViewerState extends State<VideoViewer> {
     sizeCancelToken = CancelToken();
     sizeClient = DioDownloader(
       widget.booruItem.fileURL,
-      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+      headers: await Tools.getFileCustomHeaders(
+        widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+        checkForReferer: true,
+      ),
       cancelToken: sizeCancelToken,
       onEvent: onEvent,
       fileNameExtras: widget.booruItem.fileNameExtras,
@@ -147,18 +158,22 @@ class VideoViewerState extends State<VideoViewer> {
     return;
   }
 
-  static const int maxSize = 1024 * 1024 * 200;
   void onSize(int size) {
     total.value = size;
     // TODO find a way to stop loading based on size when caching is enabled
 
+    final int? maxSize = settingsHandler.preloadSizeLimit == 0 ? null : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
     // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
       killLoading(['File is zero bytes']);
-    } else if ((size > maxSize) && isTooBig != 2) {
+    } else if (maxSize != null && (size > maxSize) && isTooBig != 2) {
       // TODO add check if resolution is too big
       isTooBig = 1;
-      killLoading(['File is too big', 'File size: ${Tools.formatBytes(size, 2)}', 'Limit: ${Tools.formatBytes(maxSize, 2)}']);
+      killLoading([
+        'File is too big',
+        'File size: ${Tools.formatBytes(size, 2)}',
+        'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
+      ]);
     }
 
     if (size > 0 && widget.booruItem.fileSize == null) {
@@ -205,9 +220,9 @@ class VideoViewerState extends State<VideoViewer> {
       } else {
         killLoading([
           'Loading Error: $error',
-          if (!settingsHandler.useAltVideoPlayer) ...[
+          if (settingsHandler.videoBackendMode.isNormal) ...[
             '',
-            'Try enabling "Use alternative video player backend" in Settings->Video if you often encounter playback issues',
+            'Try changing "Video player backend" in Settings->Video if you encounter playback issues often',
           ],
         ]);
       }
@@ -223,13 +238,14 @@ class VideoViewerState extends State<VideoViewer> {
     viewController.outputStateStream.listen(onViewStateChanged);
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
-    isViewed = settingsHandler.appMode.value.isMobile
-        ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
-        : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    isViewed = widget.isStandalone ||
+        (settingsHandler.appMode.value.isMobile
+            ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
+            : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
-      final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
-      final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+      final bool isCurrentIndex = widget.isStandalone || value == searchHandler.getItemIndex(widget.booruItem);
+      final bool isCurrentItem = widget.isStandalone || searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
       if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
@@ -398,7 +414,7 @@ class VideoViewerState extends State<VideoViewer> {
       viewerHandler.isFullscreen.value = chewieController!.isFullScreen;
     }
 
-    if (searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)) {
+    if (widget.isStandalone || searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)) {
       if (chewieController!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
         ServiceHandler.setVolumeButtons(true); // in full screen or volumebuttons scroll setting is disabled
       } else {
@@ -423,7 +439,10 @@ class VideoViewerState extends State<VideoViewer> {
       videoController = VideoPlayerController.networkUrl(
         Uri.parse(widget.booruItem.fileURL),
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
-        httpHeaders: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+        httpHeaders: await Tools.getFileCustomHeaders(
+          widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+          checkForReferer: true,
+        ),
       );
     }
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
@@ -452,7 +471,7 @@ class VideoViewerState extends State<VideoViewer> {
         playedColor: accentColor,
         handleColor: darkenedAceentColor,
         backgroundColor: Colors.grey,
-        bufferedColor: Colors.white.withOpacity(0.66),
+        bufferedColor: Colors.white.withValues(alpha: 0.66),
       ),
       systemOverlaysOnEnterFullScreen: [],
       systemOverlaysAfterFullScreen: SystemUiOverlay.values,
@@ -485,7 +504,8 @@ class VideoViewerState extends State<VideoViewer> {
         const Duration(seconds: 10),
         () {
           // force restart with cache mode, but only if file size isn't loaded yet or it's small enough (<25mb) (big videos may take a while to buffer)
-          if (!isVideoInited && (total.value == 0 || total.value < maxSize / 8)) {
+          const int maxForceCacheSize = 1024 * 1024 * 25;
+          if (!isVideoInited && (total.value == 0 || total.value < maxForceCacheSize)) {
             forceCache = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               killLoading([]);
@@ -546,7 +566,7 @@ class VideoViewerState extends State<VideoViewer> {
     // print('!!! Build video mobile ${widget.index}!!!');
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
-    final int viewedIndex = searchHandler.viewedIndex.value;
+    final int viewedIndex = widget.isStandalone ? 0 : searchHandler.viewedIndex.value;
     final bool needsRestart = lastViewedIndex != viewedIndex;
 
     if (isVideoInited) {
@@ -582,8 +602,6 @@ class VideoViewerState extends State<VideoViewer> {
       aspectRatio < screenRatio ? screenSize.height : screenSize.width / aspectRatio,
     );
 
-    const double fullOpacity = Constants.imageDefaultOpacity;
-
     return Hero(
       tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
       child: Material(
@@ -597,7 +615,6 @@ class VideoViewerState extends State<VideoViewer> {
                   ? const SizedBox.shrink()
                   : Thumbnail(
                       item: widget.booruItem,
-                      isStandalone: false,
                     ),
             ),
             AnimatedSwitcher(
@@ -640,8 +657,13 @@ class VideoViewerState extends State<VideoViewer> {
                       },
                       child: Stack(
                         children: [
-                          Opacity(
-                            opacity: fullOpacity,
+                          ImageFiltered(
+                            enabled: settingsHandler.blurImages,
+                            imageFilter: ImageFilter.blur(
+                              sigmaX: 20,
+                              sigmaY: 20,
+                              tileMode: TileMode.decal,
+                            ),
                             child: PhotoView.customChild(
                               childSize: childSize,
                               minScale: PhotoViewComputedScale.contained,

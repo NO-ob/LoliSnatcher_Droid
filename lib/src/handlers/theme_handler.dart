@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
@@ -68,7 +69,7 @@ class ThemeHandler {
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(lightColorScheme),
       cardColor: Color.lerp(lightColorScheme.surface, Colors.black, 0.04),
-      dividerColor: lightColorScheme.onSurface.withOpacity(0.12),
+      dividerColor: lightColorScheme.onSurface.withValues(alpha: 0.12),
       dialogBackgroundColor: lightColorScheme.surface,
       floatingActionButtonTheme: floatingActionButtonTheme(lightColorScheme),
       iconTheme: iconTheme(lightColorScheme),
@@ -104,7 +105,7 @@ class ThemeHandler {
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(darkColorScheme),
       cardColor: darkColorScheme.surface,
-      dividerColor: darkColorScheme.onSurface.withOpacity(0.12),
+      dividerColor: darkColorScheme.onSurface.withValues(alpha: 0.12),
       dialogBackgroundColor: darkColorScheme.surface,
       floatingActionButtonTheme: floatingActionButtonTheme(darkColorScheme),
       iconTheme: iconTheme(darkColorScheme),
@@ -138,7 +139,7 @@ class ThemeHandler {
 
     final brightness = isDark ? Brightness.dark : Brightness.light;
     final SchemeTonalSpot scheme = SchemeTonalSpot(
-      sourceColorHct: Hct.fromInt(theme.accent!.value),
+      sourceColorHct: Hct.fromInt(theme.accent!.value32bit),
       isDark: brightness == Brightness.dark,
       contrastLevel: 0,
     );
@@ -161,7 +162,7 @@ class ThemeHandler {
 
   TextSelectionThemeData textSelectionTheme(ColorScheme colorScheme) => TextSelectionThemeData(
         cursorColor: colorScheme.secondary,
-        selectionColor: Colors.blue.withOpacity(0.66),
+        selectionColor: Colors.blue.withValues(alpha: 0.66),
         selectionHandleColor: colorScheme.secondary,
       );
 
@@ -169,8 +170,10 @@ class ThemeHandler {
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.secondary,
           foregroundColor: accentIsDark ? Colors.white : Colors.black,
+          iconColor: accentIsDark ? Colors.white : Colors.black,
           disabledForegroundColor: Colors.black,
           disabledBackgroundColor: Colors.grey,
+          disabledIconColor: Colors.black,
           textStyle: TextStyle(
             color: accentIsDark ? Colors.white : Colors.black,
             fontSize: 16,
@@ -203,7 +206,7 @@ class ThemeHandler {
           color: primaryIsDark ? Colors.white : Colors.black,
         ),
         systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: (isDark ? Colors.black : Colors.white).withOpacity(0.25),
+          statusBarColor: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.25),
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
           statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
         ),
@@ -325,10 +328,10 @@ class ThemeHandler {
           color = colorScheme.secondary;
           for (final WidgetState state in states) {
             if (goodStates.contains(state)) {
-              return color.withOpacity(0.75);
+              return color.withValues(alpha: 0.75);
             }
           }
-          return color.withOpacity(0.5);
+          return color.withValues(alpha: 0.5);
         }),
         radius: const Radius.circular(10),
       );
@@ -385,7 +388,7 @@ class ThemeHandler {
   DrawerThemeData drawerTheme(ColorScheme colorScheme) => DrawerThemeData(
         elevation: 0,
         backgroundColor: colorScheme.surface,
-        scrimColor: Colors.black.withOpacity(0.5),
+        scrimColor: Colors.black.withValues(alpha: 0.5),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
         endShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
       );

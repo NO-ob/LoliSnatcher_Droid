@@ -54,6 +54,14 @@ class _DatabasePageState extends State<DatabasePage> {
     }
   }
 
+  @override
+  void dispose() {
+    scrollController.dispose();
+    sankakuSearchController.dispose();
+    cancelToken?.cancel();
+    super.dispose();
+  }
+
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
@@ -362,7 +370,7 @@ class _DatabasePageState extends State<DatabasePage> {
                           children: [
                             Positioned.fill(
                               child: ColoredBox(
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withValues(alpha: 0.5),
                               ),
                             ),
                             const Align(
@@ -446,7 +454,7 @@ class _DatabasePageState extends State<DatabasePage> {
                             Text('Delete database?'),
                           ],
                           actionButtons: [
-                            const CancelButton(),
+                            const CancelButton(withIcon: true),
                             ElevatedButton.icon(
                               onPressed: () {
                                 ServiceHandler.deleteDB(settingsHandler);
@@ -462,7 +470,7 @@ class _DatabasePageState extends State<DatabasePage> {
                                 Navigator.of(context).pop(true);
                               },
                               label: const Text('Delete'),
-                              icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                              icon: const Icon(Icons.delete_forever),
                             ),
                           ],
                         );
@@ -484,7 +492,7 @@ class _DatabasePageState extends State<DatabasePage> {
                             Text('Clear all snatched items?'),
                           ],
                           actionButtons: [
-                            const CancelButton(),
+                            const CancelButton(withIcon: true),
                             ElevatedButton.icon(
                               onPressed: () {
                                 if (settingsHandler.dbHandler.db != null) {
@@ -510,7 +518,7 @@ class _DatabasePageState extends State<DatabasePage> {
                                 Navigator.of(context).pop(true);
                               },
                               label: const Text('Clear'),
-                              icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                              icon: const Icon(Icons.delete_forever),
                             ),
                           ],
                         );
@@ -532,7 +540,7 @@ class _DatabasePageState extends State<DatabasePage> {
                             Text('Clear all favourited items?'),
                           ],
                           actionButtons: [
-                            const CancelButton(),
+                            const CancelButton(withIcon: true),
                             ElevatedButton.icon(
                               onPressed: () {
                                 if (settingsHandler.dbHandler.db != null) {
@@ -558,7 +566,7 @@ class _DatabasePageState extends State<DatabasePage> {
                                 Navigator.of(context).pop(true);
                               },
                               label: const Text('Clear'),
-                              icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                              icon: const Icon(Icons.delete_forever),
                             ),
                           ],
                         );
@@ -580,7 +588,7 @@ class _DatabasePageState extends State<DatabasePage> {
                             Text('Clear search history?'),
                           ],
                           actionButtons: [
-                            const CancelButton(),
+                            const CancelButton(withIcon: true),
                             ElevatedButton.icon(
                               onPressed: () {
                                 if (settingsHandler.dbHandler.db != null) {
@@ -597,7 +605,7 @@ class _DatabasePageState extends State<DatabasePage> {
                                 Navigator.of(context).pop(true);
                               },
                               label: const Text('Clear'),
-                              icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                              icon: const Icon(Icons.delete_forever),
                             ),
                           ],
                         );
@@ -643,7 +651,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       if (isUpdating) ...[
                         Positioned.fill(
                           child: ColoredBox(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                           ),
                         ),
                         const Positioned.fill(

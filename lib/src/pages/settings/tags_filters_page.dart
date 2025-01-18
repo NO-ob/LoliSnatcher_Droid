@@ -50,6 +50,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
 
   @override
   void dispose() {
+    tagSearchController.dispose();
     tabController.removeListener(updateState);
     tabController.dispose();
     super.dispose();

@@ -31,6 +31,9 @@
 .pub/
 /build/
 pubspec.lock
+**/*.g.dart
+**/*.freezed.dart
+/lib/generated/
 
 # Web related
 lib/generated_plugin_registrant.dart

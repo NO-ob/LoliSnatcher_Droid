@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -27,8 +28,9 @@ import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
+import 'package:lolisnatcher/src/widgets/gallery/item_viewer_page.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
@@ -91,6 +93,7 @@ class _TagViewState extends State<TagView> {
   void dispose() {
     cancelToken?.cancel();
     searchHandler.searchTextController.removeListener(onMainSearchTextChanged);
+    searchController.dispose();
     searchFocusNode.removeListener(searchFocusListener);
     itemSubscription.cancel();
     super.dispose();
@@ -254,7 +257,7 @@ class _TagViewState extends State<TagView> {
             Divider(
               height: 2,
               thickness: 2,
-              color: Colors.grey[800]!.withOpacity(0.66),
+              color: Colors.grey[800]!.withValues(alpha: 0.66),
             ),
             tagsButton(),
             Padding(
@@ -434,7 +437,7 @@ class _TagViewState extends State<TagView> {
           Divider(
             height: 2,
             thickness: 2,
-            color: Colors.grey[800]!.withOpacity(0.66),
+            color: Colors.grey[800]!.withValues(alpha: 0.66),
           ),
           infoText(Tools.pluralize('Source', sources.length), ' ', canCopy: false),
           Column(
@@ -563,7 +566,7 @@ class _TagViewState extends State<TagView> {
               ],
             ),
             const SizedBox(height: 10),
-            TagContentPreview(tag: tag),
+            if (searchHandler.currentBooru.type != BooruType.Merge) TagContentPreview(tag: tag),
             ListTile(
               leading: Icon(
                 Icons.copy,
@@ -933,7 +936,7 @@ class _TagViewState extends State<TagView> {
             ),
           ),
           Divider(
-            color: Colors.grey[800]!.withOpacity(0.66),
+            color: Colors.grey[800]!.withValues(alpha: 0.66),
             height: 1,
             thickness: 1,
           ),
@@ -1197,12 +1200,12 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
           ),
         ],
       ),
-      actionsOverflowDirection: VerticalDirection.up,
+      actionsOverflowDirection: VerticalDirection.down,
       actionsOverflowButtonSpacing: 8,
       actions: [
         ElevatedButton.icon(
           onPressed: copy,
-          label: Text('Copy ${hasSelected ? 'selected' : ''}'.trim()),
+          label: Text('Copy ${hasSelected ? 'selected' : 'all'}'.trim()),
           icon: const Icon(Icons.copy),
         ),
         ElevatedButton.icon(
@@ -1210,7 +1213,10 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
           label: Text('Open ${hasSelected ? 'selected' : ''}'.trim()),
           icon: const Icon(Icons.open_in_new),
         ),
-        const CancelButton(withIcon: true),
+        const CancelButton(
+          text: 'Return',
+          withIcon: true,
+        ),
       ],
     );
   }
@@ -1288,7 +1294,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                           const SizedBox(width: 8),
-                          Favicon(preview!.booruHandler.booru),
+                          BooruFavicon(preview!.booruHandler.booru),
                           const SizedBox(width: 8),
                           IconButton(
                             onPressed: loadPreview,
@@ -1308,9 +1314,45 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                             padding: const EdgeInsets.only(right: 8),
                             height: 180,
                             width: 120,
-                            child: ThumbnailBuild(
-                              item: preview!.booruHandler.filteredFetched[index],
-                              selectable: false,
+                            child: Stack(
+                              children: [
+                                ThumbnailBuild(
+                                  item: preview!.booruHandler.filteredFetched[index],
+                                  selectable: false,
+                                ),
+                                Positioned.fill(
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(4),
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          PageRouteBuilder(
+                                            pageBuilder: (_, __, ___) => ItemViewerPage(
+                                              item: preview!.booruHandler.filteredFetched[index],
+                                              booru: preview!.booruHandler.booru,
+                                            ),
+                                            opaque: false,
+                                            transitionDuration: const Duration(milliseconds: 300),
+                                            barrierColor: Colors.black26,
+                                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                              return const ZoomPageTransitionsBuilder().buildTransitions(
+                                                MaterialPageRoute(
+                                                  builder: (_) => const SizedBox.shrink(),
+                                                ),
+                                                context,
+                                                animation,
+                                                secondaryAnimation,
+                                                child,
+                                              );
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),

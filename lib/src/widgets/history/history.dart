@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 import 'package:huge_listview/huge_listview.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -17,11 +16,12 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/custom_scroll_bar_thumb.dart';
+import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 
 // TODO split in smaller widgets
 
@@ -55,6 +55,12 @@ class _HistoryListState extends State<HistoryList> {
       await Future.delayed(const Duration(milliseconds: 100));
       await getHistory();
     });
+  }
+
+  @override
+  void dispose() {
+    filterSearchController.dispose();
+    super.dispose();
   }
 
   Future<void> getHistory() async {
@@ -298,7 +304,7 @@ class _HistoryListState extends State<HistoryList> {
         );
       },
       thumbBackgroundColor: Theme.of(context).colorScheme.surface,
-      thumbDrawColor: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+      thumbDrawColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5),
       startIndex: 0,
       padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
     );
@@ -347,12 +353,7 @@ class _HistoryListState extends State<HistoryList> {
           ),
           onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
           minLeadingWidth: 24,
-          leading: switch (booru?.type) {
-            BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
-            BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
-            null => const Icon(CupertinoIcons.question, size: 20),
-            _ => Favicon(booru!),
-          },
+          leading: BooruFavicon(booru!),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -376,7 +377,7 @@ class _HistoryListState extends State<HistoryList> {
               isExpanded: false,
             ),
           ),
-          subtitle: Text(booru?.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
+          subtitle: Text(booru.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
         ),
       ),
     );
@@ -537,11 +538,10 @@ class _HistoryListState extends State<HistoryList> {
                     ),
                   ),
                   actionButtons: [
-                    const CancelButton(),
-                    ElevatedButton.icon(
-                      label: const Text('Delete'),
-                      icon: const Icon(Icons.delete_forever),
-                      onPressed: () async {
+                    const CancelButton(withIcon: true),
+                    DeleteButton(
+                      withIcon: true,
+                      action: () async {
                         for (int i = 0; i < selectedEntries.length; i++) {
                           await deleteEntry(selectedEntries[i]);
                         }
@@ -555,8 +555,7 @@ class _HistoryListState extends State<HistoryList> {
 
                 showDialog(
                   context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) => deleteDialog,
+                  builder: (_) => deleteDialog,
                 );
               },
             ),

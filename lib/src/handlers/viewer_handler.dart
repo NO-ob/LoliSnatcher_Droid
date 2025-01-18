@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -179,7 +181,7 @@ class ViewerHandler extends GetxController {
   }
 
   // Related to videos
-  bool videoAutoMute = false; // hold volume button in VideoViewer to mute videos globally
+  bool videoAutoMute = kDebugMode ? Constants.blurImagesDefaultDev : false; // hold volume button in VideoViewer to mute videos globally
 
   // ViewerHandler() {
   //   // debug: print keys list changes

@@ -106,7 +106,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void removeOverlay() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      if (SettingsHandler.isDesktopPlatform) {
         // delay to allow onTap to complete before removing overlay due to moving focus to onTap
         await Future.delayed(const Duration(milliseconds: 50));
       }
@@ -296,7 +296,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 cursor: SystemMouseCursors.click,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  child: Icon(Icons.cancel, size: 24, color: Colors.white.withOpacity(0.9)),
+                  child: Icon(Icons.cancel, size: 24, color: Colors.white.withValues(alpha: 0.9)),
                 ),
               ),
             ),

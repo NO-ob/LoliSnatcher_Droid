@@ -6,6 +6,7 @@ class CancelButton extends StatelessWidget {
     this.action,
     this.returnData,
     this.withIcon = false,
+    this.customIcon,
     super.key,
   });
 
@@ -13,6 +14,7 @@ class CancelButton extends StatelessWidget {
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
+  final IconData? customIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +23,7 @@ class CancelButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.grey[300],
           foregroundColor: Colors.black,
+          iconColor: Colors.black,
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -33,7 +36,7 @@ class CancelButton extends StatelessWidget {
             Navigator.of(context).pop(returnData);
           }
         },
-        icon: Icon(withIcon ? Icons.cancel_outlined : null),
+        icon: Icon(withIcon ? (customIcon ?? Icons.keyboard_return_rounded) : null),
         label: Text(text),
       );
     }
@@ -42,6 +45,7 @@ class CancelButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.grey[300],
         foregroundColor: Colors.black,
+        iconColor: Colors.black,
         textStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,

@@ -399,23 +399,10 @@ class ServiceHandler {
   }
 
   static void setSystemUiVisibility(bool visible) {
-    if (visible) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: SystemUiOverlay.values);
-    } else {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky, overlays: []);
-    }
-  }
-
-  static void makeImmersive() {
-    if (Platform.isAndroid) {
-      platform.invokeMethod('systemUIMode', {'mode': 'immersive'});
-    }
-  }
-
-  static void makeNormal() {
-    if (Platform.isAndroid) {
-      platform.invokeMethod('systemUIMode', {'mode': 'normal'});
-    }
+    SystemChrome.setEnabledSystemUIMode(
+      visible ? SystemUiMode.edgeToEdge : SystemUiMode.immersiveSticky,
+      overlays: visible ? SystemUiOverlay.values : [],
+    );
   }
 
   static Future<String> getIP() async {
@@ -487,7 +474,7 @@ class ServiceHandler {
         if (flutterWay) {
           await HapticFeedback.vibrate();
         } else {
-          if (await Vibration.hasVibrator() ?? false) {
+          if (await Vibration.hasVibrator()) {
             await Vibration.vibrate(
               duration: duration,
               amplitude: amplitude,

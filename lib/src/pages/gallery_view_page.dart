@@ -127,7 +127,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         axis: Axis.values,
         child: Dismissible(
           direction: settingsHandler.galleryScrollDirection == 'Vertical' ? DismissDirection.horizontal : DismissDirection.vertical,
-          // background: Container(color: Colors.black.withOpacity(0.3)),
+          // background: Container(color: Colors.black.withValues(alpha: 0.3)),
           key: const Key('imagePageDismissibleKey'),
           resizeDuration: null, // Duration(milliseconds: 100),
           dismissThresholds: const {
@@ -168,6 +168,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                       await searchHandler.toggleItemFavourite(
                         searchHandler.viewedIndex.value,
                         forcedValue: true,
+                        skipSnatching: true,
                       );
                     }
                   } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {
@@ -323,7 +324,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         data: Theme.of(context).copyWith(
           // copy existing main app theme, but make background semitransparent
           drawerTheme: Theme.of(context).drawerTheme.copyWith(
-                backgroundColor: Theme.of(context).canvasColor.withOpacity(0.66),
+                backgroundColor: Theme.of(context).canvasColor.withValues(alpha: 0.66),
               ),
         ),
         child: SizedBox(
@@ -350,8 +351,8 @@ Widget slidePageTransition(
   double delta = 0;
   if (pageController.hasClients && pageController.position.haveDimensions) {
     final position = (pageController.page! - index).clamp(-1.0, 1.0);
-    final width = pageController.position.viewportDimension;
-    delta = position * width / 2;
+    final viewport = pageController.position.viewportDimension;
+    delta = position * viewport / 2;
   }
   return ClipRect(
     child: Transform.translate(

@@ -45,6 +45,14 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     mouseSpeedController.text = settingsHandler.mousewheelScrollSpeed.toString();
   }
 
+  @override
+  void dispose() {
+    columnsLandscapeController.dispose();
+    columnsPortraitController.dispose();
+    mouseSpeedController.dispose();
+    super.dispose();
+  }
+
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
@@ -313,8 +321,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                             ),
                           ],
                           actionButtons: [
-                            CancelButton(),
-                            ConfirmButton(),
+                            CancelButton(withIcon: true),
+                            ConfirmButton(withIcon: true),
                           ],
                         );
                       },
@@ -349,7 +357,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   if (!settingsHandler.disableImageScaling)
                     Positioned.fill(
                       child: ColoredBox(
-                        color: Colors.black.withOpacity(0.4),
+                        color: Colors.black.withValues(alpha: 0.4),
                       ),
                     ),
                 ],
@@ -364,7 +372,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 },
                 title: 'Scroll previews buttons position',
               ),
-              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+              if (SettingsHandler.isDesktopPlatform)
                 SettingsTextInput(
                   controller: mouseSpeedController,
                   title: 'Mouse Wheel Scroll Modifer',

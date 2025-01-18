@@ -70,6 +70,11 @@ class WorldXyzHandler extends BooruHandler {
   }
 
   @override
+  String validateTags(String tags) {
+    return tags;
+  }
+
+  @override
   String makeURL(String tags) {
     // convert "tag_name_1 tag_name_2" to "tag name 1|tag name 2" and filter excluded tags out
     final String includeTags = tags.split(' ').where((f) => !f.startsWith('-')).toList().map((tag) => tag.replaceAll(RegExp('_'), '+')).toList().join('|');

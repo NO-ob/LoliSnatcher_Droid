@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:xml/xml.dart';
 
@@ -236,7 +237,10 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   String makeCommentsURL(String postID, int pageNum) {
+    return makePostURL(postID) + (pageNum == 0 ? '' : '&pid=${pageNum * 10}');
+
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=comment&q=index&post_id=7296350
+    // ignore: dead_code
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
     final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
     return '${booru.baseURL}/index.php?page=dapi&s=comment&q=index&post_id=$postID$apiKeyStr$userIdStr';
@@ -244,12 +248,34 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   List parseCommentsList(dynamic response) {
-    final parsedResponse = XmlDocument.parse(response.data);
-    return parsedResponse.findAllElements('comment').toList();
+    final document = parse(response.data);
+    final avatars = document.querySelectorAll('div.commentAvatar');
+    final bodies = document.querySelectorAll('div.commentBody');
+    return List.generate(avatars.length, (i) => [avatars[i], bodies[i]]);
   }
 
   @override
   CommentItem? parseComment(dynamic responseItem, int index) {
+    final Element avatarNode = responseItem[0];
+    final String avatarUrl = 'https://gelbooru.com/${avatarNode.outerHtml.split("url('")[1].split("')")[0]}';
+    final Element bodyNode = responseItem[1];
+
+    return CommentItem(
+      content: bodyNode.nodes[5].text,
+      authorName: bodyNode.nodes[1].nodes[0].text,
+      avatarUrl: avatarUrl,
+      score: int.tryParse(bodyNode.querySelector('span span.info span')?.text ?? '0'),
+      createDate: bodyNode.nodes[2].text?.split('at ')[1].split(' »')[0],
+      createDateFormat: 'yyyy-MM-dd HH:mm:ss',
+    );
+  }
+
+  List parseCommentsListOld(dynamic response) {
+    final parsedResponse = XmlDocument.parse(response.data);
+    return parsedResponse.findAllElements('comment').toList();
+  }
+
+  CommentItem? parseCommentOld(dynamic responseItem, int index) {
     final current = responseItem;
     final String avatar = current.getAttribute('creator_id')!.isEmpty
         ? "${booru.baseURL}/user_avatars/avatar_${current.getAttribute("creator")}.jpg"

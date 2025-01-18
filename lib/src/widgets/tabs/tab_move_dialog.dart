@@ -34,6 +34,12 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
   }
 
   @override
+  void dispose() {
+    indexController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     int? controllerNumber = int.tryParse(indexController.text);
     if (controllerNumber != null) {
@@ -122,7 +128,10 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
         ),
         //
         const SizedBox(height: 20),
-        const CancelButton(text: 'Close', withIcon: true),
+        const CancelButton(
+          text: 'Return',
+          withIcon: true,
+        ),
         const SizedBox(height: 10),
         const Text('Preview:'),
         const SizedBox(height: 10),
