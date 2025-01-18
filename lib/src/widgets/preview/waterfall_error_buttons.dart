@@ -127,7 +127,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
+                      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
@@ -145,7 +145,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                   const SizedBox(width: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
+                      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
@@ -228,7 +228,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
+                        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: IconButton(
@@ -246,7 +246,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                     const SizedBox(width: 16),
                     Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
+                        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: IconButton(
@@ -300,7 +300,7 @@ class _ButtonWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
+      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
       padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
       child: child,
     );

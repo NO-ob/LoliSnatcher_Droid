@@ -77,8 +77,8 @@ class ThumbnailCardBuild extends StatelessWidget {
                 child: InkWell(
                   enableFeedback: true,
                   borderRadius: BorderRadius.circular(4),
-                  highlightColor: Theme.of(context).colorScheme.secondary.withOpacity(0.4),
-                  splashColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                  highlightColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.4),
+                  splashColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
                   onTap: () {
                     onTap?.call(index, item);
                   },

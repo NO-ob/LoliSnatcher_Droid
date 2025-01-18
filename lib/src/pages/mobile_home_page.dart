@@ -623,7 +623,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
 
                                   return AnimatedProgressIndicator(
                                     value: snatchHandler.currentProgress,
-                                    valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.5),
+                                    valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.5),
                                     indicatorStyle: IndicatorStyle.linear,
                                     borderRadius: 0,
                                     animationDuration: const Duration(milliseconds: 100),
@@ -955,7 +955,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                       child: updating
                           ? Container(
                               alignment: Alignment.center,
-                              color: Colors.black.withOpacity(0.66),
+                              color: Colors.black.withValues(alpha: 0.66),
                               child: const Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [

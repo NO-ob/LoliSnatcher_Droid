@@ -23,6 +23,7 @@ class DeleteButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.red,
           foregroundColor: Colors.white,
+          iconColor: Colors.white,
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

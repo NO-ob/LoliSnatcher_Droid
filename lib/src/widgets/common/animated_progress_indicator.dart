@@ -267,7 +267,7 @@ class SquareProgressIndicatorPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.miter;
 
     final Paint emptyStrokePaint = Paint()
-      ..color = backgroundStrokeWidth <= 0 ? Colors.white.withOpacity(0) : backgroundColor
+      ..color = backgroundStrokeWidth <= 0 ? Colors.white.withValues(alpha: 0) : backgroundColor
       ..strokeWidth = backgroundStrokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = strokeCap ?? (borderRadius > 0 ? StrokeCap.round : StrokeCap.square)

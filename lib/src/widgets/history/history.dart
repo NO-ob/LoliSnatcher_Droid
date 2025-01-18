@@ -304,7 +304,7 @@ class _HistoryListState extends State<HistoryList> {
         );
       },
       thumbBackgroundColor: Theme.of(context).colorScheme.surface,
-      thumbDrawColor: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+      thumbDrawColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5),
       startIndex: 0,
       padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
     );

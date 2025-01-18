@@ -691,8 +691,8 @@ class SettingsOptionsList<T> extends StatelessWidget {
     int index,
   ) {
     final Color baseColor = Theme.of(context).colorScheme.secondary;
-    final Color oddItemColor = baseColor.withOpacity(0.25);
-    final Color evenItemColor = baseColor.withOpacity(0.15);
+    final Color oddItemColor = baseColor.withValues(alpha: 0.25);
+    final Color evenItemColor = baseColor.withValues(alpha: 0.15);
 
     return InkWell(
       onTap: () => onChanged(value),

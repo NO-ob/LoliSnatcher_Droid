@@ -344,7 +344,7 @@ class _CommentEntry extends StatelessWidget {
                                   formatDate(comment.createDate!, comment.createDateFormat!),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                                   ),
                                 ),
                               const SizedBox(width: 15),

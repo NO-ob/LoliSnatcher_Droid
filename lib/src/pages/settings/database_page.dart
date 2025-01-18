@@ -370,7 +370,7 @@ class _DatabasePageState extends State<DatabasePage> {
                           children: [
                             Positioned.fill(
                               child: ColoredBox(
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withValues(alpha: 0.5),
                               ),
                             ),
                             const Align(
@@ -651,7 +651,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       if (isUpdating) ...[
                         Positioned.fill(
                           child: ColoredBox(
-                            color: Colors.black.withOpacity(0.5),
+                            color: Colors.black.withValues(alpha: 0.5),
                           ),
                         ),
                         const Positioned.fill(

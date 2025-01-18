@@ -78,7 +78,7 @@ class ThumbnailBuild extends StatelessWidget {
                           child: Container(
                             padding: const EdgeInsets.all(3),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.66),
+                              color: Colors.black.withValues(alpha: 0.66),
                               borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5)),
                             ),
                             child: const Icon(
@@ -115,7 +115,7 @@ class ThumbnailBuild extends StatelessWidget {
                         return Container(
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.66),
+                            color: Colors.black.withValues(alpha: 0.66),
                             borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5)),
                           ),
                           child: BooruFavicon(booru, size: 16),
@@ -148,7 +148,7 @@ class ThumbnailBuild extends StatelessWidget {
                       bottomLeftWidget = Container(
                         padding: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.66),
+                          color: Colors.black.withValues(alpha: 0.66),
                           borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
                         ),
                         child: Row(
@@ -248,7 +248,7 @@ class _ThumbnailBottomRightIcons extends StatelessWidget {
         child: Container(
           padding: isBottomRightEmpty ? EdgeInsets.zero : const EdgeInsets.all(3),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.66),
+            color: Colors.black.withValues(alpha: 0.66),
             borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
           ),
           child: Wrap(

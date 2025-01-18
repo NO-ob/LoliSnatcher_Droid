@@ -53,7 +53,7 @@ class _ViewerTutorialState extends State<ViewerTutorial> {
           child: Container(
             width: constraints.maxWidth,
             height: constraints.maxHeight,
-            color: Colors.black.withOpacity(0.66),
+            color: Colors.black.withValues(alpha: 0.66),
             child: getTutorialPage(constraints),
           ),
         );

@@ -380,7 +380,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                 height: 18,
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: Text(
@@ -415,7 +415,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
               value: snatchHandler.currentProgress,
               animationDuration: const Duration(milliseconds: 50),
               indicatorStyle: IndicatorStyle.circular,
-              valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
+              valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.66),
               minHeight: 4,
             ),
           );
@@ -433,7 +433,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
             value: shareProgress,
             animationDuration: const Duration(milliseconds: 50),
             indicatorStyle: IndicatorStyle.circular,
-            valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
+            valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.66),
             minHeight: 4,
           );
         }
