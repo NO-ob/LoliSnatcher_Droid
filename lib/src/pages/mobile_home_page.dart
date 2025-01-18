@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -377,7 +378,7 @@ class MainDrawer extends StatelessWidget {
                       }),
                       //
                       Obx(() {
-                        if (settingsHandler.isDebug.value && settingsHandler.enabledLogTypes.isNotEmpty) {
+                        if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) && settingsHandler.enabledLogTypes.isNotEmpty) {
                           return SettingsButton(
                             name: 'Open Logger',
                             icon: const Icon(Icons.print),
@@ -428,6 +429,15 @@ class MainDrawer extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                       }),
+                      if (kDebugMode)
+                        SettingsToggle(
+                          value: settingsHandler.blurImages,
+                          onChanged: (newValue) {
+                            settingsHandler.blurImages = newValue;
+                            searchHandler.rootRestate();
+                          },
+                          title: 'Blur [DEV]',
+                        ),
                       //
                       Obx(() {
                         if (settingsHandler.updateInfo.value != null && Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
@@ -652,6 +662,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                 padding: const EdgeInsets.only(top: 8),
                                                 child: CancelButton(
                                                   withIcon: true,
+                                                  customIcon: Icons.cancel_outlined,
                                                   action: snatchHandler.onCancel,
                                                 ),
                                               ),

@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   flutter_avif_windows
   flutter_inappwebview_windows
+  fvp
   media_kit_libs_windows_video
   media_kit_video
   permission_handler_windows

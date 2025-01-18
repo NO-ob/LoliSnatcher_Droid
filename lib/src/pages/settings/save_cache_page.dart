@@ -281,13 +281,15 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 title: 'Favourite items on snatching',
               ),
               SettingsToggle(
-                value: jsonWrite,
+                value: (!Platform.isAndroid || extPathOverride.isNotEmpty) && jsonWrite,
                 onChanged: (newValue) {
                   setState(() {
                     jsonWrite = newValue;
                   });
                 },
+                enabled: !Platform.isAndroid || extPathOverride.isNotEmpty,
                 title: 'Write image data to JSON on save',
+                subtitle: (!Platform.isAndroid || extPathOverride.isNotEmpty) ? null : const Text('Requires custom storage directory'),
               ),
               SettingsButton(
                 name: 'Set storage directory',

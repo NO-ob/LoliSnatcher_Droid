@@ -57,8 +57,9 @@ android {
         namespace 'com.noaisu.loliSnatcher'
     }
 
-    compileSdk flutter.compileSdkVersion
+    // compileSdk flutter.compileSdkVersion
     // ndkVersion flutter.ndkVersion
+    compileSdk 35
     ndkVersion "27.2.12479018"
 
     compileOptions {

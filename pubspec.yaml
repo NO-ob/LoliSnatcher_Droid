@@ -2,7 +2,7 @@ name: lolisnatcher
 description: Booru Client with the ability to batch download Images.
 publish_to: none
 
-version: 2.4.1+191 # remember to update the values in constants.dart after changing them here
+version: 2.4.2+193 # remember to update the values in constants.dart after changing them here
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
@@ -15,7 +15,7 @@ dependencies:
   app_links: ^6.3.3
   auto_size_text_plus: ^3.0.2
   awesome_notifications: ^0.10.0
-  chewie: ^1.9.0
+  chewie: ^1.9.2
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
   dio: ^5.7.0
@@ -42,6 +42,7 @@ dependencies:
       url: https://github.com/jiangtian616/socks_proxy
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
   font_awesome_flutter: ^10.8.0
+  fvp: ^0.29.0
   get: ^4.6.6
   google_fonts: ^6.2.1
   html: ^0.15.5
@@ -72,14 +73,14 @@ dependencies:
   sqflite_common_ffi: ^2.3.4+4
   sqflite: ^2.4.1
   statsfl: ^2.3.0
-  talker_dio_logger: ^4.6.2
-  talker_flutter: ^4.6.2
-  talker_logger: ^4.6.2
-  talker: ^4.6.2
+  talker_dio_logger: ^4.6.4
+  talker_flutter: ^4.6.4
+  talker_logger: ^4.6.4
+  talker: ^4.6.4
   transparent_image: ^2.0.1
   url_launcher: ^6.3.1
   uuid: ^4.5.1
-  vibration: ^2.0.1
+  vibration: ^3.0.0
   video_player: ^2.9.2
   waterfall_flow: ^3.1.0
   xml: ^6.5.0
@@ -95,7 +96,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.14.2
+  flutter_launcher_icons: ^0.14.3
   flutter_lints: ^5.0.0
 
 

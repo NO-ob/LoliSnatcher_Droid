@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   awesome_notifications
   dynamic_color
   flutter_avif_linux
+  fvp
   gtk
   media_kit_libs_linux
   media_kit_video

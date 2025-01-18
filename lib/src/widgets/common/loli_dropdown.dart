@@ -284,6 +284,7 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
 
     List<Widget> actions = [
       const CancelButton(
+        text: 'Return',
         withIcon: true,
         returnData: false,
       ),
@@ -553,6 +554,7 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
 
     List<Widget> actions = [
       const CancelButton(
+        text: 'Return',
         withIcon: true,
         returnData: false,
       ),

@@ -1200,12 +1200,12 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
           ),
         ],
       ),
-      actionsOverflowDirection: VerticalDirection.up,
+      actionsOverflowDirection: VerticalDirection.down,
       actionsOverflowButtonSpacing: 8,
       actions: [
         ElevatedButton.icon(
           onPressed: copy,
-          label: Text('Copy ${hasSelected ? 'selected' : ''}'.trim()),
+          label: Text('Copy ${hasSelected ? 'selected' : 'all'}'.trim()),
           icon: const Icon(Icons.copy),
         ),
         ElevatedButton.icon(
@@ -1213,7 +1213,10 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
           label: Text('Open ${hasSelected ? 'selected' : ''}'.trim()),
           icon: const Icon(Icons.open_in_new),
         ),
-        const CancelButton(withIcon: true),
+        const CancelButton(
+          text: 'Return',
+          withIcon: true,
+        ),
       ],
     );
   }

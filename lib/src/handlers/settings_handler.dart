@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:alice_lightweight/alice.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
+import 'package:fvp/fvp.dart' as fvp;
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -15,6 +16,7 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 import 'package:lolisnatcher/src/data/settings/hand_side.dart';
+import 'package:lolisnatcher/src/data/settings/video_backend_mode.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
 import 'package:lolisnatcher/src/data/update_info.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
@@ -53,7 +55,7 @@ class SettingsHandler extends GetxController {
 
   // runtime settings vars
   bool hasHydrus = false;
-  RxList<LogTypes> enabledLogTypes = RxList.from([]);
+  RxList<LogTypes> enabledLogTypes = RxList.from(EnvironmentConfig.isTesting ? [...LogTypes.values] : []);
   RxString discordURL = RxString(Constants.discordURL);
 
   // debug toggles
@@ -92,6 +94,7 @@ class SettingsHandler extends GetxController {
   String proxyAddress = '';
   String proxyUsername = '';
   String proxyPassword = '';
+  VideoBackendMode videoBackendMode = isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.normal;
   String altVideoPlayerVO = isDesktopPlatform ? 'libmpv' : 'gpu'; // mediakit default: gpu - android, libmpv - desktop
   String altVideoPlayerHWDEC = isDesktopPlatform ? 'auto' : 'auto-safe'; // mediakit default: auto-safe - android, auto - desktop
 
@@ -160,7 +163,6 @@ class SettingsHandler extends GetxController {
   bool snatchOnFavourite = false;
   bool favouriteOnSnatch = false;
   bool disableVibration = false;
-  bool useAltVideoPlayer = isDesktopPlatform;
   bool altVideoPlayerHwAccel = true;
   bool disableImageScaling = false;
   bool gifsAsThumbnails = false;
@@ -210,7 +212,7 @@ class SettingsHandler extends GetxController {
     'proxyAddress',
     'proxyUsername',
     'proxyPassword',
-    'useAltVideoPlayer',
+    'videoBackendMode',
     'altVideoPlayerVO',
     'altVideoPlayerHWDEC',
     'altVideoPlayerHwAccel',
@@ -296,6 +298,11 @@ class SettingsHandler extends GetxController {
           'type': 'stringFromList',
           'default': isDesktopPlatform ? 'Right' : 'Disabled',
           'options': <String>['Disabled', 'Left', 'Right'],
+        },
+        'videoBackendMode': {
+          'type': 'videoBackendMode',
+          'default': isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.defaultValue,
+          'options': VideoBackendMode.values,
         },
         'altVideoPlayerVO': {
           'type': 'stringFromList',
@@ -768,6 +775,17 @@ class SettingsHandler extends GetxController {
             }
           }
 
+        case 'videoBackendMode':
+          if (toJSON) {
+            return (value as VideoBackendMode).toString();
+          } else {
+            if (value is String) {
+              return VideoBackendMode.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
         case 'logTypesList':
           if (toJSON) {
             // rxobject to list<string>
@@ -1082,8 +1100,8 @@ class SettingsHandler extends GetxController {
         return favouriteOnSnatch;
       case 'disableVibration':
         return disableVibration;
-      case 'useAltVideoPlayer':
-        return useAltVideoPlayer;
+      case 'videoBackendMode':
+        return videoBackendMode;
       case 'altVideoPlayerHwAccel':
         return altVideoPlayerHwAccel;
       case 'altVideoPlayerVO':
@@ -1325,8 +1343,8 @@ class SettingsHandler extends GetxController {
       case 'disableVibration':
         disableVibration = validatedValue;
         break;
-      case 'useAltVideoPlayer':
-        useAltVideoPlayer = validatedValue;
+      case 'videoBackendMode':
+        videoBackendMode = validatedValue;
         break;
       case 'altVideoPlayerHwAccel':
         altVideoPlayerHwAccel = validatedValue;
@@ -1432,7 +1450,7 @@ class SettingsHandler extends GetxController {
       'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),
       'favouriteOnSnatch': validateValue('favouriteOnSnatch', null, toJSON: true),
       'disableVibration': validateValue('disableVibration', null, toJSON: true),
-      'useAltVideoPlayer': validateValue('useAltVideoPlayer', null, toJSON: true),
+      'videoBackendMode': validateValue('videoBackendMode', null, toJSON: true),
       'altVideoPlayerHwAccel': validateValue('altVideoPlayerHwAccel', null, toJSON: true),
       'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
       'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
@@ -1578,7 +1596,6 @@ class SettingsHandler extends GetxController {
 
     final List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
     for (final String key in leftoverKeys) {
-      // TODO something causes rare exception which causes settings to reset
       try {
         setByString(key, json[key]);
       } catch (e, s) {
@@ -1602,6 +1619,32 @@ class SettingsHandler extends GetxController {
           }
         }
       });
+    }
+
+    try {
+      final List<String> legacyKeys = [
+        'useAltVideoPlayer',
+      ];
+      for (final String key in legacyKeys) {
+        if (json.keys.contains(key)) {
+          switch (key) {
+            case 'useAltVideoPlayer':
+              setByString(
+                'videoBackendMode',
+                (json[key] is bool && json[key]) ? VideoBackendMode.mpv.name : videoBackendMode.name,
+              );
+              break;
+          }
+        }
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse legacy keys $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     return true;
@@ -2117,9 +2160,23 @@ class SettingsHandler extends GetxController {
     try {
       postInitMessage.value = 'Setting up proxy...';
       await initProxy();
-      if (useAltVideoPlayer || isDesktopPlatform) {
+
+      if (isDesktopPlatform) {
         MediaKitVideoPlayer.registerWith();
+      } else {
+        switch (videoBackendMode) {
+          case VideoBackendMode.normal:
+            MediaKitVideoPlayer.registerNative();
+            break;
+          case VideoBackendMode.mpv:
+            MediaKitVideoPlayer.registerWith();
+            break;
+          case VideoBackendMode.mdk:
+            fvp.registerWith();
+            break;
+        }
       }
+
       postInitMessage.value = 'Loading Database...';
       await loadDatabase();
       await indexDatabase();
