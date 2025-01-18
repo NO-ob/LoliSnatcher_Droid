@@ -474,7 +474,7 @@ class ServiceHandler {
         if (flutterWay) {
           await HapticFeedback.vibrate();
         } else {
-          if (await Vibration.hasVibrator() ?? false) {
+          if (await Vibration.hasVibrator()) {
             await Vibration.vibrate(
               duration: duration,
               amplitude: amplitude,

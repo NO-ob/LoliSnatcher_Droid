@@ -450,6 +450,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.itemFilter,
     this.selectedItemBuilder,
     this.itemTitleBuilder,
+    this.itemSubtitleBuilder,
     this.clearable = false,
     this.onReset,
     this.itemExtent,
@@ -469,6 +470,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final bool Function(T?)? itemFilter;
   final Widget Function(T?)? selectedItemBuilder;
   final String Function(T?)? itemTitleBuilder;
+  final String Function(T?)? itemSubtitleBuilder;
   final bool clearable;
   final VoidCallback? onReset;
   final double? itemExtent;
@@ -478,8 +480,39 @@ class SettingsDropdown<T> extends StatelessWidget {
     return itemTitleBuilder?.call(value) ?? value.toString();
   }
 
+  String getSubtitle(T? value) {
+    return itemSubtitleBuilder?.call(value) ?? '';
+  }
+
   Widget getItemWidget(T? value) {
-    return itemBuilder?.call(value) ?? Text(getTitle(value));
+    final String subtitle = getSubtitle(value);
+    final bool hasSubtitle = subtitle.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: hasSubtitle ? const EdgeInsets.only(top: 8) : EdgeInsets.zero,
+          child: itemBuilder?.call(value) ?? Text(getTitle(value)),
+        ),
+        if (hasSubtitle)
+          Builder(
+            builder: (context) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                child: Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget getSelectedItemWidget(T? value) {
+    return selectedItemBuilder?.call(value) ?? itemBuilder?.call(value) ?? Text(getTitle(value));
   }
 
   @override
@@ -509,13 +542,7 @@ class SettingsDropdown<T> extends StatelessWidget {
               child: getItemWidget(item),
             );
           },
-          selectedItemBuilder: (item) =>
-              selectedItemBuilder?.call(item) ??
-              Row(
-                children: [
-                  getItemWidget(item),
-                ],
-              ),
+          selectedItemBuilder: getSelectedItemWidget,
           labelText: title,
         ),
         subtitle: subtitle,

@@ -1,7 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
+import 'package:fvp/fvp.dart' as fvp;
+
+import 'package:lolisnatcher/src/data/settings/video_backend_mode.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
@@ -16,7 +17,8 @@ class VideoSettingsPage extends StatefulWidget {
 class _VideoSettingsPageState extends State<VideoSettingsPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-  bool autoPlay = true, startVideosMuted = false, disableVideo = false, useAltVideoPlayer = false, altVideoPlayerHwAccel = true;
+  bool autoPlay = true, startVideosMuted = false, disableVideo = false, altVideoPlayerHwAccel = true;
+  VideoBackendMode videoBackendMode = SettingsHandler.isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.normal;
   late String altVideoPlayerVO, altVideoPlayerHWDEC, videoCacheMode;
 
   @override
@@ -26,7 +28,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     autoPlay = settingsHandler.autoPlayEnabled;
     startVideosMuted = settingsHandler.startVideosMuted;
     disableVideo = settingsHandler.disableVideo;
-    useAltVideoPlayer = settingsHandler.useAltVideoPlayer;
+    videoBackendMode = settingsHandler.videoBackendMode;
     altVideoPlayerHwAccel = settingsHandler.altVideoPlayerHwAccel;
     altVideoPlayerVO = settingsHandler.altVideoPlayerVO;
     altVideoPlayerHWDEC = settingsHandler.altVideoPlayerHWDEC;
@@ -41,16 +43,26 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     settingsHandler.autoPlayEnabled = autoPlay;
     settingsHandler.startVideosMuted = startVideosMuted;
     settingsHandler.disableVideo = disableVideo;
-    settingsHandler.useAltVideoPlayer = useAltVideoPlayer;
+    settingsHandler.videoBackendMode = SettingsHandler.isDesktopPlatform ? VideoBackendMode.mpv : videoBackendMode;
     settingsHandler.altVideoPlayerHwAccel = altVideoPlayerHwAccel;
     settingsHandler.altVideoPlayerVO = altVideoPlayerVO;
     settingsHandler.altVideoPlayerHWDEC = altVideoPlayerHWDEC;
     settingsHandler.videoCacheMode = videoCacheMode;
 
-    if (settingsHandler.useAltVideoPlayer || (Platform.isWindows || Platform.isLinux)) {
+    if (SettingsHandler.isDesktopPlatform) {
       MediaKitVideoPlayer.registerWith();
     } else {
-      MediaKitVideoPlayer.registerNative();
+      switch (videoBackendMode) {
+        case VideoBackendMode.normal:
+          MediaKitVideoPlayer.registerNative();
+          break;
+        case VideoBackendMode.mpv:
+          MediaKitVideoPlayer.registerWith();
+          break;
+        case VideoBackendMode.mdk:
+          fvp.registerWith();
+          break;
+      }
     }
 
     final bool result = await settingsHandler.saveSettings(restate: false);
@@ -122,68 +134,83 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                 name: '[Experimental]',
                 icon: Icon(Icons.science),
               ),
-              if (Platform.isAndroid || Platform.isIOS) ...[
-                SettingsToggle(
-                  value: useAltVideoPlayer,
+              if (!SettingsHandler.isDesktopPlatform)
+                SettingsDropdown(
+                  value: videoBackendMode,
+                  items: VideoBackendMode.values,
+                  itemTitleBuilder: (item) => switch (item) {
+                    VideoBackendMode.normal => 'Default',
+                    VideoBackendMode.mpv => 'MPV',
+                    VideoBackendMode.mdk => 'MDK',
+                    _ => '',
+                  },
+                  itemSubtitleBuilder: (item) => switch (item) {
+                    VideoBackendMode.normal =>
+                      'Based on exoplayer. Has best device compatibility, may have issues with 4K videos, some codecs or older devices',
+                    VideoBackendMode.mpv => 'Based on libmpv, has advanced settings which may help fix problems with some codecs/devices\n[MAY CAUSE CRASHES]',
+                    VideoBackendMode.mdk => 'Based on libmdk, may have better performance for some codecs/devices\n[MAY CAUSE CRASHES]',
+                    _ => '',
+                  },
                   onChanged: (newValue) {
                     setState(() {
-                      useAltVideoPlayer = newValue;
+                      videoBackendMode = newValue ?? VideoBackendMode.normal;
                     });
                   },
-                  title: 'Use alternative video player backend',
-                  subtitle: const Text('Has better performance in some cases, but certain videos may not work on your device'),
+                  title: 'Video player backend',
                 ),
-              ],
+
               AnimatedSize(
                 duration: const Duration(milliseconds: 300),
-                child: (useAltVideoPlayer || SettingsHandler.isDesktopPlatform)
+                child: (!videoBackendMode.isNormal || SettingsHandler.isDesktopPlatform)
                     ? Column(
                         children: [
-                          const Padding(
-                            padding: EdgeInsets.only(left: 16, right: 16, top: 8),
-                            child: Text(
-                              "Try different values of 'Alt player' settings below if videos don't work correctly or give codec errors:",
+                          if (videoBackendMode.isMpv) ...[
+                            const Padding(
+                              padding: EdgeInsets.only(left: 16, right: 16, top: 8),
+                              child: Text(
+                                "Try different values of 'MPV' settings below if videos don't work correctly or give codec errors:",
+                              ),
                             ),
-                          ),
-                          SettingsToggle(
-                            value: altVideoPlayerHwAccel,
-                            onChanged: (newValue) {
-                              setState(() {
-                                altVideoPlayerHwAccel = newValue;
-                              });
-                            },
-                            title: 'Alt player: use hardware acceleration',
-                          ),
-                          SettingsDropdown(
-                            value: altVideoPlayerVO,
-                            items: settingsHandler.map['altVideoPlayerVO']!['options'],
-                            onReset: () {
-                              setState(() {
-                                altVideoPlayerVO = settingsHandler.map['altVideoPlayerVO']!['default'];
-                              });
-                            },
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                altVideoPlayerVO = newValue ?? settingsHandler.map['altVideoPlayerVO']!['default'];
-                              });
-                            },
-                            title: 'Alt player: VO',
-                          ),
-                          SettingsDropdown(
-                            value: altVideoPlayerHWDEC,
-                            items: settingsHandler.map['altVideoPlayerHWDEC']!['options'],
-                            onReset: () {
-                              setState(() {
-                                altVideoPlayerHWDEC = settingsHandler.map['altVideoPlayerHWDEC']!['default'];
-                              });
-                            },
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                altVideoPlayerHWDEC = newValue ?? settingsHandler.map['altVideoPlayerHWDEC']!['default'];
-                              });
-                            },
-                            title: 'Alt player: HWDEC',
-                          ),
+                            SettingsToggle(
+                              value: altVideoPlayerHwAccel,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  altVideoPlayerHwAccel = newValue;
+                                });
+                              },
+                              title: 'MPV: use hardware acceleration',
+                            ),
+                            SettingsDropdown(
+                              value: altVideoPlayerVO,
+                              items: settingsHandler.map['altVideoPlayerVO']!['options'],
+                              onReset: () {
+                                setState(() {
+                                  altVideoPlayerVO = settingsHandler.map['altVideoPlayerVO']!['default'];
+                                });
+                              },
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  altVideoPlayerVO = newValue ?? settingsHandler.map['altVideoPlayerVO']!['default'];
+                                });
+                              },
+                              title: 'MPV: VO',
+                            ),
+                            SettingsDropdown(
+                              value: altVideoPlayerHWDEC,
+                              items: settingsHandler.map['altVideoPlayerHWDEC']!['options'],
+                              onReset: () {
+                                setState(() {
+                                  altVideoPlayerHWDEC = settingsHandler.map['altVideoPlayerHWDEC']!['default'];
+                                });
+                              },
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  altVideoPlayerHWDEC = newValue ?? settingsHandler.map['altVideoPlayerHWDEC']!['default'];
+                                });
+                              },
+                              title: 'MPV: HWDEC',
+                            ),
+                          ],
                           SettingsOptionsList(
                             value: videoCacheMode,
                             items: settingsHandler.map['videoCacheMode']!['options'],
@@ -194,7 +221,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                             },
                             title: 'Video cache mode',
                             subtitle: const Text(
-                              '''Videos on some Boorus may not work correctly (i.e. endless loading) on alt player with Stream video cache mode. In that case try using Cache mode. Otherwise player will retry with Cache mode automatically if video is in initial buffering state for 10+ seconds and video file size is <25mb''',
+                              '''Videos on some Boorus may not work correctly (i.e. endless loading) when using Stream video cache mode. In that case try using Cache mode. Otherwise player will retry with Cache mode automatically if video is in initial buffering state for 10+ seconds and video file size is less than 25mb''',
                             ),
                             trailingIcon: IconButton(
                               icon: const Icon(Icons.help_outline),

@@ -220,9 +220,9 @@ class VideoViewerState extends State<VideoViewer> {
       } else {
         killLoading([
           'Loading Error: $error',
-          if (!settingsHandler.useAltVideoPlayer) ...[
+          if (settingsHandler.videoBackendMode.isNormal) ...[
             '',
-            'Try enabling "Use alternative video player backend" in Settings->Video if you often encounter playback issues',
+            'Try changing "Video player backend" in Settings->Video if you encounter playback issues often',
           ],
         ]);
       }
