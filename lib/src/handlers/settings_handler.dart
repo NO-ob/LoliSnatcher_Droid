@@ -1646,6 +1646,9 @@ class SettingsHandler extends GetxController {
       );
     }
 
+    // Force enable logging on test builds
+    enabledLogTypes.value = EnvironmentConfig.isTesting ? [...LogTypes.values] : enabledLogTypes;
+
     return true;
   }
 
