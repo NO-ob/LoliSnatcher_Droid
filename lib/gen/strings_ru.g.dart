@@ -43,6 +43,8 @@ class TranslationsRu extends Translations {
   @override
   String get localeName => TranslationOverrides.string(_root.$meta, 'localeName', {}) ?? 'Русский';
   @override
+  String get localeEmoji => TranslationOverrides.string(_root.$meta, 'localeEmoji', {}) ?? '🇷🇺';
+  @override
   String get appName => TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher';
   @override
   String get error => TranslationOverrides.string(_root.$meta, 'error', {}) ?? 'Ошибка';
@@ -948,6 +950,8 @@ extension on TranslationsRu {
         return TranslationOverrides.string(_root.$meta, 'locale', {}) ?? 'ru';
       case 'localeName':
         return TranslationOverrides.string(_root.$meta, 'localeName', {}) ?? 'Русский';
+      case 'localeEmoji':
+        return TranslationOverrides.string(_root.$meta, 'localeEmoji', {}) ?? '🇷🇺';
       case 'appName':
         return TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher';
       case 'error':

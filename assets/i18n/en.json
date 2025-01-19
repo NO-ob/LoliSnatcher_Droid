@@ -2,8 +2,13 @@
     "locale": "en",
     "localeName": "English",
     "@localeName": {
-        "context": "LocaleName",
-        "description": "Name of the locale"
+        "context": "locale",
+        "description": "Human readable name of this locale"
+    },
+    "localeEmoji": "🇺🇸",
+    "@localeEmoji": {
+        "context": "locale",
+        "description": "Unicode emoji flag of this locale, can be left empty or default (🇺🇸), but then flag icon won't be shown in settings. You can find the symbol for your country here: https://emojipedia.org/flags"
     },
     "appName": "LoliSnatcher",
     "error": "Error",

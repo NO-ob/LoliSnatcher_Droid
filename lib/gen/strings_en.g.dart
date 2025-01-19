@@ -41,8 +41,11 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
   // Translations
   String get locale => TranslationOverrides.string(_root.$meta, 'locale', {}) ?? 'en';
 
-  /// Name of the locale
+  /// Human readable name of this locale
   String get localeName => TranslationOverrides.string(_root.$meta, 'localeName', {}) ?? 'English';
+
+  /// Unicode emoji flag of this locale, can be left empty or default (🇺🇸), but then flag icon won't be shown in settings. You can find the symbol for your country here: https://emojipedia.org/flags
+  String get localeEmoji => TranslationOverrides.string(_root.$meta, 'localeEmoji', {}) ?? '🇺🇸';
 
   String get appName => TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher';
   String get error => TranslationOverrides.string(_root.$meta, 'error', {}) ?? 'Error';
@@ -630,6 +633,8 @@ extension on Translations {
         return TranslationOverrides.string(_root.$meta, 'locale', {}) ?? 'en';
       case 'localeName':
         return TranslationOverrides.string(_root.$meta, 'localeName', {}) ?? 'English';
+      case 'localeEmoji':
+        return TranslationOverrides.string(_root.$meta, 'localeEmoji', {}) ?? '🇺🇸';
       case 'appName':
         return TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher';
       case 'error':

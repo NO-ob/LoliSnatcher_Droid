@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_twemoji/flutter_twemoji.dart';
+
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -65,7 +67,36 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
                   setState(() {});
                 },
                 title: context.loc.settings.language.title,
-                itemTitleBuilder: (e) => e?.localeName ?? context.loc.settings.language.systemLanguageOption,
+                itemBuilder: (e) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      e?.localeName ?? context.loc.settings.language.systemLanguageOption,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          if (e == null)
+                            const TextSpan(
+                              text: ' 🌐',
+                              style: TextStyle(fontSize: 20),
+                            )
+                          else if (e == AppLocale.en || e.localeEmoji != '🇺🇸')
+                            TwemojiTextSpan(
+                              text: ' ${e.localeEmoji}',
+                              style: const TextStyle(fontSize: 24),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               // TODO Add "Help us translate" block here with link
             ],
@@ -78,6 +109,10 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
 
 extension AppLocaleExt on AppLocale {
   String get localeName {
-    return LocaleSettings.instance.translationMap[this]?.locale ?? 'Loading...';
+    return LocaleSettings.instance.translationMap[this]?.localeName ?? 'Loading...';
+  }
+
+  String get localeEmoji {
+    return LocaleSettings.instance.translationMap[this]?.localeEmoji ?? '🌐';
   }
 }
