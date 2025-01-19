@@ -14,8 +14,13 @@ class Constants {
 
   static const String discordURL = 'https://discord.gg/r9E4HDx9dz';
 
+  static const String githubURL = 'https://github.com/NO-ob/LoliSnatcher_Droid';
+
+  static const String wikiURL = 'https://github.com/NO-ob/LoliSnatcher_Droid/wiki';
+
   static const String email = 'no.aisu@protonmail.com';
 
+  // TODO update to newer versions from time to time
   static const String defaultBrowserUserAgent =
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
 

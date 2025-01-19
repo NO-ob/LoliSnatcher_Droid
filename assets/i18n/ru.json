@@ -1,0 +1,280 @@
+{
+  "locale": "ru",
+  "localeName": "Русский",
+  "appName": "LoliSnatcher",
+  "error": "Ошибка",
+  "errorExclamation": "Ошибка!",
+  "warning": "Внимание",
+  "warningExclamation": "Внимание!",
+  "info": "Инфо",
+  "success": "Успешно",
+  "successExclamation": "Успешно!",
+  "cancel": "Отмена",
+  "later": "Позже",
+  "close": "Закрыть",
+  "ok": "OK",
+  "yes": "Да",
+  "no": "Нет",
+  "pleaseWait": "Подожди...",
+  "show": "Показать",
+  "hide": "Скрыть",
+  "enable": "Включить",
+  "disable": "Выключить",
+  "add": "Добавить",
+  "edit": "Редактировать",
+  "remove": "Убрать",
+  "save": "Сохранить",
+  "delete": "Удалить",
+  "copy": "Копировать",
+  "copied": "Скопировано!",
+  "paste": "Вставить",
+  "copyErrorText": "Скопировать ошибку",
+  "booru": "Сайт",
+  "goToSettings": "В настройки",
+  "areYouSure": "Ты уверен?",
+  "thisMayTakeSomeTime": "Это может занять некоторое время...",
+  "doYouWantToExitApp": "Ты хочешь выйти из приложения?",
+  "closeTheApp": "Закрыть приложение",
+  "invalidUrl": "Неправильная ссылка!",
+  "clipboardIsEmpty": "Буфер обмена пуст!",
+  "apiKey": "API ключ",
+  "userId": "ID юзера",
+  "login": "Логин",
+  "password": "Пароль",
+  "pause": "Пауза",
+  "resume": "Продолжить",
+  "discord": "Discord",
+  "visitOurDiscord": "Заходи на наш Discord сервер",
+  "item": "Элемент",
+  "selectAll": "Выбрать все",
+  "validationErrors": {
+    "required": "Введи значение",
+    "invalid": "Введи валидное значение",
+    "tooSmall(param=min)": "Введи значение больше {min}",
+    "tooBig(param=max)": "Введи значение меньше {max}"
+  },
+  "init": {
+    "initError": "Ошибка инициализации!",
+    "postInitError": "Ошибка постинициализации!",
+    "settingUpProxy": "Настройка прокси...",
+    "loadingDatabase": "Загрузка базы данных...",
+    "loadingBoorus": "Загрузка конфигов сайтов...",
+    "loadingTags": "Загрузка тегов...",
+    "restoringTabs": "Восстановление вкладок..."
+  },
+  "snatcher": {
+    "title": "Загрузчик",
+    "snatchingHistory": "История загрузок"
+  },
+  "multibooru": {
+    "title": "Мультисайт",
+    "multibooruMode": "Режим мультисайта",
+    "multibooruRequiresAtLeastTwoBoorus": "Режим мультисайта требует не менее двух настроенных конфигов сайтов",
+    "selectSecondaryBoorus": "Выбери второстепенные конфиги:"
+  },
+  "settings": {
+    "title": "Настройки",
+    "language": {
+      "title": "Язык",
+      "systemLanguageOption": "Системный"
+    },
+    "booru": {
+      "title": "Сайты и Поиск",
+      "defaultTags": "Теги по умолчанию",
+      "itemsPerPage": "Элементов на странице",
+      "itemsPerPageTip": "Некоторые сайты могут игнорировать этот параметр",
+      "addBooru": "Добавить конфиг сайта",
+      "shareBooru": "Поделиться конфигом сайта",
+      "shareBooruDialogMsgMobile(param=booruName)": "Конфиг сайта {booruName} будет превращен в ссылку, которой затем можно поделиться в других приложениях\n\nВключить ли данные логина/ключа api?",
+      "shareBooruDialogMsgDesktop(param=booruName)": "Конфиг сайта {booruName} будет превращен в ссылку, которая будет скопирована в буфер обмена\n\nВключить ли данные логина/ключа api?",
+      "booruSharing": "Поделиться конфигом сайта",
+      "booruSharingMsgAndroid": "Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на \"Добавить ссылку\" и выберите все доступные опции",
+      "addedBoorus": "Добавленные сайты",
+      "editBooru": "Редактировать конфиг",
+      "importBooru": "Импортировать конфиг из буфера обмена",
+      "onlyLSURLsSupported": "Поддерживаются только ссылки формата loli.snatcher",
+      "deleteBooru": "Удалить конфиг сайта",
+      "deleteBooruError": "Что-то пошло не так при удалении конфига!",
+      "booruDeleted": "Конфиг удален!",
+      "booruDropdownInfo": "Сайт выбранный здесь будет назначен сайтом по умолчанию после сохранения.\n\nСайт по умолчанию будет появляться в топе выпадающих списков",
+      "changeDefaultBooru": "Сменить сайт по умолчанию?",
+      "changeTo": "Сменить на: ",
+      "keepCurrentBooru": "Нажми [Нет] чтобы оставить текущий: ",
+      "changeToNewBooru": "Нажми [Да] чтобы сменить на: ",
+      "booruConfigLinkCopied": "Конфиг в виде ссылки скопирован!",
+      "noBooruSelected": "Сайт не выбран!",
+      "cantDeleteThisBooru": "Нельзя удалить этот сайт!",
+      "removeRelatedTabsFirst": "Сначала удалите связанные вкладки"
+    },
+    "booruEditor": {
+      "title": "Редактор конфига сайта",
+      "testBooru": "Проверить сайт",
+      "testBooruSuccessMsg": "Нажми кнопку Сохранить чтобы сохранить этот конфиг",
+      "testBooruFailedTitle": "Проверка сайта не удалась",
+      "testBooruFailedMsg(param=error)": "Данные конфига неверны, сайт не дает доступ к API, запрос не вернул данные или есть проблемы с сетью. Подробности (нажми на кнопку для копирования): {error}",
+      "saveBooru": "Сохранить конфиг",
+      "runTestFirst": "Сначала запусти проверку",
+      "booruConfigExistsError": "Такой конфиг уже существует",
+      "booruSameNameExistsError": "Конфиг с таким именем уже существует",
+      "booruSameUrlExistsError": "Конфиг с таким URL уже существует",
+      "thisBooruConfigWontBeAdded": "Этот конфиг не будет добавлен",
+      "booruConfigSaved": "Конфиг сохранен!",
+      "existingTabsNeedReload": "Существующие вкладки с этим сайтом должны быть перезагружены, чтобы применить изменения!",
+      "failedVerifyApiHydrus": "Не удалось проверить доступ к API для Hydrus",
+      "accessKeyRequestedTitle": "Запрос ключа доступа",
+      "accessKeyRequestedMsg": "Нажми [Ок] в Hydrus, затем примени. Можешь нажать [Проверить сайт] после этого",
+      "accessKeyFailedTitle": "Не удалось получить ключ доступа",
+      "accessKeyFailedMsg": "Открыл ли ты окно запроса в Hydrus?",
+      "hydrusInstructions": "Для получения ключа Hydrus нужно открыть окно запроса в клиенте Hydrus. Services > Review services > Client api > Add > From API request",
+      "getHydrusApiKey": "Получить ключ API Hydrus",
+      "booruName": "Имя конфига",
+      "booruNameRequired": "Имя конфига обязательно!",
+      "booruUrl": "URL сайта",
+      "booruUrlRequired": "URL обязательно!",
+      "booruType": "Тип конфига",
+      "booruTypeIs(param=booruType)": "Сайт типа: {booruType}",
+      "booruFavicon": "URL иконки",
+      "booruFaviconPlaceholder": "(Автоматически заполняется, если оставить пустым)",
+      "booruApiCredsInfo(param=userIdTitle, param=apiKeyTitle)": "{userIdTitle} и {apiKeyTitle} могут быть обязательны для некоторых сайтов, но в большинстве случаев не нужны.",
+      "canBeBlankPlaceholder": "(Может быть пустым)",
+      "booruDefTags": "Теги по умолчанию"
+    },
+    "interface": {
+      "title": "Интерфейс"
+    },
+    "theme": {
+      "title": "Темы"
+    },
+    "viewer": {
+      "title": "Просмотрщик"
+    },
+    "video": {
+      "title": "Видео"
+    },
+    "downloads": {
+      "title": "Скачивание",
+      "fromNextItemInQueue": "Со следующего элемента в очереди",
+      "pleaseProvideStoragePermission": "Пожалуйста, предоставь разрешение на доступ к хранилищу, чтобы сохранять файлы",
+      "noItemsSelected": "Нет выбранных элементов",
+      "noItemsQueued": "Нет элементов в очереди",
+      "batch": "Пачка",
+      "snatchSelected": "Скачать выбранные",
+      "removeSnatchedStatusFromSelected": "Удалить статус скачивания у выбранных",
+      "favouriteSelected": "Добавить выбранные в избранное",
+      "unfavouriteSelected": "Удалить выбранные из избранного",
+      "clearSelected": "Очистить выбранные",
+      "updatingData": "Обновление данных..."
+    },
+    "cache": {
+      "title": "Кэш"
+    },
+    "downloadsAndCache": "Загрузки и Кэширование",
+    "tagFilters": {
+      "title": "Фильтры тегов"
+    },
+    "database": {
+      "title": "База данных",
+      "indexingDatabase": "Индексирование базы данных",
+      "droppingIndexes": "Удаление индексов"
+    },
+    "backupAndRestore": {
+      "title": "Резервное копирование и восстановление",
+      "duplicateFileDetectedTitle": "Дублирующийся файл!",
+      "duplicateFileDetectedMsg(param=fileName)": "Файл {fileName} уже существует. Ты хочешь его перезаписать? Усли выбрать нет, то бэкап будет отменен.",
+      "androidOnlyFeatureMsg": "Эта функция доступна только на Android, на десктопных билдах можно просто копировать файлы из папки данных приложения",
+      "selectBackupDir": "Выбери папку для бэкапов",
+      "failedToGetBackupPath": "Не удалось получить путь к папке бэкапов!",
+      "backupPathMsg(param=backupPath)": "Папка бэкапов: {backupPath}",
+      "noBackupDirSelected": "Нет выбранной папки бэкапов",
+      "restoreInfoMsg": "Восстановление будет работать только если файлы расположены в корне папки.",
+      "backupSettings": "Бэкап настроек",
+      "restoreSettings": "Восстановление настроек",
+      "settingsBackedUp": "Настроики сохранены в settings.json",
+      "settingsRestored": "Настроики восстановлены из бэкапа!",
+      "backupSettingsError": "Не удалось сохранить настроики!",
+      "restoreSettingsError": "Не удалось восстановить настроики!",
+      "backupBoorus": "Бэкап конфигов сайтов",
+      "restoreBoorus": "Восстановление конфигов сайтов",
+      "boorusBackedUp": "Конфиги сохранены в boorus.json",
+      "boorusRestored": "Конфиги восстановлены из бэкапа!",
+      "backupBoorusError": "Не удалось сохранить конфиги сайтов!",
+      "restoreBoorusError": "Не удалось восстановить конфиги сайтов!",
+      "backupDatabase": "Бэкап базы данных",
+      "restoreDatabase": "Восстановление базы данных",
+      "restoreDatabaseInfo": "Может занять время в зависимости от объема базы данных, приложение перезапустится после успешного восстановления",
+      "databaseBackedUp": "База данных сохранена в database.json",
+      "databaseRestored": "База данных восстановлена из бэкапа! Приложение будет перезапущено через несколько секунд!",
+      "backupDatabaseError": "Не удалось сохранить базу данных!",
+      "restoreDatabaseError": "Не удалось восстановить базу данных!",
+      "databaseFileNotFound": "Файл базы данных не найден или не может быть прочитан!",
+      "backupTags": "Бэкап тегов",
+      "restoreTags": "Восстановление тегов",
+      "restoreTagsInfo": "Может занять время, если у тебя много тегов. Если ты сделал восстановление базы данных, то эта операция не нужна, потому что теги уже включены в базу данных",
+      "tagsBackedUp": "Теги сохранены в tags.json",
+      "tagsRestored": "Теги восстановлены из бэкапа!",
+      "backupTagsError": "Не удалось сохранить теги!",
+      "restoreTagsError": "Не удалось восстановить теги!",
+      "tagsFileNotFound": "Файл тегов не найден или не может быть прочитан!",
+      "operationTakesTooLongMsg": "Нажми Скрыть, если операция занимает слишком много времени, операция будет продолжена в фоновом режиме",
+      "backupFileNotFound": "Файл бэкапа не найден или не может быть прочитан!",
+      "backupDirNoAccess": "Нет доступа к папке бэкапов!",
+      "backupCancelled": "Бэкап отменен!"
+    },
+    "network": {
+      "title": "Сеть"
+    },
+    "privacy": {
+      "title": "Приватность"
+    },
+    "sync": {
+      "title": "LoliSync",
+      "dbError": "База данных должна быть включена чтобы использовать LoliSync"
+    },
+    "about": {
+      "title": "О приложении",
+      "appDescription": "LoliSnatcher - это открытое программное обеспечение, распространяемое по лицензии GPLv3. Исходный код доступен на GitHub. Пожалуйста, сообщайте о любых проблемах или просьбах в разделе issues репозитория.",
+      "appOnGitHub": "LoliSnatcher на Github",
+      "contact": "Связаться",
+      "emailCopied": "Email скопирован!",
+      "logoArtistThanks": "Большая благодарность Showers-U за разрешение на использование их работы для лого приложения. Пожалуйста, зацените их работы на Pixiv",
+      "developers": "Разработчики",
+      "releases": "Релизы",
+      "releasesMsg": "Последняя версия и полные списки изменений можно найти на странице релизов в GitHub:",
+      "licenses": "Лицензии"
+    },
+    "checkForUpdates": {
+      "title": "Проверить наличие обновлений",
+      "updateAvailable": "Доступно обновление!",
+      "updateChangelog": "Список изменений обновления",
+      "updateCheckError": "Ошибка при проверке обновлений!",
+      "youHaveLatestVersion": "У тебя последняя версия!",
+      "viewLatestChangelog": "Посмотреть последний список изменений",
+      "currentVersion": "Текущая версия",
+      "changelog": "Список изменений",
+      "visitPlayStore": "Перейти в Play Store",
+      "visitReleases": "Перейти к Релизам"
+    },
+    "help": {
+      "title": "Помощь"
+    },
+    "debug": {
+      "title": "Дебаг",
+      "enabledSnackbarMsg": "Дебаг включен!",
+      "disabledSnackbarMsg": "Дебаг выключен!",
+      "alreadyEnabledSnackbarMsg": "Дебаг уже включен!",
+      "openAlice": "Открыть инфо о сетевых запросах",
+      "openLogger": "Открыть логгер"
+    },
+    "logging": {
+      "title": "Логгирование",
+      "enabledMsg": "Логгирование включено",
+      "enabledLogTypes": "Включенные типы логов",
+      "disableTip": "Выключить логгирование можно в дебаг настройках"
+    },
+    "webview": {
+      "openWebview": "Открыть webview",
+      "openWebviewTip": "чтобы залогиниться или получить куки"
+    },
+    "version": "Версия"
+  }
+}

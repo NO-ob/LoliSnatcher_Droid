@@ -11,6 +11,7 @@ import 'package:fvp/fvp.dart' as fvp;
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -31,6 +32,9 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
+
+// exporting localization here to avoid import repetition, since we use settingsHandler in a lot of places anyway
+export 'package:lolisnatcher/gen/strings.g.dart';
 
 /// This class is used loading from and writing settings to files
 class SettingsHandler extends GetxController {
@@ -186,6 +190,8 @@ class SettingsHandler extends GetxController {
   Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
   RxBool useDynamicColor = false.obs;
   RxBool isAmoled = false.obs;
+
+  Rxn<AppLocale> locale = Rxn<AppLocale>(null);
   ////////////////////////////////////////////////////
 
   // list of setting names which shouldnt be synced with other devices
@@ -219,6 +225,7 @@ class SettingsHandler extends GetxController {
     'theme',
     'themeMode',
     'isAmoled',
+    'locale',
     'useDynamicColor',
     'customPrimaryColor',
     'customAccentColor',
@@ -667,6 +674,10 @@ class SettingsHandler extends GetxController {
           'type': 'rxbool',
           'default': false.obs,
         },
+        'locale': {
+          'type': 'locale',
+          'default': null,
+        },
         'customPrimaryColor': {
           'type': 'rxcolor',
           'default': Colors.pink[200],
@@ -861,6 +872,17 @@ class SettingsHandler extends GetxController {
             }
           }
 
+        case 'locale':
+          if (toJSON) {
+            return (value as Rxn<AppLocale>).value?.name;
+          } else {
+            if (value is String) {
+              return AppLocale.values.firstWhereOrNull((e) => e.name == value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
         // case 'stringList':
         default:
           return value;
@@ -921,10 +943,10 @@ class SettingsHandler extends GetxController {
       if (!Tools.isTestMode) {
         if (dbEnabled) {
           if (indexesEnabled) {
-            postInitMessage.value = 'Indexing database...\nThis may take a while';
+            postInitMessage.value = '${loc.settings.database.indexingDatabase}...\n${loc.thisMayTakeSomeTime}';
             await dbHandler.createIndexes();
           } else {
-            postInitMessage.value = 'Dropping indexes...\nThis may take a while';
+            postInitMessage.value = '${loc.settings.database.droppingIndexes}...\n${loc.thisMayTakeSomeTime}';
             await dbHandler.dropIndexes();
           }
         }
@@ -1125,6 +1147,8 @@ class SettingsHandler extends GetxController {
         return customPrimaryColor;
       case 'customAccentColor':
         return customAccentColor;
+      case 'locale':
+        return locale;
       default:
         return null;
     }
@@ -1387,6 +1411,9 @@ class SettingsHandler extends GetxController {
       case 'enableDrawerMascot':
         enableDrawerMascot = validatedValue;
         break;
+      case 'locale':
+        locale.value = validatedValue;
+        break;
       default:
         break;
     }
@@ -1481,6 +1508,7 @@ class SettingsHandler extends GetxController {
       'drawerMascotPathOverride': validateValue('drawerMascotPathOverride', null, toJSON: true),
       'customPrimaryColor': validateValue('customPrimaryColor', null, toJSON: true),
       'customAccentColor': validateValue('customAccentColor', null, toJSON: true),
+      'locale': validateValue('locale', null, toJSON: true),
       'version': Constants.appVersion,
       'build': Constants.appBuildNumber,
     };
@@ -1929,7 +1957,12 @@ class SettingsHandler extends GetxController {
       // final json = jsonDecode(jsonEncode(fakeUpdate));
 
       // use this and fakeUpdate to generate json file
-      Logger.Inst().log(jsonEncode(json), 'SettingsHandler', 'checkUpdate', LogTypes.settingsError);
+      Logger.Inst().log(
+        jsonEncode(json),
+        'SettingsHandler',
+        'checkUpdate',
+        LogTypes.settingsError,
+      );
 
       updateInfo.value = UpdateInfo(
         versionName: json['version_name'] ?? '0.0.0',
@@ -1973,9 +2006,9 @@ class SettingsHandler extends GetxController {
     } catch (e) {
       if (withMessage) {
         FlashElements.showSnackbar(
-          title: const Text(
-            'Update Check Error!',
-            style: TextStyle(fontSize: 20),
+          title: Text(
+            loc.settings.checkForUpdates.updateCheckError,
+            style: const TextStyle(fontSize: 20),
           ),
           content: Text(
             e.toString(),
@@ -1991,9 +2024,9 @@ class SettingsHandler extends GetxController {
   void showLastVersionMessage(bool withMessage) {
     if (withMessage) {
       FlashElements.showSnackbar(
-        title: const Text(
-          'You already have the latest version!',
-          style: TextStyle(fontSize: 20),
+        title: Text(
+          loc.settings.checkForUpdates.youHaveLatestVersion,
+          style: const TextStyle(fontSize: 20),
         ),
         sideColor: Colors.green,
         leadingIcon: Icons.update,
@@ -2006,7 +2039,7 @@ class SettingsHandler extends GetxController {
                 showUpdate(true);
               },
               icon: const Icon(Icons.list_alt_rounded),
-              label: const Text('View latest changelog'),
+              label: Text(loc.settings.checkForUpdates.viewLatestChangelog),
             ),
           ];
         },
@@ -2027,7 +2060,7 @@ class SettingsHandler extends GetxController {
         page: () => Scaffold(
           appBar: AppBar(
             title: Text(
-              'Update ${isDiffVersion ? 'Available!' : 'Changelog:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
+              '${isDiffVersion ? loc.settings.checkForUpdates.updateAvailable : '${loc.settings.checkForUpdates.updateChangelog}:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
             ),
           ),
           body: Column(
@@ -2040,12 +2073,26 @@ class SettingsHandler extends GetxController {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (isDiffVersion) ...[
-                        const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
+                        Text(
+                          '${loc.settings.checkForUpdates.currentVersion}: ${Constants.appVersion}+${Constants.appBuildNumber}',
+                        ),
                         const Text(''),
                       ],
-                      Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(
+                        updateInfo.value!.title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const Text(''),
-                      const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(
+                        loc.settings.checkForUpdates.changelog,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       const Text(''),
                       Text(updateInfo.value!.changelog),
                       // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
@@ -2063,7 +2110,7 @@ class SettingsHandler extends GetxController {
                         Navigator.of(ctx).pop();
                       },
                       icon: const Icon(Icons.close),
-                      label: Text(isDiffVersion ? 'Later' : 'Close'),
+                      label: Text(isDiffVersion ? loc.later : loc.close),
                     ),
                     const SizedBox(width: 16),
                     if (isFromStore && updateInfo.value!.isInStore)
@@ -2081,7 +2128,7 @@ class SettingsHandler extends GetxController {
                           Navigator.of(ctx).pop();
                         },
                         icon: const Icon(Icons.play_arrow),
-                        label: const Text('Visit Play Store'),
+                        label: Text(loc.settings.checkForUpdates.visitPlayStore),
                       )
                     else
                       ElevatedButton.icon(
@@ -2093,7 +2140,7 @@ class SettingsHandler extends GetxController {
                           Navigator.of(ctx).pop();
                         },
                         icon: const Icon(Icons.exit_to_app),
-                        label: const Text('Visit Releases'),
+                        label: Text(loc.settings.checkForUpdates.visitReleases),
                       ),
                   ],
                 ),
@@ -2113,6 +2160,14 @@ class SettingsHandler extends GetxController {
     return;
   }
 
+  Future<void> setLocale(AppLocale? locale) async {
+    if (locale == null) {
+      await LocaleSettings.useDeviceLocale();
+    } else {
+      await LocaleSettings.setLocale(locale);
+    }
+  }
+
   Future<void> initialize() async {
     if (isInit.value == true) {
       return;
@@ -2121,6 +2176,7 @@ class SettingsHandler extends GetxController {
     try {
       await getPerms();
       await loadSettings();
+      await setLocale(locale.value);
     } catch (e, s) {
       Logger.Inst().log(
         e.toString(),
@@ -2130,9 +2186,9 @@ class SettingsHandler extends GetxController {
         s: s,
       );
       FlashElements.showSnackbar(
-        title: const Text(
-          'Initialization Error!',
-          style: TextStyle(fontSize: 20),
+        title: Text(
+          loc.init.initError,
+          style: const TextStyle(fontSize: 20),
         ),
         content: Text(
           e.toString(),
@@ -2161,7 +2217,7 @@ class SettingsHandler extends GetxController {
     }
 
     try {
-      postInitMessage.value = 'Setting up proxy...';
+      postInitMessage.value = loc.init.settingUpProxy;
       await initProxy();
 
       if (isDesktopPlatform) {
@@ -2180,16 +2236,16 @@ class SettingsHandler extends GetxController {
         }
       }
 
-      postInitMessage.value = 'Loading Database...';
+      postInitMessage.value = loc.init.loadingDatabase;
       await loadDatabase();
       await indexDatabase();
       if (booruList.isEmpty) {
-        postInitMessage.value = 'Loading Boorus...';
+        postInitMessage.value = loc.init.loadingBoorus;
         await loadBoorus();
       }
       await externalAction();
     } catch (e, s) {
-      postInitMessage.value = 'Error!';
+      postInitMessage.value = loc.errorExclamation;
       Logger.Inst().log(
         e.toString(),
         'SettingsHandler',
@@ -2198,9 +2254,9 @@ class SettingsHandler extends GetxController {
         s: s,
       );
       FlashElements.showSnackbar(
-        title: const Text(
-          'Post Initialization Error!',
-          style: TextStyle(fontSize: 20),
+        title: Text(
+          loc.init.initError,
+          style: const TextStyle(fontSize: 20),
         ),
         content: Text(
           e.toString(),

@@ -1,0 +1,13 @@
+base_locale: en
+fallback_strategy: base_locale
+flat_map: true
+input_directory: assets/i18n
+input_file_pattern: .json
+statistics: true
+string_interpolation: braces
+timestamp: false
+translate_var: loc
+translation_overrides: true
+format:
+  enabled: true
+  width: 150

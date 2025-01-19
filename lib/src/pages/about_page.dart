@@ -18,31 +18,29 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LoliSnatcher'),
+        title: Text(context.loc.appName),
       ),
       body: Center(
         child: ListView(
           children: [
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: const Text(
-                'LoliSnatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo.',
-              ),
+              child: Text(context.loc.settings.about.appDescription),
             ),
             SettingsButton(
-              name: 'LoliSnatcher on Github',
+              name: context.loc.settings.about.appOnGitHub,
               icon: const Icon(Icons.public),
               trailingIcon: const Icon(Icons.exit_to_app),
               action: () {
                 launchUrlString(
-                  'https://github.com/NO-ob/LoliSnatcher_Droid',
+                  Constants.githubURL,
                   mode: LaunchMode.externalApplication,
                 );
               },
             ),
-            const DiscordButton(overrideText: 'Visit our Discord Server'),
+            DiscordButton(overrideText: context.loc.visitOurDiscord),
             SettingsButton(
-              name: 'Contact: ${Constants.email}',
+              name: '${context.loc.settings.about.contact}: ${Constants.email}',
               icon: const Icon(Icons.email),
               trailingIcon: const Icon(Icons.exit_to_app),
               action: () {
@@ -55,8 +53,11 @@ class AboutPage extends StatelessWidget {
                 Clipboard.setData(const ClipboardData(text: Constants.email));
                 FlashElements.showSnackbar(
                   context: context,
-                  title: const Text('Copied!', style: TextStyle(fontSize: 20)),
-                  content: const Text('Email address copied to clipboard'),
+                  title: Text(
+                    context.loc.copied,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  content: Text(context.loc.settings.about.emailCopied),
                   sideColor: Colors.green,
                   leadingIcon: Icons.check,
                   leadingIconColor: Colors.green,
@@ -67,7 +68,7 @@ class AboutPage extends StatelessWidget {
             //
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: const Text('A big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv'),
+              child: Text(context.loc.settings.about.logoArtistThanks),
             ),
             if (!EnvironmentConfig.isFromStore)
               SettingsButton(
@@ -84,7 +85,7 @@ class AboutPage extends StatelessWidget {
             //
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: const Text('Developers:'),
+              child: Text('${context.loc.settings.about.developers}:'),
             ),
             SettingsButton(
               name: 'NO-ob - Github',
@@ -111,10 +112,10 @@ class AboutPage extends StatelessWidget {
             //
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: const Text('Latest version and full changelogs can be found at the Github Releases page:'),
+              child: Text(context.loc.settings.about.releasesMsg),
             ),
             SettingsButton(
-              name: 'Releases',
+              name: context.loc.settings.about.releases,
               icon: const Icon(Icons.public),
               trailingIcon: const Icon(Icons.exit_to_app),
               action: () {
@@ -125,10 +126,13 @@ class AboutPage extends StatelessWidget {
               },
             ),
             SettingsButton(
-              name: 'Licenses',
+              name: context.loc.settings.about.licenses,
               icon: const Icon(Icons.document_scanner),
               action: () {
-                showLicensePage(context: context, applicationName: 'LoliSnatcher');
+                showLicensePage(
+                  context: context,
+                  applicationName: context.loc.appName,
+                );
               },
             ),
           ],

@@ -28,7 +28,7 @@ class DiscordButton extends StatelessWidget {
       final String discordURL = settingsHandler.discordURL.value;
 
       return SettingsButton(
-        name: overrideText ?? 'Discord',
+        name: overrideText ?? context.loc.discord,
         icon: const FaIcon(
           FontAwesomeIcons.discord,
           size: 20,

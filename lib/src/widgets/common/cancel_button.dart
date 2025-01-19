@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/gen/strings.g.dart';
+
 class CancelButton extends StatelessWidget {
   const CancelButton({
-    this.text = 'Cancel',
+    this.text,
     this.action,
     this.returnData,
     this.withIcon = false,
@@ -10,7 +12,7 @@ class CancelButton extends StatelessWidget {
     super.key,
   });
 
-  final String text;
+  final String? text;
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
@@ -37,7 +39,7 @@ class CancelButton extends StatelessWidget {
           }
         },
         icon: Icon(withIcon ? (customIcon ?? Icons.keyboard_return_rounded) : null),
-        label: Text(text),
+        label: Text(text ?? context.loc.cancel),
       );
     }
 
@@ -58,7 +60,7 @@ class CancelButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(text),
+      child: Text(text ?? context.loc.cancel),
     );
   }
 }

@@ -7,12 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:app_links/app_links.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:get/get.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart' hide Translations;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
-import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
@@ -75,7 +75,7 @@ void main() async {
   //   debug: true,
   // );
 
-  runApp(const MainApp());
+  runApp(TranslationProvider(child: const MainApp()));
 }
 
 class MainApp extends StatefulWidget {
@@ -131,10 +131,10 @@ class _MainAppState extends State<MainApp> {
   Future<void> initHandlers() async {
     settingsHandler.alice.setNavigatorKey(navigationHandler.navigatorKey);
     await settingsHandler.postInit(() async {
-      settingsHandler.postInitMessage.value = 'Loading tags...';
+      settingsHandler.postInitMessage.value = loc.init.loadingTags;
       // should init earlier than tabs so tags color properly on first render of search box
       await tagHandler.initialize();
-      settingsHandler.postInitMessage.value = 'Restoring tabs...';
+      settingsHandler.postInitMessage.value = loc.init.restoringTabs;
       await searchHandler.restoreTabs();
     });
   }
@@ -155,8 +155,12 @@ class _MainAppState extends State<MainApp> {
         maxFps = currentMode.refreshRate.round();
         updateState();
       }
-      Logger.Inst().log('Set max fps to $maxFps', 'MainApp', 'setMaxFPS', null);
-      // FlashElements.showSnackbar(title: Text('Max FPS: $maxFps'));
+      Logger.Inst().log(
+        'Set max fps to $maxFps',
+        'MainApp',
+        'setMaxFPS',
+        null,
+      );
     }
   }
 
@@ -234,7 +238,7 @@ class _MainAppState extends State<MainApp> {
               );
 
               return MaterialApp(
-                title: 'LoliSnatcher',
+                title: loc.appName,
                 debugShowCheckedModeBanner: false, // hide debug banner in the corner
                 showPerformanceOverlay: settingsHandler.showPerf.value,
                 scrollBehavior: const CustomScrollBehavior(),
@@ -246,11 +250,9 @@ class _MainAppState extends State<MainApp> {
                   TalkerRouteObserver(Logger.talker),
                 ],
                 home: const Home(),
-                localizationsDelegates: const [
-                  AppLocalizations.delegate,
-                ],
-
-                supportedLocales: AppLocalizations.supportedLocales, // English
+                locale: TranslationProvider.of(context).flutterLocale,
+                supportedLocales: AppLocaleUtils.supportedLocales,
+                localizationsDelegates: GlobalMaterialLocalizations.delegates,
               );
             },
           ),
@@ -336,7 +338,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   Future<void> openAppLink(String url) async {
     Logger.Inst().log(url, 'AppLinks', 'openAppLink', LogTypes.settingsLoad);
-    // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
 
     if (url.contains('loli.snatcher')) {
       final Booru booru = Booru.fromLink(url);

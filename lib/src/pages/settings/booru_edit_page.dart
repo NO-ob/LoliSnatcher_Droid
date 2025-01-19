@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -45,6 +45,8 @@ class _BooruEditState extends State<BooruEdit> {
 
   BooruType? booruType;
   BooruType selectedBooruType = BooruType.Autodetect;
+
+  TranslationsSettingsBooruEditorEn get booruEditorLoc => context.loc.settings.booruEditor;
 
   // TODO make standalone / move to handlers themselves
   String convertSiteUrlToApi() {
@@ -94,7 +96,7 @@ class _BooruEditState extends State<BooruEdit> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).title_booruEditor),
+        title: Text(booruEditorLoc.title),
         actions: const [],
       ),
       body: Center(
@@ -106,15 +108,13 @@ class _BooruEditState extends State<BooruEdit> {
             const SettingsButton(name: '', enabled: false),
             SettingsTextInput(
               controller: booruNameController,
-              title: AppLocalizations.of(context).booruEdit_nameField,
-              hintText: AppLocalizations.of(context).booruEdit_booruNamePlaceholder,
+              title: booruEditorLoc.booruName,
               clearable: true,
               pasteable: true,
             ),
             SettingsTextInput(
               controller: booruURLController,
-              title: AppLocalizations.of(context).booruEdit_urlField,
-              hintText: AppLocalizations.of(context).booruEdit_booruUrlPlaceholder,
+              title: booruEditorLoc.booruUrl,
               inputType: TextInputType.url,
               clearable: true,
               pasteable: true,
@@ -127,22 +127,21 @@ class _BooruEditState extends State<BooruEdit> {
                   selectedBooruType = newValue ?? BooruType.values.first;
                 });
               },
-              title: AppLocalizations.of(context).booruEdit_booruType,
+              title: booruEditorLoc.booruType,
               itemTitleBuilder: (BooruType? type) => type?.alias ?? '',
               expendableByScroll: true,
             ),
             SettingsTextInput(
               controller: booruFaviconController,
-              title: AppLocalizations.of(context).booruEdit_favicon,
-              hintText: AppLocalizations.of(context).booruEdit_faviconHint,
+              title: booruEditorLoc.booruFavicon,
+              hintText: booruEditorLoc.booruFaviconPlaceholder,
               inputType: TextInputType.url,
               clearable: true,
               pasteable: true,
             ),
             SettingsTextInput(
               controller: booruDefTagsController,
-              title: AppLocalizations.of(context).booruEdit_defaultTags,
-              hintText: AppLocalizations.of(context).booruEdit_defaultTagsHint,
+              title: booruEditorLoc.booruDefTags,
               clearable: true,
               pasteable: true,
             ),
@@ -150,7 +149,10 @@ class _BooruEditState extends State<BooruEdit> {
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
               width: double.infinity,
               child: Text(
-                AppLocalizations.of(context).booruEdit_apiCreds(getUserIDTitle(), getApiKeyTitle()),
+                booruEditorLoc.booruApiCredsInfo(
+                  userIdTitle: getUserIDTitle(),
+                  apiKeyTitle: getApiKeyTitle(),
+                ),
               ),
             ),
             //
@@ -163,7 +165,7 @@ class _BooruEditState extends State<BooruEdit> {
             SettingsTextInput(
               controller: booruUserIDController,
               title: getUserIDTitle(),
-              hintText: AppLocalizations.of(context).booruEdit_canBeBlankHint,
+              hintText: booruEditorLoc.canBeBlankPlaceholder,
               clearable: true,
               pasteable: true,
               drawTopBorder: true,
@@ -172,7 +174,7 @@ class _BooruEditState extends State<BooruEdit> {
               controller: booruAPIKeyController,
               title: getApiKeyTitle(),
               pasteable: true,
-              hintText: AppLocalizations.of(context).booruEdit_canBeBlankHint,
+              hintText: booruEditorLoc.canBeBlankPlaceholder,
               clearable: true,
               obscureable: shouldObscureApiKey(),
             ),
@@ -188,9 +190,9 @@ class _BooruEditState extends State<BooruEdit> {
       case BooruType.Sankaku:
       case BooruType.IdolSankaku:
       case BooruType.R34Hentai:
-        return 'Password';
+        return context.loc.password;
       default:
-        return 'API Key';
+        return context.loc.apiKey;
     }
   }
 
@@ -207,17 +209,17 @@ class _BooruEditState extends State<BooruEdit> {
       case BooruType.IdolSankaku:
       case BooruType.Danbooru:
       case BooruType.R34Hentai:
-        return 'Login';
+        return context.loc.login;
       default:
-        return 'User ID';
+        return context.loc.userId;
     }
   }
 
   Widget webviewButton() {
     if (Tools.isOnPlatformWithWebviewSupport) {
       return SettingsButton(
-        name: AppLocalizations.of(context).booruEdit_openWebview,
-        subtitle: const Text('To login or obtain cookies'),
+        name: context.loc.settings.webview.openWebview,
+        subtitle: Text(context.loc.settings.webview.openWebviewTip),
         icon: const Icon(Icons.public),
         action: () {
           if (booruURLController.text.isNotEmpty) {
@@ -245,17 +247,16 @@ class _BooruEditState extends State<BooruEdit> {
 
   SettingsButton testButton() {
     return SettingsButton(
-      name: 'Test Booru',
+      name: booruEditorLoc.testBooru,
       icon: isTesting ? const CircularProgressIndicator() : const Icon(Icons.public),
       action: () async {
         sanitizeBooruName();
 
-        // name and url are required
-        if (booruNameController.text == '') {
+        if (booruNameController.text.trim().isEmpty) {
           FlashElements.showSnackbar(
             context: context,
             title: Text(
-              AppLocalizations.of(context).booruEdit_booruNameRequired,
+              booruEditorLoc.booruNameRequired,
               style: const TextStyle(fontSize: 20),
             ),
             leadingIcon: Icons.warning_amber,
@@ -265,11 +266,11 @@ class _BooruEditState extends State<BooruEdit> {
           return;
         }
 
-        if (booruURLController.text == '') {
+        if (booruURLController.text.trim().isEmpty) {
           FlashElements.showSnackbar(
             context: context,
             title: Text(
-              AppLocalizations.of(context).booruEdit_booruUrlRequired,
+              booruEditorLoc.booruUrlRequired,
               style: const TextStyle(fontSize: 20),
             ),
             leadingIcon: Icons.warning_amber,
@@ -287,7 +288,7 @@ class _BooruEditState extends State<BooruEdit> {
           booruURLController.text = booruURLController.text.substring(0, booruURLController.text.length - 1);
         }
         // autofill favicon if not specified
-        if (booruFaviconController.text == '') {
+        if (booruFaviconController.text.trim().isEmpty) {
           booruFaviconController.text = '${booruURLController.text}/favicon.ico';
         }
         // TODO make a list of default favicons for boorus where ^default^ one won't work
@@ -333,11 +334,11 @@ class _BooruEditState extends State<BooruEdit> {
           FlashElements.showSnackbar(
             context: context,
             title: Text(
-              AppLocalizations.of(context).booruEdit_booruTypeIs(testBooruType.alias),
+              booruEditorLoc.booruTypeIs(booruType: testBooruType.alias),
               style: const TextStyle(fontSize: 20),
             ),
             content: Text(
-              AppLocalizations.of(context).booruEdit_tapSaveButton,
+              booruEditorLoc.testBooruSuccessMsg,
               style: const TextStyle(fontSize: 16),
             ),
             leadingIcon: Icons.done,
@@ -347,11 +348,37 @@ class _BooruEditState extends State<BooruEdit> {
         } else {
           FlashElements.showSnackbar(
             context: context,
-            title: Text(AppLocalizations.of(context).booruEdit_noDataReturned, style: const TextStyle(fontSize: 20)),
+            duration: const Duration(seconds: 5),
+            title: Text(
+              booruEditorLoc.testBooruFailedTitle,
+              style: const TextStyle(fontSize: 20),
+            ),
             content: Text(
-              AppLocalizations.of(context).booruEdit_noDataReturnedBody(errorString),
+              booruEditorLoc.testBooruFailedMsg(error: errorString),
               style: const TextStyle(fontSize: 16),
             ),
+            actionsBuilder: (controller) {
+              return [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: errorString));
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        context.loc.copied,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      sideColor: Colors.green,
+                      leadingIcon: Icons.check,
+                      leadingIconColor: Colors.green,
+                      duration: const Duration(seconds: 2),
+                    );
+                  },
+                  icon: const Icon(Icons.copy),
+                  label: Text(context.loc.copyErrorText),
+                ),
+              ];
+            },
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -367,7 +394,7 @@ class _BooruEditState extends State<BooruEdit> {
   /// allowing the user to save the booru config otherwise an empty container is returned
   Widget saveButton() {
     return SettingsButton(
-      name: AppLocalizations.of(context).booruEdit_saveBooru(booruType == null ? ' (Run Test First)' : ''),
+      name: '${booruEditorLoc.saveBooru}${booruType == null ? ' (${booruEditorLoc.runTestFirst})' : ''}'.trim(),
       icon: Icon(
         Icons.save,
         color: booruType == null ? Colors.red : Colors.green,
@@ -378,7 +405,10 @@ class _BooruEditState extends State<BooruEdit> {
         if (booruType == null) {
           FlashElements.showSnackbar(
             context: context,
-            title: Text(AppLocalizations.of(context).booruEdit_runTestFirst, style: const TextStyle(fontSize: 20)),
+            title: Text(
+              '${booruEditorLoc.runTestFirst}!',
+              style: const TextStyle(fontSize: 20),
+            ),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.yellow,
             sideColor: Colors.yellow,
@@ -421,16 +451,16 @@ class _BooruEditState extends State<BooruEdit> {
               }
 
               if (alreadyExists) {
-                booruExistsReason = AppLocalizations.of(context).booruEdit_booruExists;
+                booruExistsReason = booruEditorLoc.booruConfigExistsError;
               } else if (sameNameExists) {
-                booruExistsReason = AppLocalizations.of(context).booruEdit_booruConfigWithNameExists;
+                booruExistsReason = booruEditorLoc.booruSameNameExistsError;
               } else if (sameURLExists) {
-                booruExistsReason = AppLocalizations.of(context).booruEdit_booruConfigWithURLExists;
+                booruExistsReason = booruEditorLoc.booruSameUrlExistsError;
               }
             } else {
               if (alreadyExists) {
                 booruExists = true;
-                booruExistsReason = AppLocalizations.of(context).booruEdit_booruExists;
+                booruExistsReason = booruEditorLoc.booruConfigExistsError;
               }
 
               final bool oldEditBooruExists =
@@ -447,9 +477,12 @@ class _BooruEditState extends State<BooruEdit> {
         if (booruExists) {
           FlashElements.showSnackbar(
             context: context,
-            title: Text(booruExistsReason, style: const TextStyle(fontSize: 20)),
+            title: Text(
+              booruExistsReason,
+              style: const TextStyle(fontSize: 20),
+            ),
             content: Text(
-              AppLocalizations.of(context).booruEdit_booruExistsBody,
+              booruEditorLoc.thisBooruConfigWontBeAdded,
               style: const TextStyle(fontSize: 16),
             ),
             leadingIcon: Icons.warning_amber,
@@ -462,13 +495,13 @@ class _BooruEditState extends State<BooruEdit> {
           FlashElements.showSnackbar(
             context: context,
             title: Text(
-              AppLocalizations.of(context).booruEdit_booruConfigSaved,
+              booruEditorLoc.booruConfigSaved,
               style: const TextStyle(fontSize: 20),
             ),
             content: widget.booru.name == 'New'
                 ? const SizedBox(height: 20)
                 : Text(
-                    AppLocalizations.of(context).booruEdit_existingTabsNeedReload,
+                    booruEditorLoc.existingTabsNeedReload,
                     style: const TextStyle(fontSize: 16),
                   ),
             leadingIcon: Icons.done,
@@ -526,7 +559,10 @@ class _BooruEditState extends State<BooruEdit> {
       if (await hydrusHandler.verifyApiAccess()) {
         return [userBooruType, ''];
       }
-      return ['', AppLocalizations.of(context).booruEdit_failedToVerifyApiAccessForHydrus];
+      return [
+        '',
+        booruEditorLoc.failedVerifyApiHydrus,
+      ];
     }
 
     if (userBooruType == BooruType.Autodetect) {
@@ -553,14 +589,24 @@ class _BooruEditState extends State<BooruEdit> {
 
       if (test.errorString.isNotEmpty) {
         errorString = test.errorString;
-        Logger.Inst().log(errorString, 'BooruEdit', 'booruTest', LogTypes.exception);
+        Logger.Inst().log(
+          errorString,
+          'BooruEdit',
+          'booruTest',
+          LogTypes.exception,
+        );
       }
     }
 
     if (booruType == null) {
       if (testFetched.isNotEmpty) {
         booruType = userBooruType;
-        print('Found Results as $userBooruType');
+        Logger.Inst().log(
+          'Found Results as $userBooruType',
+          'BooruEdit',
+          'booruTest',
+          LogTypes.booruHandlerInfo,
+        );
         return [booruType, ''];
       }
     }
@@ -580,6 +626,7 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final booruEditorLoc = context.loc.settings.booruEditor;
     return Column(
       children: [
         Container(
@@ -602,11 +649,11 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
                 FlashElements.showSnackbar(
                   context: context,
                   title: Text(
-                    AppLocalizations.of(context).booruEdit_accessKeyRequested,
+                    booruEditorLoc.accessKeyRequestedTitle,
                     style: const TextStyle(fontSize: 20),
                   ),
                   content: Text(
-                    AppLocalizations.of(context).booruEdit_accessKeyRequestedBody,
+                    booruEditorLoc.accessKeyRequestedMsg,
                     style: const TextStyle(fontSize: 16),
                   ),
                   leadingIcon: Icons.warning_amber,
@@ -618,11 +665,11 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
                 FlashElements.showSnackbar(
                   context: context,
                   title: Text(
-                    AppLocalizations.of(context).booruEdit_failedToGetAccessKey,
+                    booruEditorLoc.accessKeyFailedTitle,
                     style: const TextStyle(fontSize: 20),
                   ),
                   content: Text(
-                    AppLocalizations.of(context).booruEdit_failedToGetAccessKeyBody,
+                    booruEditorLoc.accessKeyFailedMsg,
                     style: const TextStyle(fontSize: 16),
                   ),
                   leadingIcon: Icons.warning_amber,
@@ -631,14 +678,14 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
                 );
               }
             },
-            child: const Text('Get Hydrus Api key'),
+            child: Text(booruEditorLoc.getHydrusApiKey),
           ),
         ),
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           width: double.infinity,
           child: Text(
-            AppLocalizations.of(context).booruEdit_hydrusInstructions,
+            booruEditorLoc.hydrusInstructions,
           ),
         ),
       ],

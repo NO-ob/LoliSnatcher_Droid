@@ -5,7 +5,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
@@ -13,6 +12,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -32,17 +32,22 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
   bool inProgress = false;
   int progress = 0, total = 0;
 
+  TranslationsSettingsBackupAndRestoreEn get backupLoc => context.loc.settings.backupAndRestore;
+
   @override
   void initState() {
     super.initState();
     backupPath = settingsHandler.backupPath;
   }
 
-  void showSnackbar(BuildContext context, String text, bool isError) {
+  void showSnackbar(
+    String text, {
+    required bool isError,
+  }) {
     FlashElements.showSnackbar(
       context: context,
       title: Text(
-        isError ? AppLocalizations.of(context).snackBar_backupRestore_title_error : AppLocalizations.of(context).snackBar_backupRestore_title_success,
+        isError ? context.loc.errorExclamation : context.loc.successExclamation,
         style: const TextStyle(fontSize: 20),
       ),
       content: Text(
@@ -60,19 +65,19 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(AppLocalizations.of(context).alert_backupRestore_duplicateFile_title),
-          content: Text(AppLocalizations.of(context).alert_backupRestore_duplicateFile_body(fileName)),
+          title: Text(backupLoc.duplicateFileDetectedTitle),
+          content: Text(backupLoc.duplicateFileDetectedMsg(fileName: fileName)),
           actions: [
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(AppLocalizations.of(context).alert_action_no),
+              child: Text(context.loc.no),
             ),
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop(true);
                 await ServiceHandler.deleteFileFromSAFDirectory(backupPath, fileName);
               },
-              child: Text(AppLocalizations.of(context).alert_action_yes),
+              child: Text(context.loc.yes),
             ),
           ],
         );
@@ -90,7 +95,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
 
     if (inProgress) {
       FlashElements.showSnackbar(
-        title: const Text('Please wait...'),
+        title: Text(context.loc.pleaseWait),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.yellow,
         sideColor: Colors.yellow,
@@ -114,7 +119,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            title: Text(AppLocalizations.of(context).title_backupRestoreBeta),
+            title: Text(backupLoc.title),
           ),
           body: Center(
             child: ListView(
@@ -122,9 +127,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 Container(
                   margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                   width: double.infinity,
-                  child: Text(
-                    AppLocalizations.of(context).backupRestore_featureMessage,
-                  ),
+                  child: Text(backupLoc.androidOnlyFeatureMsg),
                 ),
               ],
             ),
@@ -139,348 +142,492 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Backup & Restore'),
+          title: Text(backupLoc.title),
         ),
         body: Center(
           child: Stack(
             children: [
               ListView(
                 children: [
-                      SettingsButton(
-                        name: 'Select backup directory',
-                        action: () async {
-                          final String path = await ServiceHandler.getSAFDirectoryAccess();
-                          if (path.isNotEmpty) {
-                            setState(() {
-                              backupPath = path;
-                              settingsHandler.backupPath = path;
-                            });
-                          } else {
-                            showSnackbar(context, 'Failed to get backup path!', true);
+                  SettingsButton(
+                    name: backupLoc.selectBackupDir,
+                    action: () async {
+                      final String path = await ServiceHandler.getSAFDirectoryAccess();
+                      if (path.isNotEmpty) {
+                        setState(() {
+                          backupPath = path;
+                          settingsHandler.backupPath = path;
+                        });
+                      } else {
+                        showSnackbar(
+                          backupLoc.failedToGetBackupPath,
+                          isError: true,
+                        );
+                      }
+                    },
+                    drawTopBorder: true,
+                  ),
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    width: double.infinity,
+                    child: Text(
+                      backupPath.isNotEmpty ? backupLoc.backupPathMsg(backupPath: backupPath) : backupLoc.noBackupDirSelected,
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    width: double.infinity,
+                    child: Text(backupLoc.restoreInfoMsg),
+                  ),
+                  if (backupPath.isNotEmpty) ...[
+                    SettingsButton(
+                      name: backupLoc.backupSettings,
+                      action: () async {
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          final File file = File('${await ServiceHandler.getConfigDir()}settings.json');
+                          if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'settings.json')) {
+                            final bool res = await detectedDuplicateFile('settings.json');
+                            if (!res) {
+                              showSnackbar(
+                                backupLoc.backupCancelled,
+                                isError: true,
+                              );
+                              inProgress = false;
+                              setState(() {});
+                              return;
+                            }
                           }
-                        },
-                        drawTopBorder: true,
-                      ),
-                      Container(
-                        margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                        width: double.infinity,
-                        child: Text(backupPath.isNotEmpty ? 'Backup path is: $backupPath' : 'No backup directory selected'),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                        width: double.infinity,
-                        child: const Text('Restore will work only if the files are placed in the same directory.'),
-                      ),
-                    ] +
-                    (backupPath.isNotEmpty
-                        ? [
-                            SettingsButton(
-                              name: 'Backup settings',
-                              action: () async {
-                                inProgress = true;
-                                setState(() {});
-                                try {
-                                  final File file = File('${await ServiceHandler.getConfigDir()}settings.json');
-                                  if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'settings.json')) {
-                                    final bool res = await detectedDuplicateFile('settings.json');
-                                    if (!res) {
-                                      showSnackbar(context, 'Backup cancelled!', true);
-                                      inProgress = false;
-                                      setState(() {});
-                                      return;
-                                    }
+
+                          await ServiceHandler.writeImage(
+                            await file.readAsBytes(),
+                            'settings',
+                            'text/json',
+                            'json',
+                            backupPath,
+                          );
+                          showSnackbar(
+                            backupLoc.settingsBackedUp,
+                            isError: false,
+                          );
+                        } catch (e, s) {
+                          showSnackbar(
+                            backupLoc.backupSettingsError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'backupSettings',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                        }
+                        inProgress = false;
+                        setState(() {});
+                      },
+                      drawTopBorder: true,
+                    ),
+                    SettingsButton(
+                      name: backupLoc.restoreSettings,
+                      subtitle: const Text('settings.json'),
+                      action: () async {
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          final Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'settings.json');
+                          if (settingsFileBytes != null) {
+                            final File newFile = File('${await ServiceHandler.getConfigDir()}settings.json');
+                            if (!(await newFile.exists())) {
+                              await newFile.create();
+                            }
+                            await newFile.writeAsBytes(settingsFileBytes);
+                            await settingsHandler.loadSettingsJson();
+                            showSnackbar(
+                              backupLoc.settingsRestored,
+                              isError: false,
+                            );
+                          } else {
+                            showSnackbar(
+                              backupLoc.backupFileNotFound,
+                              isError: true,
+                            );
+                          }
+                        } catch (e, s) {
+                          showSnackbar(
+                            backupLoc.restoreSettingsError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'restoreSettings',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                        }
+                        inProgress = false;
+                        setState(() {});
+                      },
+                    ),
+                    const SettingsButton(name: '', enabled: false),
+                    SettingsButton(
+                      name: 'Backup boorus',
+                      action: () async {
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          final List<Booru> booruList = settingsHandler.booruList.where((e) => BooruType.saveable.contains(e.type)).toList();
+                          if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'boorus.json')) {
+                            final bool res = await detectedDuplicateFile('boorus.json');
+                            if (!res) {
+                              showSnackbar(
+                                backupLoc.backupCancelled,
+                                isError: true,
+                              );
+                              inProgress = false;
+                              setState(() {});
+                              return;
+                            }
+                          }
+
+                          await ServiceHandler.writeImage(
+                            utf8.encode(json.encode(booruList)),
+                            'boorus',
+                            'text',
+                            'json',
+                            backupPath,
+                          );
+                          showSnackbar(
+                            backupLoc.boorusBackedUp,
+                            isError: false,
+                          );
+                        } catch (e, s) {
+                          showSnackbar(
+                            backupLoc.backupBoorusError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'backupBoorus',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                        }
+                        inProgress = false;
+                        setState(() {});
+                      },
+                    ),
+                    SettingsButton(
+                      name: backupLoc.restoreBoorus,
+                      subtitle: const Text('boorus.json'),
+                      action: () async {
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          final Uint8List? booruFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'boorus.json');
+                          String boorusJSONString = '';
+                          if (booruFileBytes != null) {
+                            boorusJSONString = String.fromCharCodes(booruFileBytes);
+
+                            if (boorusJSONString.isNotEmpty) {
+                              final List<dynamic> json = jsonDecode(boorusJSONString);
+                              final String configBoorusPath = '${await ServiceHandler.getConfigDir()}boorus/';
+                              final Directory configBoorusDir = await Directory(configBoorusPath).create(recursive: true);
+                              if (json.isNotEmpty) {
+                                for (int i = 0; i < json.length; i++) {
+                                  final Booru booru = Booru.fromMap(json[i]);
+                                  final bool alreadyExists =
+                                      settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
+                                  final bool isAllowed = BooruType.saveable.contains(booru.type);
+                                  if (!alreadyExists && isAllowed) {
+                                    final File booruFile = File('${configBoorusDir.path}${booru.name}.json');
+                                    final writer = booruFile.openWrite();
+                                    writer.write(jsonEncode(booru.toJson()));
+                                    await writer.close();
                                   }
-                                  if (backupPath.isNotEmpty) {
-                                    await ServiceHandler.writeImage(await file.readAsBytes(), 'settings', 'text/json', 'json', backupPath);
-                                    showSnackbar(context, 'Settings saved to settings.json', false);
-                                  } else {
-                                    showSnackbar(context, 'No access to backup folder!', true);
-                                  }
-                                } catch (e) {
-                                  showSnackbar(context, 'Error while saving settings! $e', true);
                                 }
-                                inProgress = false;
-                                setState(() {});
-                              },
-                              drawTopBorder: true,
-                            ),
-                            SettingsButton(
-                              name: 'Restore settings',
-                              subtitle: const Text('settings.json'),
-                              action: () async {
-                                inProgress = true;
-                                setState(() {});
-                                try {
-                                  if (backupPath.isNotEmpty) {
-                                    final Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'settings.json');
-                                    if (settingsFileBytes != null) {
-                                      final File newFile = File('${await ServiceHandler.getConfigDir()}settings.json');
-                                      if (!(await newFile.exists())) {
-                                        await newFile.create();
-                                      }
-                                      await newFile.writeAsBytes(settingsFileBytes);
-                                      await settingsHandler.loadSettingsJson();
-                                      showSnackbar(context, 'Settings restored from backup!', false);
-                                    } else {
-                                      showSnackbar(context, 'No restore File Found!', true);
-                                    }
-                                  } else {
-                                    showSnackbar(context, 'No access to backup folder!', true);
-                                  }
-                                } catch (e) {
-                                  showSnackbar(context, 'Error while restoring settings! $e', true);
-                                }
-                                inProgress = false;
-                                setState(() {});
-                              },
-                            ),
-                            const SettingsButton(name: '', enabled: false),
-                            SettingsButton(
-                              name: 'Backup boorus',
-                              action: () async {
-                                inProgress = true;
-                                setState(() {});
-                                try {
-                                  final List<Booru> booruList = settingsHandler.booruList.where((e) => BooruType.saveable.contains(e.type)).toList();
-                                  if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'boorus.json')) {
-                                    final bool res = await detectedDuplicateFile('boorus.json');
-                                    if (!res) {
-                                      showSnackbar(context, 'Backup cancelled!', true);
-                                      inProgress = false;
-                                      setState(() {});
-                                      return;
-                                    }
-                                  }
-                                  if (backupPath.isNotEmpty) {
-                                    await ServiceHandler.writeImage(utf8.encode(json.encode(booruList)), 'boorus', 'text', 'json', backupPath);
-                                    showSnackbar(context, 'Boorus saved to boorus.json', false);
-                                  } else {
-                                    showSnackbar(context, 'No access to backup folder!', true);
-                                  }
-                                } catch (e) {
-                                  showSnackbar(context, 'Error while saving boorus! $e', true);
-                                }
-                                inProgress = false;
-                                setState(() {});
-                              },
-                            ),
-                            SettingsButton(
-                              name: 'Restore boorus',
-                              subtitle: const Text('boorus.json'),
-                              action: () async {
-                                inProgress = true;
-                                setState(() {});
-                                try {
-                                  if (backupPath.isNotEmpty) {
-                                    final Uint8List? booruFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'boorus.json');
-                                    String boorusJSONString = '';
-                                    if (booruFileBytes != null) {
-                                      boorusJSONString = String.fromCharCodes(booruFileBytes);
-                                    }
-                                    if (boorusJSONString.isNotEmpty) {
-                                      final List<dynamic> json = jsonDecode(boorusJSONString);
-                                      final String configBoorusPath = '${await ServiceHandler.getConfigDir()}boorus/';
-                                      final Directory configBoorusDir = await Directory(configBoorusPath).create(recursive: true);
-                                      if (json.isNotEmpty) {
-                                        for (int i = 0; i < json.length; i++) {
-                                          final Booru booru = Booru.fromMap(json[i]);
-                                          final bool alreadyExists =
-                                              settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
-                                          final bool isAllowed = BooruType.saveable.contains(booru.type);
-                                          if (!alreadyExists && isAllowed) {
-                                            final File booruFile = File('${configBoorusDir.path}${booru.name}.json');
-                                            final writer = booruFile.openWrite();
-                                            writer.write(jsonEncode(booru.toJson()));
-                                            await writer.close();
-                                          }
-                                        }
-                                        await settingsHandler.loadBoorus();
-                                        showSnackbar(context, 'Boorus restored from backup!', false);
-                                      }
-                                    }
-                                  } else {
-                                    showSnackbar(context, 'No access to backup folder!', true);
-                                  }
-                                } catch (e) {
-                                  showSnackbar(context, 'Error while restoring boorus! $e', true);
-                                }
-                                inProgress = false;
-                                setState(() {});
-                              },
-                            ),
-                            const SettingsButton(name: '', enabled: false),
-                            SettingsButton(
-                              name: 'Backup database',
-                              action: () async {
-                                inProgress = true;
-                                setState(() {});
-                                try {
-                                  final File file = File('${await ServiceHandler.getConfigDir()}store.db');
-                                  if (!await file.exists()) {
-                                    showSnackbar(context, 'Database not found!', true);
-                                    inProgress = false;
+                                await settingsHandler.loadBoorus();
+                                showSnackbar(
+                                  backupLoc.boorusRestored,
+                                  isError: false,
+                                );
+                              }
+                            } else {
+                              showSnackbar(
+                                backupLoc.backupFileNotFound,
+                                isError: true,
+                              );
+                            }
+                          } else {
+                            showSnackbar(
+                              backupLoc.backupFileNotFound,
+                              isError: true,
+                            );
+                          }
+                        } catch (e, s) {
+                          showSnackbar(
+                            backupLoc.restoreBoorusError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'restoreBoorus',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                        }
+                        inProgress = false;
+                        setState(() {});
+                      },
+                    ),
+                    const SettingsButton(name: '', enabled: false),
+                    SettingsButton(
+                      name: backupLoc.backupDatabase,
+                      action: () async {
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          final File file = File('${await ServiceHandler.getConfigDir()}store.db');
+                          if (!await file.exists()) {
+                            showSnackbar(
+                              backupLoc.databaseFileNotFound,
+                              isError: true,
+                            );
+                            inProgress = false;
+                            setState(() {});
+                            return;
+                          }
+                          if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
+                            final bool res = await detectedDuplicateFile('store.db');
+                            if (!res) {
+                              showSnackbar(
+                                backupLoc.backupCancelled,
+                                isError: true,
+                              );
+                              inProgress = false;
+                              setState(() {});
+                              return;
+                            }
+                          }
+
+                          await ServiceHandler.copyFileToSafDir(
+                            await ServiceHandler.getConfigDir(),
+                            'store.db',
+                            backupPath,
+                            'application/x-sqlite3',
+                          );
+                          showSnackbar(
+                            backupLoc.databaseBackedUp,
+                            isError: false,
+                          );
+                        } catch (e, s) {
+                          showSnackbar(
+                            backupLoc.backupDatabaseError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'backupDatabase',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                        }
+                        inProgress = false;
+                        setState(() {});
+                      },
+                    ),
+                    SettingsButton(
+                      name: backupLoc.restoreDatabase,
+                      subtitle: Text('store.db (${backupLoc.restoreDatabaseInfo})'),
+                      action: () async {
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          final fileExists = await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db');
+                          if (!fileExists) {
+                            showSnackbar(
+                              backupLoc.backupFileNotFound,
+                              isError: true,
+                            );
+                            inProgress = false;
+                            setState(() {});
+                            return;
+                          }
+
+                          // disable backupping while restoring the db
+                          searchHandler.canBackup.value = false;
+
+                          final bool res = await ServiceHandler.copySafFileToDir(
+                            backupPath,
+                            'store.db',
+                            await ServiceHandler.getConfigDir(),
+                          );
+
+                          if (!res) {
+                            showSnackbar(
+                              backupLoc.restoreDatabaseError,
+                              isError: true,
+                            );
+                            searchHandler.canBackup.value = true;
+                            inProgress = false;
+                            setState(() {});
+                            return;
+                          }
+
+                          final File newFile = File('${await ServiceHandler.getConfigDir()}store.db');
+                          if (!(await newFile.exists())) {
+                            showSnackbar(
+                              backupLoc.restoreDatabaseError,
+                              isError: true,
+                            );
+                            searchHandler.canBackup.value = true;
+                            inProgress = false;
+                            setState(() {});
+                            return;
+                          }
+
+                          settingsHandler.dbHandler = DBHandler();
+                          await settingsHandler.dbHandler.dbConnect(newFile.path);
+                          //
+                          showSnackbar(
+                            backupLoc.databaseRestored,
+                            isError: false,
+                          );
+                          await Future.delayed(const Duration(seconds: 3));
+                          unawaited(ServiceHandler.restartApp());
+                        } catch (e, s) {
+                          showSnackbar(
+                            backupLoc.restoreDatabaseError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'restoreDatabase',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                          searchHandler.canBackup.value = true;
+                        }
+                        inProgress = false;
+                        setState(() {});
+                      },
+                    ),
+                    const SettingsButton(name: '', enabled: false),
+                    SettingsButton(
+                      name: backupLoc.backupTags,
+                      action: () async {
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'tags.json')) {
+                            final bool res = await detectedDuplicateFile('tags.json');
+                            if (!res) {
+                              showSnackbar(
+                                backupLoc.backupCancelled,
+                                isError: true,
+                              );
+                              inProgress = false;
+                              setState(() {});
+                              return;
+                            }
+                          }
+
+                          await ServiceHandler.writeImage(
+                            utf8.encode(json.encode(tagHandler.toList())),
+                            'tags',
+                            'text',
+                            'json',
+                            backupPath,
+                          );
+                          showSnackbar(
+                            backupLoc.tagsBackedUp,
+                            isError: false,
+                          );
+                        } catch (e, s) {
+                          showSnackbar(
+                            backupLoc.backupTagsError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'backupTags',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                        }
+                        inProgress = false;
+                        setState(() {});
+                      },
+                    ),
+                    SettingsButton(
+                      name: backupLoc.restoreTags,
+                      subtitle: Text('tags.json (${backupLoc.restoreTagsInfo})'),
+                      action: () async {
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          final Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'tags.json');
+                          String tagJSONString = '';
+                          if (tagFileBytes != null) {
+                            tagJSONString = String.fromCharCodes(tagFileBytes);
+
+                            if (tagJSONString.isNotEmpty) {
+                              await tagHandler.loadFromJSON(
+                                tagJSONString,
+                                onProgress: (newProgress, newTotal) {
+                                  progress = newProgress;
+                                  total = newTotal;
+                                  if (mounted) {
                                     setState(() {});
-                                    return;
                                   }
-                                  if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
-                                    final bool res = await detectedDuplicateFile('store.db');
-                                    if (!res) {
-                                      showSnackbar(context, 'Backup cancelled!', true);
-                                      inProgress = false;
-                                      setState(() {});
-                                      return;
-                                    }
-                                  }
-                                  if (backupPath.isNotEmpty) {
-                                    await ServiceHandler.copyFileToSafDir(
-                                      await ServiceHandler.getConfigDir(),
-                                      'store.db',
-                                      backupPath,
-                                      'application/x-sqlite3',
-                                    );
-                                    showSnackbar(context, 'Database saved to store.db', false);
-                                  } else {
-                                    showSnackbar(context, 'No access to backup folder!', true);
-                                  }
-                                } catch (e) {
-                                  showSnackbar(context, 'Error while saving database! $e', true);
-                                }
-                                inProgress = false;
-                                setState(() {});
-                              },
-                            ),
-                            SettingsButton(
-                              name: 'Restore database',
-                              subtitle: const Text('store.db (May take a while depending on the size of the database, will restart the app on success)'),
-                              action: () async {
-                                inProgress = true;
-                                setState(() {});
-                                try {
-                                  if (backupPath.isNotEmpty) {
-                                    final fileExists = await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db');
-                                    if (!fileExists) {
-                                      showSnackbar(context, 'No restore file Found!', true);
-                                      inProgress = false;
-                                      setState(() {});
-                                      return;
-                                    }
-
-                                    // disable backupping while restoring the db
-                                    searchHandler.canBackup.value = false;
-
-                                    final bool res = await ServiceHandler.copySafFileToDir(
-                                      backupPath,
-                                      'store.db',
-                                      await ServiceHandler.getConfigDir(),
-                                    );
-
-                                    if (!res) {
-                                      showSnackbar(context, 'Error while restoring database!', true);
-                                      searchHandler.canBackup.value = true;
-                                      inProgress = false;
-                                      setState(() {});
-                                      return;
-                                    }
-
-                                    final File newFile = File('${await ServiceHandler.getConfigDir()}store.db');
-                                    if (!(await newFile.exists())) {
-                                      showSnackbar(context, 'Error while restoring database!', true);
-                                      searchHandler.canBackup.value = true;
-                                      inProgress = false;
-                                      setState(() {});
-                                      return;
-                                    }
-
-                                    settingsHandler.dbHandler = DBHandler();
-                                    await settingsHandler.dbHandler.dbConnect(newFile.path);
-                                    //
-                                    showSnackbar(context, 'Database restored from backup! App will restart in a few seconds!', false);
-                                    await Future.delayed(const Duration(seconds: 3));
-                                    unawaited(ServiceHandler.restartApp());
-                                  } else {
-                                    showSnackbar(context, 'No Access to backup folder!', true);
-                                  }
-                                } catch (e) {
-                                  showSnackbar(context, 'Error while restoring database! $e', true);
-                                  searchHandler.canBackup.value = true;
-                                }
-                                inProgress = false;
-                                setState(() {});
-                              },
-                            ),
-                            const SettingsButton(name: '', enabled: false),
-                            SettingsButton(
-                              name: 'Backup Tags',
-                              action: () async {
-                                inProgress = true;
-                                setState(() {});
-                                try {
-                                  if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'tags.json')) {
-                                    final bool res = await detectedDuplicateFile('tags.json');
-                                    if (!res) {
-                                      showSnackbar(context, 'Backup cancelled!', true);
-                                      inProgress = false;
-                                      setState(() {});
-                                      return;
-                                    }
-                                  }
-                                  if (backupPath.isNotEmpty) {
-                                    await ServiceHandler.writeImage(utf8.encode(json.encode(tagHandler.toList())), 'tags', 'text', 'json', backupPath);
-                                    showSnackbar(context, 'Tags saved to tags.json', false);
-                                  } else {
-                                    showSnackbar(context, 'No access to backup folder!', true);
-                                  }
-                                } catch (e) {
-                                  showSnackbar(context, 'Error while saving tags! $e', true);
-                                }
-                                inProgress = false;
-                                setState(() {});
-                              },
-                            ),
-                            SettingsButton(
-                              name: 'Restore Tags',
-                              subtitle: const Text(
-                                "tags.json (May take a while if you have 10k+ tags. If you did a database restore, you don't need to do this as it's already included in the database)",
-                              ),
-                              action: () async {
-                                inProgress = true;
-                                setState(() {});
-                                try {
-                                  if (backupPath.isNotEmpty) {
-                                    final Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'tags.json');
-                                    String tagJSONString = '';
-                                    if (tagFileBytes != null) {
-                                      tagJSONString = String.fromCharCodes(tagFileBytes);
-                                    }
-                                    if (tagJSONString.isNotEmpty) {
-                                      await tagHandler.loadFromJSON(
-                                        tagJSONString,
-                                        onProgress: (newProgress, newTotal) {
-                                          progress = newProgress;
-                                          total = newTotal;
-                                          if (mounted) {
-                                            setState(() {});
-                                          }
-                                        },
-                                      );
-                                      showSnackbar(context, 'Tags restored from backup!', false);
-                                    }
-                                  } else {
-                                    showSnackbar(context, 'No access to backup folder!', true);
-                                  }
-                                } catch (e) {
-                                  showSnackbar(context, 'Error while restoring tags! $e', true);
-                                }
-                                inProgress = false;
-                                progress = 0;
-                                total = 0;
-                                if (mounted) {
-                                  setState(() {});
-                                }
-                              },
-                            ),
-                          ]
-                        : []),
+                                },
+                              );
+                              showSnackbar(
+                                backupLoc.tagsRestored,
+                                isError: false,
+                              );
+                            } else {
+                              showSnackbar(
+                                backupLoc.tagsFileNotFound,
+                                isError: true,
+                              );
+                            }
+                          } else {
+                            showSnackbar(
+                              backupLoc.tagsFileNotFound,
+                              isError: true,
+                            );
+                          }
+                        } catch (e, s) {
+                          showSnackbar(
+                            backupLoc.restoreTagsError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'restoreTags',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                        }
+                        inProgress = false;
+                        progress = 0;
+                        total = 0;
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                    ),
+                  ],
+                ],
               ),
               //
               if (inProgress)
@@ -494,13 +641,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       children: [
                         const CircularProgressIndicator(),
                         const SizedBox(height: 10),
-                        const Text('Please wait...'),
+                        Text(context.loc.pleaseWait),
                         if (progress != 0 && total != 0) ...[
                           Text('$progress / $total'),
-                          const Text('Press Hide below if it takes too long, operation will continue in background'),
+                          Text(backupLoc.operationTakesTooLongMsg),
                           const SizedBox(height: 10),
                           ElevatedButton(
-                            child: const Text('Hide'),
+                            child: Text(context.loc.hide),
                             onPressed: () async {
                               inProgress = false;
                               setState(() {});

@@ -1,0 +1,288 @@
+{
+    "locale": "en",
+    "localeName": "English",
+    "@localeName": {
+        "context": "LocaleName",
+        "description": "Name of the locale"
+    },
+    "appName": "LoliSnatcher",
+    "error": "Error",
+    "errorExclamation": "Error!",
+    "warning": "Warning",
+    "warningExclamation": "Warning!",
+    "info": "Info",
+    "success": "Success",
+    "successExclamation": "Success!",
+    "cancel": "Cancel",
+    "later": "Later",
+    "close": "Close",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "pleaseWait": "Please wait...",
+    "show": "Show",
+    "hide": "Hide",
+    "enable": "Enable",
+    "disable": "Disable",
+    "add": "Add",
+    "edit": "Edit",
+    "remove": "Remove",
+    "save": "Save",
+    "delete": "Delete",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "paste": "Paste",
+    "copyErrorText": "Copy error",
+    "booru": "Booru",
+    "goToSettings": "Go to settings",
+    "areYouSure": "Are you sure?",
+    "thisMayTakeSomeTime": "This may take some time...",
+    "doYouWantToExitApp": "Do you want to exit the app?",
+    "closeTheApp": "Close the app",
+    "invalidUrl": "Invalid URL!",
+    "clipboardIsEmpty": "Clipboard is empty!",
+    "apiKey": "API Key",
+    "userId": "User ID",
+    "login": "Login",
+    "password": "Password",
+    "pause": "Pause",
+    "resume": "Resume",
+    "discord": "Discord",
+    "visitOurDiscord": "Visit our Discord server",
+    "item": "Item",
+    "selectAll": "Select all",
+    "validationErrors": {
+        "required": "Please enter a value",
+        "invalid": "Please enter a valid value",
+        "tooSmall(param=min)": "Please enter a value bigger than {min}",
+        "tooBig(param=max)": "Please enter a value smaller than {max}"
+    },
+    "init": {
+        "initError": "Initialization error!",
+        "postInitError": "Post initialization error!",
+        "settingUpProxy": "Setting up proxy...",
+        "loadingDatabase": "Loading Database...",
+        "loadingBoorus": "Loading Boorus...",
+        "loadingTags": "Loading Tags...",
+        "restoringTabs": "Restoring Tabs..."
+    },
+    "snatcher": {
+        "title": "Snatcher",
+        "snatchingHistory": "Snatching history"
+    },
+    "multibooru": {
+        "title": "Multibooru",
+        "multibooruMode": "Multibooru mode",
+        "multibooruRequiresAtLeastTwoBoorus": "Multibooru mode requires at least 2 boorus to be configured",
+        "selectSecondaryBoorus": "Select secondary boorus:"
+    },
+    "settings": {
+        "title": "Settings",
+        "@title": {
+            "context": "SettingsPage",
+            "description": "Main settings page/button title"
+        },
+        "language": {
+            "title": "Language",
+            "systemLanguageOption": "System"
+        },
+        "booru": {
+            "title": "Boorus & Search",
+            "defaultTags": "Default tags",
+            "itemsPerPage": "Items fetched per page",
+            "itemsPerPageTip": "Some Boorus may ignore this setting",
+            "addBooru": "Add Booru config",
+            "shareBooru": "Share Booru config",
+            "shareBooruDialogMsgMobile(param=booruName)": "Booru config of {booruName} will be converted to a link which then can be shared to other apps\n\nShould login/apikey data be included?",
+            "shareBooruDialogMsgDesktop(param=booruName)": "Booru config of {booruName} will be converted to a link which will be copied to clipboard\n\nShould login/apikey data be included?",
+            "booruSharing": "Booru sharing",
+            "booruSharingMsgAndroid": "How to automatically open Booru config links in the app on Android 12 and higher:\n1) Tap button below to open system app link defaults settings\n2) Tap on \"Add link\" and select all available options",
+            "addedBoorus": "Added Boorus",
+            "editBooru": "Edit Booru config",
+            "importBooru": "Import Booru config from clipboard",
+            "onlyLSURLsSupported": "Only loli.snatcher URLs are supported!",
+            "deleteBooru": "Delete Booru config",
+            "deleteBooruError": "Something went wrong during deletion of a Booru config!",
+            "booruDeleted": "Booru config deleted!",
+            "booruDropdownInfo": "The Booru selected here will be set as default after saving.\n\nThe default Booru will be first to appear in the dropdown boxes",
+            "changeDefaultBooru": "Change default Booru?",
+            "changeTo": "Change to: ",
+            "keepCurrentBooru": "Tap [No] to keep current: ",
+            "changeToNewBooru": "Tap [Yes] to change to: ",
+            "booruConfigLinkCopied": "Booru config link copied to clipboard!",
+            "noBooruSelected": "No Booru selected!",
+            "cantDeleteThisBooru": "Can't delete this Booru!",
+            "removeRelatedTabsFirst": "Remove related tabs first"
+        },
+        "booruEditor": {
+            "title": "Booru Editor",
+            "testBooru": "Test Booru",
+            "testBooruSuccessMsg": "Tap the Save button to save this config",
+            "testBooruFailedTitle": "Booru test failed",
+            "testBooruFailedMsg(param=error)": "Config parameters may be incorrect, booru doesn't allow api access, request didn't return any data or there was a network error. Details (tap on the button to copy): {error}",
+            "saveBooru": "Save Booru",
+            "runTestFirst": "Run test first",
+            "booruConfigExistsError": "This Booru config already exists",
+            "booruSameNameExistsError": "Booru config with same name already exists",
+            "booruSameUrlExistsError": "Booru config with same URL already exists",
+            "thisBooruConfigWontBeAdded": "This booru config won't be added",
+            "booruConfigSaved": "Booru config saved!",
+            "existingTabsNeedReload": "Existing tabs with this Booru need to be reloaded in order to apply changes!",
+            "failedVerifyApiHydrus": "Failed to verify api access for Hydrus",
+            "accessKeyRequestedTitle": "Access key requested",
+            "accessKeyRequestedMsg": "Tap okay on Hydrus then apply. You can tap 'Test Booru' afterwards",
+            "accessKeyFailedTitle": "Failed to get access key",
+            "accessKeyFailedMsg": "Do you have the request window open in Hydrus?",
+            "hydrusInstructions": "To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client api > Add > From API request",
+            "getHydrusApiKey": "Get Hydrus API key",
+            "booruName": "Booru Name",
+            "booruNameRequired": "Booru Name is required!",
+            "booruUrl": "Booru URL",
+            "booruUrlRequired": "Booru URL is required!",
+            "booruType": "Booru Type",
+            "booruTypeIs(param=booruType)": "Booru Type is {booruType}",
+            "booruFavicon": "Favicon URL",
+            "booruFaviconPlaceholder": "(Autofills if blank)",
+            "booruApiCredsInfo(param=userIdTitle, param=apiKeyTitle)": "{userIdTitle} and {apiKeyTitle} may be needed with some boorus but in most cases aren't necessary.",
+            "canBeBlankPlaceholder": "(Can be blank)",
+            "booruDefTags": "Default tags"
+        },
+        "interface": {
+            "title": "Interface"
+        },
+        "theme": {
+            "title": "Themes"
+        },
+        "viewer": {
+            "title": "Viewer"
+        },
+        "video": {
+            "title": "Video"
+        },
+        "downloads": {
+            "title": "Snatching",
+            "fromNextItemInQueue": "From next item in queue",
+            "pleaseProvideStoragePermission": "Please provide storage permission in order to download files",
+            "noItemsSelected": "No items selected",
+            "noItemsQueued": "No items in queue",
+            "batch": "Batch",
+            "snatchSelected": "Snatch selected",
+            "removeSnatchedStatusFromSelected": "Remove snatched status from selected",
+            "favouriteSelected": "Favorite selected",
+            "unfavouriteSelected": "Unfavorite selected",
+            "clearSelected": "Clear selected",
+            "updatingData": "Updating data..."
+        },
+        "cache": {
+            "title": "Caching"
+        },
+        "downloadsAndCache": "Snatching & Cache",
+        "tagFilters": {
+            "title": "Tag filters"
+        },
+        "database": {
+            "title": "Database",
+            "indexingDatabase": "Indexing database",
+            "droppingIndexes": "Dropping indexes"
+        },
+        "backupAndRestore": {
+            "title": "Backup & Restore",
+            "duplicateFileDetectedTitle": "Duplicate file detected!",
+            "duplicateFileDetectedMsg(param=fileName)": "The file {fileName} already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.",
+            "androidOnlyFeatureMsg": "This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app's data folder, respective to your system",
+            "selectBackupDir": "Select backup directory",
+            "failedToGetBackupPath": "Failed to get backup path!",
+            "backupPathMsg(param=backupPath)": "Backup path is: {backupPath}",
+            "noBackupDirSelected": "No backup directory selected",
+            "restoreInfoMsg": "Restore will work only if the files are placed in the root of the directory.",
+            "backupSettings": "Backup Settings",
+            "restoreSettings": "Restore Settings",
+            "settingsBackedUp": "Settings backed up to settings.json",
+            "settingsRestored": "Settings restored from backup!",
+            "backupSettingsError": "Failed to backup settings!",
+            "restoreSettingsError": "Failed to restore settings!",
+            "backupBoorus": "Backup Boorus",
+            "restoreBoorus": "Restore Boorus",
+            "boorusBackedUp": "Boorus backed up to boorus.json",
+            "boorusRestored": "Boorus restored from backup!",
+            "backupBoorusError": "Failed to backup boorus!",
+            "restoreBoorusError": "Failed to restore boorus!",
+            "backupDatabase": "Backup Database",
+            "restoreDatabase": "Restore Database",
+            "restoreDatabaseInfo": "May take a while depending on the size of the database, will restart the app on success",
+            "databaseBackedUp": "Database backed up to database.json",
+            "databaseRestored": "Database restored from backup! App will restart in a few seconds!",
+            "backupDatabaseError": "Failed to backup database!",
+            "restoreDatabaseError": "Failed to restore database!",
+            "databaseFileNotFound": "Database file not found or cannot be read!",
+            "backupTags": "Backup Tags",
+            "restoreTags": "Restore Tags",
+            "restoreTagsInfo": "May take a while if you have a lot of tags. If you did a database restore, you don't need to do this because it's already included in the database",
+            "tagsBackedUp": "Tags backed up to tags.json",
+            "tagsRestored": "Tags restored from backup!",
+            "backupTagsError": "Failed to backup tags!",
+            "restoreTagsError": "Failed to restore tags!",
+            "tagsFileNotFound": "Tags file not found or cannot be read!",
+            "operationTakesTooLongMsg": "Press Hide below if it takes too long, operation will continue in background",
+            "backupFileNotFound": "Backup file not found or cannot be read!",
+            "backupDirNoAccess": "No access to backup directory!",
+            "backupCancelled": "Backup cancelled!"
+        },
+        "network": {
+            "title": "Network"
+        },
+        "privacy": {
+            "title": "Privacy"
+        },
+        "sync": {
+            "title": "LoliSync",
+            "dbError": "Database must be enabled to use LoliSync"
+        },
+        "about": {
+            "title": "About",
+            "appDescription": "LoliSnatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo.",
+            "appOnGitHub": "LoliSnatcher on Github",
+            "contact": "Contact",
+            "emailCopied": "Email copied to clipboard!",
+            "logoArtistThanks": "A big thanks to Showers-U for letting us use their artwork for the app logo. Please check them out on Pixiv",
+            "developers": "Developers",
+            "releases": "Releases",
+            "releasesMsg": "Latest version and full changelogs can be found at the Github Releases page:",
+            "licenses": "Licenses"
+        },
+        "checkForUpdates": {
+            "title": "Check for updates",
+            "updateAvailable": "Update available!",
+            "updateChangelog": "Update changelog",
+            "updateCheckError": "Update check error!",
+            "youHaveLatestVersion": "You have the latest version!",
+            "viewLatestChangelog": "View latest changelog",
+            "currentVersion": "Current version",
+            "changelog": "Changelog",
+            "visitPlayStore": "Visit Play Store",
+            "visitReleases": "Visit Releases"
+        },
+        "help": {
+            "title": "Help"
+        },
+        "debug": {
+            "title": "Debug",
+            "enabledSnackbarMsg": "Debug mode is enabled!",
+            "disabledSnackbarMsg": "Debug mode is disabled!",
+            "alreadyEnabledSnackbarMsg": "Debug mode is already enabled!",
+            "openAlice": "Open network inspector",
+            "openLogger": "Open logger"
+        },
+        "logging": {
+            "title": "Logging",
+            "enabledMsg": "Logging is enabled",
+            "enabledLogTypes": "Enabled log types",
+            "disableTip": "You can disable logging in the debug settings"
+        },
+        "webview": {
+            "openWebview": "Open webview",
+            "openWebviewTip": "to login or obtain cookies"
+        },
+        "version": "Version"
+    }
+}
