@@ -51,12 +51,23 @@ class e621Handler extends BooruHandler {
         thumbURL = current['preview']['url'];
       }
 
-      addTagsWithType([...current['tags']['character']], TagType.character);
-      addTagsWithType([...current['tags']['copyright']], TagType.copyright);
-      addTagsWithType([...current['tags']['artist']], TagType.artist);
-      addTagsWithType([...current['tags']['meta']], TagType.meta);
-      addTagsWithType([...current['tags']['general']], TagType.none);
-      addTagsWithType([...current['tags']['species']], TagType.species);
+      final List characterTags = current['tags']?['character'] ?? [];
+      final List copyrightTags = current['tags']?['copyright'] ?? [];
+      final List franchiseTags = current['tags']?['franchise'] ?? [];
+      final List artistTags = current['tags']?['artist'] ?? [];
+      final List directorTags = current['tags']?['director'] ?? [];
+      final List metaTags = current['tags']?['meta'] ?? [];
+      final List generalTags = current['tags']?['general'] ?? [];
+      final List speciesTags = current['tags']?['species'] ?? [];
+
+      addTagsWithType([...characterTags], TagType.character);
+      addTagsWithType([...copyrightTags], TagType.copyright);
+      addTagsWithType([...franchiseTags], TagType.copyright);
+      addTagsWithType([...artistTags], TagType.artist);
+      addTagsWithType([...directorTags], TagType.artist);
+      addTagsWithType([...metaTags], TagType.meta);
+      addTagsWithType([...generalTags], TagType.none);
+      addTagsWithType([...speciesTags], TagType.species);
 
       final String? dateStr = current['created_at']?.toString().substring(0, current['created_at']!.toString().length - 6);
 
@@ -65,12 +76,14 @@ class e621Handler extends BooruHandler {
         sampleURL: sampleURL,
         thumbnailURL: thumbURL,
         tagsList: [
-          ...current['tags']['character'],
-          ...current['tags']['copyright'],
-          ...current['tags']['artist'],
-          ...current['tags']['meta'],
-          ...current['tags']['general'],
-          ...current['tags']['species'],
+          ...characterTags,
+          ...copyrightTags,
+          ...franchiseTags,
+          ...artistTags,
+          ...directorTags,
+          ...metaTags,
+          ...generalTags,
+          ...speciesTags,
         ],
         postURL: makePostURL(current['id'].toString()),
         fileExt: current['file']['ext'],
