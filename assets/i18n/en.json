@@ -119,7 +119,7 @@
             "testBooru": "Test Booru",
             "testBooruSuccessMsg": "Tap the Save button to save this config",
             "testBooruFailedTitle": "Booru test failed",
-            "testBooruFailedMsg(param=error)": "Config parameters may be incorrect, booru doesn't allow api access, request didn't return any data or there was a network error. Details (tap on the button to copy): {error}",
+            "testBooruFailedMsg": "Config parameters may be incorrect, booru doesn't allow api access, request didn't return any data or there was a network error.",
             "saveBooru": "Save Booru",
             "runTestFirst": "Run test first",
             "booruConfigExistsError": "This Booru config already exists",

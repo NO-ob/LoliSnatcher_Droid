@@ -401,9 +401,9 @@ class _TranslationsSettingsBooruEditorRu extends TranslationsSettingsBooruEditor
   String get testBooruFailedTitle =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Проверка сайта не удалась';
   @override
-  String testBooruFailedMsg({required Object error}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {'error': error}) ??
-      'Данные конфига неверны, сайт не дает доступ к API, запрос не вернул данные или есть проблемы с сетью. Подробности (нажми на кнопку для копирования): ${error}';
+  String get testBooruFailedMsg =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
+      'Данные конфига неверны, сайт не дает доступ к API, запрос не вернул данные или есть проблемы с сетью.';
   @override
   String get saveBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Сохранить конфиг';
   @override
@@ -1152,9 +1152,8 @@ extension on TranslationsRu {
       case 'settings.booruEditor.testBooruFailedTitle':
         return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Проверка сайта не удалась';
       case 'settings.booruEditor.testBooruFailedMsg':
-        return ({required Object error}) =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {'error': error}) ??
-            'Данные конфига неверны, сайт не дает доступ к API, запрос не вернул данные или есть проблемы с сетью. Подробности (нажми на кнопку для копирования): ${error}';
+        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
+            'Данные конфига неверны, сайт не дает доступ к API, запрос не вернул данные или есть проблемы с сетью.';
       case 'settings.booruEditor.saveBooru':
         return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Сохранить конфиг';
       case 'settings.booruEditor.runTestFirst':

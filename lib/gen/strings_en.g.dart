@@ -261,9 +261,9 @@ class TranslationsSettingsBooruEditorEn {
   String get testBooruSuccessMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruSuccessMsg', {}) ?? 'Tap the Save button to save this config';
   String get testBooruFailedTitle => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booru test failed';
-  String testBooruFailedMsg({required Object error}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {'error': error}) ??
-      'Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error. Details (tap on the button to copy): ${error}';
+  String get testBooruFailedMsg =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
+      'Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error.';
   String get saveBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Save Booru';
   String get runTestFirst => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runTestFirst', {}) ?? 'Run test first';
   String get booruConfigExistsError =>
@@ -833,9 +833,8 @@ extension on Translations {
       case 'settings.booruEditor.testBooruFailedTitle':
         return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booru test failed';
       case 'settings.booruEditor.testBooruFailedMsg':
-        return ({required Object error}) =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {'error': error}) ??
-            'Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error. Details (tap on the button to copy): ${error}';
+        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
+            'Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error.';
       case 'settings.booruEditor.saveBooru':
         return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Save Booru';
       case 'settings.booruEditor.runTestFirst':

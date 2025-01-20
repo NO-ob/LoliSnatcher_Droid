@@ -353,30 +353,40 @@ class _BooruEditState extends State<BooruEdit> {
               booruEditorLoc.testBooruFailedTitle,
               style: const TextStyle(fontSize: 20),
             ),
-            content: Text(
-              booruEditorLoc.testBooruFailedMsg(error: errorString),
-              style: const TextStyle(fontSize: 16),
+            content: Column(
+              children: [
+                Text(
+                  booruEditorLoc.testBooruFailedMsg,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                if (errorString.trim().isNotEmpty)
+                  Text(
+                    '${context.loc.error}: $errorString',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+              ],
             ),
             actionsBuilder: (controller) {
               return [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: errorString));
-                    FlashElements.showSnackbar(
-                      context: context,
-                      title: Text(
-                        context.loc.copied,
-                        style: const TextStyle(fontSize: 20),
-                      ),
-                      sideColor: Colors.green,
-                      leadingIcon: Icons.check,
-                      leadingIconColor: Colors.green,
-                      duration: const Duration(seconds: 2),
-                    );
-                  },
-                  icon: const Icon(Icons.copy),
-                  label: Text(context.loc.copyErrorText),
-                ),
+                if (errorString.trim().isNotEmpty)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: errorString));
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(
+                          context.loc.copied,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        sideColor: Colors.green,
+                        leadingIcon: Icons.check,
+                        leadingIconColor: Colors.green,
+                        duration: const Duration(seconds: 2),
+                      );
+                    },
+                    icon: const Icon(Icons.copy),
+                    label: Text(context.loc.copyErrorText),
+                  ),
               ];
             },
             leadingIcon: Icons.warning_amber,
