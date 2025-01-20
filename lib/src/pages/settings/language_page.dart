@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_twemoji/flutter_twemoji.dart';
+import 'package:country_flags/country_flags.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -38,6 +38,60 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (result) {
       Navigator.of(context).pop();
+    }
+  }
+
+  Widget buildFlag(AppLocale? locale) {
+    if (locale == null) {
+      return const Icon(
+        Icons.settings,
+      );
+    } else {
+      if (locale.localeCode == '?') {
+        return const CircularProgressIndicator();
+      }
+
+      const double width = 36, height = 24;
+
+      Widget firstFlag = CountryFlag.fromLanguageCode(
+        locale.localeCode,
+        width: width,
+        height: height,
+        shape: const RoundedRectangle(6),
+      );
+      Widget? secondFlag;
+      switch (locale) {
+        case AppLocale.en:
+          firstFlag = CountryFlag.fromLanguageCode(
+            'en-us',
+            width: width,
+            height: height,
+            shape: const RoundedRectangle(6),
+          );
+          secondFlag = CountryFlag.fromLanguageCode(
+            locale.localeCode,
+            width: width,
+            height: height,
+            shape: const RoundedRectangle(6),
+          );
+          break;
+        default:
+          break;
+      }
+
+      if (secondFlag == null) {
+        return firstFlag;
+      } else {
+        return Stack(
+          children: [
+            firstFlag,
+            ClipPath(
+              clipper: _SecondLanguageFlagClipper(),
+              child: secondFlag,
+            ),
+          ],
+        );
+      }
     }
   }
 
@@ -79,21 +133,9 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          if (e == null)
-                            const TextSpan(
-                              text: ' 🌐',
-                              style: TextStyle(fontSize: 20),
-                            )
-                          else if (e == AppLocale.en || e.localeEmoji != '🇺🇸')
-                            TwemojiTextSpan(
-                              text: ' ${e.localeEmoji}',
-                              style: const TextStyle(fontSize: 24),
-                            ),
-                        ],
-                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: buildFlag(e),
                     ),
                   ],
                 ),
@@ -108,11 +150,28 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
 }
 
 extension AppLocaleExt on AppLocale {
+  String get localeCode {
+    return LocaleSettings.instance.translationMap[this]?.locale ?? '?';
+  }
+
   String get localeName {
     return LocaleSettings.instance.translationMap[this]?.localeName ?? 'Loading...';
   }
+}
 
-  String get localeEmoji {
-    return LocaleSettings.instance.translationMap[this]?.localeEmoji ?? '🌐';
+class _SecondLanguageFlagClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(size.width, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.lineTo(size.width, 0);
+    path.close();
+
+    return path;
   }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

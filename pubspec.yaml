@@ -16,6 +16,7 @@ dependencies:
   auto_size_text_plus: ^3.0.2
   awesome_notifications: ^0.10.0
   chewie: ^1.9.2
+  country_flags: ^3.2.0
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
   dio: ^5.7.0
@@ -41,7 +42,6 @@ dependencies:
     git:
       url: https://github.com/jiangtian616/socks_proxy
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
-  flutter_twemoji: ^1.0.1
   font_awesome_flutter: ^10.8.0
   fvp: ^0.29.0
   get: ^4.6.6
