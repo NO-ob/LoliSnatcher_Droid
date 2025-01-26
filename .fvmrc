@@ -1,6 +1,6 @@
 {
-  "flutter": "3.27.2",
+  "flutter": "3.27.3",
+  "runPubGetOnSdkChanges": true,
   "updateVscodeSettings": true,
-  "updateGitIgnore": true,
-  "runPubGetOnSdkChanges": true
+  "updateGitIgnore": true
 }
