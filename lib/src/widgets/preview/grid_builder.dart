@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
 class GridBuilder extends StatelessWidget {
@@ -30,39 +29,26 @@ class GridBuilder extends StatelessWidget {
     return Obx(() {
       final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
-      final bool isDesktop = settingsHandler.appMode.value.isDesktop;
-
-      return GridView.builder(
-        controller: searchHandler.gridScrollController,
-        physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      return SliverGrid.builder(
         addAutomaticKeepAlives: false,
-        cacheExtent: 200,
-        shrinkWrap: false,
         itemCount: searchHandler.currentFetched.length,
-        padding: EdgeInsets.fromLTRB(
-          10,
-          2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.paddingOf(context).top)),
-          10,
-          180,
-        ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columnCount,
           childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9 / 16,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
         ),
         itemBuilder: (BuildContext context, int index) {
           final BooruItem item = searchHandler.currentFetched[index];
 
-          return Card(
-            margin: const EdgeInsets.all(2),
-            child: GridTile(
-              child: ThumbnailCardBuild(
-                index: index,
-                item: item,
-                onTap: onTap,
-                onDoubleTap: onDoubleTap,
-                onLongPress: onLongPress,
-                onSecondaryTap: onSecondaryTap,
-              ),
+          return GridTile(
+            child: ThumbnailCardBuild(
+              index: index,
+              item: item,
+              onTap: onTap,
+              onDoubleTap: onDoubleTap,
+              onLongPress: onLongPress,
+              onSecondaryTap: onSecondaryTap,
             ),
           );
         },
