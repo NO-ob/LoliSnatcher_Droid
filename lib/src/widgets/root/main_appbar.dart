@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -8,6 +9,8 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/root/active_title.dart';
+
+// TODO redo as sliverappbar
 
 class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
   const MainAppBar({
@@ -120,6 +123,19 @@ class _MainAppBarState extends State<MainAppBar> {
         leading: widget.leading,
         // toolbarHeight: barHeight,
         title: const ActiveTitle(),
+        backgroundColor: settingsHandler.shitDevice ? null : Theme.of(context).appBarTheme.backgroundColor?.withValues(alpha: 0.75),
+        flexibleSpace: settingsHandler.shitDevice
+            ? null
+            : ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                  child: const SizedBox.expand(
+                    child: ColoredBox(
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ),
+              ),
         actions: [
           // lockButton(),
           widget.trailing ?? const SizedBox.shrink(),
