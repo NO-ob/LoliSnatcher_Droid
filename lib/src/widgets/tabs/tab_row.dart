@@ -151,9 +151,11 @@ class TabRow extends StatelessWidget {
           children: [
             if (withFavicon) ...[
               if (isNotEmptyBooru)
-                BooruFavicon(
-                  tab.selectedBooru.value,
-                  color: color,
+                RepaintBoundary(
+                  child: BooruFavicon(
+                    tab.selectedBooru.value,
+                    color: color,
+                  ),
                 )
               else
                 const Icon(

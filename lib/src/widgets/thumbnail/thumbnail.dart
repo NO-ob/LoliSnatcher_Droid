@@ -26,7 +26,7 @@ class Thumbnail extends StatefulWidget {
 
   final BooruItem item;
 
-  /// set to true when used in gallery preview to enable hero animation
+  /// set to true when used in a list
   final bool isStandalone;
 
   @override
@@ -406,8 +406,8 @@ class _ThumbnailState extends State<Thumbnail> {
                       ? ImageFiltered(
                           enabled: settingsHandler.blurImages || widget.item.isHated,
                           imageFilter: ImageFilter.blur(
-                            sigmaX: 10,
-                            sigmaY: 10,
+                            sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                            sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
                             tileMode: TileMode.decal,
                           ),
                           child: Image(
@@ -438,8 +438,8 @@ class _ThumbnailState extends State<Thumbnail> {
                     ? ImageFiltered(
                         enabled: settingsHandler.blurImages || widget.item.isHated,
                         imageFilter: ImageFilter.blur(
-                          sigmaX: 10,
-                          sigmaY: 10,
+                          sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                          sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
                           tileMode: TileMode.decal,
                         ),
                         child: Image(
@@ -471,20 +471,25 @@ class _ThumbnailState extends State<Thumbnail> {
                     ),
             ),
             if (widget.isStandalone)
-              ThumbnailLoading(
-                item: widget.item,
-                hasProgress: true,
-                isFromCache: isFromCache,
-                isDone: isLoaded && !isFailed,
-                isFailed: isFailed,
-                total: total,
-                received: received,
-                startedAt: startedAt,
-                restartAction: () {
-                  restartedCount = 0;
-                  restartLoading();
-                },
-                errorCode: errorCode,
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: isLoaded
+                    ? const SizedBox.shrink()
+                    : ThumbnailLoading(
+                        item: widget.item,
+                        hasProgress: true,
+                        isFromCache: isFromCache,
+                        isDone: isLoaded && !isFailed,
+                        isFailed: isFailed,
+                        total: total,
+                        received: received,
+                        startedAt: startedAt,
+                        restartAction: () {
+                          restartedCount = 0;
+                          restartLoading();
+                        },
+                        errorCode: errorCode,
+                      ),
               ),
             if (widget.item.isHated)
               Container(

@@ -294,7 +294,7 @@ class _MobileHomeState extends State<MobileHome> {
                 child: Stack(
                   alignment: Alignment.topCenter,
                   children: [
-                    const MediaPreviews(),
+                    const RepaintBoundary(child: MediaPreviews()),
                     Obx(
                       () => MainAppBar(
                         leading: settingsHandler.handSide.value.isLeft ? menuButton(InnerDrawerDirection.start) : snatcherButton(InnerDrawerDirection.start),
