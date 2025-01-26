@@ -302,7 +302,12 @@ class DBHandler {
     // benchmark reqest time
     // final DateTime start = DateTime.now();
 
-    final filterMode = isDownloads ? 'bi.isSnatched = 1' : 'bi.isFavourite = 1';
+    final String filterMode = isDownloads ? 'bi.isSnatched = 1' : 'bi.isFavourite = 1';
+
+    final bool isRandomOrder = searchTags.any((t) => t.toLowerCase() == 'sort:random');
+    if (isRandomOrder) {
+      searchTags.removeWhere((element) => element.toLowerCase() == 'sort:random');
+    }
 
     if (searchTags.isNotEmpty || excludeTags.isNotEmpty) {
       final String searchPart = searchTags.isNotEmpty ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) " : '';
@@ -333,7 +338,7 @@ class DBHandler {
         '$excludePart'
         'GROUP BY bi.id '
         '$havingPart'
-        'ORDER BY bi.id $order '
+        'ORDER BY ${isRandomOrder ? 'RANDOM() ' : 'bi.id $order'} '
         'LIMIT $limit '
         'OFFSET $offset;',
         [...excludeTags, ...searchTags],
@@ -346,7 +351,7 @@ class DBHandler {
         'FROM BooruItem AS bi '
         'WHERE $siteQuery $andStr1 $filterMode '
         'GROUP BY bi.id '
-        'ORDER BY bi.id $order '
+        'ORDER BY ${isRandomOrder ? 'RANDOM() ' : 'bi.id $order'} '
         'LIMIT $limit '
         'OFFSET $offset;',
       );
