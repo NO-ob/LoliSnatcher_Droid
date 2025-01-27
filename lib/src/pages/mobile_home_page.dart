@@ -15,7 +15,6 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
@@ -33,7 +32,6 @@ import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
-import 'package:lolisnatcher/src/widgets/root/main_appbar.dart';
 import 'package:lolisnatcher/src/widgets/search/tag_search_box.dart';
 import 'package:lolisnatcher/src/widgets/search/tag_search_button.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
@@ -122,115 +120,6 @@ class _MobileHomeState extends State<MobileHome> {
     return shouldPop ?? false;
   }
 
-  void _onMenuLongTap() {
-    ServiceHandler.vibrate();
-    // scroll to start on long press of menu buttons
-    searchHandler.gridScrollController.jumpTo(0);
-  }
-
-  Widget menuButton(InnerDrawerDirection direction) {
-    return GestureDetector(
-      onLongPress: _onMenuLongTap,
-      onSecondaryTap: _onMenuLongTap,
-      child: IconButton(
-        icon: Icon(
-          Icons.menu,
-          color: Theme.of(context).appBarTheme.iconTheme?.color,
-        ),
-        onPressed: () {
-          _toggleDrawer(direction);
-
-          // if(mainScaffoldKey.currentState?.isEndDrawerOpen == true) {
-          // } else {
-          //   mainScaffoldKey.currentState?.openEndDrawer();
-          // }
-        },
-      ),
-    );
-  }
-
-  Widget snatcherButton(InnerDrawerDirection direction) {
-    return Obx(() {
-      if (searchHandler.list.isNotEmpty) {
-        return Stack(
-          alignment: Alignment.center,
-          clipBehavior: Clip.none,
-          children: [
-            Obx(() {
-              if (snatchHandler.active.value == false || snatchHandler.current.value == null) {
-                return const SizedBox.shrink();
-              }
-
-              final double singleToTotalProgress = 1 / snatchHandler.current.value!.booruItems.length;
-              final double currentCompleteProgress = snatchHandler.queueProgress.value * singleToTotalProgress;
-
-              final double downloadProgress = snatchHandler.currentProgress;
-              final double downloadToTotalProgress = singleToTotalProgress * downloadProgress;
-
-              return CircularProgressIndicator(
-                value: currentCompleteProgress + downloadToTotalProgress,
-              );
-            }),
-            IconButton(
-              onPressed: () async {
-                _toggleDrawer(direction);
-              },
-              padding: EdgeInsets.zero,
-              icon: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (settingsHandler.handSide.value.isLeft)
-                    Icon(
-                      Icons.save,
-                      color: Theme.of(context).appBarTheme.iconTheme?.color,
-                    ),
-                  Transform.rotate(
-                    angle: settingsHandler.handSide.value.isRight ? 0 : pi,
-                    child: Icon(
-                      Icons.keyboard_double_arrow_left_rounded,
-                      color: Theme.of(context).appBarTheme.iconTheme?.color,
-                    ),
-                  ),
-                  if (settingsHandler.handSide.value.isRight)
-                    Icon(
-                      Icons.save,
-                      color: Theme.of(context).appBarTheme.iconTheme?.color,
-                    ),
-                ],
-              ),
-            ),
-            if (searchHandler.currentSelected.isNotEmpty)
-              Positioned(
-                right: -6,
-                top: 8,
-                child: IgnorePointer(
-                  child: Container(
-                    width: 20,
-                    height: 20,
-                    padding: const EdgeInsets.all(1),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Center(
-                      child: FittedBox(
-                        child: Text(
-                          searchHandler.currentSelected.length.toFormattedString(),
-                          style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-      } else {
-        return const SizedBox.shrink();
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     // print('!!! main build !!!');
@@ -282,7 +171,6 @@ class _MobileHomeState extends State<MobileHome> {
           scaffold: Scaffold(
             key: mainScaffoldKey,
             resizeToAvoidBottomInset: false,
-            // appBar: MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
             extendBody: true,
             extendBodyBehindAppBar: true,
             body: SafeArea(
@@ -291,18 +179,7 @@ class _MobileHomeState extends State<MobileHome> {
               child: PopScope(
                 canPop: false,
                 onPopInvokedWithResult: _onPopInvoked,
-                child: Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    const RepaintBoundary(child: MediaPreviews()),
-                    Obx(
-                      () => MainAppBar(
-                        leading: settingsHandler.handSide.value.isLeft ? menuButton(InnerDrawerDirection.start) : snatcherButton(InnerDrawerDirection.start),
-                        trailing: settingsHandler.handSide.value.isRight ? menuButton(InnerDrawerDirection.end) : snatcherButton(InnerDrawerDirection.end),
-                      ),
-                    ),
-                  ],
-                ),
+                child: const RepaintBoundary(child: MediaPreviews()),
               ),
             ),
           ),

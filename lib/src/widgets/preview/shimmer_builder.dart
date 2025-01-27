@@ -29,51 +29,35 @@ class ShimmerWrap extends StatelessWidget {
   }
 }
 
-class ShimmerList extends StatelessWidget {
-  const ShimmerList({super.key});
+class ThumbnailsShimmerList extends StatelessWidget {
+  const ThumbnailsShimmerList({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ShimmerWrap(
-      child: LayoutBuilder(
-        builder: (BuildContext layoutContext, BoxConstraints constraints) {
-          final SettingsHandler settingsHandler = SettingsHandler.instance;
-          final String displayType = settingsHandler.previewDisplay;
-          final bool isDesktop = settingsHandler.appMode.value.isDesktop;
-          final int previewCount = settingsHandler.itemLimit;
-          final int columnCount =
-              MediaQuery.orientationOf(layoutContext) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final String displayType = settingsHandler.previewDisplay;
+    final int previewCount = settingsHandler.itemLimit;
+    final int columnCount = MediaQuery.orientationOf(context) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
-          return GridView(
-            physics: const NeverScrollableScrollPhysics(),
-            primary: false,
-            addAutomaticKeepAlives: false,
-            cacheExtent: 200,
-            shrinkWrap: false,
-            padding: EdgeInsets.fromLTRB(
-              10,
-              2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.paddingOf(context).top)),
-              10,
-              80,
-            ),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: columnCount, childAspectRatio: displayType == 'Square' ? 1 : 9 / 16),
-            children: List.generate(
-              previewCount,
-              (int index) {
-                return Card(
-                  margin: const EdgeInsets.all(2),
-                  child: GridTile(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(3),
-                      child: const ShimmerCard(),
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+    return SliverGrid.builder(
+      addAutomaticKeepAlives: false,
+      itemCount: previewCount,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columnCount,
+        childAspectRatio: displayType == 'Square' ? 1 : 9 / 16,
+        mainAxisSpacing: 4,
+        crossAxisSpacing: 4,
       ),
+      itemBuilder: (context, index) {
+        return GridTile(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: const ShimmerCard(),
+          ),
+        );
+      },
     );
   }
 }

@@ -1,26 +1,23 @@
-import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_inner_drawer/inner_drawer.dart';
+import 'package:get/get.dart';
+
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/root/active_title.dart';
-
-// TODO redo as sliverappbar
 
 class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
   const MainAppBar({
-    this.leading,
-    this.trailing,
     super.key,
   });
-
-  final Widget? leading;
-  final Widget? trailing;
 
   double get defaultHeight => kToolbarHeight; // 56
 
@@ -37,54 +34,116 @@ class _MainAppBarState extends State<MainAppBar> {
   final SnatchHandler snatchHandler = SnatchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-  final ValueNotifier<double> _scrollOffset = ValueNotifier(1);
-  final ValueNotifier<double> _lastScrollPosition = ValueNotifier(0);
-
-  late StreamSubscription<double> scrollListener;
-  late StreamSubscription<int> tabIndexListener;
-
-  @override
-  void initState() {
-    super.initState();
-    scrollListener = searchHandler.scrollOffset.listen(updatePosition);
-    tabIndexListener = searchHandler.index.listen(updateIndex);
+  void _toggleDrawer(InnerDrawerDirection? direction) {
+    searchHandler.mainDrawerKey.currentState?.toggle(
+      // if not set, the last direction will be used
+      //InnerDrawerDirection.start OR InnerDrawerDirection.end
+      direction: direction,
+    );
   }
 
-  @override
-  void dispose() {
-    scrollListener.cancel();
-    tabIndexListener.cancel();
-    super.dispose();
+  void _onMenuLongTap() {
+    ServiceHandler.vibrate();
+    // scroll to start on long press of menu buttons
+    searchHandler.gridScrollController.jumpTo(0);
   }
 
-  void updatePosition(double newOffset) {
-    final double viewportDimension = searchHandler.gridScrollController.position.viewportDimension;
-    final double scrollChange = ((_lastScrollPosition.value - newOffset) / viewportDimension) * 10;
-
-    if (newOffset < 0 || (newOffset + 100) > searchHandler.gridScrollController.position.maxScrollExtent) {
-      // do nothing when oversrolling
-      return;
-    }
-
-    _scrollOffset.value = max(0, min(1, _scrollOffset.value + scrollChange));
-    _lastScrollPosition.value = newOffset;
-
-    if (viewerHandler.inViewer.value) {
-      // always show toolbar when in viewer
-      _scrollOffset.value = 1;
-    }
-
-    if (newOffset < (viewportDimension / 3)) {
-      // always show toolbar when close to top
-      _scrollOffset.value = 1;
-    }
+  Widget menuButton(InnerDrawerDirection direction) {
+    return GestureDetector(
+      onLongPress: _onMenuLongTap,
+      onSecondaryTap: _onMenuLongTap,
+      child: IconButton(
+        icon: Icon(
+          Icons.menu,
+          color: Theme.of(context).appBarTheme.iconTheme?.color,
+        ),
+        onPressed: () {
+          _toggleDrawer(direction);
+        },
+      ),
+    );
   }
 
-  void updateIndex(int newIndex) {
-    if (searchHandler.gridScrollController.hasClients) {
-      _lastScrollPosition.value = searchHandler.currentTab.scrollPosition;
-      _scrollOffset.value = 1;
-    }
+  Widget snatcherButton(InnerDrawerDirection direction) {
+    return Obx(() {
+      if (searchHandler.list.isNotEmpty) {
+        return Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            Obx(() {
+              if (snatchHandler.active.value == false || snatchHandler.current.value == null) {
+                return const SizedBox.shrink();
+              }
+
+              final double singleToTotalProgress = 1 / snatchHandler.current.value!.booruItems.length;
+              final double currentCompleteProgress = snatchHandler.queueProgress.value * singleToTotalProgress;
+
+              final double downloadProgress = snatchHandler.currentProgress;
+              final double downloadToTotalProgress = singleToTotalProgress * downloadProgress;
+
+              return CircularProgressIndicator(
+                value: currentCompleteProgress + downloadToTotalProgress,
+              );
+            }),
+            IconButton(
+              onPressed: () async {
+                _toggleDrawer(direction);
+              },
+              padding: EdgeInsets.zero,
+              icon: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (settingsHandler.handSide.value.isLeft)
+                    Icon(
+                      Icons.save,
+                      color: Theme.of(context).appBarTheme.iconTheme?.color,
+                    ),
+                  Transform.rotate(
+                    angle: settingsHandler.handSide.value.isRight ? 0 : pi,
+                    child: Icon(
+                      Icons.keyboard_double_arrow_left_rounded,
+                      color: Theme.of(context).appBarTheme.iconTheme?.color,
+                    ),
+                  ),
+                  if (settingsHandler.handSide.value.isRight)
+                    Icon(
+                      Icons.save,
+                      color: Theme.of(context).appBarTheme.iconTheme?.color,
+                    ),
+                ],
+              ),
+            ),
+            if (searchHandler.currentSelected.isNotEmpty)
+              Positioned(
+                right: -6,
+                top: 8,
+                child: IgnorePointer(
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    padding: const EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondary,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Center(
+                      child: FittedBox(
+                        child: Text(
+                          searchHandler.currentSelected.length.toFormattedString(),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      } else {
+        return const SizedBox.shrink();
+      }
+    });
   }
 
   Widget lockButton() {
@@ -105,43 +164,29 @@ class _MainAppBarState extends State<MainAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<double>(
-      valueListenable: _scrollOffset,
-      builder: (context, value, child) {
-        final double barHeight = _scrollOffset.value * (widget.defaultHeight + MediaQuery.paddingOf(context).top);
-
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.linear,
-          color: Colors.transparent,
-          height: barHeight,
-          child: child,
-        );
-      },
-      child: AppBar(
-        automaticallyImplyLeading: false,
-        leading: widget.leading,
-        // toolbarHeight: barHeight,
-        title: const ActiveTitle(),
-        backgroundColor: settingsHandler.shitDevice ? null : Theme.of(context).appBarTheme.backgroundColor?.withValues(alpha: 0.75),
-        flexibleSpace: settingsHandler.shitDevice
-            ? null
-            : ClipRect(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: const SizedBox.expand(
-                    child: ColoredBox(
-                      color: Colors.transparent,
-                    ),
+    return SliverAppBar(
+      floating: true,
+      automaticallyImplyLeading: false,
+      leading: settingsHandler.handSide.value.isLeft ? menuButton(InnerDrawerDirection.start) : snatcherButton(InnerDrawerDirection.start),
+      title: const ActiveTitle(),
+      backgroundColor: settingsHandler.shitDevice ? null : Theme.of(context).appBarTheme.backgroundColor?.withValues(alpha: 0.75),
+      flexibleSpace: settingsHandler.shitDevice
+          ? null
+          : ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                child: const SizedBox.expand(
+                  child: ColoredBox(
+                    color: Colors.transparent,
                   ),
                 ),
               ),
-        actions: [
-          // lockButton(),
-          widget.trailing ?? const SizedBox.shrink(),
-          const SizedBox(width: 8),
-        ],
-      ),
+            ),
+      actions: [
+        // lockButton(),
+        if (settingsHandler.handSide.value.isRight) menuButton(InnerDrawerDirection.end) else snatcherButton(InnerDrawerDirection.end),
+        const SizedBox(width: 8),
+      ],
     );
   }
 }

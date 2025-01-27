@@ -20,6 +20,7 @@ import 'package:lolisnatcher/src/widgets/preview/grid_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/staggered_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/waterfall_error_buttons.dart';
+import 'package:lolisnatcher/src/widgets/root/main_appbar.dart';
 
 class WaterfallView extends StatefulWidget {
   const WaterfallView({super.key});
@@ -74,7 +75,7 @@ class _WaterfallViewState extends State<WaterfallView> {
       initialScrollOffset: searchHandler.currentTab.scrollPosition,
       viewportBoundaryGetter: () => Rect.fromLTRB(
         0,
-        isMobile ? (kToolbarHeight + 4 + MediaQuery.paddingOf(context).top) : 0,
+        isMobile ? (MediaQuery.paddingOf(context).top + 4) : 0,
         0,
         MediaQuery.paddingOf(context).bottom,
       ),
@@ -111,7 +112,12 @@ class _WaterfallViewState extends State<WaterfallView> {
         // TODO reset the controller when appMode changes
         searchHandler.gridScrollController = AutoScrollController(
           initialScrollOffset: searchHandler.currentTab.scrollPosition,
-          viewportBoundaryGetter: () => Rect.fromLTRB(0, !isMobile ? 0 : (kToolbarHeight + 2), 0, 0),
+          viewportBoundaryGetter: () => Rect.fromLTRB(
+            0,
+            isMobile ? (MediaQuery.paddingOf(context).top + 4) : 0,
+            0,
+            MediaQuery.paddingOf(context).bottom,
+          ),
         );
       }
     });
@@ -374,7 +380,7 @@ class _WaterfallViewState extends State<WaterfallView> {
               child: RefreshIndicator(
                 triggerMode: RefreshIndicatorTriggerMode.anywhere,
                 displacement: 80,
-                edgeOffset: isMobile ? kToolbarHeight : 0,
+                edgeOffset: isMobile ? (MediaQuery.paddingOf(context).top + kToolbarHeight) : 0,
                 strokeWidth: 4,
                 color: Theme.of(context).colorScheme.secondary,
                 onRefresh: () async {
@@ -386,65 +392,67 @@ class _WaterfallViewState extends State<WaterfallView> {
                       controller: searchHandler.gridScrollController,
                       child: ShimmerWrap(
                         enabled: !SettingsHandler.instance.shitDevice,
-                        child: CustomScrollView(
-                          controller: searchHandler.gridScrollController,
-                          physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                          shrinkWrap: false,
-                          cacheExtent: 200,
-                          slivers: [
-                            SliverToBoxAdapter(
-                              child: Obx(
-                                () => SizedBox(
-                                  height: 2 + (settingsHandler.appMode.value.isDesktop ? 0 : (kToolbarHeight + MediaQuery.paddingOf(context).top)),
+                        child: Obx(() {
+                          final bool isLoadingAndNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty && !settingsHandler.shitDevice;
+
+                          return CustomScrollView(
+                            controller: searchHandler.gridScrollController,
+                            physics: isLoadingAndNoItems
+                                ? const NeverScrollableScrollPhysics()
+                                : getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                            shrinkWrap: false,
+                            cacheExtent: 200,
+                            slivers: [
+                              const MainAppBar(),
+                              SliverPadding(
+                                padding: const EdgeInsets.fromLTRB(10, 16, 10, 180),
+                                sliver: Builder(
+                                  builder: (context) {
+                                    if (isLoadingAndNoItems) {
+                                      return const ThumbnailsShimmerList();
+                                    }
+
+                                    if (isStaggered) {
+                                      return StaggeredBuilder(
+                                        onTap: onTap,
+                                        onDoubleTap: onDoubleTap,
+                                        onLongPress: onLongPress,
+                                        onSecondaryTap: onSecondaryTap,
+                                      );
+                                    }
+
+                                    return GridBuilder(
+                                      onTap: onTap,
+                                      onDoubleTap: onDoubleTap,
+                                      onLongPress: onLongPress,
+                                      onSecondaryTap: onSecondaryTap,
+                                    );
+                                  },
                                 ),
                               ),
-                            ),
-                            //
-                            SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(10, 0, 10, 180),
-                              sliver: isStaggered
-                                  ? StaggeredBuilder(
-                                      onTap: onTap,
-                                      onDoubleTap: onDoubleTap,
-                                      onLongPress: onLongPress,
-                                      onSecondaryTap: onSecondaryTap,
-                                    )
-                                  : GridBuilder(
-                                      onTap: onTap,
-                                      onDoubleTap: onDoubleTap,
-                                      onLongPress: onLongPress,
-                                      onSecondaryTap: onSecondaryTap,
-                                    ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          );
+                        }),
                       ),
                     ),
-                    Obx(() {
-                      final bool isLoadingOrNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
-
-                      return AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        child: isLoadingOrNoItems ? const ShimmerList() : const SizedBox.shrink(),
-                      );
-                    }),
                     Positioned(
                       bottom: MediaQuery.paddingOf(context).bottom + 80,
                       right: settingsHandler.scrollGridButtonsPosition == 'Right' ? MediaQuery.sizeOf(context).width * 0.07 : null,
                       left: settingsHandler.scrollGridButtonsPosition == 'Left' ? MediaQuery.sizeOf(context).width * 0.07 : null,
                       child: Obx(() {
-                        final bool isLoadingOrNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
+                        final bool isLoadingAndNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
 
                         return AnimatedSwitcher(
                           duration: const Duration(milliseconds: 300),
-                          child:
-                              (isLoadingOrNoItems || settingsHandler.scrollGridButtonsPosition == 'Disabled' || settingsHandler.appMode.value.isDesktop == true)
-                                  ? const SizedBox.shrink()
-                                  : WaterfallScrollButtons(
-                                      onTap: (bool forward) {
-                                        // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
-                                      },
-                                    ),
+                          child: (isLoadingAndNoItems ||
+                                  settingsHandler.scrollGridButtonsPosition == 'Disabled' ||
+                                  settingsHandler.appMode.value.isDesktop == true)
+                              ? const SizedBox.shrink()
+                              : WaterfallScrollButtons(
+                                  onTap: (bool forward) {
+                                    // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
+                                  },
+                                ),
                         );
                       }),
                     ),
