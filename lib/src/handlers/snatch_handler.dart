@@ -30,6 +30,8 @@ class SnatchHandler {
     return instance;
   }
 
+  static void unregister() => GetIt.instance.unregister<SnatchHandler>();
+
   RxBool active = false.obs;
   RxString status = ''.obs;
   RxInt queueProgress = 0.obs;

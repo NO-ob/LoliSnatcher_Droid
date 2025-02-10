@@ -24,6 +24,8 @@
 //     return instance;
 //   }
 
+//   static void unregister() => GetIt.instance.unregister<LocalAuthHandler>();
+
 //   RxnBool isLoggedIn = RxnBool(null);
 //   RxnBool deviceSupportsBiometrics = RxnBool(null);
 

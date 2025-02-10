@@ -14,6 +14,8 @@ class NotifyHandler {
     return instance;
   }
 
+  static void unregister() => GetIt.instance.unregister<NotifyHandler>();
+
   /// Use this method to detect when a new notification or a schedule is created
   static Future<void> onNotificationCreatedMethod(ReceivedNotification receivedNotification) async {
     // Your code goes here

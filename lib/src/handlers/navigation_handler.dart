@@ -12,5 +12,7 @@ class NavigationHandler {
     return instance;
   }
 
+  static void unregister() => GetIt.instance.unregister<NavigationHandler>();
+
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 }

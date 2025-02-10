@@ -43,6 +43,8 @@ class SettingsHandler {
     return instance;
   }
 
+  static void unregister() => GetIt.instance.unregister<SettingsHandler>();
+
   static bool get isDesktopPlatform => Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
   DBHandler dbHandler = DBHandler();

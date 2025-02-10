@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:get/get.dart';
+import 'package:flutter/material.dart';
+
 import 'package:get_it/get_it.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -23,26 +24,38 @@ class UntypedCollection {
 
 class TagHandler {
   TagHandler() {
-    untypedQueue.listen((List<UntypedCollection> list) {
-      tryGetTagTypes();
-    });
+    untypedQueue.addListener(queueListener);
   }
+
   static TagHandler get instance => GetIt.instance<TagHandler>();
 
   static TagHandler register() {
     if (!GetIt.instance.isRegistered<TagHandler>()) {
-      GetIt.instance.registerSingleton(TagHandler());
+      GetIt.instance.registerSingleton(
+        TagHandler(),
+        dispose: (tagHandler) => tagHandler.dispose(),
+      );
     }
     return instance;
   }
+
+  static void unregister() => GetIt.instance.unregister<TagHandler>();
 
   int prevLength = 0;
   final Map<String, Tag> _tagMap = {};
   Map<String, Tag> get tagMap => _tagMap; // TODO read only (or is it?)
 
-  RxList<UntypedCollection> untypedQueue = RxList<UntypedCollection>([]);
-  RxBool tagFetchActive = false.obs;
+  ValueNotifier<List<UntypedCollection>> untypedQueue = ValueNotifier([]);
+  ValueNotifier<bool> tagFetchActive = ValueNotifier(false);
   bool tagSaveActive = false;
+
+  void queueListener() {
+    tryGetTagTypes();
+  }
+
+  void dispose() {
+    untypedQueue.removeListener(queueListener);
+  }
 
   bool hasTag(String tagString) {
     return tagMap.containsKey(tagString.toLowerCase());
@@ -99,8 +112,8 @@ class TagHandler {
 
   void tryGetTagTypes() {
     if (!tagFetchActive.value) {
-      if (untypedQueue.isNotEmpty) {
-        getTagTypes(untypedQueue.removeLast());
+      if (untypedQueue.value.isNotEmpty) {
+        getTagTypes(untypedQueue.value.removeLast());
       }
     }
   }
@@ -176,7 +189,7 @@ class TagHandler {
   void queue(List<String> untypedTags, Booru booru, int cooldown) {
     Logger.Inst().log('Added ${untypedTags.length} tags to queue from ${booru.name}', 'TagHandler', 'queue', LogTypes.tagHandlerInfo);
     if (untypedTags.isNotEmpty) {
-      untypedQueue.add(UntypedCollection(untypedTags, cooldown, booru));
+      untypedQueue.value.add(UntypedCollection(untypedTags, cooldown, booru));
     }
   }
 

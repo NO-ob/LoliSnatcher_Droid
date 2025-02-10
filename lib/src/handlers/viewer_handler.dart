@@ -27,6 +27,8 @@ class ViewerHandler {
     return instance;
   }
 
+  static void unregister() => GetIt.instance.unregister<ViewerHandler>();
+
   // Keys to get states of all currently built viewers
   RxList<GlobalKey?> activeKeys = RxList([]);
   // Key of the currently viewed media widget

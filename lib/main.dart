@@ -8,7 +8,6 @@ import 'package:app_links/app_links.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
-import 'package:get_it/get_it.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -38,7 +37,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
-    // Init db stuff
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
@@ -157,24 +155,19 @@ class _MainAppState extends State<MainApp> {
         updateState();
       }
       Logger.Inst().log('Set max fps to $maxFps', 'MainApp', 'setMaxFPS', null);
-      // FlashElements.showSnackbar(title: Text('Max FPS: $maxFps'));
     }
   }
 
   @override
   void dispose() {
-    GetIt.instance.unregister<NotifyHandler>();
-    GetIt.instance.unregister<NavigationHandler>();
-    GetIt.instance.unregister<ViewerHandler>();
-    GetIt.instance.unregister<SnatchHandler>();
-    GetIt.instance.unregister<SearchHandler>(
-      disposingFunction: (searchHandler) {
-        searchHandler.dispose();
-      },
-    );
-    GetIt.instance.unregister<TagHandler>();
-    // GetIt.instance.unregister<LocalAuthHandler>();
-    GetIt.instance.unregister<SettingsHandler>();
+    NotifyHandler.unregister();
+    NavigationHandler.unregister();
+    ViewerHandler.unregister();
+    SnatchHandler.unregister();
+    SearchHandler.unregister();
+    TagHandler.unregister();
+    // LocalAuthHandler.unregister();
+    SettingsHandler.unregister();
     super.dispose();
   }
 
@@ -205,14 +198,14 @@ class _MainAppState extends State<MainApp> {
       // debugRepaintRainbowEnabled = settingsHandler.showPerf.value;
 
       return StatsFl(
-        isEnabled: settingsHandler.showFPS.value, //Toggle on/off
-        width: 400, //Set size
-        height: 50, //
-        maxFps: maxFps, // Support custom FPS target (default is 60)
-        showText: true, // Hide text label
-        sampleTime: .2, //Interval between fps calculations, in seconds.
-        totalTime: 10, //Total length of timeline, in seconds.
-        align: Alignment.bottomLeft, //Alignment of statsbox
+        isEnabled: settingsHandler.showFPS.value,
+        width: 400,
+        height: 50,
+        maxFps: maxFps,
+        showText: true,
+        sampleTime: .2,
+        totalTime: 10,
+        align: Alignment.bottomLeft,
         child: ImageStats(
           isEnabled: settingsHandler.showImageStats.value,
           width: 120,
@@ -227,7 +220,7 @@ class _MainAppState extends State<MainApp> {
 
               return MaterialApp(
                 title: 'LoliSnatcher',
-                debugShowCheckedModeBanner: false, // hide debug banner in the corner
+                debugShowCheckedModeBanner: false,
                 showPerformanceOverlay: settingsHandler.showPerf.value,
                 scrollBehavior: const CustomScrollBehavior(),
                 theme: themeHandler.lightTheme(),
@@ -304,7 +297,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (Platform.isAndroid || Platform.isIOS) {
       appLinks = AppLinks();
 
-      // check if there is a deep link on app start
       final Uri? initialLink = await appLinks!.getInitialLink();
       if (initialLink != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -312,7 +304,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         });
       }
 
-      // listen for deep links
       appLinksSubscription = appLinks!.uriLinkStream.listen((uri) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           openAppLink(uri.toString());
@@ -362,7 +353,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (Platform.isAndroid || Platform.isIOS) {
-      // set system ui mode
       ServiceHandler.setSystemUiVisibility(true);
 
       // force landscape orientation if enabled desktop mode on mobile device

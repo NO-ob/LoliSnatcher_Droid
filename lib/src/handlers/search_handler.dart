@@ -55,10 +55,15 @@ class SearchHandler {
 
   static SearchHandler register() {
     if (!GetIt.instance.isRegistered<SearchHandler>()) {
-      GetIt.instance.registerSingleton(SearchHandler());
+      GetIt.instance.registerSingleton(
+        SearchHandler(),
+        dispose: (searchHandler) => searchHandler.dispose(),
+      );
     }
     return instance;
   }
+
+  static void unregister() => GetIt.instance.unregister<SearchHandler>();
 
   // search globals list
   RxList<SearchTab> list = RxList<SearchTab>([]);
