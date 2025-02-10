@@ -6,7 +6,7 @@ version: 2.4.2+193 # remember to update the values in constants.dart after chang
 
 environment:
   sdk: ">=3.6.1 <4.0.0"
-  flutter: ^3.27.3
+  flutter: ^3.27.4
 
 dependencies:
   flutter:
