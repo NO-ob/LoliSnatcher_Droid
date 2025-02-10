@@ -15,10 +15,10 @@ dependencies:
   app_links: ^6.3.3
   auto_size_text_plus: ^3.0.2
   awesome_notifications: ^0.10.0
-  chewie: ^1.9.2
+  chewie: ^1.10.0
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
-  dio: ^5.7.0
+  dio: ^5.8.0+1
   dynamic_color: ^1.7.0
   equatable: ^2.0.7
   external_video_player_launcher: ^0.0.3
@@ -53,7 +53,7 @@ dependencies:
       ref: ce01861ac45b12e9d974cb447ea91ef68a90427d # master - forked to fix build errors and remove allowing all bad certs
   huge_listview: ^2.0.12
   image: ^4.5.2
-  intl: ^0.19.0
+  intl: ^0.20.2
   keyboard_actions: ^4.2.0
   # local_auth: ^2.3.0
   material_color_utilities: ^0.12.0
@@ -74,14 +74,14 @@ dependencies:
   sqflite_common_ffi: ^2.3.4+4
   sqflite: ^2.4.1
   statsfl: ^2.3.0
-  talker_dio_logger: ^4.6.7
-  talker_flutter: ^4.6.7
-  talker_logger: ^4.6.7
-  talker: ^4.6.7
+  talker_dio_logger: ^4.6.11
+  talker_flutter: ^4.6.11
+  talker_logger: ^4.6.11
+  talker: ^4.6.11
   transparent_image: ^2.0.1
   url_launcher: ^6.3.1
   uuid: ^4.5.1
-  vibration: ^3.1.1
+  vibration: ^3.1.2
   video_player: ^2.9.2
   waterfall_flow: ^3.1.1
   xml: ^6.5.0
@@ -89,8 +89,9 @@ dependencies:
 
 
 dependency_overrides:
-  android_intent_plus: ^5.2.2
+  android_intent_plus: ^5.3.0
   material_color_utilities: ^0.12.0 # flutter_test conflict
+  intl: ^0.20.2 # awesome_notifications conflict
 
 
 
