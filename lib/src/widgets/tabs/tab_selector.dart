@@ -359,8 +359,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
     }
 
     if (isMultiBooruMode != null) {
-      filteredTabs =
-          filteredTabs.where((tab) => isMultiBooruMode == false ? (tab.secondaryBoorus?.isEmpty ?? true) : tab.secondaryBoorus?.isNotEmpty == true).toList();
+      filteredTabs = filteredTabs
+          .where((tab) => isMultiBooruMode == false ? (tab.secondaryBoorus.value?.isEmpty ?? true) : tab.secondaryBoorus.value?.isNotEmpty == true)
+          .toList();
     }
 
     if (emptyFilter) {
@@ -1422,8 +1423,7 @@ class TabManagerItem extends StatelessWidget {
                                   else
                                     tab.booruHandler.booru.name ?? '',
                                   //
-                                  if (tab.secondaryBoorus != null)
-                                    for (final booru in tab.secondaryBoorus!) booru.name ?? '',
+                                  for (final booru in (tab.secondaryBoorus.value ?? [])) booru.name ?? '',
                                 ];
                                 final String booruNamesStr = booruNames.join(', ');
 

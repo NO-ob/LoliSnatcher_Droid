@@ -6,9 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:alice_lightweight/alice.dart';
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:fvp/fvp.dart' as fvp;
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
@@ -33,8 +33,15 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
 
 /// This class is used loading from and writing settings to files
-class SettingsHandler extends GetxController {
-  static SettingsHandler get instance => Get.find<SettingsHandler>();
+class SettingsHandler {
+  static SettingsHandler get instance => GetIt.instance<SettingsHandler>();
+
+  static SettingsHandler register() {
+    if (!GetIt.instance.isRegistered<SettingsHandler>()) {
+      GetIt.instance.registerSingleton(SettingsHandler());
+    }
+    return instance;
+  }
 
   static bool get isDesktopPlatform => Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
@@ -837,7 +844,9 @@ class SettingsHandler extends GetxController {
         case 'rxcolor':
           if (toJSON) {
             // rxobject to int
-            return (value as Rx<Color?>).value?.value32bit ?? Colors.pink.value32bit; // Color => int
+            // TODO replace value with toARGB32() in the next flutter release
+            // ignore: deprecated_member_use
+            return (value as Rx<Color?>).value?.value ?? Colors.pink.value; // Color => int
           } else {
             // int to rxobject
             if (value is int) {
@@ -1667,7 +1676,7 @@ class SettingsHandler extends GetxController {
     if (restate) {
       final searchHandler = SearchHandler.instance;
       searchHandler.filterCurrentFetched(); // refilter fetched because user could have changed the filtering settings
-      searchHandler.rootRestate(); // force global state update to redraw stuff
+      searchHandler.rootRestate?.call(); // force global state update to redraw stuff
     }
     return true;
   }

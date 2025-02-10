@@ -1,8 +1,7 @@
 import 'dart:convert';
 
-import 'package:get/utils.dart';
-
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 
 class Booru {
   Booru(

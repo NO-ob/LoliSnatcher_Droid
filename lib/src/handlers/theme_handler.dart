@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
@@ -139,7 +138,9 @@ class ThemeHandler {
 
     final brightness = isDark ? Brightness.dark : Brightness.light;
     final SchemeTonalSpot scheme = SchemeTonalSpot(
-      sourceColorHct: Hct.fromInt(theme.accent!.value32bit),
+      // TODO replace value with toARGB32() in the next flutter release
+      // ignore: deprecated_member_use
+      sourceColorHct: Hct.fromInt(theme.accent!.value),
       isDark: brightness == Brightness.dark,
       contrastLevel: 0,
     );

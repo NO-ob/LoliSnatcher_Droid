@@ -461,11 +461,11 @@ class _WaterfallViewState extends State<WaterfallView> {
               ),
             ),
             onNotification: (notif) {
-              searchHandler.updateScrollPosition();
+              searchHandler.sendToScrollStream(notif);
 
-              //print('SCROLL NOTIFICATION');
-              //print(searchHandler.gridScrollController.position.maxScrollExtent);
-              //print(notif.metrics); // pixels before viewport, in viewport, after viewport
+              // print('SCROLL NOTIFICATION');
+              // print(searchHandler.gridScrollController.position.maxScrollExtent);
+              // print(notif.metrics); // pixels before viewport, in viewport, after viewport
 
               final bool isNotAtStart = notif.metrics.pixels > 0;
               final bool isAtOrNearEdge = notif.metrics.atEdge ||
@@ -519,13 +519,13 @@ class WaterfallScrollButtons extends StatelessWidget {
         nextOffset = (scrollController.position.viewportDimension * 0.9) * (forward ? 1 : -1);
       }
 
-      onTap(forward);
-
       await scrollController.animateTo(
         scrollController.offset + nextOffset,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+
+      onTap(forward);
     }
   }
 

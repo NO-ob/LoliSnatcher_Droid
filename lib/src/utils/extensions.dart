@@ -30,11 +30,13 @@ extension StringExtras on String {
     return count == 1 ? this : '${this}s';
   }
 
-  String capitalize() => '${this[0].toUpperCase()}${substring(1)}';
+  String _capitalize() => isEmpty ? '' : '${this[0].toUpperCase()}${substring(1)}';
 
-  String toTitleCase() => split(' ').map((s) => s.capitalize()).join(' ');
+  String get capitalizeFirst => _capitalize();
 
-  String toCamelCase() => split(' ').map((s) => s.capitalize()).join('');
+  String toTitleCase() => split(' ').map((s) => s._capitalize()).join(' ');
+
+  String toCamelCase() => split(' ').map((s) => s._capitalize()).join('');
 
   String toSnakeCase() => toLowerCase().replaceAll(' ', '_');
 
@@ -71,4 +73,13 @@ String formatNumber(num number) {
         (Match match) => '${match[1]} ',
       );
   return formattedPart.trim();
+}
+
+extension ListExts<T> on List<T> {
+  T? firstWhereOrNull(bool Function(T e) test) {
+    for (final e in this) {
+      if (test(e)) return e;
+    }
+    return null;
+  }
 }

@@ -1,9 +1,18 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 
 // notification handler is already taken by awesome_notifications
-class NotifyHandler extends GetxController {
+class NotifyHandler {
   NotifyHandler();
+
+  static NotifyHandler get instance => GetIt.instance<NotifyHandler>();
+
+  static NotifyHandler register() {
+    if (!GetIt.instance.isRegistered<NotifyHandler>()) {
+      GetIt.instance.registerSingleton(NotifyHandler());
+    }
+    return instance;
+  }
 
   /// Use this method to detect when a new notification or a schedule is created
   static Future<void> onNotificationCreatedMethod(ReceivedNotification receivedNotification) async {

@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class ImageStats extends StatefulWidget {
   const ImageStats({
     required this.child,
     this.width = 120,
-    this.height = 40,
+    this.height = 100,
     this.isEnabled = true,
     this.align,
     super.key,
@@ -38,11 +36,11 @@ class _ImageStatsState extends State<ImageStats> {
   int _lastCalcTime = 0;
   late Ticker _ticker;
   // double _ticks = 0;
-  final RxInt _totalLive = 0.obs;
-  final RxInt _totalPending = 0.obs;
-  final RxInt _totalAll = 0.obs;
-  final RxInt _cacheSize = 0.obs;
-  final RxInt _cacheMax = 0.obs;
+  final ValueNotifier<int> _totalLive = ValueNotifier(0);
+  final ValueNotifier<int> _totalPending = ValueNotifier(0);
+  final ValueNotifier<int> _totalAll = ValueNotifier(0);
+  final ValueNotifier<int> _cacheSize = ValueNotifier(0);
+  final ValueNotifier<int> _cacheMax = ValueNotifier(0);
   // final bool _shouldRepaint = false;
   int sampleTimeMs = 500;
 
@@ -115,8 +113,17 @@ class _ImageStatsState extends State<ImageStats> {
                     height: widget.height,
                     color: Colors.white.withValues(alpha: 0.8),
                     child: RepaintBoundary(
-                      child: Obx(
-                        () => Column(
+                      child: ListenableBuilder(
+                        listenable: Listenable.merge(
+                          [
+                            _totalLive,
+                            _totalPending,
+                            _totalAll,
+                            _cacheSize,
+                            _cacheMax,
+                          ],
+                        ),
+                        builder: (context, child) => Column(
                           children: [
                             Text('Live: ${_totalLive.value}'),
                             Text('Pending: ${_totalPending.value}'),

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -16,8 +17,15 @@ import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 // TODO media actions, video pause/mute... global controller
 
-class ViewerHandler extends GetxController {
-  static ViewerHandler get instance => Get.find<ViewerHandler>();
+class ViewerHandler {
+  static ViewerHandler get instance => GetIt.instance<ViewerHandler>();
+
+  static ViewerHandler register() {
+    if (!GetIt.instance.isRegistered<ViewerHandler>()) {
+      GetIt.instance.registerSingleton(ViewerHandler());
+    }
+    return instance;
+  }
 
   // Keys to get states of all currently built viewers
   RxList<GlobalKey?> activeKeys = RxList([]);
@@ -198,9 +206,6 @@ class ViewerHandler extends GetxController {
   //   });
   // }
 }
-
-
-
 
 // TODO Stop video when audio output device changes/removed
 // pubspec: audio_session: ^0.1.6+1

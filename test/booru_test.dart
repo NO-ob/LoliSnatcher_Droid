@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/agnph_handler.dart';
 import 'package:lolisnatcher/src/boorus/booru_on_rails_handler.dart';
@@ -41,12 +40,13 @@ const String defaultInput = '';
 
 Future<void> main() async {
   // prepare/init handlers and stuff
-  final SettingsHandler settingsHandler = Get.put(SettingsHandler());
+  final SettingsHandler settingsHandler = SettingsHandler.register();
   await settingsHandler.initialize();
-  final TagHandler tagHandler = Get.put(TagHandler());
+  settingsHandler.tagTypeFetchEnabled = false;
+  settingsHandler.itemLimit = itemLimit;
+
+  final TagHandler tagHandler = TagHandler.register();
   await tagHandler.initialize();
-  SettingsHandler.instance.tagTypeFetchEnabled = false;
-  SettingsHandler.instance.itemLimit = itemLimit;
 
   group('booru tests', () {
     test('BooruOnRailsHandler', () async {

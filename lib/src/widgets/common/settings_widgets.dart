@@ -4,8 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
@@ -36,7 +34,7 @@ class SettingsButton extends StatelessWidget {
   final String name;
   final Widget? icon;
   final Widget? subtitle;
-  final WidgetCallback? page;
+  final Widget Function()? page;
   final VoidCallback? action;
   final VoidCallback? onLongPress;
   final Widget? trailingIcon;

@@ -37,8 +37,7 @@ class Logger {
       ),
     );
 
-    viewController = TalkerViewController();
-    viewController!.toggleExpandedLogs();
+    viewController ??= TalkerViewController()..toggleExpandedLogs();
 
     if (isInit) {
       FlutterError.onError = (FlutterErrorDetails details) {

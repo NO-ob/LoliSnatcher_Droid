@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -20,13 +21,20 @@ class UntypedCollection {
   final Booru booru;
 }
 
-class TagHandler extends GetxController {
+class TagHandler {
   TagHandler() {
     untypedQueue.listen((List<UntypedCollection> list) {
       tryGetTagTypes();
     });
   }
-  static TagHandler get instance => Get.find<TagHandler>();
+  static TagHandler get instance => GetIt.instance<TagHandler>();
+
+  static TagHandler register() {
+    if (!GetIt.instance.isRegistered<TagHandler>()) {
+      GetIt.instance.registerSingleton(TagHandler());
+    }
+    return instance;
+  }
 
   int prevLength = 0;
   final Map<String, Tag> _tagMap = {};

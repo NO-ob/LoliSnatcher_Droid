@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 
 import 'package:chewie/chewie.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 
@@ -55,7 +54,7 @@ class VideoViewerState extends State<VideoViewer> {
   ChewieController? chewieController;
 
   // VideoPlayerValue latestValue;
-  final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
+  final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
   int lastViewedIndex = -1;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false, didAutoplay = false, forceCache = false;

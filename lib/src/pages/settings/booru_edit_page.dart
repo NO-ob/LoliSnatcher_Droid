@@ -495,7 +495,7 @@ class _BooruEditState extends State<BooruEdit> {
           }
 
           // force global restate
-          searchHandler.rootRestate();
+          searchHandler.rootRestate?.call();
 
           Navigator.of(context).pop(true);
         }

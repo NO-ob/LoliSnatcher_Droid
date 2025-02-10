@@ -8,6 +8,7 @@ import 'package:app_links/app_links.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -45,10 +46,14 @@ void main() async {
   Logger.Inst();
 
   // load settings before first render to get theme data early
-  Get.put(NavigationHandler(), permanent: true);
-  Get.put(ViewerHandler(), permanent: true);
-  final SettingsHandler settingsHandler = Get.put(SettingsHandler(), permanent: true);
-  await settingsHandler.initialize();
+  NavigationHandler.register();
+  ViewerHandler.register();
+  await SettingsHandler.register().initialize();
+  SearchHandler.register();
+  SnatchHandler.register();
+  TagHandler.register();
+  NotifyHandler.register();
+  // LocalAuthHandler.register();
 
   // TODO
   // AwesomeNotifications().initialize(
@@ -74,6 +79,8 @@ void main() async {
   //   debug: true,
   // );
 
+  await ServiceHandler.setSystemUiVisibility(true);
+
   runApp(const MainApp());
 }
 
@@ -85,25 +92,19 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  late final SettingsHandler settingsHandler;
-  late final SearchHandler searchHandler;
-  late final SnatchHandler snatchHandler;
-  late final NavigationHandler navigationHandler;
-  late final TagHandler tagHandler;
-  late final NotifyHandler notifyHandler;
-  // late final LocalAuthHandler localAuthHandler;
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final SnatchHandler snatchHandler = SnatchHandler.instance;
+  final NavigationHandler navigationHandler = NavigationHandler.instance;
+  final TagHandler tagHandler = TagHandler.instance;
+  final NotifyHandler notifyHandler = NotifyHandler.instance;
+  // final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
   int maxFps = 60;
 
   @override
   void initState() {
     super.initState();
-    settingsHandler = Get.find<SettingsHandler>();
-    searchHandler = Get.put(SearchHandler(updateState), permanent: true);
-    snatchHandler = Get.put(SnatchHandler(), permanent: true);
-    tagHandler = Get.put(TagHandler(), permanent: true);
-    navigationHandler = Get.find<NavigationHandler>();
-    notifyHandler = Get.put(NotifyHandler(), permanent: true);
-    // localAuthHandler = Get.put(LocalAuthHandler(), permanent: true);
+
     initHandlers();
 
     // TODO
@@ -128,6 +129,7 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> initHandlers() async {
+    searchHandler.setRootRestate(updateState);
     settingsHandler.alice.setNavigatorKey(navigationHandler.navigatorKey);
     await settingsHandler.postInit(() async {
       settingsHandler.postInitMessage.value = 'Loading tags...';
@@ -161,14 +163,18 @@ class _MainAppState extends State<MainApp> {
 
   @override
   void dispose() {
-    Get.delete<NotifyHandler>();
-    Get.delete<NavigationHandler>();
-    Get.delete<ViewerHandler>();
-    Get.delete<SnatchHandler>();
-    Get.delete<SearchHandler>();
-    Get.delete<TagHandler>();
-    // Get.delete<LocalAuthHandler>();
-    Get.delete<SettingsHandler>();
+    GetIt.instance.unregister<NotifyHandler>();
+    GetIt.instance.unregister<NavigationHandler>();
+    GetIt.instance.unregister<ViewerHandler>();
+    GetIt.instance.unregister<SnatchHandler>();
+    GetIt.instance.unregister<SearchHandler>(
+      disposingFunction: (searchHandler) {
+        searchHandler.dispose();
+      },
+    );
+    GetIt.instance.unregister<TagHandler>();
+    // GetIt.instance.unregister<LocalAuthHandler>();
+    GetIt.instance.unregister<SettingsHandler>();
     super.dispose();
   }
 
@@ -196,19 +202,6 @@ class _MainAppState extends State<MainApp> {
         isAmoled: isAmoled,
       );
 
-      // TODO fix status bar coloring when in gallery view (AND depending on theme?)
-      // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      //   statusBarColor: Theme.of(context).colorScheme.background.withValues(alpha: 0.5),
-      //   statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-      //   statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      //   systemStatusBarContrastEnforced: true,
-
-      //   systemNavigationBarColor: Theme.of(context).colorScheme.background.withValues(alpha: 0.5),
-      //   systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-      //   systemNavigationBarContrastEnforced: true,
-      //   systemNavigationBarDividerColor: Colors.transparent,
-      // ));
-
       // debugRepaintRainbowEnabled = settingsHandler.showPerf.value;
 
       return StatsFl(
@@ -222,8 +215,8 @@ class _MainAppState extends State<MainApp> {
         align: Alignment.bottomLeft, //Alignment of statsbox
         child: ImageStats(
           isEnabled: settingsHandler.showImageStats.value,
-          width: 110,
-          height: 80,
+          width: 120,
+          height: 100,
           align: Alignment.centerLeft,
           child: DynamicColorBuilder(
             builder: (lightDynamic, darkDynamic) {

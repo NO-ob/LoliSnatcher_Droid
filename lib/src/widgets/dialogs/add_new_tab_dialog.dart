@@ -48,7 +48,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   @override
   void initState() {
     super.initState();
-    secondaryBoorus = searchHandler.currentSecondaryBoorus ?? [];
+    secondaryBoorus = searchHandler.currentSecondaryBoorus.value ?? [];
   }
 
   @override

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' as getx;
+import 'package:get/get.dart' hide Response;
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
@@ -42,8 +42,8 @@ abstract class BooruHandler {
         'sort:': 'S',
       };
 
-  getx.RxList<BooruItem> fetched = getx.RxList<BooruItem>([]);
-  getx.RxList<BooruItem> filteredFetched = getx.RxList<BooruItem>([]);
+  RxList<BooruItem> fetched = RxList<BooruItem>([]);
+  RxList<BooruItem> filteredFetched = RxList<BooruItem>([]);
 
   /// Filters the list of fetched items and stores them in filteredFetched
   ///
@@ -629,7 +629,7 @@ abstract class BooruHandler {
 
   ////////////////////////////////////////////////////////////////////////
 
-  getx.RxInt totalCount = 0.obs;
+  RxInt totalCount = 0.obs;
   // TODO for boorus where api doesn't give amount outright and we have to calculate it based on smth (last page*items per page, for example) - show "~" symbol to indicate that
   bool get countIsQuestionable => false;
   Future<void> searchCount(String input) async {

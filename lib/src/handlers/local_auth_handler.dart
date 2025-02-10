@@ -2,20 +2,26 @@
 // import 'dart:io';
 
 // import 'package:get/get.dart';
-
+// import 'package:get_it/get_it.dart';
+// import 'package:local_auth/local_auth.dart';
 // import 'package:local_auth_android/local_auth_android.dart';
 // import 'package:local_auth_ios/local_auth_ios.dart';
 // import 'package:local_auth_windows/local_auth_windows.dart';
-// import 'package:local_auth/local_auth.dart';
 
-// TODO test this more
+// // TODO test this more
 
-// class LocalAuthHandler extends GetxController {
-//   static LocalAuthHandler get instance => Get.find<LocalAuthHandler>();
-
+// class LocalAuthHandler {
 //   LocalAuthHandler() {
 //     getInitialBiometricsState();
 //     // _timer = Timer.periodic(const Duration(minutes: 1), (timer) { });
+//   }
+//   static LocalAuthHandler get instance => GetIt.instance<LocalAuthHandler>();
+
+//   static LocalAuthHandler register() {
+//     if (!GetIt.instance.isRegistered<LocalAuthHandler>()) {
+//       GetIt.instance.registerSingleton(LocalAuthHandler());
+//     }
+//     return instance;
 //   }
 
 //   RxnBool isLoggedIn = RxnBool(null);
@@ -25,9 +31,9 @@
 
 //   bool get isSupportedPlatform => Platform.isAndroid || Platform.isIOS || Platform.isWindows;
 
-//   void getInitialBiometricsState() async {
+//   Future<void> getInitialBiometricsState() async {
 //     deviceSupportsBiometrics.value = await canCheckBiometrics();
-//     logout();
+//     await logout();
 //   }
 
 //   Future<bool> canCheckBiometrics() async {
@@ -83,7 +89,7 @@
 //     return;
 //   }
 
-//   void logout() async {
+//   Future<void> logout() async {
 //     isLoggedIn.value = true;
 //     return;
 
@@ -98,11 +104,11 @@
 //     lastLeaveTime = DateTime.now().millisecondsSinceEpoch;
 //   }
 
-//   void onReturn() async {
+//   Future<void> onReturn() async {
 //     const int oneMinute = 60 * 1000;
 //     final int timeSinceLastLeave = DateTime.now().millisecondsSinceEpoch - lastLeaveTime;
 //     if (timeSinceLastLeave > oneMinute) {
-//       logout();
+//       await logout();
 //       await authenticate();
 //     }
 //   }

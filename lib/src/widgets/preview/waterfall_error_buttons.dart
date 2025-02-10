@@ -10,7 +10,12 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class WaterfallErrorButtons extends StatefulWidget {
-  const WaterfallErrorButtons({super.key});
+  const WaterfallErrorButtons({
+    this.compact = false,
+    super.key,
+  });
+
+  final bool compact;
 
   @override
   State<WaterfallErrorButtons> createState() => _WaterfallErrorButtonsState();
@@ -121,7 +126,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             );
           } else {
             return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+              padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 6),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -194,7 +199,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           );
         } else {
           if (searchHandler.errorString.isNotEmpty) {
-            final String errorFormatted = searchHandler.errorString.isNotEmpty ? '\n${searchHandler.errorString}' : '';
+            final String errorFormatted = (searchHandler.errorString.isNotEmpty && !widget.compact) ? '\n${searchHandler.errorString}' : '';
             // ... if error happened
             if (!isCollapsed) {
               return _ButtonWrapper(
@@ -222,7 +227,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
               );
             } else {
               return Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+                padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 6),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -301,7 +306,7 @@ class _ButtonWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
-      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 6),
       child: child,
     );
   }

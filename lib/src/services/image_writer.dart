@@ -143,7 +143,10 @@ class ImageWriter {
               throw Exception('SAF file not found');
             }
           } else {
-            await ServiceHandler.callMediaScanner(image.path);
+            final File file = File('$path$fileName');
+            if (!await file.exists()) {
+              throw Exception('File not found');
+            }
           }
         }
       } catch (e, s) {

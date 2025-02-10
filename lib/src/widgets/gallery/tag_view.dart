@@ -1242,7 +1242,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
 
   Future<void> loadPreview() async {
     preview = SearchTab(
-      searchHandler.currentBooru.obs,
+      searchHandler.currentBooru,
       null,
       widget.tag,
     );

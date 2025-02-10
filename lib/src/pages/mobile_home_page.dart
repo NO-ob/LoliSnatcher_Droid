@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_inner_drawer/inner_drawer.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FirstWhereExt;
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -311,7 +311,7 @@ class MainDrawer extends StatelessWidget {
                           value: settingsHandler.blurImages,
                           onChanged: (newValue) {
                             settingsHandler.blurImages = newValue;
-                            searchHandler.rootRestate();
+                            searchHandler.rootRestate?.call();
                           },
                           title: 'Blur [DEV]',
                         ),
@@ -874,8 +874,8 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
         children: [
           SettingsToggle(
             title: 'Multibooru mode',
-            value: searchHandler.currentSecondaryBoorus?.isNotEmpty ?? false,
-            drawBottomBorder: searchHandler.currentSecondaryBoorus?.isEmpty ?? true,
+            value: searchHandler.currentSecondaryBoorus.value?.isNotEmpty ?? false,
+            drawBottomBorder: searchHandler.currentSecondaryBoorus.value?.isEmpty ?? true,
             onChanged: (newValue) {
               if (settingsHandler.booruList.length < 2) {
                 FlashElements.showSnackbar(
@@ -941,7 +941,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
             },
           ),
           Obx(() {
-            final bool hasTabsAndTabHasSecondaryBoorus = searchHandler.list.isNotEmpty && (searchHandler.currentSecondaryBoorus?.isNotEmpty ?? false);
+            final bool hasTabsAndTabHasSecondaryBoorus = searchHandler.list.isNotEmpty && (searchHandler.currentSecondaryBoorus.value?.isNotEmpty ?? false);
 
             return AnimatedSize(
               duration: const Duration(milliseconds: 200),

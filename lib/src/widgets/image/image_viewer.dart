@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -44,7 +43,7 @@ class ImageViewerState extends State<ImageViewer> {
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
 
-  final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
+  final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
   bool isStopped = false, isFromCache = false, isLoaded = false, isViewed = false, isZoomed = false, firstBuild = true;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   List<String> stopReason = [];
@@ -177,7 +176,7 @@ class ImageViewerState extends State<ImageViewer> {
 
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
-    final MediaQueryData mQuery = NavigationHandler.instance.navigatorKey.currentContext!.mediaQuery;
+    final MediaQueryData mQuery = MediaQuery.of(NavigationHandler.instance.navigatorKey.currentContext!);
     widthLimit = settingsHandler.disableImageScaling ? null : (mQuery.size.width * mQuery.devicePixelRatio * 2).round();
 
     mainProvider ??= await getImageProvider();

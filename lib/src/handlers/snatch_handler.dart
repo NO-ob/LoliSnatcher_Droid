@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -13,13 +14,21 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
-class SnatchHandler extends GetxController {
+class SnatchHandler {
   SnatchHandler() {
     queuedList.listen((List<SnatchItem> list) {
       trySnatch();
     });
   }
-  static SnatchHandler get instance => Get.find<SnatchHandler>();
+
+  static SnatchHandler get instance => GetIt.instance<SnatchHandler>();
+
+  static SnatchHandler register() {
+    if (!GetIt.instance.isRegistered<SnatchHandler>()) {
+      GetIt.instance.registerSingleton(SnatchHandler());
+    }
+    return instance;
+  }
 
   RxBool active = false.obs;
   RxString status = ''.obs;

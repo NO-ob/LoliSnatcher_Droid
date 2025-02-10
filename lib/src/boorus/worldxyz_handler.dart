@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' show FirstWhereExt;
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 
 class WorldXyzHandler extends BooruHandler {
   WorldXyzHandler(super.booru, super.limit);

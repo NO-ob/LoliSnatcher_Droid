@@ -28,14 +28,6 @@ class ServiceHandler {
   }
 
   static const platform = MethodChannel('com.noaisu.loliSnatcher/services');
-  // Call androids native media scanner on a file path
-  static Future<void> callMediaScanner(String path) async {
-    try {
-      await platform.invokeMethod('scanMedia', {'path': path});
-    } catch (e) {
-      log(e);
-    }
-  }
 
   static Future<void> restartApp() {
     return platform.invokeMethod('restartApp');
@@ -398,8 +390,8 @@ class ServiceHandler {
     }
   }
 
-  static void setSystemUiVisibility(bool visible) {
-    SystemChrome.setEnabledSystemUIMode(
+  static Future<void> setSystemUiVisibility(bool visible) async {
+    await SystemChrome.setEnabledSystemUIMode(
       visible ? SystemUiMode.edgeToEdge : SystemUiMode.immersiveSticky,
       overlays: visible ? SystemUiOverlay.values : [],
     );

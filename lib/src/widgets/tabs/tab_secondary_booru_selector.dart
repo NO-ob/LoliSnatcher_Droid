@@ -36,7 +36,7 @@ class TabSecondaryBooruSelector extends StatelessWidget {
       final bool isDesktop = settingsHandler.appMode.value.isDesktop;
       final EdgeInsetsGeometry margin = isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8);
 
-      final List<Booru> value = searchHandler.currentSecondaryBoorus ?? [];
+      final List<Booru> value = searchHandler.currentSecondaryBoorus.value ?? [];
 
       return Padding(
         padding: margin,
