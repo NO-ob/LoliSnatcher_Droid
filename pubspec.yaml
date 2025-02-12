@@ -6,7 +6,7 @@ version: 2.4.2+193 # remember to update the values in constants.dart after chang
 
 environment:
   sdk: ">=3.6.1 <4.0.0"
-  flutter: ^3.27.4
+  flutter: ^3.29.0
 
 dependencies:
   flutter:
@@ -14,7 +14,7 @@ dependencies:
   alice_lightweight: ^3.9.0
   app_links: ^6.3.3
   auto_size_text_plus: ^3.0.2
-  awesome_notifications: ^0.10.0
+  # awesome_notifications: ^0.10.0
   chewie: ^1.10.0
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
@@ -50,7 +50,7 @@ dependencies:
   http_proxy: # ^1.2.2
     git:
       url: https://github.com/NANI-SORE/http_proxy.git
-      ref: ce01861ac45b12e9d974cb447ea91ef68a90427d # master - forked to fix build errors and remove allowing all bad certs
+      ref: 36a202ceec982d199acdcd717ce85436372f447d # master - forked to fix build errors and remove allowing all bad certs
   huge_listview: ^2.0.12
   image: ^4.5.2
   intl: ^0.20.2

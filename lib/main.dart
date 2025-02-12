@@ -53,29 +53,6 @@ void main() async {
   NotifyHandler.register();
   // LocalAuthHandler.register();
 
-  // TODO
-  // AwesomeNotifications().initialize(
-  //   // set the icon to null if you want to use the default app icon
-  //   null,
-  //   [
-  //     NotificationChannel(
-  //       channelGroupKey: 'basic_channel_group',
-  //       channelKey: 'basic_channel',
-  //       channelName: 'Basic notifications',
-  //       channelDescription: 'Notification channel for basic tests',
-  //       defaultColor: Colors.pink[600],
-  //       ledColor: Colors.white,
-  //     )
-  //   ],
-  //   // Channel groups are only visual and are not required
-  //   channelGroups: [
-  //     NotificationChannelGroup(
-  //       channelGroupKey: 'basic_channel_group',
-  //       channelGroupName: 'Basic group',
-  //     ),
-  //   ],
-  //   debug: true,
-  // );
 
   await ServiceHandler.setSystemUiVisibility(true);
 
@@ -104,24 +81,6 @@ class _MainAppState extends State<MainApp> {
     super.initState();
 
     initHandlers();
-
-    // TODO
-    // AwesomeNotifications().setListeners(
-    //   onActionReceivedMethod: NotifyHandler.onActionReceivedMethod,
-    //   onNotificationCreatedMethod: NotifyHandler.onNotificationCreatedMethod,
-    //   onNotificationDisplayedMethod: NotifyHandler.onNotificationDisplayedMethod,
-    //   onDismissActionReceivedMethod: NotifyHandler.onDismissActionReceivedMethod,
-    // );
-
-    // AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
-    //   if (!isAllowed) {
-    //     // TODO
-    //     // This is just a basic example. For real apps, you must show some
-    //     // friendly dialog box before call the request method.
-    //     // This is very important to not harm the user experience
-    //     AwesomeNotifications().requestPermissionToSendNotifications();
-    //   }
-    // });
 
     setMaxFPS();
   }
