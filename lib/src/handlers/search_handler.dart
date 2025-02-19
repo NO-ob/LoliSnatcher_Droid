@@ -251,6 +251,8 @@ class SearchHandler {
     }
   }
 
+  List<String> get searchTextControllerTags => searchTextController.text.trim().split(' ').where((t) => t.isNotEmpty).toList();
+
   void removeTagFromSearch(String tag) {
     if (tag.isNotEmpty) {
       searchTextController.text = searchTextController.text.replaceAll('-$tag', '').replaceAll(tag, '');

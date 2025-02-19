@@ -248,25 +248,37 @@ class MainSearchBarWithActions extends StatelessWidget {
   SearchHandler get searchHandler => SearchHandler.instance;
   SettingsHandler get settingsHandler => SettingsHandler.instance;
 
-  void onChipTap(BuildContext context, String tag) {
+  void onChipTap(
+    BuildContext context,
+    String tag,
+    int tagIndex,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => SearchQueryEditorPage(subTag: subTag)),
     );
   }
 
-  void onChipLongTap(BuildContext context, String tag) {
+  void onChipLongTap(
+    BuildContext context,
+    String tag,
+    int tagIndex,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SearchQueryEditorPage(
           subTag: subTag,
-          tagToEdit: tag,
+          tagToEditIndex: tagIndex,
         ),
       ),
     );
   }
 
-  void onChipDeleteTap(String tag) {
-    searchHandler.searchTextController.text = searchHandler.searchTextController.text.replaceAll(tag, '').trim();
+  void onChipDeleteTap(
+    String tag,
+    int tagIndex,
+  ) {
+    final List<String> tempTags = searchHandler.searchTextControllerTags..removeAt(tagIndex);
+    searchHandler.searchTextController.text = tempTags.join(' ');
   }
 
   void onSearchBackgroundTap(BuildContext context) {
@@ -303,8 +315,8 @@ class MainSearchBarWithActions extends StatelessWidget {
           ),
         ),
         child: MainSearchBar(
-          onChipTap: (tag) => onChipTap(context, tag),
-          onChipLongTap: (tag) => onChipLongTap(context, tag),
+          onChipTap: (tag, index) => onChipTap(context, tag, index),
+          onChipLongTap: (tag, index) => onChipLongTap(context, tag, index),
           onChipDeleteTap: onChipDeleteTap,
           onSearchBackgroundTap: () => onSearchBackgroundTap(context),
           onResetTap: onResetTap,
@@ -328,19 +340,21 @@ class MainSearchBar extends StatefulWidget {
     this.onSearchBackgroundTap,
     this.scrollController,
     this.selectedTag,
+    this.selectedTagIndex,
     this.subTag,
     super.key,
   });
 
-  final ValueChanged<String> onChipTap;
-  final ValueChanged<String> onChipLongTap;
-  final ValueChanged<String> onChipDeleteTap;
+  final void Function(String, int) onChipTap;
+  final void Function(String, int) onChipLongTap;
+  final void Function(String, int) onChipDeleteTap;
   final VoidCallback onResetTap;
   final VoidCallback onSearchTap;
   final VoidCallback onSearchLongTap;
   final VoidCallback? onSearchBackgroundTap;
   final AutoScrollController? scrollController;
   final String? selectedTag;
+  final int? selectedTagIndex;
   final String? subTag;
 
   @override
@@ -388,7 +402,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
   }
 
   void parseTags() {
-    tags = searchHandler.searchTextController.text.split(' ').where((t) => t.isNotEmpty).toList();
+    tags = searchHandler.searchTextControllerTags;
   }
 
   void scrollToStart() {
@@ -439,6 +453,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
                   children: [
                     Expanded(
                       child: FadingEdgeScrollView.fromScrollView(
+                        // TODO make list reorderable?
                         child: ListView(
                           controller: scrollController,
                           scrollDirection: Axis.horizontal,
@@ -473,11 +488,13 @@ class _MainSearchBarState extends State<MainSearchBar> {
                                       MainSearchTagChip(
                                         tag: tags[i],
                                         tab: searchHandler.currentTab,
-                                        onTap: widget.onChipTap,
-                                        onLongTap: widget.onChipLongTap,
-                                        onDeleteTap: widget.onChipDeleteTap,
+                                        onTap: () => widget.onChipTap(tags[i], i),
+                                        onLongTap: () => widget.onChipLongTap(tags[i], i),
+                                        onDeleteTap: () => widget.onChipDeleteTap(tags[i], i),
+                                        canDelete: widget.selectedTagIndex != i,
+                                        isSelected: widget.selectedTag == tags[i] || widget.selectedTagIndex == i,
                                       ),
-                                      if (widget.selectedTag == tags[i])
+                                      if (widget.selectedTag == tags[i] || widget.selectedTagIndex == i)
                                         Positioned.fill(
                                           child: TransparentPointer(
                                             child: DecoratedBox(
@@ -618,15 +635,19 @@ class MainSearchTagChip extends StatelessWidget {
     this.onTap,
     this.onLongTap,
     this.onDeleteTap,
+    this.canDelete = true,
+    this.isSelected = false,
     super.key,
   }) : assert(tab != null || booru != null, 'tab or booru must be provided');
 
   final String tag;
   final SearchTab? tab;
   final Booru? booru;
-  final void Function(String tag)? onTap;
-  final void Function(String tag)? onLongTap;
-  final void Function(String tag)? onDeleteTap;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongTap;
+  final VoidCallback? onDeleteTap;
+  final bool canDelete;
+  final bool isSelected;
 
   Map<RegExp, SearchModifierType> get searchModsPatterns => {
         RegExp('^sort:'): SearchModifierType.sort,
@@ -840,8 +861,8 @@ class MainSearchTagChip extends StatelessWidget {
                           child: Material(
                             color: Colors.transparent,
                             child: InkWell(
-                              onTap: () => onTap?.call(tag),
-                              onLongPress: () => onLongTap?.call(tag),
+                              onTap: onTap,
+                              onLongPress: onLongTap,
                             ),
                           ),
                         ),
@@ -862,13 +883,13 @@ class MainSearchTagChip extends StatelessWidget {
                             topRight: Radius.circular(12),
                             bottomRight: Radius.circular(12),
                           ),
-                          onTap: () => onDeleteTap?.call(tag),
+                          onTap: canDelete ? onDeleteTap : null,
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 6),
                             child: Icon(
                               Icons.close_rounded,
                               size: 20,
-                              color: tagColor,
+                              color: canDelete ? tagColor : Colors.grey.shade400,
                             ),
                           ),
                         ),
@@ -902,13 +923,13 @@ class MainSearchTagChip extends StatelessWidget {
 class SearchQueryEditorPage extends StatefulWidget {
   const SearchQueryEditorPage({
     this.subTag,
-    this.tagToEdit,
+    this.tagToEditIndex,
     this.autoFocus = true,
     super.key,
   });
 
   final String? subTag;
-  final String? tagToEdit;
+  final int? tagToEditIndex;
   final bool autoFocus;
 
   @override
@@ -924,6 +945,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
   final AutoScrollController searchBarScrollController = AutoScrollController();
 
   final TextEditingController suggestionTextController = TextEditingController();
+  String get suggestionTextControllerRawInput =>
+      suggestionTextController.text.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').replaceAll(RegExp(r'^\d+#'), '').trim();
 
   final FocusNode suggestionTextFocusNode = FocusNode();
   final ValueNotifier<bool> suggestionTextFocusNodeHasFocus = ValueNotifier(false);
@@ -931,6 +954,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
   bool loading = true, failed = false;
 
   String? tagToEdit;
+  int? tagToEditIndex;
 
   List<String> suggestedTags = [];
 
@@ -946,8 +970,17 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     suggestionTextController.addListener(onSuggestionTextChanged);
     suggestionTextFocusNode.addListener(suggestionTextFocusListener);
 
-    if (widget.tagToEdit != null) {
-      onChipTap(widget.tagToEdit ?? '');
+    if (widget.tagToEditIndex != null) {
+      onChipTap(
+        searchHandler.searchTextControllerTags[widget.tagToEditIndex!],
+        widget.tagToEditIndex!,
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        searchBarScrollController.scrollToIndex(
+          widget.tagToEditIndex!,
+          preferPosition: AutoScrollPosition.end,
+        );
+      });
     } else {
       if (widget.autoFocus) {
         suggestionTextFocusNode.requestFocus();
@@ -989,7 +1022,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
           cancelToken = CancelToken();
 
           suggestedTags = await handler.tagSearch(
-            suggestionTextController.text.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').replaceAll(RegExp(r'^\d+#'), '').trim(),
+            suggestionTextControllerRawInput,
             cancelToken: cancelToken,
           );
 
@@ -1015,9 +1048,11 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     }
   }
 
-  void onChipTap(String tag) {
-    if (tagToEdit == tag) {
+  void onChipTap(String tag, int tagIndex) {
+    // TODO ui edit for search mods?
+    if (tagToEditIndex == tagIndex) {
       suggestionTextController.clear();
+      tagToEditIndex = null;
       tagToEdit = null;
     } else {
       suggestionTextFocusNode.requestFocus();
@@ -1030,10 +1065,11 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
         ),
       );
 
+      tagToEditIndex = tagIndex;
       tagToEdit = tag;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         searchBarScrollController.scrollToIndex(
-          searchHandler.searchTextController.text.split(' ').indexOf(tag),
+          tagIndex,
           preferPosition: AutoScrollPosition.end,
         );
       });
@@ -1043,14 +1079,17 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     runSearch();
   }
 
-  void onChipLongTap(String tag) {
-    // TODO?
-    onChipTap(tag);
+  void onChipLongTap(String tag, int tagIndex) {
+    // TODO raw text edit for search mods?
+    onChipTap(tag, tagIndex);
   }
 
-  void onChipDeleteTap(String tag) {
-    searchHandler.searchTextController.text = searchHandler.searchTextController.text.replaceAll(tag, '');
-    if (tagToEdit == tag) {
+  void onChipDeleteTap(String tag, int tagIndex) {
+    final List<String> tempTags = searchHandler.searchTextControllerTags..removeAt(tagIndex);
+    searchHandler.searchTextController.text = tempTags.join(' ');
+    if (tagToEditIndex != null) {
+      // TODO update index to closest instead of resetting?
+      tagToEditIndex = null;
       tagToEdit = null;
       suggestionTextController.clear();
       setState(() {});
@@ -1076,20 +1115,30 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
   }
 
-  void onSuggestionTap(String tag) {
-    int? itemIndex;
-    if (tagToEdit != null) {
-      itemIndex = searchHandler.searchTextController.text.trim().split(' ').indexOf(tagToEdit!);
-      if (itemIndex == -1) {
-        itemIndex = null;
-      }
-      searchHandler.searchTextController.text = searchHandler.searchTextController.text.replaceAll(tagToEdit!, tag);
-    } else {
-      searchHandler.searchTextController.text = '${searchHandler.searchTextController.text.trim()} $tag';
+  void onSuggestionTap(
+    String tag, {
+    bool raw = false,
+  }) {
+    String tagWithExtras = tag;
+
+    if (!raw) {
+      final String extrasFromInput = suggestionTextController.text.replaceAll(suggestionTextControllerRawInput, '').trim();
+      tagWithExtras = '$extrasFromInput$tag';
     }
+
+    final int? itemIndex = tagToEditIndex;
+    if (tagToEditIndex != null) {
+      final List<String> tempTags = [...searchHandler.searchTextControllerTags];
+      tempTags[tagToEditIndex!] = tagWithExtras;
+      searchHandler.searchTextController.text = tempTags.join(' ');
+    } else {
+      searchHandler.searchTextController.text = '${searchHandler.searchTextController.text.trim()} $tagWithExtras';
+    }
+
     suggestedTags = [];
     suggestionTextController.clear();
     suggestionTextFocusNode.requestFocus();
+    tagToEditIndex = null;
     tagToEdit = null;
     setState(() {});
 
@@ -1127,7 +1176,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
 
   void onSuggestionSubmitted(String text) {
     if (text.isNotEmpty) {
-      onSuggestionTap(text);
+      onSuggestionTap(text, raw: true);
     }
   }
 
@@ -1283,7 +1332,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                           top: MediaQuery.paddingOf(context).top + 16,
                           bottom: 12,
                         ),
-                        itemCount: suggestedTags.isEmpty ? 1 : suggestedTags.length * 2,
+                        itemCount: suggestedTags.isEmpty ? 1 : suggestedTags.length,
                         itemBuilder: (context, index) {
                           if (suggestedTags.isEmpty) {
                             if (loading) {
@@ -1312,7 +1361,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                             }
                           }
 
-                          final String tag = suggestedTags[index % suggestedTags.length];
+                          final String tag = suggestedTags[index];
                           Color tagColor = tagHandler.getTag(tag).getColour();
                           if (tagColor == Colors.transparent) tagColor = Theme.of(context).colorScheme.onSurface;
 
@@ -1406,11 +1455,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 tag: 'mainSearchBar-${widget.subTag}',
                 child: ScrollConfiguration(
                   behavior: ScrollConfiguration.of(context).copyWith(
-                    physics: tagToEdit != null
-                        ? const NeverScrollableScrollPhysics()
-                        : const AlwaysScrollableScrollPhysics(
-                            parent: BouncingScrollPhysics(),
-                          ),
+                    physics: const AlwaysScrollableScrollPhysics(
+                      parent: BouncingScrollPhysics(),
+                    ),
                   ),
                   child: MainSearchBar(
                     onChipTap: onChipTap,
@@ -1420,7 +1467,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                     onSearchTap: onSearchTap,
                     onSearchLongTap: onSearchLongTap,
                     scrollController: searchBarScrollController,
-                    selectedTag: tagToEdit,
+                    selectedTagIndex: tagToEditIndex,
                   ),
                 ),
               ),
