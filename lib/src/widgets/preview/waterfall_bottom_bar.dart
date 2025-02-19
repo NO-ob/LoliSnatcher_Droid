@@ -97,7 +97,7 @@ class WaterfallBottomBarState extends State<WaterfallBottomBar> with TickerProvi
     final ScrollDirection direction = delta == 0 ? ScrollDirection.idle : (delta > 0 ? ScrollDirection.forward : ScrollDirection.reverse);
     delta = delta.abs();
 
-    final double offsetLimit = kToolbarHeight + MediaQuery.viewPaddingOf(context).bottom;
+    final double offsetLimit = MainSearchBar.height + MediaQuery.viewPaddingOf(context).bottom;
     const double oppositeLimit = 20;
 
     if (direction != lastDirection) {
@@ -189,7 +189,7 @@ class WaterfallBottomBarState extends State<WaterfallBottomBar> with TickerProvi
               final double buttonPadding = ((MediaQuery.sizeOf(context).width * 0.07) + kMinInteractiveDimension) * reverseAnimValue;
 
               return Transform.translate(
-                offset: Offset(0, (kToolbarHeight + bottomPadding) * animValue),
+                offset: Offset(0, (MainSearchBar.height + bottomPadding) * animValue),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 100),
                   padding: EdgeInsets.only(
@@ -217,15 +217,14 @@ class WaterfallBottomBarState extends State<WaterfallBottomBar> with TickerProvi
                     bottom: (12 + bottomPadding) * reverseAnimValue,
                   ),
                   child: Transform.translate(
-                    offset: Offset(0, (kToolbarHeight + bottomPadding) * 2 * animValue),
+                    offset: Offset(0, (MainSearchBar.height + bottomPadding) * 2 * animValue),
                     child: child,
                   ),
                 ),
               );
             },
             child: Container(
-              // TODO which height will be best for ux?
-              height: kToolbarHeight - 4,
+              height: MainSearchBar.height,
               width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 12),
               child: const MainSearchBarWithActions('bottom'),
@@ -356,6 +355,8 @@ class MainSearchBar extends StatefulWidget {
   final String? selectedTag;
   final int? selectedTagIndex;
   final String? subTag;
+
+  static double height = 48;
 
   @override
   State<MainSearchBar> createState() => _MainSearchBarState();
@@ -1448,7 +1449,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
           ),
           // Search bar
           SizedBox(
-            height: kToolbarHeight - 4,
+            height: MainSearchBar.height,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Hero(
