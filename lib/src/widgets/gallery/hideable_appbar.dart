@@ -70,8 +70,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
   CancelToken? shareCancelToken;
   bool isOnTop = true;
 
-  late StreamSubscription<bool> appbarListener;
-
   ////////// Auto Scroll Stuff ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///
   ///
@@ -566,22 +564,22 @@ class _HideableAppBarState extends State<HideableAppBar> {
                 children: [
                   SelectableText(item.fileURL),
                   const SizedBox(height: 16),
-                  if (item.isSnatched.value == true) ...[
+                  if (item.isSnatched.value != null)
                     ListTile(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                         side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                       ),
                       onTap: () async {
-                        item.isSnatched.value = false;
+                        item.isSnatched.value = !item.isSnatched.value!;
                         await settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
                         Navigator.of(context).pop();
                       },
-                      leading: const Icon(Icons.file_download_off_outlined),
-                      title: const Text('Drop Snatched status'),
+                      leading: item.isSnatched.value == true ? const Icon(Icons.clear) : const Icon(Icons.check),
+                      title: item.isSnatched.value == true ? const Text('Drop snatched status') : const Text('Set snatched status'),
                     ),
-                    const SizedBox(height: 16),
-                  ],
+                  //
+                  const SizedBox(height: 16),
                   ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -984,10 +982,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     ServiceHandler.setSystemUiVisibility(!settingsHandler.autoHideImageBar);
     viewerHandler.displayAppbar.value = !settingsHandler.autoHideImageBar;
 
-    appbarListener = viewerHandler.displayAppbar.listen((bool value) {
-      ServiceHandler.setSystemUiVisibility(value);
-      setState(() {});
-    });
+    viewerHandler.displayAppbar.addListener(appbarListener);
 
     widget.pageController.addListener(pageListener);
 
@@ -996,12 +991,17 @@ class _HideableAppBarState extends State<HideableAppBar> {
     );
   }
 
+  void appbarListener() {
+    ServiceHandler.setSystemUiVisibility(viewerHandler.displayAppbar.value);
+    setState(() {});
+  }
+
   @override
   void dispose() {
     widget.pageController.removeListener(pageListener);
     autoScrollProgressController?.dispose();
     autoScrollTimer?.cancel();
-    appbarListener.cancel();
+    viewerHandler.displayAppbar.removeListener(appbarListener);
     ServiceHandler.setSystemUiVisibility(true);
 
     super.dispose();

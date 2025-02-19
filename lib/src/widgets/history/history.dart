@@ -400,6 +400,7 @@ class _HistoryListState extends State<HistoryList> {
               clearable: true,
               pasteable: true,
               margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
           ),
           Center(

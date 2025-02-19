@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -19,7 +20,7 @@ import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/preview/grid_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/staggered_builder.dart';
-import 'package:lolisnatcher/src/widgets/preview/waterfall_error_buttons.dart';
+import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
 import 'package:lolisnatcher/src/widgets/root/main_appbar.dart';
 
 class WaterfallView extends StatefulWidget {
@@ -33,11 +34,11 @@ class _WaterfallViewState extends State<WaterfallView> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
+  final NavigationHandler navigationHandler = NavigationHandler.instance;
 
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   bool scrollDone = true;
-  late StreamSubscription tabIndexListener, tabIdListener, viewedIndexListener, isLoadingListener;
 
   Orientation currentOrientation = Orientation.portrait;
 
@@ -52,19 +53,15 @@ class _WaterfallViewState extends State<WaterfallView> {
     viewerHandler.inViewer.value = false;
 
     // scroll to current viewed item
-    viewedIndexListener = searchHandler.viewedIndex.listen(viewedIndexChanged);
+    searchHandler.viewedIndex.addListener(viewedIndexListener);
 
     // listen to current tab change to restore the scroll value
-    tabIndexListener = searchHandler.index.listen(tabChanged);
+    searchHandler.index.addListener(tabIndexListener);
 
-    tabIdListener = searchHandler.tabId.listen(tabIdChanged);
+    searchHandler.tabId.addListener(tabIdListener);
 
     // listen to isLoading to select first loaded item for desktop
-    isLoadingListener = searchHandler.isLoading.listen((bool isLoading) {
-      if (!isLoading) {
-        afterSearch();
-      }
-    });
+    searchHandler.isLoading.addListener(isLoadingListener);
 
     setVolumeListener();
     // reset the volume butons state
@@ -75,7 +72,7 @@ class _WaterfallViewState extends State<WaterfallView> {
       initialScrollOffset: searchHandler.currentTab.scrollPosition,
       viewportBoundaryGetter: () => Rect.fromLTRB(
         0,
-        isMobile ? (MediaQuery.paddingOf(context).top + 4) : 0,
+        isMobile ? (MediaQuery.paddingOf(context).top + kToolbarHeight + 4) : 0,
         0,
         MediaQuery.paddingOf(context).bottom,
       ),
@@ -84,22 +81,22 @@ class _WaterfallViewState extends State<WaterfallView> {
     isStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
   }
 
-  void viewedIndexChanged(int newIndex) {
+  void viewedIndexListener() {
     if (isMobile) {
-      jumpTo(newIndex);
+      jumpTo(searchHandler.viewedIndex.value);
     } else {
       // don't auto scroll on viewed index change on desktop
       // call jumpTo only when viewed item is possibly out of view (i.e. selected by arrow keys)
     }
   }
 
-  void tabIdChanged(String? newTabId) {
-    if (newTabId != null) {
-      tabChanged(searchHandler.currentIndex);
+  void tabIdListener() {
+    if (searchHandler.tabId.value != null) {
+      tabIndexListener();
     }
   }
 
-  void tabChanged(int newIndex) {
+  void tabIndexListener() {
     // print('tabChanged: ${searchHandler.currentTab.scrollPosition} ${searchHandler.gridScrollController.hasClients}');
 
     // postpone scroll updates until the current render is done, since this is called after the global restate after exiting settings
@@ -114,7 +111,7 @@ class _WaterfallViewState extends State<WaterfallView> {
           initialScrollOffset: searchHandler.currentTab.scrollPosition,
           viewportBoundaryGetter: () => Rect.fromLTRB(
             0,
-            isMobile ? (MediaQuery.paddingOf(context).top + 4) : 0,
+            isMobile ? (MediaQuery.paddingOf(context).top + kToolbarHeight + 4) : 0,
             0,
             MediaQuery.paddingOf(context).bottom,
           ),
@@ -127,6 +124,12 @@ class _WaterfallViewState extends State<WaterfallView> {
     if (isStaggered != newIsStaggered) {
       isStaggered = newIsStaggered;
       setState(() {});
+    }
+  }
+
+  void isLoadingListener() {
+    if (!searchHandler.isLoading.value) {
+      afterSearch();
     }
   }
 
@@ -156,10 +159,10 @@ class _WaterfallViewState extends State<WaterfallView> {
 
   @override
   void dispose() {
-    tabIndexListener.cancel();
-    tabIdListener.cancel();
-    viewedIndexListener.cancel();
-    isLoadingListener.cancel();
+    searchHandler.viewedIndex.removeListener(viewedIndexListener);
+    searchHandler.index.removeListener(tabIndexListener);
+    searchHandler.tabId.removeListener(tabIdListener);
+    searchHandler.isLoading.removeListener(isLoadingListener);
     kbFocusNode.dispose();
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(true);
@@ -173,10 +176,8 @@ class _WaterfallViewState extends State<WaterfallView> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (newIndex == 0) {
-        // viewedIndex == 0 when tab is first created, so we should scroll to top on 0th item (not to the item itself, because there is padding on top of it) to avoid bugs with appbar
         searchHandler.gridScrollController.jumpTo(0);
       } else {
-        // scroll to viewed item
         searchHandler.gridScrollController.scrollToIndex(
           newIndex,
           duration: Duration(milliseconds: isMobile ? 10 : 100),
@@ -187,10 +188,8 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   void afterSearch() {
-    // desktop view first load setter
     if ((searchHandler.currentFetched.isNotEmpty && searchHandler.currentFetched.length < (settingsHandler.itemLimit + 1)) && !isMobile) {
       if (searchHandler.viewedItem.value.fileURL.isEmpty) {
-        // print("setting booruItem value");
         final BooruItem item = searchHandler.setViewedItem(0);
         viewerHandler.setCurrent(item.key);
       }
@@ -201,7 +200,6 @@ class _WaterfallViewState extends State<WaterfallView> {
     kbFocusNode.requestFocus();
     viewerHandler.dropCurrent();
 
-    // clear all quality toggles to default
     for (final item in searchHandler.currentTab.booruHandler.fetched) {
       if (item.toggleQuality.value) {
         item.toggleQuality.value = false;
@@ -253,6 +251,11 @@ class _WaterfallViewState extends State<WaterfallView> {
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
 
       viewerCallback();
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        navigationHandler.floatingHeaderKey.currentState?.show();
+        navigationHandler.bottomBarKey.currentState?.show();
+      });
     } else {
       //
     }
@@ -285,8 +288,6 @@ class _WaterfallViewState extends State<WaterfallView> {
 
   @override
   Widget build(BuildContext context) {
-    // print('!!! WATERFALL BUILD: ${searchHandler.currentFetched.length}');
-
     // check if grid type changed when rebuilding the widget (must happen only on start and when saving settings)
     final bool newIsStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
     if (isStaggered != newIsStaggered) {
@@ -308,185 +309,147 @@ class _WaterfallViewState extends State<WaterfallView> {
       });
     }
 
-    return KeyboardListener(
-      // Note: use autofocus instead focusedChild == null that was used before, old way caused unnecesary rebuilds and broke hero animation
-      autofocus: true,
-      focusNode: kbFocusNode,
-      onKeyEvent: (KeyEvent event) {
-        // print('waterfall keyboard ${viewerHandler.inViewer.value}');
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      children: [
+        NotificationListener<ScrollUpdateNotification>(
+          child: Scrollbar(
+            controller: searchHandler.gridScrollController,
+            interactive: true,
+            thickness: 8,
+            thumbVisibility: true,
+            scrollbarOrientation: settingsHandler.handSide.value.isLeft ? ScrollbarOrientation.left : ScrollbarOrientation.right,
+            child: RefreshIndicator(
+              triggerMode: RefreshIndicatorTriggerMode.anywhere,
+              displacement: 40,
+              edgeOffset: MediaQuery.paddingOf(context).top + MainAppBar.height,
+              strokeWidth: 4,
+              color: Theme.of(context).colorScheme.secondary,
+              onRefresh: () async {
+                searchHandler.searchAction(searchHandler.currentTab.tags, null);
+              },
+              child: Stack(
+                children: [
+                  DesktopScrollWrap(
+                    controller: searchHandler.gridScrollController,
+                    child: ShimmerWrap(
+                      enabled: !SettingsHandler.instance.shitDevice,
+                      child: Obx(() {
+                        final bool isLoadingAndNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
 
-        // TODO move all this higher? make global handler for hotkeys?
-        // TODO arrows move node focus around, so they are removed for now
-        // TODO move into separate widget (and only use it on desktop?)
+                        if (isLoadingAndNoItems) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            // reset scroll position if in loading state
+                            searchHandler.gridScrollController.jumpTo(0);
+                          });
+                        }
 
-        BooruItem? item;
-        int oldIndex = 0, newIndex = 0, columnCount = 0;
-
-        // detect only key DOWN events
-        // physicalKey guarantees detection on non-english keys/languages
-        if (event.runtimeType == KeyDownEvent) {
-          if (event.physicalKey == PhysicalKeyboardKey.keyK || event.physicalKey == PhysicalKeyboardKey.keyS) {
-            // searchHandler.gridScrollController.animateTo(searchHandler.gridScrollController.offset + 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
-            columnCount = MediaQuery.orientationOf(context) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
-            oldIndex = searchHandler.viewedIndex.value;
-            newIndex = oldIndex + columnCount;
-            if (newIndex < searchHandler.currentFetched.length) {
-              item = searchHandler.setViewedItem(newIndex);
-              viewerHandler.setCurrent(item.key);
-              jumpTo(newIndex);
-            }
-          } else if (event.physicalKey == PhysicalKeyboardKey.keyJ || event.physicalKey == PhysicalKeyboardKey.keyW) {
-            // searchHandler.gridScrollController.animateTo(searchHandler.gridScrollController.offset - 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
-            columnCount = MediaQuery.orientationOf(context) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
-            oldIndex = searchHandler.viewedIndex.value;
-            newIndex = oldIndex - columnCount;
-            if (newIndex > -1) {
-              item = searchHandler.setViewedItem(newIndex);
-              viewerHandler.setCurrent(item.key);
-              jumpTo(newIndex);
-            }
-          } else if (event.physicalKey == PhysicalKeyboardKey.keyD) {
-            oldIndex = searchHandler.viewedIndex.value;
-            newIndex = oldIndex + 1;
-            if (newIndex < searchHandler.currentFetched.length) {
-              item = searchHandler.setViewedItem(newIndex);
-              viewerHandler.setCurrent(item.key);
-              jumpTo(newIndex);
-            }
-          } else if (event.physicalKey == PhysicalKeyboardKey.keyA) {
-            oldIndex = searchHandler.viewedIndex.value;
-            newIndex = oldIndex - 1;
-            if (newIndex > -1) {
-              item = searchHandler.setViewedItem(newIndex);
-              viewerHandler.setCurrent(item.key);
-              jumpTo(newIndex);
-            }
-          } else if (event.physicalKey == PhysicalKeyboardKey.escape) {
-            searchHandler.setViewedItem(-1);
-            viewerHandler.dropCurrent();
-          }
-        }
-      },
-
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          NotificationListener<ScrollUpdateNotification>(
-            child: Scrollbar(
-              controller: searchHandler.gridScrollController,
-              interactive: true,
-              thickness: 8,
-              thumbVisibility: true,
-              child: RefreshIndicator(
-                triggerMode: RefreshIndicatorTriggerMode.anywhere,
-                displacement: 80,
-                edgeOffset: isMobile ? (MediaQuery.paddingOf(context).top + kToolbarHeight) : 0,
-                strokeWidth: 4,
-                color: Theme.of(context).colorScheme.secondary,
-                onRefresh: () async {
-                  searchHandler.searchAction(searchHandler.currentTab.tags, null);
-                },
-                child: Stack(
-                  children: [
-                    DesktopScrollWrap(
-                      controller: searchHandler.gridScrollController,
-                      child: ShimmerWrap(
-                        enabled: !SettingsHandler.instance.shitDevice,
-                        child: Obx(() {
-                          final bool isLoadingAndNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty && !settingsHandler.shitDevice;
-
-                          return CustomScrollView(
-                            controller: searchHandler.gridScrollController,
-                            physics: isLoadingAndNoItems
-                                ? const NeverScrollableScrollPhysics()
-                                : getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                            shrinkWrap: false,
-                            cacheExtent: 200,
-                            slivers: [
-                              const MainAppBar(),
-                              SliverPadding(
-                                padding: const EdgeInsets.fromLTRB(10, 16, 10, 180),
-                                sliver: Builder(
-                                  builder: (context) {
-                                    if (isLoadingAndNoItems) {
-                                      return const ThumbnailsShimmerList();
-                                    }
-
-                                    if (isStaggered) {
-                                      return StaggeredBuilder(
-                                        onTap: onTap,
-                                        onDoubleTap: onDoubleTap,
-                                        onLongPress: onLongPress,
-                                        onSecondaryTap: onSecondaryTap,
+                        return CustomScrollView(
+                          controller: searchHandler.gridScrollController,
+                          physics: isLoadingAndNoItems
+                              ? const NeverScrollableScrollPhysics()
+                              : getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                          shrinkWrap: false,
+                          cacheExtent: 200,
+                          slivers: [
+                            const MainAppBar(),
+                            SliverPadding(
+                              padding: const EdgeInsets.fromLTRB(10, 16, 10, 180),
+                              sliver: Builder(
+                                builder: (context) {
+                                  if (isLoadingAndNoItems) {
+                                    if (settingsHandler.shitDevice) {
+                                      return const SliverToBoxAdapter(
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
                                       );
                                     }
 
-                                    return GridBuilder(
+                                    return const ThumbnailsShimmerList();
+                                  }
+
+                                  if (isStaggered) {
+                                    return StaggeredBuilder(
                                       onTap: onTap,
                                       onDoubleTap: onDoubleTap,
                                       onLongPress: onLongPress,
                                       onSecondaryTap: onSecondaryTap,
                                     );
-                                  },
-                                ),
-                              ),
-                            ],
-                          );
-                        }),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: MediaQuery.paddingOf(context).bottom + 80,
-                      right: settingsHandler.scrollGridButtonsPosition == 'Right' ? MediaQuery.sizeOf(context).width * 0.07 : null,
-                      left: settingsHandler.scrollGridButtonsPosition == 'Left' ? MediaQuery.sizeOf(context).width * 0.07 : null,
-                      child: Obx(() {
-                        final bool isLoadingAndNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
+                                  }
 
-                        return AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: (isLoadingAndNoItems ||
-                                  settingsHandler.scrollGridButtonsPosition == 'Disabled' ||
-                                  settingsHandler.appMode.value.isDesktop == true)
-                              ? const SizedBox.shrink()
-                              : WaterfallScrollButtons(
-                                  onTap: (bool forward) {
-                                    // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
-                                  },
-                                ),
+                                  return GridBuilder(
+                                    onTap: onTap,
+                                    onDoubleTap: onDoubleTap,
+                                    onLongPress: onLongPress,
+                                    onSecondaryTap: onSecondaryTap,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
                         );
                       }),
                     ),
-                  ],
-                ),
+                  ),
+                  Positioned(
+                    bottom: MediaQuery.viewPaddingOf(context).bottom + 120,
+                    right: settingsHandler.scrollGridButtonsPosition == 'Right' ? MediaQuery.sizeOf(context).width * 0.07 : null,
+                    left: settingsHandler.scrollGridButtonsPosition == 'Left' ? MediaQuery.sizeOf(context).width * 0.07 : null,
+                    child: Obx(() {
+                      final bool isLoadingAndNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
+
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child:
+                            (isLoadingAndNoItems || settingsHandler.scrollGridButtonsPosition == 'Disabled' || settingsHandler.appMode.value.isDesktop == true)
+                                ? const SizedBox.shrink()
+                                : WaterfallScrollButtons(
+                                    onTap: (bool forward) {
+                                      if (forward) {
+                                        navigationHandler.floatingHeaderKey.currentState?.hide();
+                                        navigationHandler.bottomBarKey.currentState?.hide();
+                                      } else {
+                                        navigationHandler.floatingHeaderKey.currentState?.show();
+                                        navigationHandler.bottomBarKey.currentState?.show();
+                                      }
+                                      // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
+                                    },
+                                  ),
+                      );
+                    }),
+                  ),
+                ],
               ),
             ),
-            onNotification: (notif) {
-              searchHandler.sendToScrollStream(notif);
-
-              // print('SCROLL NOTIFICATION');
-              // print(searchHandler.gridScrollController.position.maxScrollExtent);
-              // print(notif.metrics); // pixels before viewport, in viewport, after viewport
-
-              final bool isNotAtStart = notif.metrics.pixels > 0;
-              final bool isAtOrNearEdge = notif.metrics.atEdge ||
-                  notif.metrics.pixels >
-                      (notif.metrics.maxScrollExtent -
-                          (notif.metrics.extentInside * 2)); // trigger new page when at edge or scroll position is less than 2 viewports
-              final bool isScreenFilled =
-                  notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
-
-              if (!searchHandler.isLoading.value) {
-                if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
-                  searchHandler.runSearch();
-                }
-              }
-              return true;
-            },
           ),
-          //
-          const WaterfallErrorButtons(),
-        ],
-      ),
+          onNotification: (notif) {
+            searchHandler.sendToScrollStream(notif);
+
+            // print('SCROLL NOTIFICATION');
+            // print(searchHandler.gridScrollController.position.maxScrollExtent);
+            // print(notif.metrics); // pixels before viewport, in viewport, after viewport
+
+            final bool isNotAtStart = notif.metrics.pixels > 0;
+            final bool isAtOrNearEdge = notif.metrics.atEdge ||
+                notif.metrics.pixels >
+                    (notif.metrics.maxScrollExtent -
+                        (notif.metrics.extentInside * 2)); // trigger new page when at edge or scroll position is less than 2 viewports
+            final bool isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
+
+            if (!searchHandler.isLoading.value) {
+              if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
+                searchHandler.runSearch();
+              }
+            }
+            return true;
+          },
+        ),
+        //
+        WaterfallBottomBar(
+          key: navigationHandler.bottomBarKey,
+        ),
+      ],
     );
   }
 }

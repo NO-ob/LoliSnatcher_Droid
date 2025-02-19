@@ -8,6 +8,9 @@ class SzurubooruHandler extends BooruHandler {
   SzurubooruHandler(super.booru, super.limit);
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   String validateTags(String tags) {
     if (tags == '' || tags == ' ') {
       return '*';
@@ -80,7 +83,7 @@ class SzurubooruHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/api/tags/?offset=0&limit=10&query=$input*';
+    return '${booru.baseURL}/api/tags/?offset=0&limit=20&query=$input*';
   }
 
   @override

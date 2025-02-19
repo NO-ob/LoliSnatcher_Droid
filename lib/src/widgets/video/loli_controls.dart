@@ -9,7 +9,6 @@ import 'package:chewie/src/chewie_player.dart' show ChewieController;
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/helpers/utils.dart';
 import 'package:chewie/src/progress_bar.dart';
-import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -80,10 +79,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         onDoubleTapDown: _doubleTapInfoWrite,
         onDoubleTap: _doubleTapAction,
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          _cancelAndRestartTimer();
-          toggleToolbar();
-        },
+        onTap: _cancelAndRestartTimer,
         child: AbsorbPointer(
           // children elements won't receive gestures until they are visible
           absorbing: _hideStuff,
@@ -274,10 +270,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       },
       duration: const Duration(milliseconds: 333),
       child: GestureDetector(
-        onTap: () {
-          _cancelAndRestartTimer();
-          toggleToolbar();
-        },
+        onTap: _cancelAndRestartTimer,
         child: Container(
           height: barHeight,
           margin: EdgeInsets.only(
@@ -348,68 +341,69 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             _hideStuff = true;
           });
         }
-
-        toggleToolbar();
       },
-      child: Obx(() {
-        final bool isAppbarDisplayed = viewerHandler.displayAppbar.value;
-        final bool isFullScreen = chewieController.isFullScreen || !isAppbarDisplayed;
-        final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
+      child: ValueListenableBuilder(
+        valueListenable: viewerHandler.displayAppbar,
+        builder: (context, displayAppbar, child) {
+          final bool isFullScreen = chewieController.isFullScreen || !displayAppbar;
+          final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
 
-        return Container(
-          // color: Colors.yellow.withValues(alpha: 0.66),
-          color: Colors.transparent,
-          padding: EdgeInsets.only(
-            top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) + barHeight + 16,
-            bottom: MediaQuery.paddingOf(context).bottom + (isFullScreen ? 0 : (isTopAppbar ? kToolbarHeight : 0)),
-          ),
-          child: Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                AnimatedOpacity(
-                  opacity: (!_latestValue.isPlaying && !_dragging) ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 300),
-                  child: GestureDetector(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black87, //Theme.of(context).dialogBackgroundColor.withValues(alpha: 0.75),
-                        borderRadius: BorderRadius.circular(48),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: IconButton(
-                          icon: isFinished
-                              ? const Icon(
-                                  Icons.replay,
-                                  size: 32,
-                                  color: Colors.white,
-                                )
-                              : AnimatedIcon(
-                                  icon: AnimatedIcons.play_pause,
-                                  progress: playPauseIconAnimationController,
-                                  color: Colors.white,
-                                  size: 32,
-                                ),
-                          onPressed: _playPause,
-                        ),
+          return Container(
+            // color: Colors.yellow.withValues(alpha: 0.66),
+            color: Colors.transparent,
+            padding: EdgeInsets.only(
+              top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) + barHeight + 16,
+              bottom: MediaQuery.paddingOf(context).bottom + (isFullScreen ? 0 : (isTopAppbar ? kToolbarHeight : 0)),
+            ),
+            child: child,
+          );
+        },
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              AnimatedOpacity(
+                opacity: (!_latestValue.isPlaying && !_dragging) ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: GestureDetector(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black87, // Theme.of(context).dialogBackgroundColor.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(48),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: IconButton(
+                        icon: isFinished
+                            ? const Icon(
+                                Icons.replay,
+                                size: 32,
+                                color: Colors.white,
+                              )
+                            : AnimatedIcon(
+                                icon: AnimatedIcons.play_pause,
+                                progress: playPauseIconAnimationController,
+                                color: Colors.white,
+                                size: 32,
+                              ),
+                        onPressed: _playPause,
                       ),
                     ),
                   ),
                 ),
-                if (_latestValue.isBuffering)
-                  const Center(
-                    widthFactor: 3,
-                    heightFactor: 3,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 5,
-                    ),
+              ),
+              if (_latestValue.isBuffering)
+                const Center(
+                  widthFactor: 3,
+                  heightFactor: 3,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 5,
                   ),
-              ],
-            ),
+                ),
+            ],
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 
@@ -587,16 +581,6 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       _hideStuff = false;
       _displayTapped = true;
     });
-  }
-
-  void toggleToolbar() {
-    // TODO better way to toggle toolbar on videos?
-    // toggle toolbar and system ui only when controls are visible and not in fullscreen
-    // if the controls are visible buildHitArea and buildDoubleTapMessage listen to taps, otherwise - gestureDetector in the main build
-    // print('toggleToolbar $_hideStuff ${chewieController.isFullScreen}');
-    // if(_hideStuff && !chewieController.isFullScreen) {
-    //   viewerHandler.displayAppbar.toggle();
-    // }
   }
 
   Future<void> _initialize() async {

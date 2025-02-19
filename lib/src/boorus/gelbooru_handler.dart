@@ -21,6 +21,9 @@ class GelbooruHandler extends BooruHandler {
   bool get hasSizeData => true;
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   Map<String, TagType> get tagTypeMap => {
         '5': TagType.meta,
         '3': TagType.copyright,
@@ -141,10 +144,10 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    // EXAMPLE https://gelbooru.com/index.php?page=dapi&s=tag&q=index&name_pattern=nagat%25&limit=10&json=1
+    // EXAMPLE https://gelbooru.com/index.php?page=dapi&s=tag&q=index&name_pattern=nagat%25&limit=20&json=1
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
     final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
-    return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10&json=1$apiKeyStr$userIdStr';
+    return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20&json=1$apiKeyStr$userIdStr';
   }
 
   @override

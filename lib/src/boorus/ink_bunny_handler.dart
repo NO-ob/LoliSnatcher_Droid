@@ -15,8 +15,12 @@ class InkBunnyHandler extends BooruHandler {
 
   String sessionToken = '';
   bool _gettingToken = false;
+
   @override
   bool get hasSizeData => true;
+
+  @override
+  bool get hasTagSuggestions => true;
 
   Future<bool> setSessionToken() async {
     //https://inkbunny.net/api_login.php?output_mode=xml&username=guest

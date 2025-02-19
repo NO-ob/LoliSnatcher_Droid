@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -24,34 +22,38 @@ class _MediaPreviewsState extends State<MediaPreviews> {
   final SearchHandler searchHandler = SearchHandler.instance;
 
   bool booruListFilled = false, tabListFilled = false;
-  late StreamSubscription booruListener, tabListener;
 
   @override
   void initState() {
     super.initState();
 
     booruListFilled = settingsHandler.booruList.isNotEmpty;
-    booruListener = settingsHandler.booruList.listen((List boorus) {
-      if (!booruListFilled) {
-        setState(() {
-          booruListFilled = boorus.isNotEmpty;
-        });
-      }
-    });
+    settingsHandler.booruList.addListener(booruListener);
+
     tabListFilled = searchHandler.list.isNotEmpty;
-    tabListener = searchHandler.list.listen((List tabs) {
-      if (!tabListFilled) {
-        setState(() {
-          tabListFilled = tabs.isNotEmpty;
-        });
-      }
-    });
+    searchHandler.list.addListener(tabListener);
+  }
+
+  void booruListener() {
+    if (!booruListFilled) {
+      setState(() {
+        booruListFilled = settingsHandler.booruList.isNotEmpty;
+      });
+    }
+  }
+
+  void tabListener() {
+    if (!tabListFilled) {
+      setState(() {
+        tabListFilled = searchHandler.list.isNotEmpty;
+      });
+    }
   }
 
   @override
   void dispose() {
-    booruListener.cancel();
-    tabListener.cancel();
+    settingsHandler.booruList.removeListener(booruListener);
+    searchHandler.list.removeListener(tabListener);
     super.dispose();
   }
 

@@ -55,8 +55,6 @@ class ImageViewerState extends State<ImageViewer> {
   int? widthLimit;
   CancelToken? cancelToken;
 
-  StreamSubscription? noScaleListener, toggleQualityListener, indexListener;
-
   @override
   void didUpdateWidget(ImageViewer oldWidget) {
     // force redraw on item data change
@@ -125,42 +123,38 @@ class ImageViewerState extends State<ImageViewer> {
         (settingsHandler.appMode.value.isMobile
             ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
             : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
-    indexListener = searchHandler.viewedIndex.listen((int value) {
-      final bool prevViewed = isViewed;
-      final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
-      final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
-        isViewed = true;
-      } else {
-        isViewed = false;
-      }
-
-      if (prevViewed != isViewed) {
-        if (!isViewed) {
-          // reset zoom if not viewed
-          resetZoom();
-        }
-        updateState();
-      }
-    });
+    searchHandler.viewedIndex.addListener(indexListener);
 
     // debug output
     viewController.outputStateStream.listen(onViewStateChanged);
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
   }
 
+  void indexListener() {
+    final bool prevViewed = isViewed;
+    final bool isCurrentIndex = searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem);
+    final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
+      isViewed = true;
+    } else {
+      isViewed = false;
+    }
+
+    if (prevViewed != isViewed) {
+      if (!isViewed) {
+        // reset zoom if not viewed
+        resetZoom();
+      }
+      updateState();
+    }
+  }
+
   bool get useFullImage => settingsHandler.galleryMode == 'Full Res' ? !widget.booruItem.toggleQuality.value : widget.booruItem.toggleQuality.value;
 
   Future<void> initViewer(bool ignoreTagsCheck) async {
-    noScaleListener = widget.booruItem.isNoScale.listen((bool value) {
-      killLoading([]);
-      initViewer(false);
-    });
+    widget.booruItem.isNoScale.addListener(noScaleListener);
 
-    toggleQualityListener = widget.booruItem.toggleQuality.listen((bool value) {
-      killLoading([]);
-      initViewer(false);
-    });
+    widget.booruItem.toggleQuality.addListener(toggleQualityListener);
 
     if (widget.booruItem.isHated && !ignoreTagsCheck) {
       if (widget.booruItem.isHated) {
@@ -209,6 +203,16 @@ class ImageViewerState extends State<ImageViewer> {
     imageStream!.addListener(imageListener!);
 
     updateState();
+  }
+
+  void noScaleListener() {
+    killLoading([]);
+    initViewer(false);
+  }
+
+  void toggleQualityListener() {
+    killLoading([]);
+    initViewer(false);
   }
 
   void calcWidthLimit(BoxConstraints constraints) {
@@ -318,8 +322,7 @@ class ImageViewerState extends State<ImageViewer> {
   void dispose() {
     disposables();
 
-    indexListener?.cancel();
-    indexListener = null;
+    searchHandler.viewedIndex.removeListener(indexListener);
 
     viewerHandler.removeViewed(widget.key);
     super.dispose();
@@ -362,11 +365,8 @@ class ImageViewerState extends State<ImageViewer> {
     }
     mainProvider = null;
 
-    noScaleListener?.cancel();
-    noScaleListener = null;
-
-    toggleQualityListener?.cancel();
-    toggleQualityListener = null;
+    widget.booruItem.isNoScale.removeListener(noScaleListener);
+    widget.booruItem.toggleQuality.removeListener(toggleQualityListener);
   }
 
   // debug functions

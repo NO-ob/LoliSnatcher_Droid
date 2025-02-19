@@ -639,6 +639,7 @@ class _DatabasePageState extends State<DatabasePage> {
                               hintText: '(optional, may make the process slower)',
                               clearable: true,
                               pasteable: true,
+                              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                             ),
                             SettingsButton(
                               name: 'Update Sankaku URLs',

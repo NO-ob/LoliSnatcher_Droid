@@ -10,6 +10,9 @@ class e621Handler extends BooruHandler {
   bool get hasSizeData => true;
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   Map<String, TagType> get tagTypeMap => {
         '7': TagType.meta,
         '3': TagType.copyright,
@@ -122,7 +125,7 @@ class e621Handler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10&search[order]=count';
+    return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=20&search[order]=count';
   }
 
   @override

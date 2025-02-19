@@ -8,6 +8,9 @@ class FavouritesHandler extends BooruHandler {
   FavouritesHandler(super.booru, super.limit);
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   String validateTags(String tags) {
     return tags;
   }

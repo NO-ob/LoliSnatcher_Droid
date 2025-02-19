@@ -9,6 +9,9 @@ class WorldXyzHandler extends BooruHandler {
   WorldXyzHandler(super.booru, super.limit);
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   List parseListFromResponse(dynamic response) {
     final Map<String, dynamic> parsedResponse = response.data;
     return (parsedResponse['items'] ?? []) as List;
@@ -113,7 +116,7 @@ class WorldXyzHandler extends BooruHandler {
       data: {
         'searchText': input.replaceAll(RegExp('^-'), ''),
         'skip': 0,
-        'take': 10,
+        'take': 20,
       },
     );
   }

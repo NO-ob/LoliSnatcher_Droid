@@ -108,6 +108,7 @@ class _BooruEditState extends State<BooruEdit> {
               title: 'Name',
               clearable: true,
               pasteable: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsTextInput(
               controller: booruURLController,
@@ -115,6 +116,7 @@ class _BooruEditState extends State<BooruEdit> {
               inputType: TextInputType.url,
               clearable: true,
               pasteable: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsDropdown(
               value: selectedBooruType,
@@ -135,6 +137,7 @@ class _BooruEditState extends State<BooruEdit> {
               inputType: TextInputType.url,
               clearable: true,
               pasteable: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsTextInput(
               controller: booruDefTagsController,
@@ -142,6 +145,7 @@ class _BooruEditState extends State<BooruEdit> {
               hintText: 'Default search for booru',
               clearable: true,
               pasteable: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
@@ -164,6 +168,7 @@ class _BooruEditState extends State<BooruEdit> {
               clearable: true,
               pasteable: true,
               drawTopBorder: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsTextInput(
               controller: booruAPIKeyController,
@@ -172,6 +177,7 @@ class _BooruEditState extends State<BooruEdit> {
               hintText: '(Can be blank)',
               clearable: true,
               obscureable: shouldObscureApiKey(),
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SizedBox(height: MediaQuery.sizeOf(context).height * 0.2),
           ],
@@ -494,8 +500,12 @@ class _BooruEditState extends State<BooruEdit> {
             }
           }
 
-          // force global restate
-          searchHandler.rootRestate?.call();
+          unawaited(
+            Future.delayed(const Duration(seconds: 1)).then((_) {
+              // force global restate
+              searchHandler.rootRestate?.call();
+            }),
+          );
 
           Navigator.of(context).pop(true);
         }

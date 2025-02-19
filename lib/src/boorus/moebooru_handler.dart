@@ -14,6 +14,9 @@ class MoebooruHandler extends BooruHandler {
   bool get hasSizeData => true;
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   Map<String, TagType> get tagTypeMap => {
         '5': TagType.meta,
         '3': TagType.copyright,
@@ -104,7 +107,7 @@ class MoebooruHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/tag.xml?limit=10&order=count&name=$input*';
+    return '${booru.baseURL}/tag.xml?limit=20&order=count&name=$input*';
   }
 
   @override

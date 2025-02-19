@@ -5,6 +5,9 @@ class PhilomenaHandler extends BooruHandler {
   PhilomenaHandler(super.booru, super.limit);
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   String validateTags(String tags) {
     if (tags == '' || tags == ' ') {
       return '*';
@@ -90,7 +93,7 @@ class PhilomenaHandler extends BooruHandler {
     if (input.isEmpty) {
       input = '*';
     }
-    return '${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=10';
+    return '${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=20';
   }
 
   @override

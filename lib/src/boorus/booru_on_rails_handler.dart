@@ -11,6 +11,9 @@ class BooruOnRailsHandler extends BooruHandler {
   bool get hasSizeData => true;
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   String makePostURL(String id) {
     return '${booru.baseURL}/$id';
   }

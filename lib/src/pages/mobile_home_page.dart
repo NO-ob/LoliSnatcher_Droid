@@ -8,12 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_inner_drawer/inner_drawer.dart';
-import 'package:get/get.dart' hide FirstWhereExt;
+import 'package:get/get.dart' hide FirstWhereOrNullExt;
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
+import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
@@ -32,8 +33,7 @@ import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_box.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_button.dart';
+import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_secondary_booru_selector.dart';
@@ -208,16 +208,9 @@ class MainDrawer extends StatelessWidget {
               Obx(() {
                 if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
                   return Container(
-                    margin: const EdgeInsets.fromLTRB(2, 20, 2, 12),
-                    width: double.infinity,
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        //Tags/Search field
-                        TagSearchBox(),
-                        TagSearchButton(),
-                      ],
-                    ),
+                    height: kToolbarHeight - 4,
+                    margin: const EdgeInsets.fromLTRB(2, 24, 2, 12),
+                    child: const MainSearchBarWithActions('drawer'),
                   );
                 } else {
                   return const SizedBox.shrink();
@@ -236,8 +229,9 @@ class MainDrawer extends StatelessWidget {
                     controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
                     clipBehavior: Clip.antiAlias,
                     children: [
+                      const SizedBox(height: 12),
                       const TabButtons(true, WrapAlignment.spaceEvenly),
-                      const TabBooruSelector(),
+                      const SizedBox(height: 12),
                       const MergeBooruToggleAndSelector(),
                       //
                       Obx(() {
@@ -272,6 +266,24 @@ class MainDrawer extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                       }),
+                      ValueListenableBuilder(
+                        valueListenable: LocalAuthHandler.instance.deviceSupportsBiometrics,
+                        builder: (_, deviceSupportsBiometrics, __) => ValueListenableBuilder(
+                          valueListenable: SettingsHandler.instance.useLockscreen,
+                          builder: (_, useLockscreen, child) {
+                            if (deviceSupportsBiometrics && useLockscreen) {
+                              return child!;
+                            }
+
+                            return const SizedBox.shrink();
+                          },
+                          child: SettingsButton(
+                            name: 'Lock app',
+                            icon: const Icon(Icons.lock),
+                            action: () => LocalAuthHandler.instance.lock(manually: true),
+                          ),
+                        ),
+                      ),
                       SettingsButton(
                         name: 'Settings',
                         icon: const Icon(Icons.settings),
@@ -661,6 +673,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                 child: Scrollbar(
                                   controller: scrollController,
                                   thumbVisibility: true,
+                                  interactive: true,
                                   child: SingleChildScrollView(
                                     controller: scrollController,
                                     clipBehavior: Clip.antiAlias,

@@ -248,7 +248,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   inputType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                   clearable: true,
-                  forceLabelOnTop: true,
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                   numberButtons: true,
                   numberStep: 100,
                   numberMin: 0,
@@ -513,7 +513,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
           clearable: true,
           pasteable: true,
-          forceLabelOnTop: true,
+          floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
         SettingsButton(
           name: 'Start receiver server',

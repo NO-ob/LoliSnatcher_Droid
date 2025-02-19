@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -130,8 +129,6 @@ class _ItemViewerAppBarState extends State<_ItemViewerAppBar> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-  late StreamSubscription<bool> appbarListener;
-
   bool isOnTop = true;
 
   @override
@@ -143,15 +140,17 @@ class _ItemViewerAppBarState extends State<_ItemViewerAppBar> {
     ServiceHandler.setSystemUiVisibility(!settingsHandler.autoHideImageBar);
     viewerHandler.displayAppbar.value = !settingsHandler.autoHideImageBar;
 
-    appbarListener = viewerHandler.displayAppbar.listen((bool value) {
-      ServiceHandler.setSystemUiVisibility(value);
-      setState(() {});
-    });
+    viewerHandler.displayAppbar.addListener(appbarListener);
+  }
+
+  void appbarListener() {
+    ServiceHandler.setSystemUiVisibility(viewerHandler.displayAppbar.value);
+    setState(() {});
   }
 
   @override
   void dispose() {
-    appbarListener.cancel();
+    viewerHandler.displayAppbar.removeListener(appbarListener);
     ServiceHandler.setSystemUiVisibility(true);
 
     super.dispose();

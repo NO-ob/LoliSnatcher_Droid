@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <!-- <uses-permission android:name="android.permission.USE_BIOMETRIC"/> -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
 
     <!-- <application ... android:enableOnBackInvokedCallback="true" - required for predictive back -->
     <application
@@ -57,8 +57,10 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <!-- Disable impeller -->
+        <!-- in 3.29 it's mostly fine, but there are still some flickering/artifacts on videos and when changing pages in viewer -->
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
-            android:value="true" />
+            android:value="false" />
     </application>
 </manifest>

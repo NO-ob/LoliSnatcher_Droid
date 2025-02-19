@@ -16,6 +16,7 @@ class TabRow extends StatelessWidget {
     this.withFavicon = true,
     this.withColoredTags = true,
     this.filterText,
+    this.isExpanded = true,
     super.key,
   });
 
@@ -25,13 +26,13 @@ class TabRow extends StatelessWidget {
   final bool withFavicon;
   final bool withColoredTags;
   final String? filterText;
+  final bool isExpanded;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // print(tab.tags);
       final String rawTagsStr = tab.tags;
-      final String tagText = (rawTagsStr.trim().isEmpty ? '[No Tags]' : rawTagsStr).trim();
+      final String tagText = (rawTagsStr.trim().isEmpty ? '[Empty]' : rawTagsStr).trim();
 
       final bool hasItems = tab.booruHandler.filteredFetched.isNotEmpty;
       final bool isNotEmptyBooru = tab.selectedBooru.value.faviconURL != null;
@@ -39,6 +40,7 @@ class TabRow extends StatelessWidget {
       Widget marquee = MarqueeText(
         key: ValueKey(tagText),
         text: tagText,
+        isExpanded: isExpanded,
         style: TextStyle(
           fontSize: 16,
           fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
@@ -70,7 +72,11 @@ class TabRow extends StatelessWidget {
               spans.add(
                 TextSpan(
                   text: filterText,
-                  style: spanStyle.copyWith(backgroundColor: Colors.green),
+                  style: spanStyle.copyWith(
+                    color: Colors.green,
+                    fontWeight: FontWeight.w900,
+                    backgroundColor: Colors.green.withValues(alpha: 0.1),
+                  ),
                 ),
               );
             }
@@ -81,6 +87,7 @@ class TabRow extends StatelessWidget {
             textSpan: TextSpan(
               children: spans,
             ),
+            isExpanded: isExpanded,
             style: TextStyle(
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
@@ -107,14 +114,27 @@ class TabRow extends StatelessWidget {
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
               fontWeight: fontWeight ?? FontWeight.normal,
-              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
-              backgroundColor: isColored ? tagData.tagType.getColour().withValues(alpha: 0.66) : null,
+              color:
+                  (isColored ? tagData.tagType.getColour() : null) ?? color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
+              backgroundColor: isColored ? tagData.tagType.getColour().withValues(alpha: 0.1) : null,
             );
 
             spans.add(
               TextSpan(
+                text: prefix == '-' ? '—' : prefix,
+                style: spanStyle.copyWith(
+                  color: prefix == '-'
+                      ? Colors.redAccent
+                      : prefix == '~'
+                          ? Colors.purpleAccent
+                          : Colors.transparent,
+                ),
+              ),
+            );
+            spans.add(
+              TextSpan(
                 // add non-breaking space to the end of italics to hide text overflowing the bgColor,
-                text: '$prefix$tag${(hasItems || !isColored) ? '' : '\u{00A0}'}',
+                text: '$tag${(hasItems || !isColored) ? '' : '\u{00A0}'}',
                 style: spanStyle,
               ),
             );
@@ -135,6 +155,7 @@ class TabRow extends StatelessWidget {
             textSpan: TextSpan(
               children: spans,
             ),
+            isExpanded: isExpanded,
             style: TextStyle(
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
@@ -145,29 +166,26 @@ class TabRow extends StatelessWidget {
         }
       }
 
-      return SizedBox(
-        width: double.maxFinite,
-        child: Row(
-          children: [
-            if (withFavicon) ...[
-              if (isNotEmptyBooru)
-                RepaintBoundary(
-                  child: BooruFavicon(
-                    tab.selectedBooru.value,
-                    color: color,
-                  ),
-                )
-              else
-                const Icon(
-                  CupertinoIcons.question,
-                  size: 20,
+      return Row(
+        children: [
+          if (withFavicon) ...[
+            if (isNotEmptyBooru)
+              RepaintBoundary(
+                child: BooruFavicon(
+                  tab.selectedBooru.value,
+                  color: color,
                 ),
-              //
-              const SizedBox(width: 4),
-            ],
-            marquee,
+              )
+            else
+              const Icon(
+                CupertinoIcons.question,
+                size: 20,
+              ),
+            //
+            const SizedBox(width: 4),
           ],
-        ),
+          marquee,
+        ],
       );
     });
   }

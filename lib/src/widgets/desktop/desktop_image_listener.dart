@@ -37,7 +37,6 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   late BooruItem item;
-  StreamSubscription? itemListener;
 
   Timer? itemDelay;
   bool isDelayed = false;
@@ -91,17 +90,19 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   void updateListener() {
     // listen to changes of selected item
-    itemListener?.cancel();
+    searchHandler.viewedItem.removeListener(itemListener);
     item = searchHandler.viewedItem.value;
-    itemListener = searchHandler.viewedItem.listen((BooruItem newItem) {
-      // because all items have unique globalkey, we need to force full recreation of widget by adding a small delay between builds
-      isDelayed = true;
+    searchHandler.viewedItem.addListener(itemListener);
+  }
+
+  void itemListener() {
+    // because all items have unique globalkey, we need to force full recreation of widget by adding a small delay between builds
+    isDelayed = true;
+    updateState();
+    item = searchHandler.viewedItem.value;
+    itemDelay = Timer(const Duration(milliseconds: 50), () {
+      isDelayed = false;
       updateState();
-      item = newItem;
-      itemDelay = Timer(const Duration(milliseconds: 50), () {
-        isDelayed = false;
-        updateState();
-      });
     });
   }
 
@@ -113,7 +114,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   @override
   void dispose() {
-    itemListener?.cancel();
+    searchHandler.viewedItem.removeListener(itemListener);
     super.dispose();
   }
 

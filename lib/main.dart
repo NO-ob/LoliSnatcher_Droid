@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/notify_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -25,6 +27,7 @@ import 'package:lolisnatcher/src/handlers/theme_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/desktop_home_page.dart';
 import 'package:lolisnatcher/src/pages/init_home_page.dart';
+import 'package:lolisnatcher/src/pages/lockscreen_page.dart';
 import 'package:lolisnatcher/src/pages/mobile_home_page.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
@@ -51,8 +54,7 @@ void main() async {
   SnatchHandler.register();
   TagHandler.register();
   NotifyHandler.register();
-  // LocalAuthHandler.register();
-
+  LocalAuthHandler.register();
 
   await ServiceHandler.setSystemUiVisibility(true);
 
@@ -66,14 +68,14 @@ class MainApp extends StatefulWidget {
   State<MainApp> createState() => _MainAppState();
 }
 
-class _MainAppState extends State<MainApp> {
+class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
   final SnatchHandler snatchHandler = SnatchHandler.instance;
   final NavigationHandler navigationHandler = NavigationHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
   final NotifyHandler notifyHandler = NotifyHandler.instance;
-  // final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
+  final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
   int maxFps = 60;
 
   @override
@@ -125,13 +127,19 @@ class _MainAppState extends State<MainApp> {
     SnatchHandler.unregister();
     SearchHandler.unregister();
     TagHandler.unregister();
-    // LocalAuthHandler.unregister();
+    LocalAuthHandler.unregister();
     SettingsHandler.unregister();
     super.dispose();
   }
 
   void updateState() {
     setState(() {});
+  }
+
+  @override
+  void didChangeMetrics() {
+    setMaxFPS();
+    super.didChangeMetrics();
   }
 
   @override
@@ -152,6 +160,7 @@ class _MainAppState extends State<MainApp> {
         theme: theme,
         themeMode: themeMode,
         isAmoled: isAmoled,
+        context: context,
       );
 
       // debugRepaintRainbowEnabled = settingsHandler.showPerf.value;
@@ -190,6 +199,29 @@ class _MainAppState extends State<MainApp> {
                   TalkerRouteObserver(Logger.talker),
                 ],
                 home: const Home(),
+                builder: (_, child) => Stack(
+                  children: [
+                    child ?? const SizedBox.shrink(),
+                    // Blur overlay
+                    Overlay(
+                      initialEntries: [
+                        OverlayEntry(
+                          builder: (_) => AppLifecycleOverlay(
+                            shouldOverlay: SettingsHandler.instance.blurOnLeave.value,
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Lock screen overlay
+                    Overlay(
+                      initialEntries: [
+                        OverlayEntry(
+                          builder: (_) => const LockScreenPage(),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               );
             },
           ),
@@ -210,7 +242,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
-  // final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
+  final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
 
   Timer? backupTimer;
   Timer? cacheStaleTimer;
@@ -239,8 +271,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     });
 
     // consider app launch as return to the app
-    // WidgetsBinding.instance.addObserver(this);
-    // localAuthHandler.onReturn();
+    WidgetsBinding.instance.addObserver(this);
+    localAuthHandler.onReturn();
   }
 
   Future<void> clearCache() async {
@@ -253,6 +285,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       return;
     }
     initedDeepLinks = true;
+
     if (Platform.isAndroid || Platform.isIOS) {
       appLinks = AppLinks();
 
@@ -292,22 +325,27 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     backupTimer?.cancel();
     cacheStaleTimer?.cancel();
     appLinksSubscription?.cancel();
-    // WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   super.didChangeAppLifecycleState(state);
-  //   if (state != AppLifecycleState.resumed) {
-  //     // record time when user left the app
-  //     localAuthHandler.onLeave();
-  //   }
-  //   if (state == AppLifecycleState.resumed) {
-  //     // check if app needs to be locked when user returns to the app
-  //     localAuthHandler.onReturn();
-  //   }
-  // }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    switch (state) {
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+        // record time when user left the app
+        localAuthHandler.onLeave();
+        break;
+      case AppLifecycleState.resumed:
+        // check if app needs to be locked when user returns to the app
+        localAuthHandler.onReturn();
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -325,13 +363,16 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       }
     }
 
+    // with lockscreen:
     return ColoredBox(
       color: Theme.of(context).colorScheme.surface,
       child: Obx(() {
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
           child: Builder(
-            key: ValueKey('init:${settingsHandler.isPostInit.value}-mobile:${settingsHandler.appMode.value.isMobile}'),
+            key: ValueKey(
+              'init:${settingsHandler.isPostInit.value}-mobile:${settingsHandler.appMode.value.isMobile}',
+            ),
             builder: (context) {
               if (settingsHandler.isPostInit.value == false) {
                 return const InitHomePage();
@@ -349,18 +390,66 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         );
       }),
     );
+  }
+}
 
-    // with lockscreen:
-    // return Obx(() {
-    //   if(localAuthHandler.isLoggedIn.value == true) {
-    //     if (settingsHandler.appMode.value.isMobile) {
-    //       return const MobileHome();
-    //     } else {
-    //       return const DesktopHome();
-    //     }
-    //   } else {
-    //     return const LockScreen();
-    //   }
-    // });
+class AppLifecycleOverlay extends StatefulWidget {
+  const AppLifecycleOverlay({
+    this.shouldOverlay = true,
+    this.useBlur = true,
+    this.child,
+    super.key,
+  });
+
+  final bool shouldOverlay;
+  final bool useBlur;
+  final Widget? child;
+
+  @override
+  State<AppLifecycleOverlay> createState() => _AppLifecycleOverlayState();
+}
+
+class _AppLifecycleOverlayState extends State<AppLifecycleOverlay> with WidgetsBindingObserver {
+  bool _shouldOverlay = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    setState(() {
+      _shouldOverlay = widget.shouldOverlay && AppLifecycleState.values.where((s) => s != AppLifecycleState.resumed).any((s) => state == s);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_shouldOverlay) {
+      if (widget.useBlur) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
+            child: widget.child,
+          ),
+        );
+      }
+
+      return widget.child ?? const SizedBox.shrink();
+    }
+
+    return const SizedBox.shrink();
   }
 }

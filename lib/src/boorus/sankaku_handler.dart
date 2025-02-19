@@ -29,6 +29,9 @@ class SankakuHandler extends BooruHandler {
   bool get hasSizeData => true;
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   bool get hasCommentsSupport => true;
 
   @override
@@ -221,7 +224,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/tags?name=${input.toLowerCase()}&limit=10';
+    return '${booru.baseURL}/tags?name=${input.toLowerCase()}&limit=20';
   }
 
   @override

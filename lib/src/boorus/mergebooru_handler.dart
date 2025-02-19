@@ -18,7 +18,7 @@ class MergebooruHandler extends BooruHandler {
   List<BooruHandler> booruHandlers = [];
   List<int> booruHandlerPageNums = [];
 
-  Map<Booru, List<BooruItem>> fetchedMap = {};
+  Map<int, ({Booru booru, List<BooruItem> items})> fetchedMap = {};
 
   int innerLimit = 0;
   bool hasGelbooruV1 = false;
@@ -27,11 +27,14 @@ class MergebooruHandler extends BooruHandler {
   bool get hasSizeData => booruHandlers.every((e) => e.hasSizeData);
 
   @override
+  bool get hasTagSuggestions => booruHandlers.first.hasTagSuggestions;
+
+  @override
   Future search(String tags, int? pageNumCustom, {bool withCaptchaCheck = true}) async {
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
     }
-    final Map<Booru, List<BooruItem>> tmpFetchedMap = {};
+    final Map<int, ({Booru booru, List<BooruItem> items})> tmpFetchedMap = {};
     final List<bool> isGelbooruV1List = [];
     int fetchedMax = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
@@ -40,7 +43,15 @@ class MergebooruHandler extends BooruHandler {
       Logger.Inst().log('TAGS FOR #$i are: $currentTags', 'MergeBooruHandler', 'Search', LogTypes.booruHandlerInfo);
       booruHandlers[i].pageNum = pageNum + booruHandlerPageNums[i];
       final List<BooruItem> tmpFetched = (await booruHandlers[i].search(currentTags, null)) ?? [];
-      tmpFetchedMap.addEntries([MapEntry(booruHandlers[i].booru, tmpFetched)]);
+      tmpFetchedMap.addEntries([
+        MapEntry(
+          i,
+          (
+            booru: booruHandlers[i].booru,
+            items: tmpFetched,
+          ),
+        ),
+      ]);
       if (booruHandlers[i].booru.type == BooruType.GelbooruV1) {
         isGelbooruV1List.add(true);
       } else {
@@ -54,7 +65,7 @@ class MergebooruHandler extends BooruHandler {
     do {
       innerFetchedIndex = (innerLimit * pageNum) + innerFetchedOffset;
       for (int i = 0; i < tmpFetchedMap.entries.length; i++) {
-        final items = tmpFetchedMap[booruHandlers[i].booru]!;
+        final items = tmpFetchedMap[i]!.items;
         if (innerFetchedIndex < items.length) {
           if (hasGelbooruV1 && isGelbooruV1List[i] == false) {
             if (items[innerFetchedIndex].md5String != null) {
@@ -68,10 +79,18 @@ class MergebooruHandler extends BooruHandler {
           )) {
             newItems.add(items[innerFetchedIndex]);
 
-            if (fetchedMap[booruHandlers[i].booru] == null) {
-              fetchedMap.addEntries([MapEntry(booruHandlers[i].booru, [])]);
+            if (fetchedMap[i] == null) {
+              fetchedMap.addEntries([
+                MapEntry(
+                  i,
+                  (
+                    booru: booruHandlers[i].booru,
+                    items: [],
+                  ),
+                ),
+              ]);
             }
-            fetchedMap[booruHandlers[i].booru]!.add(items[innerFetchedIndex]);
+            fetchedMap[i]!.items.add(items[innerFetchedIndex]);
           } else {
             Logger.Inst().log(
               'Skipped because hash match: ${items[innerFetchedIndex].fileURL}',
@@ -163,7 +182,7 @@ class MergebooruHandler extends BooruHandler {
 
   @override
   Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
-    return booruHandlers[0].tagSearch(input, cancelToken: cancelToken);
+    return booruHandlers.first.tagSearch(input, cancelToken: cancelToken);
   }
 
   @override

@@ -773,11 +773,13 @@ class SettingsTextInput extends StatefulWidget {
     this.numberMax = 100,
     this.trailingIcon,
     this.onlyInput = false,
-    this.forceLabelOnTop = false,
+    this.floatingLabelBehavior = FloatingLabelBehavior.auto,
     this.copyable = false,
     this.pasteable = false,
     this.obscureable = false,
     this.isObscuredByDefault = true,
+    this.textInputAction,
+    this.enableIMEPersonalizedLearning = true,
     super.key,
   });
 
@@ -804,11 +806,13 @@ class SettingsTextInput extends StatefulWidget {
   final double numberMax;
   final Widget? trailingIcon;
   final bool onlyInput;
-  final bool forceLabelOnTop;
+  final FloatingLabelBehavior floatingLabelBehavior;
   final bool copyable;
   final bool pasteable;
   final bool obscureable;
   final bool isObscuredByDefault;
+  final TextInputAction? textInputAction;
+  final bool enableIMEPersonalizedLearning;
 
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
@@ -992,7 +996,9 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         obscuringCharacter: '*',
         onChanged: onChangedCallback,
         onFieldSubmitted: widget.onSubmitted,
-        enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
+        textInputAction: widget.textInputAction,
+        enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
+        scrollPadding: const EdgeInsets.all(kToolbarHeight),
         decoration: InputDecoration(
           labelText: widget.title,
           hintText: widget.hintText,
@@ -1002,7 +1008,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
             padding: const EdgeInsets.only(left: 2, right: 10),
             child: buildSuffixIcons(),
           ),
-          floatingLabelBehavior: widget.forceLabelOnTop ? FloatingLabelBehavior.always : FloatingLabelBehavior.auto,
+          floatingLabelBehavior: widget.floatingLabelBehavior,
         ),
       ),
     );

@@ -16,16 +16,17 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class SnatchHandler {
   SnatchHandler() {
-    queuedList.listen((List<SnatchItem> list) {
-      trySnatch();
-    });
+    queuedList.addListener(queuedListListener);
   }
 
   static SnatchHandler get instance => GetIt.instance<SnatchHandler>();
 
   static SnatchHandler register() {
     if (!GetIt.instance.isRegistered<SnatchHandler>()) {
-      GetIt.instance.registerSingleton(SnatchHandler());
+      GetIt.instance.registerSingleton(
+        SnatchHandler(),
+        dispose: (snatchHandler) => snatchHandler.dispose(),
+      );
     }
     return instance;
   }
@@ -191,6 +192,10 @@ class SnatchHandler {
     );
   }
 
+  void queuedListListener() {
+    trySnatch();
+  }
+
   void trySnatch() {
     if (!active.value && current.value == null) {
       if (queuedList.isNotEmpty) {
@@ -278,6 +283,10 @@ class SnatchHandler {
       // TODO use tag filters
     }
     queue(booruItems, booru, cooldown, false);
+  }
+
+  void dispose() {
+    queuedList.removeListener(queuedListListener);
   }
 }
 

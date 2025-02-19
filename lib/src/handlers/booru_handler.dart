@@ -293,6 +293,8 @@ abstract class BooruHandler {
 
   ////////////////////////////////////////////////////////////////////////
 
+  bool get hasTagSuggestions => false;
+
   // TODO rename to getTagSuggestions
   Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
     final List<String> tags = [];
@@ -317,7 +319,7 @@ abstract class BooruHandler {
     Logger.Inst().log('$url $uri', className, 'tagSearch', LogTypes.booruHandlerSearchURL);
 
     Response response;
-    const int limit = 10;
+    const int limit = 20;
     try {
       response = await fetchTagSuggestions(uri, input, cancelToken: cancelToken);
       if (response.statusCode == 200) {

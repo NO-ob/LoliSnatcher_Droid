@@ -78,6 +78,7 @@ class SearchHandler {
     Booru? customBooru,
     List<Booru>? secondaryBoorus,
     TabAddMode addMode = TabAddMode.end,
+    int? customPage,
   }) {
     final Booru booru = customBooru ?? currentBooru;
 
@@ -87,6 +88,10 @@ class SearchHandler {
       secondaryBoorus,
       searchText,
     );
+    if (customPage != null) {
+      newTab.booruHandler.pageNum = customPage;
+    }
+
     int newIndex = 0;
     switch (addMode) {
       case TabAddMode.prev:

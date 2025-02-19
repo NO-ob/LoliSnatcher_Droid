@@ -14,6 +14,9 @@ class AGNPHHandler extends BooruHandler {
   bool get hasSizeData => true;
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   Map<String, String> getHeaders() {
     return {
       ...super.getHeaders(),

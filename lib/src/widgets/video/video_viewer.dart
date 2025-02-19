@@ -14,6 +14,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -47,6 +48,7 @@ class VideoViewerState extends State<VideoViewer> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
+  final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
@@ -59,9 +61,7 @@ class VideoViewerState extends State<VideoViewer> {
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false, didAutoplay = false, forceCache = false;
   List<String> stopReason = [];
-  Timer? bufferingTimer;
-
-  StreamSubscription? indexListener;
+  Timer? bufferingTimer, pauseCheckTimer;
 
   CancelToken? cancelToken, sizeCancelToken;
   DioDownloader? client, sizeClient;
@@ -241,27 +241,7 @@ class VideoViewerState extends State<VideoViewer> {
         (settingsHandler.appMode.value.isMobile
             ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
             : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
-    indexListener = searchHandler.viewedIndex.listen((int value) {
-      final bool prevViewed = isViewed;
-      final bool isCurrentIndex = widget.isStandalone || value == searchHandler.getItemIndex(widget.booruItem);
-      final bool isCurrentItem = widget.isStandalone || searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
-        isViewed = true;
-      } else {
-        didAutoplay = false;
-        isViewed = false;
-      }
-
-      if (prevViewed != isViewed) {
-        if (!isViewed) {
-          // reset zoom if not viewed
-          resetZoom();
-        }
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          updateState();
-        });
-      }
-    });
+    searchHandler.viewedIndex.addListener(indexListener);
 
     initVideo(false);
   }
@@ -269,6 +249,28 @@ class VideoViewerState extends State<VideoViewer> {
   void updateState() {
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  void indexListener() {
+    final bool prevViewed = isViewed;
+    final bool isCurrentIndex = widget.isStandalone || searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem);
+    final bool isCurrentItem = widget.isStandalone || searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
+      isViewed = true;
+    } else {
+      didAutoplay = false;
+      isViewed = false;
+    }
+
+    if (prevViewed != isViewed) {
+      if (!isViewed) {
+        // reset zoom if not viewed
+        resetZoom();
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        updateState();
+      });
     }
   }
 
@@ -285,6 +287,7 @@ class VideoViewerState extends State<VideoViewer> {
     disposables();
 
     bufferingTimer?.cancel();
+    pauseCheckTimer?.cancel();
 
     total.value = 0;
     received.value = 0;
@@ -308,9 +311,9 @@ class VideoViewerState extends State<VideoViewer> {
     disposables();
 
     bufferingTimer?.cancel();
+    pauseCheckTimer?.cancel();
 
-    indexListener?.cancel();
-    indexListener = null;
+    searchHandler.viewedIndex.removeListener(indexListener);
 
     viewerHandler.removeViewed(widget.key);
 
@@ -524,6 +527,22 @@ class VideoViewerState extends State<VideoViewer> {
     updateState();
   }
 
+  Future<void> pauseOnAppLock() async {
+    pauseCheckTimer?.cancel();
+    await videoController?.pause();
+    if (videoController?.value.isPlaying == false) {
+      return;
+    }
+    pauseCheckTimer = Timer.periodic(const Duration(milliseconds: 500), (_) async {
+      if (videoController?.value.isPlaying == true) {
+        await videoController?.pause();
+        if (videoController?.value.isPlaying == false) {
+          pauseCheckTimer?.cancel();
+        }
+      }
+    });
+  }
+
   AnimatedWidget fullscreenRoutePageBuilder(
     BuildContext context,
     Animation<double> animation,
@@ -672,14 +691,42 @@ class VideoViewerState extends State<VideoViewer> {
                               controller: viewController,
                               scaleStateController: scaleController,
                               enableRotation: settingsHandler.allowRotation,
-                              child: Chewie(controller: chewieController!),
+                              child: ValueListenableBuilder(
+                                valueListenable: localAuthHandler.isAuthenticated,
+                                builder: (context, isAuthenticated, child) {
+                                  if (isAuthenticated != false) {
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      pauseCheckTimer?.cancel();
+                                    });
+
+                                    return child!;
+                                  } else {
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      pauseOnAppLock();
+                                    });
+
+                                    return const Center(child: CircularProgressIndicator());
+                                  }
+                                },
+                                child: Chewie(controller: chewieController!),
+                              ),
                             ),
                           ),
                           ChewieControllerProvider(
                             controller: chewieController!,
-                            child: const TransparentPointer(
+                            child: TransparentPointer(
                               child: SafeArea(
-                                child: LoliControls(),
+                                child: ValueListenableBuilder(
+                                  valueListenable: localAuthHandler.isAuthenticated,
+                                  builder: (context, isAuthenticated, child) {
+                                    if (isAuthenticated != false) {
+                                      return child!;
+                                    }
+
+                                    return const SizedBox.shrink();
+                                  },
+                                  child: const LoliControls(),
+                                ),
                               ),
                             ),
                           ),

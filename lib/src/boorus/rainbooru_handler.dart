@@ -11,6 +11,9 @@ class RainbooruHandler extends BooruHandler {
   RainbooruHandler(super.booru, super.limit);
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   String validateTags(String tags) {
     if (tags == '' || tags == ' ') {
       return '*';

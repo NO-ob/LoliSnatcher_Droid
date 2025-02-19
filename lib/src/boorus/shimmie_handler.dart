@@ -15,6 +15,9 @@ class ShimmieHandler extends BooruHandler {
   bool get hasSizeData => true;
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   String validateTags(String tags) {
     if (tags == ' ' || tags == '') {
       return '*';
@@ -108,7 +111,7 @@ class ShimmieHandler extends BooruHandler {
     } else {
       // TODO others don't support / don't have the parser?
       return '';
-      // return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10';
+      // return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=20';
     }
   }
 
@@ -158,6 +161,9 @@ class ShimmieHtmlHandler extends BooruHandler {
 
   @override
   bool get hasSizeData => true;
+
+  @override
+  bool get hasTagSuggestions => true;
 
   @override
   String validateTags(String tags) {
@@ -244,7 +250,7 @@ class ShimmieHtmlHandler extends BooruHandler {
     } else {
       // TODO others don't support / don't have the parser?
       return '';
-      // return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10';
+      // return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=20';
     }
   }
 

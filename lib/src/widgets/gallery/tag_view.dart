@@ -60,7 +60,6 @@ class _TagViewState extends State<TagView> {
   late BooruItem item;
   List<String> tags = [], filteredTags = [];
   bool? sortTags;
-  late StreamSubscription<BooruItem> itemSubscription;
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
   final GlobalKey searchKey = GlobalKey(debugLabel: 'tagsSearchKey');
@@ -81,12 +80,14 @@ class _TagViewState extends State<TagView> {
     filteredTags = [...tags];
     parseSortGroupTags();
 
-    itemSubscription = searchHandler.viewedItem.listen((BooruItem item) {
-      this.item = item;
-      parseSortGroupTags();
-    });
+    searchHandler.viewedItem.addListener(itemListener);
 
     reloadItemData(initial: true);
+  }
+
+  void itemListener() {
+    item = searchHandler.viewedItem.value;
+    parseSortGroupTags();
   }
 
   @override
@@ -95,7 +96,7 @@ class _TagViewState extends State<TagView> {
     searchHandler.searchTextController.removeListener(onMainSearchTextChanged);
     searchController.dispose();
     searchFocusNode.removeListener(searchFocusListener);
-    itemSubscription.cancel();
+    searchHandler.viewedItem.removeListener(itemListener);
     super.dispose();
   }
 
@@ -273,6 +274,7 @@ class _TagViewState extends State<TagView> {
                 onChanged: (_) {
                   parseSortGroupTags();
                 },
+                enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
               ),
             ),
           ],
@@ -1009,9 +1011,9 @@ class _TagText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const style = TextStyle(
+    final style = TextStyle(
       fontSize: 14,
-      fontWeight: FontWeight.w700,
+      fontWeight: filterText?.isNotEmpty == true ? FontWeight.w400 : FontWeight.w600,
     );
 
     if (filterText?.isNotEmpty == true) {
@@ -1030,7 +1032,8 @@ class _TagText extends StatelessWidget {
             TextSpan(
               text: filterText,
               style: style.copyWith(
-                backgroundColor: Colors.green,
+                color: Colors.green,
+                fontWeight: FontWeight.w600,
               ),
             ),
           );

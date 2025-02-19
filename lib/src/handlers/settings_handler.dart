@@ -118,6 +118,7 @@ class SettingsHandler {
   int volumeButtonsScrollSpeed = 200;
   int galleryAutoScrollTime = 4000;
   int cacheSize = 3;
+  int autoLockTimeout = 120;
 
   double mousewheelScrollSpeed = 10;
   double preloadSizeLimit = 0.2;
@@ -176,6 +177,8 @@ class SettingsHandler {
   bool disableImageScaling = false;
   bool gifsAsThumbnails = false;
   bool desktopListsDrag = false;
+  RxBool useLockscreen = false.obs;
+  RxBool blurOnLeave = false.obs;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -184,13 +187,10 @@ class SettingsHandler {
     name: 'Pink',
     primary: Colors.pink[200],
     accent: Colors.pink[600],
-  ).obs
-    ..listen((ThemeItem theme) {
-      // print('newTheme ${theme.name} ${theme.primary}');
-    });
+  ).obs;
 
-  Rx<Color?> customPrimaryColor = Colors.pink[200].obs;
-  Rx<Color?> customAccentColor = Colors.pink[600].obs;
+  Rx<Color?> customPrimaryColor = Colors.pink[200]!.obs;
+  Rx<Color?> customAccentColor = Colors.pink[600]!.obs;
 
   Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
   RxBool useDynamicColor = false.obs;
@@ -236,6 +236,7 @@ class SettingsHandler {
     'gifsAsThumbnails',
     'cacheDuration',
     'cacheSize',
+    'autoLockTimeout',
     'enableDrawerMascot',
     'drawerMascotPathOverride',
     'allowSelfSignedCerts',
@@ -246,6 +247,8 @@ class SettingsHandler {
     'desktopListsDrag',
     'incognitoKeyboard',
     'backupPath',
+    'useLockscreen',
+    'blurOnLeave',
   ];
 
   // default values and possible options map for validation
@@ -413,49 +416,64 @@ class SettingsHandler {
         'limit': {
           'type': 'int',
           'default': Constants.defaultItemLimit,
+          'step': 10,
           'upperLimit': 100,
           'lowerLimit': 10,
         },
         'portraitColumns': {
           'type': 'int',
           'default': 2,
+          'step': 1,
           'upperLimit': 100,
           'lowerLimit': 1,
         },
         'landscapeColumns': {
           'type': 'int',
           'default': 4,
+          'step': 1,
           'upperLimit': 100,
           'lowerLimit': 1,
         },
         'preloadCount': {
           'type': 'int',
           'default': 1,
+          'step': 1,
           'upperLimit': 3,
           'lowerLimit': 0,
         },
         'snatchCooldown': {
           'type': 'int',
           'default': 250,
+          'step': 50,
           'upperLimit': 10000,
           'lowerLimit': 0,
         },
         'volumeButtonsScrollSpeed': {
           'type': 'int',
           'default': 200,
+          'step': 10,
           'upperLimit': 1000000,
           'lowerLimit': 0,
         },
         'galleryAutoScrollTime': {
           'type': 'int',
           'default': 4000,
+          'step': 100,
           'upperLimit': 100000,
           'lowerLimit': 100,
         },
         'cacheSize': {
           'type': 'int',
           'default': 3,
+          'step': 1,
           'upperLimit': 10,
+          'lowerLimit': 0,
+        },
+        'autoLockTimeout': {
+          'type': 'int',
+          'default': 120,
+          'step': 10,
+          'upperLimit': double.infinity,
           'lowerLimit': 0,
         },
 
@@ -615,6 +633,14 @@ class SettingsHandler {
         'altVideoPlayerHwAccel': {
           'type': 'bool',
           'default': true,
+        },
+        'useLockscreen': {
+          'type': 'rxbool',
+          'default': false,
+        },
+        'blurOnLeave': {
+          'type': 'rxbool',
+          'default': false,
         },
 
         // other
@@ -1058,8 +1084,14 @@ class SettingsHandler {
         return cacheDuration;
       case 'cacheSize':
         return cacheSize;
+      case 'autoLockTimeout':
+        return autoLockTimeout;
       case 'allowSelfSignedCerts':
         return allowSelfSignedCerts;
+      case 'useLockscreen':
+        return useLockscreen;
+      case 'blurOnLeave':
+        return blurOnLeave;
       case 'enabledLogTypes':
         return enabledLogTypes;
 
@@ -1282,6 +1314,9 @@ class SettingsHandler {
       case 'cacheSize':
         cacheSize = validatedValue;
         break;
+      case 'autoLockTimeout':
+        autoLockTimeout = validatedValue;
+        break;
       case 'prefBooru':
         prefBooru = validatedValue;
         break;
@@ -1366,6 +1401,12 @@ class SettingsHandler {
       case 'altVideoPlayerHWDEC':
         altVideoPlayerHWDEC = validatedValue;
         break;
+      case 'useLockscreen':
+        useLockscreen = validatedValue;
+        break;
+      case 'blurOnLeave':
+        blurOnLeave = validatedValue;
+        break;
 
       // theme stuff
       case 'appMode':
@@ -1447,6 +1488,7 @@ class SettingsHandler {
       'desktopListsDrag': validateValue('desktopListsDrag', null, toJSON: true),
       'cacheDuration': validateValue('cacheDuration', null, toJSON: true),
       'cacheSize': validateValue('cacheSize', null, toJSON: true),
+      'autoLockTimeout': validateValue('autoLockTimeout', null, toJSON: true),
       'allowSelfSignedCerts': validateValue('allowSelfSignedCerts', null, toJSON: true),
       'enabledLogTypes': validateValue('enabledLogTypes', null, toJSON: true),
       'wakeLockEnabled': validateValue('wakeLockEnabled', null, toJSON: true),
@@ -1465,6 +1507,8 @@ class SettingsHandler {
       'altVideoPlayerHwAccel': validateValue('altVideoPlayerHwAccel', null, toJSON: true),
       'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
       'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
+      'useLockscreen': validateValue('useLockscreen', null, toJSON: true),
+      'blurOnLeave': validateValue('blurOnLeave', null, toJSON: true),
 
       //TODO
       'buttonOrder': buttonOrder.map((e) => e[0]).toList(),
@@ -1678,7 +1722,11 @@ class SettingsHandler {
     if (restate) {
       final searchHandler = SearchHandler.instance;
       searchHandler.filterCurrentFetched(); // refilter fetched because user could have changed the filtering settings
-      searchHandler.rootRestate?.call(); // force global state update to redraw stuff
+      unawaited(
+        Future.delayed(const Duration(seconds: 1)).then((_) {
+          searchHandler.rootRestate?.call(); // force global state update to redraw stuff
+        }),
+      );
     }
     return true;
   }

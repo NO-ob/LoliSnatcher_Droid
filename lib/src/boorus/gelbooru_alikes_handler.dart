@@ -26,6 +26,9 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   bool get hasSizeData => true;
 
+  @override
+  bool get hasTagSuggestions => true;
+
   bool get isR34xxx => booru.baseURL!.contains('rule34.xxx');
 
   // TODO ?
@@ -161,7 +164,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String makeTagURL(String input) {
     // 16.01.22 - r34xx has order=count&direction=desc, but only it has it, so not worth adding it
-    // "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=nagato%&limit=10&order=count&direction=desc"
+    // "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=nagato%&limit=20&order=count&direction=desc"
 
     // EXAMPLE: https://safebooru.org/autocomplete.php?q=naga
     String baseUrl = booru.baseURL!;

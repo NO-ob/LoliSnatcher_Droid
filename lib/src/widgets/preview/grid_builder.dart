@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -26,12 +24,13 @@ class GridBuilder extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
 
-    return Obx(() {
-      final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
-      return SliverGrid.builder(
+    return ValueListenableBuilder(
+      valueListenable: searchHandler.currentTab.booruHandler.filteredFetched,
+      builder: (context, currentFetched, child) => SliverGrid.builder(
         addAutomaticKeepAlives: false,
-        itemCount: searchHandler.currentFetched.length,
+        itemCount: currentFetched.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columnCount,
           childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9 / 16,
@@ -52,7 +51,7 @@ class GridBuilder extends StatelessWidget {
             ),
           );
         },
-      );
-    });
+      ),
+    );
   }
 }

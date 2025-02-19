@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -129,15 +127,14 @@ class SettingsPage extends StatelessWidget {
                 icon: const Icon(Icons.network_check),
                 page: () => const NetworkPage(),
               ),
-              if (Platform.isAndroid)
-                SettingsButton(
-                  name: 'Privacy',
-                  icon: const FaIcon(
-                    FontAwesomeIcons.userShield,
-                    size: 20,
-                  ),
-                  page: () => const PrivacyPage(),
+              SettingsButton(
+                name: 'Privacy',
+                icon: const FaIcon(
+                  FontAwesomeIcons.userShield,
+                  size: 20,
                 ),
+                page: () => const PrivacyPage(),
+              ),
               SettingsButton(
                 name: 'LoliSync',
                 icon: const Icon(Icons.sync),

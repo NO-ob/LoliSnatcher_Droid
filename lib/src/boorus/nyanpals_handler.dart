@@ -5,6 +5,9 @@ class NyanPalsHandler extends BooruHandler {
   NyanPalsHandler(super.booru, super.limit);
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   List parseListFromResponse(dynamic response) {
     final parsedResponse = response.data;
     totalCount.value = parsedResponse['total']!;
@@ -76,6 +79,6 @@ class NyanPalsHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10';
+    return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20';
   }
 }

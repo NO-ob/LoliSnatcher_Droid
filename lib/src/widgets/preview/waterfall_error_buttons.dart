@@ -27,24 +27,26 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
   int _startedAt = 0;
   Timer? checkInterval;
   bool isCollapsed = false;
-  StreamSubscription<bool>? loadingListener;
 
   @override
   void initState() {
     super.initState();
+
     startTimer();
-    loadingListener = searchHandler.isLoading.listen((bool isLoading) {
-      if (isLoading) {
-        startTimer();
-      } else {
-        stopTimer();
-      }
-    });
+    searchHandler.isLoading.addListener(loadingListener);
   }
 
   void updateState() {
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  void loadingListener() {
+    if (searchHandler.isLoading.value) {
+      startTimer();
+    } else {
+      stopTimer();
     }
   }
 
@@ -68,7 +70,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
   @override
   void dispose() {
     checkInterval?.cancel();
-    loadingListener?.cancel();
+    searchHandler.isLoading.removeListener(loadingListener);
     super.dispose();
   }
 
@@ -126,7 +128,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             );
           } else {
             return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 6),
+              padding: EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom + 6),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -227,7 +229,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
               );
             } else {
               return Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 6),
+                padding: EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom + 6),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -306,7 +308,7 @@ class _ButtonWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
-      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom + 6),
+      padding: EdgeInsets.only(bottom: MediaQuery.viewPaddingOf(context).bottom + 6),
       child: child,
     );
   }

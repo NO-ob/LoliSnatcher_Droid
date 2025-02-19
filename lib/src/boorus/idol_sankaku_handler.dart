@@ -13,6 +13,9 @@ class IdolSankakuHandler extends SankakuHandler {
   IdolSankakuHandler(super.booru, super.limit);
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   Options? fetchSearchOptions() {
     // TODO without this and manual decode requests fail with endless redirect error. why it happens? dio doesn't consider the response data as json? some missing header in response?
     return Options(responseType: ResponseType.plain);
@@ -121,7 +124,7 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/tag/index.json?name=$input*&limit=10';
+    return '${booru.baseURL}/tag/index.json?name=$input*&limit=20';
   }
 
   @override
