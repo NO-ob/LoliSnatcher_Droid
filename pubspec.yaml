@@ -64,7 +64,7 @@ dependencies:
   media_kit_libs_video: ^1.0.5
   native_dio_adapter: ^1.4.0
   path_provider: ^2.1.5
-  permission_handler: ^11.3.1
+  permission_handler: ^11.4.0
   photo_view:
     git:
       url: https://github.com/NANI-SORE/photo_view.git
@@ -76,10 +76,10 @@ dependencies:
   sqflite_common_ffi: ^2.3.5
   sqflite: ^2.4.2
   statsfl: ^2.3.0
-  talker_dio_logger: ^4.6.11
-  talker_flutter: ^4.6.11
-  talker_logger: ^4.6.11
-  talker: ^4.6.11
+  talker_dio_logger: ^4.6.12
+  talker_flutter: ^4.6.12
+  talker_logger: ^4.6.12
+  talker: ^4.6.12
   transparent_image: ^2.0.1
   url_launcher: ^6.3.1
   uuid: ^4.5.1
