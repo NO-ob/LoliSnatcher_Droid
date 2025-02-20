@@ -6,6 +6,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -234,8 +235,9 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
-    final String tagStr = responseItem['tagName'] ?? '';
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
+    // tagName - sankaku, name - idol
+    final String tagStr = responseItem['tagName'] ?? responseItem['name'] ?? '';
     if (tagStr.isEmpty) {
       return null;
     }
@@ -247,7 +249,11 @@ class SankakuHandler extends BooruHandler {
       tagType = tagTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);
-    return tagStr;
+    return TagSuggestion(
+      tag: tagStr,
+      type: tagType,
+      count: responseItem['count'] ?? 0,
+    );
   }
 
   @override

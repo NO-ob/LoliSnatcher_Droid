@@ -9,6 +9,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -142,35 +143,48 @@ class GelbooruHandler extends BooruHandler {
 
   // ----------------- Tag suggestions and tag handler stuff
 
+  Map<String, TagType> get tagSuggestionsTypeMap => {
+        'metadata': TagType.meta,
+        'copyright': TagType.copyright,
+        'character': TagType.character,
+        'artist': TagType.artist,
+        'tag': TagType.none,
+      };
+
   @override
   String makeTagURL(String input) {
     // EXAMPLE https://gelbooru.com/index.php?page=dapi&s=tag&q=index&name_pattern=nagat%25&limit=20&json=1
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
     final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
-    return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20&json=1$apiKeyStr$userIdStr';
+    return '${booru.baseURL}/index.php?page=autocomplete2&term=$input&type=tag_query&limit=20$apiKeyStr$userIdStr'; // limit doesnt work
+    // return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20&order=post_count&direction=desc&json=1$apiKeyStr$userIdStr'; // order doesnt work
   }
 
   @override
   List parseTagSuggestionsList(dynamic response) {
-    final parsedResponse = response.data['tag'] ?? [];
+    final parsedResponse = response.data is List ? response.data : response.data['tag'] ?? [];
     return parsedResponse;
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
-    final String tagStr = responseItem['name'] ?? '';
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
+    final String tagStr = responseItem['value'] ?? responseItem['name'] ?? '';
     if (tagStr.isEmpty) {
       return null;
     }
 
     // record tag data for future use
-    final String rawTagType = responseItem['type']?.toString() ?? '';
+    final String rawTagType = (responseItem['category'] ?? responseItem['type'])?.toString() ?? '';
     TagType tagType = TagType.none;
-    if (rawTagType.isNotEmpty && tagTypeMap.containsKey(rawTagType)) {
-      tagType = tagTypeMap[rawTagType] ?? TagType.none;
+    if (rawTagType.isNotEmpty && (tagTypeMap.containsKey(rawTagType) || tagSuggestionsTypeMap.containsKey(rawTagType))) {
+      tagType = tagTypeMap[rawTagType] ?? tagSuggestionsTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);
-    return tagStr;
+    return TagSuggestion(
+      tag: tagStr,
+      type: tagType,
+      count: int.tryParse((responseItem['count'] ?? responseItem['post_count'])?.toString() ?? '0') ?? 0,
+    );
   }
 
   @override

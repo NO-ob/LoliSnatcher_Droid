@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -55,8 +56,12 @@ class FavouritesHandler extends BooruHandler {
   }
 
   @override
-  Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
-    final List<String> tags = await SettingsHandler.instance.dbHandler.getTags(input, limit);
+  Future<List<TagSuggestion>> tagSearch(
+    String input, {
+    CancelToken? cancelToken,
+  }) async {
+    final List<TagSuggestion> tags =
+        (await SettingsHandler.instance.dbHandler.getTags(input, limit)).map((t) => TagSuggestion(tag: t)).where((t) => t.tag.trim().isNotEmpty).toList();
     return tags;
   }
 

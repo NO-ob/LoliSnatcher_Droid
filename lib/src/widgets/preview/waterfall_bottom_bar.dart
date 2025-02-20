@@ -10,11 +10,13 @@ import 'package:dio/dio.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/search_modifier.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -31,6 +33,8 @@ import 'package:lolisnatcher/src/widgets/preview/waterfall_error_buttons.dart';
 
 // current implementation listens to MainAppBar visibility changes
 // and shows/hides bottom bar as soon as it reaches starting height/leaves screen
+
+// TODO split into separate files
 
 class WaterfallBottomBar extends StatefulWidget {
   const WaterfallBottomBar({super.key});
@@ -345,8 +349,8 @@ class MainSearchBar extends StatefulWidget {
   });
 
   final void Function(String, int) onChipTap;
-  final void Function(String, int) onChipLongTap;
-  final void Function(String, int) onChipDeleteTap;
+  final void Function(String, int)? onChipLongTap;
+  final void Function(String, int)? onChipDeleteTap;
   final VoidCallback onResetTap;
   final VoidCallback onSearchTap;
   final VoidCallback onSearchLongTap;
@@ -454,7 +458,6 @@ class _MainSearchBarState extends State<MainSearchBar> {
                   children: [
                     Expanded(
                       child: FadingEdgeScrollView.fromScrollView(
-                        // TODO make list reorderable?
                         child: ListView(
                           controller: scrollController,
                           scrollDirection: Axis.horizontal,
@@ -490,8 +493,8 @@ class _MainSearchBarState extends State<MainSearchBar> {
                                         tag: tags[i],
                                         tab: searchHandler.currentTab,
                                         onTap: () => widget.onChipTap(tags[i], i),
-                                        onLongTap: () => widget.onChipLongTap(tags[i], i),
-                                        onDeleteTap: () => widget.onChipDeleteTap(tags[i], i),
+                                        onLongTap: widget.onChipLongTap == null ? null : () => widget.onChipLongTap!(tags[i], i),
+                                        onDeleteTap: widget.onChipDeleteTap == null ? null : () => widget.onChipDeleteTap!(tags[i], i),
                                         canDelete: widget.selectedTagIndex != i,
                                         isSelected: widget.selectedTag == tags[i] || widget.selectedTagIndex == i,
                                       ),
@@ -957,7 +960,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
   String? tagToEdit;
   int? tagToEditIndex;
 
-  List<String> suggestedTags = [];
+  List<TagSuggestion> suggestedTags = [];
 
   CancelToken? cancelToken;
 
@@ -1250,7 +1253,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                       final ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
                       final String copied = cdata?.text ?? '';
                       if (copied.isNotEmpty) {
-                        suggestionTextController.text = '${suggestionTextController.text.isEmpty ? '' : ' '}$copied ';
+                        suggestionTextController.text =
+                            '${suggestionTextController.text}${(suggestionTextController.text.isEmpty || suggestionTextController.text.endsWith(' ')) ? '' : ' '}$copied';
                         suggestionTextController.selection = TextSelection(
                           baseOffset: suggestionTextController.text.length,
                           extentOffset: suggestionTextController.text.length,
@@ -1362,37 +1366,37 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                             }
                           }
 
-                          final String tag = suggestedTags[index];
-                          Color tagColor = tagHandler.getTag(tag).getColour();
+                          final TagSuggestion tag = suggestedTags[index];
+                          Color tagColor = !tag.type.isNone ? tag.type.getColour() : tagHandler.getTag(tag.tag).getColour();
                           if (tagColor == Colors.transparent) tagColor = Theme.of(context).colorScheme.onSurface;
 
                           //
 
                           final suggestionSearchText = suggestionTextController.text.trim();
 
+                          final style = Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: tagColor,
+                                fontWeight: FontWeight.w400,
+                                height: 1,
+                              );
+
                           final List<TextSpan> spans = [];
                           if (suggestionSearchText.isNotEmpty) {
-                            final List<String> split = tag.split(suggestionSearchText);
+                            final List<String> split = tag.tag.split(suggestionSearchText);
                             for (int i = 0; i < split.length; i++) {
                               spans.add(
                                 TextSpan(
                                   text: split[i].replaceAll('_', ' '),
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        color: tagColor,
-                                        fontWeight: FontWeight.w400,
-                                        height: 1,
-                                      ),
+                                  style: style,
                                 ),
                               );
                               if (i < split.length - 1) {
                                 spans.add(
                                   TextSpan(
                                     text: suggestionSearchText.replaceAll('_', ' '),
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          color: tagColor,
-                                          fontWeight: FontWeight.w600,
-                                          height: 1,
-                                        ),
+                                    style: style?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 );
                               }
@@ -1400,12 +1404,10 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                           } else {
                             spans.add(
                               TextSpan(
-                                text: tag.replaceAll('_', ' '),
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: tagColor,
-                                      fontWeight: FontWeight.w600,
-                                      height: 1,
-                                    ),
+                                text: tag.tag.replaceAll('_', ' '),
+                                style: style?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             );
                           }
@@ -1416,17 +1418,29 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: () => onSuggestionTap(tag),
-                                onLongPress: () => onSuggestionLongTap(tag),
+                                onTap: () => onSuggestionTap(tag.tag),
+                                onLongPress: () => onSuggestionLongTap(tag.tag),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  child: MarqueeText.rich(
-                                    textSpan: TextSpan(children: spans),
-                                    isExpanded: false,
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          color: tagColor,
-                                          height: 1,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      MarqueeText.rich(
+                                        textSpan: TextSpan(children: spans),
+                                        style: style,
+                                      ),
+                                      if (tag.count > 0)
+                                        Text(
+                                          // TODO locale
+                                          NumberFormat.compact(locale: 'en').format(tag.count),
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
+                                                height: 1,
+                                              ),
                                         ),
+                                    ],
                                   ),
                                 ),
                               ),

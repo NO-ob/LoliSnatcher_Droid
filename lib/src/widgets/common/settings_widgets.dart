@@ -967,8 +967,9 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
             onPressed: () {
               if (widget.onSubmitted != null) {
                 widget.onSubmitted?.call(widget.controller.text);
+              } else {
+                _focusNode.unfocus();
               }
-              _focusNode.unfocus();
             },
           )
         else

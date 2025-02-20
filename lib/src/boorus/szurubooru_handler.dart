@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -93,8 +94,8 @@ class SzurubooruHandler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
     final String? tag = responseItem['names']?[0]?.toString().replaceAll(':', r'\:');
-    return tag;
+    return tag != null ? TagSuggestion(tag: tag) : null;
   }
 }

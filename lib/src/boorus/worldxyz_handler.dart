@@ -1,9 +1,12 @@
 import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
+
+// TODO parser for new engine
 
 class WorldXyzHandler extends BooruHandler {
   WorldXyzHandler(super.booru, super.limit);
@@ -128,7 +131,9 @@ class WorldXyzHandler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
-    return responseItem['value']?.replaceAll(RegExp(' '), '_');
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
+    return TagSuggestion(
+      tag: responseItem['value']?.replaceAll(RegExp(' '), '_') ?? '',
+    );
   }
 }

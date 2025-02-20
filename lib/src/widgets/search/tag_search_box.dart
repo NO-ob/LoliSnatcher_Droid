@@ -10,6 +10,7 @@ import 'package:keyboard_actions/keyboard_actions.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -367,7 +368,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       [' ', 'loading'],
     ];
     // TODO cancel previous search when new starts
-    List<String?> getFromBooru = [];
+    List<TagSuggestion> getFromBooru = [];
     cancelToken?.cancel();
     cancelToken = CancelToken();
     if (multiIndex != -1) {
@@ -378,7 +379,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     }
 
     booruResults.value = getFromBooru.map((tag) {
-      final String tagTemp = tag ?? '';
+      final String tagTemp = tag.tag;
       return [tagTemp, 'booru'];
     }).toList();
   }

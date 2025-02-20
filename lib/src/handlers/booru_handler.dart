@@ -11,6 +11,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
@@ -296,8 +297,8 @@ abstract class BooruHandler {
   bool get hasTagSuggestions => false;
 
   // TODO rename to getTagSuggestions
-  Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
-    final List<String> tags = [];
+  Future<List<TagSuggestion>> tagSearch(String input, {CancelToken? cancelToken}) async {
+    final List<TagSuggestion> tags = [];
 
     final String url = makeTagURL(input);
     if (url.isEmpty) {
@@ -329,8 +330,12 @@ abstract class BooruHandler {
           final rawTag = rawTags[i];
           try {
             if (tags.length < limit) {
-              final String parsedTag = Uri.decodeComponent(parseFragment(await parseTagSuggestion(rawTag, i) ?? '').text ?? '').trim();
-              if (parsedTag.isNotEmpty) {
+              TagSuggestion? parsedTag = await parseTagSuggestion(rawTag, i);
+              parsedTag = parsedTag?.copyWith(
+                tag: Uri.decodeComponent(parseFragment(parsedTag.tag.trim()).text ?? '').trim(),
+              );
+
+              if (parsedTag != null && parsedTag.tag.isNotEmpty) {
                 // TODO add tag to taghandler before adding it to list
                 // addTagsWithType(parsedTag, tagType);
                 tags.add(parsedTag);
@@ -388,8 +393,8 @@ abstract class BooruHandler {
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  FutureOr<String?> parseTagSuggestion(dynamic responseItem, int index) {
-    return '';
+  FutureOr<TagSuggestion?> parseTagSuggestion(dynamic responseItem, int index) {
+    return null;
   }
 
   /// [SHOULD BE OVERRIDDEN]

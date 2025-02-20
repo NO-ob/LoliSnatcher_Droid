@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -168,7 +169,7 @@ class DanbooruHandler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
     final String tagStr = (responseItem['antecedent'] ?? responseItem['value'])?.toString() ?? '';
     if (tagStr.isEmpty) {
       return null;
@@ -180,7 +181,11 @@ class DanbooruHandler extends BooruHandler {
       tagType = tagTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);
-    return tagStr;
+    return TagSuggestion(
+      tag: tagStr,
+      type: tagType,
+      count: responseItem['post_count'] ?? 0,
+    );
   }
 
   @override

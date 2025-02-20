@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
@@ -244,8 +245,11 @@ class InkBunnyHandler extends BooruHandler {
   }
 
   @override
-  Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
-    final List<String> searchTags = [];
+  Future<List<TagSuggestion>> tagSearch(
+    String input, {
+    CancelToken? cancelToken,
+  }) async {
+    final List<TagSuggestion> searchTags = [];
     final String url = makeTagURL(input);
     try {
       final Uri uri = Uri.parse(url);
@@ -258,8 +262,8 @@ class InkBunnyHandler extends BooruHandler {
           final tagObjects = parsedResponse['results'];
           if (tagObjects.length > 0) {
             for (int i = 0; i < tagObjects.length; i++) {
-              Logger.Inst().log("tag $i = ${tagObjects[i]["value"]}", className, 'tagSearch', LogTypes.booruHandlerInfo);
-              searchTags.add(tagObjects[i]['value'].replaceAll(' ', '_'));
+              Logger.Inst().log("tag $i = ${tagObjects[i]?["value"]}", className, 'tagSearch', LogTypes.booruHandlerInfo);
+              searchTags.add(TagSuggestion(tag: tagObjects[i]?['value']?.replaceAll(' ', '_') ?? ''));
             }
           }
         }

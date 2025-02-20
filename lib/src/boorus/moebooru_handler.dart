@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -117,7 +118,7 @@ class MoebooruHandler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
     final String tagStr = responseItem.getAttribute('name')?.trim() ?? '';
     if (tagStr.isEmpty) {
       return null;
@@ -130,7 +131,11 @@ class MoebooruHandler extends BooruHandler {
       tagType = tagTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);
-    return tagStr;
+    return TagSuggestion(
+      tag: tagStr,
+      type: tagType,
+      count: int.tryParse(responseItem.getAttribute('count') ?? '0') ?? 0,
+    );
   }
 
   // TODO parse comments from html

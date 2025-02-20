@@ -1,4 +1,5 @@
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
@@ -135,7 +136,7 @@ class e621Handler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
     final String tagStr = responseItem['name'] ?? '';
     if (tagStr.isEmpty) {
       return null;
@@ -148,6 +149,10 @@ class e621Handler extends BooruHandler {
       tagType = tagTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);
-    return tagStr;
+    return TagSuggestion(
+      tag: tagStr,
+      type: tagType,
+      count: responseItem['post_count'] ?? 0,
+    );
   }
 }

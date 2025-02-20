@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 
@@ -93,7 +94,7 @@ class RainbooruHandler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
     final List tagStringReplacements = [
       ['-colon-', ':'],
       ['-dash-', '-'],
@@ -107,6 +108,6 @@ class RainbooruHandler extends BooruHandler {
     for (int x = 0; x < tagStringReplacements.length; x++) {
       tag = tag.replaceAll(tagStringReplacements[x][0], tagStringReplacements[x][1]);
     }
-    return tag;
+    return TagSuggestion(tag: tag);
   }
 }

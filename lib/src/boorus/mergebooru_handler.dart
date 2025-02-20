@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -181,7 +182,10 @@ class MergebooruHandler extends BooruHandler {
   }
 
   @override
-  Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
+  Future<List<TagSuggestion>> tagSearch(
+    String input, {
+    CancelToken? cancelToken,
+  }) async {
     return booruHandlers.first.tagSearch(input, cancelToken: cancelToken);
   }
 

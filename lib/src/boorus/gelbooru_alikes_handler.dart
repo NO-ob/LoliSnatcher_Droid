@@ -10,6 +10,7 @@ import 'package:xml/xml.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -163,25 +164,47 @@ class GelbooruAlikesHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    // 16.01.22 - r34xx has order=count&direction=desc, but only it has it, so not worth adding it
-    // "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=nagato%&limit=20&order=count&direction=desc"
-
     // EXAMPLE: https://safebooru.org/autocomplete.php?q=naga
     String baseUrl = booru.baseURL!;
     if (isR34xxx) {
       baseUrl = 'https://api.rule34.xxx';
     }
-    return '$baseUrl/autocomplete.php?q=$input'; // doesn't allow limit, but sorts by popularity
+    return '$baseUrl/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20&order=count&direction=desc';
+    // return '$baseUrl/autocomplete.php?q=$input';
   }
 
   @override
   List parseTagSuggestionsList(dynamic response) {
-    return jsonDecode(response.data) ?? [];
+    return ((response.data is String && response.data?.startsWith('<?xml') == true)
+            ? XmlDocument.parse(response.data).findAllElements('tag').toList()
+            : jsonDecode(response.data)) ??
+        [];
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
-    return responseItem['value'];
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
+    if (responseItem is XmlElement) {
+      final String tagStr = getAttrOrElem(responseItem, 'name') as String? ?? '';
+      final int count = int.tryParse(getAttrOrElem(responseItem, 'count')?.toString() ?? '0') ?? 0;
+      final String rawTagType = getAttrOrElem(responseItem, 'type')?.toString() ?? '';
+      TagType tagType = TagType.none;
+      if (rawTagType.isNotEmpty && tagTypeMap.containsKey(rawTagType)) {
+        tagType = tagTypeMap[rawTagType] ?? TagType.none;
+      }
+      addTagsWithType([tagStr], tagType);
+
+      return TagSuggestion(
+        tag: tagStr,
+        count: count,
+        type: tagType,
+      );
+    } else {
+      final labelCountRegExp = RegExp(r'\((\d+)\)$');
+      return TagSuggestion(
+        tag: responseItem['value'] ?? '',
+        count: int.tryParse(labelCountRegExp.firstMatch(responseItem['label'])?.group(1) ?? '0') ?? 0,
+      );
+    }
   }
 
   // ----------------- Search count
