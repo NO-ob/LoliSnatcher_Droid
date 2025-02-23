@@ -293,7 +293,8 @@ class _DebugPageState extends State<DebugPage> {
                 name: 'Delete All Cookies',
                 icon: const Icon(Icons.cookie_outlined),
                 action: () async {
-                  await CookieManager.instance().deleteAllCookies();
+                  await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteAllCookies();
+                  globalWindowsCookies.clear();
                 },
               ),
 

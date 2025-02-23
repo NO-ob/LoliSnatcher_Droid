@@ -221,8 +221,11 @@ class Tools {
     String cookieString = '';
     if (isOnPlatformWithWebviewSupport) {
       try {
-        final CookieManager cookieManager = CookieManager.instance();
+        final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
         final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(uri));
+        if (Platform.isWindows) {
+          cookies.addAll(globalWindowsCookies[WebUri(uri).host] ?? []);
+        }
         for (final Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
