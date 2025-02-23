@@ -128,10 +128,6 @@ class DioNetwork {
     return client;
   }
 
-  static CancelToken get cancelToken {
-    return CancelToken();
-  }
-
   static Options get defaultOptions {
     final options = Options(
       responseType: ResponseType.json,

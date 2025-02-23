@@ -20,6 +20,7 @@ class Thumbnail extends StatefulWidget {
   const Thumbnail({
     required this.item,
     this.isStandalone = false,
+    this.useHero = true,
     super.key,
   });
 
@@ -27,6 +28,8 @@ class Thumbnail extends StatefulWidget {
 
   /// set to true when used in a list
   final bool isStandalone;
+
+  final bool useHero;
 
   @override
   State<Thumbnail> createState() => _ThumbnailState();
@@ -511,7 +514,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
     // print('building thumb ${searchHandler.getItemIndex(widget.item)}');
 
-    if (widget.isStandalone) {
+    if (widget.isStandalone && widget.useHero) {
       return HeroMode(
         enabled: settingsHandler.enableHeroTransitions,
         child: Hero(

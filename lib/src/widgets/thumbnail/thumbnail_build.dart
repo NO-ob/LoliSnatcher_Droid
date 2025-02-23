@@ -41,6 +41,7 @@ class ThumbnailBuild extends StatelessWidget {
           Thumbnail(
             item: item,
             isStandalone: true,
+            useHero: selectable,
           ),
           // Image(
           //   image: ResizeImage(NetworkImage(item.thumbnailURL),

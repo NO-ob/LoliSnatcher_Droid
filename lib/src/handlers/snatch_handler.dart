@@ -40,6 +40,10 @@ class SnatchHandler {
   RxInt received = 0.obs;
   RxInt total = 0.obs;
 
+  RxList<({BooruItem item, Booru booru})> existsItems = RxList([]);
+  RxList<({BooruItem item, Booru booru})> failedItems = RxList([]);
+  RxList<({BooruItem item, Booru booru})> cancelledItems = RxList([]);
+
   CancelToken? cancelToken;
 
   double get currentProgress {
@@ -70,6 +74,70 @@ class SnatchHandler {
   void onProgress(int newReceived, int newTotal) {
     received.value = newReceived;
     total.value = newTotal;
+  }
+
+  void onRemoveRetryItem(
+    ({BooruItem item, Booru booru}) record,
+  ) {
+    existsItems.remove(record);
+    failedItems.remove(record);
+    cancelledItems.remove(record);
+  }
+
+  void onClearRetryableItems() {
+    existsItems.clear();
+    failedItems.clear();
+    cancelledItems.clear();
+  }
+
+  void onRetryAll({
+    required int cooldown,
+    bool ignoreExists = false,
+  }) {
+    final itemsToRetry = [...existsItems, ...failedItems, ...cancelledItems];
+    final Set<Booru> uniqueBoorus = itemsToRetry.map((i) => i.booru).toSet();
+    final Map<Booru, List<BooruItem>> booruItemsMap = {};
+    booruItemsMap.addEntries(uniqueBoorus.map((b) => MapEntry(b, [])));
+    for (int i = 0; i < itemsToRetry.length; i++) {
+      final BooruItem item = itemsToRetry[i].item;
+      final Booru booru = itemsToRetry[i].booru;
+      final List<BooruItem> items = booruItemsMap[booru]!;
+      items.add(item);
+      booruItemsMap[booru] = items;
+    }
+
+    final List<SnatchItem> snatchItems = [];
+    booruItemsMap.forEach((booru, items) {
+      snatchItems.add(
+        SnatchItem(
+          items,
+          cooldown,
+          booru,
+          ignoreExists || items.any((i) => existsItems.any((e) => e.item == i)),
+        ),
+      );
+    });
+
+    queuedList.addAll(snatchItems);
+
+    onClearRetryableItems();
+  }
+
+  void onRetryItem(
+    ({BooruItem item, Booru booru}) record, {
+    required int cooldown,
+    bool ignoreExists = false,
+  }) {
+    queuedList.add(
+      SnatchItem(
+        [record.item],
+        cooldown,
+        record.booru,
+        ignoreExists,
+      ),
+    );
+
+    onRemoveRetryItem(record);
   }
 
   void onCancel() {
@@ -165,6 +233,12 @@ class SnatchHandler {
               //TODO restart/retry buttons for failed items?
             );
           }
+        }
+
+        if (isLastMessage) {
+          existsItems.addAll(exists.map((e) => (booru: item.booru, item: e)));
+          failedItems.addAll(failed.map((e) => (booru: item.booru, item: e)));
+          cancelledItems.addAll(cancelled.map((e) => (booru: item.booru, item: e)));
         }
 
         cancelToken = null;

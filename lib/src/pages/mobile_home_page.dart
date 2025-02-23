@@ -27,10 +27,12 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
+import 'package:lolisnatcher/src/widgets/common/retry_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
 import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
@@ -470,9 +472,14 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                   final int queuesLength = snatchHandler.queuedList.length;
                   final int activeLength =
                       snatchHandler.current.value != null ? snatchHandler.current.value!.booruItems.length - snatchHandler.queueProgress.value : 0;
-                  final int totalAmount = queuesLength + activeLength;
+                  final int totalActiveAmount = queuesLength + activeLength;
 
-                  if (totalAmount == 0) {
+                  final int existsLength = snatchHandler.existsItems.length;
+                  final int failedLength = snatchHandler.failedItems.length;
+                  final int cancelledLength = snatchHandler.cancelledItems.length;
+                  final int totalRetryableAmount = existsLength + failedLength + cancelledLength;
+
+                  if (totalActiveAmount == 0 && totalRetryableAmount == 0) {
                     return const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -491,169 +498,248 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                     );
                   }
 
-                  return ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    itemCount: totalAmount,
-                    itemExtent: 200,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (activeLength != 0 && index < activeLength) {
-                        final item = snatchHandler.current.value!.booruItems[snatchHandler.queueProgress.value + index];
-                        return Stack(
-                          children: [
-                            if (index == 0)
-                              Positioned.fill(
-                                bottom: 0,
-                                left: 0,
-                                child: Obx(() {
-                                  if (snatchHandler.total.value == 0) {
-                                    return const SizedBox.shrink();
-                                  }
+                  if (totalActiveAmount != 0) {
+                    return ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      itemCount: totalActiveAmount,
+                      itemExtent: 200,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (activeLength != 0 && index < activeLength) {
+                          final item = snatchHandler.current.value!.booruItems[snatchHandler.queueProgress.value + index];
+                          return Stack(
+                            children: [
+                              if (index == 0)
+                                Positioned.fill(
+                                  bottom: 0,
+                                  left: 0,
+                                  child: Obx(() {
+                                    if (snatchHandler.total.value == 0) {
+                                      return const SizedBox.shrink();
+                                    }
 
-                                  return AnimatedProgressIndicator(
-                                    value: snatchHandler.currentProgress,
-                                    valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.5),
-                                    indicatorStyle: IndicatorStyle.linear,
-                                    borderRadius: 0,
-                                    animationDuration: const Duration(milliseconds: 100),
-                                  );
-                                }),
-                              ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: SizedBox(
-                                        width: 100,
-                                        height: 150,
-                                        child: ThumbnailBuild(
-                                          item: item,
-                                          selectable: false,
+                                    return AnimatedProgressIndicator(
+                                      value: snatchHandler.currentProgress,
+                                      valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.5),
+                                      indicatorStyle: IndicatorStyle.linear,
+                                      borderRadius: 0,
+                                      animationDuration: const Duration(milliseconds: 100),
+                                    );
+                                  }),
+                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: SizedBox(
+                                          width: 100,
+                                          height: 150,
+                                          child: ThumbnailBuild(
+                                            item: item,
+                                            selectable: false,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      child: Obx(
-                                        () => Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            if (snatchHandler.current.value!.booruItems.length != 1)
-                                              Text(
-                                                '${snatchHandler.queueProgress.value + index + 1}/${snatchHandler.current.value!.booruItems.length}',
-                                                style: const TextStyle(fontSize: 16),
-                                              ),
-                                            //
-                                            if (index == 0)
-                                              Padding(
-                                                padding: const EdgeInsets.only(top: 8),
-                                                child: CancelButton(
+                                      Expanded(
+                                        child: Obx(
+                                          () => Column(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            spacing: 8,
+                                            children: [
+                                              if (snatchHandler.current.value!.booruItems.length != 1)
+                                                Text(
+                                                  '${snatchHandler.queueProgress.value + index + 1}/${snatchHandler.current.value!.booruItems.length}',
+                                                  style: const TextStyle(fontSize: 16),
+                                                ),
+                                              //
+                                              if (index == 0)
+                                                CancelButton(
                                                   withIcon: true,
                                                   customIcon: Icons.cancel_outlined,
                                                   action: snatchHandler.onCancel,
                                                 ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
+                                  ),
+                                  //
+                                  if (index == 0)
+                                    Obx(
+                                      () => Padding(
+                                        padding: const EdgeInsets.only(left: 8, right: 8),
+                                        child: Row(
+                                          children: [
+                                            if (snatchHandler.total.value != 0)
+                                              Text(
+                                                '${Tools.formatBytes(
+                                                  snatchHandler.received.value,
+                                                  2,
+                                                  withSpace: false,
+                                                )}/${Tools.formatBytes(
+                                                  snatchHandler.total.value,
+                                                  2,
+                                                  withSpace: false,
+                                                )}',
+                                                style: const TextStyle(fontSize: 16),
+                                              )
+                                            else
+                                              const SizedBox.shrink(),
+                                            const Spacer(),
+                                            if (snatchHandler.total.value != 0)
+                                              Text(
+                                                '${(snatchHandler.currentProgress * 100.0).toStringAsFixed(2)}%',
+                                                style: const TextStyle(fontSize: 16),
+                                              )
+                                            else
+                                              const SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child: CircularProgressIndicator(),
                                               ),
                                           ],
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                ),
-                                //
-                                if (index == 0)
-                                  Obx(
-                                    () => Padding(
-                                      padding: const EdgeInsets.only(left: 8, right: 8),
-                                      child: Row(
-                                        children: [
-                                          if (snatchHandler.total.value != 0)
-                                            Text(
-                                              '${Tools.formatBytes(
-                                                snatchHandler.received.value,
-                                                2,
-                                                withSpace: false,
-                                              )}/${Tools.formatBytes(
-                                                snatchHandler.total.value,
-                                                2,
-                                                withSpace: false,
-                                              )}',
-                                              style: const TextStyle(fontSize: 16),
-                                            )
-                                          else
-                                            const SizedBox.shrink(),
-                                          const Spacer(),
-                                          if (snatchHandler.total.value != 0)
-                                            Text(
-                                              '${(snatchHandler.currentProgress * 100.0).toStringAsFixed(2)}%',
-                                              style: const TextStyle(fontSize: 16),
-                                            )
-                                          else
-                                            const SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(),
-                                            ),
-                                        ],
+                                ],
+                              ),
+                            ],
+                          );
+                        } else {
+                          final int queueIndex = lerpDouble(
+                            0,
+                            max(0, queuesLength - 1),
+                            (index - activeLength) / (queuesLength - 1),
+                          )!
+                              .toInt();
+                          final queue = snatchHandler.queuedList[queueIndex];
+                          final firstItem = queue.booruItems.first;
+                          final lastItem = queue.booruItems.last;
+
+                          return Row(
+                            children: [
+                              Stack(
+                                children: [
+                                  if (firstItem != lastItem) ...[
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                      child: SizedBox(
+                                        width: 100,
+                                        height: 134,
+                                        child: ThumbnailBuild(
+                                          item: lastItem,
+                                          selectable: false,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        );
-                      } else {
-                        final int queueIndex = lerpDouble(
-                          0,
-                          max(0, queuesLength - 1),
-                          (index - activeLength) / (queuesLength - 1),
-                        )!
-                            .toInt();
-                        final queue = snatchHandler.queuedList[queueIndex];
-                        final firstItem = queue.booruItems.first;
-                        final lastItem = queue.booruItems.last;
-
-                        return Row(
-                          children: [
-                            Stack(
-                              children: [
-                                if (firstItem != lastItem) ...[
+                                  ],
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                    padding: const EdgeInsets.all(8),
                                     child: SizedBox(
                                       width: 100,
-                                      height: 134,
+                                      height: 150,
                                       child: ThumbnailBuild(
-                                        item: lastItem,
+                                        item: firstItem,
                                         selectable: false,
                                       ),
                                     ),
                                   ),
                                 ],
+                              ),
+                              Text(
+                                queue.booruItems.length == 1 ? 'Item #$queueIndex' : 'Batch #$queueIndex (${queue.booruItems.length})',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    );
+                  }
+
+                  if (totalRetryableAmount != 0) {
+                    return ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      itemCount: totalRetryableAmount,
+                      itemExtent: 200,
+                      itemBuilder: (BuildContext context, int index) {
+                        final bool isExists = index < existsLength;
+                        final bool isFailed = index < existsLength + failedLength;
+                        // final bool isCancelled = index < existsLength + failedLength + cancelledLength;
+
+                        final record = isExists
+                            ? snatchHandler.existsItems[index]
+                            : isFailed
+                                ? snatchHandler.failedItems[index - existsLength]
+                                : snatchHandler.cancelledItems[index - existsLength - failedLength];
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
                                 Padding(
                                   padding: const EdgeInsets.all(8),
                                   child: SizedBox(
                                     width: 100,
                                     height: 150,
                                     child: ThumbnailBuild(
-                                      item: firstItem,
+                                      item: record.item,
                                       selectable: false,
                                     ),
                                   ),
                                 ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    spacing: 8,
+                                    children: [
+                                      Text(
+                                        isExists
+                                            ? 'File already exists'
+                                            : isFailed
+                                                ? 'Failed to download'
+                                                : 'Cancelled by user',
+                                      ),
+                                      RetryButton(
+                                        text: isExists ? 'Save anyway' : 'Retry',
+                                        withIcon: true,
+                                        onTap: () => snatchHandler.onRetryItem(
+                                          record,
+                                          cooldown: settingsHandler.snatchCooldown,
+                                          ignoreExists: isExists,
+                                        ),
+                                        onLongTap: () => snatchHandler.onRetryItem(
+                                          record,
+                                          cooldown: settingsHandler.snatchCooldown,
+                                          ignoreExists: true,
+                                        ),
+                                      ),
+                                      DeleteButton(
+                                        text: 'Skip',
+                                        customIcon: Icons.skip_next,
+                                        action: () => snatchHandler.onRemoveRetryItem(record),
+                                        withIcon: true,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
                               ],
-                            ),
-                            Text(
-                              queue.booruItems.length == 1 ? 'Item #$queueIndex' : 'Batch #$queueIndex (${queue.booruItems.length})',
-                              style: const TextStyle(fontSize: 16),
                             ),
                           ],
                         );
-                      }
-                    },
-                  );
+                      },
+                    );
+                  }
+
+                  return const SizedBox.shrink();
                 }),
               ),
               //
@@ -704,6 +790,50 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                     icon: snatchHandler.active.value ? const Icon(Icons.pause) : const Icon(Icons.play_arrow),
                                                     name: snatchHandler.active.value ? 'Pause' : 'Unpause',
                                                     subtitle: snatchHandler.active.value ? const Text('(from next item in queue)') : null,
+                                                  ),
+                                          ),
+                                        ),
+                                        Obx(
+                                          () => AnimatedSize(
+                                            duration: const Duration(milliseconds: 200),
+                                            alignment: Alignment.bottomCenter,
+                                            child: snatchHandler.active.value ||
+                                                    (snatchHandler.existsItems.isEmpty &&
+                                                        snatchHandler.failedItems.isEmpty &&
+                                                        snatchHandler.cancelledItems.isEmpty)
+                                                ? const SizedBox.shrink()
+                                                : SettingsButton(
+                                                    drawBottomBorder: false,
+                                                    drawTopBorder: true,
+                                                    action: () => snatchHandler.onRetryAll(
+                                                      cooldown: settingsHandler.snatchCooldown,
+                                                    ),
+                                                    onLongPress: () => snatchHandler.onRetryAll(
+                                                      cooldown: settingsHandler.snatchCooldown,
+                                                      ignoreExists: true,
+                                                    ),
+                                                    icon: const Icon(Icons.refresh),
+                                                    name:
+                                                        'Retry all (${snatchHandler.existsItems.length + snatchHandler.failedItems.length + snatchHandler.cancelledItems.length})',
+                                                    subtitle: const Text('Existing, failed or cancelled items'),
+                                                  ),
+                                          ),
+                                        ),
+                                        Obx(
+                                          () => AnimatedSize(
+                                            duration: const Duration(milliseconds: 200),
+                                            alignment: Alignment.bottomCenter,
+                                            child: snatchHandler.active.value ||
+                                                    (snatchHandler.existsItems.isEmpty &&
+                                                        snatchHandler.failedItems.isEmpty &&
+                                                        snatchHandler.cancelledItems.isEmpty)
+                                                ? const SizedBox.shrink()
+                                                : SettingsButton(
+                                                    drawBottomBorder: false,
+                                                    drawTopBorder: true,
+                                                    action: snatchHandler.onClearRetryableItems,
+                                                    icon: const Icon(Icons.delete_forever),
+                                                    name: 'Clear all retryable items',
                                                   ),
                                           ),
                                         ),
