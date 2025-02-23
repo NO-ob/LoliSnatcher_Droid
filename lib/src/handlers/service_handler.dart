@@ -29,6 +29,14 @@ class ServiceHandler {
 
   static const platform = MethodChannel('com.noaisu.loliSnatcher/services');
 
+  static Future<void> callMediaScanner(String path) async {
+    try {
+      await platform.invokeMethod('scanMedia', {'path': path});
+    } catch (e) {
+      log(e);
+    }
+  }
+
   static Future<void> restartApp() {
     return platform.invokeMethod('restartApp');
   }

@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -18,6 +19,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.WindowManager
 import android.webkit.MimeTypeMap
+import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
@@ -30,12 +32,6 @@ import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.util.*
 import java.util.concurrent.Executors
-
-// TODO currently shelved the idea of lock screen, needs more testing, possibly will lead to bugs, because fragment is not considered as good practice
-// For local_auth:
-// import io.flutter.embedding.android.FlutterFragmentActivity
-// class MainActivity: FlutterFragmentActivity() {
-// replace all "context" with "applicationContext" and "activity" with "this"
 
 class MainActivity: FlutterFragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +60,9 @@ class MainActivity: FlutterFragmentActivity() {
             if (call.method == "getExtPath") {
                 val path = getExtDir()
                 result.success(path)
+            } else if (call.method == "scanMedia") {
+                val path: String? = call.argument("path")
+                result.success(refreshMedia(path))
             } else if (call.method == "shareText") {
                 val text: String? = call.argument("text")
                 val title: String? = call.argument("title")
@@ -292,6 +291,8 @@ class MainActivity: FlutterFragmentActivity() {
             } else if(call.method == "restartApp"){
                 restartApp()
                 result.success("ok")
+            } else {
+                result.notImplemented()
             }
         }
 
@@ -612,5 +613,35 @@ class MainActivity: FlutterFragmentActivity() {
                 Objects.requireNonNull(fos)?.close()
             }
         }
+    }
+
+    private fun refreshMedia(path: String?): String {
+        return try {
+            if (path == null) {
+                throw NullPointerException()
+            }
+
+            val file = File(path)
+            if (!file.exists()) {
+                throw FileNotFoundException("File does not exist: $path")
+            }
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                applicationContext.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)))
+            } else {
+                MediaScannerConnection.scanFile(
+                    applicationContext,
+                    arrayOf(file.toString()),
+                    arrayOf(file.name),
+                    null,
+                )
+            }
+            Log.d("Media Scanner", "Success show image $path in Gallery")
+            "Success show image $path in Gallery"
+        } catch (e: Exception) {
+            Log.e("Media Scanner", e.toString())
+            e.toString()
+        }
+
     }
 }
