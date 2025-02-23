@@ -106,6 +106,13 @@ class TabRow extends StatelessWidget {
               tag = tag.substring(1);
             }
 
+            final int? booruNumber = int.tryParse(tag.split('#').firstOrNull ?? '');
+            if (booruNumber != null) {
+              tag = tag.split('#').sublist(1).join('#');
+            }
+
+            // TODO parse search mods
+
             final tagData = TagHandler.instance.getTag(tag);
 
             final bool isColored = !tagData.tagType.isNone;
@@ -119,18 +126,32 @@ class TabRow extends StatelessWidget {
               backgroundColor: isColored ? tagData.tagType.getColour().withValues(alpha: 0.1) : null,
             );
 
-            spans.add(
-              TextSpan(
-                text: prefix == '-' ? '—' : prefix,
-                style: spanStyle.copyWith(
-                  color: prefix == '-'
-                      ? Colors.redAccent
-                      : prefix == '~'
-                          ? Colors.purpleAccent
-                          : Colors.transparent,
+            if (prefix.isNotEmpty) {
+              spans.add(
+                TextSpan(
+                  text: prefix == '-' ? '—' : prefix,
+                  style: spanStyle.copyWith(
+                    color: prefix == '-'
+                        ? Colors.redAccent
+                        : prefix == '~'
+                            ? Colors.purpleAccent
+                            : Colors.transparent,
+                  ),
                 ),
-              ),
-            );
+              );
+            }
+
+            if (booruNumber != null) {
+              spans.add(
+                TextSpan(
+                  text: '$booruNumber#',
+                  style: spanStyle.copyWith(
+                    color: spanStyle.color?.withValues(alpha: 0.5),
+                  ),
+                ),
+              );
+            }
+
             spans.add(
               TextSpan(
                 // add non-breaking space to the end of italics to hide text overflowing the bgColor,
