@@ -189,25 +189,22 @@ class WaterfallBottomBarState extends State<WaterfallBottomBar> with TickerProvi
           // + grid scroll buttons on the side (fixed vertical position, if present - change width of loading/error text)
           AnimatedBuilder(
             animation: animation,
-            builder: (context, _) {
+            builder: (context, child) {
               final double buttonPadding = ((MediaQuery.sizeOf(context).width * 0.07) + kMinInteractiveDimension) * reverseAnimValue;
 
               return Transform.translate(
-                offset: Offset(0, (MainSearchBar.height + bottomPadding) * animValue),
+                offset: Offset(0, (MainSearchBar.height - 24 + bottomPadding) * animValue),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 100),
                   padding: EdgeInsets.only(
-                    left: settingsHandler.scrollGridButtonsPosition == 'Left' ? buttonPadding : 0,
-                    right: settingsHandler.scrollGridButtonsPosition == 'Right' ? buttonPadding : 0,
+                    left: (settingsHandler.scrollGridButtonsPosition == 'Left' ? buttonPadding : 0) + 10,
+                    right: (settingsHandler.scrollGridButtonsPosition == 'Right' ? buttonPadding : 0) + 10,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    // TODO rewrite it to change height/bg/border on scroll
-                    child: WaterfallErrorButtons(compact: animValue == 1),
-                  ),
+                  child: child,
                 ),
               );
             },
+            child: WaterfallErrorButtons(animation: animation),
           ),
           // search bar (goes out of screen with scroll)
           AnimatedBuilder(
