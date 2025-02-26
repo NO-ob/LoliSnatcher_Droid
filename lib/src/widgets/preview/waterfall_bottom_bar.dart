@@ -1029,6 +1029,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
           );
           if (!newCancelToken.isCancelled) {
             suggestedTags = newSuggestions;
+            for (final tag in suggestedTags.where((t) => !t.type.isNone)) {
+              unawaited(tagHandler.addTagsWithType([tag.tag], tag.type));
+            }
           }
 
           if (cancelToken == newCancelToken) {
