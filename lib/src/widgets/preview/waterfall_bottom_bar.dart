@@ -1020,16 +1020,22 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
           setState(() {});
 
           cancelToken?.cancel();
-          cancelToken = CancelToken();
+          final newCancelToken = CancelToken();
+          cancelToken = newCancelToken;
 
-          suggestedTags = await handler.tagSearch(
+          final newSuggestions = await handler.tagSearch(
             suggestionTextControllerRawInput,
             cancelToken: cancelToken,
           );
+          if (!newCancelToken.isCancelled) {
+            suggestedTags = newSuggestions;
+          }
 
-          loading = false;
-          failed = false;
-          setState(() {});
+          if (cancelToken == newCancelToken) {
+            loading = false;
+            failed = false;
+            setState(() {});
+          }
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) {
