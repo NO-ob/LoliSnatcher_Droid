@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dio/dio.dart';
+import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
@@ -264,18 +265,33 @@ class _TagViewState extends State<TagView> {
             tagsButton(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: SettingsTextInput(
-                key: searchKey,
-                controller: searchController,
-                focusNode: searchFocusNode,
-                title: 'Search tags',
-                onlyInput: true,
-                clearable: true,
-                pasteable: true,
-                onChanged: (_) {
-                  parseSortGroupTags();
-                },
-                enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+                        filled: false,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                ),
+                child: SettingsTextInput(
+                  key: searchKey,
+                  controller: searchController,
+                  focusNode: searchFocusNode,
+                  title: 'Search tags',
+                  onlyInput: true,
+                  clearable: true,
+                  pasteable: true,
+                  onChanged: (_) {
+                    parseSortGroupTags();
+                  },
+                  enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+                ),
               ),
             ),
           ],
@@ -956,42 +972,44 @@ class _TagViewState extends State<TagView> {
       controller: scrollController,
       child: DesktopScrollWrap(
         controller: scrollController,
-        child: CustomScrollView(
-          controller: scrollController,
-          physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-          slivers: [
-            infoBuild(),
-            SliverToBoxAdapter(
-              child: (filteredTags.isEmpty && tags.isNotEmpty)
-                  ? const Column(
-                      children: [
-                        Kaomoji(
-                          type: KaomojiType.shrug,
-                          style: TextStyle(fontSize: 40),
-                        ),
-                        Text(
-                          'No tags found',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        SizedBox(height: 60),
-                      ],
-                    )
-                  : const SizedBox.shrink(),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                tagsItemBuilder,
-                addAutomaticKeepAlives: false,
-                // add empty items to allow a bit of overscroll for easier reachability
-                childCount: filteredTags.length,
+        child: FadingEdgeScrollView.fromScrollView(
+          child: CustomScrollView(
+            controller: scrollController,
+            physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+            slivers: [
+              infoBuild(),
+              SliverToBoxAdapter(
+                child: (filteredTags.isEmpty && tags.isNotEmpty)
+                    ? const Column(
+                        children: [
+                          Kaomoji(
+                            type: KaomojiType.shrug,
+                            style: TextStyle(fontSize: 40),
+                          ),
+                          Text(
+                            'No tags found',
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          SizedBox(height: 60),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: MediaQuery.viewInsetsOf(context).bottom,
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  tagsItemBuilder,
+                  addAutomaticKeepAlives: false,
+                  // add empty items to allow a bit of overscroll for easier reachability
+                  childCount: filteredTags.length,
+                ),
               ),
-            ),
-          ],
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.viewInsetsOf(context).bottom,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1239,6 +1257,8 @@ class TagContentPreview extends StatefulWidget {
 class _TagContentPreviewState extends State<TagContentPreview> {
   final SearchHandler searchHandler = SearchHandler.instance;
 
+  final ScrollController scrollController = ScrollController();
+
   SearchTab? preview;
   bool loading = false, failed = false;
 
@@ -1297,7 +1317,12 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                           ),
                           const SizedBox(width: 8),
                           BooruFavicon(preview!.booruHandler.booru),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 4),
+                          Text(
+                            preview!.booruHandler.booru.name ?? '',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          const SizedBox(width: 4),
                           IconButton(
                             onPressed: loadPreview,
                             icon: const Icon(Icons.refresh),
@@ -1308,53 +1333,56 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                       SizedBox(
                         height: 180,
                         width: MediaQuery.sizeOf(context).width,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: preview!.booruHandler.filteredFetched.length,
-                          itemBuilder: (context, index) => Container(
-                            padding: const EdgeInsets.only(right: 8),
-                            height: 180,
-                            width: 120,
-                            child: Stack(
-                              children: [
-                                ThumbnailBuild(
-                                  item: preview!.booruHandler.filteredFetched[index],
-                                  selectable: false,
-                                ),
-                                Positioned.fill(
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(4),
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          PageRouteBuilder(
-                                            pageBuilder: (_, __, ___) => ItemViewerPage(
-                                              item: preview!.booruHandler.filteredFetched[index],
-                                              booru: preview!.booruHandler.booru,
+                        child: FadingEdgeScrollView.fromScrollView(
+                          child: ListView.builder(
+                            controller: scrollController,
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: preview!.booruHandler.filteredFetched.length,
+                            itemBuilder: (context, index) => Container(
+                              padding: const EdgeInsets.only(right: 8),
+                              height: 180,
+                              width: 120,
+                              child: Stack(
+                                children: [
+                                  ThumbnailBuild(
+                                    item: preview!.booruHandler.filteredFetched[index],
+                                    selectable: false,
+                                  ),
+                                  Positioned.fill(
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(4),
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            PageRouteBuilder(
+                                              pageBuilder: (_, __, ___) => ItemViewerPage(
+                                                item: preview!.booruHandler.filteredFetched[index],
+                                                booru: preview!.booruHandler.booru,
+                                              ),
+                                              opaque: false,
+                                              transitionDuration: const Duration(milliseconds: 300),
+                                              barrierColor: Colors.black26,
+                                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                                return const ZoomPageTransitionsBuilder().buildTransitions(
+                                                  MaterialPageRoute(
+                                                    builder: (_) => const SizedBox.shrink(),
+                                                  ),
+                                                  context,
+                                                  animation,
+                                                  secondaryAnimation,
+                                                  child,
+                                                );
+                                              },
                                             ),
-                                            opaque: false,
-                                            transitionDuration: const Duration(milliseconds: 300),
-                                            barrierColor: Colors.black26,
-                                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                              return const ZoomPageTransitionsBuilder().buildTransitions(
-                                                MaterialPageRoute(
-                                                  builder: (_) => const SizedBox.shrink(),
-                                                ),
-                                                context,
-                                                animation,
-                                                secondaryAnimation,
-                                                child,
-                                              );
-                                            },
-                                          ),
-                                        );
-                                      },
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),

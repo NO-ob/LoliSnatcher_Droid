@@ -1976,13 +1976,14 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
               ),
             ],
           ),
-        const SizedBox(height: 32),
+
         //
         // TODO block with favourite metatags + dialog to view and favourite them
         if (false)
           // ignore: dead_code
           Column(
             children: [
+              const SizedBox(height: 32),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: GestureDetector(
@@ -2048,13 +2049,14 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
               ),
             ],
           ),
-        const SizedBox(height: 32),
+
         //
         // TODO block with pinned/favourite (need to decide on the name) search queries, with dialog where you can sort/fav/label/search them
         if (false)
           // ignore: dead_code
           Column(
             children: [
+              const SizedBox(height: 32),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: GestureDetector(
@@ -2439,6 +2441,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                     label: Text(item.searchText),
                     onDeleted: item.isFavourite ? () {} : null,
                     deleteIcon: item.isFavourite ? favIcon : null,
+                    deleteButtonTooltipMessage: '',
                   ),
                 );
               },
