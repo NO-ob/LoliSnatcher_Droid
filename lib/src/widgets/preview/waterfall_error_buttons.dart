@@ -173,24 +173,6 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           children: <Widget>[
             ...previousChildren,
             if (currentChild != null) currentChild,
-            //
-            if (kDebugMode)
-              Positioned(
-                top: 0,
-                left: 0,
-                child: AnimatedBuilder(
-                  animation: widget.animation,
-                  builder: (context, _) {
-                    return LayoutBuilder(
-                      builder: (context, _) {
-                        return Text(
-                          '${MediaQuery.viewPaddingOf(context).bottom} | $animValue',
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
           ],
         ),
         child: isCollapsed
@@ -283,7 +265,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                     const SizedBox(width: 8),
                     IconButton(
                       onPressed: onTap,
-                      iconSize: 24,
+                      iconSize: 28,
                       icon: icon,
                     ),
                     const SizedBox(width: 6),
@@ -293,22 +275,19 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(top: 8, bottom: 8),
+                            padding: const EdgeInsets.only(bottom: 4),
                             child: Text(title),
                           ),
                           AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),
                             child: showSubtitle
-                                ? Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: Text(
-                                        subtitle,
-                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                            ),
-                                      ),
+                                ? Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      subtitle,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                          ),
                                     ),
                                   )
                                 : const SizedBox.shrink(),
@@ -319,7 +298,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                     const SizedBox(width: 6),
                     IconButton(
                       onPressed: toggleCollapsed,
-                      iconSize: 24,
+                      iconSize: 28,
                       icon: const Icon(Icons.arrow_drop_down),
                     ),
                     const SizedBox(width: 8),
