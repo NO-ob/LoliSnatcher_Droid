@@ -140,7 +140,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     SettingsPageOpen(
       context: context,
       asDialog: true,
-      page: () => TagsFiltersAddDialog(
+      page: (_) => TagsFiltersAddDialog(
         tagFilterType: type,
         onAdd: (String newTag) => addTag(newTag, type),
       ),
@@ -151,7 +151,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     SettingsPageOpen(
       context: context,
       asDialog: true,
-      page: () => TagsFiltersEditDialog(
+      page: (_) => TagsFiltersEditDialog(
         tag: tag,
         onEdit: (String newTag) => editTag(tag, newTag, type),
         onDelete: (String tag) => deleteTag(tag, type),

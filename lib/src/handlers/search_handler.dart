@@ -180,6 +180,43 @@ class SearchHandler {
     }
   }
 
+  void removeTabs(List<SearchTab> tabs) {
+    final curTab = currentTab;
+    final totalTabs = total;
+
+    setViewedItem(-1);
+
+    for (final tab in tabs) {
+      list.value.remove(tab);
+    }
+
+    if (totalTabs == tabs.length) {
+      FlashElements.showSnackbar(
+        title: const Text('Removed last tab', style: TextStyle(fontSize: 20)),
+        content: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Resetting search to default tags!'),
+          ],
+        ),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.yellow,
+        sideColor: Colors.yellow,
+      );
+
+      final SettingsHandler settingsHandler = SettingsHandler.instance;
+      final String defaultText = currentBooru.defTags?.isNotEmpty == true ? currentBooru.defTags! : settingsHandler.defTags;
+      searchTextController.text = defaultText;
+
+      final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
+      list.value[0] = newTab;
+      changeTabIndex(0);
+    } else {
+      final newIndex = list.value.indexWhere((t) => t.id == curTab.id);
+      changeTabIndex(newIndex == -1 ? total - 1 : newIndex);
+    }
+  }
+
   void moveTab(int fromIndex, int toIndex) {
     // value checks
     if (fromIndex == toIndex) {
@@ -463,6 +500,18 @@ class SearchHandler {
   }) async {
     final BooruItem item = currentFetched[itemIndex];
     if (item.isFavourite.value != null) {
+      if (item.tagsList.isEmpty) {
+        // try to update the item before favouriting, do nothing on fail
+        if (!currentBooruHandler.hasLoadItemSupport) {
+          return item.isFavourite.value;
+        }
+
+        final res = await currentBooruHandler.loadItem(item: item);
+        if (res[1] == false || item.tagsList.isEmpty) {
+          return item.isFavourite.value;
+        }
+      }
+
       if (forcedValue == null) {
         await ServiceHandler.vibrate();
       }

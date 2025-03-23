@@ -33,16 +33,16 @@ class SnatchHandler {
 
   static void unregister() => GetIt.instance.unregister<SnatchHandler>();
 
-  RxBool active = false.obs;
-  RxString status = ''.obs;
-  RxInt queueProgress = 0.obs;
-  Rx<SnatchItem?> current = Rx<SnatchItem?>(null);
-  RxInt received = 0.obs;
-  RxInt total = 0.obs;
+  final RxBool active = false.obs;
+  final RxString status = ''.obs;
+  final RxInt queueProgress = 0.obs;
+  final Rx<SnatchItem?> current = Rx<SnatchItem?>(null);
+  final RxInt received = 0.obs;
+  final RxInt total = 0.obs;
 
-  RxList<({BooruItem item, Booru booru})> existsItems = RxList([]);
-  RxList<({BooruItem item, Booru booru})> failedItems = RxList([]);
-  RxList<({BooruItem item, Booru booru})> cancelledItems = RxList([]);
+  final RxList<({BooruItem item, Booru booru})> existsItems = RxList([]);
+  final RxList<({BooruItem item, Booru booru})> failedItems = RxList([]);
+  final RxList<({BooruItem item, Booru booru})> cancelledItems = RxList([]);
 
   CancelToken? cancelToken;
 
@@ -51,7 +51,7 @@ class SnatchHandler {
     return received.value / total.value;
   }
 
-  RxList<SnatchItem> queuedList = RxList<SnatchItem>([]);
+  final RxList<SnatchItem> queuedList = RxList<SnatchItem>([]);
 
   Stream<Map<String, int>> writeMultipleFake(List<BooruItem> items, Booru booru, int cooldown) async* {
     int snatchedCounter = 0;
@@ -313,6 +313,21 @@ class SnatchHandler {
             duration: const Duration(seconds: 2),
             leadingIcon: Icons.info_outline,
             sideColor: Colors.green,
+            content: Row(
+              children: [
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: ThumbnailBuild(
+                    item: booruItems.first,
+                    selectable: false,
+                    simple: true,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
           );
         }
       }
@@ -351,10 +366,10 @@ class SnatchHandler {
 
     while (count < int.parse(amount) && !booruHandler.locked) {
       booruItems = await booruHandler.search(tags, null) ?? [];
+      booruItems = booruItems.where((e) => !e.isHated).toList();
       booruHandler.pageNum++;
       count = booruItems.length;
       // TODO error handling?
-      // TODO use tag filters
     }
     queue(booruItems, booru, cooldown, false);
   }

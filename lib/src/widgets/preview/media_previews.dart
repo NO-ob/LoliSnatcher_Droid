@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -99,13 +98,17 @@ class _MediaPreviewsState extends State<MediaPreviews> {
         child: Column(
           children: [
             const CircularProgressIndicator(),
-            Obx(() {
-              if (searchHandler.isRestored.value) {
-                return const SizedBox.shrink();
-              } else {
-                return const Text('Restoring previous session...');
-              }
-            }),
+            ValueListenableBuilder(
+              valueListenable: searchHandler.isRestored,
+              builder: (context, isRestored, child) {
+                if (searchHandler.isRestored.value) {
+                  return const SizedBox.shrink();
+                }
+
+                return child!;
+              },
+              child: const Text('Restoring previous session...'),
+            ),
           ],
         ),
       );

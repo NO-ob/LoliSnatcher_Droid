@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -114,8 +115,11 @@ class Tools {
     if (booru.baseURL?.contains('danbooru.donmai.us') ?? false) {
       headers['User-Agent'] = appUserAgent;
     }
-    if (booru.baseURL?.contains('sankakucomplex.com') ?? false) {
-      headers['User-Agent'] = Constants.defaultBrowserUserAgent;
+    if ([
+      ...SankakuHandler.knownUrls,
+      'sankakuapi.com',
+    ].any(booru.baseURL!.contains)) {
+      headers['User-Agent'] = Constants.sankakuAppUserAgent;
     }
 
     if (!isTestMode) {
@@ -222,9 +226,11 @@ class Tools {
     if (isOnPlatformWithWebviewSupport) {
       try {
         final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
-        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(uri));
+        List<Cookie> cookies = [];
         if (Platform.isWindows) {
           cookies.addAll(globalWindowsCookies[WebUri(uri).host] ?? []);
+        } else {
+          cookies = await cookieManager.getCookies(url: WebUri(uri));
         }
         for (final Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';

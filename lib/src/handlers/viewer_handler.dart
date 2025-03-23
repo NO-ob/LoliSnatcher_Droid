@@ -30,9 +30,9 @@ class ViewerHandler {
   static void unregister() => GetIt.instance.unregister<ViewerHandler>();
 
   // Keys to get states of all currently built viewers
-  RxList<GlobalKey?> activeKeys = RxList([]);
+  final RxList<GlobalKey?> activeKeys = RxList([]);
   // Key of the currently viewed media widget
-  Rxn<GlobalKey> currentKey = Rxn(null);
+  final Rxn<GlobalKey> currentKey = Rxn(null);
 
   // Add media widget key
   void addViewed(Key? key) {
@@ -76,15 +76,15 @@ class ViewerHandler {
   }
 
   // Viewer state stuff
-  RxBool inViewer = false.obs; // is in viewerpage
-  RxBool displayAppbar = true.obs; // is gallery toolbar visible
-  RxBool isZoomed = false.obs; // is current item zoomed in
-  RxBool isLoaded = false.obs; // is current item loaded
-  Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view controller value
-  RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoViewer)
-  RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
+  final RxBool inViewer = false.obs; // is in viewerpage
+  final RxBool displayAppbar = true.obs; // is gallery toolbar visible
+  final RxBool isZoomed = false.obs; // is current item zoomed in
+  final RxBool isLoaded = false.obs; // is current item loaded
+  final Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view controller value
+  final RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoViewer)
+  final RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
 
-  RxBool showNotes = true.obs;
+  final RxBool showNotes = true.obs;
 
   void resetState() {
     inViewer.value = false;
@@ -108,8 +108,8 @@ class ViewerHandler {
       switch (state?.widget.runtimeType) {
         case const (ImageViewer):
           final widgetState = state! as ImageViewerState;
-          isZoomed.value = widgetState.isZoomed;
-          isLoaded.value = widgetState.isLoaded;
+          isZoomed.value = widgetState.isZoomed.value;
+          isLoaded.value = widgetState.isLoaded.value;
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
           break;

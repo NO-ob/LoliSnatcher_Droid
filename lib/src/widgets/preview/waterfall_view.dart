@@ -200,7 +200,7 @@ class _WaterfallViewState extends State<WaterfallView> {
     kbFocusNode.requestFocus();
     viewerHandler.dropCurrent();
 
-    for (final item in searchHandler.currentTab.booruHandler.fetched) {
+    for (final item in searchHandler.currentFetched) {
       if (item.toggleQuality.value) {
         item.toggleQuality.value = false;
       }

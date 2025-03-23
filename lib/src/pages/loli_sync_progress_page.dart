@@ -15,6 +15,8 @@ class LoliSyncProgressPage extends StatefulWidget {
     this.favourites = false,
     this.favouritesv2 = false,
     this.favSkip = 0,
+    this.snatched = false,
+    this.snatchedSkip = 0,
     this.settings = false,
     this.booru = false,
     this.tabs = false,
@@ -26,8 +28,8 @@ class LoliSyncProgressPage extends StatefulWidget {
 
   final String type, port, tabsMode, tagsMode;
   final String? ip;
-  final bool favourites, favouritesv2, settings, booru, tabs, tags;
-  final int favSkip;
+  final bool favourites, favouritesv2, snatched, settings, booru, tabs, tags;
+  final int favSkip, snatchedSkip;
 
   @override
   State<LoliSyncProgressPage> createState() => _LoliSyncProgressPageState();
@@ -65,6 +67,9 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
       if (widget.favouritesv2) {
         toSync.add('Favouritesv2');
       }
+      if (widget.snatched) {
+        toSync.add('Snatched');
+      }
       if (widget.settings) {
         toSync.add('Settings');
       }
@@ -78,7 +83,15 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
         toSync.add('Tags');
       }
 
-      progressStream = loliSync.startSync(widget.ip!, widget.port, toSync, widget.favSkip, widget.tabsMode, widget.tagsMode);
+      progressStream = loliSync.startSync(
+        widget.ip!,
+        widget.port,
+        toSync,
+        widget.favSkip,
+        widget.snatchedSkip,
+        widget.tabsMode,
+        widget.tagsMode,
+      );
     } else {
       progressStream = loliSync.startServer(widget.ip, widget.port);
     }

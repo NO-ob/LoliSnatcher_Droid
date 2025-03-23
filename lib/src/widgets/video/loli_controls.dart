@@ -392,7 +392,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   ),
                 ),
               ),
-              if (_latestValue.isBuffering)
+              // checking if the video is playing because some video backends wrongly keep reporting that they are buffering after seeking/looping
+              if (_latestValue.isBuffering && !_latestValue.isPlaying)
                 const Center(
                   widthFactor: 3,
                   heightFactor: 3,

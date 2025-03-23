@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:fpdart/fpdart.dart';
 
+import 'package:lolisnatcher/src/data/response_error.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -56,13 +58,23 @@ class FavouritesHandler extends BooruHandler {
   }
 
   @override
-  Future<List<TagSuggestion>> tagSearch(
+  Future<Either<ResponseError, List<TagSuggestion>>> getTagSuggestions(
     String input, {
     CancelToken? cancelToken,
   }) async {
-    final List<TagSuggestion> tags =
-        (await SettingsHandler.instance.dbHandler.getTags(input, limit)).map((t) => TagSuggestion(tag: t)).where((t) => t.tag.trim().isNotEmpty).toList();
-    return tags;
+    try {
+      final List<TagSuggestion> tags =
+          (await SettingsHandler.instance.dbHandler.getTags(input, limit)).map((t) => TagSuggestion(tag: t)).where((t) => t.tag.trim().isNotEmpty).toList();
+      return Right(tags);
+    } catch (e, s) {
+      return Left(
+        ResponseError(
+          message: 'getTagSuggestions error',
+          error: e,
+          stackTrace: s,
+        ),
+      );
+    }
   }
 
   @override

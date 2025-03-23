@@ -32,9 +32,6 @@ class GelbooruAlikesHandler extends BooruHandler {
 
   bool get isR34xxx => booru.baseURL!.contains('rule34.xxx');
 
-  // TODO ?
-  //Realbooru api returns 0 for models but on the website shows them
-  //listed as model on the tagsearch so I dont think the api shows tag types properly
   @override
   Map<String, TagType> get tagTypeMap => {
         '5': TagType.meta,

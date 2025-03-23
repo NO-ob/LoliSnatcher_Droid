@@ -221,21 +221,23 @@ class _ThumbnailBottomRightIcons extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SnatchHandler snatchHandler = SnatchHandler.instance;
 
+    final tagsData = settingsHandler.parseTagsList(
+      item.tagsList,
+      isCapped: false,
+    );
+    final bool isSound = tagsData.soundTags.isNotEmpty;
+    final bool isAi = tagsData.aiTags.isNotEmpty;
+    final bool hasNotes = item.hasNotes == true;
+    final bool hasComments = item.hasComments == true;
+
     return Obx(() {
       final IconData? itemIcon = Tools.getFileIcon(item.possibleMediaType.value ?? item.mediaType.value);
 
-      final tagsData = settingsHandler.parseTagsList(
-        item.tagsList,
-        isCapped: false,
-      );
       final bool? isFav = item.isFavourite.value;
       final bool isFavOrLoved = isFav == true || tagsData.lovedTags.isNotEmpty;
       // final bool isHated = tagsData.hatedTags.isNotEmpty;
-      final bool isSound = tagsData.soundTags.isNotEmpty;
-      final bool isAi = tagsData.aiTags.isNotEmpty;
-      final bool hasNotes = item.hasNotes == true;
-      final bool hasComments = item.hasComments == true;
       final bool isSnatched = item.isSnatched.value == true;
+
       final bool isInQueueToBeSnatched = snatchHandler.current.value?.booruItems.any((booruItem) => booruItem == item) == true;
       final bool isCurrentlyBeingSnatched =
           snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;

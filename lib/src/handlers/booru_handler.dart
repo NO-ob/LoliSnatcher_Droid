@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:html/parser.dart';
 
@@ -9,7 +10,9 @@ import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/response_error.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
@@ -156,7 +159,7 @@ abstract class BooruHandler {
 
     Response response;
     try {
-      response = await fetchSearch(uri, withCaptchaCheck: withCaptchaCheck);
+      response = await fetchSearch(uri, tags, withCaptchaCheck: withCaptchaCheck);
       if (response.statusCode == 200) {
         // parse response data
         final List<BooruItem> newItems = await parseResponse(response);
@@ -192,14 +195,24 @@ abstract class BooruHandler {
     return fetched;
   }
 
-  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
+  Future<Response<dynamic>> fetchSearch(
+    Uri uri,
+    String input, {
+    bool withCaptchaCheck = true,
+    Map<String, dynamic>? queryParams,
+  }) async {
     final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    Logger.Inst().log('fetching: $uri with headers: $headers', className, 'Search', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log(
+      'fetching: $uri with headers: $headers',
+      className,
+      'Search',
+      LogTypes.booruHandlerSearchURL,
+    );
 
     return DioNetwork.get(
       uri.toString(),
@@ -296,14 +309,14 @@ abstract class BooruHandler {
 
   bool get hasTagSuggestions => false;
 
-  // TODO rename to getTagSuggestions
-  Future<List<TagSuggestion>> tagSearch(String input, {CancelToken? cancelToken}) async {
+  Future<Either<ResponseError, List<TagSuggestion>>> getTagSuggestions(String input, {CancelToken? cancelToken}) async {
     final List<TagSuggestion> tags = [];
 
     final String url = makeTagURL(input);
     if (url.isEmpty) {
-      return tags;
+      return Left(ResponseError(message: 'invalid url: $url'));
     }
+
     Uri uri;
     try {
       uri = Uri.parse(url);
@@ -311,20 +324,26 @@ abstract class BooruHandler {
       Logger.Inst().log(
         'invalid url: $url',
         className,
-        'tagSearch',
+        'getTagSuggestions',
         LogTypes.booruHandlerFetchFailed,
         s: s,
       );
-      return tags;
+      return Left(
+        ResponseError(
+          message: 'invalid url: $url',
+          error: e,
+          stackTrace: s,
+        ),
+      );
     }
-    Logger.Inst().log('$url $uri', className, 'tagSearch', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url $uri', className, 'getTagSuggestions', LogTypes.booruHandlerSearchURL);
 
     Response response;
     const int limit = 20;
     try {
       response = await fetchTagSuggestions(uri, input, cancelToken: cancelToken);
       if (response.statusCode == 200) {
-        Logger.Inst().log('fetchTagSuggestions response: ${response.data}', className, 'tagSearch', null);
+        Logger.Inst().log('fetchTagSuggestions response: ${response.data}', className, 'getTagSuggestions', null);
         final rawTags = await parseTagSuggestionsList(response);
         for (int i = 0; i < rawTags.length; i++) {
           final rawTag = rawTags[i];
@@ -349,23 +368,43 @@ abstract class BooruHandler {
               LogTypes.booruHandlerRawFetched,
               s: s,
             );
+            return Left(
+              ResponseError(
+                message: 'parseTagSuggestion error',
+                error: e,
+                stackTrace: s,
+              ),
+            );
           }
         }
       } else {
-        Logger.Inst().log('error fetching url: $url', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log('status: ${response.statusCode}', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log('response: ${response.data}', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('error fetching url: $url', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('status: ${response.statusCode}', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('response: ${response.data}', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
+        return Left(
+          ResponseError(
+            message: 'error fetching url: $url',
+            statusCode: response.statusCode,
+          ),
+        );
       }
     } catch (e, s) {
       Logger.Inst().log(
         e.toString(),
         className,
-        'tagSearch',
+        'getTagSuggestions',
         LogTypes.booruHandlerFetchFailed,
         s: s,
       );
+      return Left(
+        ResponseError(
+          message: 'getTagSuggestions error',
+          error: e,
+          stackTrace: s,
+        ),
+      );
     }
-    return tags;
+    return Right(tags);
   }
 
   Future<Response<dynamic>> fetchTagSuggestions(Uri uri, String input, {CancelToken? cancelToken}) async {
@@ -758,4 +797,33 @@ abstract class BooruHandler {
 
     return;
   }
+
+  // TEMPORARY
+  List<MetaTag> availableMetaTags() {
+    return [
+      GenericRatingMetaTag(),
+      SortMetaTag(
+        values: [
+          MetaTagValue(name: 'Score ascending', value: 'score:asc'),
+          MetaTagValue(name: 'Score descending', value: 'score:desc'),
+          MetaTagValue(name: 'Date ascending', value: 'date:asc'),
+          MetaTagValue(name: 'Date descending', value: 'date:desc'),
+        ],
+      ),
+      ComparableNumberMetaTag(name: 'score', keyName: 'score'),
+      DateMetaTag(name: 'date', keyName: 'date'),
+      StringMetaTag(name: 'id', keyName: 'id'),
+      StringMetaTag(name: 'user', keyName: 'user'),
+      StringMetaTag(name: 'md5', keyName: 'md5'),
+      NumberMetaTag(name: 'fav', keyName: 'fav'),
+      NumberMetaTag(name: 'favcount', keyName: 'favcount'),
+      ComparableNumberMetaTag(name: 'width', keyName: 'width'),
+      ComparableNumberMetaTag(name: 'height', keyName: 'height'),
+    ];
+  }
+
+  // TODO generic metatags list
+  // List<MetaTag> availableMetaTags() {
+  //   return [];
+  // }
 }

@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
@@ -45,7 +46,12 @@ class SankakuHandler extends BooruHandler {
   bool get hasSignInSupport => true;
 
   @override
-  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
+  Future<Response<dynamic>> fetchSearch(
+    Uri uri,
+    String input, {
+    bool withCaptchaCheck = true,
+    Map<String, dynamic>? queryParams,
+  }) async {
     return DioNetwork.get(
       uri.toString(),
       headers: getHeaders(),
@@ -143,7 +149,7 @@ class SankakuHandler extends BooruHandler {
         }
       }
     } catch (e) {
-      if (e is DioException && e.type == DioExceptionType.cancel) {
+      if (e is DioException && CancelToken.isCancel(e)) {
         return [item, null, 'Cancelled'];
       }
 
@@ -155,12 +161,12 @@ class SankakuHandler extends BooruHandler {
   @override
   Map<String, String> getHeaders() {
     return {
-      'Accept': 'application/vnd.sankaku.api+json;v=2',
+      'Accept': 'application/json, text/plain, */*',
       if (authToken.isNotEmpty) 'Authorization': authToken,
-      // 'User-Agent': 'SCChannelApp/4.0',
-      'User-Agent': Constants.defaultBrowserUserAgent,
+      'User-Agent': Constants.sankakuAppUserAgent,
       'Referer': 'https://sankaku.app/',
       'Origin': 'https://sankaku.app',
+      'api-version': '2',
     };
   }
 
@@ -169,15 +175,25 @@ class SankakuHandler extends BooruHandler {
     return 'https://chan.sankakucomplex.com/post/show/$id';
   }
 
+  static List<String> knownUrls = [
+    'capi-v2.sankakucomplex.com',
+    'sankakucomplex.com',
+    'beta.sankakucomplex.com',
+    'chan.sankakucomplex.com',
+    'sankaku.app',
+  ];
+
+  String get baseUrl => knownUrls.any(booru.baseURL!.contains) ? 'https://sankakuapi.com' : booru.baseURL!;
+
   @override
   String makeURL(String tags) {
     final tagsStr = tags.trim().isEmpty ? '' : 'tags=${tags.trim()}&';
 
-    return '${booru.baseURL}/posts?${tagsStr}limit=$limit&page=$pageNum';
+    return '$baseUrl/posts?${tagsStr}limit=$limit&page=$pageNum';
   }
 
   String makeApiPostURL(String id) {
-    return '${booru.baseURL}/posts/$id';
+    return '$baseUrl/posts/$id';
   }
 
   @override
@@ -190,7 +206,7 @@ class SankakuHandler extends BooruHandler {
     bool success = false;
     try {
       final response = await DioNetwork.post(
-        '${booru.baseURL}/auth/token',
+        '$baseUrl/auth/token',
         queryParameters: {'lang': 'english'},
         headers: {
           'Content-Type': 'application/json',
@@ -225,7 +241,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/tags?name=${input.toLowerCase()}&limit=20';
+    return '$baseUrl/tags?name=${input.toLowerCase()}&limit=20';
   }
 
   @override
@@ -258,9 +274,9 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String makeCommentsURL(String postID, int pageNum) {
-    // EXAMPLE: https://capi-v2.sankakucomplex.com/posts/25237881/comments
+    // EXAMPLE: https://sankakuapi.com/posts/25237881/comments
     // Possibly uses pages?
-    return '${booru.baseURL}/posts/$postID/comments';
+    return '$baseUrl/posts/$postID/comments';
   }
 
   @override
@@ -288,7 +304,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String makeNotesURL(String postID) {
-    return '${booru.baseURL}/posts/$postID/notes';
+    return '$baseUrl/posts/$postID/notes';
   }
 
   @override
@@ -309,5 +325,22 @@ class SankakuHandler extends BooruHandler {
       width: current['width'] ?? 0,
       height: current['height'] ?? 0,
     );
+  }
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    final tags = [...super.availableMetaTags()];
+    final index = tags.indexWhere((e) => e is SortMetaTag);
+
+    if (index != -1) {
+      tags[index] = OrderMetaTag(
+        values: [
+          MetaTagValue(name: 'Popularity', value: 'popular'),
+          ...(tags[index] as SortMetaTag).values,
+        ],
+      );
+    }
+
+    return tags;
   }
 }

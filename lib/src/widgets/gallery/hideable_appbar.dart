@@ -364,7 +364,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
       case 'select':
         return Obx(() {
-          final bool isSelected = searchHandler.currentSelected.contains(item);
+          final int selectedIndex = searchHandler.currentSelected.indexOf(item);
+          final bool isSelected = selectedIndex != -1;
           if (!isSelected) {
             return const SizedBox.shrink();
           }
@@ -382,7 +383,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   borderRadius: BorderRadius.circular(50),
                 ),
                 child: Text(
-                  '${searchHandler.currentSelected.indexOf(item) + 1}',
+                  '${selectedIndex + 1}',
                   style: const TextStyle(fontSize: 11),
                 ),
               ),

@@ -236,8 +236,8 @@ class ThemeHandler {
       );
 
   InputDecorationTheme inputDecorationTheme(ColorScheme colorScheme) => InputDecorationTheme(
-        fillColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
-        filled: false,
+        fillColor: colorScheme.surfaceContainerHigh,
+        filled: true,
         labelStyle: TextStyle(
           color: isDark ? Colors.white : Colors.black,
           fontSize: 18,
@@ -245,13 +245,13 @@ class ThemeHandler {
         ),
         hintStyle: TextStyle(
           color: isDark ? Colors.grey[300] : Colors.grey[900],
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
         ),
         alignLabelWithHint: false,
         // contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme.secondary, width: 1),
+          borderSide: const BorderSide(color: Colors.transparent, width: 0),
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
@@ -267,7 +267,7 @@ class ThemeHandler {
           borderRadius: BorderRadius.circular(8),
         ),
         border: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme.secondary, width: 1),
+          borderSide: const BorderSide(color: Colors.transparent, width: 0),
           borderRadius: BorderRadius.circular(8),
         ),
         disabledBorder: OutlineInputBorder(

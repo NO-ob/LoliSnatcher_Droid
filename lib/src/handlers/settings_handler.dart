@@ -52,26 +52,26 @@ class SettingsHandler {
   late Alice alice;
 
   // service vars
-  RxBool isInit = false.obs, isPostInit = false.obs;
-  RxString postInitMessage = ''.obs;
+  final RxBool isInit = false.obs, isPostInit = false.obs;
+  final RxString postInitMessage = ''.obs;
   String cachePath = '';
   String path = '';
   String boorusPath = '';
 
-  Rx<UpdateInfo?> updateInfo = Rxn(null);
+  final Rx<UpdateInfo?> updateInfo = Rxn(null);
 
   ////////////////////////////////////////////////////
 
   // runtime settings vars
   bool hasHydrus = false;
-  RxList<LogTypes> enabledLogTypes = RxList.from(EnvironmentConfig.isTesting ? [...LogTypes.values] : []);
-  RxString discordURL = RxString(Constants.discordURL);
+  final RxList<LogTypes> enabledLogTypes = RxList.from(EnvironmentConfig.isTesting ? [...LogTypes.values] : []);
+  final RxString discordURL = RxString(Constants.discordURL);
 
   // debug toggles
-  RxBool isDebug = (kDebugMode || false).obs;
-  RxBool showFPS = false.obs;
-  RxBool showPerf = false.obs;
-  RxBool showImageStats = false.obs;
+  final RxBool isDebug = (kDebugMode || false).obs;
+  final RxBool showFps = false.obs;
+  final RxBool showPerf = false.obs;
+  final RxBool showImageStats = false.obs;
   bool blurImages = kDebugMode ? Constants.blurImagesDefaultDev : false;
 
   ////////////////////////////////////////////////////
@@ -85,8 +85,8 @@ class SettingsHandler {
   String galleryMode = 'Full Res';
   String snatchMode = 'Full Res';
   String shareAction = 'Ask';
-  Rx<AppMode> appMode = AppMode.defaultValue.obs;
-  Rx<HandSide> handSide = HandSide.defaultValue.obs;
+  final Rx<AppMode> appMode = AppMode.defaultValue.obs;
+  final Rx<HandSide> handSide = HandSide.defaultValue.obs;
   String galleryBarPosition = 'Top';
   String galleryScrollDirection = 'Horizontal';
   String extPathOverride = '';
@@ -177,24 +177,25 @@ class SettingsHandler {
   bool disableImageScaling = false;
   bool gifsAsThumbnails = false;
   bool desktopListsDrag = false;
-  RxBool useLockscreen = false.obs;
-  RxBool blurOnLeave = false.obs;
-  RxList<Booru> booruList = RxList<Booru>([]);
+  bool showBottomSearchbar = true;
+  final RxBool useLockscreen = false.obs;
+  final RxBool blurOnLeave = false.obs;
+  final RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
   // themes wip
-  Rx<ThemeItem> theme = ThemeItem(
+  final Rx<ThemeItem> theme = ThemeItem(
     name: 'Pink',
     primary: Colors.pink[200],
     accent: Colors.pink[600],
   ).obs;
 
-  Rx<Color?> customPrimaryColor = Colors.pink[200]!.obs;
-  Rx<Color?> customAccentColor = Colors.pink[600]!.obs;
+  final Rx<Color?> customPrimaryColor = Colors.pink[200]!.obs;
+  final Rx<Color?> customAccentColor = Colors.pink[600]!.obs;
 
-  Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
-  RxBool useDynamicColor = false.obs;
-  RxBool isAmoled = false.obs;
+  final Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
+  final RxBool useDynamicColor = false.obs;
+  final RxBool isAmoled = false.obs;
   ////////////////////////////////////////////////////
 
   // list of setting names which shouldnt be synced with other devices
@@ -240,13 +241,14 @@ class SettingsHandler {
     'enableDrawerMascot',
     'drawerMascotPathOverride',
     'allowSelfSignedCerts',
-    'showFPS',
+    'showFps',
     'showPerf',
     'showImageStats',
     'isDebug',
     'desktopListsDrag',
     'incognitoKeyboard',
     'backupPath',
+    'showBottomSearchbar',
     'useLockscreen',
     'blurOnLeave',
   ];
@@ -634,12 +636,16 @@ class SettingsHandler {
           'type': 'bool',
           'default': true,
         },
+        'showBottomSearchbar': {
+          'type': 'bool',
+          'default': true,
+        },
         'useLockscreen': {
-          'type': 'rxbool',
+          'type': 'bool',
           'default': false,
         },
         'blurOnLeave': {
-          'type': 'rxbool',
+          'type': 'bool',
           'default': false,
         },
 
@@ -695,19 +701,19 @@ class SettingsHandler {
           'options': ThemeMode.values,
         },
         'useDynamicColor': {
-          'type': 'rxbool',
-          'default': false.obs,
+          'type': 'bool',
+          'default': false,
         },
         'isAmoled': {
-          'type': 'rxbool',
-          'default': false.obs,
+          'type': 'bool',
+          'default': false,
         },
         'customPrimaryColor': {
-          'type': 'rxcolor',
+          'type': 'color',
           'default': Colors.pink[200],
         },
         'customAccentColor': {
-          'type': 'rxcolor',
+          'type': 'color',
           'default': Colors.pink[600],
         },
       };
@@ -717,6 +723,10 @@ class SettingsHandler {
 
     if (toJSON) {
       value = getByString(name);
+    }
+
+    if (value is Rx) {
+      value = value.value;
     }
 
     if (settingParams == null) {
@@ -769,28 +779,11 @@ class SettingsHandler {
             return value;
           }
 
-        case 'rxbool':
-          if (toJSON) {
-            // rxbool to bool
-            return (value as RxBool).value;
-          } else {
-            // bool to rxbool
-            if (value is RxBool) {
-              return value;
-            } else if (value is bool) {
-              return value.obs;
-            } else {
-              throw Exception('value "$value" for $name is not a rxbool');
-            }
-          }
-
         case 'appMode':
           if (toJSON) {
-            // rxobject to string
-            return (value as Rx<AppMode>).value.toString();
+            return (value as AppMode).toString();
           } else {
             if (value is String) {
-              // string to rxobject
               return AppMode.fromString(value);
             } else {
               return settingParams['default'];
@@ -799,11 +792,9 @@ class SettingsHandler {
 
         case 'handSide':
           if (toJSON) {
-            // rxobject to string
-            return (value as Rx<HandSide>).value.toString();
+            return (value as HandSide).toString();
           } else {
             if (value is String) {
-              // string to rxobject
               return HandSide.fromString(value);
             } else {
               return settingParams['default'];
@@ -823,11 +814,9 @@ class SettingsHandler {
 
         case 'logTypesList':
           if (toJSON) {
-            // rxobject to list<string>
-            return (value as RxList<LogTypes>).map((el) => el.toString()).toList();
+            return (value as List<LogTypes>).map((el) => el.toString()).toList();
           } else {
             if (value is List) {
-              // list<string> to list<LogTypes>
               return List<String>.from(value).map(LogTypes.fromString).toList();
             } else {
               return settingParams['default'];
@@ -836,11 +825,9 @@ class SettingsHandler {
 
         case 'theme':
           if (toJSON) {
-            // rxobject to string
-            return (value as Rx<ThemeItem>).value.name;
+            return (value as ThemeItem).name;
           } else {
             if (value is String) {
-              // string to rxobject
               final ThemeItem findTheme =
                   List<ThemeItem>.from(settingParams['options']!).firstWhere((el) => el.name == value, orElse: () => settingParams['default']);
               return findTheme;
@@ -851,11 +838,9 @@ class SettingsHandler {
 
         case 'themeMode':
           if (toJSON) {
-            // rxobject to string
-            return (value as Rx<ThemeMode>).value.toString().split('.')[1]; // ThemeMode.dark => dark
+            return (value as ThemeMode).name; // ThemeMode.dark => dark
           } else {
             if (value is String) {
-              // string to rxobject
               final List<ThemeMode> findMode = ThemeMode.values.where((element) => element.toString() == 'ThemeMode.$value').toList();
               if (findMode.isNotEmpty) {
                 // if theme mode is present
@@ -869,14 +854,12 @@ class SettingsHandler {
             }
           }
 
-        case 'rxcolor':
+        case 'color':
           if (toJSON) {
-            // rxobject to int
             // TODO replace value with toARGB32() in the next flutter release
             // ignore: deprecated_member_use
-            return (value as Rx<Color?>).value?.value ?? Colors.pink.value; // Color => int
+            return (value as Color?)?.value ?? Colors.pink.value; // Color => int
           } else {
-            // int to rxobject
             if (value is int) {
               return Color(value);
             } else {
@@ -1088,6 +1071,8 @@ class SettingsHandler {
         return autoLockTimeout;
       case 'allowSelfSignedCerts':
         return allowSelfSignedCerts;
+      case 'showBottomSearchbar':
+        return showBottomSearchbar;
       case 'useLockscreen':
         return useLockscreen;
       case 'blurOnLeave':
@@ -1401,11 +1386,14 @@ class SettingsHandler {
       case 'altVideoPlayerHWDEC':
         altVideoPlayerHWDEC = validatedValue;
         break;
+      case 'showBottomSearchbar':
+        showBottomSearchbar = validatedValue;
+        break;
       case 'useLockscreen':
-        useLockscreen = validatedValue;
+        useLockscreen.value = validatedValue;
         break;
       case 'blurOnLeave':
-        blurOnLeave = validatedValue;
+        blurOnLeave.value = validatedValue;
         break;
 
       // theme stuff
@@ -1422,10 +1410,10 @@ class SettingsHandler {
         themeMode.value = validatedValue;
         break;
       case 'useDynamicColor':
-        useDynamicColor = validatedValue;
+        useDynamicColor.value = validatedValue;
         break;
       case 'isAmoled':
-        isAmoled = validatedValue;
+        isAmoled.value = validatedValue;
         break;
       case 'customPrimaryColor':
         customPrimaryColor.value = validatedValue;
@@ -1507,6 +1495,7 @@ class SettingsHandler {
       'altVideoPlayerHwAccel': validateValue('altVideoPlayerHwAccel', null, toJSON: true),
       'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
       'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
+      'showBottomSearchbar': validateValue('showBottomSearchbar', null, toJSON: true),
       'useLockscreen': validateValue('useLockscreen', null, toJSON: true),
       'blurOnLeave': validateValue('blurOnLeave', null, toJSON: true),
 
@@ -1703,7 +1692,10 @@ class SettingsHandler {
     }
 
     // Force enable logging on test builds
-    enabledLogTypes.value = EnvironmentConfig.isTesting ? [...LogTypes.values] : [...enabledLogTypes];
+    enabledLogTypes.value = EnvironmentConfig.isTesting ? [...LogTypes.values] : [...enabledLogTypes.value];
+
+    // force mobile app mode, until we redo UI for desktop and start doing builds again
+    appMode.value = AppMode.Mobile;
 
     return true;
   }
@@ -2083,7 +2075,7 @@ class SettingsHandler {
 
       SettingsPageOpen(
         context: ctx,
-        page: () => Scaffold(
+        page: (_) => Scaffold(
           appBar: AppBar(
             title: Text(
               'Update ${isDiffVersion ? 'Available!' : 'Changelog:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',

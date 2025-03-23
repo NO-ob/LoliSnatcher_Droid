@@ -50,14 +50,24 @@ class DanbooruHandler extends BooruHandler {
   }
 
   @override
-  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
+  Future<Response<dynamic>> fetchSearch(
+    Uri uri,
+    String input, {
+    bool withCaptchaCheck = true,
+    Map<String, dynamic>? queryParams,
+  }) async {
     final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    Logger.Inst().log('fetching: $uri with headers: $headers', className, 'Search', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log(
+      'fetching: $uri with headers: $headers',
+      className,
+      'Search',
+      LogTypes.booruHandlerSearchURL,
+    );
 
     return DioNetwork.get(
       uri.toString(),

@@ -107,14 +107,9 @@ class LoliDropdown<T> extends StatelessWidget {
 
     const double radius = 10;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: withBorder ? const BorderRadius.all(Radius.circular(radius)) : null,
-        onTap: () async {
-          await showDialog(context);
-        },
-        child: InputDecorator(
+    return Stack(
+      children: [
+        InputDecorator(
           decoration: InputDecoration(
             label: labelBuilder?.call() ??
                 RichText(
@@ -165,7 +160,19 @@ class LoliDropdown<T> extends StatelessWidget {
             ],
           ),
         ),
-      ),
+        //
+        Positioned.fill(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: withBorder ? const BorderRadius.all(Radius.circular(radius)) : null,
+              onTap: () async {
+                await showDialog(context);
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -444,14 +451,9 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
 
     const double radius = 10;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: withBorder ? const BorderRadius.all(Radius.circular(radius)) : null,
-        onTap: () async {
-          await showDialog(context);
-        },
-        child: InputDecorator(
+    return Stack(
+      children: [
+        InputDecorator(
           decoration: InputDecoration(
             label: labelBuilder?.call() ??
                 RichText(
@@ -502,7 +504,19 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
             ],
           ),
         ),
-      ),
+        //
+        Positioned.fill(
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: withBorder ? const BorderRadius.all(Radius.circular(radius)) : null,
+              onTap: () async {
+                await showDialog(context);
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

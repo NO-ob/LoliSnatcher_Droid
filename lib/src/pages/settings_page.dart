@@ -22,7 +22,6 @@ import 'package:lolisnatcher/src/pages/settings/tags_filters_page.dart';
 import 'package:lolisnatcher/src/pages/settings/theme_page.dart';
 import 'package:lolisnatcher/src/pages/settings/user_interface_page.dart';
 import 'package:lolisnatcher/src/pages/settings/video_page.dart';
-import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
@@ -189,9 +188,9 @@ class SettingsPage extends StatelessWidget {
                     icon: const Icon(Icons.developer_mode),
                     page: () => const DebugPage(),
                   );
-                } else {
-                  return const SizedBox.shrink();
                 }
+
+                return const SizedBox.shrink();
               }),
               const VersionButton(),
               const MascotImage(),
@@ -283,7 +282,7 @@ class LogsEnabledWarning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final List<LogTypes> enabledLogTypes = [
+      final enabledLogTypes = [
         ...SettingsHandler.instance.enabledLogTypes,
       ];
 

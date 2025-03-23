@@ -96,6 +96,7 @@ class _TagViewState extends State<TagView> {
     searchHandler.searchTextController.removeListener(onMainSearchTextChanged);
     searchController.dispose();
     searchFocusNode.removeListener(searchFocusListener);
+    searchFocusNode.dispose();
     searchHandler.viewedItem.removeListener(itemListener);
     super.dispose();
   }
@@ -213,7 +214,7 @@ class _TagViewState extends State<TagView> {
     final String score = item.score ?? '';
     final String md5 = item.md5String ?? '';
     final List<String> sources = item.sources ?? [];
-    final bool tagsAvailable = tags.isNotEmpty;
+    final bool tagsAvailable = tags.isNotEmpty || supportsItemUpdate;
     String postDate = item.postDate ?? '';
     final String postDateFormat = item.postDateFormat ?? '';
     String formattedDate = '';
@@ -376,7 +377,7 @@ class _TagViewState extends State<TagView> {
       action: () {
         SettingsPageOpen(
           context: context,
-          page: () => CommentsDialog(
+          page: (_) => CommentsDialog(
             index: searchHandler.viewedIndex.value,
             item: searchHandler.viewedItem.value,
           ),
@@ -402,9 +403,7 @@ class _TagViewState extends State<TagView> {
             Icons.note_add,
             color: Theme.of(context).iconTheme.color,
           ),
-          action: () {
-            viewerHandler.showNotes.toggle();
-          },
+          action: viewerHandler.showNotes.toggle,
           onLongPress: () {
             showDialog(
               context: context,

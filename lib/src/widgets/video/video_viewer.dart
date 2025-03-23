@@ -684,6 +684,10 @@ class VideoViewerState extends State<VideoViewer> {
                             ),
                             child: PhotoView.customChild(
                               childSize: childSize,
+                              customSize: Size(
+                                MediaQuery.sizeOf(context).width,
+                                MediaQuery.sizeOf(context).height,
+                              ),
                               minScale: PhotoViewComputedScale.contained,
                               maxScale: PhotoViewComputedScale.covered * 8,
                               initialScale: PhotoViewComputedScale.contained,

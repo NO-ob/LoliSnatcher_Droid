@@ -223,7 +223,7 @@ class ImageWriter {
         if (snatchResult == null) {
           existsList.add(snatched[i]);
         } else if (snatchResult is! String) {
-          if (snatchResult is DioException && snatchResult.type == DioExceptionType.cancel) {
+          if (snatchResult is DioException && CancelToken.isCancel(snatchResult)) {
             cancelledList.add(snatched[i]);
           } else {
             failedList.add(snatched[i]);

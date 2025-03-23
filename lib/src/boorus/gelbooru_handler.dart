@@ -7,6 +7,7 @@ import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
@@ -232,7 +233,7 @@ class GelbooruHandler extends BooruHandler {
       Logger.Inst().log(
         e.toString(),
         className,
-        'tagSearch',
+        'genTagObjects',
         LogTypes.exception,
         s: s,
       );
@@ -342,5 +343,17 @@ class GelbooruHandler extends BooruHandler {
       width: int.tryParse(current.getAttribute('width') ?? '0') ?? 0,
       height: int.tryParse(current.getAttribute('height') ?? '0') ?? 0,
     );
+  }
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    final tags = [...super.availableMetaTags()];
+    final index = tags.indexWhere((e) => e is GenericRatingMetaTag);
+
+    if (index != -1) {
+      tags[index] = GelbooruRatingMetaTag();
+    }
+
+    return tags;
   }
 }

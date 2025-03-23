@@ -248,19 +248,23 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                             // itemWidget = UnknownViewerPlaceholder(item: item);
                           }
 
-                          final child = Obx(() {
-                            final bool isViewed = index == searchHandler.viewedIndex.value;
-                            final int distanceFromCurrent = (searchHandler.viewedIndex.value - index).abs();
-                            // don't render more than 3 videos at once, chance to crash is too high otherwise
-                            // disabled video preload for sankaku because their videos cause crashes if loading/rendering(?) more than one at a time
-                            final bool isNear = distanceFromCurrent <= (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
-                            if (!isViewed && !isNear) {
-                              // don't render if out of preload range
-                              return Center(child: Container(color: Colors.black));
-                            }
+                          final child = ValueListenableBuilder(
+                            valueListenable: searchHandler.viewedIndex,
+                            builder: (context, viewedIndex, child) {
+                              final bool isViewed = index == viewedIndex;
+                              final int distanceFromCurrent = (viewedIndex - index).abs();
+                              // don't render more than 3 videos at once, chance to crash is too high otherwise
+                              // disabled video preload for sankaku because their videos cause crashes if loading/rendering(?) more than one at a time
+                              final bool isNear = distanceFromCurrent <= (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
+                              if (!isViewed && !isNear) {
+                                // don't render if out of preload range
+                                return Center(child: Container(color: Colors.black));
+                              }
 
-                            // Cut to the size of the container, prevents overlapping
-                            return ClipRect(
+                              // Cut to the size of the container, prevents overlapping
+                              return child!;
+                            },
+                            child: ClipRect(
                               // Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
                               child: GestureDetector(
                                 onTap: () {
@@ -271,8 +275,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                                 },
                                 child: itemWidget,
                               ),
-                            );
-                          });
+                            ),
+                          );
 
                           if (settingsHandler.disableCustomPageTransitions) {
                             return child;

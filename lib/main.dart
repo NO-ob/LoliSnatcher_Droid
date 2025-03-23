@@ -81,7 +81,7 @@ class MainApp extends StatefulWidget {
   State<MainApp> createState() => _MainAppState();
 }
 
-class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
+class _MainAppState extends State<MainApp> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
   final SnatchHandler snatchHandler = SnatchHandler.instance;
@@ -89,15 +89,12 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
   final TagHandler tagHandler = TagHandler.instance;
   final NotifyHandler notifyHandler = NotifyHandler.instance;
   final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
-  int maxFps = 60;
 
   @override
   void initState() {
     super.initState();
 
     initHandlers();
-
-    setMaxFPS();
   }
 
   Future<void> initHandlers() async {
@@ -110,26 +107,6 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
       settingsHandler.postInitMessage.value = 'Restoring tabs...';
       await searchHandler.restoreTabs();
     });
-  }
-
-  Future<void> setMaxFPS() async {
-    // enable higher refresh rate
-    // TODO make this a setting?
-    // TODO make it work on ios, desktop?
-    // Currently there is no official support on these platforms, see:
-    // https://github.com/flutter/flutter/issues/49757
-    // https://github.com/flutter/flutter/issues/90675
-
-    if (Platform.isAndroid) {
-      await FlutterDisplayMode.setHighRefreshRate();
-      final DisplayMode currentMode = await FlutterDisplayMode.active;
-
-      if (currentMode.refreshRate > maxFps) {
-        maxFps = currentMode.refreshRate.round();
-        updateState();
-      }
-      Logger.Inst().log('Set max fps to $maxFps', 'MainApp', 'setMaxFPS', null);
-    }
   }
 
   @override
@@ -150,48 +127,28 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeMetrics() {
-    setMaxFPS();
-    super.didChangeMetrics();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
-          ? ThemeItem(
-              name: 'Custom',
-              primary: settingsHandler.customPrimaryColor.value,
-              accent: settingsHandler.customAccentColor.value,
-            )
-          : settingsHandler.theme.value;
-      final ThemeMode themeMode = settingsHandler.themeMode.value;
-      final bool useDynamicColor = settingsHandler.useDynamicColor.value;
-      final bool isAmoled = settingsHandler.isAmoled.value;
+    return Obx(
+      () {
+        final ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
+            ? ThemeItem(
+                name: 'Custom',
+                primary: settingsHandler.customPrimaryColor.value,
+                accent: settingsHandler.customAccentColor.value,
+              )
+            : settingsHandler.theme.value;
+        final ThemeMode themeMode = settingsHandler.themeMode.value;
+        final bool useDynamicColor = settingsHandler.useDynamicColor.value;
+        final bool isAmoled = settingsHandler.isAmoled.value;
 
-      final ThemeHandler themeHandler = ThemeHandler(
-        theme: theme,
-        themeMode: themeMode,
-        isAmoled: isAmoled,
-        context: context,
-      );
+        final ThemeHandler themeHandler = ThemeHandler(
+          theme: theme,
+          themeMode: themeMode,
+          isAmoled: isAmoled,
+          context: context,
+        );
 
-      // debugRepaintRainbowEnabled = settingsHandler.showPerf.value;
-
-      return StatsFl(
-        isEnabled: settingsHandler.showFPS.value,
-        width: 400,
-        height: 50,
-        maxFps: maxFps,
-        showText: true,
-        sampleTime: .2,
-        totalTime: 10,
-        align: Alignment.bottomLeft,
-        child: ImageStats(
-          isEnabled: settingsHandler.showImageStats.value,
-          width: 120,
-          height: 100,
-          align: Alignment.centerLeft,
+        return DebuggingWidgets(
           child: DynamicColorBuilder(
             builder: (lightDynamic, darkDynamic) {
               themeHandler.setDynamicColors(
@@ -199,48 +156,134 @@ class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
                 useDynamicColor ? darkDynamic : null,
               );
 
-              return MaterialApp(
-                title: 'LoliSnatcher',
-                debugShowCheckedModeBanner: false,
-                showPerformanceOverlay: settingsHandler.showPerf.value,
-                scrollBehavior: const CustomScrollBehavior(),
-                theme: themeHandler.lightTheme(),
-                darkTheme: themeHandler.darkTheme(),
-                themeMode: themeMode,
-                navigatorKey: navigationHandler.navigatorKey,
-                navigatorObservers: [
-                  TalkerRouteObserver(Logger.talker),
-                ],
-                home: const Home(),
-                builder: (_, child) => Stack(
-                  children: [
-                    child ?? const SizedBox.shrink(),
-                    // Blur overlay
-                    Overlay(
-                      initialEntries: [
-                        OverlayEntry(
-                          builder: (_) => AppLifecycleOverlay(
-                            shouldOverlay: SettingsHandler.instance.blurOnLeave.value,
-                          ),
+              return ValueListenableBuilder(
+                valueListenable: settingsHandler.showPerf,
+                builder: (context, showPerf, _) {
+                  return MaterialApp(
+                    title: 'LoliSnatcher',
+                    debugShowCheckedModeBanner: false,
+                    showPerformanceOverlay: showPerf,
+                    scrollBehavior: const CustomScrollBehavior(),
+                    theme: themeHandler.lightTheme(),
+                    darkTheme: themeHandler.darkTheme(),
+                    themeMode: themeMode,
+                    navigatorKey: navigationHandler.navigatorKey,
+                    navigatorObservers: [
+                      TalkerRouteObserver(Logger.talker),
+                    ],
+                    home: const Home(),
+                    builder: (_, child) => Stack(
+                      children: [
+                        child ?? const SizedBox.shrink(),
+                        // Blur overlay
+                        Overlay(
+                          initialEntries: [
+                            OverlayEntry(
+                              builder: (_) => AppLifecycleOverlay(
+                                shouldOverlay: settingsHandler.blurOnLeave.value,
+                              ),
+                            ),
+                          ],
+                        ),
+                        // Lock screen overlay
+                        Overlay(
+                          initialEntries: [
+                            OverlayEntry(
+                              builder: (_) => const LockScreenPage(),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    // Lock screen overlay
-                    Overlay(
-                      initialEntries: [
-                        OverlayEntry(
-                          builder: (_) => const LockScreenPage(),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  );
+                },
               );
             },
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
+  }
+}
+
+class DebuggingWidgets extends StatefulWidget {
+  const DebuggingWidgets({
+    required this.child,
+    super.key,
+  });
+
+  final Widget child;
+
+  @override
+  State<DebuggingWidgets> createState() => _DebuggingWidgetsState();
+}
+
+class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBindingObserver {
+  final settingsHandler = SettingsHandler.instance;
+
+  final ValueNotifier<int> maxFps = ValueNotifier(60);
+
+  @override
+  void initState() {
+    super.initState();
+
+    setMaxFPS();
+  }
+
+  Future<void> setMaxFPS() async {
+    // enable higher refresh rate
+    // TODO make this a setting?
+    // TODO make it work on ios, desktop?
+    // Currently there is no official support on these platforms, see:
+    // https://github.com/flutter/flutter/issues/49757
+    // https://github.com/flutter/flutter/issues/90675
+
+    if (Platform.isAndroid) {
+      await FlutterDisplayMode.setHighRefreshRate();
+      final DisplayMode currentMode = await FlutterDisplayMode.active;
+
+      if (currentMode.refreshRate > maxFps.value) {
+        maxFps.value = currentMode.refreshRate.round();
+      }
+      Logger.Inst().log('Set max fps to $maxFps', 'MainApp', 'setMaxFPS', null);
+    }
+  }
+
+  @override
+  void didChangeMetrics() {
+    setMaxFPS();
+    super.didChangeMetrics();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: maxFps,
+      builder: (context, maxFps, child) {
+        return Obx(
+          () {
+            return StatsFl(
+              isEnabled: settingsHandler.showFps.value,
+              width: 400,
+              height: 50,
+              maxFps: maxFps,
+              showText: true,
+              sampleTime: .2,
+              totalTime: 10,
+              align: Alignment.bottomLeft,
+              child: ImageStats(
+                isEnabled: settingsHandler.showImageStats.value,
+                width: 120,
+                height: 100,
+                align: Alignment.centerLeft,
+                child: child!,
+              ),
+            );
+          },
+        );
+      },
+      child: widget.child,
+    );
   }
 }
 
@@ -328,7 +371,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           // Rename config if its already in the list
           booru.name = '${booru.name!} (duplicate)';
         }
-        await SettingsPageOpen(context: context, page: () => BooruEdit(booru)).open();
+        await SettingsPageOpen(context: context, page: (_) => BooruEdit(booru)).open();
       }
     }
   }
@@ -376,7 +419,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       }
     }
 
-    // with lockscreen:
     return ColoredBox(
       color: Theme.of(context).colorScheme.surface,
       child: Obx(() {

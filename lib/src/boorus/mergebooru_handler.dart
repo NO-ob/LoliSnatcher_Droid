@@ -3,10 +3,13 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:fpdart/fpdart.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
+import 'package:lolisnatcher/src/data/response_error.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
@@ -29,6 +32,11 @@ class MergebooruHandler extends BooruHandler {
 
   @override
   bool get hasTagSuggestions => booruHandlers.first.hasTagSuggestions;
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    return booruHandlers.first.availableMetaTags();
+  }
 
   @override
   Future search(String tags, int? pageNumCustom, {bool withCaptchaCheck = true}) async {
@@ -182,11 +190,11 @@ class MergebooruHandler extends BooruHandler {
   }
 
   @override
-  Future<List<TagSuggestion>> tagSearch(
+  Future<Either<ResponseError, List<TagSuggestion>>> getTagSuggestions(
     String input, {
     CancelToken? cancelToken,
   }) async {
-    return booruHandlers.first.tagSearch(input, cancelToken: cancelToken);
+    return booruHandlers.first.getTagSuggestions(input, cancelToken: cancelToken);
   }
 
   @override

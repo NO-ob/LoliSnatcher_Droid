@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -12,10 +13,12 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 class WaterfallErrorButtons extends StatefulWidget {
   const WaterfallErrorButtons({
     required this.animation,
+    required this.showSearchBar,
     super.key,
   });
 
   final Animation<double> animation;
+  final bool showSearchBar;
 
   @override
   State<WaterfallErrorButtons> createState() => _WaterfallErrorButtonsState();
@@ -28,6 +31,9 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
   int _startedAt = 0;
   Timer? checkInterval;
   bool isCollapsed = false;
+
+  double get animValue => widget.showSearchBar ? widget.animation.value : 1;
+  double get reverseAnimValue => 1 - animValue;
 
   @override
   void initState() {
@@ -78,7 +84,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
   void restartTimerRetrySearch() {
     stopTimer();
     startTimer();
-    restartTimerRetrySearch();
+    retrySearch();
   }
 
   void toggleCollapsed() {
@@ -149,7 +155,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             animation: widget.animation,
             builder: (context, child) {
               return Container(
-                height: widget.animation.value * MediaQuery.systemGestureInsetsOf(context).bottom,
+                height: MediaQuery.systemGestureInsetsOf(context).bottom,
                 color: Colors.transparent,
               );
             },
@@ -167,6 +173,24 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           children: <Widget>[
             ...previousChildren,
             if (currentChild != null) currentChild,
+            //
+            if (kDebugMode)
+              Positioned(
+                top: 0,
+                left: 0,
+                child: AnimatedBuilder(
+                  animation: widget.animation,
+                  builder: (context, _) {
+                    return LayoutBuilder(
+                      builder: (context, _) {
+                        return Text(
+                          '${MediaQuery.viewPaddingOf(context).bottom} | $animValue',
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
           ],
         ),
         child: isCollapsed
@@ -176,7 +200,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                 builder: (context, child) {
                   return Padding(
                     padding: EdgeInsets.only(
-                      bottom: widget.animation.value * MediaQuery.viewPaddingOf(context).bottom + 6,
+                      bottom: (animValue * MediaQuery.viewPaddingOf(context).bottom * 2) + 12,
                     ),
                     child: child,
                   );
@@ -197,7 +221,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                         IconButton(
                           onPressed: onTap,
                           iconSize: 28,
-                          icon: const Icon(Icons.refresh),
+                          icon: icon,
                         ),
                         IconButton(
                           onPressed: toggleCollapsed,
@@ -214,11 +238,12 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                 animation: widget.animation,
                 builder: (context, child) {
                   const double baseBorderRadius = 12;
-                  final double borderRadius = (1 - widget.animation.value) * baseBorderRadius;
+                  final double borderRadius = reverseAnimValue * baseBorderRadius;
 
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 100),
                     clipBehavior: Clip.antiAlias,
+                    margin: EdgeInsets.only(bottom: reverseAnimValue * 12),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
                       borderRadius: BorderRadius.only(
@@ -243,7 +268,8 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                           onTap: onTap,
                           child: Padding(
                             padding: EdgeInsets.only(
-                              bottom: widget.animation.value * MediaQuery.viewPaddingOf(context).bottom + 6,
+                              top: 8,
+                              bottom: (animValue * MediaQuery.viewPaddingOf(context).bottom * 2) + 8,
                             ),
                             child: child,
                           ),

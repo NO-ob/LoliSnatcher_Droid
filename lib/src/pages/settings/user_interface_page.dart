@@ -27,7 +27,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   final TextEditingController mouseSpeedController = TextEditingController();
 
   late String previewMode, previewDisplay, scrollGridButtonsPosition;
-  late bool disableVibration;
+  late bool showBottomSearchbar, disableVibration;
   late AppMode appMode;
   late HandSide handSide;
 
@@ -38,6 +38,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     columnsLandscapeController.text = settingsHandler.landscapeColumns.toString();
     appMode = settingsHandler.appMode.value;
     handSide = settingsHandler.handSide.value;
+    showBottomSearchbar = settingsHandler.showBottomSearchbar;
     disableVibration = settingsHandler.disableVibration;
     previewDisplay = settingsHandler.previewDisplay;
     previewMode = settingsHandler.previewMode;
@@ -61,6 +62,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
 
     settingsHandler.appMode.value = appMode;
     settingsHandler.handSide.value = handSide;
+    settingsHandler.showBottomSearchbar = showBottomSearchbar;
     settingsHandler.disableVibration = disableVibration;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
@@ -93,72 +95,76 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
         body: Center(
           child: ListView(
             children: [
-              SettingsOptionsList(
-                value: appMode,
-                items: AppMode.values,
-                onChanged: (AppMode? newValue) async {
-                  bool confirmation = false;
-                  if ((Platform.isAndroid || Platform.isIOS) && newValue?.isDesktop == true) {
-                    confirmation = await showDialog<bool>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return const SettingsDialog(
-                              title: Text('App UI mode'),
-                              contentItems: [
-                                Text('Are you sure you want to use Desktop mode? It may cause problems on Mobile devices and is considered DEPRECATED.'),
-                              ],
-                              actionButtons: [
-                                CancelButton(),
-                                ConfirmButton(),
-                              ],
-                            );
-                          },
-                        ) ??
-                        false;
-                  } else {
-                    confirmation = true;
-                  }
+              // TODO disabled for now, until we rework desktop ui
+              // mobile mode only for now (force enabled on settings init)
+              if (false)
+                // ignore: dead_code
+                SettingsOptionsList(
+                  value: appMode,
+                  items: AppMode.values,
+                  onChanged: (AppMode? newValue) async {
+                    bool confirmation = false;
+                    if ((Platform.isAndroid || Platform.isIOS) && newValue?.isDesktop == true) {
+                      confirmation = await showDialog<bool>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return const SettingsDialog(
+                                title: Text('App UI mode'),
+                                contentItems: [
+                                  Text('Are you sure you want to use Desktop mode? It may cause problems on Mobile devices and is considered DEPRECATED.'),
+                                ],
+                                actionButtons: [
+                                  CancelButton(),
+                                  ConfirmButton(),
+                                ],
+                              );
+                            },
+                          ) ??
+                          false;
+                    } else {
+                      confirmation = true;
+                    }
 
-                  if (!confirmation) {
-                    return;
-                  }
+                    if (!confirmation) {
+                      return;
+                    }
 
-                  setState(() {
-                    appMode = newValue!;
-                  });
-                },
-                title: 'App UI mode',
-                itemLeadingBuilder: (item) {
-                  return switch (item) {
-                    AppMode.Mobile => const Icon(Icons.phone_android_sharp),
-                    AppMode.Desktop => const Icon(Icons.desktop_windows_sharp),
-                    _ => const Icon(null),
-                  };
-                },
-                trailingIcon: IconButton(
-                  icon: const Icon(Icons.help_outline),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return const SettingsDialog(
-                          title: Text('App UI mode'),
-                          contentItems: [
-                            Text('- Mobile - Normal Mobile UI'),
-                            Text('- Desktop - Ahoviewer Style UI [DEPRECATED, NEEDS REWORK]'),
-                            SizedBox(height: 10),
-                            Text(
-                              '[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.',
-                            ),
-                            Text('If you are on android versions below 11 you can remove the appMode line from /LoliSnatcher/config/settings.json'),
-                            Text('If you are on android 11 or higher you will have to wipe app data via system settings'),
-                          ],
-                        );
-                      },
-                    );
+                    setState(() {
+                      appMode = newValue!;
+                    });
                   },
+                  title: 'App UI mode',
+                  itemLeadingBuilder: (item) {
+                    return switch (item) {
+                      AppMode.Mobile => const Icon(Icons.phone_android_sharp),
+                      AppMode.Desktop => const Icon(Icons.desktop_windows_sharp),
+                      _ => const Icon(null),
+                    };
+                  },
+                  trailingIcon: IconButton(
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return const SettingsDialog(
+                            title: Text('App UI mode'),
+                            contentItems: [
+                              Text('- Mobile - Normal Mobile UI'),
+                              Text('- Desktop - Ahoviewer Style UI [DEPRECATED, NEEDS REWORK]'),
+                              SizedBox(height: 10),
+                              Text(
+                                '[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.',
+                              ),
+                              Text('If you are on android versions below 11 you can remove the appMode line from /LoliSnatcher/config/settings.json'),
+                              Text('If you are on android 11 or higher you will have to wipe app data via system settings'),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
               SettingsOptionsList(
                 value: handSide,
                 items: HandSide.values,
@@ -184,6 +190,15 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     );
                   },
                 ),
+              ),
+              SettingsToggle(
+                value: showBottomSearchbar,
+                onChanged: (newValue) {
+                  setState(() {
+                    showBottomSearchbar = newValue;
+                  });
+                },
+                title: 'Show bottom searchbar',
               ),
               SettingsToggle(
                 value: disableVibration,

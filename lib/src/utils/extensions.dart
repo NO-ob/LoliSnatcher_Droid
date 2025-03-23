@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 extension UIExtras on Widget {
@@ -65,6 +67,15 @@ extension DoubleExtras on double {
   String toStringAsFixed(int digits) => toStringAsFixed(digits);
 
   String toFormattedString() => formatNumber(this);
+
+  double toPrecision(int fractionDigits) {
+    final mod = pow(10, fractionDigits.toDouble()).toDouble();
+    return (this * mod).round().toDouble() / mod;
+  }
+}
+
+extension BoolExtras on bool {
+  void toggle() => this ? false : true;
 }
 
 String formatNumber(num number) {
@@ -78,6 +89,13 @@ String formatNumber(num number) {
 extension ListExts<T> on List<T> {
   T? firstWhereOrNull(bool Function(T e) test) {
     for (final e in this) {
+      if (test(e)) return e;
+    }
+    return null;
+  }
+
+  T? lastWhereOrNull(bool Function(T e) test) {
+    for (final e in reversed) {
       if (test(e)) return e;
     }
     return null;

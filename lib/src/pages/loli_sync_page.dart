@@ -36,6 +36,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   final TextEditingController ipController = TextEditingController();
   final TextEditingController portController = TextEditingController();
   final TextEditingController favouritesSkipController = TextEditingController();
+  final TextEditingController snatchedSkipController = TextEditingController();
   final TextEditingController startPortController = TextEditingController();
 
   final LoliSync testSync = LoliSync();
@@ -44,14 +45,14 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   SyncSide syncSide = SyncSide.none;
 
-  bool favourites = false, favouritesv2 = false, settings = false, booru = false, tabs = false, tags = false;
+  bool favourites = false, favouritesv2 = false, snatched = false, settings = false, booru = false, tabs = false, tags = false;
   int favToggleCount = 0;
   String tabsMode = 'Merge';
   String tagsMode = 'PreferTypeIfNone';
   List<String> tabsModesList = ['Merge', 'Replace'];
   // TODO: Will change all these string to enum at some point, also for booru type
   List<String> tagsModesList = ['Overwrite', 'PreferTypeIfNone'];
-  int? favCount;
+  int? favCount, snatchedCount;
 
   List<NetworkInterface> ipList = [];
   List<String> ipListNames = ['Auto', 'Localhost'];
@@ -135,6 +136,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
       ipController.text,
       portController.text,
       ['Test'],
+      0,
       0,
       'Merge',
       'PreferTypeIfNone',
@@ -264,6 +266,56 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                             contentItems: [
                               Text(
                                 'Allows to set from where the sync should start from, useful if you already synced all your favs before and want to sync only the newest items',
+                              ),
+                              Text('If you want to sync from the beginning leave this field blank'),
+                              Text(''),
+                              Text('Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X'),
+                              Text('Order of favs: From oldest (0) to newest (X)'),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                )
+              : const SizedBox.shrink(),
+        ),
+        SettingsToggle(
+          value: snatched,
+          onChanged: (newValue) {
+            setState(() {
+              snatched = newValue;
+            });
+          },
+          title: 'Send snatched history',
+          subtitle: Text('Snatched: ${snatchedCount ?? '...'}'),
+          drawBottomBorder: !snatched,
+        ),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: snatched
+              ? SettingsTextInput(
+                  controller: snatchedSkipController,
+                  title: 'Sync snatched from #...',
+                  inputType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                  clearable: true,
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  numberButtons: true,
+                  numberStep: 100,
+                  numberMin: 0,
+                  numberMax: snatchedCount?.toDouble() ?? double.infinity,
+                  trailingIcon: IconButton(
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return const SettingsDialog(
+                            title: Text('Sync snatched from #...'),
+                            contentItems: [
+                              Text(
+                                'Allows to set from where the sync should start from, useful if you already synced all your snatched history before and want to sync only the newest items',
                               ),
                               Text('If you want to sync from the beginning leave this field blank'),
                               Text(''),
@@ -417,19 +469,21 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           icon: const Icon(Icons.send_to_mobile),
           action: () async {
             final bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
-            final bool isAnySyncSelected = favouritesv2 || favourites || settings || booru || tabs || tags;
+            final bool isAnySyncSelected = favouritesv2 || favourites || snatched || settings || booru || tabs || tags;
             final bool syncAllowed = isAddressEntered && isAnySyncSelected;
 
             if (syncAllowed) {
               await SettingsPageOpen(
                 context: context,
-                page: () => LoliSyncProgressPage(
+                page: (_) => LoliSyncProgressPage(
                   type: 'sender',
                   ip: ipController.text,
                   port: portController.text,
                   favourites: favourites,
                   favouritesv2: favouritesv2,
                   favSkip: int.tryParse(favouritesSkipController.text) ?? 0,
+                  snatched: snatched,
+                  snatchedSkip: int.tryParse(snatchedSkipController.text) ?? 0,
                   settings: settings,
                   booru: booru,
                   tabs: tabs,
@@ -521,7 +575,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           action: () async {
             await SettingsPageOpen(
               context: context,
-              page: () => LoliSyncProgressPage(
+              page: (_) => LoliSyncProgressPage(
                 type: 'receiver',
                 ip: selectedAddress,
                 port: startPortController.text.isEmpty ? '8080' : startPortController.text,

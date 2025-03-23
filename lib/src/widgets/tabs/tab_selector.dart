@@ -207,29 +207,32 @@ class TabSelector extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      InkWell(
-                        borderRadius: withBorder
-                            ? const BorderRadius.only(
-                                topLeft: Radius.circular(radius),
-                                bottomLeft: Radius.circular(radius),
-                              )
-                            : null,
-                        onTap: () => dropdown.showDialog(context),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            top: 12,
-                            left: 16,
-                            right: 16,
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              BooruFavicon(searchHandler.currentBooru),
-                              Icon(
-                                Icons.arrow_drop_down,
-                                color: color ?? theme.iconTheme.color,
-                              ),
-                            ],
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: withBorder
+                              ? const BorderRadius.only(
+                                  topLeft: Radius.circular(radius),
+                                  bottomLeft: Radius.circular(radius),
+                                )
+                              : null,
+                          onTap: () => dropdown.showDialog(context),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: 12,
+                              left: 16,
+                              right: 16,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                BooruFavicon(searchHandler.currentBooru),
+                                Icon(
+                                  Icons.arrow_drop_down,
+                                  color: color ?? theme.iconTheme.color,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -242,64 +245,67 @@ class TabSelector extends StatelessWidget {
                         height: double.infinity,
                         width: 2,
                         decoration: BoxDecoration(
-                          color: inputDecoration.border?.borderSide.color.withValues(alpha: 0.5),
+                          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       //
                       Expanded(
-                        child: InkWell(
-                          borderRadius: withBorder
-                              ? const BorderRadius.only(
-                                  topRight: Radius.circular(radius),
-                                  bottomRight: Radius.circular(radius),
-                                )
-                              : null,
-                          onTap: () {
-                            SettingsPageOpen(
-                              context: context,
-                              page: () => const TabManagerPage(),
-                            ).open();
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 10,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      TabRow(
-                                        tab: currentTab,
-                                        color: color,
-                                        withFavicon: false,
-                                      ),
-                                      MarqueeText(
-                                        text: [
-                                          if (currentTab.booruHandler is MergebooruHandler)
-                                            (currentTab.booruHandler as MergebooruHandler).booruList[0].name ?? ''
-                                          else
-                                            currentTab.booruHandler.booru.name ?? '',
-                                          //
-                                          for (final booru in (currentTab.secondaryBoorus.value ?? <Booru>[])) booru.name ?? '',
-                                        ].join(', '),
-                                        style: inputDecoration.labelStyle?.copyWith(
-                                          fontSize: 14,
-                                          color: color?.withValues(alpha: 0.75),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: withBorder
+                                ? const BorderRadius.only(
+                                    topRight: Radius.circular(radius),
+                                    bottomRight: Radius.circular(radius),
+                                  )
+                                : null,
+                            onTap: () {
+                              SettingsPageOpen(
+                                context: context,
+                                page: (_) => const TabManagerPage(),
+                              ).open();
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 10,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        TabRow(
+                                          tab: currentTab,
+                                          color: color,
+                                          withFavicon: false,
                                         ),
-                                      ),
-                                    ],
+                                        MarqueeText(
+                                          text: [
+                                            if (currentTab.booruHandler is MergebooruHandler)
+                                              (currentTab.booruHandler as MergebooruHandler).booruList[0].name ?? ''
+                                            else
+                                              currentTab.booruHandler.booru.name ?? '',
+                                            //
+                                            for (final booru in (currentTab.secondaryBoorus.value ?? <Booru>[])) booru.name ?? '',
+                                          ].join(', '),
+                                          style: inputDecoration.labelStyle?.copyWith(
+                                            fontSize: 14,
+                                            color: color?.withValues(alpha: 0.75),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.arrow_drop_down,
-                                  color: color ?? theme.iconTheme.color,
-                                ),
-                              ],
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_drop_down,
+                                    color: color ?? theme.iconTheme.color,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -486,6 +492,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
     if (duplicateFilter) {
       // tabs where booru and tags are the same
       final Map<String, List<SearchTab>> freqMap = {};
+
       for (final tab in filteredTabs) {
         final tags = tab.tags.toLowerCase().trim();
         final key = duplicateBooruFilter ? '${tab.selectedBooru.value.name}+$tags' : tags;
@@ -496,11 +503,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
           freqMap[key] = [tab];
         }
       }
-      filteredTabs = freqMap.entries.where((e) => e.value.length > 1).expand((e) => e.value).toList();
-      // restore tab order for sortingMode == none
-      filteredTabs.sort((a, b) {
-        return searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b));
-      });
+
+      final List<SearchTab> duplicateTabs = freqMap.entries.where((e) => e.value.length > 1).expand<SearchTab>((e) => e.value).toList();
+      filteredTabs = searchHandler.list.where(duplicateTabs.contains).toList();
     }
 
     if (isMultiBooruMode != null) {
@@ -555,7 +560,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
     final String? result = await SettingsPageOpen(
       context: context,
       asBottomSheet: true,
-      page: () => TabManagerFiltersDialog(
+      page: (_) => TabManagerFiltersDialog(
         loadedFilter: loadedFilter,
         loadedFilterChanged: (bool? newValue) {
           loadedFilter = newValue;
@@ -917,10 +922,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
         DeleteButton(
           withIcon: true,
           action: () {
-            for (int i = 0; i < selectedTabs.length; i++) {
-              final int index = searchHandler.list.indexOf(selectedTabs[i]);
-              searchHandler.removeTabAt(tabIndex: index);
-            }
+            searchHandler.removeTabs(selectedTabs);
             selectedTabs.clear();
             getTabs();
             Navigator.of(context).pop();

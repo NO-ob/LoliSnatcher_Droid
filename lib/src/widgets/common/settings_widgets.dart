@@ -50,7 +50,7 @@ class SettingsButton extends StatelessWidget {
     if (action != null) {
       action?.call();
     } else if (page != null) {
-      SettingsPageOpen(context: context, page: page!).open();
+      SettingsPageOpen(context: context, page: (_) => page!()).open();
     }
   }
 
@@ -98,15 +98,17 @@ class SettingsPageOpen {
     this.barrierDismissible = true,
     this.asDialog = false,
     this.asBottomSheet = false,
+    this.bottomSheetExpandableByScroll = false,
     this.useFloatingDialog = false,
   }) : assert(!(asDialog && asBottomSheet), "asDialog and asBottomSheet can't be true at the same time");
 
-  final Widget Function() page;
+  final Widget Function(ScrollController?) page;
   final BuildContext context;
   final bool condition;
   final bool barrierDismissible;
   final bool asDialog;
   final bool asBottomSheet;
+  final bool bottomSheetExpandableByScroll;
   final bool useFloatingDialog;
 
   Future<dynamic> open() async {
@@ -128,7 +130,7 @@ class SettingsPageOpen {
           return Dialog(
             child: SizedBox(
               width: min(MediaQuery.sizeOf(context).width, 500),
-              child: page(),
+              child: page(null),
             ),
           );
         },
@@ -139,7 +141,7 @@ class SettingsPageOpen {
         result = await showDialog(
           context: context,
           builder: (BuildContext context) {
-            return page();
+            return page(null);
           },
           barrierDismissible: barrierDismissible,
         );
@@ -149,7 +151,21 @@ class SettingsPageOpen {
           builder: (BuildContext context) {
             return Padding(
               padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-              child: page(),
+              child: bottomSheetExpandableByScroll
+                  ? GestureDetector(
+                      onTap: () => Navigator.of(context).pop(false),
+                      child: ColoredBox(
+                        color: Colors.transparent,
+                        child: DraggableScrollableSheet(
+                          minChildSize: 0.3,
+                          initialChildSize: 0.7,
+                          maxChildSize: 1,
+                          shouldCloseOnMinExtent: true,
+                          builder: (_, controller) => page(controller),
+                        ),
+                      ),
+                    )
+                  : page(null),
             );
           },
           isScrollControlled: true,
@@ -159,7 +175,7 @@ class SettingsPageOpen {
       } else {
         result = await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (BuildContext context) => page(),
+            builder: (BuildContext context) => page(null),
           ),
         );
       }
@@ -780,6 +796,9 @@ class SettingsTextInput extends StatefulWidget {
     this.isObscuredByDefault = true,
     this.textInputAction,
     this.enableIMEPersonalizedLearning = true,
+    this.submitIcon,
+    this.showSubmitButton = true,
+    this.prefixIcon,
     super.key,
   });
 
@@ -813,6 +832,9 @@ class SettingsTextInput extends StatefulWidget {
   final bool isObscuredByDefault;
   final TextInputAction? textInputAction;
   final bool enableIMEPersonalizedLearning;
+  final IconData? submitIcon;
+  final bool showSubmitButton;
+  final Widget? prefixIcon;
 
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
@@ -846,7 +868,9 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
   @override
   void dispose() {
     _focusNode.removeListener(focusListener);
-    _focusNode.dispose();
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 
@@ -897,7 +921,10 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         if (widget.resetText != null && widget.controller.text != widget.resetText!())
           IconButton(
             key: const Key('reset-button'),
-            icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),
+            icon: Icon(
+              Icons.refresh,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onPressed: () {
               widget.controller.text = widget.resetText!();
               onChangedCallback(widget.controller.text);
@@ -913,10 +940,13 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
             key: const Key('number-button-up'),
             child: buildNumberButton(stepNumberUp, Icons.add),
           ),
-        if (widget.clearable && isFocused)
+        if (widget.clearable && isFocused && widget.controller.text.isNotEmpty)
           IconButton(
             key: const Key('clear-button'),
-            icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface),
+            icon: Icon(
+              Icons.clear,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onPressed: () {
               widget.controller.clear();
               onChangedCallback(widget.controller.text);
@@ -945,6 +975,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
                   final data = snapshot.data?.text;
                   if (data?.isNotEmpty == true) {
                     widget.controller.text = data!;
+                    onChangedCallback(widget.controller.text);
                   }
                 },
               );
@@ -960,10 +991,13 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
             ),
             onPressed: toggleObscure,
           )
-        else if (isFocused)
+        else if (isFocused && widget.showSubmitButton)
           IconButton(
             key: const Key('submit-button'),
-            icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Theme.of(context).colorScheme.onSurface),
+            icon: Icon(
+              widget.submitIcon ?? (widget.onSubmitted != null ? Icons.send : Icons.done),
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onPressed: () {
               if (widget.onSubmitted != null) {
                 widget.onSubmitted?.call(widget.controller.text);
@@ -972,7 +1006,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
               }
             },
           )
-        else
+        else if (!isFocused)
           IconButton(
             key: const Key('edit-button'),
             icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
@@ -1005,6 +1039,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
           hintText: widget.hintText,
           errorText: widget.validator?.call(widget.controller.text),
           contentPadding: const EdgeInsets.fromLTRB(12, 0, 15, 0),
+          prefixIcon: widget.prefixIcon,
           suffixIcon: Padding(
             padding: const EdgeInsets.only(left: 2, right: 10),
             child: buildSuffixIcons(),
@@ -1102,6 +1137,7 @@ class SettingsBottomSheet extends StatelessWidget {
     this.borderRadius,
     this.backgroundColor,
     this.showCloseButton = true,
+    this.scrollController,
     super.key,
   });
 
@@ -1115,6 +1151,7 @@ class SettingsBottomSheet extends StatelessWidget {
   final BorderRadius? borderRadius;
   final Color? backgroundColor;
   final bool showCloseButton;
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -1123,56 +1160,85 @@ class SettingsBottomSheet extends StatelessWidget {
         color: backgroundColor ?? Theme.of(context).colorScheme.surface,
         borderRadius: borderRadius ?? const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
       ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (title != null)
-                  Padding(
-                    padding: titlePadding ?? const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: title,
-                  )
-                else
-                  const SizedBox(height: 12),
-                if (showCloseButton)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 12, 16, 0),
-                    child: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
+            children: [
+              SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (title != null)
+                          Padding(
+                            padding: titlePadding ?? const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                            child: title,
+                          )
+                        else
+                          const SizedBox(height: 12),
+                        if (showCloseButton)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 12, 16, 0),
+                            child: IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
-              ],
-            ),
-            if (content != null) content!,
-            if (contentItems != null)
-              Flexible(
-                child: Padding(
-                  padding: contentPadding,
-                  child: SingleChildScrollView(
-                    child: ListBody(
-                      children: contentItems ?? [],
+                    if (content != null) content!,
+                    if (contentItems != null)
+                      Flexible(
+                        child: Padding(
+                          padding: contentPadding,
+                          child: SingleChildScrollView(
+                            controller: scrollController,
+                            child: ListBody(
+                              children: contentItems ?? [],
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (actionButtons != null)
+                      Padding(
+                        padding: buttonPadding ?? const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          alignment: WrapAlignment.center,
+                          children: actionButtons ?? [],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              //
+              Positioned(
+                top: 6,
+                left: constraints.maxWidth / 2 - 20,
+                child: Center(
+                  child: SizedBox(
+                    height: 4,
+                    width: 40,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: backgroundColor ?? Theme.of(context).colorScheme.onSurface,
+                        borderRadius: borderRadius ??
+                            const BorderRadius.all(
+                              Radius.circular(20),
+                            ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            if (actionButtons != null)
-              Padding(
-                padding: buttonPadding ?? const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  alignment: WrapAlignment.center,
-                  children: actionButtons ?? [],
-                ),
-              ),
-          ],
-        ),
+            ],
+          );
+        },
       ),
     );
   }

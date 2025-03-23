@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -53,11 +52,12 @@ class ItemViewerPage extends StatelessWidget {
           },
           onDismissed: (_) => Navigator.of(context).pop(),
           child: Center(
-            child: Obx(
-              () {
-                final bool isVideo = item.mediaType.value.isVideo;
-                final bool isImage = item.mediaType.value.isImageOrAnimation;
-                final bool isNeedsExtraRequest = item.mediaType.value.isNeedsExtraRequest;
+            child: ValueListenableBuilder(
+              valueListenable: item.mediaType,
+              builder: (context, mediaType, child) {
+                final bool isVideo = mediaType.isVideo;
+                final bool isImage = mediaType.isImageOrAnimation;
+                final bool isNeedsExtraRequest = mediaType.isNeedsExtraRequest;
 
                 late Widget itemWidget;
                 if (isImage) {
@@ -172,14 +172,13 @@ class _ItemViewerAppBarState extends State<_ItemViewerAppBar> {
         color: Colors.transparent,
         height: viewerHandler.displayAppbar.value ? (isOnTop ? null : (widget.defaultHeight + extraPadding)) : 0,
         padding: isOnTop ? null : EdgeInsets.only(bottom: extraPadding),
-        child: Obx(
-          () {
-            final type = widget.item.mediaType;
-
+        child: ValueListenableBuilder(
+          valueListenable: widget.item.mediaType,
+          builder: (context, type, _) {
             return AppBar(
-              title: type.value.isVideo
+              title: type.isVideo
                   ? const Text('Video')
-                  : type.value.isImageOrAnimation
+                  : type.isImageOrAnimation
                       ? const Text('Image')
                       : const Text('Viewer'),
               elevation: 0,

@@ -189,7 +189,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       builder: (BuildContext context) {
                         return Stack(
                           children: [
-                            Obx(() => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox.shrink()),
+                            Obx(
+                              () => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox.shrink(),
+                            ),
                             const NotesRenderer(null),
                             Container(
                               padding: const EdgeInsets.all(10),

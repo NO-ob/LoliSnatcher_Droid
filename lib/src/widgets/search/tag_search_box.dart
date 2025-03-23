@@ -49,10 +49,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   int cursorPos = 0;
   List<String> splitInput = [];
 
-  RxList<List<String>> booruResults = RxList([]);
-  RxList<List<String>> historyResults = RxList([]);
-  RxList<List<String>> databaseResults = RxList([]);
-  RxList<List<String>> modifiersResults = RxList([]);
+  final RxList<List<String>> booruResults = RxList([]);
+  final RxList<List<String>> historyResults = RxList([]);
+  final RxList<List<String>> databaseResults = RxList([]);
+  final RxList<List<String>> modifiersResults = RxList([]);
 
   CancelToken? cancelToken;
 
@@ -373,9 +373,15 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     cancelToken = CancelToken();
     if (multiIndex != -1) {
       final MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
-      getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(lastTag, cancelToken: cancelToken);
+      getFromBooru = (await handler.booruHandlers[multiIndex].getTagSuggestions(lastTag, cancelToken: cancelToken)).fold(
+        (e) => [],
+        (tags) => tags,
+      );
     } else {
-      getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag, cancelToken: cancelToken);
+      getFromBooru = (await searchHandler.currentBooruHandler.getTagSuggestions(lastTag, cancelToken: cancelToken)).fold(
+        (e) => [],
+        (tags) => tags,
+      );
     }
 
     booruResults.value = getFromBooru.map((tag) {

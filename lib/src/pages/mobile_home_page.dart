@@ -1005,10 +1005,10 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final SettingsHandler settingsHandler = SettingsHandler.instance;
-      final SearchHandler searchHandler = SearchHandler.instance;
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
 
+    return Obx(() {
       if (settingsHandler.booruList.length < 2 || searchHandler.list.isEmpty) {
         return const SizedBox.shrink();
       }
