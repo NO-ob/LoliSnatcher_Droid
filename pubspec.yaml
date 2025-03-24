@@ -64,9 +64,9 @@ dependencies:
       ref: c4ba001e441f3d69baedfb6613e857e11e8c2c40 # master
   local_auth: ^2.3.0
   material_color_utilities: ^0.12.0
-  media_kit: ^1.1.11
-  media_kit_video: ^1.2.5
-  media_kit_libs_video: ^1.0.5
+  media_kit: ^1.2.0
+  media_kit_video: ^1.3.0
+  media_kit_libs_video: ^1.0.6
   native_dio_adapter: ^1.4.0
   path_provider: ^2.1.5
   permission_handler: ^11.4.0
