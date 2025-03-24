@@ -155,9 +155,24 @@ class _BooruEditState extends State<BooruEdit> {
               title: 'Favicon',
               hintText: '(Autofills if blank)',
               inputType: TextInputType.url,
-              clearable: true,
-              pasteable: true,
+              onChanged: (_) {
+                setState(() {});
+              },
               enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+              trailingIcon: SizedBox(
+                height: 24,
+                width: 24,
+                child: Image(
+                  image: NetworkImage(booruFaviconController.text),
+                  fit: BoxFit.fill,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.error,
+                    size: 24,
+                    color: Colors.redAccent,
+                  ),
+                  loadingBuilder: (context, child, loadingProgress) => loadingProgress == null ? child : const CircularProgressIndicator(),
+                ),
+              ),
             ),
             SettingsTextInput(
               controller: booruDefTagsController,

@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -583,7 +584,9 @@ class _TagViewState extends State<TagView> {
               ],
             ),
             const SizedBox(height: 10),
+            //
             if (searchHandler.currentBooru.type != BooruType.Merge) TagContentPreview(tag: tag),
+            //
             ListTile(
               leading: Icon(
                 Icons.copy,
@@ -609,6 +612,7 @@ class _TagViewState extends State<TagView> {
                 Navigator.of(context).pop();
               },
             ),
+            //
             if (isInSearch)
               ListTile(
                 leading: Icon(
@@ -620,8 +624,8 @@ class _TagViewState extends State<TagView> {
                   searchHandler.removeTagFromSearch(tag);
                   Navigator.of(context).pop();
                 },
-              ),
-            if (!isInSearch)
+              )
+            else ...[
               ListTile(
                 leading: const Icon(Icons.add, color: Colors.green),
                 title: const Text('Add to Search'),
@@ -646,7 +650,6 @@ class _TagViewState extends State<TagView> {
                   Navigator.of(context).pop();
                 },
               ),
-            if (!isInSearch)
               ListTile(
                 leading: const Icon(Icons.add, color: Colors.red),
                 title: const Text('Add to Search (Exclude)'),
@@ -671,6 +674,8 @@ class _TagViewState extends State<TagView> {
                   Navigator.of(context).pop();
                 },
               ),
+            ],
+            //
             if (!isHated && !isLoved)
               ListTile(
                 leading: const Icon(Icons.star, color: Colors.yellow),
@@ -1245,10 +1250,12 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
 class TagContentPreview extends StatefulWidget {
   const TagContentPreview({
     required this.tag,
+    this.customBooru,
     super.key,
   });
 
   final String tag;
+  final Booru? customBooru;
 
   @override
   State<TagContentPreview> createState() => _TagContentPreviewState();
@@ -1264,7 +1271,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
 
   Future<void> loadPreview() async {
     preview = SearchTab(
-      searchHandler.currentBooru,
+      widget.customBooru ?? searchHandler.currentBooru,
       null,
       widget.tag,
     );

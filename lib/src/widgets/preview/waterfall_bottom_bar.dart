@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'package:calendar_date_picker2/calendar_date_picker2.dart';
 import 'package:dio/dio.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -17,6 +18,7 @@ import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/data/meta_tag.dart';
@@ -27,11 +29,13 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
+import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/history/history.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/preview/waterfall_error_buttons.dart';
@@ -730,6 +734,7 @@ class MainSearchTagChip extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            // OR/EXCLUDE
                             if (isBoolMod)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -761,6 +766,7 @@ class MainSearchTagChip extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                            // Multibooru numbers
                             if (isNumberMod && hasBooruNumber) ...[
                               if (isValidNumberMod)
                                 Container(
@@ -815,7 +821,7 @@ class MainSearchTagChip extends StatelessWidget {
                                   ),
                                 ),
                             ],
-                            //
+                            // Metatag
                             if (isMetaTag)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 6),
@@ -860,8 +866,8 @@ class MainSearchTagChip extends StatelessWidget {
                                   },
                                 ),
                               ),
-                            //
                             const SizedBox(width: 10),
+                            // Divider
                             if (metaTag is MetaTagWithCompareModes)
                               Builder(
                                 builder: (context) {
@@ -884,20 +890,52 @@ class MainSearchTagChip extends StatelessWidget {
                                   );
                                 },
                               ),
-                            //
-                            Center(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                child: Text(
-                                  formattedTag,
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1,
-                                      ),
+                            // Value
+                            if (metaTag is DateMetaTag)
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  child: Builder(
+                                    builder: (context) {
+                                      final dates = formattedTag
+                                          .split(metaTag.valuesDivider)
+                                          .map((d) {
+                                            final parsedDate = DateTime.tryParse(d);
+                                            if (parsedDate == null) {
+                                              return d;
+                                            }
+
+                                            return DateFormat(metaTag.prettierDateFormat ?? metaTag.dateFormat).format(parsedDate);
+                                          })
+                                          .toList()
+                                          .join(metaTag.valuesDivider);
+
+                                      return Text(
+                                        dates,
+                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w600,
+                                              height: 1,
+                                            ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              )
+                            else
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                  child: Text(
+                                    formattedTag,
+                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1,
+                                        ),
+                                  ),
                                 ),
                               ),
-                            ),
                             const SizedBox(width: 10),
                           ],
                         ),
@@ -1064,8 +1102,13 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     }
   }
 
+  String _lastSuggestionText = '';
   void onSuggestionTextChanged() {
-    runSearch(instant: false);
+    // focus change can trigger this too, so we run search only when text changed
+    if (suggestionTextController.text != _lastSuggestionText) {
+      _lastSuggestionText = suggestionTextController.text;
+      runSearch(instant: false);
+    }
   }
 
   void suggestionTextFocusListener() {
@@ -1248,23 +1291,23 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
   }
 
   void onSuggestionTap(
-    String tag, {
+    TagSuggestion tag, {
     bool raw = false,
   }) {
-    String tagWithExtras = tag;
+    String tagText = tag.tag;
 
     if (!raw) {
       final String extrasFromInput = suggestionTextController.text.replaceAll(suggestionTextControllerRawInput, '').trim();
-      tagWithExtras = '$extrasFromInput$tag';
+      tagText = '$extrasFromInput$tagText';
     }
 
     final int? itemIndex = tagToEditIndex;
     if (tagToEditIndex != null) {
       final List<String> tempTags = [...searchHandler.searchTextControllerTags];
-      tempTags[tagToEditIndex!] = tagWithExtras;
+      tempTags[tagToEditIndex!] = tagText;
       searchHandler.searchTextController.text = tempTags.join(' ');
     } else {
-      searchHandler.searchTextController.text = '${searchHandler.searchTextController.text.trim()} $tagWithExtras';
+      searchHandler.searchTextController.text = '${searchHandler.searchTextController.text.trim()} $tagText';
     }
 
     suggestedTags = [];
@@ -1293,23 +1336,47 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     runSearch();
   }
 
-  void onSuggestionLongTap(String tag) {
-    // TODO dialog with options: add, hate+-, fav+-, copy, preview
-    Clipboard.setData(ClipboardData(text: tag));
-    FlashElements.showSnackbar(
+  Future<void> onSuggestionLongTap(TagSuggestion tag) async {
+    // TODO add more actions? hate/fave +-, add as exclude, add with multibooru number?
+    await SettingsPageOpen(
       context: context,
-      title: const Text('Copied!', style: TextStyle(fontSize: 20)),
-      content: Text('Copied "$tag" to clipboard'),
-      sideColor: Colors.green,
-      leadingIcon: Icons.check,
-      leadingIconColor: Colors.green,
-      duration: const Duration(seconds: 2),
-    );
+      asBottomSheet: true,
+      page: (_) {
+        return SettingsBottomSheet(
+          contentItems: [
+            const SizedBox(height: 16),
+            TagSuggestionText(tag: tag, isExpanded: false),
+            const SizedBox(height: 16),
+            if (searchHandler.currentBooru.type != BooruType.Merge) TagContentPreview(tag: tag.tag),
+            ListTile(
+              title: const Text('Copy'),
+              leading: const Icon(Icons.copy),
+              onTap: () async {
+                final tagText = tag.tag;
+
+                await Clipboard.setData(ClipboardData(text: tagText));
+                FlashElements.showSnackbar(
+                  context: context,
+                  title: const Text('Copied!', style: TextStyle(fontSize: 20)),
+                  content: Text('Copied "$tagText" to clipboard'),
+                  sideColor: Colors.green,
+                  leadingIcon: Icons.check,
+                  leadingIconColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                );
+                Navigator.of(context).pop();
+              },
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        );
+      },
+    ).open();
   }
 
   void onSuggestionTextSubmitted(String text) {
     if (text.isNotEmpty) {
-      onSuggestionTap(text, raw: true);
+      onSuggestionTap(TagSuggestion(tag: text), raw: true);
     }
   }
 
@@ -1328,7 +1395,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
         res.value,
       );
       if (res.shouldAddDirectly) {
-        onSuggestionTap(tag);
+        onSuggestionTap(TagSuggestion(tag: tag));
       } else {
         suggestionTextController.text = tag;
       }
@@ -1336,15 +1403,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     }
   }
 
+  double get keyboardActionsHeight => 44;
+
   KeyboardActionsConfig buildConfig() {
-    const double buttonHeight = kMinInteractiveDimension;
-
-    final buttonStyle = Theme.of(context).elevatedButtonTheme.style?.copyWith(
-          fixedSize: WidgetStateProperty.all<Size>(
-            const Size(buttonHeight, buttonHeight),
-          ),
-        );
-
     return KeyboardActionsConfig(
       keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
       nextFocus: false,
@@ -1355,97 +1416,133 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
           displayArrows: false,
           displayDoneButton: false,
           footerBuilder: (_) => PreferredSize(
-            preferredSize: const Size.fromHeight(buttonHeight),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              color: Theme.of(context).colorScheme.surface,
-              height: buttonHeight,
-              child: Row(
-                children: [
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Add '_' at current cursor position
-                      final String beforeSelection = suggestionTextController.selection.textBefore(suggestionTextController.text);
-                      // final String insideSelection = searchHandler.searchTextController.selection.textInside(searchHandler.searchTextController.text);
-                      final String afterSelection = suggestionTextController.selection.textAfter(suggestionTextController.text);
-                      suggestionTextController.text = '${beforeSelection}_$afterSelection';
-                      // set cursor to the end when tapped unfocused
-                      suggestionTextController.selection = TextSelection(
-                        baseOffset: beforeSelection.length + 1,
-                        extentOffset: beforeSelection.length + 1,
-                        affinity: TextAffinity.upstream,
-                      );
-                    },
-                    style: buttonStyle,
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 2,
-                          vertical: 4,
+            preferredSize: Size.fromHeight(keyboardActionsHeight),
+            child: KeyboardVisibilityBuilder(
+              builder: (context, isKbVisible) {
+                final buttonStyle = Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                      fixedSize: WidgetStateProperty.all<Size>(
+                        Size(keyboardActionsHeight, keyboardActionsHeight),
+                      ),
+                      padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+                        EdgeInsets.fromLTRB(
+                          4,
+                          isKbVisible ? 4 : 0,
+                          4,
+                          4,
                         ),
-                        child: SizedBox(
-                          width: 30,
-                          height: 3,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.onSecondary,
-                              borderRadius: BorderRadius.circular(4),
+                      ),
+                    );
+
+                return Container(
+                  padding: const EdgeInsets.only(top: 2, bottom: 2),
+                  height: keyboardActionsHeight - 4,
+                  color: Theme.of(context).colorScheme.surface,
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Add '_' at current cursor position
+                          final String beforeSelection = suggestionTextController.selection.textBefore(suggestionTextController.text);
+                          // final String insideSelection = searchHandler.searchTextController.selection.textInside(searchHandler.searchTextController.text);
+                          final String afterSelection = suggestionTextController.selection.textAfter(suggestionTextController.text);
+                          suggestionTextController.text = '${beforeSelection}_$afterSelection';
+                          // set cursor to the end when tapped unfocused
+                          suggestionTextController.selection = TextSelection(
+                            baseOffset: beforeSelection.length + 1,
+                            extentOffset: beforeSelection.length + 1,
+                            affinity: TextAffinity.upstream,
+                          );
+                        },
+                        style: buttonStyle?.copyWith(
+                          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+                            EdgeInsets.fromLTRB(
+                              4,
+                              isKbVisible ? 4 : 0,
+                              4,
+                              8,
+                            ),
+                          ),
+                        ),
+                        child: Align(
+                          alignment: isKbVisible ? Alignment.bottomCenter : Alignment.topCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 2,
+                              vertical: 4,
+                            ),
+                            child: SizedBox(
+                              width: 30,
+                              height: 3,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.onSecondary,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                  const Spacer(),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () async {
-                      final ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
-                      final String copied = cdata?.text ?? '';
-                      if (copied.isNotEmpty) {
-                        suggestionTextController.text =
-                            '${suggestionTextController.text}${(suggestionTextController.text.isEmpty || suggestionTextController.text.endsWith(' ')) ? '' : ' '}$copied';
-                        suggestionTextController.selection = TextSelection(
-                          baseOffset: suggestionTextController.text.length,
-                          extentOffset: suggestionTextController.text.length,
-                          affinity: TextAffinity.upstream,
-                        );
-                      }
-                    },
-                    style: buttonStyle,
-                    child: Icon(
-                      Icons.paste,
-                      color: Theme.of(context).colorScheme.onSecondary,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: suggestionTextFocusNode.unfocus,
-                    style: buttonStyle,
-                    child: Icon(
-                      Icons.keyboard_hide,
-                      color: Theme.of(context).colorScheme.onSecondary,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  ValueListenableBuilder(
-                    valueListenable: suggestionTextController,
-                    builder: (context, _, __) {
-                      return ElevatedButton(
-                        onPressed: suggestionTextControllerRawInput.isEmpty ? null : () => onSuggestionTextSubmitted(suggestionTextController.text),
+                      const Spacer(),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () async {
+                          final ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
+                          final String copied = cdata?.text ?? '';
+                          if (copied.isNotEmpty) {
+                            suggestionTextController.text =
+                                '${suggestionTextController.text}${(suggestionTextController.text.isEmpty || suggestionTextController.text.endsWith(' ')) ? '' : ' '}$copied';
+                            suggestionTextController.selection = TextSelection(
+                              baseOffset: suggestionTextController.text.length,
+                              extentOffset: suggestionTextController.text.length,
+                              affinity: TextAffinity.upstream,
+                            );
+                          }
+                        },
                         style: buttonStyle,
-                        child: Icon(
-                          Icons.add_rounded,
-                          color: Theme.of(context).colorScheme.onSecondary,
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: isKbVisible ? 0 : 20),
+                          child: Icon(
+                            Icons.paste,
+                            color: Theme.of(context).colorScheme.onSecondary,
+                          ),
                         ),
-                      );
-                    },
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: suggestionTextFocusNode.unfocus,
+                        style: buttonStyle,
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: isKbVisible ? 0 : 20),
+                          child: Icon(
+                            Icons.keyboard_hide,
+                            color: Theme.of(context).colorScheme.onSecondary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      ValueListenableBuilder(
+                        valueListenable: suggestionTextController,
+                        builder: (context, _, __) {
+                          return ElevatedButton(
+                            onPressed: suggestionTextControllerRawInput.isEmpty ? null : () => onSuggestionTextSubmitted(suggestionTextController.text),
+                            style: buttonStyle,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: isKbVisible ? 0 : 20),
+                              child: Icon(
+                                Icons.add_rounded,
+                                color: Theme.of(context).colorScheme.onSecondary,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 16),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ),
@@ -1558,67 +1655,44 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                               }
 
                               final TagSuggestion tag = suggestedTags[index];
-                              Color tagColor = !tag.type.isNone ? tag.type.getColour() : tagHandler.getTag(tag.tag).getColour();
-                              if (tagColor == Colors.transparent) tagColor = Theme.of(context).colorScheme.onSurface;
-
-                              //
-
-                              final style = Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: tagColor,
-                                    fontWeight: FontWeight.w400,
-                                    height: 1,
-                                  );
-
-                              final List<TextSpan> spans = [];
-                              if (suggestionTextControllerRawInput.isNotEmpty) {
-                                final List<String> split = tag.tag.split(suggestionTextControllerRawInput);
-                                for (int i = 0; i < split.length; i++) {
-                                  spans.add(
-                                    TextSpan(
-                                      text: split[i].replaceAll('_', ' '),
-                                      style: style,
-                                    ),
-                                  );
-                                  if (i < split.length - 1) {
-                                    spans.add(
-                                      TextSpan(
-                                        text: suggestionTextControllerRawInput.replaceAll('_', ' '),
-                                        style: style?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                }
-                              } else {
-                                spans.add(
-                                  TextSpan(
-                                    text: tag.tag.replaceAll('_', ' '),
-                                    style: style?.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                );
-                              }
 
                               return Container(
-                                height: kMinInteractiveDimension,
+                                height: kMinInteractiveDimension + (tag.hasDescription ? 8 : 0),
                                 alignment: Alignment.centerLeft,
                                 child: Material(
                                   color: Colors.transparent,
                                   child: InkWell(
-                                    onTap: () => onSuggestionTap(tag.tag),
-                                    onLongPress: () => onSuggestionLongTap(tag.tag),
+                                    onTap: () => onSuggestionTap(tag),
+                                    onLongPress: () => onSuggestionLongTap(tag),
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 4,
+                                      ),
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          MarqueeText.rich(
-                                            textSpan: TextSpan(children: spans),
-                                            style: style,
+                                          Expanded(
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                TagSuggestionText(
+                                                  tag: tag,
+                                                  searchText: suggestionTextControllerRawInput,
+                                                ),
+                                                if (tag.hasDescription)
+                                                  Text(
+                                                    tag.description!,
+                                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
+                                                        ),
+                                                  ),
+                                              ],
+                                            ),
                                           ),
                                           if (tag.count > 0)
                                             Padding(
@@ -1688,70 +1762,137 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
             config: buildConfig(),
             autoScroll: false,
             overscroll: 0,
-            isDialog: true,
+            isDialog: false,
             child: ValueListenableBuilder(
               valueListenable: suggestionTextFocusNodeHasFocus,
-              builder: (context, _, __) => KeyboardVisibilityBuilder(
-                builder: (context, isKbVisible) {
-                  return Column(
+              builder: (context, suggestionTextFocusNodeHasFocus, __) => Column(
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: SettingsTextInput(
-                              controller: suggestionTextController,
-                              focusNode: suggestionTextFocusNode,
-                              title: 'Search for tags',
-                              clearable: true,
-                              hintText: 'Search for tags',
-                              onSubmitted: onSuggestionTextSubmitted,
-                              onlyInput: true,
-                              floatingLabelBehavior: FloatingLabelBehavior.never,
-                              textInputAction: TextInputAction.search,
-                              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
-                              showSubmitButton: false,
-                              prefixIcon: IconButton(
-                                icon: const Icon(Icons.arrow_back_rounded),
-                                onPressed: () => Navigator.of(context).pop(),
-                              ),
-                            ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: SettingsTextInput(
+                          controller: suggestionTextController,
+                          focusNode: suggestionTextFocusNode,
+                          title: 'Search for tags',
+                          clearable: true,
+                          hintText: 'Search for tags',
+                          onSubmitted: onSuggestionTextSubmitted,
+                          onlyInput: true,
+                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                          textInputAction: TextInputAction.search,
+                          enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+                          showSubmitButton: false,
+                          prefixIcon: IconButton(
+                            icon: const Icon(Icons.arrow_back_rounded),
+                            onPressed: () => Navigator.of(context).pop(),
                           ),
-                          ValueListenableBuilder(
-                            valueListenable: suggestionTextController,
-                            builder: (context, _, child) => AnimatedSize(
-                              duration: const Duration(milliseconds: 200),
-                              child: suggestionTextControllerRawInput.isEmpty ? child! : const SizedBox.shrink(),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: IconButton(
-                                icon: const Icon(Icons.filter_list),
-                                onPressed: onAddMenuTap,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                        ],
+                        ),
                       ),
-                      AnimatedSize(
+                      ValueListenableBuilder(
+                        valueListenable: suggestionTextController,
+                        builder: (context, _, child) => AnimatedSize(
+                          duration: const Duration(milliseconds: 200),
+                          child: suggestionTextControllerRawInput.isEmpty ? child! : const SizedBox.shrink(),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: IconButton(
+                            icon: const Icon(Icons.filter_list),
+                            onPressed: onAddMenuTap,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                  KeyboardVisibilityBuilder(
+                    builder: (context, isKbVisible) {
+                      return AnimatedSize(
                         duration: const Duration(milliseconds: 200),
                         child: SizedBox(
                           width: double.infinity,
-                          height: ((isKbVisible || (suggestionTextFocusNodeHasFocus.value && (Platform.isAndroid || Platform.isIOS)))
-                                  ? kMinInteractiveDimension + 8
-                                  : 0) +
-                              MediaQuery.paddingOf(context).bottom,
+                          height: (isKbVisible || (suggestionTextFocusNodeHasFocus && (Platform.isAndroid || Platform.isIOS)))
+                              ? 0 // keyboardActionsHeight
+                              : MediaQuery.paddingOf(context).bottom,
+                          // child: ColoredBox(color: Colors.yellow.withValues(alpha: 0.2)),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class TagSuggestionText extends StatelessWidget {
+  const TagSuggestionText({
+    required this.tag,
+    this.searchText = '',
+    this.isExpanded = true,
+    super.key,
+  });
+
+  final TagSuggestion tag;
+  final String searchText;
+  final bool isExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    final tagHandler = TagHandler.instance;
+
+    Color tagColor = !tag.type.isNone ? tag.type.getColour() : tagHandler.getTag(tag.tag).getColour();
+    if (tagColor == Colors.transparent) tagColor = Theme.of(context).colorScheme.onSurface;
+
+    //
+
+    final style = Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: tagColor,
+          fontWeight: FontWeight.w400,
+          height: 1,
+        );
+
+    final List<TextSpan> spans = [];
+    if (searchText.isNotEmpty) {
+      final List<String> split = tag.tag.split(searchText);
+      for (int i = 0; i < split.length; i++) {
+        spans.add(
+          TextSpan(
+            text: split[i].replaceAll('_', ' '),
+            style: style,
+          ),
+        );
+        if (i < split.length - 1) {
+          spans.add(
+            TextSpan(
+              text: searchText.replaceAll('_', ' '),
+              style: style?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          );
+        }
+      }
+    } else {
+      spans.add(
+        TextSpan(
+          text: tag.tag.replaceAll('_', ' '),
+          style: style?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
+    return MarqueeText.rich(
+      textSpan: TextSpan(children: spans),
+      style: style,
+      isExpanded: isExpanded,
     );
   }
 }
@@ -1803,8 +1944,6 @@ class AddTagBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final searchHandler = SearchHandler.instance;
 
-    final ScrollController scrollController = this.scrollController ?? ScrollController();
-
     final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
 
     if (metaTags.isEmpty) {
@@ -1828,7 +1967,29 @@ class AddTagBottomSheet extends StatelessWidget {
           Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => onOptionSelect(context, tag),
+              onTap: () async {
+                switch (tag.type) {
+                  case MetaTagType.date:
+                    final metaTag = tag as DateMetaTag;
+                    final res = await showSingleDatePicker(
+                      context,
+                      dateFormat: metaTag.dateFormat,
+                    );
+
+                    if (res is DateTime) {
+                      onOptionSelect(
+                        context,
+                        tag,
+                        compareMode: null,
+                        value: DateFormat(metaTag.dateFormat).format(res),
+                      );
+                    }
+                    break;
+                  default:
+                    onOptionSelect(context, tag);
+                    break;
+                }
+              },
               child: SizedBox(
                 height: 48,
                 child: Padding(
@@ -1842,27 +2003,61 @@ class AddTagBottomSheet extends StatelessWidget {
                         ),
                       ),
                       switch (tag.type) {
-                        MetaTagType.date => IconButton(
-                            onPressed: () async {
-                              final res = await showDatePicker(context);
+                        MetaTagType.date => Builder(
+                            builder: (context) {
+                              final metaTag = tag as DateMetaTag;
+                              return Row(
+                                spacing: 6,
+                                children: [
+                                  IconButton.outlined(
+                                    onPressed: () async {
+                                      final res = await showSingleDatePicker(
+                                        context,
+                                        dateFormat: metaTag.dateFormat,
+                                      );
 
-                              if (res is DateTime) {
-                                final metaTag = tag as DateMetaTag;
-                                onOptionSelect(
-                                  context,
-                                  tag,
-                                  compareMode: null,
-                                  value: DateFormat(metaTag.dateFormat).format(res),
-                                );
-                              }
+                                      if (res is DateTime) {
+                                        onOptionSelect(
+                                          context,
+                                          tag,
+                                          compareMode: null,
+                                          value: DateFormat(metaTag.dateFormat).format(res),
+                                        );
+                                      }
+                                    },
+                                    icon: metaTag.supportsRange ? const Text('Single') : const Icon(Icons.calendar_month_rounded),
+                                  ),
+                                  if (metaTag.supportsRange)
+                                    IconButton.outlined(
+                                      onPressed: () async {
+                                        final res = await showRangeDatePicker(
+                                          context,
+                                          dateFormat: metaTag.dateFormat,
+                                        );
+
+                                        if (res is List<DateTime> && res.length == 2) {
+                                          onOptionSelect(
+                                            context,
+                                            tag,
+                                            compareMode: null,
+                                            value: DateFormat(metaTag.dateFormat).format(res[0]) +
+                                                metaTag.valuesDivider +
+                                                DateFormat(metaTag.dateFormat).format(res[1]),
+                                          );
+                                        }
+                                      },
+                                      icon: const Text('Range'),
+                                    ),
+                                  if (metaTag.supportsRange) const Icon(Icons.calendar_month_rounded),
+                                ],
+                              );
                             },
-                            icon: const Icon(Icons.calendar_month_rounded),
                           ),
                         MetaTagType.sort => const Icon(Icons.sort_rounded),
                         MetaTagType.comparableNumber => Row(
                             children: [
                               for (final mode in (tag as MetaTagWithCompareModes).compareModes)
-                                IconButton(
+                                IconButton.outlined(
                                   onPressed: () => onOptionSelect(context, tag, compareMode: mode),
                                   icon: FaIcon(
                                     switch (mode) {
@@ -2142,12 +2337,17 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
   }
 }
 
-Future<DateTime?> showDatePicker(BuildContext context) async {
+Future<DateTime?> showSingleDatePicker(
+  BuildContext context, {
+  String? dateFormat,
+}) async {
   final res = await SettingsPageOpen(
     context: context,
     asBottomSheet: true,
-    bottomSheetExpandableByScroll: true,
-    page: (_) => const DatePickerBottomSheet(),
+    bottomSheetExpandableByScroll: false,
+    page: (_) => SingleDatePickerBottomSheet(
+      dateFormat: dateFormat,
+    ),
   ).open();
 
   if (res is DateTime) {
@@ -2157,49 +2357,132 @@ Future<DateTime?> showDatePicker(BuildContext context) async {
   return null;
 }
 
-class DatePickerBottomSheet extends StatefulWidget {
-  const DatePickerBottomSheet({super.key});
+class SingleDatePickerBottomSheet extends StatefulWidget {
+  const SingleDatePickerBottomSheet({
+    this.dateFormat,
+    super.key,
+  });
+
+  final String? dateFormat;
 
   @override
-  State<DatePickerBottomSheet> createState() => _DatePickerBottomSheetState();
+  State<SingleDatePickerBottomSheet> createState() => _SingleDatePickerBottomSheetState();
 }
 
-class _DatePickerBottomSheetState extends State<DatePickerBottomSheet> {
-  DateTime date = DateTime.now();
-
-  // TODO complete the design, add range support
+class _SingleDatePickerBottomSheetState extends State<SingleDatePickerBottomSheet> {
+  List<DateTime> date = [DateTime.now()];
 
   @override
   Widget build(BuildContext context) {
     return SettingsBottomSheet(
+      title: Text(
+        'Select date',
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
       contentItems: [
-        Text(DateFormat('yyyy-MM-dd').format(date)),
-        Theme(
-          data: Theme.of(context).copyWith(
-            datePickerTheme: DatePickerThemeData(
-              dayBackgroundColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return Theme.of(context).colorScheme.secondary;
-                }
-                return null;
-              }),
-            ),
-          ),
-          child: CalendarDatePicker(
-            initialDate: date,
-            firstDate: DateTime(1970),
-            lastDate: DateTime.now(),
-            onDateChanged: (value) => setState(() => date = value),
-          ),
+        const SizedBox(height: 16),
+        Text(
+          DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(date.first),
+          style: Theme.of(context).textTheme.bodyLarge,
         ),
+        CalendarDatePicker2(
+          config: CalendarDatePicker2Config(
+            calendarType: CalendarDatePicker2Type.single,
+            firstDate: DateTime(2000),
+            lastDate: DateTime.now(),
+          ),
+          value: date,
+          onValueChanged: (value) => setState(() => date = value),
+        ),
+      ],
+      actionButtons: [
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           spacing: 12,
           children: [
-            const CancelButton(),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(date),
-              child: const Text('Done'),
+            const CancelButton(withIcon: true),
+            ConfirmButton(
+              returnData: date.first,
+              withIcon: true,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+Future<List<DateTime>?> showRangeDatePicker(
+  BuildContext context, {
+  String? dateFormat,
+}) async {
+  final res = await SettingsPageOpen(
+    context: context,
+    asBottomSheet: true,
+    bottomSheetExpandableByScroll: false,
+    page: (_) => RangeDatePickerBottomSheet(
+      dateFormat: dateFormat,
+    ),
+  ).open();
+
+  if (res is List<DateTime>) {
+    return res;
+  }
+
+  return null;
+}
+
+class RangeDatePickerBottomSheet extends StatefulWidget {
+  const RangeDatePickerBottomSheet({
+    this.dateFormat,
+    super.key,
+  });
+
+  final String? dateFormat;
+
+  @override
+  State<RangeDatePickerBottomSheet> createState() => _RangeDatePickerBottomSheetState();
+}
+
+class _RangeDatePickerBottomSheetState extends State<RangeDatePickerBottomSheet> {
+  List<DateTime> range = [
+    DateTime.now().subtract(const Duration(days: 7)),
+    DateTime.now(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsBottomSheet(
+      title: Text(
+        'Select dates range',
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
+      contentItems: [
+        const SizedBox(height: 16),
+        Text(
+          // ignore: prefer_interpolation_to_compose_strings
+          DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(range.first) + ' - ' + DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(range.last),
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        CalendarDatePicker2(
+          config: CalendarDatePicker2Config(
+            calendarType: CalendarDatePicker2Type.range,
+            firstDate: DateTime(2000),
+            lastDate: DateTime.now(),
+          ),
+          value: range,
+          onValueChanged: (value) => setState(() => range = value),
+        ),
+      ],
+      actionButtons: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          spacing: 12,
+          children: [
+            const CancelButton(withIcon: true),
+            ConfirmButton(
+              returnData: range,
+              withIcon: true,
             ),
           ],
         ),

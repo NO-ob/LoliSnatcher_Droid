@@ -330,14 +330,25 @@ class SankakuHandler extends BooruHandler {
   @override
   List<MetaTag> availableMetaTags() {
     final tags = [...super.availableMetaTags()];
-    final index = tags.indexWhere((e) => e is SortMetaTag);
 
-    if (index != -1) {
-      tags[index] = OrderMetaTag(
+    final sortIndex = tags.indexWhere((e) => e is SortMetaTag);
+    if (sortIndex != -1) {
+      tags[sortIndex] = OrderMetaTag(
         values: [
           MetaTagValue(name: 'Popularity', value: 'popular'),
-          ...(tags[index] as SortMetaTag).values,
+          MetaTagValue(name: 'Score', value: 'score'),
+          MetaTagValue(name: 'Date', value: 'date'),
         ],
+      );
+    }
+
+    final dateIndex = tags.indexWhere((e) => e is DateMetaTag);
+    if (dateIndex != -1) {
+      tags[dateIndex] = DateMetaTag(
+        name: 'Date',
+        keyName: 'date',
+        dateFormat: 'yyyy-MM-ddT21:00',
+        prettierDateFormat: 'yyyy-MM-dd',
       );
     }
 

@@ -15,6 +15,7 @@ dependencies:
   app_links: ^6.4.0
   auto_size_text_plus: ^3.0.2
   # awesome_notifications: ^0.10.0 # TODO use fork that drops v1 embedding until its merged
+  calendar_date_picker2: ^2.0.0
   chewie: ^1.11.0
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
@@ -55,9 +56,12 @@ dependencies:
       url: https://github.com/NANI-SORE/http_proxy.git
       ref: 36a202ceec982d199acdcd717ce85436372f447d # master - forked to fix build errors and remove allowing all bad certs
   huge_listview: ^2.0.12
-  image: ^4.5.3
+  image: ^4.5.4
   intl: ^0.20.2
-  keyboard_actions: ^4.2.0
+  keyboard_actions: # ^4.2.0
+    git:
+      url: https://github.com/coffeebeats/flutter_keyboard_actions.git
+      ref: c4ba001e441f3d69baedfb6613e857e11e8c2c40 # master
   local_auth: ^2.3.0
   material_color_utilities: ^0.12.0
   media_kit: ^1.1.11

@@ -810,15 +810,13 @@ abstract class BooruHandler {
           MetaTagValue(name: 'Date descending', value: 'date:desc'),
         ],
       ),
-      ComparableNumberMetaTag(name: 'score', keyName: 'score'),
-      DateMetaTag(name: 'date', keyName: 'date'),
-      StringMetaTag(name: 'id', keyName: 'id'),
-      StringMetaTag(name: 'user', keyName: 'user'),
-      StringMetaTag(name: 'md5', keyName: 'md5'),
-      NumberMetaTag(name: 'fav', keyName: 'fav'),
-      NumberMetaTag(name: 'favcount', keyName: 'favcount'),
-      ComparableNumberMetaTag(name: 'width', keyName: 'width'),
-      ComparableNumberMetaTag(name: 'height', keyName: 'height'),
+      ComparableNumberMetaTag(name: 'Score', keyName: 'score'),
+      DateMetaTag(name: 'Date', keyName: 'date'),
+      StringMetaTag(name: 'ID', keyName: 'id'),
+      StringMetaTag(name: 'User', keyName: 'user'),
+      StringMetaTag(name: 'MD5', keyName: 'md5'),
+      ComparableNumberMetaTag(name: 'Width', keyName: 'width'),
+      ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
     ];
   }
 

@@ -161,7 +161,11 @@ class SettingsPageOpen {
                           initialChildSize: 0.7,
                           maxChildSize: 1,
                           shouldCloseOnMinExtent: true,
-                          builder: (_, controller) => page(controller),
+                          builder: (_, controller) => GestureDetector(
+                            // required to ignore taps on empty places inside the sheet while also allowing taps on the barrier
+                            onTap: () {},
+                            child: page(controller),
+                          ),
                         ),
                       ),
                     )

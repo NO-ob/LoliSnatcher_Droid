@@ -86,30 +86,19 @@ abstract class MetaTag {
   bool get hasAutoComplete => true;
 
   Future<List<TagSuggestion>> getAutoComplete(String text) async {
-    // await Future.delayed(const Duration(seconds: 1));
-    // return [TagSuggestion(tag: text)];
-
     if (this is MetaTagWithValues) {
-      final List<String> possibleValues = (this as MetaTagWithValues)
-          .values
-          .where((e) => e is String || e is MetaTagValue)
-          .map(
-            (e) => switch (e.runtimeType) {
-              const (String) => e as String,
-              const (MetaTagValue) => (e as MetaTagValue).value,
-              _ => '',
-            },
-          )
-          .where((e) => e.isNotEmpty)
-          .toList();
+      final List<dynamic> possibleValues = (this as MetaTagWithValues).values.where((e) => (e is String && e.isNotEmpty) || e is MetaTagValue).toList();
 
       final List<TagSuggestion> suggestedTags = [];
-      for (final v in possibleValues) {
+      for (final value in possibleValues) {
+        final String v = value is String ? value : (value as MetaTagValue).value;
+
         final tag = tagBuilder(null, null, v);
         if (tag.contains(text)) {
           suggestedTags.add(
             TagSuggestion(
               tag: tag,
+              description: value is MetaTagValue ? value.name : null,
             ),
           );
         }
@@ -227,12 +216,18 @@ class DateMetaTag extends MetaTagWithCompareModes {
     required super.name,
     required super.keyName,
     this.dateFormat = 'yyyy-MM-dd',
+    this.prettierDateFormat,
     this.valuesDivider = '..',
+    this.supportsRange = true,
   });
 
   final String dateFormat; // yyyy-MM-dd
 
+  final String? prettierDateFormat; // for cases when api uses some ugly date format, use this to format date in searchbar chip
+
   final String valuesDivider; // .. // for between mode
+
+  final bool supportsRange;
 
   @override
   MetaTagType get type => MetaTagType.date;
