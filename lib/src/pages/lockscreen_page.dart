@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 class LockScreenPage extends StatelessWidget {
   const LockScreenPage({super.key});
@@ -28,40 +31,49 @@ class LockScreenPage extends StatelessWidget {
         child: PopScope(
           canPop: false,
           child: Scaffold(
-            appBar: AppBar(
-              title: const Text('LoliSnatcher'),
-            ),
-            body: Column(
-              children: [
-                const Spacer(),
-                Center(
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(100),
-                    onTap: () {
-                      LocalAuthHandler.instance.authenticate();
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.all(12),
-                      child: Icon(
-                        Icons.lock,
-                        size: 100,
+            backgroundColor: SettingsHandler.instance.shitDevice ? null : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.33),
+            body: BackdropFilter(
+              enabled: !SettingsHandler.instance.shitDevice,
+              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+              child: GestureDetector(
+                onTap: LocalAuthHandler.instance.authenticate,
+                child: ColoredBox(
+                  color: Colors.transparent,
+                  child: Column(
+                    children: [
+                      const Spacer(),
+                      Center(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(100),
+                          onTap: LocalAuthHandler.instance.authenticate,
+                          child: const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Icon(
+                              Icons.fingerprint,
+                              size: 100,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Tap to unlock',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const Spacer(),
+                      if (kDebugMode) ...[
+                        ElevatedButton(
+                          onPressed: () {
+                            LocalAuthHandler.instance.authenticate(forceUnlock: true);
+                          },
+                          child: const Text('DEV UNLOCK'),
+                        ),
+                        const Spacer(),
+                      ],
+                    ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Text('Tap to unlock'),
-                const Spacer(),
-                if (kDebugMode) ...[
-                  ElevatedButton(
-                    onPressed: () {
-                      LocalAuthHandler.instance.authenticate(forceUnlock: true);
-                    },
-                    child: const Text('DEV UNLOCK'),
-                  ),
-                  const Spacer(),
-                ],
-              ],
+              ),
             ),
           ),
         ),

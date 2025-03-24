@@ -119,7 +119,9 @@ class _PrivacyPageState extends State<PrivacyPage> {
                     });
                   },
                   title: 'Incognito keyboard',
-                  subtitle: const Text('Tells your keyboard to disable typing history and learning based on your input.'),
+                  subtitle: const Text(
+                    "Tells system keyboard to don't save your typing history and disable learning based on your input.\nWill be applied to most of app's text inputs.",
+                  ),
                 ),
             ],
           ),
