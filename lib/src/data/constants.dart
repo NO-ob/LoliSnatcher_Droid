@@ -2,8 +2,8 @@ class Constants {
   static const String appName = 'LoliSnatcher';
 
   // TODO don't forget to update on every new release
-  static const String appVersion = '2.4.2';
-  static const int appBuildNumber = 193;
+  static const String appVersion = '2.4.3';
+  static const int appBuildNumber = 194;
   //
 
   static const int defaultItemLimit = 20;
