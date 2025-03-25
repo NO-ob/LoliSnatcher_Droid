@@ -520,7 +520,7 @@ class LoliSync {
                   offset.toString(),
                   limit.toString(),
                   'ASC',
-                  'loliSyncFav',
+                  isSnatched ? 'loliSyncSnatch' : 'loliSyncFav',
                   isDownloads: isSnatched,
                 );
                 Logger.Inst().log('fetched is ${fetched.length} i is $i', 'LoliSync', 'startSync', LogTypes.loliSyncInfo);
