@@ -67,7 +67,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
                   },
                   title: 'App lock',
                   subtitle: const Text(
-                    'Allows to lock the app manually or if left for too long',
+                    'Allows to lock the app manually or if left for too long. Requires system lock with PIN or biometrics to be enabled.',
                   ),
                 ),
               AnimatedSize(

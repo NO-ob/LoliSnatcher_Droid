@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -31,47 +29,48 @@ class LockScreenPage extends StatelessWidget {
         child: PopScope(
           canPop: false,
           child: Scaffold(
-            backgroundColor: SettingsHandler.instance.shitDevice ? null : Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.33),
-            body: BackdropFilter(
-              enabled: !SettingsHandler.instance.shitDevice,
-              filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-              child: GestureDetector(
-                onTap: LocalAuthHandler.instance.authenticate,
-                child: ColoredBox(
-                  color: Colors.transparent,
-                  child: Column(
-                    children: [
-                      const Spacer(),
-                      Center(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(100),
-                          onTap: LocalAuthHandler.instance.authenticate,
-                          child: const Padding(
-                            padding: EdgeInsets.all(12),
-                            child: Icon(
-                              Icons.fingerprint,
-                              size: 100,
-                            ),
+            body: GestureDetector(
+              onTap: LocalAuthHandler.instance.authenticate,
+              child: ColoredBox(
+                color: Colors.transparent,
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    Center(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(100),
+                        onTap: LocalAuthHandler.instance.authenticate,
+                        child: const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Icon(
+                            Icons.fingerprint,
+                            size: 80,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Tap to unlock',
-                        style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Tap to authenticate',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const Spacer(),
+                    if (kDebugMode || EnvironmentConfig.isTesting) ...[
+                      ElevatedButton(
+                        onPressed: () {
+                          LocalAuthHandler.instance.authenticate(forceUnlock: true);
+                        },
+                        child: const Text('DEV UNLOCK'),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        child: Text(
+                          '[TESTING]: Press this if you cannot unlock the app through normal means. Report to developer with details about your device.',
+                        ),
                       ),
                       const Spacer(),
-                      if (kDebugMode) ...[
-                        ElevatedButton(
-                          onPressed: () {
-                            LocalAuthHandler.instance.authenticate(forceUnlock: true);
-                          },
-                          child: const Text('DEV UNLOCK'),
-                        ),
-                        const Spacer(),
-                      ],
                     ],
-                  ),
+                  ],
                 ),
               ),
             ),
