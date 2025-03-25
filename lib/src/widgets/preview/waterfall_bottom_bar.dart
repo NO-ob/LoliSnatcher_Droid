@@ -1369,6 +1369,14 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
             const SizedBox(height: 16),
             TagSuggestionText(tag: tag, isExpanded: false),
             const SizedBox(height: 16),
+            ListTile(
+              title: const Text('Add'),
+              leading: const Icon(Icons.add_rounded),
+              onTap: () async {
+                onSuggestionTap(tag);
+                Navigator.of(context).pop();
+              },
+            ),
             if (searchHandler.currentBooru.type != BooruType.Merge) TagContentPreview(tag: tag.tag),
             ListTile(
               title: const Text('Copy'),
@@ -1541,12 +1549,15 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                         valueListenable: suggestionTextController,
                         builder: (context, _, __) {
                           return ElevatedButton(
-                            onPressed: suggestionTextControllerRawInput.isEmpty ? null : () => onSuggestionTextSubmitted(suggestionTextController.text),
+                            onPressed: suggestionTextControllerRawInput.isEmpty ? onSearchTap : () => onSuggestionTextSubmitted(suggestionTextController.text),
+                            onLongPress: suggestionTextControllerRawInput.isEmpty
+                                ? onSearchLongTap
+                                : () => onSuggestionLongTap(TagSuggestion(tag: suggestionTextControllerRawInput)),
                             style: buttonStyle,
                             child: Padding(
                               padding: EdgeInsets.only(bottom: isKbVisible ? 0 : 20),
                               child: Icon(
-                                Icons.add_rounded,
+                                suggestionTextControllerRawInput.isEmpty ? Icons.search : Icons.add_rounded,
                                 color: Theme.of(context).colorScheme.onSecondary,
                               ),
                             ),
