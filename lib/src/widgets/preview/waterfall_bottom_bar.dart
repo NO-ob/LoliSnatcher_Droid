@@ -2783,7 +2783,7 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
                   ),
                 IconButton(
                   onPressed: openMetatagsDialog,
-                  icon: const Icon(Icons.settings),
+                  icon: const Icon(Icons.chevron_right_rounded),
                 ),
               ],
             ),
