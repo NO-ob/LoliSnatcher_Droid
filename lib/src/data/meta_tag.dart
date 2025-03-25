@@ -177,7 +177,7 @@ class SortMetaTag extends MetaTagWithValues<MetaTagValue> {
   SortMetaTag({
     required super.values,
   }) : super(
-          name: 'sort',
+          name: 'Sort',
           keyName: 'sort',
         );
 
@@ -191,7 +191,7 @@ class OrderMetaTag extends MetaTagWithValues<MetaTagValue> {
   OrderMetaTag({
     required super.values,
   }) : super(
-          name: 'order',
+          name: 'Order',
           keyName: 'order',
         );
 
@@ -292,7 +292,7 @@ class StringFromListMetaTag extends MetaTagWithValues<String> {
 class GenericRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
   GenericRatingMetaTag()
       : super(
-          name: 'rating',
+          name: 'Rating',
           keyName: 'rating',
           values: [
             MetaTagValue(name: 'Safe', value: 'safe'),
@@ -305,7 +305,7 @@ class GenericRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
 class GelbooruRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
   GelbooruRatingMetaTag()
       : super(
-          name: 'rating',
+          name: 'Rating',
           keyName: 'rating',
           values: [
             MetaTagValue(name: 'General', value: 'general'),

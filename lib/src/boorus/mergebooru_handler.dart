@@ -34,6 +34,9 @@ class MergebooruHandler extends BooruHandler {
   bool get hasTagSuggestions => booruHandlers.first.hasTagSuggestions;
 
   @override
+  String? get metatagsCheatSheetLink => booruHandlers.first.metatagsCheatSheetLink;
+
+  @override
   List<MetaTag> availableMetaTags() {
     return booruHandlers.first.availableMetaTags();
   }

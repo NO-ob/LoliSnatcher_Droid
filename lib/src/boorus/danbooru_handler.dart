@@ -246,4 +246,7 @@ class DanbooruHandler extends BooruHandler {
       height: int.tryParse(current['height']?.toString() ?? '0') ?? 0,
     );
   }
+
+  @override
+  String? get metatagsCheatSheetLink => 'https://danbooru.donmai.us/wiki_pages/help:cheatsheet';
 }

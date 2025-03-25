@@ -346,6 +346,9 @@ class GelbooruHandler extends BooruHandler {
   }
 
   @override
+  String? get metatagsCheatSheetLink => 'https://gelbooru.com/index.php?page=wiki&s=view&id=26263';
+
+  @override
   List<MetaTag> availableMetaTags() {
     final tags = [...super.availableMetaTags()];
     final index = tags.indexWhere((e) => e is GenericRatingMetaTag);

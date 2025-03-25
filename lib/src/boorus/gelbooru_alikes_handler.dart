@@ -457,6 +457,10 @@ class GelbooruAlikesHandler extends BooruHandler {
       return [item, false, e.toString()];
     }
   }
+
+  @override
+  String? get metatagsCheatSheetLink =>
+      isR34xxx ? 'https://rule34.xxx/index.php?page=help&topic=cheatsheet' : 'https://gelbooru.com/index.php?page=help&topic=cheatsheet';
 }
 
 List<String> tagsFromHtml(List<Element>? elements) {

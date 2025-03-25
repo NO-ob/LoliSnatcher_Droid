@@ -1318,6 +1318,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                     children: [
                       Row(
                         children: [
+                          const Icon(Icons.search),
+                          const SizedBox(width: 8),
                           Text(
                             'Preview:',
                             style: Theme.of(context).textTheme.bodyLarge,
@@ -1345,52 +1347,73 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                             controller: scrollController,
                             shrinkWrap: true,
                             scrollDirection: Axis.horizontal,
-                            itemCount: preview!.booruHandler.filteredFetched.length,
-                            itemBuilder: (context, index) => Container(
-                              padding: const EdgeInsets.only(right: 8),
-                              height: 180,
-                              width: 120,
-                              child: Stack(
-                                children: [
-                                  ThumbnailBuild(
-                                    item: preview!.booruHandler.filteredFetched[index],
-                                    selectable: false,
+                            itemCount: preview!.booruHandler.filteredFetched.isEmpty ? 1 : preview!.booruHandler.filteredFetched.length,
+                            itemBuilder: (context, index) {
+                              if (preview!.booruHandler.filteredFetched.isEmpty) {
+                                return const Center(
+                                  child: Column(
+                                    // mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Kaomoji(
+                                        type: KaomojiType.shrug,
+                                        style: TextStyle(fontSize: 24),
+                                      ),
+                                      Text(
+                                        'Nothing found',
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ],
                                   ),
-                                  Positioned.fill(
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(4),
-                                        onTap: () {
-                                          Navigator.of(context).push(
-                                            PageRouteBuilder(
-                                              pageBuilder: (_, __, ___) => ItemViewerPage(
-                                                item: preview!.booruHandler.filteredFetched[index],
-                                                booru: preview!.booruHandler.booru,
+                                );
+                              }
+
+                              return Container(
+                                padding: const EdgeInsets.only(right: 8),
+                                height: 180,
+                                width: 120,
+                                child: Stack(
+                                  children: [
+                                    ThumbnailBuild(
+                                      item: preview!.booruHandler.filteredFetched[index],
+                                      selectable: false,
+                                    ),
+                                    Positioned.fill(
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(4),
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              PageRouteBuilder(
+                                                pageBuilder: (_, __, ___) => ItemViewerPage(
+                                                  item: preview!.booruHandler.filteredFetched[index],
+                                                  booru: preview!.booruHandler.booru,
+                                                ),
+                                                opaque: false,
+                                                transitionDuration: const Duration(milliseconds: 300),
+                                                barrierColor: Colors.black26,
+                                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                                  return const ZoomPageTransitionsBuilder().buildTransitions(
+                                                    MaterialPageRoute(
+                                                      builder: (_) => const SizedBox.shrink(),
+                                                    ),
+                                                    context,
+                                                    animation,
+                                                    secondaryAnimation,
+                                                    child,
+                                                  );
+                                                },
                                               ),
-                                              opaque: false,
-                                              transitionDuration: const Duration(milliseconds: 300),
-                                              barrierColor: Colors.black26,
-                                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                                return const ZoomPageTransitionsBuilder().buildTransitions(
-                                                  MaterialPageRoute(
-                                                    builder: (_) => const SizedBox.shrink(),
-                                                  ),
-                                                  context,
-                                                  animation,
-                                                  secondaryAnimation,
-                                                  child,
-                                                );
-                                              },
-                                            ),
-                                          );
-                                        },
+                                            );
+                                          },
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                                  ],
+                                ),
+                              );
+                            },
                           ),
                         ),
                       ),

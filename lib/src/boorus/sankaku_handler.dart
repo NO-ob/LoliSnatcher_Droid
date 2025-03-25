@@ -328,6 +328,9 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
+  String? get metatagsCheatSheetLink => 'https://chan.sankakucomplex.com/wiki/help%3A_advanced_search_guide';
+
+  @override
   List<MetaTag> availableMetaTags() {
     final tags = [...super.availableMetaTags()];
 

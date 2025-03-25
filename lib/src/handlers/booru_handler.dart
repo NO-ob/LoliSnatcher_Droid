@@ -350,8 +350,13 @@ abstract class BooruHandler {
           try {
             if (tags.length < limit) {
               TagSuggestion? parsedTag = await parseTagSuggestion(rawTag, i);
+              String parsedText = '';
+              try {
+                parsedText = parseFragment(parsedTag?.tag.trim()).text ?? '';
+                parsedText = Uri.decodeComponent(parsedText).trim();
+              } catch (_) {}
               parsedTag = parsedTag?.copyWith(
-                tag: Uri.decodeComponent(parseFragment(parsedTag.tag.trim()).text ?? '').trim(),
+                tag: parsedText,
               );
 
               if (parsedTag != null && parsedTag.tag.isNotEmpty) {
@@ -377,6 +382,9 @@ abstract class BooruHandler {
             );
           }
         }
+      } else if (response.statusCode == 404) {
+        // return nothing on 404
+        return const Right([]);
       } else {
         Logger.Inst().log('error fetching url: $url', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log('status: ${response.statusCode}', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
@@ -798,7 +806,8 @@ abstract class BooruHandler {
     return;
   }
 
-  // TEMPORARY
+  String? get metatagsCheatSheetLink => null;
+
   List<MetaTag> availableMetaTags() {
     return [
       GenericRatingMetaTag(),
@@ -819,9 +828,4 @@ abstract class BooruHandler {
       ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
     ];
   }
-
-  // TODO generic metatags list
-  // List<MetaTag> availableMetaTags() {
-  //   return [];
-  // }
 }
