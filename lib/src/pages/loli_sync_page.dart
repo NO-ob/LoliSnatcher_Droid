@@ -82,6 +82,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     favouritesSkipController.text = '';
 
     getFavCount();
+    getSnatchedCount();
     getIPList();
   }
 
@@ -103,6 +104,11 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   Future<void> getFavCount() async {
     favCount = await settingsHandler.dbHandler.getFavouritesCount();
+    updateState();
+  }
+
+  Future<void> getSnatchedCount() async {
+    snatchedCount = await settingsHandler.dbHandler.getSnatchedCount();
     updateState();
   }
 
@@ -530,6 +536,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             children: [
               const Text('Stats of this device:'),
               Text("Favourites: ${favCount?.toFormattedString() ?? '...'}"),
+              Text('Snatched: ${snatchedCount?.toFormattedString() ?? '...'}'),
               Text('Boorus: ${settingsHandler.booruList.length.toFormattedString()}'),
               Text('Tabs: ${searchHandler.total.toFormattedString()}'),
             ],
