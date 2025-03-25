@@ -514,7 +514,7 @@ class LoliSync {
               if (!syncKilled) {
                 final int offset = i * limit;
                 // TODO rework to send only missing ones?
-                yield 'Fetching favourites $offset / $count';
+                yield 'Fetching items $offset / $count';
                 final List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB(
                   '',
                   offset.toString(),
@@ -551,7 +551,7 @@ class LoliSync {
               if (!syncKilled) {
                 final int offset = i * limit;
                 // TODO rework to send only missing ones?
-                yield 'Fetching favourites $offset / $favouritesCount';
+                yield 'Fetching items $offset / $favouritesCount';
                 final List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB('', offset.toString(), limit.toString(), 'ASC', 'loliSyncFav');
                 yield 'Fetched ${fetched.length} favourites';
                 Logger.Inst().log('fetched is ${fetched.length} i is $i', 'LoliSync', 'startSync', LogTypes.loliSyncInfo);
