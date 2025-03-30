@@ -350,13 +350,36 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   List<MetaTag> availableMetaTags() {
-    final tags = [...super.availableMetaTags()];
-    final index = tags.indexWhere((e) => e is GenericRatingMetaTag);
-
-    if (index != -1) {
-      tags[index] = GelbooruRatingMetaTag();
-    }
-
-    return tags;
+    return [
+      DanbooruGelbooruRatingMetaTag(),
+      SortMetaTag(
+        values: [
+          MetaTagValue(name: 'ID', value: 'id'),
+          MetaTagValue(name: 'ID (ascending)', value: 'id:asc'),
+          MetaTagValue(name: 'Score', value: 'score'),
+          MetaTagValue(name: 'Score (ascending)', value: 'score:asc'),
+          MetaTagValue(name: 'Rating', value: 'rating'),
+          MetaTagValue(name: 'Rating (ascending)', value: 'rating:asc'),
+          MetaTagValue(name: 'User', value: 'user'),
+          MetaTagValue(name: 'User (ascending)', value: 'user:asc'),
+          MetaTagValue(name: 'Height', value: 'height'),
+          MetaTagValue(name: 'Height (ascending)', value: 'height:asc'),
+          MetaTagValue(name: 'Width', value: 'width'),
+          MetaTagValue(name: 'Width (ascending)', value: 'width:asc'),
+          MetaTagValue(name: 'Source', value: 'source'),
+          MetaTagValue(name: 'Source (ascending)', value: 'source:asc'),
+          MetaTagValue(name: 'Updated', value: 'updated'),
+          MetaTagValue(name: 'Updated (ascending)', value: 'updated:asc'),
+          MetaTagValue(name: 'Random', value: 'random'), // can add seed at the end (sort:random:{seed})
+        ],
+      ),
+      ComparableNumberMetaTag(name: 'Score', keyName: 'score'),
+      StringMetaTag(name: 'ID', keyName: 'id'),
+      StringMetaTag(name: 'User', keyName: 'user'),
+      // StringMetaTag(name: 'Favourites of user ID (fav:{id})', keyName: 'fav'),
+      StringMetaTag(name: 'MD5', keyName: 'md5'),
+      ComparableNumberMetaTag(name: 'Width', keyName: 'width'),
+      ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
+    ];
   }
 }

@@ -27,7 +27,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   final TextEditingController mouseSpeedController = TextEditingController();
 
   late String previewMode, previewDisplay, scrollGridButtonsPosition;
-  late bool showBottomSearchbar, disableVibration;
+  late bool showBottomSearchbar, showSearchbarQuickActions, autofocusSearchbar, disableVibration;
   late AppMode appMode;
   late HandSide handSide;
 
@@ -39,6 +39,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     appMode = settingsHandler.appMode.value;
     handSide = settingsHandler.handSide.value;
     showBottomSearchbar = settingsHandler.showBottomSearchbar;
+    showSearchbarQuickActions = settingsHandler.showSearchbarQuickActions;
+    autofocusSearchbar = settingsHandler.autofocusSearchbar;
     disableVibration = settingsHandler.disableVibration;
     previewDisplay = settingsHandler.previewDisplay;
     previewMode = settingsHandler.previewMode;
@@ -63,6 +65,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.appMode.value = appMode;
     settingsHandler.handSide.value = handSide;
     settingsHandler.showBottomSearchbar = showBottomSearchbar;
+    settingsHandler.showSearchbarQuickActions = showSearchbarQuickActions;
+    settingsHandler.autofocusSearchbar = autofocusSearchbar;
     settingsHandler.disableVibration = disableVibration;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
@@ -199,6 +203,24 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: 'Show bottom searchbar',
+              ),
+              SettingsToggle(
+                value: showSearchbarQuickActions,
+                onChanged: (newValue) {
+                  setState(() {
+                    showSearchbarQuickActions = newValue;
+                  });
+                },
+                title: 'Show quick actions when typing in tag suggestions',
+              ),
+              SettingsToggle(
+                value: autofocusSearchbar,
+                onChanged: (newValue) {
+                  setState(() {
+                    autofocusSearchbar = newValue;
+                  });
+                },
+                title: 'Focus on search input after opening tag suggestions',
               ),
               SettingsToggle(
                 value: disableVibration,

@@ -469,6 +469,24 @@ class VideoViewerState extends State<VideoViewer> {
       //   backgroundColor: Color.fromRGBO(41, 41, 41, 0.7),
       //   iconColor: Color.fromARGB(255, 200, 200, 200)
       // ),
+      playbackSpeeds: const [
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1,
+        1.25,
+        1.5,
+        1.75,
+        2,
+        3,
+        4,
+        6,
+        8,
+        12,
+        16,
+        32,
+      ],
       materialProgressColors: ChewieProgressColors(
         playedColor: accentColor,
         handleColor: darkenedAceentColor,
@@ -566,9 +584,11 @@ class VideoViewerState extends State<VideoViewer> {
               controllerProvider,
               ChewieControllerProvider(
                 controller: chewieController!,
-                child: const TransparentPointer(
+                child: TransparentPointer(
                   child: SafeArea(
-                    child: LoliControls(),
+                    child: LoliControls(
+                      useLongTapFastForward: settingsHandler.longTapFastForwardVideo,
+                    ),
                   ),
                 ),
               ),
@@ -729,7 +749,9 @@ class VideoViewerState extends State<VideoViewer> {
 
                                     return const SizedBox.shrink();
                                   },
-                                  child: const LoliControls(),
+                                  child: LoliControls(
+                                    useLongTapFastForward: settingsHandler.longTapFastForwardVideo,
+                                  ),
                                 ),
                               ),
                             ),

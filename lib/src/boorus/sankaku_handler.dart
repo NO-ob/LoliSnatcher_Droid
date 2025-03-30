@@ -332,29 +332,65 @@ class SankakuHandler extends BooruHandler {
 
   @override
   List<MetaTag> availableMetaTags() {
-    final tags = [...super.availableMetaTags()];
-
-    final sortIndex = tags.indexWhere((e) => e is SortMetaTag);
-    if (sortIndex != -1) {
-      tags[sortIndex] = OrderMetaTag(
+    return [
+      GenericRatingMetaTag(),
+      OrderMetaTag(
         values: [
+          MetaTagValue(name: 'ID', value: 'id'),
+          MetaTagValue(name: 'ID (descending)', value: 'id_desc'),
           MetaTagValue(name: 'Popularity', value: 'popular'),
           MetaTagValue(name: 'Score', value: 'score'),
           MetaTagValue(name: 'Date', value: 'date'),
+          MetaTagValue(name: 'Last change date', value: 'change'),
+          MetaTagValue(name: 'Last change date (descending)', value: 'change_desc'),
+          MetaTagValue(name: 'Quality', value: 'quality'),
+          MetaTagValue(name: 'Favourites', value: 'fav_count'),
+          MetaTagValue(name: 'Views', value: 'view_count'),
+          MetaTagValue(name: 'Recently favorited', value: 'recently_favorited'),
+          MetaTagValue(name: 'Recently voted', value: 'recently_voted'),
+          MetaTagValue(name: 'Recently commented', value: 'recently_commented'),
+          MetaTagValue(name: 'Recently noted', value: 'recently_noted'),
+          MetaTagValue(name: 'Megapixels (descending)', value: 'mpixels_desc'),
+          MetaTagValue(name: 'Megapixels (ascending)', value: 'mpixels_asc'),
+          MetaTagValue(name: 'Filesize', value: 'file_size'),
+          MetaTagValue(name: 'Filesize (ascending)', value: 'file_size_asc'),
+          MetaTagValue(name: 'Landscape', value: 'landscape'),
+          MetaTagValue(name: 'Portrait', value: 'portrait'),
+          MetaTagValue(name: 'Tags count', value: 'tag_count'),
+          MetaTagValue(name: 'Tags count (ascending)', value: 'tag_count_asc'),
+          MetaTagValue(name: 'Random', value: 'random'),
+          MetaTagValue(name: 'Unpopularity', value: 'unpopular'),
+          MetaTagValue(name: 'Unquality', value: 'unquality'),
         ],
-      );
-    }
-
-    final dateIndex = tags.indexWhere((e) => e is DateMetaTag);
-    if (dateIndex != -1) {
-      tags[dateIndex] = DateMetaTag(
+      ),
+      StringMetaTag(name: 'User', keyName: 'user'),
+      StringMetaTag(name: 'Threshold', keyName: 'threshold'),
+      DateMetaTag(
         name: 'Date',
         keyName: 'date',
-        dateFormat: 'yyyy-MM-ddT21:00',
+        dateFormat: 'yyyy-MM-ddT00:00',
         prettierDateFormat: 'yyyy-MM-dd',
-      );
-    }
-
-    return tags;
+      ),
+      ComparableNumberMetaTag(name: 'Width', keyName: 'width'),
+      ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
+      StringMetaTag(name: 'Megapixels', keyName: 'mpixels'),
+      ComparableNumberMetaTag(name: 'Filesize', keyName: 'file_size'),
+      StringMetaTag(name: 'Filetype', keyName: 'file_type'),
+      ComparableNumberMetaTag(name: 'Duration', keyName: 'duration'),
+      ComparableNumberMetaTag(name: 'Tag count', keyName: 'total_tag_count'),
+      ComparableNumberMetaTag(name: 'General tags count', keyName: 'general_tag_count'),
+      ComparableNumberMetaTag(name: 'Artist tags count', keyName: 'artist_tag_count'),
+      ComparableNumberMetaTag(name: 'Character tags count', keyName: 'character_tag_count'),
+      ComparableNumberMetaTag(name: 'Copyright tags count', keyName: 'copyright_tag_count'),
+      ComparableNumberMetaTag(name: 'Meta tags count', keyName: 'meta_tag_count'),
+      MetaTagWithValues(
+        name: 'Parent ID',
+        keyName: 'parent',
+        values: [
+          MetaTagValue(name: 'Any', value: 'any'),
+          MetaTagValue(name: 'None', value: 'none'),
+        ],
+      ),
+    ];
   }
 }

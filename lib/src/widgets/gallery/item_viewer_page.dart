@@ -184,6 +184,11 @@ class _ItemViewerAppBarState extends State<_ItemViewerAppBar> {
               elevation: 0,
               backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,
+              titleTextStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
               shadowColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
               leading: IconButton(

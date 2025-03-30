@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
@@ -206,7 +207,10 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   CommentItem? parseComment(dynamic responseItem, int index) {
-    final String? dateStr = responseItem['created_at']?.toString().substring(0, responseItem['created_at']!.toString().length - 6);
+    final String? dateStr = responseItem['created_at']?.toString().substring(
+          0,
+          responseItem['created_at']!.toString().length - 6,
+        );
     return CommentItem(
       id: responseItem['id'].toString(),
       title: responseItem['post_id'].toString(),
@@ -249,4 +253,199 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   String? get metatagsCheatSheetLink => 'https://danbooru.donmai.us/wiki_pages/help:cheatsheet';
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    return [
+      DanbooruGelbooruRatingMetaTag(isFree: true),
+      OrderMetaTag(
+        values: [
+          MetaTagValue(name: 'ID', value: 'id'),
+          MetaTagValue(name: 'ID (descending)', value: 'id_desc'),
+          MetaTagValue(name: 'MD5', value: 'md5'),
+          MetaTagValue(name: 'MD5 (ascending)', value: 'md5_asc'),
+          MetaTagValue(name: 'Score', value: 'score'),
+          MetaTagValue(name: 'Score (ascending)', value: 'score_asc'),
+          MetaTagValue(name: 'Favorites', value: 'favcount'),
+          MetaTagValue(name: 'Favorites (ascending)', value: 'favcount_asc'),
+          MetaTagValue(name: 'Creation date', value: 'created_at'),
+          MetaTagValue(name: 'Creation date (ascending)', value: 'created_at_asc'),
+          MetaTagValue(name: 'Last change date', value: 'change'),
+          MetaTagValue(name: 'Last change date (ascending)', value: 'change_asc'),
+          MetaTagValue(name: 'Comments', value: 'comment'),
+          MetaTagValue(name: 'Comments (ascending)', value: 'comment_asc'),
+          MetaTagValue(name: 'Comment bumped', value: 'comment_bumped'),
+          MetaTagValue(name: 'Comment bumped (ascending)', value: 'comment_bumped_asc'),
+          MetaTagValue(name: 'Notes', value: 'note'),
+          MetaTagValue(name: 'Notes (ascending)', value: 'note_asc'),
+          MetaTagValue(name: 'Artist commentary', value: 'artcomm'),
+          MetaTagValue(name: 'Artist commentary (ascending)', value: 'artcomm_asc'),
+          MetaTagValue(name: 'Megapixels', value: 'mpixels'),
+          MetaTagValue(name: 'Megapixels (ascending)', value: 'mpixels_asc'),
+          MetaTagValue(name: 'Portrait', value: 'portrait'),
+          MetaTagValue(name: 'Landscape', value: 'landscape'),
+          MetaTagValue(name: 'Filesize', value: 'filesize'),
+          MetaTagValue(name: 'Filesize (ascending)', value: 'filesize_asc'),
+          MetaTagValue(name: 'Rank', value: 'rank'),
+          MetaTagValue(name: 'Curated', value: 'curated'),
+          MetaTagValue(name: 'Modqueue', value: 'modqueue'),
+          MetaTagValue(name: 'Random', value: 'random'),
+          MetaTagValue(name: 'Custom', value: 'custom'),
+          MetaTagValue(name: 'None', value: 'none'),
+        ],
+      ),
+      StringMetaTag(
+        name: 'Score',
+        keyName: 'score',
+        isFree: true,
+      ),
+      StringMetaTag(
+        name: 'ID',
+        keyName: 'id',
+        isFree: true,
+      ),
+      StringMetaTag(name: 'User', keyName: 'user'),
+      DateMetaTag(
+        name: 'Date',
+        keyName: 'date',
+        isFree: true,
+      ),
+      StringMetaTag(name: 'source', keyName: 'source'),
+      StringMetaTag(
+        name: 'Age',
+        keyName: 'age',
+        isFree: true,
+      ),
+      StringMetaTag(
+        name: 'MD5',
+        keyName: 'md5',
+        isFree: true,
+      ),
+      ComparableNumberMetaTag(
+        name: 'Width',
+        keyName: 'width',
+        isFree: true,
+      ),
+      ComparableNumberMetaTag(
+        name: 'Height',
+        keyName: 'height',
+        isFree: true,
+      ),
+      StringMetaTag(
+        name: 'Megapixels',
+        keyName: 'mpixels',
+        isFree: true,
+      ),
+      StringMetaTag(name: 'Ratio', keyName: 'ratio'),
+      ComparableNumberMetaTag(
+        name: 'Filesize',
+        keyName: 'filesize',
+        isFree: true,
+      ),
+      StringMetaTag(
+        name: 'Filetype',
+        keyName: 'filetype',
+        isFree: true,
+      ),
+      ComparableNumberMetaTag(
+        name: 'Duration',
+        keyName: 'duration',
+        isFree: true,
+      ),
+      MetaTagWithValues(
+        name: 'Status',
+        keyName: 'status',
+        isFree: true,
+        values: [
+          MetaTagValue(name: 'Any', value: 'any'),
+          MetaTagValue(name: 'All', value: 'all'),
+          MetaTagValue(name: 'Pending', value: 'pending'),
+          MetaTagValue(name: 'Flagged', value: 'flagged'),
+          MetaTagValue(name: 'Deleted', value: 'deleted'),
+          // MetaTagValue(name: 'Banned', value: 'banned'),
+          MetaTagValue(name: 'Active', value: 'active'),
+        ],
+      ),
+      MetaTagWithValues(
+        name: 'Commenter',
+        keyName: 'commenter',
+        values: [
+          MetaTagValue(name: 'Has comments', value: 'any'),
+          MetaTagValue(name: 'Has no comments', value: 'none'),
+        ],
+      ),
+      MetaTagWithValues(
+        name: 'Noter',
+        keyName: 'noter',
+        values: [
+          MetaTagValue(name: 'Has notes', value: 'any'),
+          MetaTagValue(name: 'Has no notes', value: 'none'),
+        ],
+      ),
+      ComparableNumberMetaTag(
+        name: 'Tag count',
+        keyName: 'tagcount',
+        isFree: true,
+      ),
+      ComparableNumberMetaTag(name: 'General tags count', keyName: 'gentags'),
+      ComparableNumberMetaTag(name: 'Artist tags count', keyName: 'arttags'),
+      ComparableNumberMetaTag(name: 'Character tags count', keyName: 'chartags'),
+      ComparableNumberMetaTag(name: 'Copyright tags count', keyName: 'copytags'),
+      ComparableNumberMetaTag(name: 'Meta tags count', keyName: 'metatags'),
+      StringMetaTag(name: 'Pool ID or name (Post order)', keyName: 'pool'),
+      StringMetaTag(name: 'Pool ID or name (Pool order)', keyName: 'ordpool'),
+      StringMetaTag(name: 'Favourites of user (Post order)', keyName: 'fav'),
+      StringMetaTag(name: 'Favourites of user (Fav order)', keyName: 'ordfav'),
+      StringMetaTag(name: 'Favourites group (Post order)', keyName: 'favgroup'),
+      StringMetaTag(name: 'Favourites group (Fav order)', keyName: 'ordfavgroup'),
+      ComparableNumberMetaTag(
+        name: 'Favourites count',
+        keyName: 'favcount',
+        isFree: true,
+      ),
+      StringMetaTag(name: 'Saved search', keyName: 'search'),
+      MetaTagWithValues(
+        name: 'Parent ID',
+        keyName: 'parent',
+        isFree: true,
+        values: [
+          MetaTagValue(name: 'Any', value: 'any'),
+          MetaTagValue(name: 'None', value: 'none'),
+        ],
+      ),
+      MetaTagWithValues(
+        name: 'Child',
+        keyName: 'child',
+        isFree: true,
+        values: [
+          MetaTagValue(name: 'Any', value: 'any'),
+          MetaTagValue(name: 'None', value: 'none'),
+        ],
+      ),
+      StringMetaTag(
+        name: 'Pixiv ID',
+        keyName: 'pixiv_id',
+        isFree: true,
+      ),
+      StringMetaTag(
+        name: 'Pixiv',
+        keyName: 'pixiv',
+        isFree: true,
+      ),
+      StringMetaTag(
+        name: 'Embedded',
+        keyName: 'embedded',
+        isFree: true,
+      ),
+      StringMetaTag(
+        name: 'Limit',
+        keyName: 'limit',
+        isFree: true,
+      ),
+      StringMetaTag(
+        name: 'Random',
+        keyName: 'random',
+      ),
+    ];
+  }
 }

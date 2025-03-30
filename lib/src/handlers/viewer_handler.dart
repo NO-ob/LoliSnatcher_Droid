@@ -173,8 +173,11 @@ class ViewerHandler {
     isLoaded.value = value;
   }
 
-  void toggleToolbar(bool isLongTap) {
-    final bool newAppbarVisibility = !displayAppbar.value;
+  void toggleToolbar(
+    bool isLongTap, {
+    bool? forcedNewValue,
+  }) {
+    final bool newAppbarVisibility = forcedNewValue ?? !displayAppbar.value;
     displayAppbar.value = newAppbarVisibility;
 
     if (isLongTap) {

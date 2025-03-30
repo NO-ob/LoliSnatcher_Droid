@@ -1,22 +1,30 @@
 // ignore_for_file: implementation_imports
 
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' hide e;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chewie/src/chewie_player.dart' show ChewieController;
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/helpers/utils.dart';
 import 'package:chewie/src/progress_bar.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 
 class LoliControls extends StatefulWidget {
-  const LoliControls({super.key});
+  const LoliControls({
+    this.useLongTapFastForward = true,
+    super.key,
+  });
+
+  final bool useLongTapFastForward;
 
   @override
   State<StatefulWidget> createState() {
@@ -48,8 +56,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     reverseDuration: const Duration(milliseconds: 400),
   );
 
-  bool _doubleTapped = false;
-  Timer? _doubleTapHideTimer;
+  bool _doubleTappedOrHoldingDown = false;
+  Timer? _doubleTapHideTimer, longTapDelayTimer, longTapSpeedChangeDelayTimer;
+  double longTapFastForwardSpeed = 2;
+  bool speedSetManually = false;
   TapDownDetails? _doubleTapInfo;
   int _lastDoubleTapAmount = 0;
   int _lastDoubleTapSide = 0;
@@ -76,6 +86,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         _cancelAndRestartTimer();
       },
       child: GestureDetector(
+        onLongPressDown: widget.useLongTapFastForward ? onLongPressDown : null,
+        onLongPressCancel: widget.useLongTapFastForward ? onLongPressUp : null,
+        onLongPressMoveUpdate: widget.useLongTapFastForward ? onLongPressMove : null,
+        onLongPressEnd: widget.useLongTapFastForward ? (_) => onLongPressUp() : null,
         onDoubleTapDown: _doubleTapInfoWrite,
         onDoubleTap: _doubleTapAction,
         behavior: HitTestBehavior.opaque,
@@ -116,6 +130,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   void _dispose() {
     controller.removeListener(_updateState);
     _doubleTapHideTimer?.cancel();
+    longTapDelayTimer?.cancel();
+    longTapSpeedChangeDelayTimer?.cancel();
     _hideTimer?.cancel();
     _initTimer?.cancel();
     _showAfterExpandCollapseTimer?.cancel();
@@ -188,11 +204,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       if (chewieController.allowPlaybackSpeedChanging) _buildSpeedButton(controller),
-                      // Container(child: _buildSpeedButton(controller), decoration: BoxDecoration(color: Colors.red)),
                       if (chewieController.allowMuting) _buildMuteButton(controller),
-                      // Container(child: _buildMuteButton(controller), decoration: BoxDecoration(color: Colors.yellow)),
                       if (chewieController.allowFullScreen) _buildExpandButton(),
-                      // Container(child: _buildExpandButton(), decoration: BoxDecoration(color: Colors.green)),
                     ],
                   ),
                 ),
@@ -258,13 +271,15 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     );
 
     return AnimatedOpacity(
-      opacity: _doubleTapped ? 1.0 : 0.0,
+      opacity: _doubleTappedOrHoldingDown ? 1.0 : 0.0,
       onEnd: () {
-        if (!_doubleTapped) {
-          setState(() {
-            _lastDoubleTapAmount = 0;
-            _lastDoubleTapSide = 0;
-            _doubleTapExtraMessage = '';
+        if (!_doubleTappedOrHoldingDown) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            setState(() {
+              _lastDoubleTapAmount = 0;
+              _lastDoubleTapSide = 0;
+              _doubleTapExtraMessage = '';
+            });
           });
         }
       },
@@ -329,15 +344,24 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         if (_latestValue.isPlaying) {
           if (_displayTapped) {
             setState(() {
+              if (widget.useLongTapFastForward) {
+                viewerHandler.toggleToolbar(false, forcedNewValue: false);
+              }
               _hideStuff = true;
             });
           } else {
             _cancelAndRestartTimer();
+            if (widget.useLongTapFastForward) {
+              viewerHandler.toggleToolbar(false, forcedNewValue: false);
+            }
           }
         } else {
           _playPause();
 
           setState(() {
+            if (widget.useLongTapFastForward) {
+              viewerHandler.toggleToolbar(false, forcedNewValue: false);
+            }
             _hideStuff = true;
           });
         }
@@ -417,6 +441,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
         final chosenSpeed = await showModalBottomSheet<double>(
           context: context,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           isScrollControlled: true,
           isDismissible: true,
           useRootNavigator: true,
@@ -429,6 +455,9 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
         if (chosenSpeed != null) {
           await controller.setPlaybackSpeed(chosenSpeed);
+          setState(() {
+            speedSetManually = true;
+          });
         }
 
         if (_latestValue.isPlaying) {
@@ -578,6 +607,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     _hideTimer?.cancel();
     _startHideTimer();
 
+    if (widget.useLongTapFastForward) {
+      viewerHandler.toggleToolbar(false, forcedNewValue: true);
+    }
+
     setState(() {
       _hideStuff = false;
       _displayTapped = true;
@@ -621,6 +654,9 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         _hideStuff = false;
         _hideTimer?.cancel();
         controller.pause();
+        if (widget.useLongTapFastForward) {
+          viewerHandler.toggleToolbar(false, forcedNewValue: true);
+        }
       } else {
         _cancelAndRestartTimer();
 
@@ -655,9 +691,11 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   void _startDoubleTapTimer() {
+    longTapDelayTimer?.cancel();
+    _doubleTapHideTimer?.cancel();
     _doubleTapHideTimer = Timer(const Duration(seconds: 2), () {
       setState(() {
-        _doubleTapped = false;
+        _doubleTappedOrHoldingDown = false;
       });
     });
   }
@@ -701,6 +739,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       skipSeconds = 10;
     }
 
+    longTapDelayTimer?.cancel();
+
     if (tapSide != 0 && skipSeconds != 0) {
       final int videoPositionMillisecs = controller.value.position.inMilliseconds;
       final int videoDurationMillisecs = controller.value.duration.inMilliseconds;
@@ -715,7 +755,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
       setState(() {
         _doubleTapHideTimer?.cancel();
-        _doubleTapped = true;
+        _doubleTappedOrHoldingDown = true;
         if (videoDurationMillisecs == newTime) {
           isAtVideoEdge = true;
           _doubleTapExtraMessage = 'End';
@@ -737,9 +777,83 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     }
   }
 
+  void onLongPressDown(LongPressDownDetails details) {
+    // TODO seek backwards when going below 2x
+    longTapDelayTimer?.cancel();
+    // without this delay short taps will cause long tap logic to trigger
+    longTapDelayTimer = Timer(
+      const Duration(milliseconds: 300),
+      () {
+        setState(() {
+          if (!_latestValue.isPlaying) {
+            // force play if video is paused
+            _playPause();
+          }
+          // force show controls and keep them visible while holding down
+          _hideTimer?.cancel();
+          _hideStuff = false;
+          _displayTapped = true;
+
+          // keep top message block visible while holding down
+          _doubleTapHideTimer?.cancel();
+          _doubleTappedOrHoldingDown = true;
+          speedSetManually = false;
+          _doubleTapExtraMessage = '${longTapFastForwardSpeed.toStringAsFixed(1)}x';
+          controller.setPlaybackSpeed(longTapFastForwardSpeed);
+          _lastDoubleTapSide = 1;
+        });
+      },
+    );
+  }
+
+  void onLongPressMove(LongPressMoveUpdateDetails details) {
+    setState(() {
+      longTapFastForwardSpeed = 2 +
+          (double.tryParse(
+                (details.offsetFromOrigin.dx / (MediaQuery.sizeOf(context).width / 6)).toStringAsFixed(1),
+              ) ??
+              0);
+      // limit between 2 and 4
+      longTapFastForwardSpeed = longTapFastForwardSpeed.clamp(2, 4);
+      // update ui value immediately, real speed change will happen in a timer below
+      _doubleTappedOrHoldingDown = true;
+      speedSetManually = false;
+      _doubleTapExtraMessage = '${longTapFastForwardSpeed.toStringAsFixed(1)}x';
+
+      longTapSpeedChangeDelayTimer?.cancel();
+      longTapSpeedChangeDelayTimer = Timer(
+        // delay to avoid changing speed too fast
+        const Duration(milliseconds: 300),
+        () {
+          try {
+            controller.setPlaybackSpeed(longTapFastForwardSpeed);
+          } catch (_) {
+            // future proofing - setPlaybackSpeed may throw an exception on ios
+            setState(() {
+              longTapFastForwardSpeed = 2;
+              controller.setPlaybackSpeed(2);
+            });
+          }
+        },
+      );
+    });
+  }
+
+  void onLongPressUp() {
+    setState(() {
+      // reset speed and start all hide timers
+      longTapDelayTimer?.cancel();
+      _doubleTappedOrHoldingDown = false;
+      longTapFastForwardSpeed = 2;
+      if (!speedSetManually) {
+        controller.setPlaybackSpeed(1);
+        _cancelAndRestartTimer();
+      }
+    });
+  }
+
   Widget _buildProgressBar() {
     return Expanded(
-      // TODO make it update smoother
       // TODO redesign to be taller and easier to hit (something like sound sliders on miui?)
       child: VideoProgressBar(
         controller,
@@ -772,7 +886,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 }
 
-class _PlaybackSpeedDialog extends StatelessWidget {
+class _PlaybackSpeedDialog extends StatefulWidget {
   const _PlaybackSpeedDialog({
     required this.speeds,
     required this.selected,
@@ -782,67 +896,183 @@ class _PlaybackSpeedDialog extends StatelessWidget {
   final double selected;
 
   @override
+  State<_PlaybackSpeedDialog> createState() => _PlaybackSpeedDialogState();
+}
+
+class _PlaybackSpeedDialogState extends State<_PlaybackSpeedDialog> {
+  final ValueNotifier<int> selectedIndex = ValueNotifier(0);
+  late final PageAutoScrollController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    int initialIndex = widget.speeds.indexOf(widget.selected);
+    if (initialIndex == -1) {
+      initialIndex = widget.speeds.indexOf(1);
+    }
+    selectedIndex.value = initialIndex;
+    controller = PageAutoScrollController(
+      initialPage: initialIndex,
+      viewportFraction: 0.33,
+    );
+  }
+
+  void changeValue(int change) {
+    int newIndex = selectedIndex.value + change;
+    if (newIndex < 0) {
+      newIndex = widget.speeds.length - 1;
+    } else if (newIndex >= widget.speeds.length) {
+      newIndex = 0;
+    }
+
+    selectedIndex.value = newIndex;
+    controller.animateToPage(
+      newIndex,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  Future<void> resetValue() async {
+    selectedIndex.value = widget.speeds.indexOf(1);
+    await controller.animateToPage(
+      selectedIndex.value,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+    );
+    confirmValue();
+  }
+
+  void confirmValue() {
+    Navigator.of(context).pop(widget.speeds[selectedIndex.value]);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Color selectedColor = Theme.of(context).colorScheme.secondary;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) {
+          return;
+        }
 
-    final scrollController = ScrollController();
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          height: 58,
-          child: Row(
-            children: [
-              const SizedBox(width: 32),
-              const Expanded(
-                child: Text(
-                  'Select Video Speed:',
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              IconButton(
-                onPressed: Navigator.of(context).pop,
-                icon: const Icon(Icons.close),
-              ),
-              const SizedBox(width: 8),
-            ],
+        confirmValue();
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(16),
+            topRight: Radius.circular(16),
           ),
         ),
-        Flexible(
-          child: Scrollbar(
-            controller: scrollController,
-            thumbVisibility: true,
-            child: ListView.builder(
-              shrinkWrap: true,
-              controller: scrollController,
-              itemCount: speeds.length,
-              itemBuilder: (context, index) {
-                final double speed = speeds[index];
-                return ListTile(
-                  dense: true,
-                  title: Text(
-                    speed.toString(),
-                    style: const TextStyle(color: Colors.white),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 58,
+              child: Row(
+                children: [
+                  const SizedBox(width: 32),
+                  Expanded(
+                    child: Text(
+                      'Video speed',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                   ),
-                  leading: Icon(
-                    speed == selected ? Icons.check : null,
-                    size: 20,
-                    color: selectedColor,
+                  const SizedBox(width: 16),
+                  IconButton(
+                    onPressed: confirmValue,
+                    icon: const Icon(Icons.close),
                   ),
-                  selected: speed == selected,
-                  onTap: () {
-                    Navigator.of(context).pop(speed);
-                  },
+                  const SizedBox(width: 8),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 6,
+              children: [
+                IconButton(
+                  onPressed: () => changeValue(-1),
+                  icon: const Icon(
+                    Icons.keyboard_double_arrow_left_sharp,
+                    size: 30,
+                  ),
+                ),
+                IconButton(
+                  onPressed: resetValue,
+                  icon: const Icon(
+                    Icons.refresh,
+                    size: 30,
+                  ),
+                ),
+                IconButton(
+                  onPressed: confirmValue,
+                  icon: const Icon(
+                    Icons.check_rounded,
+                    size: 30,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => changeValue(1),
+                  icon: const Icon(
+                    Icons.keyboard_double_arrow_right_sharp,
+                    size: 30,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ValueListenableBuilder(
+              valueListenable: selectedIndex,
+              builder: (context, _, __) {
+                return SizedBox(
+                  height: 50,
+                  child: PageView.builder(
+                    itemCount: widget.speeds.length,
+                    scrollDirection: Axis.horizontal,
+                    controller: controller,
+                    onPageChanged: (value) {
+                      selectedIndex.value = value;
+                    },
+                    itemBuilder: (context, i) {
+                      return GestureDetector(
+                        onTap: () {
+                          if (i != selectedIndex.value) {
+                            changeValue(i - selectedIndex.value);
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surfaceContainer,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${widget.speeds[i].truncateTrailingZeroes()}x',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: i == selectedIndex.value ? Theme.of(context).colorScheme.secondary : null,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
-          ),
+            const SizedBox(height: 24),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

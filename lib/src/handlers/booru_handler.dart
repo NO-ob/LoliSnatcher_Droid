@@ -810,22 +810,7 @@ abstract class BooruHandler {
 
   List<MetaTag> availableMetaTags() {
     return [
-      GenericRatingMetaTag(),
-      SortMetaTag(
-        values: [
-          MetaTagValue(name: 'Score ascending', value: 'score:asc'),
-          MetaTagValue(name: 'Score descending', value: 'score:desc'),
-          MetaTagValue(name: 'Date ascending', value: 'date:asc'),
-          MetaTagValue(name: 'Date descending', value: 'date:desc'),
-        ],
-      ),
-      ComparableNumberMetaTag(name: 'Score', keyName: 'score'),
-      DateMetaTag(name: 'Date', keyName: 'date'),
-      StringMetaTag(name: 'ID', keyName: 'id'),
-      StringMetaTag(name: 'User', keyName: 'user'),
-      StringMetaTag(name: 'MD5', keyName: 'md5'),
-      ComparableNumberMetaTag(name: 'Width', keyName: 'width'),
-      ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
+      GenericMetaTag(),
     ];
   }
 }

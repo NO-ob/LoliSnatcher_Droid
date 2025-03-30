@@ -301,7 +301,12 @@ class MainSearchBarWithActions extends StatelessWidget {
 
   void onSearchBackgroundTap(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => SearchQueryEditorPage(subTag: subTag)),
+      MaterialPageRoute(
+        builder: (_) => SearchQueryEditorPage(
+          subTag: subTag,
+          autoFocus: settingsHandler.autofocusSearchbar,
+        ),
+      ),
     );
   }
 
@@ -543,33 +548,21 @@ class _MainSearchBarState extends State<MainSearchBar> {
                           if (searchHandler.currentTab.tags.trim() == tags.join(' ')) {
                             return Material(
                               key: const Key('clear-button'),
-                              color: Colors.white.withValues(alpha: 0.8),
-                              child: DecoratedBox(
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    left: BorderSide(
-                                      color: Colors.black.withValues(alpha: 0.5),
-                                      width: 1,
-                                    ),
-                                  ),
-                                ),
-                                child: InkWell(
-                                  splashColor: Colors.black.withValues(alpha: 0.2),
-                                  onTap: searchHandler.searchTextController.clear,
-                                  child: const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 10),
-                                    child: Icon(
-                                      Icons.close_rounded,
-                                      size: 24,
-                                      color: Colors.black,
-                                    ),
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: searchHandler.searchTextController.clear,
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: Icon(
+                                    Icons.close_rounded,
+                                    size: 24,
                                   ),
                                 ),
                               ),
                             );
-                          } else {
-                            return const SizedBox.shrink();
                           }
+
+                          return const SizedBox.shrink();
                         },
                       ),
                     //
@@ -578,59 +571,35 @@ class _MainSearchBarState extends State<MainSearchBar> {
                         if (searchHandler.currentTab.tags.trim() != tags.join(' ')) {
                           return Material(
                             key: const Key('reset-button'),
-                            color: Colors.white.withValues(alpha: 0.8),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  left: BorderSide(
-                                    color: Colors.black.withValues(alpha: 0.5),
-                                    width: 1,
-                                  ),
-                                ),
-                              ),
-                              child: InkWell(
-                                splashColor: Colors.black.withValues(alpha: 0.2),
-                                onTap: widget.onResetTap,
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 10),
-                                  child: Icon(
-                                    Icons.refresh,
-                                    size: 24,
-                                    color: Colors.black,
-                                  ),
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: widget.onResetTap,
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                child: Icon(
+                                  Icons.refresh,
+                                  size: 24,
                                 ),
                               ),
                             ),
                           );
-                        } else {
-                          return const SizedBox.shrink();
                         }
+
+                        return const SizedBox.shrink();
                       },
                     ),
                     //
                     Material(
                       key: const Key('search-button'),
-                      color: Colors.white.withValues(alpha: 0.8),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            left: BorderSide(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        child: InkWell(
-                          splashColor: Colors.black.withValues(alpha: 0.2),
-                          onTap: widget.onSearchTap,
-                          onLongPress: widget.onSearchLongTap,
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12),
-                            child: Icon(
-                              Icons.search_rounded,
-                              size: 24,
-                              color: Colors.black,
-                            ),
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: widget.onSearchTap,
+                        onLongPress: widget.onSearchLongTap,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Icon(
+                            Icons.search_rounded,
+                            size: 24,
                           ),
                         ),
                       ),
@@ -1158,10 +1127,12 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
         bool isCancelled = false;
 
         final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
+        metaTags.removeWhere((mt) => mt is GenericMetaTag);
         final MetaTag? metaTag = metaTags.firstWhereOrNull((p) => p.keyParser(suggestionTextControllerRawInput) != null);
         if (metaTag != null) {
           if (metaTag.hasAutoComplete) {
             suggestedTags = await metaTag.getAutoComplete(suggestionTextControllerRawInput);
+            suggestedTags.sort((a, b) => a.tag.compareTo(b.tag));
           } else {
             suggestedTags.clear();
           }
@@ -1793,7 +1764,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
           ),
           // Suggestions text input
           KeyboardActions(
-            enable: Platform.isAndroid || Platform.isIOS,
+            enable: settingsHandler.showSearchbarQuickActions && (Platform.isAndroid || Platform.isIOS),
             config: buildConfig(),
             autoScroll: false,
             overscroll: 0,
@@ -1811,31 +1782,41 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                       clearable: true,
                       hintText: 'Search for tags',
                       onSubmitted: onSuggestionTextSubmitted,
+                      onSubmittedLongTap: (_) => onSuggestionLongTap(
+                        TagSuggestion(tag: suggestionTextControllerRawInput),
+                      ),
                       onlyInput: true,
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       textInputAction: TextInputAction.search,
+                      // disable native suggestions because they cause issues due to keyboards changing text style of the current word,
+                      // and it looks wrong when text includes metatags
+                      enableSuggestions: false,
                       enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
-                      showSubmitButton: false,
+                      showSubmitButton: (text) => !settingsHandler.showSearchbarQuickActions && text.isNotEmpty,
+                      submitIcon: Icons.add_rounded,
                       prefixIcon: IconButton(
                         icon: const Icon(Icons.arrow_back_rounded),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ),
                   ),
-                  KeyboardVisibilityBuilder(
-                    builder: (context, isKbVisible) {
-                      return AnimatedSize(
-                        duration: const Duration(milliseconds: 200),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: (isKbVisible || (suggestionTextFocusNodeHasFocus && (Platform.isAndroid || Platform.isIOS)))
-                              ? 0 // keyboardActionsHeight
-                              : MediaQuery.paddingOf(context).bottom,
-                          // child: ColoredBox(color: Colors.yellow.withValues(alpha: 0.2)),
-                        ),
-                      );
-                    },
-                  ),
+                  if (settingsHandler.showSearchbarQuickActions && (Platform.isAndroid || Platform.isIOS))
+                    KeyboardVisibilityBuilder(
+                      builder: (context, isKbVisible) {
+                        return AnimatedSize(
+                          duration: const Duration(milliseconds: 200),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: (isKbVisible || (suggestionTextFocusNodeHasFocus && (Platform.isAndroid || Platform.isIOS)))
+                                ? 0 // keyboardActionsHeight
+                                : MediaQuery.paddingOf(context).bottom,
+                            // child: ColoredBox(color: Colors.yellow.withValues(alpha: 0.2)),
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    SizedBox(height: MediaQuery.paddingOf(context).bottom),
                 ],
               ),
             ),
@@ -1963,6 +1944,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
     final searchHandler = SearchHandler.instance;
 
     final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
+    metaTags.removeWhere((mt) => mt is GenericMetaTag);
 
     if (metaTags.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -1971,9 +1953,21 @@ class AddMetatagBottomSheet extends StatelessWidget {
     }
 
     return SettingsBottomSheet(
-      title: const Text(
-        'Metatags',
-        style: TextStyle(fontSize: 20),
+      title: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            'Metatags',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            metaTags.length.toString(),
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ],
       ),
       titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       contentPadding: EdgeInsets.zero,
@@ -1981,6 +1975,34 @@ class AddMetatagBottomSheet extends StatelessWidget {
       scrollController: scrollController,
       contentItems: [
         const SizedBox(height: 16),
+        if (metaTags.any((t) => t.isFree))
+          Container(
+            margin: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Theme.of(context).colorScheme.surfaceContainer,
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.info_outline_rounded),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Free metatags',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Free metatags do not count against the tag search limits',
+                ),
+              ],
+            ),
+          ),
+        //
         for (final tag in metaTags)
           Material(
             color: Colors.transparent,
@@ -2008,18 +2030,56 @@ class AddMetatagBottomSheet extends StatelessWidget {
                     break;
                 }
               },
-              child: SizedBox(
-                height: 48,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 56),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          tag.name,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    tag.name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                  Text(
+                                    tag.keyName,
+                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (tag.isFree)
+                              Container(
+                                margin: const EdgeInsets.only(left: 8),
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.66),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'Free',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                ),
+                              ),
+                            //
+                            const SizedBox(width: 8),
+                          ],
                         ),
                       ),
+                      //
                       switch (tag.type) {
                         MetaTagType.date => Builder(
                             builder: (context) {
@@ -2073,7 +2133,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
                           ),
                         MetaTagType.sort => const Icon(Icons.sort_rounded),
                         MetaTagType.comparableNumber => Row(
-                            spacing: 6,
+                            spacing: 2,
                             children: [
                               for (final mode in (tag as MetaTagWithCompareModes).compareModes)
                                 IconButton.outlined(
@@ -2736,7 +2796,14 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
 
   @override
   Widget build(BuildContext context) {
-    final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
+    List<MetaTag> metaTags = searchHandler.currentBooruHandler.availableMetaTags();
+    metaTags.removeWhere((mt) => mt is GenericMetaTag);
+    bool overflows = false;
+    if (metaTags.length > 15) {
+      // show only first 15 tags (only danbooru has this much right now) to motivate user to open bottom sheet dialog with full list
+      metaTags = metaTags.sublist(0, 15);
+      overflows = true;
+    }
 
     if (metaTags.isEmpty) {
       return const SizedBox.shrink();
@@ -2798,8 +2865,18 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: metaTags.length,
+              itemCount: metaTags.length + (overflows ? 1 : 0),
               itemBuilder: (BuildContext context, int index) {
+                if (overflows && index == metaTags.length) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ActionChip(
+                      label: const Text('...'),
+                      onPressed: openMetatagsDialog,
+                    ),
+                  );
+                }
+
                 final tag = metaTags[index];
 
                 return Padding(

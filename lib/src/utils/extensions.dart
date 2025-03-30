@@ -64,14 +64,14 @@ extension IntExtras on int {
 extension DoubleExtras on double {
   double clamp(double min, double max) => (min > this ? min : (max < this ? max : this));
 
-  String toStringAsFixed(int digits) => toStringAsFixed(digits);
-
   String toFormattedString() => formatNumber(this);
 
   double toPrecision(int fractionDigits) {
     final mod = pow(10, fractionDigits.toDouble()).toDouble();
     return (this * mod).round().toDouble() / mod;
   }
+
+  String truncateTrailingZeroes() => toStringAsFixed(toString().split('.')[1].length).replaceAll('.0', '');
 }
 
 extension BoolExtras on bool {

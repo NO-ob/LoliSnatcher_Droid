@@ -159,6 +159,7 @@ class SettingsHandler {
   bool useVolumeButtonsForScroll = false;
   bool shitDevice = false;
   bool disableVideo = false;
+  bool longTapFastForwardVideo = false;
   bool enableDrawerMascot = false;
   bool allowSelfSignedCerts = false;
   bool wakeLockEnabled = true;
@@ -178,6 +179,8 @@ class SettingsHandler {
   bool gifsAsThumbnails = false;
   bool desktopListsDrag = false;
   bool showBottomSearchbar = true;
+  bool showSearchbarQuickActions = false;
+  bool autofocusSearchbar = true;
   final RxBool useLockscreen = false.obs;
   final RxBool blurOnLeave = false.obs;
   final RxList<Booru> booruList = RxList<Booru>([]);
@@ -202,6 +205,7 @@ class SettingsHandler {
   List<String> deviceSpecificSettings = [
     'shitDevice',
     'disableVideo',
+    'longTapFastForwardVideo',
     'thumbnailCache',
     'mediaCache',
     'dbEnabled',
@@ -249,6 +253,8 @@ class SettingsHandler {
     'incognitoKeyboard',
     'backupPath',
     'showBottomSearchbar',
+    'showSearchbarQuickActions',
+    'autofocusSearchbar',
     'useLockscreen',
     'blurOnLeave',
   ];
@@ -560,6 +566,10 @@ class SettingsHandler {
           'type': 'bool',
           'default': false,
         },
+        'longTapFastForwardVideo': {
+          'type': 'bool',
+          'default': false,
+        },
         'enableDrawerMascot': {
           'type': 'bool',
           'default': false,
@@ -637,6 +647,14 @@ class SettingsHandler {
           'default': true,
         },
         'showBottomSearchbar': {
+          'type': 'bool',
+          'default': true,
+        },
+        'showSearchbarQuickActions': {
+          'type': 'bool',
+          'default': false,
+        },
+        'autofocusSearchbar': {
           'type': 'bool',
           'default': true,
         },
@@ -1045,6 +1063,8 @@ class SettingsHandler {
         return preloadSizeLimit;
       case 'disableVideo':
         return disableVideo;
+      case 'longTapFastForwardVideo':
+        return longTapFastForwardVideo;
       case 'shitDevice':
         return shitDevice;
       case 'galleryAutoScrollTime':
@@ -1073,6 +1093,10 @@ class SettingsHandler {
         return allowSelfSignedCerts;
       case 'showBottomSearchbar':
         return showBottomSearchbar;
+      case 'showSearchbarQuickActions':
+        return showSearchbarQuickActions;
+      case 'autofocusSearchbar':
+        return autofocusSearchbar;
       case 'useLockscreen':
         return useLockscreen;
       case 'blurOnLeave':
@@ -1266,6 +1290,9 @@ class SettingsHandler {
       case 'disableVideo':
         disableVideo = validatedValue;
         break;
+      case 'longTapFastForwardVideo':
+        longTapFastForwardVideo = validatedValue;
+        break;
       case 'shitDevice':
         shitDevice = validatedValue;
         break;
@@ -1389,6 +1416,12 @@ class SettingsHandler {
       case 'showBottomSearchbar':
         showBottomSearchbar = validatedValue;
         break;
+      case 'showSearchbarQuickActions':
+        showSearchbarQuickActions = validatedValue;
+        break;
+      case 'autofocusSearchbar':
+        autofocusSearchbar = validatedValue;
+        break;
       case 'useLockscreen':
         useLockscreen.value = validatedValue;
         break;
@@ -1466,6 +1499,7 @@ class SettingsHandler {
       'mousewheelScrollSpeed': validateValue('mousewheelScrollSpeed', null, toJSON: true),
       'preloadSizeLimit': validateValue('preloadSizeLimit', null, toJSON: true),
       'disableVideo': validateValue('disableVideo', null, toJSON: true),
+      'longTapFastForwardVideo': validateValue('longTapFastForwardVideo', null, toJSON: true),
       'shitDevice': validateValue('shitDevice', null, toJSON: true),
       'galleryAutoScrollTime': validateValue('galleryAutoScrollTime', null, toJSON: true),
       'zoomButtonPosition': validateValue('zoomButtonPosition', null, toJSON: true),
@@ -1496,6 +1530,8 @@ class SettingsHandler {
       'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
       'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
       'showBottomSearchbar': validateValue('showBottomSearchbar', null, toJSON: true),
+      'showSearchbarQuickActions': validateValue('showSearchbarQuickActions', null, toJSON: true),
+      'autofocusSearchbar': validateValue('autofocusSearchbar', null, toJSON: true),
       'useLockscreen': validateValue('useLockscreen', null, toJSON: true),
       'blurOnLeave': validateValue('blurOnLeave', null, toJSON: true),
 

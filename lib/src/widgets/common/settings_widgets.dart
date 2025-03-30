@@ -781,6 +781,7 @@ class SettingsTextInput extends StatefulWidget {
     this.autofocus = false,
     this.onChanged,
     this.onSubmitted,
+    this.onSubmittedLongTap,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.margin = const EdgeInsets.symmetric(vertical: 8),
@@ -799,9 +800,10 @@ class SettingsTextInput extends StatefulWidget {
     this.obscureable = false,
     this.isObscuredByDefault = true,
     this.textInputAction,
+    this.enableSuggestions = true,
     this.enableIMEPersonalizedLearning = true,
     this.submitIcon,
-    this.showSubmitButton = true,
+    this.showSubmitButton,
     this.prefixIcon,
     super.key,
   });
@@ -817,6 +819,7 @@ class SettingsTextInput extends StatefulWidget {
   final bool autofocus;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onSubmittedLongTap;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final EdgeInsets margin;
@@ -835,9 +838,10 @@ class SettingsTextInput extends StatefulWidget {
   final bool obscureable;
   final bool isObscuredByDefault;
   final TextInputAction? textInputAction;
+  final bool enableSuggestions;
   final bool enableIMEPersonalizedLearning;
   final IconData? submitIcon;
-  final bool showSubmitButton;
+  final bool Function(String)? showSubmitButton;
   final Widget? prefixIcon;
 
   @override
@@ -921,6 +925,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
   Widget buildSuffixIcons() {
     return Row(
       mainAxisSize: MainAxisSize.min,
+      spacing: 2,
       children: [
         if (widget.resetText != null && widget.controller.text != widget.resetText!())
           IconButton(
@@ -948,7 +953,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
           IconButton(
             key: const Key('clear-button'),
             icon: Icon(
-              Icons.clear,
+              Icons.close_rounded,
               color: Theme.of(context).colorScheme.onSurface,
             ),
             onPressed: () {
@@ -995,7 +1000,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
             ),
             onPressed: toggleObscure,
           )
-        else if (isFocused && widget.showSubmitButton)
+        else if (isFocused && (widget.showSubmitButton?.call(widget.controller.text) ?? true))
           IconButton(
             key: const Key('submit-button'),
             icon: Icon(
@@ -1009,6 +1014,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
                 _focusNode.unfocus();
               }
             },
+            onLongPress: widget.onSubmittedLongTap != null ? () => widget.onSubmittedLongTap?.call(widget.controller.text) : null,
           )
         else if (!isFocused)
           IconButton(
@@ -1036,16 +1042,17 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         onChanged: onChangedCallback,
         onFieldSubmitted: widget.onSubmitted,
         textInputAction: widget.textInputAction,
+        enableSuggestions: widget.enableSuggestions,
         enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
         scrollPadding: const EdgeInsets.all(kToolbarHeight),
         decoration: InputDecoration(
           labelText: widget.title,
           hintText: widget.hintText,
           errorText: widget.validator?.call(widget.controller.text),
-          contentPadding: const EdgeInsets.fromLTRB(12, 0, 15, 0),
+          contentPadding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
           prefixIcon: widget.prefixIcon,
           suffixIcon: Padding(
-            padding: const EdgeInsets.only(left: 2, right: 10),
+            padding: const EdgeInsets.only(left: 2, right: 4),
             child: buildSuffixIcons(),
           ),
           floatingLabelBehavior: widget.floatingLabelBehavior,
@@ -1186,7 +1193,7 @@ class SettingsBottomSheet extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 12, 16, 0),
                             child: IconButton(
-                              icon: const Icon(Icons.close),
+                              icon: const Icon(Icons.close_rounded),
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },

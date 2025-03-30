@@ -29,6 +29,7 @@ abstract class MetaTag {
     required this.name,
     required this.keyName,
     this.divider = ':',
+    this.isFree = false,
   });
 
   MetaTagType get type => MetaTagType.string;
@@ -38,6 +39,8 @@ abstract class MetaTag {
   String keyName;
 
   String divider;
+
+  bool isFree; // for danbooru, they have free tags which don't count towards query tag limit
 
   //
 
@@ -76,7 +79,7 @@ abstract class MetaTag {
   RegExp get tagMatcher => RegExp('^($keyName)($divider)(\\S+)?');
 
   /// data: {key, value, divider}
-  String tagBuilder(String? key, String? divider, String? value) => '${keyBuilder(keyName)}${dividerBuilder(divider)}${valueBuilder(value)}';
+  String tagBuilder(String? key, String? divider, String? value) => '${keyBuilder(key)}${dividerBuilder(divider)}${valueBuilder(value)}';
 
   Map<String, dynamic> tagParser(String text) {
     final match = tagMatcher.firstMatch(text);
@@ -115,6 +118,7 @@ class MetaTagWithValues<T> extends MetaTag {
     required super.name,
     required super.keyName,
     required this.values,
+    super.isFree = false,
   });
 
   final List<T> values;
@@ -128,6 +132,7 @@ class MetaTagWithCompareModes extends MetaTag {
     required super.name,
     required super.keyName,
     this.compareModes = CompareMode.values,
+    super.isFree = false,
   });
 
   final List<CompareMode> compareModes;
@@ -176,6 +181,7 @@ class MetaTagValue {
 class SortMetaTag extends MetaTagWithValues<MetaTagValue> {
   SortMetaTag({
     required super.values,
+    super.isFree = false,
   }) : super(
           name: 'Sort',
           keyName: 'sort',
@@ -190,6 +196,7 @@ class SortMetaTag extends MetaTagWithValues<MetaTagValue> {
 class OrderMetaTag extends MetaTagWithValues<MetaTagValue> {
   OrderMetaTag({
     required super.values,
+    super.isFree = false,
   }) : super(
           name: 'Order',
           keyName: 'order',
@@ -219,6 +226,7 @@ class DateMetaTag extends MetaTagWithCompareModes {
     this.prettierDateFormat,
     this.valuesDivider = '..',
     this.supportsRange = true,
+    super.isFree = false,
   });
 
   final String dateFormat; // yyyy-MM-dd
@@ -238,6 +246,7 @@ class ComparableNumberMetaTag extends MetaTagWithCompareModes {
     required super.name,
     required super.keyName,
     this.valuesDivider = '..',
+    super.isFree = false,
   });
 
   final String valuesDivider;
@@ -252,6 +261,7 @@ class NumberMetaTag extends MetaTag {
   NumberMetaTag({
     required super.name,
     required super.keyName,
+    super.isFree = false,
   });
 
   @override
@@ -262,6 +272,7 @@ class BoolMetaTag extends MetaTag {
   BoolMetaTag({
     required super.name,
     required super.keyName,
+    super.isFree = false,
   });
 
   @override
@@ -272,6 +283,7 @@ class StringMetaTag extends MetaTag {
   StringMetaTag({
     required super.name,
     required super.keyName,
+    super.isFree = false,
   });
 
   @override
@@ -283,10 +295,37 @@ class StringFromListMetaTag extends MetaTagWithValues<String> {
     required super.name,
     required super.keyName,
     required super.values,
+    super.isFree = false,
   });
 
   @override
   MetaTagType get type => MetaTagType.stringFromList;
+}
+
+/// Special tag, only used when booru has no metatags data.
+/// In that case this is used to do a generic detection of anything formatted like "key:value".
+/// Hidden from UI, only affects text styling in tag/tab widgets and tag suggestion search input
+class GenericMetaTag extends MetaTag {
+  GenericMetaTag()
+      : super(
+          name: '',
+          keyName: '',
+        );
+
+  @override
+  RegExp get keyMatcher => RegExp('^(\\w+)$divider');
+
+  @override
+  RegExp get dividerMatcher => RegExp('^(?:\\w+)($divider)');
+
+  @override
+  RegExp get keyDividerMatcher => RegExp('^(\\w+$divider)');
+
+  @override
+  RegExp get valueMatcher => RegExp('^\\w+$divider(\\S+)');
+
+  @override
+  RegExp get tagMatcher => RegExp('^(\\w+)($divider)(\\S+)?');
 }
 
 class GenericRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
@@ -302,9 +341,10 @@ class GenericRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
         );
 }
 
-class GelbooruRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
-  GelbooruRatingMetaTag()
-      : super(
+class DanbooruGelbooruRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
+  DanbooruGelbooruRatingMetaTag({
+    super.isFree = false,
+  }) : super(
           name: 'Rating',
           keyName: 'rating',
           values: [

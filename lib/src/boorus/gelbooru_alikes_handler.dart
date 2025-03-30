@@ -9,6 +9,7 @@ import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
@@ -461,6 +462,44 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String? get metatagsCheatSheetLink =>
       isR34xxx ? 'https://rule34.xxx/index.php?page=help&topic=cheatsheet' : 'https://gelbooru.com/index.php?page=help&topic=cheatsheet';
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    return [
+      GenericRatingMetaTag(),
+      SortMetaTag(
+        values: [
+          MetaTagValue(name: 'ID', value: 'id'),
+          MetaTagValue(name: 'ID (ascending)', value: 'id:asc'),
+          MetaTagValue(name: 'Score', value: 'score'),
+          MetaTagValue(name: 'Score (ascending)', value: 'score:asc'),
+          MetaTagValue(name: 'Rating', value: 'rating'),
+          MetaTagValue(name: 'Rating (ascending)', value: 'rating:asc'),
+          MetaTagValue(name: 'User', value: 'user'),
+          MetaTagValue(name: 'User (ascending)', value: 'user:asc'),
+          MetaTagValue(name: 'Height', value: 'height'),
+          MetaTagValue(name: 'Height (ascending)', value: 'height:asc'),
+          MetaTagValue(name: 'Width', value: 'width'),
+          MetaTagValue(name: 'Width (ascending)', value: 'width:asc'),
+          MetaTagValue(name: 'Parent', value: 'parent'),
+          MetaTagValue(name: 'Parent (ascending)', value: 'parent:asc'),
+          MetaTagValue(name: 'Source', value: 'source'),
+          MetaTagValue(name: 'Source (ascending)', value: 'source:asc'),
+          MetaTagValue(name: 'Updated', value: 'updated'),
+          MetaTagValue(name: 'Updated (ascending)', value: 'updated:asc'),
+          MetaTagValue(name: 'Random', value: 'random'),
+        ],
+      ),
+      ComparableNumberMetaTag(name: 'Score', keyName: 'score'),
+      StringMetaTag(name: 'ID', keyName: 'id'),
+      StringMetaTag(name: 'User', keyName: 'user'),
+      // StringMetaTag(name: 'Favourites of user ID (fav:{id})', keyName: 'fav'),
+      StringMetaTag(name: 'Parent ID', keyName: 'parent'),
+      StringMetaTag(name: 'MD5', keyName: 'md5'),
+      ComparableNumberMetaTag(name: 'Width', keyName: 'width'),
+      ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
+    ];
+  }
 }
 
 List<String> tagsFromHtml(List<Element>? elements) {

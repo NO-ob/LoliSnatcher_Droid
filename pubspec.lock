@@ -655,10 +655,10 @@ packages:
     dependency: "direct main"
     description:
       name: fvp
-      sha256: f5012756985f7c8c19caaea2d65baf8a6cf5fee9fe520e1fabb8bc61e1d5f468
+      sha256: "724802f4c3f4d22cd2913356e91208096ba5aaab1db71c9e12b66bef4cf6f799"
       url: "https://pub.dev"
     source: hosted
-    version: "0.30.0"
+    version: "0.31.0"
   get:
     dependency: "direct main"
     description:
@@ -1194,10 +1194,10 @@ packages:
     dependency: transitive
     description:
       name: provider
-      sha256: c8a055ee5ce3fd98d6fc872478b03823ffdb448699c6ebdbbc71d59b596fd48c
+      sha256: "489024f942069c2920c844ee18bb3d467c69e48955a4f32d1677f71be103e310"
       url: "https://pub.dev"
     source: hosted
-    version: "6.1.2"
+    version: "6.1.4"
   pub_semver:
     dependency: transitive
     description:
@@ -1583,10 +1583,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player
-      sha256: "48941c8b05732f9582116b1c01850b74dbee1d8520cd7e34ad4609d6df666845"
+      sha256: "7d78f0cfaddc8c19d4cb2d3bebe1bfef11f2103b0a03e5398b303a1bf65eeb14"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.3"
+    version: "2.9.5"
   video_player_android:
     dependency: transitive
     description:
@@ -1639,10 +1639,10 @@ packages:
     dependency: transitive
     description:
       name: wakelock_plus
-      sha256: "36c88af0b930121941345306d259ec4cc4ecca3b151c02e3a9e71aede83c615e"
+      sha256: b90fbcc8d7bdf3b883ea9706d9d76b9978cb1dfa4351fcc8014d6ec31a493354
       url: "https://pub.dev"
     source: hosted
-    version: "1.2.10"
+    version: "1.2.11"
   wakelock_plus_platform_interface:
     dependency: transitive
     description:
