@@ -291,6 +291,10 @@ class _BooruEditState extends State<BooruEdit> {
           booruFaviconController.text = 'https://agn.ph/skin/Retro/favicon.ico';
         }
 
+        if (booruURLController.text.contains('rule34.us')) {
+          booruFaviconController.text = '${booruURLController.text}/favicon.png';
+        }
+
         // some boorus have their api url different from main host
         booruURLController.text = convertSiteUrlToApi();
 

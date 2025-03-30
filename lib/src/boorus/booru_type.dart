@@ -19,6 +19,7 @@ enum BooruType {
   Philomena,
   Rainbooru,
   R34Hentai,
+  R34US,
   Sankaku,
   IdolSankaku,
   Shimmie,
