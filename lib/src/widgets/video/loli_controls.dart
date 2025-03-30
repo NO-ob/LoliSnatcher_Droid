@@ -843,6 +843,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     setState(() {
       // reset speed and start all hide timers
       longTapDelayTimer?.cancel();
+      longTapSpeedChangeDelayTimer?.cancel();
       _doubleTappedOrHoldingDown = false;
       longTapFastForwardSpeed = 2;
       if (!speedSetManually) {
