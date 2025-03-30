@@ -115,9 +115,9 @@ class ViewerHandler {
           break;
         case const (VideoViewer):
           final widgetState = state! as VideoViewerState;
-          isZoomed.value = widgetState.isZoomed;
+          isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isVideoInited;
-          isFullscreen.value = widgetState.chewieController?.isFullScreen ?? false;
+          isFullscreen.value = widgetState.chewieController.value?.isFullScreen ?? false;
           viewState.value = widgetState.viewController.value;
           break;
         case const (VideoViewerPlaceholder):

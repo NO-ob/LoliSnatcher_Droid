@@ -35,7 +35,7 @@ class LoliControls extends StatefulWidget {
 class _LoliControlsState extends State<LoliControls> with SingleTickerProviderStateMixin {
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-  late VideoPlayerValue _latestValue;
+  VideoPlayerValue _latestValue = const VideoPlayerValue(duration: Duration.zero);
   bool _hideStuff = true;
   Timer? _hideTimer;
   Timer? _initTimer;
@@ -129,6 +129,15 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
   void _dispose() {
     controller.removeListener(_updateState);
+
+    if (_latestValue.playbackSpeed != 1) {
+      controller.setPlaybackSpeed(1);
+    }
+    _doubleTappedOrHoldingDown = false;
+    speedSetManually = false;
+    _doubleTapExtraMessage = '';
+    longTapFastForwardSpeed = 2;
+
     _doubleTapHideTimer?.cancel();
     longTapDelayTimer?.cancel();
     longTapSpeedChangeDelayTimer?.cancel();
@@ -149,6 +158,16 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     }
 
     super.didChangeDependencies();
+  }
+
+  @override
+  void didUpdateWidget(LoliControls oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.useLongTapFastForward != widget.useLongTapFastForward) {
+      _dispose();
+      _initialize();
+    }
   }
 
   AnimatedOpacity _buildBottomBar(
@@ -417,7 +436,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                 ),
               ),
               // checking if the video is playing because some video backends wrongly keep reporting that they are buffering after seeking/looping
-              if (_latestValue.isBuffering && !_latestValue.isPlaying)
+              // if (_latestValue.isBuffering && !_latestValue.isPlaying)
+              if (_latestValue.isBuffering)
                 const Center(
                   widthFactor: 3,
                   heightFactor: 3,
