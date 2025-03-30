@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -90,10 +92,10 @@ class SnatchHandler {
     cancelledItems.clear();
   }
 
-  void onRetryAll({
+  Future<void> onRetryAll({
     required int cooldown,
     bool ignoreExists = false,
-  }) {
+  }) async {
     final itemsToRetry = [...existsItems, ...failedItems, ...cancelledItems];
     final Set<Booru> uniqueBoorus = itemsToRetry.map((i) => i.booru).toSet();
     final Map<Booru, List<BooruItem>> booruItemsMap = {};
@@ -107,7 +109,23 @@ class SnatchHandler {
     }
 
     final List<SnatchItem> snatchItems = [];
-    booruItemsMap.forEach((booru, items) {
+    booruItemsMap.forEach((booru, items) async {
+      if (booru.type == BooruType.Sankaku) {
+        try {
+          // TODO detect when item data is outdated?
+          // TODO expand to other boorus?
+          final temp = BooruHandlerFactory().getBooruHandler([booru], 10);
+          final sankakuHandler = temp[0] as SankakuHandler;
+          // refetch data only on smaller-ish batches, otherwise they will most likely rate limit the user
+          if (items.length <= 20) {
+            for (final item in items) {
+              await sankakuHandler.loadItem(item: item);
+              await Future.delayed(const Duration(milliseconds: 100));
+            }
+          }
+        } catch (_) {}
+      }
+
       snatchItems.add(
         SnatchItem(
           items,

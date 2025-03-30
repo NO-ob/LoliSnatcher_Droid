@@ -11,8 +11,11 @@ import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart' hide FirstWhereOrNullExt;
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -400,13 +403,13 @@ class DownloadsDrawer extends StatefulWidget {
 }
 
 class _DownloadsDrawerState extends State<DownloadsDrawer> {
+  final SnatchHandler snatchHandler = SnatchHandler.instance;
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+
   bool updating = false;
 
   Future<void> onStartSnatching(BuildContext context, bool isLongTap) async {
-    final SnatchHandler snatchHandler = SnatchHandler.instance;
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final SearchHandler searchHandler = SearchHandler.instance;
-
     final bool permsRes = await getPerms();
     if (!permsRes) {
       FlashElements.showSnackbar(
@@ -447,12 +450,52 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
     }
   }
 
+  Future<void> onRetryFailedItem(
+    ({Booru booru, BooruItem item}) record,
+    bool isExists,
+    bool isLongTap,
+  ) async {
+    setState(() {
+      updating = true;
+    });
+
+    if (record.booru.type == BooruType.Sankaku) {
+      try {
+        // TODO detect when item data is outdated?
+        // TODO expand to other boorus?
+        final temp = BooruHandlerFactory().getBooruHandler([record.booru], 10);
+        final sankakuHandler = temp[0] as SankakuHandler;
+        await sankakuHandler.loadItem(item: record.item);
+      } catch (_) {}
+    }
+    snatchHandler.onRetryItem(
+      record,
+      cooldown: settingsHandler.snatchCooldown,
+      ignoreExists: isExists || isLongTap,
+    );
+
+    setState(() {
+      updating = false;
+    });
+  }
+
+  Future<void> onRetryAllFailed(bool isLongTap) async {
+    setState(() {
+      updating = true;
+    });
+
+    await snatchHandler.onRetryAll(
+      cooldown: settingsHandler.snatchCooldown,
+      ignoreExists: isLongTap,
+    );
+
+    setState(() {
+      updating = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final SnatchHandler snatchHandler = SnatchHandler.instance;
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final SearchHandler searchHandler = SearchHandler.instance;
-
     // TODO better design?
     // TODO detailed dl speed info
     // TODO rework snatchhandler? drop the queue and just use a single list?
@@ -710,16 +753,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                       RetryButton(
                                         text: isExists ? 'Save anyway' : 'Retry',
                                         withIcon: true,
-                                        onTap: () => snatchHandler.onRetryItem(
-                                          record,
-                                          cooldown: settingsHandler.snatchCooldown,
-                                          ignoreExists: isExists,
-                                        ),
-                                        onLongTap: () => snatchHandler.onRetryItem(
-                                          record,
-                                          cooldown: settingsHandler.snatchCooldown,
-                                          ignoreExists: true,
-                                        ),
+                                        onTap: () => onRetryFailedItem(record, isExists, false),
+                                        onLongTap: () => onRetryFailedItem(record, isExists, true),
                                       ),
                                       DeleteButton(
                                         text: 'Skip',
@@ -805,13 +840,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                 : SettingsButton(
                                                     drawBottomBorder: false,
                                                     drawTopBorder: true,
-                                                    action: () => snatchHandler.onRetryAll(
-                                                      cooldown: settingsHandler.snatchCooldown,
-                                                    ),
-                                                    onLongPress: () => snatchHandler.onRetryAll(
-                                                      cooldown: settingsHandler.snatchCooldown,
-                                                      ignoreExists: true,
-                                                    ),
+                                                    action: () => onRetryAllFailed(false),
+                                                    onLongPress: () => onRetryAllFailed(true),
                                                     icon: const Icon(Icons.refresh),
                                                     name:
                                                         'Retry all (${snatchHandler.existsItems.length + snatchHandler.failedItems.length + snatchHandler.cancelledItems.length})',
