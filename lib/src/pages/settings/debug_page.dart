@@ -104,6 +104,15 @@ class _DebugPageState extends State<DebugPage> {
                 },
                 title: 'Show Image Stats',
               ),
+              SettingsToggle(
+                value: settingsHandler.showVideoStats.value,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.showVideoStats.value = newValue;
+                  });
+                },
+                title: 'Show Video Stats',
+              ),
               if (kDebugMode)
                 SettingsToggle(
                   value: settingsHandler.blurImages,

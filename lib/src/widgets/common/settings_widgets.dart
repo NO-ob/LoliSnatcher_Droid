@@ -801,6 +801,7 @@ class SettingsTextInput extends StatefulWidget {
     this.isObscuredByDefault = true,
     this.textInputAction,
     this.enableSuggestions = true,
+    this.autocorrect = true,
     this.enableIMEPersonalizedLearning = true,
     this.submitIcon,
     this.showSubmitButton,
@@ -839,6 +840,7 @@ class SettingsTextInput extends StatefulWidget {
   final bool isObscuredByDefault;
   final TextInputAction? textInputAction;
   final bool enableSuggestions;
+  final bool autocorrect;
   final bool enableIMEPersonalizedLearning;
   final IconData? submitIcon;
   final bool Function(String)? showSubmitButton;
@@ -1043,6 +1045,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         onFieldSubmitted: widget.onSubmitted,
         textInputAction: widget.textInputAction,
         enableSuggestions: widget.enableSuggestions,
+        autocorrect: widget.autocorrect,
         enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
         scrollPadding: const EdgeInsets.all(kToolbarHeight),
         decoration: InputDecoration(

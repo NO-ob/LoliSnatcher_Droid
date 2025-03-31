@@ -3,7 +3,7 @@
 import 'dart:async';
 import 'dart:math' hide e;
 
-import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chewie/src/chewie_player.dart' show ChewieController;
@@ -42,6 +42,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   Timer? _showAfterExpandCollapseTimer;
   bool _dragging = false;
   bool _displayTapped = false;
+  Timer? bufferingDisplayTimer;
+  bool displayBufferingIndicator = false;
 
   final barHeight = 48.0;
   final marginSize = 5.0;
@@ -56,9 +58,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     reverseDuration: const Duration(milliseconds: 400),
   );
 
-  bool _doubleTappedOrHoldingDown = false;
-  Timer? _doubleTapHideTimer, longTapDelayTimer, longTapSpeedChangeDelayTimer;
+  bool doubleTapped = false, holdingDown = false;
+  Timer? _doubleTapHideTimer, longTapSpeedChangeDelayTimer, pointerCountCheckTimer;
   double longTapFastForwardSpeed = 2;
+  int pointerCount = 0;
   bool speedSetManually = false;
   TapDownDetails? _doubleTapInfo;
   int _lastDoubleTapAmount = 0;
@@ -86,10 +89,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         _cancelAndRestartTimer();
       },
       child: GestureDetector(
-        onLongPressDown: widget.useLongTapFastForward ? onLongPressDown : null,
-        onLongPressCancel: widget.useLongTapFastForward ? onLongPressUp : null,
-        onLongPressMoveUpdate: widget.useLongTapFastForward ? onLongPressMove : null,
-        onLongPressEnd: widget.useLongTapFastForward ? (_) => onLongPressUp() : null,
+        onLongPress: widget.useLongTapFastForward ? onHitAreaLongPress : null,
+        onLongPressMoveUpdate: widget.useLongTapFastForward ? onHitAreaLongPressMove : null,
+        onLongPressCancel: widget.useLongTapFastForward ? onHitAreaLongPressUp : null,
+        onLongPressEnd: widget.useLongTapFastForward ? (_) => onHitAreaLongPressUp() : null,
         onDoubleTapDown: _doubleTapInfoWrite,
         onDoubleTap: _doubleTapAction,
         behavior: HitTestBehavior.opaque,
@@ -104,6 +107,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   children: [
                     _buildDoubleTapMessage(),
                     _buildHitArea(),
+                    _buildDebugInfo(),
                   ],
                 ),
               ),
@@ -133,17 +137,19 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     if (_latestValue.playbackSpeed != 1) {
       controller.setPlaybackSpeed(1);
     }
-    _doubleTappedOrHoldingDown = false;
+    doubleTapped = false;
+    holdingDown = false;
     speedSetManually = false;
     _doubleTapExtraMessage = '';
     longTapFastForwardSpeed = 2;
 
     _doubleTapHideTimer?.cancel();
-    longTapDelayTimer?.cancel();
     longTapSpeedChangeDelayTimer?.cancel();
     _hideTimer?.cancel();
     _initTimer?.cancel();
     _showAfterExpandCollapseTimer?.cancel();
+    bufferingDisplayTimer?.cancel();
+    pointerCountCheckTimer?.cancel();
   }
 
   @override
@@ -290,9 +296,9 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     );
 
     return AnimatedOpacity(
-      opacity: _doubleTappedOrHoldingDown ? 1.0 : 0.0,
+      opacity: (doubleTapped || holdingDown) ? 1.0 : 0.0,
       onEnd: () {
-        if (!_doubleTappedOrHoldingDown) {
+        if (!doubleTapped && !holdingDown) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             setState(() {
               _lastDoubleTapAmount = 0;
@@ -356,100 +362,166 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   Widget _buildHitArea() {
-    final bool isFinished = _latestValue.position >= _latestValue.duration;
+    final bool isFinished = (_latestValue.position >= _latestValue.duration) && _latestValue.duration.inSeconds > 0;
 
-    return GestureDetector(
-      onTap: () {
-        if (_latestValue.isPlaying) {
-          if (_displayTapped) {
+    return Listener(
+      onPointerDown: (_) {
+        pointerCount++;
+      },
+      onPointerCancel: (_) {
+        pointerCount--;
+      },
+      onPointerUp: (_) {
+        pointerCount--;
+      },
+      child: GestureDetector(
+        onTap: () {
+          if (_latestValue.isPlaying) {
+            if (_displayTapped) {
+              setState(() {
+                if (widget.useLongTapFastForward) {
+                  viewerHandler.toggleToolbar(false, forcedNewValue: false);
+                }
+                _hideStuff = true;
+              });
+            } else {
+              _cancelAndRestartTimer();
+              if (widget.useLongTapFastForward) {
+                viewerHandler.toggleToolbar(false, forcedNewValue: false);
+              }
+            }
+          } else {
+            _playPause();
+
             setState(() {
               if (widget.useLongTapFastForward) {
                 viewerHandler.toggleToolbar(false, forcedNewValue: false);
               }
               _hideStuff = true;
             });
-          } else {
-            _cancelAndRestartTimer();
-            if (widget.useLongTapFastForward) {
-              viewerHandler.toggleToolbar(false, forcedNewValue: false);
-            }
           }
-        } else {
-          _playPause();
-
-          setState(() {
-            if (widget.useLongTapFastForward) {
-              viewerHandler.toggleToolbar(false, forcedNewValue: false);
-            }
-            _hideStuff = true;
-          });
-        }
-      },
-      child: ValueListenableBuilder(
-        valueListenable: viewerHandler.displayAppbar,
-        builder: (context, displayAppbar, child) {
-          final bool isFullScreen = chewieController.isFullScreen || !displayAppbar;
-          final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
-
-          return Container(
-            // color: Colors.yellow.withValues(alpha: 0.66),
-            color: Colors.transparent,
-            padding: EdgeInsets.only(
-              top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) + barHeight + 16,
-              bottom: MediaQuery.paddingOf(context).bottom + (isFullScreen ? 0 : (isTopAppbar ? kToolbarHeight : 0)),
-            ),
-            child: child,
-          );
         },
-        child: Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              AnimatedOpacity(
-                opacity: (!_latestValue.isPlaying && !_dragging) ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 300),
-                child: GestureDetector(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black87, // Theme.of(context).dialogBackgroundColor.withValues(alpha: 0.75),
-                      borderRadius: BorderRadius.circular(48),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: IconButton(
-                        icon: isFinished
-                            ? const Icon(
-                                Icons.replay,
-                                size: 32,
-                                color: Colors.white,
-                              )
-                            : AnimatedIcon(
-                                icon: AnimatedIcons.play_pause,
-                                progress: playPauseIconAnimationController,
-                                color: Colors.white,
-                                size: 32,
-                              ),
-                        onPressed: _playPause,
+        child: ValueListenableBuilder(
+          valueListenable: viewerHandler.displayAppbar,
+          builder: (context, displayAppbar, child) {
+            final bool isFullScreen = chewieController.isFullScreen || !displayAppbar;
+            final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
+
+            return Container(
+              // color: Colors.yellow.withValues(alpha: 0.66),
+              color: Colors.transparent,
+              padding: EdgeInsets.only(
+                top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) + barHeight + 16,
+                bottom: MediaQuery.paddingOf(context).bottom + (isFullScreen ? 0 : (isTopAppbar ? kToolbarHeight : 0)),
+              ),
+              child: child,
+            );
+          },
+          child: Center(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AnimatedOpacity(
+                  opacity: (!_latestValue.isPlaying && !_dragging) ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: GestureDetector(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black87, // Theme.of(context).dialogBackgroundColor.withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(48),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: IconButton(
+                          icon: isFinished
+                              ? const Icon(
+                                  Icons.replay,
+                                  size: 32,
+                                  color: Colors.white,
+                                )
+                              : AnimatedIcon(
+                                  icon: AnimatedIcons.play_pause,
+                                  progress: playPauseIconAnimationController,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
+                          onPressed: _playPause,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              // checking if the video is playing because some video backends wrongly keep reporting that they are buffering after seeking/looping
-              // if (_latestValue.isBuffering && !_latestValue.isPlaying)
-              if (_latestValue.isBuffering)
-                const Center(
-                  widthFactor: 3,
-                  heightFactor: 3,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 5,
+                //
+                Center(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 100),
+                    child: displayBufferingIndicator ? const CircularProgressIndicator(strokeWidth: 5) : const SizedBox.shrink(),
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildDebugInfo() {
+    if (kDebugMode && SettingsHandler.instance.showVideoStats.value) {
+      return Positioned(
+        left: 8,
+        top: MediaQuery.paddingOf(context).top + 32,
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.66),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              {'isInit': _latestValue.isInitialized},
+              {'isPlaying': _latestValue.isPlaying},
+              {'isBuffering': _latestValue.isBuffering},
+              {'position': _latestValue.position.toString().replaceAll(RegExp(r'000$'), '')},
+              {'duration': _latestValue.duration.toString().replaceAll(RegExp(r'000$'), '')},
+              {'isCompleted': _latestValue.isCompleted},
+              {'volume': _latestValue.volume},
+              {'playbackSpeed': _latestValue.playbackSpeed},
+              {'isFullScreen': chewieController.isFullScreen},
+              {'aspectRatio': _latestValue.aspectRatio.toStringAsFixed(2)},
+              // ignore: prefer_interpolation_to_compose_strings
+              {'size': _latestValue.size.width.truncateTrailingZeroes(2) + 'x' + _latestValue.size.height.truncateTrailingZeroes(2)},
+            ]
+                .map(
+                  (e) => Row(
+                    children: [
+                      Text(
+                        '${e.keys.first}: ',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        e.values.first.toString(),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   Widget _buildSpeedButton(
@@ -653,6 +725,16 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         });
       });
     }
+
+    pointerCountCheckTimer?.cancel();
+    pointerCountCheckTimer = Timer.periodic(
+      const Duration(milliseconds: 500),
+      (Timer t) {
+        if (holdingDown && pointerCount != 1) {
+          onHitAreaLongPressUp();
+        }
+      },
+    );
   }
 
   void _onExpandCollapse() {
@@ -666,7 +748,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   void _playPause() {
-    final bool isFinished = _latestValue.position >= _latestValue.duration;
+    final bool isFinished = (_latestValue.position >= _latestValue.duration) && _latestValue.duration.inSeconds > 0;
 
     setState(() {
       if (controller.value.isPlaying) {
@@ -704,18 +786,41 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     });
   }
 
+  void bufferingTimerTimeout() {
+    displayBufferingIndicator = true;
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   void _updateState() {
+    if (!mounted) return;
+
+    if (chewieController.progressIndicatorDelay != null) {
+      if (controller.value.isBuffering && !controller.value.isPlaying) {
+        bufferingDisplayTimer ??= Timer(
+          chewieController.progressIndicatorDelay!,
+          bufferingTimerTimeout,
+        );
+      } else {
+        bufferingDisplayTimer?.cancel();
+        bufferingDisplayTimer = null;
+        displayBufferingIndicator = false;
+      }
+    } else {
+      displayBufferingIndicator = controller.value.isBuffering && !controller.value.isPlaying;
+    }
+
     setState(() {
       _latestValue = controller.value;
     });
   }
 
   void _startDoubleTapTimer() {
-    longTapDelayTimer?.cancel();
     _doubleTapHideTimer?.cancel();
     _doubleTapHideTimer = Timer(const Duration(seconds: 2), () {
       setState(() {
-        _doubleTappedOrHoldingDown = false;
+        doubleTapped = false;
       });
     });
   }
@@ -759,7 +864,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       skipSeconds = 10;
     }
 
-    longTapDelayTimer?.cancel();
+    longTapSpeedChangeDelayTimer?.cancel();
 
     if (tapSide != 0 && skipSeconds != 0) {
       final int videoPositionMillisecs = controller.value.position.inMilliseconds;
@@ -775,7 +880,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
       setState(() {
         _doubleTapHideTimer?.cancel();
-        _doubleTappedOrHoldingDown = true;
+        doubleTapped = true;
         if (videoDurationMillisecs == newTime) {
           isAtVideoEdge = true;
           _doubleTapExtraMessage = 'End';
@@ -797,36 +902,29 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     }
   }
 
-  void onLongPressDown(LongPressDownDetails details) {
+  void onHitAreaLongPress() {
     // TODO seek backwards when going below 2x
-    longTapDelayTimer?.cancel();
-    // without this delay short taps will cause long tap logic to trigger
-    longTapDelayTimer = Timer(
-      const Duration(milliseconds: 300),
-      () {
-        setState(() {
-          if (!_latestValue.isPlaying) {
-            // force play if video is paused
-            _playPause();
-          }
-          // force show controls and keep them visible while holding down
-          _hideTimer?.cancel();
-          _hideStuff = false;
-          _displayTapped = true;
+    setState(() {
+      if (!_latestValue.isPlaying) {
+        // force play if video is paused
+        _playPause();
+      }
+      // force show controls and keep them visible while holding down
+      _hideTimer?.cancel();
+      _hideStuff = false;
+      _displayTapped = true;
 
-          // keep top message block visible while holding down
-          _doubleTapHideTimer?.cancel();
-          _doubleTappedOrHoldingDown = true;
-          speedSetManually = false;
-          _doubleTapExtraMessage = '${longTapFastForwardSpeed.toStringAsFixed(1)}x';
-          controller.setPlaybackSpeed(longTapFastForwardSpeed);
-          _lastDoubleTapSide = 1;
-        });
-      },
-    );
+      // keep top message block visible while holding down
+      _doubleTapHideTimer?.cancel();
+      holdingDown = true;
+      speedSetManually = false;
+      _doubleTapExtraMessage = '${longTapFastForwardSpeed.toStringAsFixed(1)}x';
+      controller.setPlaybackSpeed(longTapFastForwardSpeed);
+      _lastDoubleTapSide = 1;
+    });
   }
 
-  void onLongPressMove(LongPressMoveUpdateDetails details) {
+  void onHitAreaLongPressMove(LongPressMoveUpdateDetails details) {
     setState(() {
       longTapFastForwardSpeed = 2 +
           (double.tryParse(
@@ -836,7 +934,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       // limit between 2 and 4
       longTapFastForwardSpeed = longTapFastForwardSpeed.clamp(2, 4);
       // update ui value immediately, real speed change will happen in a timer below
-      _doubleTappedOrHoldingDown = true;
+      holdingDown = true;
       speedSetManually = false;
       _doubleTapExtraMessage = '${longTapFastForwardSpeed.toStringAsFixed(1)}x';
 
@@ -859,12 +957,11 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     });
   }
 
-  void onLongPressUp() {
+  void onHitAreaLongPressUp() {
     setState(() {
       // reset speed and start all hide timers
-      longTapDelayTimer?.cancel();
       longTapSpeedChangeDelayTimer?.cancel();
-      _doubleTappedOrHoldingDown = false;
+      holdingDown = false;
       longTapFastForwardSpeed = 2;
       if (!speedSetManually) {
         controller.setPlaybackSpeed(1);
@@ -883,6 +980,9 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             _dragging = true;
           });
 
+          _hideTimer?.cancel();
+        },
+        onDragUpdate: () {
           _hideTimer?.cancel();
         },
         onDragEnd: () {
@@ -1075,7 +1175,7 @@ class _PlaybackSpeedDialogState extends State<_PlaybackSpeedDialog> {
                           ),
                           child: Center(
                             child: Text(
-                              '${widget.speeds[i].truncateTrailingZeroes()}x',
+                              '${widget.speeds[i].truncateTrailingZeroes(2)}x',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                     color: i == selectedIndex.value ? Theme.of(context).colorScheme.secondary : null,

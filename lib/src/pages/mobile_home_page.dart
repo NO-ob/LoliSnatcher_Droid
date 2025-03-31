@@ -162,11 +162,6 @@ class _MobileHomeState extends State<MobileHome> {
           innerDrawerCallback: (bool isOpen, InnerDrawerDirection? direction) {
             // print('$isOpen $direction');
             isDrawerOpened = isOpen;
-            if (!isOpen) {
-              if (searchHandler.searchBoxFocus.hasFocus) {
-                searchHandler.searchBoxFocus.unfocus();
-              }
-            }
           }, // return  true (open) or false (close)
 
           leftChild: settingsHandler.handSide.value.isLeft ? const MainDrawer() : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
@@ -223,163 +218,155 @@ class MainDrawer extends StatelessWidget {
               }),
               const TabSelector(),
               Expanded(
-                child: Listener(
-                  onPointerDown: (event) {
-                    // print("pointer down");
-                    if (searchHandler.searchBoxFocus.hasFocus) {
-                      searchHandler.searchBoxFocus.unfocus();
-                    }
-                  },
-                  child: ListView(
-                    controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
-                    clipBehavior: Clip.antiAlias,
-                    children: [
-                      const SizedBox(height: 12),
-                      const TabButtons(true, WrapAlignment.spaceEvenly),
-                      const SizedBox(height: 12),
-                      const MergeBooruToggleAndSelector(),
-                      //
-                      Obx(() {
-                        if (settingsHandler.isDebug.value) {
-                          return SettingsButton(
-                            name: 'Open Alice',
-                            icon: const Icon(Icons.developer_board),
-                            action: () {
-                              settingsHandler.alice.showInspector();
-                            },
-                          );
-                        } else {
+                child: ListView(
+                  controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
+                  clipBehavior: Clip.antiAlias,
+                  children: [
+                    const SizedBox(height: 12),
+                    const TabButtons(true, WrapAlignment.spaceEvenly),
+                    const SizedBox(height: 12),
+                    const MergeBooruToggleAndSelector(),
+                    //
+                    Obx(() {
+                      if (settingsHandler.isDebug.value) {
+                        return SettingsButton(
+                          name: 'Open Alice',
+                          icon: const Icon(Icons.developer_board),
+                          action: () {
+                            settingsHandler.alice.showInspector();
+                          },
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
+                    //
+                    Obx(() {
+                      if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) && settingsHandler.enabledLogTypes.isNotEmpty) {
+                        return SettingsButton(
+                          name: 'Open Logger',
+                          icon: const Icon(Icons.print),
+                          action: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => LoggerViewPage(talker: Logger.talker),
+                              ),
+                            );
+                          },
+                          drawTopBorder: true,
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
+                    ValueListenableBuilder(
+                      valueListenable: LocalAuthHandler.instance.deviceSupportsBiometrics,
+                      builder: (_, deviceSupportsBiometrics, __) => ValueListenableBuilder(
+                        valueListenable: SettingsHandler.instance.useLockscreen,
+                        builder: (_, useLockscreen, child) {
+                          if (deviceSupportsBiometrics && useLockscreen) {
+                            return child!;
+                          }
+
                           return const SizedBox.shrink();
-                        }
-                      }),
-                      //
-                      Obx(() {
-                        if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) && settingsHandler.enabledLogTypes.isNotEmpty) {
-                          return SettingsButton(
-                            name: 'Open Logger',
-                            icon: const Icon(Icons.print),
-                            action: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => LoggerViewPage(talker: Logger.talker),
-                                ),
-                              );
-                            },
-                            drawTopBorder: true,
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }),
-                      ValueListenableBuilder(
-                        valueListenable: LocalAuthHandler.instance.deviceSupportsBiometrics,
-                        builder: (_, deviceSupportsBiometrics, __) => ValueListenableBuilder(
-                          valueListenable: SettingsHandler.instance.useLockscreen,
-                          builder: (_, useLockscreen, child) {
-                            if (deviceSupportsBiometrics && useLockscreen) {
-                              return child!;
+                        },
+                        child: SettingsButton(
+                          name: 'Lock app',
+                          icon: const Icon(Icons.lock),
+                          action: () => LocalAuthHandler.instance.lock(manually: true),
+                        ),
+                      ),
+                    ),
+                    SettingsButton(
+                      name: 'Settings',
+                      icon: const Icon(Icons.settings),
+                      page: () => const SettingsPage(),
+                    ),
+                    Obx(() {
+                      if (settingsHandler.booruList.isNotEmpty &&
+                          searchHandler.list.isNotEmpty &&
+                          BooruType.saveable.contains(searchHandler.currentBooru.type) &&
+                          Tools.isOnPlatformWithWebviewSupport) {
+                        return SettingsButton(
+                          name: 'Open webview',
+                          icon: const Icon(Icons.public),
+                          action: () {
+                            final String? url = searchHandler.currentBooru.baseURL;
+                            final String userAgent = Tools.browserUserAgent;
+                            if (url == null || url.isEmpty) {
+                              return;
                             }
 
-                            return const SizedBox.shrink();
-                          },
-                          child: SettingsButton(
-                            name: 'Lock app',
-                            icon: const Icon(Icons.lock),
-                            action: () => LocalAuthHandler.instance.lock(manually: true),
-                          ),
-                        ),
-                      ),
-                      SettingsButton(
-                        name: 'Settings',
-                        icon: const Icon(Icons.settings),
-                        page: () => const SettingsPage(),
-                      ),
-                      Obx(() {
-                        if (settingsHandler.booruList.isNotEmpty &&
-                            searchHandler.list.isNotEmpty &&
-                            BooruType.saveable.contains(searchHandler.currentBooru.type) &&
-                            Tools.isOnPlatformWithWebviewSupport) {
-                          return SettingsButton(
-                            name: 'Open webview',
-                            icon: const Icon(Icons.public),
-                            action: () {
-                              final String? url = searchHandler.currentBooru.baseURL;
-                              final String userAgent = Tools.browserUserAgent;
-                              if (url == null || url.isEmpty) {
-                                return;
-                              }
-
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => InAppWebviewView(
-                                    initialUrl: url,
-                                    userAgent: userAgent,
-                                  ),
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => InAppWebviewView(
+                                  initialUrl: url,
+                                  userAgent: userAgent,
                                 ),
-                              );
-                            },
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }),
-                      if (kDebugMode)
-                        SettingsToggle(
-                          value: settingsHandler.blurImages,
-                          onChanged: (newValue) {
-                            settingsHandler.blurImages = newValue;
-                            searchHandler.rootRestate?.call();
+                              ),
+                            );
                           },
-                          title: 'Blur [DEV]',
-                        ),
-                      //
-                      Obx(() {
-                        if (settingsHandler.updateInfo.value != null && Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
-                          return SettingsButton(
-                            name: 'Update Available!',
-                            icon: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                const Icon(Icons.update),
-                                Positioned(
-                                  top: 1,
-                                  left: 1,
-                                  child: Center(
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
+                    if (kDebugMode)
+                      SettingsToggle(
+                        value: settingsHandler.blurImages,
+                        onChanged: (newValue) {
+                          settingsHandler.blurImages = newValue;
+                          searchHandler.rootRestate?.call();
+                        },
+                        title: 'Blur [DEV]',
+                      ),
+                    //
+                    Obx(() {
+                      if (settingsHandler.updateInfo.value != null && Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
+                        return SettingsButton(
+                          name: 'Update Available!',
+                          icon: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              const Icon(Icons.update),
+                              Positioned(
+                                top: 1,
+                                left: 1,
+                                child: Center(
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                            action: () async {
-                              settingsHandler.showUpdate(true);
-                            },
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }),
-                      if (SettingsHandler.isDesktopPlatform)
-                        SettingsButton(
-                          name: 'Close the app',
-                          icon: const Icon(Icons.exit_to_app),
+                              ),
+                            ],
+                          ),
                           action: () async {
-                            // twice to trigger drawer close
-                            await Navigator.of(context).maybePop();
-                            await Future.delayed(const Duration(milliseconds: 400));
-                            await Navigator.of(context).maybePop();
+                            settingsHandler.showUpdate(true);
                           },
-                        ),
-                      //
-                      if (settingsHandler.enableDrawerMascot) const MascotImage(),
-                    ],
-                  ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
+                    if (SettingsHandler.isDesktopPlatform)
+                      SettingsButton(
+                        name: 'Close the app',
+                        icon: const Icon(Icons.exit_to_app),
+                        action: () async {
+                          // twice to trigger drawer close
+                          await Navigator.of(context).maybePop();
+                          await Future.delayed(const Duration(milliseconds: 400));
+                          await Navigator.of(context).maybePop();
+                        },
+                      ),
+                    //
+                    if (settingsHandler.enableDrawerMascot) const MascotImage(),
+                  ],
                 ),
               ),
             ],

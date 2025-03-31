@@ -457,7 +457,7 @@ class ImageViewerState extends State<ImageViewer> {
                 //
                 Listener(
                   onPointerSignal: (pointerSignal) {
-                    if (mainProvider.value == null) {
+                    if (mainProvider.value == null || !SettingsHandler.isDesktopPlatform) {
                       return;
                     }
                     if (pointerSignal is PointerScrollEvent) {

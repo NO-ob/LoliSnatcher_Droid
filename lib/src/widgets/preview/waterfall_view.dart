@@ -36,7 +36,6 @@ class _WaterfallViewState extends State<WaterfallView> {
   final ViewerHandler viewerHandler = ViewerHandler.instance;
   final NavigationHandler navigationHandler = NavigationHandler.instance;
 
-  FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   bool scrollDone = true;
 
@@ -163,7 +162,6 @@ class _WaterfallViewState extends State<WaterfallView> {
     searchHandler.index.removeListener(tabIndexListener);
     searchHandler.tabId.removeListener(tabIdListener);
     searchHandler.isLoading.removeListener(isLoadingListener);
-    kbFocusNode.dispose();
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(true);
     super.dispose();
@@ -197,7 +195,6 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   void viewerCallback() {
-    kbFocusNode.requestFocus();
     viewerHandler.dropCurrent();
 
     for (final item in searchHandler.currentFetched) {
@@ -225,7 +222,6 @@ class _WaterfallViewState extends State<WaterfallView> {
         return;
       }
 
-      kbFocusNode.unfocus();
       viewerHandler.inViewer.value = true;
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
 

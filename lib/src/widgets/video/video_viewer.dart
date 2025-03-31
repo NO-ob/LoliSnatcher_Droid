@@ -472,6 +472,8 @@ class VideoViewerState extends State<VideoViewer> {
       allowFullScreen: widget.enableFullscreen,
       showControls: false,
       showControlsOnInitialize: viewerHandler.displayAppbar.value,
+      progressIndicatorDelay: const Duration(milliseconds: 100),
+      customControls: null,
       // customControls: SafeArea(child: LoliControls()),
       // MaterialControls(),
       // CupertinoControls(
@@ -595,6 +597,7 @@ class VideoViewerState extends State<VideoViewer> {
                 controller: chewieController.value!,
                 child: TransparentPointer(
                   child: SafeArea(
+                    top: false,
                     child: LoliControls(
                       useLongTapFastForward: settingsHandler.longTapFastForwardVideo,
                     ),
@@ -698,7 +701,7 @@ class VideoViewerState extends State<VideoViewer> {
               child: isVideoInited
                   ? Listener(
                       onPointerSignal: (pointerSignal) {
-                        if (pointerSignal is PointerScrollEvent) {
+                        if (SettingsHandler.isDesktopPlatform && pointerSignal is PointerScrollEvent) {
                           scrollZoomImage(pointerSignal.scrollDelta.dy);
                         }
                       },
@@ -749,17 +752,27 @@ class VideoViewerState extends State<VideoViewer> {
                             controller: chewieController.value!,
                             child: TransparentPointer(
                               child: SafeArea(
+                                top: false,
                                 child: ValueListenableBuilder(
-                                  valueListenable: localAuthHandler.isAuthenticated,
-                                  builder: (context, isAuthenticated, child) {
-                                    if (isAuthenticated != false) {
-                                      return child!;
-                                    }
-
-                                    return const SizedBox.shrink();
+                                  valueListenable: isViewed,
+                                  builder: (context, isViewed, child) {
+                                    return ValueListenableBuilder(
+                                      valueListenable: localAuthHandler.isAuthenticated,
+                                      builder: (context, isAuthenticated, _) {
+                                        return AnimatedSwitcher(
+                                          duration: const Duration(milliseconds: 200),
+                                          child: (isViewed && isAuthenticated != false) ? child : const SizedBox.shrink(),
+                                        );
+                                      },
+                                    );
                                   },
-                                  child: LoliControls(
-                                    useLongTapFastForward: !isZoomed.value && settingsHandler.longTapFastForwardVideo,
+                                  child: ValueListenableBuilder(
+                                    valueListenable: isZoomed,
+                                    builder: (context, isZoomed, _) {
+                                      return LoliControls(
+                                        useLongTapFastForward: !isZoomed && settingsHandler.longTapFastForwardVideo,
+                                      );
+                                    },
                                   ),
                                 ),
                               ),

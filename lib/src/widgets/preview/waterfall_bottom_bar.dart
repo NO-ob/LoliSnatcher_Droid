@@ -316,14 +316,12 @@ class MainSearchBarWithActions extends StatelessWidget {
 
   void onSearchTap() {
     searchHandler.searchTextController.clearComposing();
-    searchHandler.searchBoxFocus.unfocus();
     searchHandler.searchAction(searchHandler.searchTextController.text, null);
   }
 
   void onSearchLongTap() {
     ServiceHandler.vibrate();
     searchHandler.searchTextController.clearComposing();
-    searchHandler.searchBoxFocus.unfocus();
     searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
   }
 
@@ -1023,6 +1021,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     suggestionTextController = RichTextController(
       text: '',
       onMatch: (_) {},
+      onMatchIndex: (_) {},
       regExpDotAll: true,
       regExpMultiLine: true,
       regExpUnicode: true,
@@ -1271,7 +1270,6 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
   void onSearchTap() {
     Navigator.of(context).pop();
     searchHandler.searchTextController.clearComposing();
-    searchHandler.searchBoxFocus.unfocus();
     searchHandler.searchAction(searchHandler.searchTextController.text, null);
   }
 
@@ -1279,7 +1277,6 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     Navigator.of(context).pop();
     ServiceHandler.vibrate();
     searchHandler.searchTextController.clearComposing();
-    searchHandler.searchBoxFocus.unfocus();
     searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
   }
 
@@ -1779,8 +1776,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                       controller: suggestionTextController,
                       focusNode: suggestionTextFocusNode,
                       title: 'Search for tags',
-                      clearable: true,
                       hintText: 'Search for tags',
+                      clearable: true,
                       onSubmitted: onSuggestionTextSubmitted,
                       onSubmittedLongTap: (_) => onSuggestionLongTap(
                         TagSuggestion(tag: suggestionTextControllerRawInput),
@@ -1788,9 +1785,6 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                       onlyInput: true,
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                       textInputAction: TextInputAction.search,
-                      // disable native suggestions because they cause issues due to keyboards changing text style of the current word,
-                      // and it looks wrong when text includes metatags
-                      enableSuggestions: false,
                       enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                       showSubmitButton: (text) => !settingsHandler.showSearchbarQuickActions && text.isNotEmpty,
                       submitIcon: Icons.add_rounded,

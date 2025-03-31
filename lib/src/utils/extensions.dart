@@ -71,7 +71,10 @@ extension DoubleExtras on double {
     return (this * mod).round().toDouble() / mod;
   }
 
-  String truncateTrailingZeroes() => toStringAsFixed(toString().split('.')[1].length).replaceAll('.0', '');
+  String truncateTrailingZeroes(int? fractionDigits) => toStringAsFixed(fractionDigits ?? toString().split('.')[1].length).replaceAllMapped(
+        RegExp(r'(\.\d*?[1-9]|)\.?0+$'),
+        (match) => '${match[1] == '.' ? '' : match[1]}',
+      );
 }
 
 extension BoolExtras on bool {

@@ -72,6 +72,7 @@ class SettingsHandler {
   final RxBool showFps = false.obs;
   final RxBool showPerf = false.obs;
   final RxBool showImageStats = false.obs;
+  final RxBool showVideoStats = false.obs;
   bool blurImages = kDebugMode ? Constants.blurImagesDefaultDev : false;
 
   ////////////////////////////////////////////////////
@@ -248,6 +249,7 @@ class SettingsHandler {
     'showFps',
     'showPerf',
     'showImageStats',
+    'showVideoStats',
     'isDebug',
     'desktopListsDrag',
     'incognitoKeyboard',

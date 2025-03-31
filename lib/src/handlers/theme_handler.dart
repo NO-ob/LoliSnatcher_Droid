@@ -64,7 +64,6 @@ class ThemeHandler {
       appBarTheme: appBarTheme(lightColorScheme),
       colorScheme: lightColorScheme,
       textTheme: textTheme(),
-      textSelectionTheme: textSelectionTheme(lightColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(lightColorScheme),
       splashFactory: InkSparkle.splashFactory,
       applyElevationOverlayColor: true,
@@ -100,7 +99,6 @@ class ThemeHandler {
       scaffoldBackgroundColor: darkColorScheme.surface,
       colorScheme: darkColorScheme,
       textTheme: textTheme(),
-      textSelectionTheme: textSelectionTheme(darkColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(darkColorScheme),
       splashFactory: InkSparkle.splashFactory,
       applyElevationOverlayColor: true,
@@ -162,12 +160,6 @@ class ThemeHandler {
   }
 
   TextTheme textTheme() => GoogleFonts.notoSansTextTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme);
-
-  TextSelectionThemeData textSelectionTheme(ColorScheme colorScheme) => TextSelectionThemeData(
-        cursorColor: colorScheme.secondary,
-        selectionColor: Colors.blue.withValues(alpha: 0.66),
-        selectionHandleColor: colorScheme.secondary,
-      );
 
   ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) => ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

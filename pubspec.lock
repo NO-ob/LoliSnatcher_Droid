@@ -1217,10 +1217,11 @@ packages:
   rich_text_controller:
     dependency: "direct main"
     description:
-      name: rich_text_controller
-      sha256: d60b36c5369ccbb527929febaff993760c48e92adfcb32ddea4b0a1fde4533b8
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: b84b371347ab4f13374c2709becaf247aec354e4
+      resolved-ref: b84b371347ab4f13374c2709becaf247aec354e4
+      url: "https://github.com/NANI-SORE/rich_text_controller.git"
+    source: git
     version: "3.0.1"
   rxdart:
     dependency: transitive
@@ -1631,10 +1632,10 @@ packages:
     dependency: transitive
     description:
       name: volume_controller
-      sha256: "4c2a873c242da6ce69ae1d17c256c5626e0c481be1824d6c5fc95e68c31f3b36"
+      sha256: e82fd689bb8e1fe8e64be3fa5946ff8699058f8cf9f4c1679acdba20cda7f5bd
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.2"
+    version: "3.3.3"
   wakelock_plus:
     dependency: transitive
     description:

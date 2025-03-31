@@ -301,15 +301,6 @@ class SearchHandler {
 
   final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();
 
-  Future<void> openAndFocusSearch() async {
-    mainDrawerKey.currentState?.open();
-    await Future.delayed(const Duration(milliseconds: 300));
-    searchBoxFocus.requestFocus();
-    searchTextController.selection = TextSelection.fromPosition(
-      TextPosition(offset: searchTextController.text.length),
-    );
-  }
-
   // switch to tab #index
   void changeTabIndex(
     int i, {
