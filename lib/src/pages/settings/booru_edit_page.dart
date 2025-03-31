@@ -68,6 +68,10 @@ class _BooruEditState extends State<BooruEdit> {
       faviconUrl = 'https://agn.ph/skin/Retro/favicon.ico';
     }
 
+    if (booruURLController.text.contains('rule34.us')) {
+      faviconUrl = 'https://rule34.us/favicon.png';
+    }
+
     if ([
       ...SankakuHandler.knownUrls,
       ...IdolSankakuHandler.knownUrls,

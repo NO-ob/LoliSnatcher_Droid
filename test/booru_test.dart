@@ -14,6 +14,7 @@ import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
 import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/r34us_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
@@ -106,11 +107,10 @@ Future<void> main() async {
       final BooruHandler booruHandler = await testBooru(Booru('r34hentai', BooruType.R34Hentai, '', 'https://r34hentai.com', ''));
       expect(booruHandler, isA<PhilomenaHandler>());
     });
-    //Not in the factory?
-    /*test('R34USHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("r34US", "R34US","","https://rule34.us",""));
+    test('R34USHandler', () async {
+      final BooruHandler booruHandler = await testBooru(Booru('r34US', BooruType.R34US, '', 'https://rule34.us', ''));
       expect(booruHandler, isA<R34USHandler>());
-    });*/
+    });
     test('SankakuHandler', () async {
       // TODO doesn't parse all items correctly?
       final BooruHandler booruHandler = await testBooru(Booru('sankaku', BooruType.Sankaku, '', 'https://capi-v2.sankakucomplex.com', ''));

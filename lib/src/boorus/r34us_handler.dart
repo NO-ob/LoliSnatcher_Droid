@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 
@@ -21,6 +22,9 @@ class R34USHandler extends BooruHandler {
   }
 
   @override
+  bool get hasLoadItemSupport => true;
+
+  @override
   List parseListFromResponse(dynamic response) {
     final document = parse(response.data);
     return document.querySelectorAll('div.thumbail-container > div');
@@ -38,28 +42,35 @@ class R34USHandler extends BooruHandler {
         tags.add(tag.replaceAll(' ', '_'));
       });
 
-      BooruItem item = BooruItem(
-        fileURL: '',
-        sampleURL: '',
+      final mediaType = (tags.contains('gif') || tags.contains('animated_gif'))
+          ? MediaType.animation
+          : tags.contains('video') || (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
+              ? MediaType.video
+              : null;
+      
+      String fullURL = thumbURL.replaceFirst('thumbnail', 'image').replaceFirst('thumbnail_', '').replaceFirst('.jpg', '.jpeg');
+      if (mediaType == MediaType.video) fullURL = fullURL.replaceFirst(RegExp(r'img\d+'), 'video');
+
+      final BooruItem item = BooruItem(
+        fileURL: fullURL,
+        sampleURL: fullURL,
         thumbnailURL: thumbURL,
         tagsList: tags,
         md5String: getHashFromURL(thumbURL),
         postURL: makePostURL(id),
       );
 
-      item = await getPostData(item, id);
-      if (item.fileURL.isNotEmpty) {
-        return item;
-      } else {
-        return null;
-      }
+      item.possibleMediaType.value = mediaType;
+      item.mediaType.value = MediaType.needsExtraRequest;
+
+      return item;
     } else {
       return null;
     }
   }
 
-  // TODO convert to loadItem
-  Future<BooruItem> getPostData(BooruItem item, String id) async {
+  @override
+  Future<List> loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
     try {
       final response = await DioNetwork.get(item.postURL, headers: getHeaders());
       if (response.statusCode == 200) {
@@ -85,7 +96,7 @@ class R34USHandler extends BooruHandler {
       );
       errorString = e.toString();
     }
-    return item;
+    return [item, true, null];
   }
 
   String getHashFromURL(String url) {
@@ -100,6 +111,6 @@ class R34USHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    return "${booru.baseURL}/index.php?r=posts/index&q=${tags.replaceAll(" ", "+")}&pid=${pageNum * 20}";
+    return "${booru.baseURL}/index.php?r=posts/index&q=${tags.replaceAll(" ", "+")}&page=${pageNum}";
   }
 }
