@@ -3,11 +3,10 @@
 import 'dart:async';
 import 'dart:math' hide e;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:chewie/src/chewie_player.dart' show ChewieController;
-import 'package:chewie/src/chewie_progress_colors.dart';
+import 'package:chewie/chewie.dart';
+import 'package:chewie/src/center_play_button.dart';
 import 'package:chewie/src/helpers/utils.dart';
 import 'package:chewie/src/progress_bar.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -32,11 +31,11 @@ class LoliControls extends StatefulWidget {
   }
 }
 
-class _LoliControlsState extends State<LoliControls> with SingleTickerProviderStateMixin {
+class _LoliControlsState extends State<LoliControls> {
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   VideoPlayerValue _latestValue = const VideoPlayerValue(duration: Duration.zero);
-  bool _hideStuff = true;
+  bool _hideStuff = false;
   Timer? _hideTimer;
   Timer? _initTimer;
   Timer? _showAfterExpandCollapseTimer;
@@ -45,18 +44,13 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   Timer? bufferingDisplayTimer;
   bool displayBufferingIndicator = false;
 
-  final barHeight = 48.0;
-  final marginSize = 5.0;
+  final double barHeight = 48;
+  final double marginSize = 5;
 
   late VideoPlayerController controller;
   ChewieController? _chewieController;
   // We know that _chewieController is set in didChangeDependencies
   ChewieController get chewieController => _chewieController!;
-  late AnimationController playPauseIconAnimationController = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 400),
-    reverseDuration: const Duration(milliseconds: 400),
-  );
 
   bool doubleTapped = false, holdingDown = false;
   Timer? _doubleTapHideTimer, longTapSpeedChangeDelayTimer, pointerCountCheckTimer;
@@ -97,28 +91,39 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         onDoubleTap: _doubleTapAction,
         behavior: HitTestBehavior.opaque,
         onTap: _cancelAndRestartTimer,
-        child: AbsorbPointer(
-          // children elements won't receive gestures until they are visible
-          absorbing: _hideStuff,
-          child: Column(
-            children: [
-              Expanded(
-                child: Stack(
+        child: Listener(
+          onPointerDown: (_) {
+            pointerCount += 1;
+          },
+          onPointerCancel: (_) {
+            pointerCount -= 1;
+          },
+          onPointerUp: (_) {
+            pointerCount -= 1;
+          },
+          child: AbsorbPointer(
+            // children elements won't receive gestures until they are visible
+            absorbing: _hideStuff,
+            child: Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
+                      _buildDoubleTapMessage(),
+                      _buildHitArea(),
+                      _buildDebugInfo(),
+                    ],
+                  ),
+                ),
+                Stack(
+                  alignment: AlignmentDirectional.bottomStart,
                   children: [
-                    _buildDoubleTapMessage(),
-                    _buildHitArea(),
-                    _buildDebugInfo(),
+                    _buildBottomBar(context),
+                    _buildBottomProgress(),
                   ],
                 ),
-              ),
-              Stack(
-                alignment: AlignmentDirectional.bottomStart,
-                children: [
-                  _buildBottomBar(context),
-                  _buildBottomProgress(),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -186,7 +191,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     final bool drawProgressBar = !(chewieController.isLive || isTooShort);
 
     return AnimatedOpacity(
-      opacity: _hideStuff ? 0.0 : 1.0,
+      opacity: _hideStuff ? 0 : 1,
       duration: const Duration(milliseconds: 300),
       child: Column(
         children: [
@@ -247,7 +252,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     final bool isTooShort = controller.value.duration.inSeconds <= 2;
 
     return AnimatedOpacity(
-      opacity: (_hideStuff && !isTooShort) ? 1.0 : 0.0,
+      opacity: (_hideStuff && !isTooShort) ? 1 : 0,
       duration: const Duration(milliseconds: 300),
       child: AbsorbPointer(
         absorbing: false,
@@ -296,7 +301,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     );
 
     return AnimatedOpacity(
-      opacity: (doubleTapped || holdingDown) ? 1.0 : 0.0,
+      opacity: (doubleTapped || holdingDown) ? 1 : 0,
       onEnd: () {
         if (!doubleTapped && !holdingDown) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -340,7 +345,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         // extra container with decoration to force more clickable width, otherwise there is ~40px of empty space on the right
         decoration: const BoxDecoration(color: Colors.transparent),
         child: AnimatedOpacity(
-          opacity: _hideStuff ? 0.0 : 1.0,
+          opacity: _hideStuff ? 0 : 1,
           duration: const Duration(milliseconds: 300),
           child: Container(
             height: barHeight,
@@ -363,103 +368,80 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
   Widget _buildHitArea() {
     final bool isFinished = (_latestValue.position >= _latestValue.duration) && _latestValue.duration.inSeconds > 0;
+    final bool showPlayButton = !_dragging && !_hideStuff;
 
-    return Listener(
-      onPointerDown: (_) {
-        pointerCount++;
-      },
-      onPointerCancel: (_) {
-        pointerCount--;
-      },
-      onPointerUp: (_) {
-        pointerCount--;
-      },
-      child: GestureDetector(
-        onTap: () {
-          if (_latestValue.isPlaying) {
-            if (_displayTapped) {
-              setState(() {
-                if (widget.useLongTapFastForward) {
-                  viewerHandler.toggleToolbar(false, forcedNewValue: false);
-                }
-                _hideStuff = true;
-              });
-            } else {
-              _cancelAndRestartTimer();
-              if (widget.useLongTapFastForward) {
-                viewerHandler.toggleToolbar(false, forcedNewValue: false);
-              }
-            }
-          } else {
-            _playPause();
-
+    return GestureDetector(
+      onTap: () {
+        if (_latestValue.isPlaying) {
+          if (_displayTapped) {
             setState(() {
               if (widget.useLongTapFastForward) {
                 viewerHandler.toggleToolbar(false, forcedNewValue: false);
               }
               _hideStuff = true;
             });
+          } else {
+            _cancelAndRestartTimer();
+            if (widget.useLongTapFastForward) {
+              viewerHandler.toggleToolbar(false, forcedNewValue: false);
+            }
           }
-        },
-        child: ValueListenableBuilder(
-          valueListenable: viewerHandler.displayAppbar,
-          builder: (context, displayAppbar, child) {
-            final bool isFullScreen = chewieController.isFullScreen || !displayAppbar;
-            final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
+        } else {
+          _playPause();
 
-            return Container(
-              // color: Colors.yellow.withValues(alpha: 0.66),
-              color: Colors.transparent,
-              padding: EdgeInsets.only(
-                top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) + barHeight + 16,
-                bottom: MediaQuery.paddingOf(context).bottom + (isFullScreen ? 0 : (isTopAppbar ? kToolbarHeight : 0)),
-              ),
-              child: child,
-            );
-          },
-          child: Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                AnimatedOpacity(
-                  opacity: (!_latestValue.isPlaying && !_dragging) ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 300),
-                  child: GestureDetector(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black87, // Theme.of(context).dialogBackgroundColor.withValues(alpha: 0.75),
-                        borderRadius: BorderRadius.circular(48),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: IconButton(
-                          icon: isFinished
-                              ? const Icon(
-                                  Icons.replay,
-                                  size: 32,
-                                  color: Colors.white,
-                                )
-                              : AnimatedIcon(
-                                  icon: AnimatedIcons.play_pause,
-                                  progress: playPauseIconAnimationController,
-                                  color: Colors.white,
-                                  size: 32,
-                                ),
-                          onPressed: _playPause,
-                        ),
-                      ),
+          setState(() {
+            if (widget.useLongTapFastForward) {
+              viewerHandler.toggleToolbar(false, forcedNewValue: false);
+            }
+            _hideStuff = true;
+          });
+        }
+      },
+      child: ValueListenableBuilder(
+        valueListenable: viewerHandler.displayAppbar,
+        builder: (context, displayAppbar, child) {
+          final bool isFullScreen = chewieController.isFullScreen || !displayAppbar;
+          final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
+
+          return Container(
+            // color: Colors.yellow.withValues(alpha: 0.66),
+            color: Colors.transparent,
+            padding: EdgeInsets.only(
+              top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) + barHeight + 16,
+              bottom: MediaQuery.paddingOf(context).bottom + (isFullScreen ? 0 : (isTopAppbar ? kToolbarHeight : 0)),
+            ),
+            child: child,
+          );
+        },
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              AnimatedOpacity(
+                opacity: (!_latestValue.isPlaying && !_dragging) ? 1 : 0,
+                duration: const Duration(milliseconds: 300),
+                child: GestureDetector(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: CenterPlayButton(
+                      backgroundColor: Colors.black54,
+                      iconColor: Colors.white,
+                      isFinished: isFinished,
+                      isPlaying: controller.value.isPlaying,
+                      show: showPlayButton,
+                      onPressed: _playPause,
                     ),
                   ),
                 ),
-                //
-                Center(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 100),
-                    child: displayBufferingIndicator ? const CircularProgressIndicator(strokeWidth: 5) : const SizedBox.shrink(),
-                  ),
+              ),
+              //
+              Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 100),
+                  child: displayBufferingIndicator ? const CircularProgressIndicator(strokeWidth: 5) : const SizedBox.shrink(),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -467,7 +449,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   Widget _buildDebugInfo() {
-    if (kDebugMode && SettingsHandler.instance.showVideoStats.value) {
+    if (SettingsHandler.instance.showVideoStats.value) {
       return Positioned(
         left: 8,
         top: MediaQuery.paddingOf(context).top + 32,
@@ -493,6 +475,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
               {'aspectRatio': _latestValue.aspectRatio.toStringAsFixed(2)},
               // ignore: prefer_interpolation_to_compose_strings
               {'size': _latestValue.size.width.truncateTrailingZeroes(2) + 'x' + _latestValue.size.height.truncateTrailingZeroes(2)},
+              {'pointerCount': pointerCount},
             ]
                 .map(
                   (e) => Row(
@@ -557,7 +540,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         }
       },
       onLongPress: () async {
-        if (_latestValue.playbackSpeed == 1.0) {
+        if (_latestValue.playbackSpeed == 1) {
           return;
         }
 
@@ -568,7 +551,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         }
       },
       child: AnimatedOpacity(
-        opacity: _hideStuff ? 0.0 : 1.0,
+        opacity: _hideStuff ? 0 : 1,
         duration: const Duration(milliseconds: 300),
         child: ClipRect(
           child: Container(
@@ -579,7 +562,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             ),
             child: Icon(
               Icons.speed,
-              color: _latestValue.playbackSpeed == 1.0 ? Colors.white : Theme.of(context).colorScheme.secondary,
+              color: _latestValue.playbackSpeed == 1 ? Colors.white : Theme.of(context).colorScheme.secondary,
             ),
           ),
         ),
@@ -610,7 +593,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         }
       },
       child: AnimatedOpacity(
-        opacity: _hideStuff ? 0.0 : 1.0,
+        opacity: _hideStuff ? 0 : 1,
         duration: const Duration(milliseconds: 300),
         child: ClipRect(
           child: Container(
@@ -741,9 +724,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     setState(() {
       _hideStuff = true;
       chewieController.toggleFullScreen();
-      _showAfterExpandCollapseTimer = Timer(const Duration(milliseconds: 300), () {
-        setState(_cancelAndRestartTimer);
-      });
+      _showAfterExpandCollapseTimer = Timer(
+        const Duration(milliseconds: 300),
+        () => setState(_cancelAndRestartTimer),
+      );
     });
   }
 
@@ -752,7 +736,6 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
     setState(() {
       if (controller.value.isPlaying) {
-        playPauseIconAnimationController.reverse();
         _hideStuff = false;
         _hideTimer?.cancel();
         controller.pause();
@@ -765,13 +748,11 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         if (!controller.value.isInitialized) {
           controller.initialize().then((_) {
             controller.play();
-            playPauseIconAnimationController.forward();
           });
         } else {
           if (isFinished) {
             controller.seekTo(Duration.zero);
           }
-          playPauseIconAnimationController.forward();
           controller.play();
         }
       }
@@ -999,8 +980,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             ChewieProgressColors(
               playedColor: Theme.of(context).colorScheme.secondary,
               handleColor: Theme.of(context).colorScheme.secondary,
-              bufferedColor: Theme.of(context).colorScheme.surface,
-              backgroundColor: Theme.of(context).disabledColor,
+              bufferedColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+              backgroundColor: Theme.of(context).disabledColor.withValues(alpha: 0.5),
             ),
       ),
     );

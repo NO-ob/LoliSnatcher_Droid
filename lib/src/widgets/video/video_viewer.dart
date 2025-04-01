@@ -501,8 +501,8 @@ class VideoViewerState extends State<VideoViewer> {
       materialProgressColors: ChewieProgressColors(
         playedColor: accentColor,
         handleColor: darkenedAceentColor,
-        backgroundColor: Colors.grey,
         bufferedColor: Colors.white.withValues(alpha: 0.66),
+        backgroundColor: Theme.of(context).disabledColor.withValues(alpha: 0.5),
       ),
       systemOverlaysOnEnterFullScreen: [],
       systemOverlaysAfterFullScreen: SystemUiOverlay.values,

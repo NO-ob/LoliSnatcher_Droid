@@ -47,7 +47,7 @@ class R34USHandler extends BooruHandler {
           : tags.contains('video') || (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
               ? MediaType.video
               : null;
-      
+
       String fullURL = thumbURL.replaceFirst('thumbnail', 'image').replaceFirst('thumbnail_', '').replaceFirst('.jpg', '.jpeg');
       if (mediaType == MediaType.video) fullURL = fullURL.replaceFirst(RegExp(r'img\d+'), 'video');
 
@@ -111,6 +111,6 @@ class R34USHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    return "${booru.baseURL}/index.php?r=posts/index&q=${tags.replaceAll(" ", "+")}&page=${pageNum}";
+    return "${booru.baseURL}/index.php?r=posts/index&q=${tags.replaceAll(" ", "+")}&page=$pageNum";
   }
 }
