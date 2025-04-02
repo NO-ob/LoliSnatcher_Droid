@@ -560,10 +560,8 @@ abstract class BooruHandler {
 
   ////////////////////////////////////////////////////////////////////////
 
-  // TODO
   bool get hasLoadItemSupport => false;
 
-  // TODO fetch and overwrite current item data when entering tag view with a newer / more complete data
   bool get shouldUpdateIteminTagView => false;
 
   Future<({BooruItem? item, bool failed, String? error})> loadItem({

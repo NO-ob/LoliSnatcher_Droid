@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -14,6 +15,7 @@ class PrivacyPage extends StatefulWidget {
 
 class _PrivacyPageState extends State<PrivacyPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
 
   bool blurOnLeave = false, useLockscreen = false, incognitoKeyboard = false;
   final TextEditingController autoLockTimeoutController = TextEditingController();
@@ -21,6 +23,8 @@ class _PrivacyPageState extends State<PrivacyPage> {
   @override
   void initState() {
     super.initState();
+
+    localAuthHandler.canCheckBiometrics().then((_) => setState(() {}));
 
     blurOnLeave = settingsHandler.blurOnLeave.value;
     useLockscreen = settingsHandler.useLockscreen.value;
@@ -57,7 +61,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
         body: Center(
           child: ListView(
             children: [
-              if (Platform.isAndroid || Platform.isIOS)
+              if (localAuthHandler.isSupportedPlatform)
                 SettingsToggle(
                   value: useLockscreen,
                   onChanged: (newValue) {

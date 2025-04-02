@@ -550,7 +550,6 @@ class LoliSync {
             for (int i = startFrom; i < ceiling; i++) {
               if (!syncKilled) {
                 final int offset = i * limit;
-                // TODO rework to send only missing ones?
                 yield 'Fetching items $offset / $favouritesCount';
                 final List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB('', offset.toString(), limit.toString(), 'ASC', 'loliSyncFav');
                 yield 'Fetched ${fetched.length} favourites';
@@ -558,7 +557,6 @@ class LoliSync {
                 for (int x = 0; x < fetched.length; x++) {
                   final int count = offset + x;
                   if (count < favouritesCount) {
-                    // TODO send in batches, not in singles
                     final String resp = await sendBooruItem(fetched.elementAt(x), favouritesCount, count);
                     yield '$count / $favouritesCount - $resp';
                   } else {

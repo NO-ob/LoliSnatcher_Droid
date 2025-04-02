@@ -8,8 +8,6 @@ import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
-// TODO loadItem support
-
 class WorldXyzHandler extends BooruHandler {
   WorldXyzHandler(super.booru, super.limit);
 

@@ -228,7 +228,6 @@ class SnatchHandler {
               ),
               leadingIcon: Icons.done_all,
               sideColor: failed.isNotEmpty ? Colors.red : ((exists.isNotEmpty || cancelled.isNotEmpty) ? Colors.yellow : Colors.green),
-              // TODO restart/retry buttons for failed items?
             );
           } else {
             FlashElements.showSnackbar(
@@ -248,7 +247,6 @@ class SnatchHandler {
               ),
               leadingIcon: Icons.done_all,
               sideColor: failed.isNotEmpty ? Colors.red : ((exists.isNotEmpty || cancelled.isNotEmpty) ? Colors.yellow : Colors.green),
-              //TODO restart/retry buttons for failed items?
             );
           }
         }

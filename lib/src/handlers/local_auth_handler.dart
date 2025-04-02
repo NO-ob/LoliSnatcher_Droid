@@ -7,14 +7,9 @@ import 'package:flutter/material.dart';
 
 import 'package:get_it/get_it.dart';
 import 'package:local_auth/local_auth.dart';
-import 'package:local_auth_android/local_auth_android.dart';
-import 'package:local_auth_darwin/local_auth_darwin.dart';
-import 'package:local_auth_windows/local_auth_windows.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
-
-// TODO update messages
 
 class LocalAuthHandler {
   LocalAuthHandler() {
@@ -32,6 +27,8 @@ class LocalAuthHandler {
 
   static void unregister() => GetIt.instance.unregister<LocalAuthHandler>();
 
+  final LocalAuthentication auth = LocalAuthentication();
+
   ValueNotifier<bool?> isAuthenticated = ValueNotifier(null);
   bool manuallyLocked = false;
   ValueNotifier<bool> deviceSupportsBiometrics = ValueNotifier(false);
@@ -41,15 +38,16 @@ class LocalAuthHandler {
   bool get isSupportedPlatform => Platform.isAndroid || Platform.isIOS || Platform.isWindows;
 
   Future<void> init() async {
-    deviceSupportsBiometrics.value = await canCheckBiometrics();
+    await canCheckBiometrics();
     await lock();
   }
 
-  Future<bool> canCheckBiometrics() async {
-    if (!isSupportedPlatform) return false;
-
-    final LocalAuthentication auth = LocalAuthentication();
-    return auth.canCheckBiometrics;
+  Future<void> canCheckBiometrics() async {
+    bool result = false;
+    if (isSupportedPlatform) {
+      result = await auth.canCheckBiometrics || await auth.isDeviceSupported();
+    }
+    deviceSupportsBiometrics.value = result;
   }
 
   Future<void> authenticate({
@@ -66,38 +64,15 @@ class LocalAuthHandler {
     }
 
     if (deviceSupportsBiometrics.value == true) {
-      final LocalAuthentication auth = LocalAuthentication();
       try {
         final bool authenticated = forceUnlock ||
             await auth.authenticate(
-              localizedReason: 'Please authenticate to use Lolisnatcher',
+              localizedReason: 'Please authenticate to use the app',
               options: const AuthenticationOptions(
                 stickyAuth: true,
                 useErrorDialogs: true,
                 biometricOnly: false,
               ),
-              authMessages: [
-                const IOSAuthMessages(
-                  cancelButton: 'Cancel',
-                  goToSettingsButton: 'Settings',
-                  goToSettingsDescription: 'To enable biometric authentication, go to Settings',
-                  localizedFallbackTitle: 'Use a Passcode',
-                  lockOut: 'Too many failed attempts. Try again later.',
-                ),
-                const AndroidAuthMessages(
-                  cancelButton: 'Cancel',
-                  goToSettingsButton: 'Settings',
-                  goToSettingsDescription: 'To enable biometric authentication, go to Settings',
-                  biometricHint: 'Use biometrics or enter PIN',
-                  biometricNotRecognized: 'Your biometrics could not be recognized',
-                  biometricSuccess: 'Authentication successful',
-                  biometricRequiredTitle: 'Authentication is required',
-                  deviceCredentialsRequiredTitle: 'Device credentials are required',
-                  deviceCredentialsSetupDescription: 'To enable biometric authentication, go to Settings',
-                  signInTitle: 'Sign in',
-                ),
-                const WindowsAuthMessages(),
-              ],
             );
 
         if (authenticated) {
@@ -127,7 +102,7 @@ class LocalAuthHandler {
   Future<void> lock({
     bool manually = false,
   }) async {
-    deviceSupportsBiometrics.value = await canCheckBiometrics();
+    await canCheckBiometrics();
     final bool shouldLock = deviceSupportsBiometrics.value && SettingsHandler.instance.useLockscreen.value;
 
     if (!shouldLock) {
@@ -155,7 +130,7 @@ class LocalAuthHandler {
     const int unlockDelayMs = 1000;
     final int timeSinceLastUnlock = DateTime.now().millisecondsSinceEpoch - (lastUnlockTime ?? 0);
 
-    // lock if surpassed leaveTimeout since last leave and unlockDelay since last unlock (to avoid locking again because native auth screen is also considered a leave)
+    // lock if leaveTimeoutMs passed since last leave and unlockDelayMs since last unlock (to avoid locking again because native auth screen is also considered a leave)
     if (leaveTimeoutMs != 0 && timeSinceLastLeave > leaveTimeoutMs && timeSinceLastUnlock > unlockDelayMs) {
       await lock();
     }
