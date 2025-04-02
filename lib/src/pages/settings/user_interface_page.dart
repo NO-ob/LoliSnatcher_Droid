@@ -202,7 +202,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     showBottomSearchbar = newValue;
                   });
                 },
-                title: 'Show bottom searchbar',
+                title: 'Show search bar in preview grid',
               ),
               SettingsToggle(
                 value: showSearchbarQuickActions,
@@ -211,7 +211,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     showSearchbarQuickActions = newValue;
                   });
                 },
-                title: 'Show quick actions when typing in tag suggestions',
+                title: 'Search view quick actions panel',
               ),
               SettingsToggle(
                 value: autofocusSearchbar,
@@ -220,7 +220,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     autofocusSearchbar = newValue;
                   });
                 },
-                title: 'Focus on search input after opening tag suggestions',
+                title: 'Search view input autofocus',
               ),
               SettingsToggle(
                 value: disableVibration,
@@ -230,7 +230,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: 'Disable vibration',
-                subtitle: const Text('(may still happen on some actions even when disabled)'),
+                subtitle: const Text('May still happen on some actions even when disabled'),
               ),
               SettingsTextInput(
                 controller: columnsPortraitController,
