@@ -119,7 +119,7 @@ class _TagViewState extends State<TagView> {
         cancelToken: cancelToken,
         withCapcthaCheck: !initial,
       );
-      if (res[1] == false) {
+      if (res.failed) {
         failedUpdate = true;
       }
       loadingUpdate = false;

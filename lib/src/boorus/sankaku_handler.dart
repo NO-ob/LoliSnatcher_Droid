@@ -128,7 +128,11 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  Future<List> loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
+  Future<({BooruItem? item, bool failed, String? error})> loadItem({
+    required BooruItem item,
+    CancelToken? cancelToken,
+    bool withCapcthaCheck = false,
+  }) async {
     try {
       await searchSetup();
       final response = await DioNetwork.get(
@@ -138,7 +142,7 @@ class SankakuHandler extends BooruHandler {
         customInterceptor: withCapcthaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Constants.defaultBrowserUserAgent) : null,
       );
       if (response.statusCode != 200) {
-        return [item, false, 'Invalid status code ${response.statusCode}'];
+        return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
         final Map<String, dynamic> current = response.data;
         Logger.Inst().log(current.toString(), className, 'updateFavourite', LogTypes.booruHandlerRawFetched);
@@ -147,15 +151,15 @@ class SankakuHandler extends BooruHandler {
           item.sampleURL = current['sample_url'];
           item.thumbnailURL = current['preview_url'];
         }
+        return (item: item, failed: false, error: null);
       }
     } catch (e) {
       if (e is DioException && CancelToken.isCancel(e)) {
-        return [item, null, 'Cancelled'];
+        return (item: null, failed: true, error: 'Cancelled');
       }
 
-      return [item, false, e.toString()];
+      return (item: null, failed: true, error: e.toString());
     }
-    return [item, true, null];
   }
 
   @override

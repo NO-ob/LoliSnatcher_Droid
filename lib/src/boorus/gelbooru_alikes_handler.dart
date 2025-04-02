@@ -123,7 +123,7 @@ class GelbooruAlikesHandler extends BooruHandler {
             : (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
                 ? MediaType.video
                 : null;
-        item.mediaType.value = MediaType.needsExtraRequest;
+        item.mediaType.value = MediaType.needToGuess;
       }
 
       return item;
@@ -411,7 +411,11 @@ class GelbooruAlikesHandler extends BooruHandler {
   }
 
   @override
-  Future loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
+  Future<({BooruItem? item, bool failed, String? error})> loadItem({
+    required BooruItem item,
+    CancelToken? cancelToken,
+    bool withCapcthaCheck = false,
+  }) async {
     try {
       final cookies = await getCookiesForPost(item.postURL);
 
@@ -430,22 +434,22 @@ class GelbooruAlikesHandler extends BooruHandler {
       );
 
       if (response.statusCode != 200) {
-        return [item, false, 'Invalid status code ${response.statusCode}'];
+        return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
         final html = parse(response.data);
         final sidebar = html.getElementById('tag-sidebar');
-        final copyrightTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright tag'));
+        final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright tag'));
         addTagsWithType(copyrightTags, TagType.copyright);
-        final characterTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-character tag'));
+        final characterTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-character tag'));
         addTagsWithType(characterTags, TagType.character);
-        final artistTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-artist tag'));
+        final artistTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-artist tag'));
         addTagsWithType(artistTags, TagType.artist);
-        final generalTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-general tag'));
+        final generalTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-general tag'));
         addTagsWithType(generalTags, TagType.none);
-        final metaTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-meta tag'));
+        final metaTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-meta tag'));
         addTagsWithType(metaTags, TagType.meta);
         item.isUpdated = true;
-        return [item, true, null];
+        return (item: item, failed: false, error: null);
       }
     } catch (e, s) {
       Logger.Inst().log(
@@ -455,7 +459,7 @@ class GelbooruAlikesHandler extends BooruHandler {
         LogTypes.exception,
         s: s,
       );
-      return [item, false, e.toString()];
+      return (item: null, failed: true, error: e.toString());
     }
   }
 
@@ -502,7 +506,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   }
 }
 
-List<String> tagsFromHtml(List<Element>? elements) {
+List<String> _tagsFromHtml(List<Element>? elements) {
   if (elements == null || elements.isEmpty) {
     return [];
   }

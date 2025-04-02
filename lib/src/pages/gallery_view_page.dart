@@ -23,6 +23,7 @@ import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/gallery/viewer_tutorial.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/load_item_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
@@ -212,7 +213,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                           // String fileURL = item.fileURL;
                           final bool isVideo = item.mediaType.value.isVideo;
                           final bool isImage = item.mediaType.value.isImageOrAnimation;
-                          final bool isNeedsExtraRequest = item.mediaType.value.isNeedsExtraRequest;
+                          final bool isNeedToGuess = item.mediaType.value.isNeedToGuess;
+                          final bool isNeedToLoadItem = item.mediaType.value.isNeedToLoadItem && searchHandler.currentBooruHandler.hasLoadItemSupport;
                           // print(fileURL);
                           // print('isVideo: '+isVideo.toString());
 
@@ -229,11 +231,20 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                                 itemWidget = VideoViewerPlaceholder(item: item);
                               }
                             }
-                          } else if (isNeedsExtraRequest) {
+                          } else if (isNeedToGuess) {
                             itemWidget = GuessExtensionViewer(
                               item: item,
                               onMediaTypeGuessed: (MediaType mediaType) {
                                 item.mediaType.value = mediaType;
+                                setState(() {});
+                              },
+                            );
+                          } else if (isNeedToLoadItem) {
+                            itemWidget = LoadItemViewer(
+                              item: item,
+                              handler: searchHandler.currentBooruHandler,
+                              onItemLoaded: (newItem) {
+                                searchHandler.currentFetched[index] = newItem;
                                 setState(() {});
                               },
                             );

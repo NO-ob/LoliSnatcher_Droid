@@ -6,15 +6,18 @@ import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/load_item_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
-class ItemViewerPage extends StatelessWidget {
+class ItemViewerPage extends StatefulWidget {
   const ItemViewerPage({
     required this.item,
     required this.booru,
@@ -25,11 +28,25 @@ class ItemViewerPage extends StatelessWidget {
   final Booru booru;
 
   @override
+  State<ItemViewerPage> createState() => _ItemViewerPageState();
+}
+
+class _ItemViewerPageState extends State<ItemViewerPage> {
+  late BooruItem _item;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _item = widget.item;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-    final PreferredSizeWidget appBar = _ItemViewerAppBar(item);
+    final PreferredSizeWidget appBar = _ItemViewerAppBar(_item);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -53,37 +70,49 @@ class ItemViewerPage extends StatelessWidget {
           onDismissed: (_) => Navigator.of(context).pop(),
           child: Center(
             child: ValueListenableBuilder(
-              valueListenable: item.mediaType,
+              valueListenable: _item.mediaType,
               builder: (context, mediaType, child) {
                 final bool isVideo = mediaType.isVideo;
                 final bool isImage = mediaType.isImageOrAnimation;
-                final bool isNeedsExtraRequest = mediaType.isNeedsExtraRequest;
+                final bool isNeedToGuess = mediaType.isNeedToGuess;
+
+                final booruHandler = BooruHandlerFactory().getBooruHandler([widget.booru], 20)[0] as BooruHandler;
+                final bool isNeedToLoadItem = mediaType.isNeedToLoadItem && booruHandler.hasLoadItemSupport;
 
                 late Widget itemWidget;
                 if (isImage) {
-                  itemWidget = ImageViewer(item, isStandalone: true, key: item.key);
+                  itemWidget = ImageViewer(_item, isStandalone: true, key: _item.key);
                 } else if (isVideo) {
                   if (settingsHandler.disableVideo) {
                     itemWidget = const Center(child: Text('Video Disabled', style: TextStyle(fontSize: 20)));
                   } else {
                     if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
-                      itemWidget = VideoViewer(item, isStandalone: true, enableFullscreen: true, key: item.key);
+                      itemWidget = VideoViewer(_item, isStandalone: true, enableFullscreen: true, key: _item.key);
                     } else {
-                      itemWidget = VideoViewerPlaceholder(item: item);
+                      itemWidget = VideoViewerPlaceholder(item: _item);
                     }
                   }
-                } else if (isNeedsExtraRequest) {
+                } else if (isNeedToGuess) {
                   itemWidget = GuessExtensionViewer(
-                    item: item,
+                    item: _item,
                     onMediaTypeGuessed: (MediaType mediaType) {
-                      item.mediaType.value = mediaType;
+                      _item.mediaType.value = mediaType;
+                    },
+                  );
+                } else if (isNeedToLoadItem) {
+                  itemWidget = LoadItemViewer(
+                    item: _item,
+                    handler: booruHandler,
+                    onItemLoaded: (newItem) {
+                      _item = newItem;
+                      setState(() {});
                     },
                   );
                 } else {
                   itemWidget = GuessExtensionViewer(
-                    item: item,
+                    item: _item,
                     onMediaTypeGuessed: (MediaType mediaType) {
-                      item.mediaType.value = mediaType;
+                      _item.mediaType.value = mediaType;
                     },
                   );
                   // itemWidget = UnknownViewerPlaceholder(item: item);

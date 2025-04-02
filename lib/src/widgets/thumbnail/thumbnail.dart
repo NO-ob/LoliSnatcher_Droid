@@ -214,7 +214,10 @@ class _ThumbnailState extends State<Thumbnail> {
         widget.item.mediaType.value.isAnimation && ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated : true);
 
     isThumbQuality = settingsHandler.previewMode == 'Thumbnail' ||
-        (isGifSampleNotAllowed || widget.item.mediaType.value.isVideo || widget.item.mediaType.value.isNeedsExtraRequest) ||
+        (isGifSampleNotAllowed ||
+            widget.item.mediaType.value.isVideo ||
+            widget.item.mediaType.value.isNeedToGuess ||
+            widget.item.mediaType.value.isNeedToLoadItem) ||
         (!widget.isStandalone && widget.item.fileURL == widget.item.sampleURL);
     thumbURL = isThumbQuality == true ? widget.item.thumbnailURL : widget.item.sampleURL;
     thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';

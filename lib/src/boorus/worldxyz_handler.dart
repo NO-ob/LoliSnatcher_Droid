@@ -232,7 +232,11 @@ class WorldXyzHandler extends BooruHandler {
   }
 
   @override
-  Future loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
+  Future<({BooruItem? item, bool failed, String? error})> loadItem({
+    required BooruItem item,
+    CancelToken? cancelToken,
+    bool withCapcthaCheck = false,
+  }) async {
     try {
       final cookies = await getCookies();
 
@@ -251,7 +255,7 @@ class WorldXyzHandler extends BooruHandler {
       );
 
       if (response.statusCode != 200) {
-        return [item, false, 'Invalid status code ${response.statusCode}'];
+        return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
         final Map<String, dynamic> current = response.data;
         final List<dynamic> tags = current['tags'] ?? [];
@@ -269,7 +273,7 @@ class WorldXyzHandler extends BooruHandler {
         item.sources = List<String>.from(current['data']?['sources'] ?? []);
 
         item.isUpdated = true;
-        return [item, true, null];
+        return (item: item, failed: false, error: null);
       }
     } catch (e, s) {
       Logger.Inst().log(
@@ -279,7 +283,7 @@ class WorldXyzHandler extends BooruHandler {
         LogTypes.exception,
         s: s,
       );
-      return [item, false, e.toString()];
+      return (item: null, failed: true, error: e.toString());
     }
   }
 

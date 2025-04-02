@@ -498,7 +498,7 @@ class SearchHandler {
         }
 
         final res = await currentBooruHandler.loadItem(item: item);
-        if (res[1] == false || item.tagsList.isEmpty) {
+        if (res.failed || res.item == null || res.item!.tagsList.isEmpty) {
           return item.isFavourite.value;
         }
       }
