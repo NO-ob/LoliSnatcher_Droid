@@ -813,7 +813,7 @@ class _LoliControlsState extends State<LoliControls> {
   }
 
   void _doubleTapAction() {
-    if (_doubleTapInfo == null || !controller.value.isInitialized) return;
+    if (_doubleTapInfo == null || !controller.value.isInitialized || holdingDown) return;
 
     // Detect on which side we tapped
     final double screenWidth = MediaQuery.sizeOf(context).width;
@@ -897,6 +897,7 @@ class _LoliControlsState extends State<LoliControls> {
 
       // keep top message block visible while holding down
       _doubleTapHideTimer?.cancel();
+      doubleTapped = false;
       holdingDown = true;
       speedSetManually = false;
       _doubleTapExtraMessage = '${longTapFastForwardSpeed.toStringAsFixed(1)}x';
@@ -915,6 +916,7 @@ class _LoliControlsState extends State<LoliControls> {
       // limit between 2 and 4
       longTapFastForwardSpeed = longTapFastForwardSpeed.clamp(2, 4);
       // update ui value immediately, real speed change will happen in a timer below
+      doubleTapped = false;
       holdingDown = true;
       speedSetManually = false;
       _doubleTapExtraMessage = '${longTapFastForwardSpeed.toStringAsFixed(1)}x';
