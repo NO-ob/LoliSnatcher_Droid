@@ -13,13 +13,11 @@ class TagSearchButton extends StatelessWidget {
     return GestureDetector(
       onSecondaryTap: () {
         searchHandler.searchTextController.clearComposing();
-        searchHandler.searchBoxFocus.unfocus();
         searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
       },
       onLongPress: () {
         ServiceHandler.vibrate();
         searchHandler.searchTextController.clearComposing();
-        searchHandler.searchBoxFocus.unfocus();
         searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
       },
       child: IconButton(
@@ -27,7 +25,6 @@ class TagSearchButton extends StatelessWidget {
         icon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface),
         onPressed: () {
           searchHandler.searchTextController.clearComposing();
-          searchHandler.searchBoxFocus.unfocus();
           searchHandler.searchAction(searchHandler.searchTextController.text, null);
         },
       ),

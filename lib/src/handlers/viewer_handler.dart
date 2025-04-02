@@ -30,9 +30,9 @@ class ViewerHandler {
   static void unregister() => GetIt.instance.unregister<ViewerHandler>();
 
   // Keys to get states of all currently built viewers
-  RxList<GlobalKey?> activeKeys = RxList([]);
+  final RxList<GlobalKey?> activeKeys = RxList([]);
   // Key of the currently viewed media widget
-  Rxn<GlobalKey> currentKey = Rxn(null);
+  final Rxn<GlobalKey> currentKey = Rxn(null);
 
   // Add media widget key
   void addViewed(Key? key) {
@@ -76,15 +76,15 @@ class ViewerHandler {
   }
 
   // Viewer state stuff
-  RxBool inViewer = false.obs; // is in viewerpage
-  RxBool displayAppbar = true.obs; // is gallery toolbar visible
-  RxBool isZoomed = false.obs; // is current item zoomed in
-  RxBool isLoaded = false.obs; // is current item loaded
-  Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view controller value
-  RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoViewer)
-  RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
+  final RxBool inViewer = false.obs; // is in viewerpage
+  final RxBool displayAppbar = true.obs; // is gallery toolbar visible
+  final RxBool isZoomed = false.obs; // is current item zoomed in
+  final RxBool isLoaded = false.obs; // is current item loaded
+  final Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view controller value
+  final RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoViewer)
+  final RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
 
-  RxBool showNotes = true.obs;
+  final RxBool showNotes = true.obs;
 
   void resetState() {
     inViewer.value = false;
@@ -108,16 +108,16 @@ class ViewerHandler {
       switch (state?.widget.runtimeType) {
         case const (ImageViewer):
           final widgetState = state! as ImageViewerState;
-          isZoomed.value = widgetState.isZoomed;
-          isLoaded.value = widgetState.isLoaded;
+          isZoomed.value = widgetState.isZoomed.value;
+          isLoaded.value = widgetState.isLoaded.value;
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
           break;
         case const (VideoViewer):
           final widgetState = state! as VideoViewerState;
-          isZoomed.value = widgetState.isZoomed;
+          isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isVideoInited;
-          isFullscreen.value = widgetState.chewieController?.isFullScreen ?? false;
+          isFullscreen.value = widgetState.chewieController.value?.isFullScreen ?? false;
           viewState.value = widgetState.viewController.value;
           break;
         case const (VideoViewerPlaceholder):
@@ -173,8 +173,11 @@ class ViewerHandler {
     isLoaded.value = value;
   }
 
-  void toggleToolbar(bool isLongTap) {
-    final bool newAppbarVisibility = !displayAppbar.value;
+  void toggleToolbar(
+    bool isLongTap, {
+    bool? forcedNewValue,
+  }) {
+    final bool newAppbarVisibility = forcedNewValue ?? !displayAppbar.value;
     displayAppbar.value = newAppbarVisibility;
 
     if (isLongTap) {
@@ -208,58 +211,3 @@ class ViewerHandler {
   //   });
   // }
 }
-
-// TODO Stop video when audio output device changes/removed
-// pubspec: audio_session: ^0.1.6+1
-// import 'package:audio_session/audio_session.dart';
-
-// late final audioSession;
-
-// in init: audioSessionInit();
-
-// void audioSessionInit() async {
-//   audioSession = await AudioSession.instance;
-//   await audioSession.configure(AudioSessionConfiguration(
-//     avAudioSessionCategory: AVAudioSessionCategory.playAndRecord,
-//     avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.allowBluetooth,
-//     avAudioSessionMode: AVAudioSessionMode.spokenAudio,
-//     avAudioSessionRouteSharingPolicy: AVAudioSessionRouteSharingPolicy.defaultPolicy,
-//     avAudioSessionSetActiveOptions: AVAudioSessionSetActiveOptions.none,
-//     androidAudioAttributes: const AndroidAudioAttributes(
-//       contentType: AndroidAudioContentType.movie,
-//       flags: AndroidAudioFlags.none,
-//       usage: AndroidAudioUsage.media,
-//     ),
-//     androidAudioFocusGainType: AndroidAudioFocusGainType.gain,
-//     androidWillPauseWhenDucked: true,
-//   ));
-//   await audioSession.setActive(true);
-
-//   audioSession.becomingNoisyEventStream.listen((_) {
-//       FlashElements.showSnackbar(
-//       context: context,
-//       title: Text(
-//         "Audio disconnected!",
-//         style: TextStyle(fontSize: 20)
-//       ),
-//       sideColor: Colors.yellow,
-//       leadingIcon: Icons.audiotrack,
-//     );
-//   });
-
-//   audioSession.devicesChangedEventStream.listen((event) {
-//     FlashElements.showSnackbar(
-//       context: context,
-//       title: Text(
-//         "Audio changed!",
-//         style: TextStyle(fontSize: 20)
-//       ),
-//       content: Text(
-//         'Devices A: ${event.devicesAdded} R: ${event.devicesRemoved}',
-//         style: TextStyle(fontSize: 14)
-//       ),
-//       sideColor: Colors.yellow,
-//       leadingIcon: Icons.audiotrack,
-//     );
-//   });
-// }

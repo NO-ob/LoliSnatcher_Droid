@@ -1,15 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class NetworkPage extends StatefulWidget {
   const NetworkPage({super.key});
@@ -110,31 +113,34 @@ class _NetworkPageState extends State<NetworkPage> {
                 SettingsTextInput(
                   controller: proxyAddressController,
                   title: 'Address',
-                  forceLabelOnTop: true,
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                   resetText: () => '',
                   pasteable: true,
+                  enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                 ),
                 SettingsTextInput(
                   controller: proxyUsernameController,
                   title: 'Username',
-                  forceLabelOnTop: true,
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                   resetText: () => '',
                   pasteable: true,
+                  enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                 ),
                 SettingsTextInput(
                   controller: proxyPasswordController,
                   title: 'Password',
-                  forceLabelOnTop: true,
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                   resetText: () => '',
                   pasteable: true,
                   obscureable: true,
+                  enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                 ),
               ],
               const SettingsButton(name: '', enabled: false),
               SettingsTextInput(
                 controller: userAgentController,
                 title: 'Custom user agent',
-                forceLabelOnTop: true,
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 resetText: () => '',
                 pasteable: true,
                 drawBottomBorder: false,
@@ -177,7 +183,11 @@ class _NetworkPageState extends State<NetworkPage> {
                 onChanged: (newValue) async {
                   selectedBooru = newValue;
                   if (newValue != null) {
-                    selectedBooruCookies = await CookieManager.instance().getCookies(url: WebUri(selectedBooru!.baseURL!));
+                    selectedBooruCookies =
+                        await CookieManager.instance(webViewEnvironment: webViewEnvironment).getCookies(url: WebUri(selectedBooru!.baseURL!));
+                    if (Platform.isWindows) {
+                      selectedBooruCookies.addAll(globalWindowsCookies[selectedBooru!.baseURL!] ?? []);
+                    }
                   } else {
                     selectedBooruCookies = [];
                   }
@@ -193,10 +203,11 @@ class _NetworkPageState extends State<NetworkPage> {
                     name:
                         '${cookie.name} = ${cookie.value}${cookie.expiresDate != null ? '\nExpires: ${DateTime.fromMillisecondsSinceEpoch(cookie.expiresDate!)}' : ''}',
                     action: () {
-                      CookieManager.instance().deleteCookie(
+                      CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteCookie(
                         url: WebUri(selectedBooru!.baseURL!),
                         name: cookie.name,
                       );
+                      globalWindowsCookies[selectedBooru!.baseURL!]?.remove(cookie);
                       selectedBooruCookies.removeAt(selectedBooruCookies.indexOf(cookie));
                       setState(() {});
                       FlashElements.showSnackbar(
@@ -215,13 +226,15 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
                 action: () async {
                   if (selectedBooru != null) {
-                    await CookieManager.instance().deleteCookies(url: WebUri(selectedBooru!.baseURL!));
+                    await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteCookies(url: WebUri(selectedBooru!.baseURL!));
+                    globalWindowsCookies[selectedBooru!.baseURL!]?.clear();
                     FlashElements.showSnackbar(
                       context: context,
                       title: Text('Cookies for ${selectedBooru?.name} deleted'),
                     );
                   } else {
-                    await CookieManager.instance().deleteAllCookies();
+                    await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteAllCookies();
+                    globalWindowsCookies.clear();
                     FlashElements.showSnackbar(
                       context: context,
                       title: const Text('All cookies deleted'),

@@ -1,9 +1,11 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:fpdart/fpdart.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/response_error.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
@@ -15,8 +17,12 @@ class InkBunnyHandler extends BooruHandler {
 
   String sessionToken = '';
   bool _gettingToken = false;
+
   @override
   bool get hasSizeData => true;
+
+  @override
+  bool get hasTagSuggestions => true;
 
   Future<bool> setSessionToken() async {
     //https://inkbunny.net/api_login.php?output_mode=xml&username=guest
@@ -31,7 +37,7 @@ class InkBunnyHandler extends BooruHandler {
       queryParams['password'] = booru.apiKey!;
     }
     try {
-      final response = await fetchSearch(Uri.parse(url), queryParams: queryParams);
+      final response = await fetchSearch(Uri.parse(url), '', queryParams: queryParams);
       final Map<String, dynamic> parsedResponse = response.data;
       if (parsedResponse['sid'] != null) {
         sessionToken = parsedResponse['sid'].toString();
@@ -57,7 +63,7 @@ class InkBunnyHandler extends BooruHandler {
   Future<bool> setRatingOptions() async {
     final String url = '${booru.baseURL}/api_userrating.php?output_mode=json&sid=$sessionToken&tag[2]=yes&tag[3]=yes&tag[4]=yes&tag[5]=yes';
     try {
-      final response = await fetchSearch(Uri.parse(url));
+      final response = await fetchSearch(Uri.parse(url), '');
       final Map<String, dynamic> parsedResponse = response.data;
       if (parsedResponse['sid'] != null) {
         if (sessionToken == parsedResponse['sid']) {
@@ -89,7 +95,7 @@ class InkBunnyHandler extends BooruHandler {
     Logger.Inst().log('Got submission ids: $ids', className, 'getSubmissionResponse', LogTypes.booruHandlerInfo);
     try {
       final Uri uri = Uri.parse("${booru.baseURL}/api_submissions.php?output_mode=json&sid=$sessionToken&submission_ids=${ids.join(",")}");
-      final response = await fetchSearch(uri);
+      final response = await fetchSearch(uri, '');
       Logger.Inst().log('Getting submission data: $uri', className, 'getSubmissionResponse', LogTypes.booruHandlerRawFetched);
       if (response.statusCode == 200) {
         Logger.Inst().log(response.data, className, 'getSubmissionResponse', LogTypes.booruHandlerRawFetched);
@@ -240,37 +246,53 @@ class InkBunnyHandler extends BooruHandler {
   }
 
   @override
-  Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
-    final List<String> searchTags = [];
+  Future<Either<ResponseError, List<TagSuggestion>>> getTagSuggestions(
+    String input, {
+    CancelToken? cancelToken,
+  }) async {
+    final List<TagSuggestion> searchTags = [];
     final String url = makeTagURL(input);
     try {
       final Uri uri = Uri.parse(url);
-      final response = await fetchSearch(uri);
-      Logger.Inst().log('$url ', className, 'tagSearch', LogTypes.booruHandlerInfo);
-      Logger.Inst().log(response.data, className, 'tagSearch', LogTypes.booruHandlerInfo);
+      final response = await fetchSearch(uri, '');
+      Logger.Inst().log('$url ', className, 'getTagSuggestions', LogTypes.booruHandlerInfo);
+      Logger.Inst().log(response.data, className, 'getTagSuggestions', LogTypes.booruHandlerInfo);
       if (response.statusCode == 200) {
         final parsedResponse = response.data;
         if (parsedResponse.containsKey('results')) {
           final tagObjects = parsedResponse['results'];
           if (tagObjects.length > 0) {
             for (int i = 0; i < tagObjects.length; i++) {
-              Logger.Inst().log("tag $i = ${tagObjects[i]["value"]}", className, 'tagSearch', LogTypes.booruHandlerInfo);
-              searchTags.add(tagObjects[i]['value'].replaceAll(' ', '_'));
+              Logger.Inst().log("tag $i = ${tagObjects[i]?["value"]}", className, 'getTagSuggestions', LogTypes.booruHandlerInfo);
+              searchTags.add(TagSuggestion(tag: tagObjects[i]?['value']?.replaceAll(' ', '_') ?? ''));
             }
           }
         }
+        return Right(searchTags);
       } else {
-        Logger.Inst().log(e.toString(), className, 'tagSearch', LogTypes.exception);
+        Logger.Inst().log('response.statusCode = ${response.statusCode}, url = $url', className, 'getTagSuggestions', LogTypes.exception);
+        return Left(
+          ResponseError(
+            message: 'getTagSuggestions error',
+            statusCode: response.statusCode,
+          ),
+        );
       }
     } catch (e, s) {
       Logger.Inst().log(
         e.toString(),
         className,
-        'tagSearch',
+        'getTagSuggestions',
         LogTypes.exception,
         s: s,
       );
+      return Left(
+        ResponseError(
+          message: 'getTagSuggestions error',
+          error: e,
+          stackTrace: s,
+        ),
+      );
     }
-    return searchTags;
   }
 }

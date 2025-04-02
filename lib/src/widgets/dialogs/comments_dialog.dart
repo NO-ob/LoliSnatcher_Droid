@@ -154,6 +154,8 @@ class _CommentsDialogState extends State<CommentsDialog> {
         onNotification: onScroll,
         child: Scrollbar(
           controller: scrollController,
+          interactive: true,
+          scrollbarOrientation: settingsHandler.handSide.value.isLeft ? ScrollbarOrientation.left : ScrollbarOrientation.right,
           child: RefreshIndicator(
             triggerMode: RefreshIndicatorTriggerMode.anywhere,
             strokeWidth: 4,

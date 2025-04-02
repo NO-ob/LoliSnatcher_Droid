@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
+import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
+
 enum _NavigationMenuOptions {
   goToInitial,
   enterCustomUrl,
@@ -29,7 +31,7 @@ class WebviewNavigationMenu extends StatefulWidget {
 }
 
 class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
-  final CookieManager cookieManager = CookieManager.instance();
+  final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
   final TextEditingController _urlController = TextEditingController();
 
   @override
@@ -88,7 +90,10 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
   }
 
   Future<void> _onListCookies(InAppWebViewController controller) async {
-    final List<Cookie> cookies = await cookieManager.getCookies(url: await controller.getUrl() ?? WebUri('https://flutter.dev'));
+    final List<Cookie> cookies = await cookieManager.getCookies(
+      url: await controller.getUrl() ?? WebUri('https://flutter.dev'),
+      webViewController: controller,
+    );
     if (!mounted) return;
 
     await showDialog(
@@ -118,7 +123,10 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
     // TODO doesn't work? maybe something related to android 12?
     final Uri url = await controller.getUrl() ?? WebUri('https://flutter.dev');
     print('Clearing cookies for $url');
-    await cookieManager.deleteCookies(url: WebUri.uri(url));
+    await cookieManager.deleteCookies(
+      url: WebUri.uri(url),
+      webViewController: controller,
+    );
     const String message = 'There were cookies. Now, they are gone!';
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

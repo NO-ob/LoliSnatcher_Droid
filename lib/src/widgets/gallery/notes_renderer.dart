@@ -48,9 +48,6 @@ class _NotesRendererState extends State<NotesRenderer> {
   CancelToken? cancelToken;
   final List<NoteBuild> notesMap = [];
 
-  StreamSubscription<BooruItem>? itemListener;
-  StreamSubscription? viewStateListener;
-
   bool get currentItemHasNotes => item.fileURL.isNotEmpty && searchHandler.currentBooruHandler.hasNotesSupport && item.hasNotes == true;
 
   @override
@@ -68,20 +65,9 @@ class _NotesRendererState extends State<NotesRenderer> {
     item = searchHandler.viewedItem.value;
     doCalculations(); // trigger calculations on init even if there is no item to init all values
     loadNotes();
-    itemListener = searchHandler.viewedItem.listen((BooruItem item) {
-      // TODO doesn't trigger for the first item after changing tabs on desktop
-      this.item = item;
-      notesMap.clear();
-      updateState();
-      if (cancelToken != null && !cancelToken!.isCancelled) {
-        cancelToken!.cancel();
-      }
-      loadNotes();
-    });
+    searchHandler.viewedItem.addListener(itemListener);
 
-    viewStateListener = viewerHandler.viewState.listen((_) {
-      triggerCalculations();
-    });
+    viewerHandler.viewState.addListener(viewStateListener);
 
     widget.pageController?.addListener(triggerCalculations);
   }
@@ -94,12 +80,27 @@ class _NotesRendererState extends State<NotesRenderer> {
     });
   }
 
+  void itemListener() {
+    // TODO doesn't trigger for the first item after changing tabs on desktop
+    item = searchHandler.viewedItem.value;
+    notesMap.clear();
+    updateState();
+    if (cancelToken != null && !cancelToken!.isCancelled) {
+      cancelToken!.cancel();
+    }
+    loadNotes();
+  }
+
+  void viewStateListener() {
+    triggerCalculations();
+  }
+
   @override
   void dispose() {
     cancelToken?.cancel();
     widget.pageController?.removeListener(triggerCalculations);
-    itemListener?.cancel();
-    viewStateListener?.cancel();
+    searchHandler.viewedItem.removeListener(itemListener);
+    viewerHandler.viewState.removeListener(viewStateListener);
     super.dispose();
   }
 

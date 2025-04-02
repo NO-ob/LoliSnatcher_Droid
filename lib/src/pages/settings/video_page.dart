@@ -17,7 +17,7 @@ class VideoSettingsPage extends StatefulWidget {
 class _VideoSettingsPageState extends State<VideoSettingsPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-  bool autoPlay = true, startVideosMuted = false, disableVideo = false, altVideoPlayerHwAccel = true;
+  bool autoPlay = true, startVideosMuted = false, disableVideo = false, longTapFastForwardVideo = false, altVideoPlayerHwAccel = true;
   VideoBackendMode videoBackendMode = SettingsHandler.isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.normal;
   late String altVideoPlayerVO, altVideoPlayerHWDEC, videoCacheMode;
 
@@ -28,6 +28,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     autoPlay = settingsHandler.autoPlayEnabled;
     startVideosMuted = settingsHandler.startVideosMuted;
     disableVideo = settingsHandler.disableVideo;
+    longTapFastForwardVideo = settingsHandler.longTapFastForwardVideo;
     videoBackendMode = settingsHandler.videoBackendMode;
     altVideoPlayerHwAccel = settingsHandler.altVideoPlayerHwAccel;
     altVideoPlayerVO = settingsHandler.altVideoPlayerVO;
@@ -43,6 +44,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     settingsHandler.autoPlayEnabled = autoPlay;
     settingsHandler.startVideosMuted = startVideosMuted;
     settingsHandler.disableVideo = disableVideo;
+    settingsHandler.longTapFastForwardVideo = longTapFastForwardVideo;
     settingsHandler.videoBackendMode = SettingsHandler.isDesktopPlatform ? VideoBackendMode.mpv : videoBackendMode;
     settingsHandler.altVideoPlayerHwAccel = altVideoPlayerHwAccel;
     settingsHandler.altVideoPlayerVO = altVideoPlayerVO;
@@ -133,6 +135,18 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
               const SettingsButton(
                 name: '[Experimental]',
                 icon: Icon(Icons.science),
+              ),
+              SettingsToggle(
+                value: longTapFastForwardVideo,
+                onChanged: (newValue) {
+                  setState(() {
+                    longTapFastForwardVideo = newValue;
+                  });
+                },
+                title: 'Long tap to fast forward video',
+                subtitle: const Text(
+                  'When this is enabled toolbar can be hidden with the tap when video controls are visible. [Experimental] May become default behavior in the future.',
+                ),
               ),
               if (!SettingsHandler.isDesktopPlatform)
                 SettingsDropdown(

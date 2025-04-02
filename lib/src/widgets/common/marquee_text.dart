@@ -25,7 +25,7 @@ class MarqueeText extends StatelessWidget {
 
   const MarqueeText.rich({
     required this.textSpan,
-    required TextStyle this.style,
+    required this.style,
     this.velocity = 45.0,
     this.curve = Curves.linear,
     this.blankSpace = 50.0,

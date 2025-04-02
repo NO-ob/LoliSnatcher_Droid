@@ -41,7 +41,7 @@ class Logger {
 
     if (isInit) {
       FlutterError.onError = (FlutterErrorDetails details) {
-        if (details.exception is DioException && (details.exception as DioException).type == DioExceptionType.cancel) {
+        if (details.exception is DioException && CancelToken.isCancel(details.exception as DioException)) {
           // ignore exceptions caused by cancelling dio requests (mostly for image loading)
           return;
         }
@@ -71,14 +71,14 @@ class Logger {
   static TalkerViewController? viewController;
 
   void log(
-    dynamic logStr,
+    dynamic object,
     String callerClass,
     String callerFunction,
     LogTypes? logType, {
     StackTrace? s,
   }) {
     if (!Tools.isTestMode) {
-      //  don't call handlers when in test mode
+      // don't call handlers when in test mode
       // don't check which types are ignored in test mode and output everything
       final bool allowedToLog = logType == null || SettingsHandler.instance.enabledLogTypes.contains(logType);
       if (!allowedToLog) {
@@ -87,9 +87,16 @@ class Logger {
       }
     }
 
-    // protect from exceptions when logStr is not a stringifiable object
-    // TODO still could throw exception for some objects? needs more testing
-    logStr = logStr is String ? logStr : '$logStr';
+    String logStr = '';
+    try {
+      logStr = object is String ? object : '$object';
+    } catch (_) {
+      logStr = object.runtimeType.toString();
+    }
+
+    if (logStr.length > 10000) {
+      logStr = '${logStr.substring(0, 10000)}...';
+    }
 
     final logLevel = logType?.logLevel ?? LogLevel.wtf;
     if (logLevel == LogLevel.info) {

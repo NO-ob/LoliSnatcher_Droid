@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:html/parser.dart';
 
@@ -9,8 +10,11 @@ import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/response_error.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
@@ -155,7 +159,7 @@ abstract class BooruHandler {
 
     Response response;
     try {
-      response = await fetchSearch(uri, withCaptchaCheck: withCaptchaCheck);
+      response = await fetchSearch(uri, tags, withCaptchaCheck: withCaptchaCheck);
       if (response.statusCode == 200) {
         // parse response data
         final List<BooruItem> newItems = await parseResponse(response);
@@ -191,14 +195,24 @@ abstract class BooruHandler {
     return fetched;
   }
 
-  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
+  Future<Response<dynamic>> fetchSearch(
+    Uri uri,
+    String input, {
+    bool withCaptchaCheck = true,
+    Map<String, dynamic>? queryParams,
+  }) async {
     final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    Logger.Inst().log('fetching: $uri with headers: $headers', className, 'Search', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log(
+      'fetching: $uri with headers: $headers',
+      className,
+      'Search',
+      LogTypes.booruHandlerSearchURL,
+    );
 
     return DioNetwork.get(
       uri.toString(),
@@ -293,14 +307,16 @@ abstract class BooruHandler {
 
   ////////////////////////////////////////////////////////////////////////
 
-  // TODO rename to getTagSuggestions
-  Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
-    final List<String> tags = [];
+  bool get hasTagSuggestions => false;
+
+  Future<Either<ResponseError, List<TagSuggestion>>> getTagSuggestions(String input, {CancelToken? cancelToken}) async {
+    final List<TagSuggestion> tags = [];
 
     final String url = makeTagURL(input);
     if (url.isEmpty) {
-      return tags;
+      return Left(ResponseError(message: 'invalid url: $url'));
     }
+
     Uri uri;
     try {
       uri = Uri.parse(url);
@@ -308,27 +324,42 @@ abstract class BooruHandler {
       Logger.Inst().log(
         'invalid url: $url',
         className,
-        'tagSearch',
+        'getTagSuggestions',
         LogTypes.booruHandlerFetchFailed,
         s: s,
       );
-      return tags;
+      return Left(
+        ResponseError(
+          message: 'invalid url: $url',
+          error: e,
+          stackTrace: s,
+        ),
+      );
     }
-    Logger.Inst().log('$url $uri', className, 'tagSearch', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url $uri', className, 'getTagSuggestions', LogTypes.booruHandlerSearchURL);
 
     Response response;
-    const int limit = 10;
+    const int limit = 20;
     try {
       response = await fetchTagSuggestions(uri, input, cancelToken: cancelToken);
       if (response.statusCode == 200) {
-        Logger.Inst().log('fetchTagSuggestions response: ${response.data}', className, 'tagSearch', null);
+        Logger.Inst().log('fetchTagSuggestions response: ${response.data}', className, 'getTagSuggestions', null);
         final rawTags = await parseTagSuggestionsList(response);
         for (int i = 0; i < rawTags.length; i++) {
           final rawTag = rawTags[i];
           try {
             if (tags.length < limit) {
-              final String parsedTag = Uri.decodeComponent(parseFragment(await parseTagSuggestion(rawTag, i) ?? '').text ?? '').trim();
-              if (parsedTag.isNotEmpty) {
+              TagSuggestion? parsedTag = await parseTagSuggestion(rawTag, i);
+              String parsedText = '';
+              try {
+                parsedText = parseFragment(parsedTag?.tag.trim()).text ?? '';
+                parsedText = Uri.decodeComponent(parsedText).trim();
+              } catch (_) {}
+              parsedTag = parsedTag?.copyWith(
+                tag: parsedText,
+              );
+
+              if (parsedTag != null && parsedTag.tag.isNotEmpty) {
                 // TODO add tag to taghandler before adding it to list
                 // addTagsWithType(parsedTag, tagType);
                 tags.add(parsedTag);
@@ -342,23 +373,46 @@ abstract class BooruHandler {
               LogTypes.booruHandlerRawFetched,
               s: s,
             );
+            return Left(
+              ResponseError(
+                message: 'parseTagSuggestion error',
+                error: e,
+                stackTrace: s,
+              ),
+            );
           }
         }
+      } else if (response.statusCode == 404) {
+        // return nothing on 404
+        return const Right([]);
       } else {
-        Logger.Inst().log('error fetching url: $url', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log('status: ${response.statusCode}', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log('response: ${response.data}', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('error fetching url: $url', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('status: ${response.statusCode}', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('response: ${response.data}', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
+        return Left(
+          ResponseError(
+            message: 'error fetching url: $url',
+            statusCode: response.statusCode,
+          ),
+        );
       }
     } catch (e, s) {
       Logger.Inst().log(
         e.toString(),
         className,
-        'tagSearch',
+        'getTagSuggestions',
         LogTypes.booruHandlerFetchFailed,
         s: s,
       );
+      return Left(
+        ResponseError(
+          message: 'getTagSuggestions error',
+          error: e,
+          stackTrace: s,
+        ),
+      );
     }
-    return tags;
+    return Right(tags);
   }
 
   Future<Response<dynamic>> fetchTagSuggestions(Uri uri, String input, {CancelToken? cancelToken}) async {
@@ -386,8 +440,8 @@ abstract class BooruHandler {
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  FutureOr<String?> parseTagSuggestion(dynamic responseItem, int index) {
-    return '';
+  FutureOr<TagSuggestion?> parseTagSuggestion(dynamic responseItem, int index) {
+    return null;
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -506,14 +560,16 @@ abstract class BooruHandler {
 
   ////////////////////////////////////////////////////////////////////////
 
-  // TODO
   bool get hasLoadItemSupport => false;
 
-  // TODO fetch and overwrite current item data when entering tag view with a newer / more complete data
   bool get shouldUpdateIteminTagView => false;
 
-  Future loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
-    return null;
+  Future<({BooruItem? item, bool failed, String? error})> loadItem({
+    required BooruItem item,
+    CancelToken? cancelToken,
+    bool withCapcthaCheck = false,
+  }) async {
+    return (item: item, failed: false, error: null);
   }
 
   ////////////////////////////////////////////////////////////////////////
@@ -750,5 +806,13 @@ abstract class BooruHandler {
     }
 
     return;
+  }
+
+  String? get metatagsCheatSheetLink => null;
+
+  List<MetaTag> availableMetaTags() {
+    return [
+      GenericMetaTag(),
+    ];
   }
 }

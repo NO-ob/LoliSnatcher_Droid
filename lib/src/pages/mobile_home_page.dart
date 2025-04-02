@@ -8,12 +8,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_inner_drawer/inner_drawer.dart';
-import 'package:get/get.dart' hide FirstWhereExt;
+import 'package:get/get.dart' hide FirstWhereOrNullExt;
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
+import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
@@ -26,14 +30,15 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
+import 'package:lolisnatcher/src/widgets/common/retry_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_box.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_button.dart';
+import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_secondary_booru_selector.dart';
@@ -157,11 +162,6 @@ class _MobileHomeState extends State<MobileHome> {
           innerDrawerCallback: (bool isOpen, InnerDrawerDirection? direction) {
             // print('$isOpen $direction');
             isDrawerOpened = isOpen;
-            if (!isOpen) {
-              if (searchHandler.searchBoxFocus.hasFocus) {
-                searchHandler.searchBoxFocus.unfocus();
-              }
-            }
           }, // return  true (open) or false (close)
 
           leftChild: settingsHandler.handSide.value.isLeft ? const MainDrawer() : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
@@ -208,16 +208,9 @@ class MainDrawer extends StatelessWidget {
               Obx(() {
                 if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
                   return Container(
-                    margin: const EdgeInsets.fromLTRB(2, 20, 2, 12),
-                    width: double.infinity,
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        //Tags/Search field
-                        TagSearchBox(),
-                        TagSearchButton(),
-                      ],
-                    ),
+                    height: MainSearchBar.height,
+                    margin: const EdgeInsets.fromLTRB(2, 24, 2, 12),
+                    child: const MainSearchBarWithActions('drawer'),
                   );
                 } else {
                   return const SizedBox.shrink();
@@ -225,144 +218,155 @@ class MainDrawer extends StatelessWidget {
               }),
               const TabSelector(),
               Expanded(
-                child: Listener(
-                  onPointerDown: (event) {
-                    // print("pointer down");
-                    if (searchHandler.searchBoxFocus.hasFocus) {
-                      searchHandler.searchBoxFocus.unfocus();
-                    }
-                  },
-                  child: ListView(
-                    controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
-                    clipBehavior: Clip.antiAlias,
-                    children: [
-                      const TabButtons(true, WrapAlignment.spaceEvenly),
-                      const TabBooruSelector(),
-                      const MergeBooruToggleAndSelector(),
-                      //
-                      Obx(() {
-                        if (settingsHandler.isDebug.value) {
-                          return SettingsButton(
-                            name: 'Open Alice',
-                            icon: const Icon(Icons.developer_board),
-                            action: () {
-                              settingsHandler.alice.showInspector();
-                            },
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }),
-                      //
-                      Obx(() {
-                        if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) && settingsHandler.enabledLogTypes.isNotEmpty) {
-                          return SettingsButton(
-                            name: 'Open Logger',
-                            icon: const Icon(Icons.print),
-                            action: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => LoggerViewPage(talker: Logger.talker),
-                                ),
-                              );
-                            },
-                            drawTopBorder: true,
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }),
-                      SettingsButton(
-                        name: 'Settings',
-                        icon: const Icon(Icons.settings),
-                        page: () => const SettingsPage(),
-                      ),
-                      Obx(() {
-                        if (settingsHandler.booruList.isNotEmpty &&
-                            searchHandler.list.isNotEmpty &&
-                            BooruType.saveable.contains(searchHandler.currentBooru.type) &&
-                            Tools.isOnPlatformWithWebviewSupport) {
-                          return SettingsButton(
-                            name: 'Open webview',
-                            icon: const Icon(Icons.public),
-                            action: () {
-                              final String? url = searchHandler.currentBooru.baseURL;
-                              final String userAgent = Tools.browserUserAgent;
-                              if (url == null || url.isEmpty) {
-                                return;
-                              }
-
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => InAppWebviewView(
-                                    initialUrl: url,
-                                    userAgent: userAgent,
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }),
-                      if (kDebugMode)
-                        SettingsToggle(
-                          value: settingsHandler.blurImages,
-                          onChanged: (newValue) {
-                            settingsHandler.blurImages = newValue;
-                            searchHandler.rootRestate?.call();
+                child: ListView(
+                  controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
+                  clipBehavior: Clip.antiAlias,
+                  children: [
+                    const SizedBox(height: 12),
+                    const TabButtons(true, WrapAlignment.spaceEvenly),
+                    const SizedBox(height: 12),
+                    const MergeBooruToggleAndSelector(),
+                    //
+                    Obx(() {
+                      if (settingsHandler.isDebug.value) {
+                        return SettingsButton(
+                          name: 'Open Alice',
+                          icon: const Icon(Icons.developer_board),
+                          action: () {
+                            settingsHandler.alice.showInspector();
                           },
-                          title: 'Blur [DEV]',
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
+                    //
+                    Obx(() {
+                      if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) && settingsHandler.enabledLogTypes.isNotEmpty) {
+                        return SettingsButton(
+                          name: 'Open Logger',
+                          icon: const Icon(Icons.print),
+                          action: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => LoggerViewPage(talker: Logger.talker),
+                              ),
+                            );
+                          },
+                          drawTopBorder: true,
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
+                    ValueListenableBuilder(
+                      valueListenable: LocalAuthHandler.instance.deviceSupportsBiometrics,
+                      builder: (_, deviceSupportsBiometrics, __) => ValueListenableBuilder(
+                        valueListenable: SettingsHandler.instance.useLockscreen,
+                        builder: (_, useLockscreen, child) {
+                          if (deviceSupportsBiometrics && useLockscreen) {
+                            return child!;
+                          }
+
+                          return const SizedBox.shrink();
+                        },
+                        child: SettingsButton(
+                          name: 'Lock app',
+                          icon: const Icon(Icons.lock),
+                          action: () => LocalAuthHandler.instance.lock(manually: true),
                         ),
-                      //
-                      Obx(() {
-                        if (settingsHandler.updateInfo.value != null && Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
-                          return SettingsButton(
-                            name: 'Update Available!',
-                            icon: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                const Icon(Icons.update),
-                                Positioned(
-                                  top: 1,
-                                  left: 1,
-                                  child: Center(
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
+                      ),
+                    ),
+                    SettingsButton(
+                      name: 'Settings',
+                      icon: const Icon(Icons.settings),
+                      page: () => const SettingsPage(),
+                    ),
+                    Obx(() {
+                      if (settingsHandler.booruList.isNotEmpty &&
+                          searchHandler.list.isNotEmpty &&
+                          BooruType.saveable.contains(searchHandler.currentBooru.type) &&
+                          Tools.isOnPlatformWithWebviewSupport) {
+                        return SettingsButton(
+                          name: 'Open webview',
+                          icon: const Icon(Icons.public),
+                          action: () {
+                            final String? url = searchHandler.currentBooru.baseURL;
+                            final String userAgent = Tools.browserUserAgent;
+                            if (url == null || url.isEmpty) {
+                              return;
+                            }
+
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => InAppWebviewView(
+                                  initialUrl: url,
+                                  userAgent: userAgent,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
+                    if (kDebugMode)
+                      SettingsToggle(
+                        value: settingsHandler.blurImages,
+                        onChanged: (newValue) {
+                          settingsHandler.blurImages = newValue;
+                          searchHandler.rootRestate?.call();
+                        },
+                        title: 'Blur [DEV]',
+                      ),
+                    //
+                    Obx(() {
+                      if (settingsHandler.updateInfo.value != null && Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
+                        return SettingsButton(
+                          name: 'Update Available!',
+                          icon: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              const Icon(Icons.update),
+                              Positioned(
+                                top: 1,
+                                left: 1,
+                                child: Center(
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(15),
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                            action: () async {
-                              settingsHandler.showUpdate(true);
-                            },
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      }),
-                      if (SettingsHandler.isDesktopPlatform)
-                        SettingsButton(
-                          name: 'Close the app',
-                          icon: const Icon(Icons.exit_to_app),
+                              ),
+                            ],
+                          ),
                           action: () async {
-                            // twice to trigger drawer close
-                            await Navigator.of(context).maybePop();
-                            await Future.delayed(const Duration(milliseconds: 400));
-                            await Navigator.of(context).maybePop();
+                            settingsHandler.showUpdate(true);
                           },
-                        ),
-                      //
-                      if (settingsHandler.enableDrawerMascot) const MascotImage(),
-                    ],
-                  ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
+                    if (SettingsHandler.isDesktopPlatform)
+                      SettingsButton(
+                        name: 'Close the app',
+                        icon: const Icon(Icons.exit_to_app),
+                        action: () async {
+                          // twice to trigger drawer close
+                          await Navigator.of(context).maybePop();
+                          await Future.delayed(const Duration(milliseconds: 400));
+                          await Navigator.of(context).maybePop();
+                        },
+                      ),
+                    //
+                    if (settingsHandler.enableDrawerMascot) const MascotImage(),
+                  ],
                 ),
               ),
             ],
@@ -386,13 +390,13 @@ class DownloadsDrawer extends StatefulWidget {
 }
 
 class _DownloadsDrawerState extends State<DownloadsDrawer> {
+  final SnatchHandler snatchHandler = SnatchHandler.instance;
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+
   bool updating = false;
 
   Future<void> onStartSnatching(BuildContext context, bool isLongTap) async {
-    final SnatchHandler snatchHandler = SnatchHandler.instance;
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final SearchHandler searchHandler = SearchHandler.instance;
-
     final bool permsRes = await getPerms();
     if (!permsRes) {
       FlashElements.showSnackbar(
@@ -433,12 +437,52 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
     }
   }
 
+  Future<void> onRetryFailedItem(
+    ({Booru booru, BooruItem item}) record,
+    bool isExists,
+    bool isLongTap,
+  ) async {
+    setState(() {
+      updating = true;
+    });
+
+    if (record.booru.type == BooruType.Sankaku) {
+      try {
+        // TODO detect when item data is outdated?
+        // TODO expand to other boorus?
+        final temp = BooruHandlerFactory().getBooruHandler([record.booru], 10);
+        final sankakuHandler = temp[0] as SankakuHandler;
+        await sankakuHandler.loadItem(item: record.item);
+      } catch (_) {}
+    }
+    snatchHandler.onRetryItem(
+      record,
+      cooldown: settingsHandler.snatchCooldown,
+      ignoreExists: isExists || isLongTap,
+    );
+
+    setState(() {
+      updating = false;
+    });
+  }
+
+  Future<void> onRetryAllFailed(bool isLongTap) async {
+    setState(() {
+      updating = true;
+    });
+
+    await snatchHandler.onRetryAll(
+      cooldown: settingsHandler.snatchCooldown,
+      ignoreExists: isLongTap,
+    );
+
+    setState(() {
+      updating = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final SnatchHandler snatchHandler = SnatchHandler.instance;
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final SearchHandler searchHandler = SearchHandler.instance;
-
     // TODO better design?
     // TODO detailed dl speed info
     // TODO rework snatchhandler? drop the queue and just use a single list?
@@ -458,9 +502,14 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                   final int queuesLength = snatchHandler.queuedList.length;
                   final int activeLength =
                       snatchHandler.current.value != null ? snatchHandler.current.value!.booruItems.length - snatchHandler.queueProgress.value : 0;
-                  final int totalAmount = queuesLength + activeLength;
+                  final int totalActiveAmount = queuesLength + activeLength;
 
-                  if (totalAmount == 0) {
+                  final int existsLength = snatchHandler.existsItems.length;
+                  final int failedLength = snatchHandler.failedItems.length;
+                  final int cancelledLength = snatchHandler.cancelledItems.length;
+                  final int totalRetryableAmount = existsLength + failedLength + cancelledLength;
+
+                  if (totalActiveAmount == 0 && totalRetryableAmount == 0) {
                     return const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -479,169 +528,240 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                     );
                   }
 
-                  return ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    itemCount: totalAmount,
-                    itemExtent: 200,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (activeLength != 0 && index < activeLength) {
-                        final item = snatchHandler.current.value!.booruItems[snatchHandler.queueProgress.value + index];
-                        return Stack(
-                          children: [
-                            if (index == 0)
-                              Positioned.fill(
-                                bottom: 0,
-                                left: 0,
-                                child: Obx(() {
-                                  if (snatchHandler.total.value == 0) {
-                                    return const SizedBox.shrink();
-                                  }
+                  if (totalActiveAmount != 0) {
+                    return ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      itemCount: totalActiveAmount,
+                      itemExtent: 200,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (activeLength != 0 && index < activeLength) {
+                          final item = snatchHandler.current.value!.booruItems[snatchHandler.queueProgress.value + index];
+                          return Stack(
+                            children: [
+                              if (index == 0)
+                                Positioned.fill(
+                                  bottom: 0,
+                                  left: 0,
+                                  child: Obx(() {
+                                    if (snatchHandler.total.value == 0) {
+                                      return const SizedBox.shrink();
+                                    }
 
-                                  return AnimatedProgressIndicator(
-                                    value: snatchHandler.currentProgress,
-                                    valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.5),
-                                    indicatorStyle: IndicatorStyle.linear,
-                                    borderRadius: 0,
-                                    animationDuration: const Duration(milliseconds: 100),
-                                  );
-                                }),
-                              ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: SizedBox(
-                                        width: 100,
-                                        height: 150,
-                                        child: ThumbnailBuild(
-                                          item: item,
-                                          selectable: false,
+                                    return AnimatedProgressIndicator(
+                                      value: snatchHandler.currentProgress,
+                                      valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.5),
+                                      indicatorStyle: IndicatorStyle.linear,
+                                      borderRadius: 0,
+                                      animationDuration: const Duration(milliseconds: 100),
+                                    );
+                                  }),
+                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: SizedBox(
+                                          width: 100,
+                                          height: 150,
+                                          child: ThumbnailBuild(
+                                            item: item,
+                                            selectable: false,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      child: Obx(
-                                        () => Column(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            if (snatchHandler.current.value!.booruItems.length != 1)
-                                              Text(
-                                                '${snatchHandler.queueProgress.value + index + 1}/${snatchHandler.current.value!.booruItems.length}',
-                                                style: const TextStyle(fontSize: 16),
-                                              ),
-                                            //
-                                            if (index == 0)
-                                              Padding(
-                                                padding: const EdgeInsets.only(top: 8),
-                                                child: CancelButton(
+                                      Expanded(
+                                        child: Obx(
+                                          () => Column(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            spacing: 8,
+                                            children: [
+                                              if (snatchHandler.current.value!.booruItems.length != 1)
+                                                Text(
+                                                  '${snatchHandler.queueProgress.value + index + 1}/${snatchHandler.current.value!.booruItems.length}',
+                                                  style: const TextStyle(fontSize: 16),
+                                                ),
+                                              //
+                                              if (index == 0)
+                                                CancelButton(
                                                   withIcon: true,
                                                   customIcon: Icons.cancel_outlined,
                                                   action: snatchHandler.onCancel,
                                                 ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
+                                  ),
+                                  //
+                                  if (index == 0)
+                                    Obx(
+                                      () => Padding(
+                                        padding: const EdgeInsets.only(left: 8, right: 8),
+                                        child: Row(
+                                          children: [
+                                            if (snatchHandler.total.value != 0)
+                                              Text(
+                                                '${Tools.formatBytes(
+                                                  snatchHandler.received.value,
+                                                  2,
+                                                  withSpace: false,
+                                                )}/${Tools.formatBytes(
+                                                  snatchHandler.total.value,
+                                                  2,
+                                                  withSpace: false,
+                                                )}',
+                                                style: const TextStyle(fontSize: 16),
+                                              )
+                                            else
+                                              const SizedBox.shrink(),
+                                            const Spacer(),
+                                            if (snatchHandler.total.value != 0)
+                                              Text(
+                                                '${(snatchHandler.currentProgress * 100.0).toStringAsFixed(2)}%',
+                                                style: const TextStyle(fontSize: 16),
+                                              )
+                                            else
+                                              const SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child: CircularProgressIndicator(),
                                               ),
                                           ],
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                ),
-                                //
-                                if (index == 0)
-                                  Obx(
-                                    () => Padding(
-                                      padding: const EdgeInsets.only(left: 8, right: 8),
-                                      child: Row(
-                                        children: [
-                                          if (snatchHandler.total.value != 0)
-                                            Text(
-                                              '${Tools.formatBytes(
-                                                snatchHandler.received.value,
-                                                2,
-                                                withSpace: false,
-                                              )}/${Tools.formatBytes(
-                                                snatchHandler.total.value,
-                                                2,
-                                                withSpace: false,
-                                              )}',
-                                              style: const TextStyle(fontSize: 16),
-                                            )
-                                          else
-                                            const SizedBox.shrink(),
-                                          const Spacer(),
-                                          if (snatchHandler.total.value != 0)
-                                            Text(
-                                              '${(snatchHandler.currentProgress * 100.0).toStringAsFixed(2)}%',
-                                              style: const TextStyle(fontSize: 16),
-                                            )
-                                          else
-                                            const SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(),
-                                            ),
-                                        ],
+                                ],
+                              ),
+                            ],
+                          );
+                        } else {
+                          final int queueIndex = lerpDouble(
+                            0,
+                            max(0, queuesLength - 1),
+                            (index - activeLength) / (queuesLength - 1),
+                          )!
+                              .toInt();
+                          final queue = snatchHandler.queuedList[queueIndex];
+                          final firstItem = queue.booruItems.first;
+                          final lastItem = queue.booruItems.last;
+
+                          return Row(
+                            children: [
+                              Stack(
+                                children: [
+                                  if (firstItem != lastItem) ...[
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                      child: SizedBox(
+                                        width: 100,
+                                        height: 134,
+                                        child: ThumbnailBuild(
+                                          item: lastItem,
+                                          selectable: false,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                              ],
-                            ),
-                          ],
-                        );
-                      } else {
-                        final int queueIndex = lerpDouble(
-                          0,
-                          max(0, queuesLength - 1),
-                          (index - activeLength) / (queuesLength - 1),
-                        )!
-                            .toInt();
-                        final queue = snatchHandler.queuedList[queueIndex];
-                        final firstItem = queue.booruItems.first;
-                        final lastItem = queue.booruItems.last;
-
-                        return Row(
-                          children: [
-                            Stack(
-                              children: [
-                                if (firstItem != lastItem) ...[
+                                  ],
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                    padding: const EdgeInsets.all(8),
                                     child: SizedBox(
                                       width: 100,
-                                      height: 134,
+                                      height: 150,
                                       child: ThumbnailBuild(
-                                        item: lastItem,
+                                        item: firstItem,
                                         selectable: false,
                                       ),
                                     ),
                                   ),
                                 ],
+                              ),
+                              Text(
+                                queue.booruItems.length == 1 ? 'Item #$queueIndex' : 'Batch #$queueIndex (${queue.booruItems.length})',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    );
+                  }
+
+                  if (totalRetryableAmount != 0) {
+                    return ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      itemCount: totalRetryableAmount,
+                      itemExtent: 200,
+                      itemBuilder: (BuildContext context, int index) {
+                        final bool isExists = index < existsLength;
+                        final bool isFailed = index < existsLength + failedLength;
+                        // final bool isCancelled = index < existsLength + failedLength + cancelledLength;
+
+                        final record = isExists
+                            ? snatchHandler.existsItems[index]
+                            : isFailed
+                                ? snatchHandler.failedItems[index - existsLength]
+                                : snatchHandler.cancelledItems[index - existsLength - failedLength];
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
                                 Padding(
                                   padding: const EdgeInsets.all(8),
                                   child: SizedBox(
                                     width: 100,
                                     height: 150,
                                     child: ThumbnailBuild(
-                                      item: firstItem,
+                                      item: record.item,
                                       selectable: false,
                                     ),
                                   ),
                                 ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    spacing: 8,
+                                    children: [
+                                      Text(
+                                        isExists
+                                            ? 'File already exists'
+                                            : isFailed
+                                                ? 'Failed to download'
+                                                : 'Cancelled by user',
+                                      ),
+                                      RetryButton(
+                                        text: isExists ? 'Save anyway' : 'Retry',
+                                        withIcon: true,
+                                        onTap: () => onRetryFailedItem(record, isExists, false),
+                                        onLongTap: () => onRetryFailedItem(record, isExists, true),
+                                      ),
+                                      DeleteButton(
+                                        text: 'Skip',
+                                        customIcon: Icons.skip_next,
+                                        action: () => snatchHandler.onRemoveRetryItem(record),
+                                        withIcon: true,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
                               ],
-                            ),
-                            Text(
-                              queue.booruItems.length == 1 ? 'Item #$queueIndex' : 'Batch #$queueIndex (${queue.booruItems.length})',
-                              style: const TextStyle(fontSize: 16),
                             ),
                           ],
                         );
-                      }
-                    },
-                  );
+                      },
+                    );
+                  }
+
+                  return const SizedBox.shrink();
                 }),
               ),
               //
@@ -661,6 +781,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                 child: Scrollbar(
                                   controller: scrollController,
                                   thumbVisibility: true,
+                                  interactive: true,
                                   child: SingleChildScrollView(
                                     controller: scrollController,
                                     clipBehavior: Clip.antiAlias,
@@ -691,6 +812,45 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                     icon: snatchHandler.active.value ? const Icon(Icons.pause) : const Icon(Icons.play_arrow),
                                                     name: snatchHandler.active.value ? 'Pause' : 'Unpause',
                                                     subtitle: snatchHandler.active.value ? const Text('(from next item in queue)') : null,
+                                                  ),
+                                          ),
+                                        ),
+                                        Obx(
+                                          () => AnimatedSize(
+                                            duration: const Duration(milliseconds: 200),
+                                            alignment: Alignment.bottomCenter,
+                                            child: snatchHandler.active.value ||
+                                                    (snatchHandler.existsItems.isEmpty &&
+                                                        snatchHandler.failedItems.isEmpty &&
+                                                        snatchHandler.cancelledItems.isEmpty)
+                                                ? const SizedBox.shrink()
+                                                : SettingsButton(
+                                                    drawBottomBorder: false,
+                                                    drawTopBorder: true,
+                                                    action: () => onRetryAllFailed(false),
+                                                    onLongPress: () => onRetryAllFailed(true),
+                                                    icon: const Icon(Icons.refresh),
+                                                    name:
+                                                        'Retry all (${snatchHandler.existsItems.length + snatchHandler.failedItems.length + snatchHandler.cancelledItems.length})',
+                                                    subtitle: const Text('Existing, failed or cancelled items'),
+                                                  ),
+                                          ),
+                                        ),
+                                        Obx(
+                                          () => AnimatedSize(
+                                            duration: const Duration(milliseconds: 200),
+                                            alignment: Alignment.bottomCenter,
+                                            child: snatchHandler.active.value ||
+                                                    (snatchHandler.existsItems.isEmpty &&
+                                                        snatchHandler.failedItems.isEmpty &&
+                                                        snatchHandler.cancelledItems.isEmpty)
+                                                ? const SizedBox.shrink()
+                                                : SettingsButton(
+                                                    drawBottomBorder: false,
+                                                    drawTopBorder: true,
+                                                    action: snatchHandler.onClearRetryableItems,
+                                                    icon: const Icon(Icons.delete_forever),
+                                                    name: 'Clear all retryable items',
                                                   ),
                                           ),
                                         ),
@@ -862,10 +1022,10 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final SettingsHandler settingsHandler = SettingsHandler.instance;
-      final SearchHandler searchHandler = SearchHandler.instance;
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
 
+    return Obx(() {
       if (settingsHandler.booruList.length < 2 || searchHandler.list.isEmpty) {
         return const SizedBox.shrink();
       }

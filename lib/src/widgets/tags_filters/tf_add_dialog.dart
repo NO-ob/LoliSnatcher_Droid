@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -70,8 +71,9 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
             inputType: TextInputType.text,
             clearable: true,
             pasteable: true,
-            forceLabelOnTop: true,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
             onSubmitted: onSubmit,
+            enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
           ),
         ),
       ],

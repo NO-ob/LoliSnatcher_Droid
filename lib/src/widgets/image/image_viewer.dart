@@ -36,26 +36,29 @@ class ImageViewer extends StatefulWidget {
 }
 
 class ImageViewerState extends State<ImageViewer> {
-  final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final SearchHandler searchHandler = SearchHandler.instance;
-  final ViewerHandler viewerHandler = ViewerHandler.instance;
+  final settingsHandler = SettingsHandler.instance;
+  final searchHandler = SearchHandler.instance;
+  final viewerHandler = ViewerHandler.instance;
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
 
   final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
-  bool isStopped = false, isFromCache = false, isLoaded = false, isViewed = false, isZoomed = false, firstBuild = true;
+  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true),
+      isLoaded = ValueNotifier(false),
+      isViewed = ValueNotifier(false),
+      isFromCache = ValueNotifier(false),
+      isZoomed = ValueNotifier(false),
+      isStopped = ValueNotifier(false);
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
-  List<String> stopReason = [];
+  final ValueNotifier<List<String>> stopReason = ValueNotifier([]);
 
-  ImageProvider? mainProvider;
+  final ValueNotifier<ImageProvider?> mainProvider = ValueNotifier(null);
   ImageStreamListener? imageListener;
   ImageStream? imageStream;
   String imageFolder = 'media';
   int? widthLimit;
   CancelToken? cancelToken;
-
-  StreamSubscription? noScaleListener, toggleQualityListener, indexListener;
 
   @override
   void didUpdateWidget(ImageViewer oldWidget) {
@@ -121,46 +124,36 @@ class ImageViewerState extends State<ImageViewer> {
     super.initState();
     viewerHandler.addViewed(widget.key);
 
-    isViewed = widget.isStandalone ||
+    isViewed.value = widget.isStandalone ||
         (settingsHandler.appMode.value.isMobile
             ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
             : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
-    indexListener = searchHandler.viewedIndex.listen((int value) {
-      final bool prevViewed = isViewed;
-      final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
-      final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
-        isViewed = true;
-      } else {
-        isViewed = false;
-      }
-
-      if (prevViewed != isViewed) {
-        if (!isViewed) {
-          // reset zoom if not viewed
-          resetZoom();
-        }
-        updateState();
-      }
-    });
+    searchHandler.viewedIndex.addListener(indexListener);
 
     // debug output
     viewController.outputStateStream.listen(onViewStateChanged);
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
   }
 
+  void indexListener() {
+    final bool prevViewed = isViewed.value;
+    final bool isCurrentIndex = searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem);
+    final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+
+    isViewed.value = settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem;
+
+    if (prevViewed != isViewed.value && !isViewed.value) {
+      // reset zoom if not viewed
+      resetZoom();
+    }
+  }
+
   bool get useFullImage => settingsHandler.galleryMode == 'Full Res' ? !widget.booruItem.toggleQuality.value : widget.booruItem.toggleQuality.value;
 
   Future<void> initViewer(bool ignoreTagsCheck) async {
-    noScaleListener = widget.booruItem.isNoScale.listen((bool value) {
-      killLoading([]);
-      initViewer(false);
-    });
+    widget.booruItem.isNoScale.addListener(noScaleListener);
 
-    toggleQualityListener = widget.booruItem.toggleQuality.listen((bool value) {
-      killLoading([]);
-      initViewer(false);
-    });
+    widget.booruItem.toggleQuality.addListener(toggleQualityListener);
 
     if (widget.booruItem.isHated && !ignoreTagsCheck) {
       if (widget.booruItem.isHated) {
@@ -172,21 +165,21 @@ class ImageViewerState extends State<ImageViewer> {
       }
     }
 
-    isStopped = false;
+    isStopped.value = false;
 
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     final MediaQueryData mQuery = MediaQuery.of(NavigationHandler.instance.navigatorKey.currentContext!);
     widthLimit = settingsHandler.disableImageScaling ? null : (mQuery.size.width * mQuery.devicePixelRatio * 2).round();
 
-    mainProvider ??= await getImageProvider();
+    mainProvider.value ??= await getImageProvider();
 
     imageStream?.removeListener(imageListener!);
-    imageStream = mainProvider!.resolve(ImageConfiguration.empty);
+    imageStream = mainProvider.value!.resolve(ImageConfiguration.empty);
     imageListener = ImageStreamListener(
       (imageInfo, syncCall) {
-        final prevIsLoaded = isLoaded;
-        isLoaded = true;
+        final prevIsLoaded = isLoaded.value;
+        isLoaded.value = true;
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           // without this check gifs will keep resetting zoom on every frame change
@@ -196,10 +189,6 @@ class ImageViewerState extends State<ImageViewer> {
           }
           viewerHandler.setLoaded(widget.key, true);
         });
-
-        if (!syncCall) {
-          updateState();
-        }
       },
       onChunk: (event) {
         onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
@@ -207,20 +196,24 @@ class ImageViewerState extends State<ImageViewer> {
       onError: (e, stack) => onError(e),
     );
     imageStream!.addListener(imageListener!);
-
-    updateState();
   }
 
-  void calcWidthLimit(BoxConstraints constraints) {
+  void noScaleListener() {
+    killLoading([]);
+    initViewer(false);
+  }
+
+  void toggleQualityListener() {
+    killLoading([]);
+    initViewer(false);
+  }
+
+  void calcWidthLimit(double maxWidth) {
     if (!mounted) {
       return;
     }
 
-    final int? prevWidthLimit = widthLimit;
-    widthLimit = settingsHandler.disableImageScaling ? null : (constraints.maxWidth * MediaQuery.devicePixelRatioOf(context) * 2).round();
-    if (prevWidthLimit != widthLimit) {
-      updateState(postFrame: true);
-    }
+    widthLimit = settingsHandler.disableImageScaling ? null : (maxWidth * MediaQuery.devicePixelRatioOf(context) * 2).round();
   }
 
   Future<ImageProvider> getImageProvider() async {
@@ -259,10 +252,7 @@ class ImageViewerState extends State<ImageViewer> {
             fileNameExtras: widget.booruItem.fileNameExtras,
             onError: onError,
             onCacheDetected: (bool didDetectCache) {
-              if (didDetectCache) {
-                isFromCache = true;
-                updateState();
-              }
+              isFromCache.value = didDetectCache;
             },
           )
         : CustomNetworkImage(
@@ -277,10 +267,7 @@ class ImageViewerState extends State<ImageViewer> {
             fileNameExtras: widget.booruItem.fileNameExtras,
             onError: onError,
             onCacheDetected: (bool didDetectCache) {
-              if (didDetectCache) {
-                isFromCache = true;
-                updateState();
-              }
+              isFromCache.value = didDetectCache;
             },
           );
 
@@ -304,39 +291,22 @@ class ImageViewerState extends State<ImageViewer> {
 
     startedAt.value = 0;
 
-    isLoaded = false;
-    isFromCache = false;
-    isStopped = true;
-    stopReason = reason;
+    isLoaded.value = false;
+    isFromCache.value = false;
+    isStopped.value = true;
+    stopReason.value = reason;
 
     viewerHandler.setLoaded(widget.key, false);
-
-    updateState();
   }
 
   @override
   void dispose() {
     disposables();
 
-    indexListener?.cancel();
-    indexListener = null;
+    searchHandler.viewedIndex.removeListener(indexListener);
 
     viewerHandler.removeViewed(widget.key);
     super.dispose();
-  }
-
-  void updateState({bool postFrame = false}) {
-    if (postFrame) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    } else {
-      if (mounted) {
-        setState(() {});
-      }
-    }
   }
 
   void disposables() {
@@ -351,8 +321,8 @@ class ImageViewerState extends State<ImageViewer> {
 
     // evict image from memory cache if it's media type or it's an animation and gifsAsThumbnails is disabled
     if (imageFolder == 'media' || (!widget.booruItem.mediaType.value.isAnimation || !settingsHandler.gifsAsThumbnails)) {
-      mainProvider?.evict();
-      // mainProvider?.evict().then((bool success) {
+      mainProvider.value?.evict();
+      // mainProvider.value?.evict().then((bool success) {
       //   if(success) {
       //     print('main image evicted');
       //   } else {
@@ -360,13 +330,10 @@ class ImageViewerState extends State<ImageViewer> {
       //   }
       // });
     }
-    mainProvider = null;
+    mainProvider.value = null;
 
-    noScaleListener?.cancel();
-    noScaleListener = null;
-
-    toggleQualityListener?.cancel();
-    toggleQualityListener = null;
+    widget.booruItem.isNoScale.removeListener(noScaleListener);
+    widget.booruItem.toggleQuality.removeListener(toggleQualityListener);
   }
 
   // debug functions
@@ -374,8 +341,8 @@ class ImageViewerState extends State<ImageViewer> {
     // print(scaleState);
 
     // manual zoom || double tap || double tap AFTER double tap
-    isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
-    viewerHandler.setZoomed(widget.key, isZoomed);
+    isZoomed.value = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
+    viewerHandler.setZoomed(widget.key, isZoomed.value);
   }
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
@@ -404,7 +371,7 @@ class ImageViewerState extends State<ImageViewer> {
   }
 
   void doubleTapZoom() {
-    if (!isLoaded) return;
+    if (!isLoaded.value) return;
     scaleController.scaleState = PhotoViewScaleState.covering;
   }
 
@@ -412,103 +379,150 @@ class ImageViewerState extends State<ImageViewer> {
   Widget build(BuildContext context) {
     // print('!!! Build media ${searchHandler.getItemIndex(widget.booruItem)} $isViewed !!!');
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          calcWidthLimit(constraints);
-          if (firstBuild) {
-            firstBuild = false;
-            initViewer(false);
-          }
-        });
-
+    return ValueListenableBuilder(
+      valueListenable: isViewed,
+      builder: (context, isViewed, child) {
         return Hero(
           tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
-          // without this every text element will have broken styles on first frames
-          child: Material(
+          child: child!,
+        );
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final mqSize = MediaQuery.sizeOf(context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            calcWidthLimit(mqSize.width);
+
+            if (isFirstBuild.value) {
+              isFirstBuild.value = false;
+              initViewer(false);
+            }
+          });
+
+          return Material(
+            // without this every text element will have broken styles on first frames
             color: Colors.black,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // TODO find a way to detect when main image is fully rendered to dispose this widget to free up memory
-                Thumbnail(
-                  item: widget.booruItem,
-                ),
+                Thumbnail(item: widget.booruItem),
                 //
-                MediaLoading(
-                  item: widget.booruItem,
-                  hasProgress: true,
-                  isFromCache: isFromCache,
-                  isDone: isLoaded,
-                  isTooBig: isTooBig > 0,
-                  isStopped: isStopped,
-                  stopReasons: stopReason,
-                  isViewed: isViewed,
-                  total: total,
-                  received: received,
-                  startedAt: startedAt,
-                  startAction: () {
-                    if (isTooBig == 1) {
-                      isTooBig = 2;
-                    }
-                    initViewer(true);
-                  },
-                  stopAction: () {
-                    killLoading(['Stopped by User']);
-                  },
-                ),
-                //
-                AnimatedSwitcher(
-                  duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-                  child: mainProvider != null
-                      ? Listener(
-                          onPointerSignal: (pointerSignal) {
-                            if (pointerSignal is PointerScrollEvent) {
-                              scrollZoomImage(pointerSignal.scrollDelta.dy);
-                            }
+                ValueListenableBuilder(
+                  valueListenable: isLoaded,
+                  builder: (context, isLoaded, _) {
+                    return ValueListenableBuilder(
+                      valueListenable: isViewed,
+                      builder: (context, isViewed, _) {
+                        return ValueListenableBuilder(
+                          valueListenable: isStopped,
+                          builder: (context, isStopped, _) {
+                            return ValueListenableBuilder(
+                              valueListenable: isFromCache,
+                              builder: (context, isFromCache, _) {
+                                return ValueListenableBuilder(
+                                  valueListenable: stopReason,
+                                  builder: (context, stopReason, _) {
+                                    return MediaLoading(
+                                      item: widget.booruItem,
+                                      hasProgress: true,
+                                      isFromCache: isFromCache,
+                                      isDone: isLoaded,
+                                      isTooBig: isTooBig > 0,
+                                      isStopped: isStopped,
+                                      stopReasons: stopReason,
+                                      isViewed: isViewed,
+                                      total: total,
+                                      received: received,
+                                      startedAt: startedAt,
+                                      startAction: () {
+                                        if (isTooBig == 1) {
+                                          isTooBig = 2;
+                                        }
+                                        initViewer(true);
+                                      },
+                                      stopAction: () {
+                                        killLoading(['Stopped by User']);
+                                      },
+                                    );
+                                  },
+                                );
+                              },
+                            );
                           },
-                          child: ImageFiltered(
-                            enabled: settingsHandler.blurImages,
-                            imageFilter: ImageFilter.blur(
-                              sigmaX: 30,
-                              sigmaY: 30,
-                              tileMode: TileMode.decal,
-                            ),
-                            child: AnimatedOpacity(
-                              opacity: isLoaded ? 1 : 0,
-                              duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-                              child: PhotoView(
-                                imageProvider: mainProvider,
-                                gaplessPlayback: true,
-                                loadingBuilder: (context, event) {
-                                  return const SizedBox.shrink();
-                                },
-                                errorBuilder: (_, error, __) {
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    onError(error);
-                                  });
-                                  return const SizedBox.shrink();
-                                },
-                                // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                                filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
-                                minScale: PhotoViewComputedScale.contained,
-                                maxScale: PhotoViewComputedScale.covered * 8,
-                                initialScale: PhotoViewComputedScale.contained,
-                                enableRotation: settingsHandler.allowRotation,
-                                basePosition: Alignment.center,
-                                controller: viewController,
-                                scaleStateController: scaleController,
-                              ),
-                            ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
+                        );
+                      },
+                    );
+                  },
+                ),
+                //
+                Listener(
+                  onPointerSignal: (pointerSignal) {
+                    if (mainProvider.value == null || !SettingsHandler.isDesktopPlatform) {
+                      return;
+                    }
+                    if (pointerSignal is PointerScrollEvent) {
+                      scrollZoomImage(pointerSignal.scrollDelta.dy);
+                    }
+                  },
+                  child: ImageFiltered(
+                    enabled: settingsHandler.blurImages,
+                    imageFilter: ImageFilter.blur(
+                      sigmaX: 30,
+                      sigmaY: 30,
+                      tileMode: TileMode.decal,
+                    ),
+                    child: ValueListenableBuilder(
+                      valueListenable: isLoaded,
+                      builder: (context, isLoaded, child) {
+                        return AnimatedOpacity(
+                          opacity: isLoaded ? 1 : 0,
+                          duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                          child: child,
+                        );
+                      },
+                      child: ValueListenableBuilder(
+                        valueListenable: mainProvider,
+                        builder: (context, mainProvider, _) {
+                          return AnimatedSwitcher(
+                            duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                            child: mainProvider == null
+                                ? const SizedBox.shrink()
+                                : PhotoView(
+                                    imageProvider: mainProvider,
+                                    gaplessPlayback: true,
+                                    loadingBuilder: (context, event) {
+                                      return const SizedBox.shrink();
+                                    },
+                                    errorBuilder: (_, error, __) {
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        onError(error);
+                                      });
+                                      return const SizedBox.shrink();
+                                    },
+                                    // to avoid flickering during hero transition
+                                    // TODO will cause scaling issues on desktop, fix when we'll get back to it
+                                    customSize: Size(mqSize.width, mqSize.height),
+                                    // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                                    filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
+                                    minScale: PhotoViewComputedScale.contained,
+                                    maxScale: PhotoViewComputedScale.covered * 8,
+                                    initialScale: PhotoViewComputedScale.contained,
+                                    enableRotation: settingsHandler.allowRotation,
+                                    basePosition: Alignment.center,
+                                    controller: viewController,
+                                    scaleStateController: scaleController,
+                                  ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

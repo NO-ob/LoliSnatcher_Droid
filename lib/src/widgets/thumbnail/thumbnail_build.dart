@@ -41,6 +41,7 @@ class ThumbnailBuild extends StatelessWidget {
           Thumbnail(
             item: item,
             isStandalone: true,
+            useHero: selectable,
           ),
           // Image(
           //   image: ResizeImage(NetworkImage(item.thumbnailURL),
@@ -59,40 +60,34 @@ class ThumbnailBuild extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Builder(
-                    builder: (context) {
-                      if (settingsHandler.isDebug.value == true) {
-                        return InkWell(
-                          onTap: () {
-                            Clipboard.setData(ClipboardData(text: item.toString()));
-                            FlashElements.showSnackbar(
-                              context: context,
-                              title: const Text('Copied!', style: TextStyle(fontSize: 20)),
-                              content: const Text('Booru item copied to clipboard'),
-                              sideColor: Colors.green,
-                              leadingIcon: Icons.copy,
-                              leadingIconColor: Colors.white,
-                              duration: const Duration(seconds: 2),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.66),
-                              borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5)),
-                            ),
-                            child: const Icon(
-                              Icons.copy,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                          ),
+                  if (settingsHandler.isDebug.value == true)
+                    InkWell(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: item.toString()));
+                        FlashElements.showSnackbar(
+                          context: context,
+                          title: const Text('Copied!', style: TextStyle(fontSize: 20)),
+                          content: const Text('Booru item copied to clipboard'),
+                          sideColor: Colors.green,
+                          leadingIcon: Icons.copy,
+                          leadingIconColor: Colors.white,
+                          duration: const Duration(seconds: 2),
                         );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    },
-                  ),
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.66),
+                          borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5)),
+                        ),
+                        child: const Icon(
+                          Icons.copy,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  //
                   const Spacer(),
                   Builder(
                     builder: (context) {
@@ -101,9 +96,12 @@ class ThumbnailBuild extends StatelessWidget {
                         final fetchedMap = handler.fetchedMap;
 
                         Booru? booru;
-                        for (final entry in fetchedMap.entries) {
-                          if (entry.value.contains(item)) {
-                            booru = entry.key;
+                        int? booruIndex;
+                        for (int i = 0; i < fetchedMap.entries.length; i++) {
+                          final entry = fetchedMap.entries.elementAt(i);
+                          if (entry.value.items.contains(item)) {
+                            booruIndex = i;
+                            booru = entry.value.booru;
                             break;
                           }
                         }
@@ -112,13 +110,31 @@ class ThumbnailBuild extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
 
+                        if (booruIndex != null) {
+                          booruIndex += 1;
+                        }
+
                         return Container(
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.66),
                             borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5)),
                           ),
-                          child: BooruFavicon(booru, size: 16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              if (booruIndex != null)
+                                Text(
+                                  '$booruIndex ',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white,
+                                    height: 1,
+                                  ),
+                                ),
+                              BooruFavicon(booru, size: 16),
+                            ],
+                          ),
                         );
                       }
 
@@ -205,21 +221,23 @@ class _ThumbnailBottomRightIcons extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SnatchHandler snatchHandler = SnatchHandler.instance;
 
+    final tagsData = settingsHandler.parseTagsList(
+      item.tagsList,
+      isCapped: false,
+    );
+    final bool isSound = tagsData.soundTags.isNotEmpty;
+    final bool isAi = tagsData.aiTags.isNotEmpty;
+    final bool hasNotes = item.hasNotes == true;
+    final bool hasComments = item.hasComments == true;
+
     return Obx(() {
       final IconData? itemIcon = Tools.getFileIcon(item.possibleMediaType.value ?? item.mediaType.value);
 
-      final tagsData = settingsHandler.parseTagsList(
-        item.tagsList,
-        isCapped: false,
-      );
       final bool? isFav = item.isFavourite.value;
       final bool isFavOrLoved = isFav == true || tagsData.lovedTags.isNotEmpty;
       // final bool isHated = tagsData.hatedTags.isNotEmpty;
-      final bool isSound = tagsData.soundTags.isNotEmpty;
-      final bool isAi = tagsData.aiTags.isNotEmpty;
-      final bool hasNotes = item.hasNotes == true;
-      final bool hasComments = item.hasComments == true;
       final bool isSnatched = item.isSnatched.value == true;
+
       final bool isInQueueToBeSnatched = snatchHandler.current.value?.booruItems.any((booruItem) => booruItem == item) == true;
       final bool isCurrentlyBeingSnatched =
           snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;

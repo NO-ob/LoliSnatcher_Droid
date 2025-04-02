@@ -7,8 +7,10 @@ import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -19,6 +21,9 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   bool get hasSizeData => true;
+
+  @override
+  bool get hasTagSuggestions => true;
 
   @override
   Map<String, TagType> get tagTypeMap => {
@@ -139,35 +144,48 @@ class GelbooruHandler extends BooruHandler {
 
   // ----------------- Tag suggestions and tag handler stuff
 
+  Map<String, TagType> get tagSuggestionsTypeMap => {
+        'metadata': TagType.meta,
+        'copyright': TagType.copyright,
+        'character': TagType.character,
+        'artist': TagType.artist,
+        'tag': TagType.none,
+      };
+
   @override
   String makeTagURL(String input) {
-    // EXAMPLE https://gelbooru.com/index.php?page=dapi&s=tag&q=index&name_pattern=nagat%25&limit=10&json=1
+    // EXAMPLE https://gelbooru.com/index.php?page=dapi&s=tag&q=index&name_pattern=nagat%25&limit=20&json=1
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
     final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
-    return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10&json=1$apiKeyStr$userIdStr';
+    return '${booru.baseURL}/index.php?page=autocomplete2&term=$input&type=tag_query&limit=20$apiKeyStr$userIdStr'; // limit doesnt work
+    // return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20&order=post_count&direction=desc&json=1$apiKeyStr$userIdStr'; // order doesnt work
   }
 
   @override
   List parseTagSuggestionsList(dynamic response) {
-    final parsedResponse = response.data['tag'] ?? [];
+    final parsedResponse = response.data is List ? response.data : response.data['tag'] ?? [];
     return parsedResponse;
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
-    final String tagStr = responseItem['name'] ?? '';
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
+    final String tagStr = responseItem['value'] ?? responseItem['name'] ?? '';
     if (tagStr.isEmpty) {
       return null;
     }
 
     // record tag data for future use
-    final String rawTagType = responseItem['type']?.toString() ?? '';
+    final String rawTagType = (responseItem['category'] ?? responseItem['type'])?.toString() ?? '';
     TagType tagType = TagType.none;
-    if (rawTagType.isNotEmpty && tagTypeMap.containsKey(rawTagType)) {
-      tagType = tagTypeMap[rawTagType] ?? TagType.none;
+    if (rawTagType.isNotEmpty && (tagTypeMap.containsKey(rawTagType) || tagSuggestionsTypeMap.containsKey(rawTagType))) {
+      tagType = tagTypeMap[rawTagType] ?? tagSuggestionsTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);
-    return tagStr;
+    return TagSuggestion(
+      tag: tagStr,
+      type: tagType,
+      count: int.tryParse((responseItem['count'] ?? responseItem['post_count'])?.toString() ?? '0') ?? 0,
+    );
   }
 
   @override
@@ -215,7 +233,7 @@ class GelbooruHandler extends BooruHandler {
       Logger.Inst().log(
         e.toString(),
         className,
-        'tagSearch',
+        'genTagObjects',
         LogTypes.exception,
         s: s,
       );
@@ -325,5 +343,43 @@ class GelbooruHandler extends BooruHandler {
       width: int.tryParse(current.getAttribute('width') ?? '0') ?? 0,
       height: int.tryParse(current.getAttribute('height') ?? '0') ?? 0,
     );
+  }
+
+  @override
+  String? get metatagsCheatSheetLink => 'https://gelbooru.com/index.php?page=wiki&s=view&id=26263';
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    return [
+      DanbooruGelbooruRatingMetaTag(),
+      SortMetaTag(
+        values: [
+          MetaTagValue(name: 'ID', value: 'id'),
+          MetaTagValue(name: 'ID (ascending)', value: 'id:asc'),
+          MetaTagValue(name: 'Score', value: 'score'),
+          MetaTagValue(name: 'Score (ascending)', value: 'score:asc'),
+          MetaTagValue(name: 'Rating', value: 'rating'),
+          MetaTagValue(name: 'Rating (ascending)', value: 'rating:asc'),
+          MetaTagValue(name: 'User', value: 'user'),
+          MetaTagValue(name: 'User (ascending)', value: 'user:asc'),
+          MetaTagValue(name: 'Height', value: 'height'),
+          MetaTagValue(name: 'Height (ascending)', value: 'height:asc'),
+          MetaTagValue(name: 'Width', value: 'width'),
+          MetaTagValue(name: 'Width (ascending)', value: 'width:asc'),
+          MetaTagValue(name: 'Source', value: 'source'),
+          MetaTagValue(name: 'Source (ascending)', value: 'source:asc'),
+          MetaTagValue(name: 'Updated', value: 'updated'),
+          MetaTagValue(name: 'Updated (ascending)', value: 'updated:asc'),
+          MetaTagValue(name: 'Random', value: 'random'), // can add seed at the end (sort:random:{seed})
+        ],
+      ),
+      ComparableNumberMetaTag(name: 'Score', keyName: 'score'),
+      StringMetaTag(name: 'ID', keyName: 'id'),
+      StringMetaTag(name: 'User', keyName: 'user'),
+      // StringMetaTag(name: 'Favourites of user ID (fav:{id})', keyName: 'fav'),
+      StringMetaTag(name: 'MD5', keyName: 'md5'),
+      ComparableNumberMetaTag(name: 'Width', keyName: 'width'),
+      ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
+    ];
   }
 }

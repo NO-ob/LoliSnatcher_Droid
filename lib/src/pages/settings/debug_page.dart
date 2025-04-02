@@ -9,13 +9,13 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -47,7 +47,7 @@ class _DebugPageState extends State<DebugPage> {
   Future<dynamic> showTagsManager(BuildContext context) async {
     return SettingsPageOpen(
       context: context,
-      page: () => const TagsManagerDialog(),
+      page: (_) => const TagsManagerDialog(),
     ).open();
   }
 
@@ -87,10 +87,10 @@ class _DebugPageState extends State<DebugPage> {
                 title: 'Show Performance graph',
               ),
               SettingsToggle(
-                value: settingsHandler.showFPS.value,
+                value: settingsHandler.showFps.value,
                 onChanged: (newValue) {
                   setState(() {
-                    settingsHandler.showFPS.value = newValue;
+                    settingsHandler.showFps.value = newValue;
                   });
                 },
                 title: 'Show FPS graph',
@@ -103,6 +103,15 @@ class _DebugPageState extends State<DebugPage> {
                   });
                 },
                 title: 'Show Image Stats',
+              ),
+              SettingsToggle(
+                value: settingsHandler.showVideoStats.value,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.showVideoStats.value = newValue;
+                  });
+                },
+                title: 'Show Video Stats',
               ),
               if (kDebugMode)
                 SettingsToggle(
@@ -293,7 +302,8 @@ class _DebugPageState extends State<DebugPage> {
                 name: 'Delete All Cookies',
                 icon: const Icon(Icons.cookie_outlined),
                 action: () async {
-                  await CookieManager.instance().deleteAllCookies();
+                  await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteAllCookies();
+                  globalWindowsCookies.clear();
                 },
               ),
 

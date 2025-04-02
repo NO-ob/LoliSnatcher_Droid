@@ -63,6 +63,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
               inputType: TextInputType.text,
               clearable: true,
               pasteable: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsTextInput(
               controller: snatcherAmountController,

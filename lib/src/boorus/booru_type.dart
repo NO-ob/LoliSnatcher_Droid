@@ -66,7 +66,7 @@ enum BooruType {
   String get alias {
     switch (this) {
       case World:
-        return 'World/XYZ';
+        return 'World/XYZ/Vault';
       case IdolSankaku:
         return 'Sankaku Idol';
       default:

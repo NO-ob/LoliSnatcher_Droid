@@ -22,9 +22,14 @@ class FurAffinityHandler extends BooruHandler {
   }
 
   @override
-  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
+  Future<Response<dynamic>> fetchSearch(
+    Uri uri,
+    String input, {
+    bool withCaptchaCheck = true,
+    Map<String, dynamic>? queryParams,
+  }) async {
     if (body == null) {
-      return super.fetchSearch(uri, withCaptchaCheck: withCaptchaCheck);
+      return super.fetchSearch(uri, input, withCaptchaCheck: withCaptchaCheck);
     }
 
     final String cookies = await getCookies() ?? '';

@@ -143,10 +143,7 @@ class ImageWriter {
               throw Exception('SAF file not found');
             }
           } else {
-            final File file = File('$path$fileName');
-            if (!await file.exists()) {
-              throw Exception('File not found');
-            }
+            await ServiceHandler.callMediaScanner(image.path);
           }
         }
       } catch (e, s) {
@@ -226,7 +223,7 @@ class ImageWriter {
         if (snatchResult == null) {
           existsList.add(snatched[i]);
         } else if (snatchResult is! String) {
-          if (snatchResult is DioException && snatchResult.type == DioExceptionType.cancel) {
+          if (snatchResult is DioException && CancelToken.isCancel(snatchResult)) {
             cancelledList.add(snatched[i]);
           } else {
             failedList.add(snatched[i]);

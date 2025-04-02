@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class TagsManagerListFilter extends StatelessWidget {
@@ -33,6 +34,7 @@ class TagsManagerListFilter extends StatelessWidget {
               clearable: true,
               pasteable: true,
               margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
+              enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
             ),
           ),
         ],

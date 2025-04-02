@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -67,9 +66,7 @@ class _HistoryListState extends State<HistoryList> {
     isLoading = true;
     setState(() {});
 
-    final List<Map<String, dynamic>> rawHistory =
-        (settingsHandler.dbEnabled && settingsHandler.searchHistoryEnabled) ? await settingsHandler.dbHandler.getSearchHistory() : [];
-    history = List.from(rawHistory.map(HistoryItem.fromMap));
+    history = (settingsHandler.dbEnabled && settingsHandler.searchHistoryEnabled) ? await settingsHandler.dbHandler.getSearchHistory() : [];
 
     history.sort(compareFavourites);
     filteredHistory = history;
@@ -134,20 +131,6 @@ class _HistoryListState extends State<HistoryList> {
     }
   }
 
-  String formatDate(String timestamp, {bool withTime = true}) {
-    final Duration timeZone = DateTime.now().timeZoneOffset;
-    final DateTime searchDate = DateTime.parse(timestamp).add(timeZone);
-
-    final String dayStr = searchDate.day.toString().padLeft(2, '0');
-    final String monthStr = searchDate.month.toString().padLeft(2, '0');
-    final String yearStr = searchDate.year.toString().substring(2);
-    final String hourStr = searchDate.hour.toString().padLeft(2, '0');
-    final String minuteStr = searchDate.minute.toString().padLeft(2, '0');
-    final String secondStr = searchDate.second.toString().padLeft(2, '0');
-    final String searchDateStr = withTime ? '$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr' : '$dayStr.$monthStr.$yearStr';
-    return searchDateStr;
-  }
-
   void showHistoryEntryActions(Widget row, HistoryItem entry, Booru? booru) {
     showDialog(
       context: context,
@@ -155,7 +138,7 @@ class _HistoryListState extends State<HistoryList> {
         return SettingsDialog(
           contentItems: [
             SizedBox(width: double.maxFinite, child: row),
-            Text('Last searched on: ${formatDate(entry.timestamp)}', textAlign: TextAlign.center),
+            Text('Last search: ${formatDate(entry.timestamp)}', textAlign: TextAlign.center),
             //
             const SizedBox(height: 20),
             ListTile(
@@ -166,8 +149,6 @@ class _HistoryListState extends State<HistoryList> {
               onTap: () {
                 if (booru != null) {
                   searchHandler.searchTextController.text = entry.searchText;
-                  // close the tab options dialog
-                  Navigator.of(context).pop(true);
                   searchHandler.searchAction(entry.searchText, booru);
                 } else {
                   FlashElements.showSnackbar(
@@ -177,10 +158,10 @@ class _HistoryListState extends State<HistoryList> {
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
                   );
+                  return;
                 }
 
-                // close the history list dialog
-                Navigator.of(context).pop(true);
+                Navigator.of(context).popUntil(ModalRoute.withName('/'));
               },
               leading: const Icon(Icons.open_in_browser),
               title: const Text('Open'),
@@ -195,7 +176,6 @@ class _HistoryListState extends State<HistoryList> {
               onTap: () {
                 if (booru != null) {
                   searchHandler.searchTextController.text = entry.searchText;
-                  Navigator.of(context).pop(true);
                   searchHandler.addTabByString(
                     entry.searchText,
                     customBooru: booru,
@@ -209,9 +189,10 @@ class _HistoryListState extends State<HistoryList> {
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
                   );
+                  return;
                 }
 
-                Navigator.of(context).pop(true);
+                Navigator.of(context).popUntil(ModalRoute.withName('/'));
               },
               leading: const Icon(Icons.add_circle_outline),
               title: const Text('Open in new tab'),
@@ -234,7 +215,7 @@ class _HistoryListState extends State<HistoryList> {
 
                 settingsHandler.dbHandler.setFavouriteSearchHistory(entry.id, newFavourite);
 
-                Navigator.of(context).pop(true);
+                Navigator.of(context).pop();
               },
               leading: Icon(entry.isFavourite ? Icons.favorite_border : Icons.favorite, color: entry.isFavourite ? Colors.grey : Colors.red),
               title: Text(entry.isFavourite ? 'Remove from Favourites' : 'Set as Favourite'),
@@ -256,7 +237,7 @@ class _HistoryListState extends State<HistoryList> {
                   leadingIcon: Icons.copy,
                   sideColor: Colors.green,
                 );
-                Navigator.of(context).pop(true);
+                Navigator.of(context).pop();
               },
               leading: const Icon(Icons.copy),
               title: const Text('Copy'),
@@ -271,7 +252,7 @@ class _HistoryListState extends State<HistoryList> {
               onTap: () async {
                 selectedEntries.removeWhere((e) => e.id == entry.id);
                 await deleteEntry(entry);
-                Navigator.of(context).pop(true);
+                Navigator.of(context).pop();
               },
               leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
               title: const Text('Delete'),
@@ -400,32 +381,16 @@ class _HistoryListState extends State<HistoryList> {
               clearable: true,
               pasteable: true,
               margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
           ),
           Center(
             child: IconButton(
-              icon: Stack(
-                alignment: Alignment.center,
-                children: [
-                  const Center(
-                    child: Icon(
-                      Icons.favorite,
-                      size: 40,
-                      color: Colors.red,
-                    ),
-                  ),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 2),
-                      child: Icon(
-                        showFavourites ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
-                        color: showFavourites ? Colors.white : Colors.white60,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                ],
+              icon: Icon(
+                Icons.favorite,
+                color: showFavourites ? Colors.red : null,
               ),
+              iconSize: 32,
               onPressed: () {
                 showFavourites = !showFavourites;
                 filterHistory();
@@ -615,4 +580,18 @@ class _HistoryListState extends State<HistoryList> {
       ),
     );
   }
+}
+
+String formatDate(String timestamp, {bool withTime = true}) {
+  final Duration timeZone = DateTime.now().timeZoneOffset;
+  final DateTime searchDate = DateTime.parse(timestamp).add(timeZone);
+
+  final String dayStr = searchDate.day.toString().padLeft(2, '0');
+  final String monthStr = searchDate.month.toString().padLeft(2, '0');
+  final String yearStr = searchDate.year.toString().substring(2);
+  final String hourStr = searchDate.hour.toString().padLeft(2, '0');
+  final String minuteStr = searchDate.minute.toString().padLeft(2, '0');
+  final String secondStr = searchDate.second.toString().padLeft(2, '0');
+  final String searchDateStr = withTime ? '$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr' : '$dayStr.$monthStr.$yearStr';
+  return searchDateStr;
 }

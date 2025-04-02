@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
@@ -12,15 +10,24 @@ class ActiveTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final SearchHandler searchHandler = SearchHandler.instance;
 
-    return Obx(() {
-      if (searchHandler.list.isEmpty) {
-        return const Text('LoliSnatcher');
-      } else {
-        return TabSelector(
+    return ValueListenableBuilder(
+      valueListenable: searchHandler.list,
+      builder: (context, list, child) {
+        if (list.isEmpty) {
+          return const Text('LoliSnatcher');
+        }
+
+        return child!;
+      },
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(filled: false),
+        ),
+        child: TabSelector(
           withBorder: false,
           color: Theme.of(context).appBarTheme.foregroundColor,
-        );
-      }
-    });
+        ),
+      ),
+    );
   }
 }

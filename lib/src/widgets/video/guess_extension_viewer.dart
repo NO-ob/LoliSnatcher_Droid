@@ -29,7 +29,6 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
   @override
   void initState() {
     super.initState();
-    cancelToken = CancelToken();
 
     startGuessing();
   }
@@ -43,8 +42,11 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
   Future<void> startGuessing() async {
     // check mimetype of original file url
     try {
+      failed = false;
+      cancelToken?.cancel();
+      cancelToken = CancelToken();
       currentExtension = 'head content-type';
-      setState(() {});
+      safeSetState();
       final mimeRes = await DioNetwork.head(
         widget.item.fileURL,
         cancelToken: cancelToken,
@@ -66,7 +68,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
           if (mediaType != null) {
             widget.item.fileExt = contentType!.split('/')[1];
             widget.onMediaTypeGuessed(mediaType);
-            setState(() {});
+            safeSetState();
             return;
           }
         }
@@ -96,7 +98,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
     for (final String extension in possibleExtensions) {
       try {
         currentExtension = extension;
-        setState(() {});
+        safeSetState();
 
         // TODO run multiple requests at once through Future.wait? (at least from the same category)
 
@@ -109,7 +111,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
         if (res.statusCode == 200) {
           widget.item.fileURL = '${widget.item.fileURL.replaceAll(RegExp(r'\.\w+$'), '')}.$extension';
           widget.onMediaTypeGuessed(MediaType.fromExtension(extension));
-          setState(() {});
+          safeSetState();
           return;
         }
 
@@ -120,7 +122,13 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
       }
     }
     failed = true;
-    setState(() {});
+    safeSetState();
+  }
+
+  void safeSetState() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -144,8 +152,9 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
                   failed ? failedText : defaultText,
@@ -155,28 +164,12 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
                 const SizedBox(height: 10),
                 if (failed) ...[
                   ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 20,
-                      ),
-                    ),
-                    onPressed: () {
-                      failed = false;
-                      startGuessing();
-                      setState(() {});
-                    },
+                    onPressed: startGuessing,
                     icon: const Icon(Icons.refresh),
                     label: const Text('Retry'),
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 20,
-                        vertical: 20,
-                      ),
-                    ),
                     onPressed: () {
                       launchUrlString(
                         widget.item.fileURL,
@@ -184,7 +177,18 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
                       );
                     },
                     icon: const Icon(Icons.public),
-                    label: const Text('Open in browser'),
+                    label: const Text('Open file in browser'),
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      launchUrlString(
+                        widget.item.postURL,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    icon: const Icon(Icons.public),
+                    label: const Text('Open post in browser'),
                   ),
                 ] else ...[
                   const Text(
@@ -198,7 +202,13 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
                     style: const TextStyle(fontSize: 20),
                   ),
                   const SizedBox(height: 10),
-                  const CircularProgressIndicator(),
+                  const Center(
+                    child: SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
                 ],
               ],
             ),

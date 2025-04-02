@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 
@@ -117,7 +118,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
             Expanded(
               child: Listener(
                 onPointerSignal: (pointerSignal) {
-                  if (pointerSignal is PointerScrollEvent) {
+                  if (SettingsHandler.isDesktopPlatform && pointerSignal is PointerScrollEvent) {
                     onMouseScroll(pointerSignal.scrollDelta.dy);
                   }
                 },

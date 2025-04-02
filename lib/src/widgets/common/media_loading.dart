@@ -216,17 +216,17 @@ class _MediaLoadingState extends State<MediaLoading> {
       }
     }
 
-    final String filesizeText = (hasProgressData && percentDone < 1) ? ('$loadedSize / $expectedSize') : '';
+    final String filesizeText = (hasProgressData && percentDone < 1) ? '$loadedSize / $expectedSize' : '';
 
     int expectedSpeed = 0;
     if (hasProgressData && _prevAmount > 0 && _lastAmount > 0) {
       expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / (nowMils - _prevTime))).round();
       // expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / speedCheckInterval)).round();
     }
-    final String expectedSpeedText = (hasProgressData && percentDone < 1) ? ('${Tools.formatBytes(expectedSpeed, 1)}/s') : '';
+    final String expectedSpeedText = (hasProgressData && percentDone < 1) ? '${Tools.formatBytes(expectedSpeed, 1)}/s' : '';
 
     final double expectedTime = hasProgressData ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed)) : 0;
-    final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? ('~${expectedTime.toStringAsFixed(1)} s') : '';
+    final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? '~${expectedTime.toStringAsFixed(1)} s' : '';
 
     final int sinceStartSeconds = (sinceStart / 1000).floor();
     final String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds}s ago' : '';

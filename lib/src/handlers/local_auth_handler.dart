@@ -1,117 +1,138 @@
-// import 'dart:async';
-// import 'dart:io';
+// ignore_for_file: depend_on_referenced_packages
 
-// import 'package:get/get.dart';
-// import 'package:get_it/get_it.dart';
-// import 'package:local_auth/local_auth.dart';
-// import 'package:local_auth_android/local_auth_android.dart';
-// import 'package:local_auth_ios/local_auth_ios.dart';
-// import 'package:local_auth_windows/local_auth_windows.dart';
+import 'dart:async';
+import 'dart:io';
 
-// // TODO test this more
+import 'package:flutter/material.dart';
 
-// class LocalAuthHandler {
-//   LocalAuthHandler() {
-//     getInitialBiometricsState();
-//     // _timer = Timer.periodic(const Duration(minutes: 1), (timer) { });
-//   }
-//   static LocalAuthHandler get instance => GetIt.instance<LocalAuthHandler>();
+import 'package:get_it/get_it.dart';
+import 'package:local_auth/local_auth.dart';
 
-//   static LocalAuthHandler register() {
-//     if (!GetIt.instance.isRegistered<LocalAuthHandler>()) {
-//       GetIt.instance.registerSingleton(LocalAuthHandler());
-//     }
-//     return instance;
-//   }
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
-//   static void unregister() => GetIt.instance.unregister<LocalAuthHandler>();
+class LocalAuthHandler {
+  LocalAuthHandler() {
+    init();
+  }
 
-//   RxnBool isLoggedIn = RxnBool(null);
-//   RxnBool deviceSupportsBiometrics = RxnBool(null);
+  static LocalAuthHandler get instance => GetIt.instance<LocalAuthHandler>();
 
-//   int lastLeaveTime = DateTime.now().millisecondsSinceEpoch;
+  static LocalAuthHandler register() {
+    if (!GetIt.instance.isRegistered<LocalAuthHandler>()) {
+      GetIt.instance.registerSingleton(LocalAuthHandler());
+    }
+    return instance;
+  }
 
-//   bool get isSupportedPlatform => Platform.isAndroid || Platform.isIOS || Platform.isWindows;
+  static void unregister() => GetIt.instance.unregister<LocalAuthHandler>();
 
-//   Future<void> getInitialBiometricsState() async {
-//     deviceSupportsBiometrics.value = await canCheckBiometrics();
-//     await logout();
-//   }
+  final LocalAuthentication auth = LocalAuthentication();
 
-//   Future<bool> canCheckBiometrics() async {
-//     if (!isSupportedPlatform) return false;
+  ValueNotifier<bool?> isAuthenticated = ValueNotifier(null);
+  bool manuallyLocked = false;
+  ValueNotifier<bool> deviceSupportsBiometrics = ValueNotifier(false);
 
-//     final LocalAuthentication auth = LocalAuthentication();
-//     return auth.canCheckBiometrics;
-//   }
+  int? lastLeaveTime, lastUnlockTime;
 
-//   final IOSAuthMessages iosMessages = const IOSAuthMessages(
-//     cancelButton: 'Cancel',
-//     goToSettingsButton: 'Settings',
-//     goToSettingsDescription: 'To enable fingerprint authentication, go to Settings',
-//     localizedFallbackTitle: 'Use a Passcode',
-//     lockOut: 'Too many failed attempts. Try again later.',
-//   );
+  bool get isSupportedPlatform => Platform.isAndroid || Platform.isIOS || Platform.isWindows;
 
-//   final AndroidAuthMessages androidMessages = const AndroidAuthMessages(
-//     cancelButton: 'Cancel',
-//     goToSettingsButton: 'Settings',
-//     goToSettingsDescription: 'To enable fingerprint authentication, go to Settings',
-//     biometricHint: 'Scan your fingerprint',
-//     biometricNotRecognized: 'Your fingerprint could not be recognized',
-//     biometricSuccess: 'Authentication successful',
-//     biometricRequiredTitle: 'Authentication is required',
-//     deviceCredentialsRequiredTitle: 'Device credentials are required',
-//     deviceCredentialsSetupDescription: 'To enable fingerprint authentication, go to Settings',
-//     signInTitle: 'Sign in',
-//   );
+  Future<void> init() async {
+    await canCheckBiometrics();
+    await lock();
+  }
 
-//   final WindowsAuthMessages windowsMessages = const WindowsAuthMessages();
+  Future<void> canCheckBiometrics() async {
+    bool result = false;
+    if (isSupportedPlatform) {
+      result = await auth.canCheckBiometrics || await auth.isDeviceSupported();
+    }
+    deviceSupportsBiometrics.value = result;
+  }
 
-//   Future<void> authenticate() async {
-//     if (deviceSupportsBiometrics.value == true) {
-//       final LocalAuthentication auth = LocalAuthentication();
-//       final bool authenticated = await auth.authenticate(
-//         localizedReason: 'Please authenticate to use Lolisnatcher',
-//         options: const AuthenticationOptions(
-//           stickyAuth: true,
-//           useErrorDialogs: true,
-//           biometricOnly: false,
-//         ),
-//         authMessages: [
-//           iosMessages,
-//           androidMessages,
-//           windowsMessages,
-//         ],
-//       );
-//       isLoggedIn.value = authenticated;
-//     } else {
-//       isLoggedIn.value = true;
-//     }
-//     return;
-//   }
+  Future<void> authenticate({
+    bool initial = false,
+    bool forceUnlock = false,
+  }) async {
+    if (!forceUnlock && initial && manuallyLocked) {
+      manuallyLocked = false;
+      return;
+    }
 
-//   Future<void> logout() async {
-//     isLoggedIn.value = true;
-//     return;
+    if (isAuthenticated.value == true) {
+      return;
+    }
 
-//     if (deviceSupportsBiometrics.value == true) {
-//       isLoggedIn.value = false; // SettingsHandler.instance.enableLockscreen ? false : true;
-//     } else {
-//       isLoggedIn.value = true;
-//     }
-//   }
+    if (deviceSupportsBiometrics.value == true) {
+      try {
+        final bool authenticated = forceUnlock ||
+            await auth.authenticate(
+              localizedReason: 'Please authenticate to use the app',
+              options: const AuthenticationOptions(
+                stickyAuth: true,
+                useErrorDialogs: true,
+                biometricOnly: false,
+              ),
+            );
 
-//   void onLeave() {
-//     lastLeaveTime = DateTime.now().millisecondsSinceEpoch;
-//   }
+        if (authenticated) {
+          lastUnlockTime = DateTime.now().millisecondsSinceEpoch;
+          lastLeaveTime = null;
+        }
+        await Future.delayed(const Duration(milliseconds: 300));
+        isAuthenticated.value = authenticated;
+      } catch (e, s) {
+        // TODO handle all errors
+        Logger.Inst().log(
+          e.toString(),
+          'LocalAuthHandler',
+          'authenticate',
+          LogTypes.exception,
+          s: s,
+        );
+      }
+    } else {
+      lastUnlockTime = DateTime.now().millisecondsSinceEpoch;
+      lastLeaveTime = null;
+      isAuthenticated.value = true;
+    }
+    return;
+  }
 
-//   Future<void> onReturn() async {
-//     const int oneMinute = 60 * 1000;
-//     final int timeSinceLastLeave = DateTime.now().millisecondsSinceEpoch - lastLeaveTime;
-//     if (timeSinceLastLeave > oneMinute) {
-//       await logout();
-//       await authenticate();
-//     }
-//   }
-// }
+  Future<void> lock({
+    bool manually = false,
+  }) async {
+    await canCheckBiometrics();
+    final bool shouldLock = deviceSupportsBiometrics.value && SettingsHandler.instance.useLockscreen.value;
+
+    if (!shouldLock) {
+      lastUnlockTime = DateTime.now().millisecondsSinceEpoch;
+    } else {
+      manuallyLocked = manually;
+    }
+
+    lastLeaveTime = null;
+    isAuthenticated.value = !shouldLock;
+  }
+
+  void onLeave() {
+    lastLeaveTime ??= DateTime.now().millisecondsSinceEpoch;
+  }
+
+  Future<void> onReturn() async {
+    if (lastLeaveTime == null) {
+      return;
+    }
+    await Future.delayed(const Duration(milliseconds: 10));
+    final int leaveTimeoutMs = 1000 * SettingsHandler.instance.autoLockTimeout;
+    final int timeSinceLastLeave = DateTime.now().millisecondsSinceEpoch - (lastLeaveTime ?? 0);
+
+    const int unlockDelayMs = 1000;
+    final int timeSinceLastUnlock = DateTime.now().millisecondsSinceEpoch - (lastUnlockTime ?? 0);
+
+    // lock if leaveTimeoutMs passed since last leave and unlockDelayMs since last unlock (to avoid locking again because native auth screen is also considered a leave)
+    if (leaveTimeoutMs != 0 && timeSinceLastLeave > leaveTimeoutMs && timeSinceLastUnlock > unlockDelayMs) {
+      await lock();
+    }
+  }
+}

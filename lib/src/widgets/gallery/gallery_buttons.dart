@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'package:preload_page_view/preload_page_view.dart';
@@ -23,7 +21,6 @@ class _GalleryButtonsState extends State<GalleryButtons> {
 
   bool isVisible = false, isLoaded = false;
   double bottomOffset = kToolbarHeight * 3;
-  StreamSubscription<bool>? appbarListener, loadedListener;
 
   @override
   void initState() {
@@ -33,24 +30,10 @@ class _GalleryButtonsState extends State<GalleryButtons> {
     bottomOffset = kToolbarHeight * (settingsHandler.galleryBarPosition == 'Top' ? 2 : 3);
 
     isVisible = settingsHandler.appMode.value.isMobile && viewerHandler.displayAppbar.value;
-    appbarListener = viewerHandler.displayAppbar.listen((bool value) {
-      if (settingsHandler.appMode.value.isMobile) {
-        isVisible = value;
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        updateState();
-      });
-    });
+    viewerHandler.displayAppbar.addListener(appbarListener);
 
     isLoaded = viewerHandler.isLoaded.value;
-    loadedListener = viewerHandler.isLoaded.listen((bool value) {
-      if (isLoaded != value) {
-        isLoaded = value;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          updateState();
-        });
-      }
-    });
+    viewerHandler.isLoaded.addListener(loadedListener);
   }
 
   void updateState() {
@@ -59,10 +42,29 @@ class _GalleryButtonsState extends State<GalleryButtons> {
     }
   }
 
+  void appbarListener() {
+    if (settingsHandler.appMode.value.isMobile) {
+      isVisible = viewerHandler.displayAppbar.value;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      updateState();
+    });
+  }
+
+  void loadedListener() {
+    final value = viewerHandler.isLoaded.value;
+    if (isLoaded != value) {
+      isLoaded = value;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        updateState();
+      });
+    }
+  }
+
   @override
   void dispose() {
-    appbarListener?.cancel();
-    loadedListener?.cancel();
+    viewerHandler.displayAppbar.removeListener(appbarListener);
+    viewerHandler.isLoaded.removeListener(loadedListener);
     super.dispose();
   }
 

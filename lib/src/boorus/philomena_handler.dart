@@ -1,8 +1,12 @@
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 class PhilomenaHandler extends BooruHandler {
   PhilomenaHandler(super.booru, super.limit);
+
+  @override
+  bool get hasTagSuggestions => true;
 
   @override
   String validateTags(String tags) {
@@ -90,7 +94,7 @@ class PhilomenaHandler extends BooruHandler {
     if (input.isEmpty) {
       input = '*';
     }
-    return '${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=10';
+    return '${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=20';
   }
 
   @override
@@ -100,7 +104,7 @@ class PhilomenaHandler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
     final List tagStringReplacements = [
       ['-colon-', ':'],
       ['-dash-', '-'],
@@ -114,6 +118,6 @@ class PhilomenaHandler extends BooruHandler {
     for (int x = 0; x < tagStringReplacements.length; x++) {
       tag = tag.replaceAll(tagStringReplacements[x][0], tagStringReplacements[x][1]);
     }
-    return tag;
+    return TagSuggestion(tag: tag);
   }
 }

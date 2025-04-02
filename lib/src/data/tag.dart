@@ -39,19 +39,6 @@ class Tag {
   }
 
   Color getColour() {
-    switch (tagType) {
-      case TagType.artist:
-        return Colors.red;
-      case TagType.copyright:
-        return Colors.purple;
-      case TagType.character:
-        return Colors.green;
-      case TagType.species:
-        return Colors.brown;
-      case TagType.meta:
-        return Colors.orange;
-      default:
-        return Colors.transparent;
-    }
+    return tagType.getColour();
   }
 }

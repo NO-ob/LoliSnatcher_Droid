@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/parser.dart';
@@ -8,6 +10,7 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class R34HentaiHandler extends ShimmieHandler {
   R34HentaiHandler(super.booru, super.limit);
@@ -75,7 +78,7 @@ class R34HentaiHandler extends ShimmieHandler {
 
   @override
   Future<bool> signIn() async {
-    final CookieManager cookieManager = CookieManager.instance();
+    final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
     List<String>? setCookies;
     try {
       final res = await DioNetwork.post(
@@ -114,6 +117,15 @@ class R34HentaiHandler extends ShimmieHandler {
           name: name,
           value: value,
         );
+        if (Platform.isWindows) {
+          globalWindowsCookies[WebUri(booru.baseURL!).host]?.add(
+            Cookie(
+              name: name,
+              value: value,
+              domain: WebUri(booru.baseURL!).host,
+            ),
+          );
+        }
       }
       return true;
     } else {
@@ -123,8 +135,11 @@ class R34HentaiHandler extends ShimmieHandler {
 
   @override
   Future<bool> isSignedIn() async {
-    final CookieManager cookieManager = CookieManager.instance();
+    final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
     final cookies = await cookieManager.getCookies(url: WebUri(booru.baseURL!));
+    if (Platform.isWindows) {
+      cookies.addAll(globalWindowsCookies[WebUri(booru.baseURL!).host] ?? []);
+    }
     final bool hasCookies = cookies.any((e) => e.name == 'shm_user') && cookies.any((e) => e.name == 'shm_session');
 
     if (!hasCookies) {
@@ -172,10 +187,13 @@ class R34HentaiHandler extends ShimmieHandler {
       }
     }
 
-    final CookieManager cookieManager = CookieManager.instance();
+    final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
     await cookieManager.deleteCookies(
       url: WebUri(booru.baseURL!),
     );
+    if (Platform.isWindows) {
+      globalWindowsCookies[WebUri(booru.baseURL!).host]?.clear();
+    }
 
     return success;
   }

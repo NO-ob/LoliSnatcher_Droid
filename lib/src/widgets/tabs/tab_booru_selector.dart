@@ -64,7 +64,7 @@ class TabBooruSelector extends StatelessWidget {
             }
 
             return Container(
-              padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.all(5) : const EdgeInsets.only(left: 16, right: 16),
+              padding: isDesktop ? const EdgeInsets.all(5) : const EdgeInsets.only(left: 16, right: 16),
               height: kMinInteractiveDimension,
               decoration: isCurrent
                   ? BoxDecoration(
