@@ -34,7 +34,6 @@ class R34USHandler extends BooruHandler {
     return document.querySelectorAll('div.thumbail-container > div');
   }
 
-  // user_id=24582; pass_hash=66f1d55e1e13efcf27bfe09736436af43a3b138f
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
     final current = responseItem.children[0];
@@ -97,6 +96,7 @@ class R34USHandler extends BooruHandler {
         item.fileWidth = double.tryParse(div.attributes['width'] ?? '');
         item.fileAspectRatio = (item.fileWidth != null && item.fileHeight != null) ? item.fileWidth! / item.fileHeight! : null;
         item.fileExt = Tools.getFileExt(item.fileURL);
+        item.possibleMediaType.value = null;
         item.mediaType.value = MediaType.fromExtension(item.fileExt);
 
         final sidebar = html.getElementById('tag-list');

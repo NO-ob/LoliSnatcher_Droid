@@ -491,14 +491,14 @@ class SearchHandler {
   }) async {
     final BooruItem item = currentFetched[itemIndex];
     if (item.isFavourite.value != null) {
-      if (item.tagsList.isEmpty) {
+      if (item.tagsList.isEmpty || item.mediaType.value.isNeedToLoadItem) {
         // try to update the item before favouriting, do nothing on fail
         if (!currentBooruHandler.hasLoadItemSupport) {
           return item.isFavourite.value;
         }
 
         final res = await currentBooruHandler.loadItem(item: item);
-        if (res.failed || res.item == null || res.item!.tagsList.isEmpty) {
+        if (res.failed || res.item == null || res.item!.tagsList.isEmpty || res.item!.mediaType.value.isNeedToLoadItem) {
           return item.isFavourite.value;
         }
       }
