@@ -19,13 +19,18 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
   /// You can call this constructor and build your own translation instance of this locale.
   /// Constructing via the enum [AppLocale.build] is preferred.
   /// [AppLocaleUtils.buildWithOverrides] is recommended for overriding.
-  Translations({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver})
-      : $meta = TranslationMetadata(
-          locale: AppLocale.en,
-          overrides: overrides ?? {},
-          cardinalResolver: cardinalResolver,
-          ordinalResolver: ordinalResolver,
-        ) {
+  Translations(
+      {Map<String, Node>? overrides,
+      PluralResolver? cardinalResolver,
+      PluralResolver? ordinalResolver,
+      TranslationMetadata<AppLocale, Translations>? meta})
+      : $meta = meta ??
+            TranslationMetadata(
+              locale: AppLocale.en,
+              overrides: overrides ?? {},
+              cardinalResolver: cardinalResolver,
+              ordinalResolver: ordinalResolver,
+            ) {
     $meta.setFlatMapFunction(_flatMapFunction);
   }
 
@@ -37,6 +42,8 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
   dynamic operator [](String key) => $meta.getTranslation(key);
 
   late final Translations _root = this; // ignore: unused_field
+
+  Translations $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => Translations(meta: meta ?? this.$meta);
 
   // Translations
   String get locale => TranslationOverrides.string(_root.$meta, 'locale', {}) ?? 'en';

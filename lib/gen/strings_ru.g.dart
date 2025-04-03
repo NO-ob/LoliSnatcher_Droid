@@ -15,13 +15,18 @@ class TranslationsRu extends Translations {
   /// You can call this constructor and build your own translation instance of this locale.
   /// Constructing via the enum [AppLocale.build] is preferred.
   /// [AppLocaleUtils.buildWithOverrides] is recommended for overriding.
-  TranslationsRu({Map<String, Node>? overrides, PluralResolver? cardinalResolver, PluralResolver? ordinalResolver})
-      : $meta = TranslationMetadata(
-          locale: AppLocale.ru,
-          overrides: overrides ?? {},
-          cardinalResolver: cardinalResolver,
-          ordinalResolver: ordinalResolver,
-        ),
+  TranslationsRu(
+      {Map<String, Node>? overrides,
+      PluralResolver? cardinalResolver,
+      PluralResolver? ordinalResolver,
+      TranslationMetadata<AppLocale, Translations>? meta})
+      : $meta = meta ??
+            TranslationMetadata(
+              locale: AppLocale.ru,
+              overrides: overrides ?? {},
+              cardinalResolver: cardinalResolver,
+              ordinalResolver: ordinalResolver,
+            ),
         super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
     super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
     $meta.setFlatMapFunction(_flatMapFunction);
@@ -36,6 +41,9 @@ class TranslationsRu extends Translations {
   dynamic operator [](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
 
   late final TranslationsRu _root = this; // ignore: unused_field
+
+  @override
+  TranslationsRu $copyWith({TranslationMetadata<AppLocale, Translations>? meta}) => TranslationsRu(meta: meta ?? this.$meta);
 
   // Translations
   @override

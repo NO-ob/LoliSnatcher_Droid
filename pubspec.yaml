@@ -11,6 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   alice_lightweight: ^3.9.0
   app_links: ^6.4.0
   auto_size_text_plus: ^3.0.2
@@ -83,8 +85,8 @@ dependencies:
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
   share_plus: ^10.1.4 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
-  slang_flutter: ^4.4.0
-  slang: ^4.4.1
+  slang_flutter: ^4.6.0
+  slang: ^4.6.0
   sqflite_common_ffi: ^2.3.5
   sqflite: ^2.4.2
   statsfl: ^2.3.0
@@ -99,8 +101,6 @@ dependencies:
   video_player: ^2.9.5
   waterfall_flow: ^3.1.1
   xml: ^6.5.0
-  flutter_localizations:
-    sdk: flutter
 
 
 
