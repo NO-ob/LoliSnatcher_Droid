@@ -59,6 +59,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
         item: item,
         onMediaTypeGuessed: (MediaType mediaType) {
           item.mediaType.value = mediaType;
+          item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
           updateState();
         },
       );
@@ -79,6 +80,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
         item: item,
         onMediaTypeGuessed: (MediaType mediaType) {
           item.mediaType.value = mediaType;
+          item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
           updateState();
         },
       );

@@ -97,6 +97,8 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
                     item: _item,
                     onMediaTypeGuessed: (MediaType mediaType) {
                       _item.mediaType.value = mediaType;
+                      _item.possibleMediaType.value = mediaType.isUnknown ? _item.possibleMediaType.value : null;
+                      setState(() {});
                     },
                   );
                 } else if (isNeedToLoadItem) {
@@ -113,6 +115,8 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
                     item: _item,
                     onMediaTypeGuessed: (MediaType mediaType) {
                       _item.mediaType.value = mediaType;
+                      _item.possibleMediaType.value = mediaType.isUnknown ? _item.possibleMediaType.value : null;
+                      setState(() {});
                     },
                   );
                   // itemWidget = UnknownViewerPlaceholder(item: item);

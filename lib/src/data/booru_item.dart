@@ -211,6 +211,7 @@ enum MediaType {
       case 'jpeg':
       case 'png':
       case 'webp':
+      case 'avif':
         return MediaType.image;
 
       case 'mp4':

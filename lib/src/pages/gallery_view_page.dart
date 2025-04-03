@@ -236,6 +236,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                               item: item,
                               onMediaTypeGuessed: (MediaType mediaType) {
                                 item.mediaType.value = mediaType;
+                                item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
                                 setState(() {});
                               },
                             );
@@ -253,6 +254,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                               item: item,
                               onMediaTypeGuessed: (MediaType mediaType) {
                                 item.mediaType.value = mediaType;
+                                item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
                                 setState(() {});
                               },
                             );
