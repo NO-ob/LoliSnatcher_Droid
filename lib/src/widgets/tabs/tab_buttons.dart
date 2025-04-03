@@ -23,7 +23,7 @@ class TabButtons extends StatelessWidget {
   Future<dynamic> showHistory(BuildContext context) {
     return SettingsPageOpen(
       context: context,
-      page: () => const HistoryList(),
+      page: (_) => const HistoryList(),
     ).open();
   }
 
@@ -32,13 +32,12 @@ class TabButtons extends StatelessWidget {
     await SettingsPageOpen(
       context: context,
       asBottomSheet: true,
-      page: () => const AddNewTabDialog(),
+      page: (_) => const AddNewTabDialog(),
     ).open();
   }
 
   @override
   Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
 
     final Color iconColor = Theme.of(context).colorScheme.secondary;
@@ -91,7 +90,8 @@ class TabButtons extends StatelessWidget {
           icon: const Icon(Icons.add_circle_outline),
           color: iconColor,
           onPressed: () {
-            final String defaultText = searchHandler.currentBooru.defTags?.isNotEmpty == true ? searchHandler.currentBooru.defTags! : settingsHandler.defTags;
+            final String defaultText =
+                searchHandler.currentBooru.defTags?.isNotEmpty == true ? searchHandler.currentBooru.defTags! : SettingsHandler.instance.defTags;
             // add new tab to the list end and switch to it
             searchHandler.searchTextController.text = defaultText;
             searchHandler.addTabByString(defaultText, switchToNew: true);
@@ -116,7 +116,7 @@ class TabButtons extends StatelessWidget {
           SettingsPageOpen(
             context: context,
             asBottomSheet: true,
-            page: () => const PageNumberDialog(),
+            page: (_) => const PageNumberDialog(),
           ).open();
         },
       );

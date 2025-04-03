@@ -137,6 +137,9 @@ class MediaKitVideoPlayer extends VideoPlayerPlatform {
       case DataSourceType.network:
       case DataSourceType.file:
       case DataSourceType.contentUri:
+        if (dataSource.uri == null) {
+          throw ArgumentError('uri must not be null');
+        }
         resource = dataSource.uri!;
         break;
 
@@ -159,6 +162,11 @@ class MediaKitVideoPlayer extends VideoPlayerPlatform {
   /// Returns a Stream of [VideoEventType]s.
   @override
   Stream<VideoEvent> videoEventsFor(int textureId) {
+    if (_streamControllers[textureId] == null) {
+      throw StateError(
+        'VideoPlayer for textureId $textureId is not found, Check if its disposed.',
+      );
+    }
     return _streamControllers[textureId]!.stream;
   }
 
@@ -209,6 +217,11 @@ class MediaKitVideoPlayer extends VideoPlayerPlatform {
   /// Returns a widget displaying the video with a given textureId.
   @override
   Widget buildView(int textureId) {
+    if (_videoControllers[textureId] == null) {
+      throw StateError(
+        'VideoPlayer for textureId $textureId is not found, Check if its disposed.',
+      );
+    }
     return Video(
       key: ValueKey(_videoControllers[textureId]!),
       controller: _videoControllers[textureId]!,

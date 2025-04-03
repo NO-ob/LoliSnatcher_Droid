@@ -336,10 +336,10 @@ class LoliSync {
     syncKilled = true;
   }
 
-  Future<String> sendBooruBatch(List<BooruItem> items, int favouritesCount, int offset) async {
+  Future<String> sendBooruBatch(List<BooruItem> items, int count, int offset) async {
     final int lastIndex = offset + items.length;
-    Logger.Inst().log('Sending batch $offset-$lastIndex / $favouritesCount', 'LoliSync', 'sendBooruItem', LogTypes.loliSyncInfo);
-    final HttpClientRequest request = await HttpClient().post(ip, port, '/lolisync/boorubatch?amount=$favouritesCount&offset=$offset&size=${items.length}')
+    Logger.Inst().log('Sending batch $offset-$lastIndex / $count', 'LoliSync', 'sendBooruItem', LogTypes.loliSyncInfo);
+    final HttpClientRequest request = await HttpClient().post(ip, port, '/lolisync/boorubatch?amount=$count&offset=$offset&size=${items.length}')
       ..headers.contentType = ContentType.json
       ..write(jsonEncode(items.map((e) => e.toJson()).toList()));
     final HttpClientResponse response = await request.close();
@@ -475,7 +475,15 @@ class LoliSync {
     }
   }
 
-  Stream<String> startSync(String ipOverride, String portOverride, List<String> toSync, int favSkip, String tabsMode, String tagsMode) async* {
+  Stream<String> startSync(
+    String ipOverride,
+    String portOverride,
+    List<String> toSync,
+    int favSkip,
+    int snatchedSkip,
+    String tabsMode,
+    String tagsMode,
+  ) async* {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
     final TagHandler tagHandler = TagHandler.instance;
@@ -487,28 +495,39 @@ class LoliSync {
     for (int i = 0; i < toSync.length; i++) {
       switch (toSync.elementAt(i)) {
         case 'Favouritesv2':
-          yield 'Sync Starting $address';
-          yield 'Preparing favourites data';
-          final int favouritesCount = await settingsHandler.dbHandler.getFavouritesCount();
-          yield 'Favourites count: $favouritesCount';
-          if (favouritesCount > 0) {
-            const int limit = 100;
-            final int ceiling = (favouritesCount / limit).ceil();
+        case 'Snatched':
+          final isSnatched = toSync.elementAt(i) == 'Snatched';
 
-            // If favSkip is set, start from skipAmount/limit, but limitted to (last 1000 items (ceiling - 1))
-            final int startFrom = min(ceiling - 1, (favSkip == 0 ? 0 : (favSkip / limit).floor()));
+          yield 'Sync starting $address';
+          yield 'Preparing data';
+          final int count = isSnatched ? await settingsHandler.dbHandler.getSnatchedCount() : await settingsHandler.dbHandler.getFavouritesCount();
+          yield 'Items count: $count';
+          if (count > 0) {
+            const int limit = 100;
+            final int ceiling = (count / limit).ceil();
+            final skip = isSnatched ? snatchedSkip : favSkip;
+
+            // If skip is set, start from skipAmount/limit, but limitted to (last 1000 items (ceiling - 1))
+            final int startFrom = min(ceiling - 1, (skip == 0 ? 0 : (skip / limit).floor()));
 
             for (int i = startFrom; i < ceiling; i++) {
               if (!syncKilled) {
                 final int offset = i * limit;
                 // TODO rework to send only missing ones?
-                yield 'Fetching favourites $offset / $favouritesCount';
-                final List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB('', offset.toString(), limit.toString(), 'ASC', 'loliSyncFav');
+                yield 'Fetching items $offset / $count';
+                final List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB(
+                  '',
+                  offset.toString(),
+                  limit.toString(),
+                  'ASC',
+                  isSnatched ? 'loliSyncSnatch' : 'loliSyncFav',
+                  isDownloads: isSnatched,
+                );
                 Logger.Inst().log('fetched is ${fetched.length} i is $i', 'LoliSync', 'startSync', LogTypes.loliSyncInfo);
 
-                final String resp = await sendBooruBatch(fetched, favouritesCount, offset);
-                final int count = offset + fetched.length;
-                yield '$offset-$count / $favouritesCount - $resp';
+                final String resp = await sendBooruBatch(fetched, count, offset);
+                final int updatedCount = offset + fetched.length;
+                yield '$offset-$updatedCount / $updatedCount - $resp';
               }
             }
             yield 'Favourites sent';
@@ -531,15 +550,13 @@ class LoliSync {
             for (int i = startFrom; i < ceiling; i++) {
               if (!syncKilled) {
                 final int offset = i * limit;
-                // TODO rework to send only missing ones?
-                yield 'Fetching favourites $offset / $favouritesCount';
+                yield 'Fetching items $offset / $favouritesCount';
                 final List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB('', offset.toString(), limit.toString(), 'ASC', 'loliSyncFav');
                 yield 'Fetched ${fetched.length} favourites';
                 Logger.Inst().log('fetched is ${fetched.length} i is $i', 'LoliSync', 'startSync', LogTypes.loliSyncInfo);
                 for (int x = 0; x < fetched.length; x++) {
                   final int count = offset + x;
                   if (count < favouritesCount) {
-                    // TODO send in batches, not in singles
                     final String resp = await sendBooruItem(fetched.elementAt(x), favouritesCount, count);
                     yield '$count / $favouritesCount - $resp';
                   } else {

@@ -4,22 +4,21 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
-  awesome_notifications
   dynamic_color
   flutter_avif_windows
   flutter_inappwebview_windows
   fvp
+  local_auth_windows
   media_kit_libs_windows_video
   media_kit_video
   permission_handler_windows
-  screen_brightness_windows
   share_plus
   url_launcher_windows
+  volume_controller
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   jni
-  media_kit_native_event_loop
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

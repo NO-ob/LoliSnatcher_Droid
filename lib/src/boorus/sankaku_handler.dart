@@ -5,7 +5,9 @@ import 'package:dio/dio.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -29,6 +31,9 @@ class SankakuHandler extends BooruHandler {
   bool get hasSizeData => true;
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   bool get hasCommentsSupport => true;
 
   @override
@@ -41,7 +46,12 @@ class SankakuHandler extends BooruHandler {
   bool get hasSignInSupport => true;
 
   @override
-  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
+  Future<Response<dynamic>> fetchSearch(
+    Uri uri,
+    String input, {
+    bool withCaptchaCheck = true,
+    Map<String, dynamic>? queryParams,
+  }) async {
     return DioNetwork.get(
       uri.toString(),
       headers: getHeaders(),
@@ -118,7 +128,11 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  Future<List> loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
+  Future<({BooruItem? item, bool failed, String? error})> loadItem({
+    required BooruItem item,
+    CancelToken? cancelToken,
+    bool withCapcthaCheck = false,
+  }) async {
     try {
       await searchSetup();
       final response = await DioNetwork.get(
@@ -128,7 +142,7 @@ class SankakuHandler extends BooruHandler {
         customInterceptor: withCapcthaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Constants.defaultBrowserUserAgent) : null,
       );
       if (response.statusCode != 200) {
-        return [item, false, 'Invalid status code ${response.statusCode}'];
+        return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
         final Map<String, dynamic> current = response.data;
         Logger.Inst().log(current.toString(), className, 'updateFavourite', LogTypes.booruHandlerRawFetched);
@@ -137,26 +151,26 @@ class SankakuHandler extends BooruHandler {
           item.sampleURL = current['sample_url'];
           item.thumbnailURL = current['preview_url'];
         }
+        return (item: item, failed: false, error: null);
       }
     } catch (e) {
-      if (e is DioException && e.type == DioExceptionType.cancel) {
-        return [item, null, 'Cancelled'];
+      if (e is DioException && CancelToken.isCancel(e)) {
+        return (item: null, failed: true, error: 'Cancelled');
       }
 
-      return [item, false, e.toString()];
+      return (item: null, failed: true, error: e.toString());
     }
-    return [item, true, null];
   }
 
   @override
   Map<String, String> getHeaders() {
     return {
-      'Accept': 'application/vnd.sankaku.api+json;v=2',
+      'Accept': 'application/json, text/plain, */*',
       if (authToken.isNotEmpty) 'Authorization': authToken,
-      // 'User-Agent': 'SCChannelApp/4.0',
-      'User-Agent': Constants.defaultBrowserUserAgent,
+      'User-Agent': Constants.sankakuAppUserAgent,
       'Referer': 'https://sankaku.app/',
       'Origin': 'https://sankaku.app',
+      'api-version': '2',
     };
   }
 
@@ -165,15 +179,25 @@ class SankakuHandler extends BooruHandler {
     return 'https://chan.sankakucomplex.com/post/show/$id';
   }
 
+  static List<String> knownUrls = [
+    'capi-v2.sankakucomplex.com',
+    'sankakucomplex.com',
+    'beta.sankakucomplex.com',
+    'chan.sankakucomplex.com',
+    'sankaku.app',
+  ];
+
+  String get baseUrl => knownUrls.any(booru.baseURL!.contains) ? 'https://sankakuapi.com' : booru.baseURL!;
+
   @override
   String makeURL(String tags) {
     final tagsStr = tags.trim().isEmpty ? '' : 'tags=${tags.trim()}&';
 
-    return '${booru.baseURL}/posts?${tagsStr}limit=$limit&page=$pageNum';
+    return '$baseUrl/posts?${tagsStr}limit=$limit&page=$pageNum';
   }
 
   String makeApiPostURL(String id) {
-    return '${booru.baseURL}/posts/$id';
+    return '$baseUrl/posts/$id';
   }
 
   @override
@@ -186,7 +210,7 @@ class SankakuHandler extends BooruHandler {
     bool success = false;
     try {
       final response = await DioNetwork.post(
-        '${booru.baseURL}/auth/token',
+        '$baseUrl/auth/token',
         queryParameters: {'lang': 'english'},
         headers: {
           'Content-Type': 'application/json',
@@ -221,7 +245,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/tags?name=${input.toLowerCase()}&limit=10';
+    return '$baseUrl/tags?name=${input.toLowerCase()}&limit=20';
   }
 
   @override
@@ -231,8 +255,9 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
-    final String tagStr = responseItem['tagName'] ?? '';
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
+    // tagName - sankaku, name - idol
+    final String tagStr = responseItem['tagName'] ?? responseItem['name'] ?? '';
     if (tagStr.isEmpty) {
       return null;
     }
@@ -244,14 +269,18 @@ class SankakuHandler extends BooruHandler {
       tagType = tagTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);
-    return tagStr;
+    return TagSuggestion(
+      tag: tagStr,
+      type: tagType,
+      count: responseItem['count'] ?? 0,
+    );
   }
 
   @override
   String makeCommentsURL(String postID, int pageNum) {
-    // EXAMPLE: https://capi-v2.sankakucomplex.com/posts/25237881/comments
+    // EXAMPLE: https://sankakuapi.com/posts/25237881/comments
     // Possibly uses pages?
-    return '${booru.baseURL}/posts/$postID/comments';
+    return '$baseUrl/posts/$postID/comments';
   }
 
   @override
@@ -279,7 +308,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String makeNotesURL(String postID) {
-    return '${booru.baseURL}/posts/$postID/notes';
+    return '$baseUrl/posts/$postID/notes';
   }
 
   @override
@@ -300,5 +329,72 @@ class SankakuHandler extends BooruHandler {
       width: current['width'] ?? 0,
       height: current['height'] ?? 0,
     );
+  }
+
+  @override
+  String? get metatagsCheatSheetLink => 'https://chan.sankakucomplex.com/wiki/help%3A_advanced_search_guide';
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    return [
+      GenericRatingMetaTag(),
+      OrderMetaTag(
+        values: [
+          MetaTagValue(name: 'ID', value: 'id'),
+          MetaTagValue(name: 'ID (descending)', value: 'id_desc'),
+          MetaTagValue(name: 'Popularity', value: 'popular'),
+          MetaTagValue(name: 'Score', value: 'score'),
+          MetaTagValue(name: 'Date', value: 'date'),
+          MetaTagValue(name: 'Last change date', value: 'change'),
+          MetaTagValue(name: 'Last change date (descending)', value: 'change_desc'),
+          MetaTagValue(name: 'Quality', value: 'quality'),
+          MetaTagValue(name: 'Favourites', value: 'fav_count'),
+          MetaTagValue(name: 'Views', value: 'view_count'),
+          MetaTagValue(name: 'Recently favorited', value: 'recently_favorited'),
+          MetaTagValue(name: 'Recently voted', value: 'recently_voted'),
+          MetaTagValue(name: 'Recently commented', value: 'recently_commented'),
+          MetaTagValue(name: 'Recently noted', value: 'recently_noted'),
+          MetaTagValue(name: 'Megapixels (descending)', value: 'mpixels_desc'),
+          MetaTagValue(name: 'Megapixels (ascending)', value: 'mpixels_asc'),
+          MetaTagValue(name: 'Filesize', value: 'file_size'),
+          MetaTagValue(name: 'Filesize (ascending)', value: 'file_size_asc'),
+          MetaTagValue(name: 'Landscape', value: 'landscape'),
+          MetaTagValue(name: 'Portrait', value: 'portrait'),
+          MetaTagValue(name: 'Tags count', value: 'tag_count'),
+          MetaTagValue(name: 'Tags count (ascending)', value: 'tag_count_asc'),
+          MetaTagValue(name: 'Random', value: 'random'),
+          MetaTagValue(name: 'Unpopularity', value: 'unpopular'),
+          MetaTagValue(name: 'Unquality', value: 'unquality'),
+        ],
+      ),
+      StringMetaTag(name: 'User', keyName: 'user'),
+      StringMetaTag(name: 'Threshold', keyName: 'threshold'),
+      DateMetaTag(
+        name: 'Date',
+        keyName: 'date',
+        dateFormat: 'yyyy-MM-ddT00:00',
+        prettierDateFormat: 'yyyy-MM-dd',
+      ),
+      ComparableNumberMetaTag(name: 'Width', keyName: 'width'),
+      ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
+      StringMetaTag(name: 'Megapixels', keyName: 'mpixels'),
+      ComparableNumberMetaTag(name: 'Filesize', keyName: 'file_size'),
+      StringMetaTag(name: 'Filetype', keyName: 'file_type'),
+      ComparableNumberMetaTag(name: 'Duration', keyName: 'duration'),
+      ComparableNumberMetaTag(name: 'Tag count', keyName: 'total_tag_count'),
+      ComparableNumberMetaTag(name: 'General tags count', keyName: 'general_tag_count'),
+      ComparableNumberMetaTag(name: 'Artist tags count', keyName: 'artist_tag_count'),
+      ComparableNumberMetaTag(name: 'Character tags count', keyName: 'character_tag_count'),
+      ComparableNumberMetaTag(name: 'Copyright tags count', keyName: 'copyright_tag_count'),
+      ComparableNumberMetaTag(name: 'Meta tags count', keyName: 'meta_tag_count'),
+      MetaTagWithValues(
+        name: 'Parent ID',
+        keyName: 'parent',
+        values: [
+          MetaTagValue(name: 'Any', value: 'any'),
+          MetaTagValue(name: 'None', value: 'none'),
+        ],
+      ),
+    ];
   }
 }

@@ -30,7 +30,6 @@
 .pub-cache/
 .pub/
 /build/
-pubspec.lock
 **/*.g.dart
 **/*.freezed.dart
 /lib/generated/

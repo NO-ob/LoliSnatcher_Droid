@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
@@ -14,9 +13,10 @@ class ThemeHandler {
     required this.theme,
     required this.themeMode,
     required this.isAmoled,
+    required this.context,
   }) {
-    final platformBrigtness = WidgetsBinding.instance.platformDispatcher.views.first.platformDispatcher.platformBrightness;
-    isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrigtness == Brightness.dark);
+    final platformBrigtness = MediaQuery.platformBrightnessOf(context);
+    isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrigtness.isDark);
 
     final Brightness primaryBrightness =
         ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
@@ -29,6 +29,7 @@ class ThemeHandler {
   final ThemeItem theme;
   final ThemeMode themeMode;
   final bool isAmoled;
+  final BuildContext context;
   ColorScheme? lightDynamic;
   ColorScheme? darkDynamic;
 
@@ -40,8 +41,8 @@ class ThemeHandler {
     lightDynamic = light;
     darkDynamic = dark;
 
-    final platformBrigtness = WidgetsBinding.instance.platformDispatcher.views.first.platformDispatcher.platformBrightness;
-    isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrigtness == Brightness.dark);
+    final platformBrigtness = MediaQuery.platformBrightnessOf(context);
+    isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrigtness.isDark);
 
     final Brightness primaryBrightness =
         ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
@@ -70,7 +71,7 @@ class ThemeHandler {
       buttonTheme: buttonTheme(lightColorScheme),
       cardColor: Color.lerp(lightColorScheme.surface, Colors.black, 0.04),
       dividerColor: lightColorScheme.onSurface.withValues(alpha: 0.12),
-      dialogBackgroundColor: lightColorScheme.surface,
+      dialogTheme: dialogTheme(lightColorScheme),
       floatingActionButtonTheme: floatingActionButtonTheme(lightColorScheme),
       iconTheme: iconTheme(lightColorScheme),
       inputDecorationTheme: inputDecorationTheme(lightColorScheme),
@@ -106,7 +107,7 @@ class ThemeHandler {
       buttonTheme: buttonTheme(darkColorScheme),
       cardColor: darkColorScheme.surface,
       dividerColor: darkColorScheme.onSurface.withValues(alpha: 0.12),
-      dialogBackgroundColor: darkColorScheme.surface,
+      dialogTheme: dialogTheme(darkColorScheme),
       floatingActionButtonTheme: floatingActionButtonTheme(darkColorScheme),
       iconTheme: iconTheme(darkColorScheme),
       inputDecorationTheme: inputDecorationTheme(darkColorScheme),
@@ -139,7 +140,9 @@ class ThemeHandler {
 
     final brightness = isDark ? Brightness.dark : Brightness.light;
     final SchemeTonalSpot scheme = SchemeTonalSpot(
-      sourceColorHct: Hct.fromInt(theme.accent!.value32bit),
+      // TODO replace value with toARGB32() in the next flutter release
+      // ignore: deprecated_member_use
+      sourceColorHct: Hct.fromInt(theme.accent!.value),
       isDark: brightness == Brightness.dark,
       contrastLevel: 0,
     );
@@ -205,6 +208,7 @@ class ThemeHandler {
         iconTheme: IconThemeData(
           color: primaryIsDark ? Colors.white : Colors.black,
         ),
+        titleSpacing: 8,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.25),
           statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
@@ -232,8 +236,8 @@ class ThemeHandler {
       );
 
   InputDecorationTheme inputDecorationTheme(ColorScheme colorScheme) => InputDecorationTheme(
-        fillColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
-        filled: false,
+        fillColor: colorScheme.surfaceContainerHigh,
+        filled: true,
         labelStyle: TextStyle(
           color: isDark ? Colors.white : Colors.black,
           fontSize: 18,
@@ -241,13 +245,13 @@ class ThemeHandler {
         ),
         hintStyle: TextStyle(
           color: isDark ? Colors.grey[300] : Colors.grey[900],
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
         ),
         alignLabelWithHint: false,
         // contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme.secondary, width: 1),
+          borderSide: const BorderSide(color: Colors.transparent, width: 0),
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
@@ -263,7 +267,7 @@ class ThemeHandler {
           borderRadius: BorderRadius.circular(8),
         ),
         border: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme.secondary, width: 1),
+          borderSide: const BorderSide(color: Colors.transparent, width: 0),
           borderRadius: BorderRadius.circular(8),
         ),
         disabledBorder: OutlineInputBorder(
@@ -284,8 +288,11 @@ class ThemeHandler {
       );
 
   PageTransitionsTheme pageTransitionsTheme() => const PageTransitionsTheme(
+        // ZoomPageTransitionsBuilder alternatives:
+        // PredictiveBackPageTransitionsBuilder - android only, requires predictive back enabled, still wip
+        // FadeForwardsPageTransitionsBuilder - latest material3 spec animation, currently conflicts with modal routes (and stuttering if there is a global restate?)
         builders: <TargetPlatform, PageTransitionsBuilder>{
-          TargetPlatform.android: ZoomPageTransitionsBuilder(), // PredictiveBackPageTransitionsBuilder(),
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
           TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
           TargetPlatform.linux: ZoomPageTransitionsBuilder(),
@@ -338,9 +345,12 @@ class ThemeHandler {
 
   ProgressIndicatorThemeData progressIndicatorTheme(ColorScheme colorScheme) => ProgressIndicatorThemeData(
         color: colorScheme.secondary,
-        circularTrackColor: Colors.transparent,
-        linearTrackColor: Colors.transparent,
+        circularTrackColor: colorScheme.secondaryContainer.withValues(alpha: 0.33),
+        linearTrackColor: colorScheme.secondaryContainer.withValues(alpha: 0.33),
+        trackGap: 5,
         refreshBackgroundColor: null,
+        // ignore: deprecated_member_use
+        year2023: true, // TODO change to false when they fix exception when value is null?
       );
 
   CheckboxThemeData checkboxTheme(ColorScheme colorScheme) => CheckboxThemeData(
@@ -406,4 +416,13 @@ class ThemeHandler {
           backgroundColor: WidgetStatePropertyAll(colorScheme.surface),
         ),
       );
+
+  DialogThemeData dialogTheme(ColorScheme colorScheme) => DialogThemeData(
+        backgroundColor: colorScheme.surface,
+      );
+}
+
+extension BrightnessExtension on Brightness {
+  bool get isDark => this == Brightness.dark;
+  bool get isLight => this == Brightness.light;
 }

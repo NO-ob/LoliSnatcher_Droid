@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 class InitHomePage extends StatefulWidget {
@@ -41,10 +39,11 @@ class _InitHomePageState extends State<InitHomePage> {
               height: 100,
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 50),
-                child: Obx(
-                  () => Text(
-                    key: ValueKey(settingsHandler.postInitMessage.value),
-                    settingsHandler.postInitMessage.value,
+                child: ValueListenableBuilder(
+                  valueListenable: settingsHandler.postInitMessage,
+                  builder: (context, postInitMessage, _) => Text(
+                    key: ValueKey(postInitMessage),
+                    postInitMessage,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),

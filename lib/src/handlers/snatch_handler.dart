@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -13,20 +16,35 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
-class SnatchHandler extends GetxController {
+class SnatchHandler {
   SnatchHandler() {
-    queuedList.listen((List<SnatchItem> list) {
-      trySnatch();
-    });
+    queuedList.addListener(queuedListListener);
   }
-  static SnatchHandler get instance => Get.find<SnatchHandler>();
 
-  RxBool active = false.obs;
-  RxString status = ''.obs;
-  RxInt queueProgress = 0.obs;
-  Rx<SnatchItem?> current = Rx<SnatchItem?>(null);
-  RxInt received = 0.obs;
-  RxInt total = 0.obs;
+  static SnatchHandler get instance => GetIt.instance<SnatchHandler>();
+
+  static SnatchHandler register() {
+    if (!GetIt.instance.isRegistered<SnatchHandler>()) {
+      GetIt.instance.registerSingleton(
+        SnatchHandler(),
+        dispose: (snatchHandler) => snatchHandler.dispose(),
+      );
+    }
+    return instance;
+  }
+
+  static void unregister() => GetIt.instance.unregister<SnatchHandler>();
+
+  final RxBool active = false.obs;
+  final RxString status = ''.obs;
+  final RxInt queueProgress = 0.obs;
+  final Rx<SnatchItem?> current = Rx<SnatchItem?>(null);
+  final RxInt received = 0.obs;
+  final RxInt total = 0.obs;
+
+  final RxList<({BooruItem item, Booru booru})> existsItems = RxList([]);
+  final RxList<({BooruItem item, Booru booru})> failedItems = RxList([]);
+  final RxList<({BooruItem item, Booru booru})> cancelledItems = RxList([]);
 
   CancelToken? cancelToken;
 
@@ -35,7 +53,7 @@ class SnatchHandler extends GetxController {
     return received.value / total.value;
   }
 
-  RxList<SnatchItem> queuedList = RxList<SnatchItem>([]);
+  final RxList<SnatchItem> queuedList = RxList<SnatchItem>([]);
 
   Stream<Map<String, int>> writeMultipleFake(List<BooruItem> items, Booru booru, int cooldown) async* {
     int snatchedCounter = 0;
@@ -58,6 +76,86 @@ class SnatchHandler extends GetxController {
   void onProgress(int newReceived, int newTotal) {
     received.value = newReceived;
     total.value = newTotal;
+  }
+
+  void onRemoveRetryItem(
+    ({BooruItem item, Booru booru}) record,
+  ) {
+    existsItems.remove(record);
+    failedItems.remove(record);
+    cancelledItems.remove(record);
+  }
+
+  void onClearRetryableItems() {
+    existsItems.clear();
+    failedItems.clear();
+    cancelledItems.clear();
+  }
+
+  Future<void> onRetryAll({
+    required int cooldown,
+    bool ignoreExists = false,
+  }) async {
+    final itemsToRetry = [...existsItems, ...failedItems, ...cancelledItems];
+    final Set<Booru> uniqueBoorus = itemsToRetry.map((i) => i.booru).toSet();
+    final Map<Booru, List<BooruItem>> booruItemsMap = {};
+    booruItemsMap.addEntries(uniqueBoorus.map((b) => MapEntry(b, [])));
+    for (int i = 0; i < itemsToRetry.length; i++) {
+      final BooruItem item = itemsToRetry[i].item;
+      final Booru booru = itemsToRetry[i].booru;
+      final List<BooruItem> items = booruItemsMap[booru]!;
+      items.add(item);
+      booruItemsMap[booru] = items;
+    }
+
+    final List<SnatchItem> snatchItems = [];
+    booruItemsMap.forEach((booru, items) async {
+      if (booru.type == BooruType.Sankaku) {
+        try {
+          // TODO detect when item data is outdated?
+          // TODO expand to other boorus?
+          final temp = BooruHandlerFactory().getBooruHandler([booru], 10);
+          final sankakuHandler = temp[0] as SankakuHandler;
+          // refetch data only on smaller-ish batches, otherwise they will most likely rate limit the user
+          if (items.length <= 20) {
+            for (final item in items) {
+              await sankakuHandler.loadItem(item: item);
+              await Future.delayed(const Duration(milliseconds: 100));
+            }
+          }
+        } catch (_) {}
+      }
+
+      snatchItems.add(
+        SnatchItem(
+          items,
+          cooldown,
+          booru,
+          ignoreExists || items.any((i) => existsItems.any((e) => e.item == i)),
+        ),
+      );
+    });
+
+    queuedList.addAll(snatchItems);
+
+    onClearRetryableItems();
+  }
+
+  void onRetryItem(
+    ({BooruItem item, Booru booru}) record, {
+    required int cooldown,
+    bool ignoreExists = false,
+  }) {
+    queuedList.add(
+      SnatchItem(
+        [record.item],
+        cooldown,
+        record.booru,
+        ignoreExists,
+      ),
+    );
+
+    onRemoveRetryItem(record);
   }
 
   void onCancel() {
@@ -130,7 +228,6 @@ class SnatchHandler extends GetxController {
               ),
               leadingIcon: Icons.done_all,
               sideColor: failed.isNotEmpty ? Colors.red : ((exists.isNotEmpty || cancelled.isNotEmpty) ? Colors.yellow : Colors.green),
-              // TODO restart/retry buttons for failed items?
             );
           } else {
             FlashElements.showSnackbar(
@@ -150,9 +247,14 @@ class SnatchHandler extends GetxController {
               ),
               leadingIcon: Icons.done_all,
               sideColor: failed.isNotEmpty ? Colors.red : ((exists.isNotEmpty || cancelled.isNotEmpty) ? Colors.yellow : Colors.green),
-              //TODO restart/retry buttons for failed items?
             );
           }
+        }
+
+        if (isLastMessage) {
+          existsItems.addAll(exists.map((e) => (booru: item.booru, item: e)));
+          failedItems.addAll(failed.map((e) => (booru: item.booru, item: e)));
+          cancelledItems.addAll(cancelled.map((e) => (booru: item.booru, item: e)));
         }
 
         cancelToken = null;
@@ -178,6 +280,10 @@ class SnatchHandler extends GetxController {
         }
       },
     );
+  }
+
+  void queuedListListener() {
+    trySnatch();
   }
 
   void trySnatch() {
@@ -223,6 +329,21 @@ class SnatchHandler extends GetxController {
             duration: const Duration(seconds: 2),
             leadingIcon: Icons.info_outline,
             sideColor: Colors.green,
+            content: Row(
+              children: [
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: ThumbnailBuild(
+                    item: booruItems.first,
+                    selectable: false,
+                    simple: true,
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
           );
         }
       }
@@ -261,12 +382,16 @@ class SnatchHandler extends GetxController {
 
     while (count < int.parse(amount) && !booruHandler.locked) {
       booruItems = await booruHandler.search(tags, null) ?? [];
+      booruItems = booruItems.where((e) => !e.isHated).toList();
       booruHandler.pageNum++;
       count = booruItems.length;
       // TODO error handling?
-      // TODO use tag filters
     }
     queue(booruItems, booru, cooldown, false);
+  }
+
+  void dispose() {
+    queuedList.removeListener(queuedListListener);
   }
 }
 

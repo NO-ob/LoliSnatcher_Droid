@@ -3,17 +3,19 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' show FirstWhereExt;
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -26,11 +28,11 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   bool get hasSizeData => true;
 
+  @override
+  bool get hasTagSuggestions => true;
+
   bool get isR34xxx => booru.baseURL!.contains('rule34.xxx');
 
-  // TODO ?
-  //Realbooru api returns 0 for models but on the website shows them
-  //listed as model on the tagsearch so I dont think the api shows tag types properly
   @override
   Map<String, TagType> get tagTypeMap => {
         '5': TagType.meta,
@@ -121,7 +123,7 @@ class GelbooruAlikesHandler extends BooruHandler {
             : (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
                 ? MediaType.video
                 : null;
-        item.mediaType.value = MediaType.needsExtraRequest;
+        item.mediaType.value = MediaType.needToGuess;
       }
 
       return item;
@@ -160,25 +162,47 @@ class GelbooruAlikesHandler extends BooruHandler {
 
   @override
   String makeTagURL(String input) {
-    // 16.01.22 - r34xx has order=count&direction=desc, but only it has it, so not worth adding it
-    // "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=nagato%&limit=10&order=count&direction=desc"
-
     // EXAMPLE: https://safebooru.org/autocomplete.php?q=naga
     String baseUrl = booru.baseURL!;
     if (isR34xxx) {
       baseUrl = 'https://api.rule34.xxx';
     }
-    return '$baseUrl/autocomplete.php?q=$input'; // doesn't allow limit, but sorts by popularity
+    return '$baseUrl/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20&order=count&direction=desc';
+    // return '$baseUrl/autocomplete.php?q=$input';
   }
 
   @override
   List parseTagSuggestionsList(dynamic response) {
-    return jsonDecode(response.data) ?? [];
+    return ((response.data is String && response.data?.startsWith('<?xml') == true)
+            ? XmlDocument.parse(response.data).findAllElements('tag').toList()
+            : jsonDecode(response.data)) ??
+        [];
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
-    return responseItem['value'];
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
+    if (responseItem is XmlElement) {
+      final String tagStr = getAttrOrElem(responseItem, 'name') as String? ?? '';
+      final int count = int.tryParse(getAttrOrElem(responseItem, 'count')?.toString() ?? '0') ?? 0;
+      final String rawTagType = getAttrOrElem(responseItem, 'type')?.toString() ?? '';
+      TagType tagType = TagType.none;
+      if (rawTagType.isNotEmpty && tagTypeMap.containsKey(rawTagType)) {
+        tagType = tagTypeMap[rawTagType] ?? TagType.none;
+      }
+      addTagsWithType([tagStr], tagType);
+
+      return TagSuggestion(
+        tag: tagStr,
+        count: count,
+        type: tagType,
+      );
+    } else {
+      final labelCountRegExp = RegExp(r'\((\d+)\)$');
+      return TagSuggestion(
+        tag: responseItem['value'] ?? '',
+        count: int.tryParse(labelCountRegExp.firstMatch(responseItem['label'])?.group(1) ?? '0') ?? 0,
+      );
+    }
   }
 
   // ----------------- Search count
@@ -387,7 +411,11 @@ class GelbooruAlikesHandler extends BooruHandler {
   }
 
   @override
-  Future loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
+  Future<({BooruItem? item, bool failed, String? error})> loadItem({
+    required BooruItem item,
+    CancelToken? cancelToken,
+    bool withCapcthaCheck = false,
+  }) async {
     try {
       final cookies = await getCookiesForPost(item.postURL);
 
@@ -406,22 +434,22 @@ class GelbooruAlikesHandler extends BooruHandler {
       );
 
       if (response.statusCode != 200) {
-        return [item, false, 'Invalid status code ${response.statusCode}'];
+        return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
         final html = parse(response.data);
         final sidebar = html.getElementById('tag-sidebar');
-        final copyrightTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright tag'));
+        final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright tag'));
         addTagsWithType(copyrightTags, TagType.copyright);
-        final characterTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-character tag'));
+        final characterTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-character tag'));
         addTagsWithType(characterTags, TagType.character);
-        final artistTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-artist tag'));
+        final artistTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-artist tag'));
         addTagsWithType(artistTags, TagType.artist);
-        final generalTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-general tag'));
+        final generalTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-general tag'));
         addTagsWithType(generalTags, TagType.none);
-        final metaTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-meta tag'));
+        final metaTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-meta tag'));
         addTagsWithType(metaTags, TagType.meta);
         item.isUpdated = true;
-        return [item, true, null];
+        return (item: item, failed: false, error: null);
       }
     } catch (e, s) {
       Logger.Inst().log(
@@ -431,12 +459,54 @@ class GelbooruAlikesHandler extends BooruHandler {
         LogTypes.exception,
         s: s,
       );
-      return [item, false, e.toString()];
+      return (item: null, failed: true, error: e.toString());
     }
+  }
+
+  @override
+  String? get metatagsCheatSheetLink =>
+      isR34xxx ? 'https://rule34.xxx/index.php?page=help&topic=cheatsheet' : 'https://gelbooru.com/index.php?page=help&topic=cheatsheet';
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    return [
+      GenericRatingMetaTag(),
+      SortMetaTag(
+        values: [
+          MetaTagValue(name: 'ID', value: 'id'),
+          MetaTagValue(name: 'ID (ascending)', value: 'id:asc'),
+          MetaTagValue(name: 'Score', value: 'score'),
+          MetaTagValue(name: 'Score (ascending)', value: 'score:asc'),
+          MetaTagValue(name: 'Rating', value: 'rating'),
+          MetaTagValue(name: 'Rating (ascending)', value: 'rating:asc'),
+          MetaTagValue(name: 'User', value: 'user'),
+          MetaTagValue(name: 'User (ascending)', value: 'user:asc'),
+          MetaTagValue(name: 'Height', value: 'height'),
+          MetaTagValue(name: 'Height (ascending)', value: 'height:asc'),
+          MetaTagValue(name: 'Width', value: 'width'),
+          MetaTagValue(name: 'Width (ascending)', value: 'width:asc'),
+          MetaTagValue(name: 'Parent', value: 'parent'),
+          MetaTagValue(name: 'Parent (ascending)', value: 'parent:asc'),
+          MetaTagValue(name: 'Source', value: 'source'),
+          MetaTagValue(name: 'Source (ascending)', value: 'source:asc'),
+          MetaTagValue(name: 'Updated', value: 'updated'),
+          MetaTagValue(name: 'Updated (ascending)', value: 'updated:asc'),
+          MetaTagValue(name: 'Random', value: 'random'),
+        ],
+      ),
+      ComparableNumberMetaTag(name: 'Score', keyName: 'score'),
+      StringMetaTag(name: 'ID', keyName: 'id'),
+      StringMetaTag(name: 'User', keyName: 'user'),
+      // StringMetaTag(name: 'Favourites of user ID (fav:{id})', keyName: 'fav'),
+      StringMetaTag(name: 'Parent ID', keyName: 'parent'),
+      StringMetaTag(name: 'MD5', keyName: 'md5'),
+      ComparableNumberMetaTag(name: 'Width', keyName: 'width'),
+      ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
+    ];
   }
 }
 
-List<String> tagsFromHtml(List<Element>? elements) {
+List<String> _tagsFromHtml(List<Element>? elements) {
   if (elements == null || elements.isEmpty) {
     return [];
   }

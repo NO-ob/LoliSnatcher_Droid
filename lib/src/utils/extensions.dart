@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 extension UIExtras on Widget {
@@ -30,11 +32,13 @@ extension StringExtras on String {
     return count == 1 ? this : '${this}s';
   }
 
-  String capitalize() => '${this[0].toUpperCase()}${substring(1)}';
+  String _capitalize() => isEmpty ? '' : '${this[0].toUpperCase()}${substring(1)}';
 
-  String toTitleCase() => split(' ').map((s) => s.capitalize()).join(' ');
+  String get capitalizeFirst => _capitalize();
 
-  String toCamelCase() => split(' ').map((s) => s.capitalize()).join('');
+  String toTitleCase() => split(' ').map((s) => s._capitalize()).join(' ');
+
+  String toCamelCase() => split(' ').map((s) => s._capitalize()).join('');
 
   String toSnakeCase() => toLowerCase().replaceAll(' ', '_');
 
@@ -60,9 +64,21 @@ extension IntExtras on int {
 extension DoubleExtras on double {
   double clamp(double min, double max) => (min > this ? min : (max < this ? max : this));
 
-  String toStringAsFixed(int digits) => toStringAsFixed(digits);
-
   String toFormattedString() => formatNumber(this);
+
+  double toPrecision(int fractionDigits) {
+    final mod = pow(10, fractionDigits.toDouble()).toDouble();
+    return (this * mod).round().toDouble() / mod;
+  }
+
+  String truncateTrailingZeroes(int? fractionDigits) => toStringAsFixed(fractionDigits ?? toString().split('.')[1].length).replaceAllMapped(
+        RegExp(r'(\.\d*?[1-9]|)\.?0+$'),
+        (match) => '${match[1] == '.' ? '' : match[1]}',
+      );
+}
+
+extension BoolExtras on bool {
+  void toggle() => this ? false : true;
 }
 
 String formatNumber(num number) {
@@ -71,4 +87,29 @@ String formatNumber(num number) {
         (Match match) => '${match[1]} ',
       );
   return formattedPart.trim();
+}
+
+extension ListExts<T> on List<T> {
+  T? firstWhereOrNull(bool Function(T e) test) {
+    for (final e in this) {
+      if (test(e)) return e;
+    }
+    return null;
+  }
+
+  T? lastWhereOrNull(bool Function(T e) test) {
+    for (final e in reversed) {
+      if (test(e)) return e;
+    }
+    return null;
+  }
+}
+
+extension IterableExts<T> on Iterable<T> {
+  T? firstWhereOrNull(bool Function(T e) test) {
+    for (final e in this) {
+      if (test(e)) return e;
+    }
+    return null;
+  }
 }

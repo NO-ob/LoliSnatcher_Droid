@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -21,6 +20,7 @@ class Thumbnail extends StatefulWidget {
   const Thumbnail({
     required this.item,
     this.isStandalone = false,
+    this.useHero = true,
     super.key,
   });
 
@@ -28,6 +28,8 @@ class Thumbnail extends StatefulWidget {
 
   /// set to true when used in a list
   final bool isStandalone;
+
+  final bool useHero;
 
   @override
   State<Thumbnail> createState() => _ThumbnailState();
@@ -37,13 +39,16 @@ class _ThumbnailState extends State<Thumbnail> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
 
-  final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
+  final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
   int restartedCount = 0;
-  bool? isFromCache;
-  // isFailed - loading error, isVisible - controls fade in
-  bool isFailed = false, isLoaded = false, isLoadedExtra = false, failedRendering = false, firstBuild = true;
-  String? errorCode;
-  CancelToken? cancelToken;
+  final ValueNotifier<bool?> isFromCache = ValueNotifier(null);
+  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true),
+      isFailed = ValueNotifier(false),
+      isLoaded = ValueNotifier(false),
+      isLoadedExtra = ValueNotifier(false),
+      failedRendering = ValueNotifier(false);
+  final ValueNotifier<String?> errorCode = ValueNotifier(null);
+  CancelToken? mainCancelToken, extraCancelToken;
 
   Timer? debounceLoading;
 
@@ -52,8 +57,7 @@ class _ThumbnailState extends State<Thumbnail> {
   late String thumbFolder;
   double? thumbWidth, thumbHeight;
 
-  ImageProvider? mainProvider;
-  ImageProvider? extraProvider;
+  final ValueNotifier<ImageProvider?> mainProvider = ValueNotifier(null), extraProvider = ValueNotifier(null);
   ImageStreamListener? mainImageListener, extraImageListener;
   ImageStream? mainImageStream, extraImageStream;
 
@@ -75,13 +79,17 @@ class _ThumbnailState extends State<Thumbnail> {
     //   return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: 10);
     // }
 
-    cancelToken ??= CancelToken();
+    if (isMain) {
+      mainCancelToken ??= CancelToken();
+    } else {
+      extraCancelToken ??= CancelToken();
+    }
     final String url = isMain ? thumbURL : widget.item.thumbnailURL;
     final bool isAvif = url.contains('.avif');
     final ImageProvider provider = isAvif
         ? CustomNetworkAvifImage(
             url,
-            cancelToken: cancelToken,
+            cancelToken: isMain ? mainCancelToken : extraCancelToken,
             headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
@@ -91,14 +99,13 @@ class _ThumbnailState extends State<Thumbnail> {
             onError: isMain ? onError : null,
             onCacheDetected: (bool didDetectCache) {
               if (isMain) {
-                isFromCache = didDetectCache;
-                updateState();
+                isFromCache.value = didDetectCache;
               }
             },
           )
         : CustomNetworkImage(
             url,
-            cancelToken: cancelToken,
+            cancelToken: isMain ? mainCancelToken : extraCancelToken,
             headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
@@ -108,8 +115,7 @@ class _ThumbnailState extends State<Thumbnail> {
             onError: isMain ? onError : null,
             onCacheDetected: (bool didDetectCache) {
               if (isMain) {
-                isFromCache = didDetectCache;
-                updateState();
+                isFromCache.value = didDetectCache;
               }
             },
           );
@@ -131,8 +137,6 @@ class _ThumbnailState extends State<Thumbnail> {
     if (!mounted) {
       return;
     }
-
-    final double? prevThumbWidth = thumbWidth, prevThumbHeight = thumbHeight;
 
     final double widthLimit = constraints.maxWidth * MediaQuery.devicePixelRatioOf(context) * 1;
     double thumbRatio = 1;
@@ -169,10 +173,6 @@ class _ThumbnailState extends State<Thumbnail> {
     }
 
     // print('thumbWidth: $thumbWidth thumbHeight: $thumbHeight');
-
-    if (prevThumbHeight != thumbHeight || prevThumbWidth != thumbWidth) {
-      updateState(postFrame: true);
-    }
   }
 
   void onBytesAdded(int receivedNew, int? totalNew) {
@@ -181,12 +181,11 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   void onError(Object error, {bool delayed = false}) {
-    /// Error handling
     if (error is DioException && CancelToken.isCancel(error)) {
       // print('Canceled by user: $error');
     } else {
       if (restartedCount < 5) {
-        // attempt to reload 5 times with a second delay
+        // attempt to reload 5 times with a 1s delay
         Debounce.debounce(
           tag: 'thumbnail_reload_${widget.item.hashCode}',
           callback: () {
@@ -196,15 +195,12 @@ class _ThumbnailState extends State<Thumbnail> {
           duration: const Duration(seconds: 1),
         );
       } else {
-        //show error
-        isFailed = true;
+        isFailed.value = true;
         if (error is DioException) {
-          errorCode = error.response?.statusCode?.toString();
+          errorCode.value = error.response?.statusCode?.toString();
         } else {
-          errorCode = null;
+          errorCode.value = null;
         }
-        // onError can happen while widget restates, which will cause an exception, this will delay the restate until the other one is done
-        updateState(postFrame: delayed);
       }
       // print('Dio request cancelled: $thumbURL $error');
     }
@@ -218,7 +214,10 @@ class _ThumbnailState extends State<Thumbnail> {
         widget.item.mediaType.value.isAnimation && ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated : true);
 
     isThumbQuality = settingsHandler.previewMode == 'Thumbnail' ||
-        (isGifSampleNotAllowed || widget.item.mediaType.value.isVideo || widget.item.mediaType.value.isNeedsExtraRequest) ||
+        (isGifSampleNotAllowed ||
+            widget.item.mediaType.value.isVideo ||
+            widget.item.mediaType.value.isNeedToGuess ||
+            widget.item.mediaType.value.isNeedToLoadItem) ||
         (!widget.isStandalone && widget.item.fileURL == widget.item.sampleURL);
     thumbURL = isThumbQuality == true ? widget.item.thumbnailURL : widget.item.sampleURL;
     thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
@@ -234,22 +233,19 @@ class _ThumbnailState extends State<Thumbnail> {
   Future<void> startDownloading() async {
     final bool useExtra = isThumbQuality == false && !widget.item.isHated;
 
-    mainProvider = await getImageProvider(true);
+    mainProvider.value = await getImageProvider(true);
     mainImageStream?.removeListener(mainImageListener!);
-    mainImageStream = mainProvider!.resolve(ImageConfiguration.empty);
+    mainImageStream = mainProvider.value!.resolve(ImageConfiguration.empty);
     mainImageListener = ImageStreamListener(
       (imageInfo, syncCall) {
-        isLoaded = true;
-        if (!syncCall) {
-          updateState();
-        }
+        isLoaded.value = true;
       },
       onChunk: (event) {
         onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
       },
       onError: (e, s) {
         if (e is! DioException) {
-          failedRendering = true;
+          failedRendering.value = true;
         }
         Logger.Inst().log(
           'Error loading thumbnail: ${widget.item.sampleURL} ${widget.item.thumbnailURL}',
@@ -264,19 +260,16 @@ class _ThumbnailState extends State<Thumbnail> {
     mainImageStream!.addListener(mainImageListener!);
 
     if (useExtra) {
-      extraProvider = await getImageProvider(false);
+      extraProvider.value = await getImageProvider(false);
       extraImageStream?.removeListener(extraImageListener!);
-      extraImageStream = extraProvider!.resolve(ImageConfiguration.empty);
+      extraImageStream = extraProvider.value!.resolve(ImageConfiguration.empty);
       extraImageListener = ImageStreamListener(
         (imageInfo, syncCall) {
-          isLoadedExtra = true;
-          if (!syncCall) {
-            updateState();
-          }
+          isLoadedExtra.value = true;
         },
         onError: (e, s) {
           if (e is! DioException) {
-            failedRendering = true;
+            failedRendering.value = true;
           }
           Logger.Inst().log(
             'Error loading extra thumbnail: ${widget.item.thumbnailURL}',
@@ -289,13 +282,11 @@ class _ThumbnailState extends State<Thumbnail> {
       );
       extraImageStream!.addListener(extraImageListener!);
     }
-
-    updateState();
   }
 
   void restartLoading() {
-    if (failedRendering) {
-      failedRendering = false;
+    if (failedRendering.value) {
+      failedRendering.value = false;
       cleanProviderCache();
     }
 
@@ -305,41 +296,25 @@ class _ThumbnailState extends State<Thumbnail> {
     received.value = 0;
     startedAt.value = 0;
 
-    isLoaded = false;
-    isLoadedExtra = false;
-    isFromCache = null;
-    isFailed = false;
-    errorCode = null;
-
-    updateState();
+    isLoaded.value = false;
+    isLoadedExtra.value = false;
+    isFromCache.value = null;
+    isFailed.value = false;
+    errorCode.value = null;
 
     selectThumbProvider();
   }
 
   Future<void> cleanProviderCache() async {
-    if (mainProvider != null) {
+    if (mainProvider.value != null) {
       final CustomNetworkImage usedMainProvider =
-          (mainProvider is ResizeImage ? (mainProvider! as ResizeImage).imageProvider : mainProvider!) as CustomNetworkImage;
+          (mainProvider.value is ResizeImage ? (mainProvider.value! as ResizeImage).imageProvider : mainProvider.value!) as CustomNetworkImage;
       await usedMainProvider.deleteCacheFile();
     }
-    if (extraProvider != null) {
+    if (extraProvider.value != null) {
       final CustomNetworkImage usedExtraProvider =
-          (extraProvider is ResizeImage ? (extraProvider! as ResizeImage).imageProvider : extraProvider!) as CustomNetworkImage;
+          (extraProvider.value is ResizeImage ? (extraProvider.value! as ResizeImage).imageProvider : extraProvider.value!) as CustomNetworkImage;
       await usedExtraProvider.deleteCacheFile();
-    }
-  }
-
-  void updateState({bool postFrame = false}) {
-    if (postFrame) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    } else {
-      if (mounted) {
-        setState(() {});
-      }
     }
   }
 
@@ -357,17 +332,22 @@ class _ThumbnailState extends State<Thumbnail> {
     extraImageListener = null;
     extraImageStream = null;
 
-    if (!(cancelToken?.isCancelled ?? true)) {
-      cancelToken?.cancel();
+    if (!(mainCancelToken?.isCancelled ?? true)) {
+      mainCancelToken?.cancel();
     }
-    cancelToken = null;
+    mainCancelToken = null;
+
+    if (!(extraCancelToken?.isCancelled ?? true)) {
+      extraCancelToken?.cancel();
+    }
+    extraCancelToken = null;
 
     // evict from memory cache only when in grid
     if (widget.isStandalone) {
-      mainProvider?.evict();
-      mainProvider = null;
-      extraProvider?.evict();
-      extraProvider = null;
+      mainProvider.value?.evict();
+      mainProvider.value = null;
+      extraProvider.value?.evict();
+      extraProvider.value = null;
     }
 
     debounceLoading?.cancel();
@@ -380,8 +360,8 @@ class _ThumbnailState extends State<Thumbnail> {
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           calcThumbWidth(constraints);
-          if (firstBuild) {
-            firstBuild = false;
+          if (isFirstBuild.value) {
+            isFirstBuild.value = false;
             selectThumbProvider();
           }
         });
@@ -389,108 +369,179 @@ class _ThumbnailState extends State<Thumbnail> {
         // take smallest dimension for hated icon container
         final double iconSize = (constraints.maxHeight < constraints.maxWidth ? constraints.maxHeight : constraints.maxWidth) * 0.75;
 
-        final bool showShimmer = !(isLoaded || isLoadedExtra) && !isFailed;
         final bool useExtra = isThumbQuality == false && !widget.item.isHated;
 
         return Stack(
           alignment: Alignment.center,
           children: [
             if (useExtra) // fetch small low quality thumbnail while loading a sample
-              AnimatedOpacity(
-                // fade in image
-                opacity: (!widget.isStandalone || isLoadedExtra) ? 1 : 0,
-                duration: const Duration(milliseconds: 200),
+              ValueListenableBuilder(
+                valueListenable: isLoadedExtra,
+                builder: (context, isLoadedExtra, child) {
+                  return AnimatedOpacity(
+                    // fade in image
+                    opacity: (!widget.isStandalone || isLoadedExtra) ? 1 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: child,
+                  );
+                },
                 child: AnimatedSwitcher(
                   duration: Duration(milliseconds: widget.isStandalone ? 100 : 0),
-                  child: extraProvider != null
-                      ? ImageFiltered(
-                          enabled: settingsHandler.blurImages || widget.item.isHated,
-                          imageFilter: ImageFilter.blur(
-                            sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                            sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                            tileMode: TileMode.decal,
-                          ),
-                          child: Image(
-                            image: extraProvider!,
-                            fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
-                            isAntiAlias: true,
-                            width: double.infinity,
-                            height: double.infinity,
-                            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                              if (widget.isStandalone) {
-                                return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withValues(alpha: 0.5));
-                              } else {
-                                return const SizedBox.shrink();
-                              }
-                            },
-                          ),
-                        )
-                      : const SizedBox.expand(),
-                ),
-              ),
-            AnimatedOpacity(
-              // fade in image
-              opacity: (!widget.isStandalone || isLoaded) ? 1 : 0,
-              duration: const Duration(milliseconds: 300),
-              child: AnimatedSwitcher(
-                duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
-                child: mainProvider != null
-                    ? ImageFiltered(
-                        enabled: settingsHandler.blurImages || widget.item.isHated,
-                        imageFilter: ImageFilter.blur(
-                          sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                          sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                          tileMode: TileMode.decal,
-                        ),
-                        child: Image(
-                          image: mainProvider!,
+                  child: ImageFiltered(
+                    enabled: settingsHandler.blurImages || widget.item.isHated,
+                    imageFilter: ImageFilter.blur(
+                      sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                      sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                      tileMode: TileMode.decal,
+                    ),
+                    child: ValueListenableBuilder(
+                      valueListenable: extraProvider,
+                      builder: (context, extraProvider, _) {
+                        if (extraProvider == null) {
+                          return const SizedBox.shrink();
+                        }
+
+                        return Image(
+                          image: extraProvider,
                           fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                           isAntiAlias: true,
-                          filterQuality: FilterQuality.medium,
                           width: double.infinity,
                           height: double.infinity,
                           errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                             if (widget.isStandalone) {
-                              return Icon(Icons.broken_image, size: 30, color: Colors.white.withValues(alpha: 0.5));
+                              return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withValues(alpha: 0.5));
                             } else {
                               return const SizedBox.shrink();
                             }
                           },
-                        ),
-                      )
-                    : const SizedBox.expand(),
-              ),
-            ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: (isLoaded || isLoadedExtra)
-                  ? const SizedBox.shrink()
-                  : ShimmerCard(
-                      isLoading: showShimmer,
-                      child: showShimmer ? null : const SizedBox.shrink(),
+                        );
+                      },
                     ),
-            ),
-            if (widget.isStandalone)
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                child: isLoaded
-                    ? const SizedBox.shrink()
-                    : ThumbnailLoading(
-                        item: widget.item,
-                        hasProgress: true,
-                        isFromCache: isFromCache,
-                        isDone: isLoaded && !isFailed,
-                        isFailed: isFailed,
-                        total: total,
-                        received: received,
-                        startedAt: startedAt,
-                        restartAction: () {
-                          restartedCount = 0;
-                          restartLoading();
-                        },
-                        errorCode: errorCode,
-                      ),
+                  ),
+                ),
               ),
+            //
+            ValueListenableBuilder(
+              valueListenable: isLoaded,
+              builder: (context, isLoaded, child) {
+                return AnimatedOpacity(
+                  // fade in image
+                  opacity: (!widget.isStandalone || isLoaded) ? 1 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  child: child,
+                );
+              },
+              child: AnimatedSwitcher(
+                duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
+                child: ImageFiltered(
+                  enabled: settingsHandler.blurImages || widget.item.isHated,
+                  imageFilter: ImageFilter.blur(
+                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                    tileMode: TileMode.decal,
+                  ),
+                  child: ValueListenableBuilder(
+                    valueListenable: mainProvider,
+                    builder: (context, mainProvider, _) {
+                      if (mainProvider == null) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Image(
+                        image: mainProvider,
+                        fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+                        isAntiAlias: true,
+                        filterQuality: FilterQuality.medium,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                          if (widget.isStandalone) {
+                            return Icon(Icons.broken_image, size: 30, color: Colors.white.withValues(alpha: 0.5));
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            //
+            ValueListenableBuilder(
+              valueListenable: isLoaded,
+              builder: (context, isLoaded, _) {
+                return ValueListenableBuilder(
+                  valueListenable: isLoadedExtra,
+                  builder: (context, isLoadedExtra, _) {
+                    return ValueListenableBuilder(
+                      valueListenable: isFailed,
+                      builder: (context, isFailed, _) {
+                        final bool isAnyLoaded = isLoaded || isLoadedExtra;
+                        final bool showShimmer = !isAnyLoaded && !isFailed;
+
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          child: isAnyLoaded
+                              ? const SizedBox.shrink()
+                              : ShimmerCard(
+                                  isLoading: showShimmer,
+                                  child: showShimmer ? null : const SizedBox.shrink(),
+                                ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+            //
+            if (widget.isStandalone)
+              ValueListenableBuilder(
+                valueListenable: isLoaded,
+                builder: (context, isLoaded, child) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: isLoaded ? const SizedBox.shrink() : child,
+                  );
+                },
+                child: ValueListenableBuilder(
+                  valueListenable: isLoaded,
+                  builder: (context, isLoaded, child) {
+                    return ValueListenableBuilder(
+                      valueListenable: isFromCache,
+                      builder: (context, isFromCache, child) {
+                        return ValueListenableBuilder(
+                          valueListenable: isFailed,
+                          builder: (context, isFailed, child) {
+                            return ValueListenableBuilder(
+                              valueListenable: errorCode,
+                              builder: (context, errorCode, child) {
+                                return ThumbnailLoading(
+                                  item: widget.item,
+                                  hasProgress: true,
+                                  isFromCache: isFromCache,
+                                  isDone: isLoaded && !isFailed,
+                                  isFailed: isFailed,
+                                  total: total,
+                                  received: received,
+                                  startedAt: startedAt,
+                                  restartAction: () {
+                                    restartedCount = 0;
+                                    restartLoading();
+                                  },
+                                  errorCode: errorCode,
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            //
             if (widget.item.isHated)
               Container(
                 alignment: Alignment.center,
@@ -512,7 +563,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
     // print('building thumb ${searchHandler.getItemIndex(widget.item)}');
 
-    if (widget.isStandalone) {
+    if (widget.isStandalone && widget.useHero) {
       return HeroMode(
         enabled: settingsHandler.enableHeroTransitions,
         child: Hero(

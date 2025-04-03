@@ -166,7 +166,8 @@ enum MediaType {
   animation,
   notSupportedAnimation,
   unknown,
-  needsExtraRequest;
+  needToGuess,
+  needToLoadItem;
 
   bool get isImage {
     return this == MediaType.image;
@@ -192,8 +193,12 @@ enum MediaType {
     return this == MediaType.unknown;
   }
 
-  bool get isNeedsExtraRequest {
-    return this == MediaType.needsExtraRequest;
+  bool get isNeedToGuess {
+    return this == MediaType.needToGuess;
+  }
+
+  bool get isNeedToLoadItem {
+    return this == MediaType.needToLoadItem;
   }
 
   String toJson() {
@@ -206,6 +211,7 @@ enum MediaType {
       case 'jpeg':
       case 'png':
       case 'webp':
+      case 'avif':
         return MediaType.image;
 
       case 'mp4':
@@ -219,7 +225,10 @@ enum MediaType {
         return MediaType.notSupportedAnimation;
 
       case 'extra':
-        return MediaType.needsExtraRequest;
+        return MediaType.needToGuess;
+
+      case 'loadItem':
+        return MediaType.needToLoadItem;
 
       default:
         return MediaType.unknown;

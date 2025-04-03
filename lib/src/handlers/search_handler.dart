@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 
@@ -40,11 +41,29 @@ List<List<String>> decodeBackupString(String input) {
   return result;
 }
 
-class SearchHandler extends GetxController {
-  SearchHandler(this.rootRestate);
+class SearchHandler {
+  SearchHandler() {
+    _volumeStream = Platform.isAndroid ? StreamController.broadcast() : null;
+    _scrollStream = StreamController.broadcast();
+    _rootVolumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
+      _volumeStream?.sink.add(event);
+    });
+  }
   // alternative way to get instance of the controller
   // i.e. "SearchHandler.to.list" instead of "Get.find<SearchHandler>().list"
-  static SearchHandler get instance => Get.find<SearchHandler>();
+  static SearchHandler get instance => GetIt.instance<SearchHandler>();
+
+  static SearchHandler register() {
+    if (!GetIt.instance.isRegistered<SearchHandler>()) {
+      GetIt.instance.registerSingleton(
+        SearchHandler(),
+        dispose: (searchHandler) => searchHandler.dispose(),
+      );
+    }
+    return instance;
+  }
+
+  static void unregister() => GetIt.instance.unregister<SearchHandler>();
 
   // search globals list
   RxList<SearchTab> list = RxList<SearchTab>([]);
@@ -59,15 +78,20 @@ class SearchHandler extends GetxController {
     Booru? customBooru,
     List<Booru>? secondaryBoorus,
     TabAddMode addMode = TabAddMode.end,
+    int? customPage,
   }) {
-    final Rx<Booru> booru = (customBooru ?? currentBooru).obs;
+    final Booru booru = customBooru ?? currentBooru;
 
     // Add new tab depending on the add mode
     final SearchTab newTab = SearchTab(
       booru,
-      secondaryBoorus?.obs,
+      secondaryBoorus,
       searchText,
     );
+    if (customPage != null) {
+      newTab.booruHandler.pageNum = customPage;
+    }
+
     int newIndex = 0;
     switch (addMode) {
       case TabAddMode.prev:
@@ -89,8 +113,8 @@ class SearchHandler extends GetxController {
     if (searchText != '' && settingsHandler.searchHistoryEnabled) {
       settingsHandler.dbHandler.updateSearchHistory(
         searchText,
-        booru.value.type?.name,
-        booru.value.name,
+        booru.type?.name,
+        booru.name,
       );
     }
 
@@ -150,9 +174,46 @@ class SearchHandler extends GetxController {
       final String defaultText = currentBooru.defTags?.isNotEmpty == true ? currentBooru.defTags! : settingsHandler.defTags;
       searchTextController.text = defaultText;
 
-      final SearchTab newTab = SearchTab(currentBooru.obs, null, defaultText);
+      final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
       list[0] = newTab;
       changeTabIndex(0);
+    }
+  }
+
+  void removeTabs(List<SearchTab> tabs) {
+    final curTab = currentTab;
+    final totalTabs = total;
+
+    setViewedItem(-1);
+
+    for (final tab in tabs) {
+      list.value.remove(tab);
+    }
+
+    if (totalTabs == tabs.length) {
+      FlashElements.showSnackbar(
+        title: const Text('Removed last tab', style: TextStyle(fontSize: 20)),
+        content: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Resetting search to default tags!'),
+          ],
+        ),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.yellow,
+        sideColor: Colors.yellow,
+      );
+
+      final SettingsHandler settingsHandler = SettingsHandler.instance;
+      final String defaultText = currentBooru.defTags?.isNotEmpty == true ? currentBooru.defTags! : settingsHandler.defTags;
+      searchTextController.text = defaultText;
+
+      final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
+      list.value[0] = newTab;
+      changeTabIndex(0);
+    } else {
+      final newIndex = list.value.indexWhere((t) => t.id == curTab.id);
+      changeTabIndex(newIndex == -1 ? total - 1 : newIndex);
     }
   }
 
@@ -204,8 +265,13 @@ class SearchHandler extends GetxController {
   // grid scroll controller
   AutoScrollController gridScrollController = AutoScrollController(); // will be overwritten on the first render because there is hasClients check
   RxDouble scrollOffset = 0.0.obs;
+  // stream that will notify it's listeners about scroll events of the grid controller
+  StreamController<ScrollUpdateNotification>? _scrollStream;
+  Stream<ScrollUpdateNotification>? get scrollStream => _scrollStream?.stream;
 
-  void updateScrollPosition() {
+  void sendToScrollStream(ScrollUpdateNotification notification) {
+    _scrollStream?.sink.add(notification);
+
     scrollOffset.value = gridScrollController.offset;
     currentTab.scrollPosition = gridScrollController.offset;
   }
@@ -222,6 +288,8 @@ class SearchHandler extends GetxController {
     }
   }
 
+  List<String> get searchTextControllerTags => searchTextController.text.trim().split(' ').where((t) => t.isNotEmpty).toList();
+
   void removeTagFromSearch(String tag) {
     if (tag.isNotEmpty) {
       searchTextController.text = searchTextController.text.replaceAll('-$tag', '').replaceAll(tag, '');
@@ -232,15 +300,6 @@ class SearchHandler extends GetxController {
   FocusNode searchBoxFocus = FocusNode();
 
   final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();
-
-  Future<void> openAndFocusSearch() async {
-    mainDrawerKey.currentState?.open();
-    await Future.delayed(const Duration(milliseconds: 300));
-    searchBoxFocus.requestFocus();
-    searchTextController.selection = TextSelection.fromPosition(
-      TextPosition(offset: searchTextController.text.length),
-    );
-  }
 
   // switch to tab #index
   void changeTabIndex(
@@ -308,8 +367,8 @@ class SearchHandler extends GetxController {
   // recreate current tab with custom starting page number
   void changeCurrentTabPageNumber(int newPageNum) {
     final SearchTab newTab = SearchTab(
-      currentBooru.obs,
-      currentSecondaryBoorus,
+      currentBooru,
+      currentSecondaryBoorus.value,
       currentTab.tags,
     );
     newTab.booruHandler.pageNum = newPageNum;
@@ -384,7 +443,7 @@ class SearchHandler extends GetxController {
   SearchTab get currentTab => list[currentIndex];
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   Booru get currentBooru => currentTab.selectedBooru.value;
-  RxList<Booru>? get currentSecondaryBoorus => currentTab.secondaryBoorus;
+  Rxn<List<Booru>?> get currentSecondaryBoorus => currentTab.secondaryBoorus;
   List<BooruItem> get currentSelected => currentTab.selected;
   List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
   void filterCurrentFetched() {
@@ -432,6 +491,18 @@ class SearchHandler extends GetxController {
   }) async {
     final BooruItem item = currentFetched[itemIndex];
     if (item.isFavourite.value != null) {
+      if (item.tagsList.isEmpty || item.mediaType.value.isNeedToLoadItem) {
+        // try to update the item before favouriting, do nothing on fail
+        if (!currentBooruHandler.hasLoadItemSupport) {
+          return item.isFavourite.value;
+        }
+
+        final res = await currentBooruHandler.loadItem(item: item);
+        if (res.failed || res.item == null || res.item!.tagsList.isEmpty || res.item!.mediaType.value.isNeedToLoadItem) {
+          return item.isFavourite.value;
+        }
+      }
+
       if (forcedValue == null) {
         await ServiceHandler.vibrate();
       }
@@ -507,16 +578,16 @@ class SearchHandler extends GetxController {
     if (list.isEmpty) {
       if (settingsHandler.booruList.isNotEmpty) {
         final SearchTab newTab = SearchTab(
-          settingsHandler.booruList[0].obs,
-          currentSecondaryBoorus,
+          settingsHandler.booruList[0],
+          currentSecondaryBoorus.value,
           text,
         );
         list.add(newTab);
       }
     } else {
       final SearchTab newTab = SearchTab(
-        (newBooru ?? currentBooru).obs,
-        currentSecondaryBoorus,
+        newBooru ?? currentBooru,
+        currentSecondaryBoorus.value,
         text,
       );
       list[currentIndex] = newTab;
@@ -605,9 +676,9 @@ class SearchHandler extends GetxController {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     final bool canAddSecondary = secondaryBoorus != null && settingsHandler.booruList.length > 1;
-    final RxList<Booru>? secondary = canAddSecondary ? secondaryBoorus.obs : null;
+    final List<Booru>? secondary = canAddSecondary ? secondaryBoorus : null;
 
-    final SearchTab newTab = SearchTab(currentBooru.obs, secondary, currentTab.tags);
+    final SearchTab newTab = SearchTab(currentBooru, secondary, currentTab.tags);
     list[currentIndex] = newTab;
 
     // run search
@@ -698,22 +769,13 @@ class SearchHandler extends GetxController {
   StreamSubscription? _rootVolumeListener;
 
   // hack to allow global restates to force refresh of everything (mainly used when saving settings when exiting settings page)
-  VoidCallback rootRestate;
+  VoidCallback? rootRestate;
+  void setRootRestate(VoidCallback? rootSetStateCallback) => rootRestate = rootSetStateCallback;
 
-  @override
-  void onInit() {
-    super.onInit();
-    _volumeStream = Platform.isAndroid ? StreamController.broadcast() : null;
-    _rootVolumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
-      _volumeStream?.sink.add(event);
-    });
-  }
-
-  @override
-  void onClose() {
+  void dispose() {
+    _scrollStream?.close();
     _rootVolumeListener?.cancel();
     _volumeStream?.close();
-    super.onClose();
   }
 
   // Backup/restore tabs stuff
@@ -749,13 +811,13 @@ class SearchHandler extends GetxController {
             orElse: () => Booru(null, null, null, null, null),
           );
           if (findBooru.name != null) {
-            final SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
+            final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
             restoredGlobals.add(newTab);
           } else {
             foundBrokenItem = true;
             brokenItems.add('${booruAndTags[0]}: ${booruAndTags[1]}');
             final SearchTab newTab = SearchTab(
-              settingsHandler.booruList[0].obs,
+              settingsHandler.booruList[0],
               null,
               booruAndTags[1],
             );
@@ -817,7 +879,7 @@ class SearchHandler extends GetxController {
       }
       final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
       if (defaultBooru.type != null) {
-        final SearchTab newTab = SearchTab(defaultBooru.obs, null, defaultText);
+        final SearchTab newTab = SearchTab(defaultBooru, null, defaultText);
         list.add(newTab);
         changeTabIndex(0);
       }
@@ -841,7 +903,7 @@ class SearchHandler extends GetxController {
           orElse: () => Booru(null, null, null, null, null),
         );
         if (findBooru.name != null) {
-          final SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
+          final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
           // add only if there are not already the same tab in the list and booru is available on this device
           if (list.indexWhere(
                 (tab) => tab.selectedBooru.value.name == newTab.selectedBooru.value.name && tab.tags == newTab.tags,
@@ -884,7 +946,7 @@ class SearchHandler extends GetxController {
           orElse: () => Booru(null, null, null, null, null),
         );
         if (findBooru.name != null) {
-          final SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
+          final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
           restoredGlobals.add(newTab);
 
           if (booruAndTags[2] == 'selected') {
@@ -928,7 +990,7 @@ class SearchHandler extends GetxController {
           brokenItems.add(tabBackup);
           restoredTabs.add(
             SearchTab(
-              settingsHandler.booruList[0].obs,
+              settingsHandler.booruList[0],
               null,
               tabBackup.tags,
             ),
@@ -979,11 +1041,7 @@ class SearchHandler extends GetxController {
       final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         list.add(
-          SearchTab(
-            defaultBooru.obs,
-            null,
-            defaultText,
-          ),
+          SearchTab(defaultBooru, null, defaultText),
         );
         changeTabIndex(0);
       }
@@ -1003,7 +1061,7 @@ class SearchHandler extends GetxController {
           list.any(
             (tab) =>
                 tab.selectedBooru.value.name == newTab.selectedBooru.value.name &&
-                tab.secondaryBoorus?.map((t) => t.name).toList() == newTab.secondaryBoorus?.map((t) => t.name).toList() &&
+                tab.secondaryBoorus.value?.map((t) => t.name).toList() == newTab.secondaryBoorus.value?.map((t) => t.name).toList() &&
                 tab.tags == newTab.tags,
           )) {
         restoredTabs.add(newTab);
@@ -1067,7 +1125,7 @@ class SearchHandler extends GetxController {
       final List<String> dump = tabList.map((tab) {
         final String tags = tab.tags;
         final String booruName = tab.selectedBooru.value.name ?? 'unknown';
-        final List<String> secondaryBoorusNames = tab.secondaryBoorus?.map((b) => b.name ?? 'unknown').toList() ?? [];
+        final List<String> secondaryBoorusNames = tab.secondaryBoorus.value?.map((b) => b.name ?? 'unknown').toList() ?? [];
         final bool selected = tab == tabList[tabIndex];
 
         return jsonEncode(
@@ -1093,8 +1151,8 @@ class SearchHandler extends GetxController {
     final List<Booru> secondaryBoorus = backup.secondaryBoorus.map((b) => booruList.firstWhere((booru) => booru.name == b)).toList();
 
     return SearchTab(
-      selectedBooru.obs,
-      secondaryBoorus.isEmpty ? null : secondaryBoorus.obs,
+      selectedBooru,
+      secondaryBoorus.isEmpty ? null : secondaryBoorus,
       backup.tags,
     );
   }
@@ -1118,7 +1176,7 @@ class SearchHandler extends GetxController {
       }
       final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
       if (defaultBooru.type != null) {
-        final SearchTab newTab = SearchTab(defaultBooru.obs, null, defaultText);
+        final SearchTab newTab = SearchTab(defaultBooru, null, defaultText);
         list.clear();
         list.add(newTab);
         changeTabIndex(0);
@@ -1164,10 +1222,17 @@ class SearchHandler extends GetxController {
 }
 
 class SearchTab {
-  SearchTab(this.selectedBooru, this.secondaryBoorus, this.tags) {
+  SearchTab(
+    Booru selectedBooru,
+    List<Booru>? secondaryBoorus,
+    this.tags,
+  ) {
+    this.selectedBooru = selectedBooru.obs;
+    this.secondaryBoorus = Rxn<List<Booru>?>(secondaryBoorus);
+
     final List<Booru> tempBooruList = [];
-    tempBooruList.add(selectedBooru.value);
-    if (secondaryBoorus != null && secondaryBoorus?.isNotEmpty == true) {
+    tempBooruList.add(selectedBooru);
+    if (secondaryBoorus?.isNotEmpty == true) {
       tempBooruList.addAll(secondaryBoorus!);
     }
     final List temp = BooruHandlerFactory().getBooruHandler(tempBooruList, null);
@@ -1178,12 +1243,12 @@ class SearchTab {
     booruHandler.pageNum = pageNumTemp;
   }
   // unique id to use for booru controller
-  String id = uuid.v4();
+  final String id = uuid.v4();
   String tags = '';
 
-  Rx<Booru> selectedBooru;
-  RxList<Booru>? secondaryBoorus;
-  late BooruHandler booruHandler;
+  late final Rx<Booru> selectedBooru;
+  late final Rxn<List<Booru>?> secondaryBoorus;
+  late final BooruHandler booruHandler;
 
   double scrollPosition = 0;
   RxInt viewedIndex = (-1).obs;

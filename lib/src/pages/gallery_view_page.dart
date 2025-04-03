@@ -23,6 +23,7 @@ import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/gallery/viewer_tutorial.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/load_item_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
@@ -212,7 +213,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                           // String fileURL = item.fileURL;
                           final bool isVideo = item.mediaType.value.isVideo;
                           final bool isImage = item.mediaType.value.isImageOrAnimation;
-                          final bool isNeedsExtraRequest = item.mediaType.value.isNeedsExtraRequest;
+                          final bool isNeedToGuess = item.mediaType.value.isNeedToGuess;
+                          final bool isNeedToLoadItem = item.mediaType.value.isNeedToLoadItem && searchHandler.currentBooruHandler.hasLoadItemSupport;
                           // print(fileURL);
                           // print('isVideo: '+isVideo.toString());
 
@@ -229,11 +231,21 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                                 itemWidget = VideoViewerPlaceholder(item: item);
                               }
                             }
-                          } else if (isNeedsExtraRequest) {
+                          } else if (isNeedToGuess) {
                             itemWidget = GuessExtensionViewer(
                               item: item,
                               onMediaTypeGuessed: (MediaType mediaType) {
                                 item.mediaType.value = mediaType;
+                                item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
+                                setState(() {});
+                              },
+                            );
+                          } else if (isNeedToLoadItem) {
+                            itemWidget = LoadItemViewer(
+                              item: item,
+                              handler: searchHandler.currentBooruHandler,
+                              onItemLoaded: (newItem) {
+                                searchHandler.currentFetched[index] = newItem;
                                 setState(() {});
                               },
                             );
@@ -242,25 +254,30 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                               item: item,
                               onMediaTypeGuessed: (MediaType mediaType) {
                                 item.mediaType.value = mediaType;
+                                item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
                                 setState(() {});
                               },
                             );
                             // itemWidget = UnknownViewerPlaceholder(item: item);
                           }
 
-                          final child = Obx(() {
-                            final bool isViewed = index == searchHandler.viewedIndex.value;
-                            final int distanceFromCurrent = (searchHandler.viewedIndex.value - index).abs();
-                            // don't render more than 3 videos at once, chance to crash is too high otherwise
-                            // disabled video preload for sankaku because their videos cause crashes if loading/rendering(?) more than one at a time
-                            final bool isNear = distanceFromCurrent <= (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
-                            if (!isViewed && !isNear) {
-                              // don't render if out of preload range
-                              return Center(child: Container(color: Colors.black));
-                            }
+                          final child = ValueListenableBuilder(
+                            valueListenable: searchHandler.viewedIndex,
+                            builder: (context, viewedIndex, child) {
+                              final bool isViewed = index == viewedIndex;
+                              final int distanceFromCurrent = (viewedIndex - index).abs();
+                              // don't render more than 3 videos at once, chance to crash is too high otherwise
+                              // disabled video preload for sankaku because their videos cause crashes if loading/rendering(?) more than one at a time
+                              final bool isNear = distanceFromCurrent <= (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
+                              if (!isViewed && !isNear) {
+                                // don't render if out of preload range
+                                return Center(child: Container(color: Colors.black));
+                              }
 
-                            // Cut to the size of the container, prevents overlapping
-                            return ClipRect(
+                              // Cut to the size of the container, prevents overlapping
+                              return child!;
+                            },
+                            child: ClipRect(
                               // Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
                               child: GestureDetector(
                                 onTap: () {
@@ -271,8 +288,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                                 },
                                 child: itemWidget,
                               ),
-                            );
-                          });
+                            ),
+                          );
 
                           if (settingsHandler.disableCustomPageTransitions) {
                             return child;

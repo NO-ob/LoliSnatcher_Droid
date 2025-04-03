@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class ThemePage extends StatefulWidget {

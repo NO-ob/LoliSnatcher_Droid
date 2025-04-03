@@ -39,21 +39,24 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   Booru? booru;
-  bool addSecondaryBoorus = false, switchToNew = true;
+  bool addSecondaryBoorus = false, useCustomPage = false, switchToNew = true;
   List<Booru> secondaryBoorus = [];
   TabAddMode addMode = TabAddMode.end; // prev, next, end
   _Querymode queryMode = _Querymode.defaultTags;
-  TextEditingController customTagsController = TextEditingController();
+  final TextEditingController customTagsController = TextEditingController(), customPageController = TextEditingController();
+  GlobalKey secondaryBoorusDropdownKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    secondaryBoorus = searchHandler.currentSecondaryBoorus ?? [];
+    secondaryBoorus = searchHandler.currentSecondaryBoorus.value ?? [];
+    customPageController.text = searchHandler.currentTab.booruHandler.pageNum.toString();
   }
 
   @override
   void dispose() {
     customTagsController.dispose();
+    customPageController.dispose();
     super.dispose();
   }
 
@@ -79,6 +82,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
       secondaryBoorus: (addSecondaryBoorus && secondaryBoorus.isNotEmpty) ? [...secondaryBoorus] : null,
       switchToNew: switchToNew,
       addMode: addMode,
+      customPage: (int.tryParse(customPageController.text) ?? 0) - 1,
     );
 
     Navigator.of(context).pop();
@@ -138,6 +142,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                       inputType: TextInputType.text,
                       clearable: true,
                       pasteable: true,
+                      enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                     )
                   : Text(
                       usedQuery.isEmpty ? '[empty]' : usedQuery,
@@ -156,6 +161,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                           ),
                         ),
                         title: LoliMultiselectDropdown(
+                          key: secondaryBoorusDropdownKey,
                           value: secondaryBoorus,
                           onChanged: (List<Booru> value) {
                             setState(() {
@@ -200,10 +206,59 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                         onChanged: (v) {
                           setState(() {
                             addSecondaryBoorus = v;
+                            if (secondaryBoorus.isEmpty) {
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => (secondaryBoorusDropdownKey.currentWidget as LoliMultiselectDropdown<Booru>?)?.showDialog(context),
+                              );
+                            }
                           });
                         },
                         title: secondaryBoorus.isEmpty ? 'Add secondary boorus' : 'Keep secondary boorus',
                         subtitle: const Text('aka Multibooru mode'),
+                      ),
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: useCustomPage
+                    ? ListTile(
+                        shape: Border(
+                          bottom: BorderSide(
+                            color: Theme.of(context).dividerColor,
+                            width: borderWidth,
+                          ),
+                        ),
+                        title: SettingsTextInput(
+                          title: 'Page #',
+                          hintText: 'Page #',
+                          onlyInput: true,
+                          controller: customPageController,
+                          autofocus: true,
+                          inputType: TextInputType.number,
+                          numberButtons: true,
+                          numberStep: 1,
+                          numberMin: -1,
+                          numberMax: double.infinity,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a number';
+                            } else if (int.tryParse(value) == null) {
+                              return 'Please enter a valid number';
+                            }
+                            return null;
+                          },
+                        ),
+                      )
+                    : SettingsToggle(
+                        value: useCustomPage,
+                        onChanged: (v) {
+                          setState(() {
+                            useCustomPage = v;
+                          });
+                        },
+                        title: 'Start from custom page number',
                       ),
               ),
             ),

@@ -10,6 +10,7 @@ import 'package:keyboard_actions/keyboard_actions.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -48,10 +49,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   int cursorPos = 0;
   List<String> splitInput = [];
 
-  RxList<List<String>> booruResults = RxList([]);
-  RxList<List<String>> historyResults = RxList([]);
-  RxList<List<String>> databaseResults = RxList([]);
-  RxList<List<String>> modifiersResults = RxList([]);
+  final RxList<List<String>> booruResults = RxList([]);
+  final RxList<List<String>> historyResults = RxList([]);
+  final RxList<List<String>> databaseResults = RxList([]);
+  final RxList<List<String>> modifiersResults = RxList([]);
 
   CancelToken? cancelToken;
 
@@ -367,18 +368,24 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       [' ', 'loading'],
     ];
     // TODO cancel previous search when new starts
-    List<String?> getFromBooru = [];
+    List<TagSuggestion> getFromBooru = [];
     cancelToken?.cancel();
     cancelToken = CancelToken();
     if (multiIndex != -1) {
       final MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
-      getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(lastTag, cancelToken: cancelToken);
+      getFromBooru = (await handler.booruHandlers[multiIndex].getTagSuggestions(lastTag, cancelToken: cancelToken)).fold(
+        (e) => [],
+        (tags) => tags,
+      );
     } else {
-      getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag, cancelToken: cancelToken);
+      getFromBooru = (await searchHandler.currentBooruHandler.getTagSuggestions(lastTag, cancelToken: cancelToken)).fold(
+        (e) => [],
+        (tags) => tags,
+      );
     }
 
     booruResults.value = getFromBooru.map((tag) {
-      final String tagTemp = tag ?? '';
+      final String tagTemp = tag.tag;
       return [tagTemp, 'booru'];
     }).toList();
   }

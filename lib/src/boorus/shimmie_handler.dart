@@ -4,6 +4,7 @@ import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -13,6 +14,9 @@ class ShimmieHandler extends BooruHandler {
 
   @override
   bool get hasSizeData => true;
+
+  @override
+  bool get hasTagSuggestions => true;
 
   @override
   String validateTags(String tags) {
@@ -108,18 +112,24 @@ class ShimmieHandler extends BooruHandler {
     } else {
       // TODO others don't support / don't have the parser?
       return '';
-      // return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10';
+      // return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=20';
     }
   }
 
   @override
   List parseTagSuggestionsList(dynamic response) {
     // TODO explain why this
-    return response.data.substring(1, response.data.length - 1).replaceAll(RegExp('(:.([0-9])+)'), '').replaceAll('"', '').split(',');
+    return response.data
+        .substring(1, response.data.length - 1)
+        .replaceAll(RegExp('(:.([0-9])+)'), '')
+        .replaceAll('"', '')
+        .split(',')
+        .map((e) => TagSuggestion(tag: e))
+        .toList();
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
     // all manipulations were already done in list parse
     return responseItem;
   }
@@ -158,6 +168,9 @@ class ShimmieHtmlHandler extends BooruHandler {
 
   @override
   bool get hasSizeData => true;
+
+  @override
+  bool get hasTagSuggestions => true;
 
   @override
   String validateTags(String tags) {
@@ -244,18 +257,30 @@ class ShimmieHtmlHandler extends BooruHandler {
     } else {
       // TODO others don't support / don't have the parser?
       return '';
-      // return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10';
+      // return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=20';
     }
   }
 
   @override
   List parseTagSuggestionsList(dynamic response) {
     // TODO explain why this
-    return response.data.substring(1, response.data.length - 1).replaceAll(RegExp('(:.([0-9])+)'), '').replaceAll('"', '').split(',');
+    return response.data is List
+        ? (response.data as List).map((e) => TagSuggestion(tag: e)).toList()
+        : response.data is Map<String, dynamic>
+            ? (response.data as Map<String, dynamic>)
+                .entries
+                .map(
+                  (e) => TagSuggestion(
+                    tag: e.key.toLowerCase(),
+                    count: e.value['count'],
+                  ),
+                )
+                .toList()
+            : [];
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
     // all manipulations were already done in list parse
     return responseItem;
   }

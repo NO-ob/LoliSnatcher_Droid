@@ -1,6 +1,7 @@
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -12,6 +13,9 @@ class AGNPHHandler extends BooruHandler {
 
   @override
   bool get hasSizeData => true;
+
+  @override
+  bool get hasTagSuggestions => true;
 
   @override
   Map<String, String> getHeaders() {
@@ -124,8 +128,12 @@ class AGNPHHandler extends BooruHandler {
   }
 
   @override
-  String? parseTagSuggestion(dynamic responseItem, int index) {
+  TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
     // TODO parse tag type
-    return responseItem.getElement('name')?.innerText ?? '';
+    final String tagStr = responseItem.getElement('name')?.innerText ?? '';
+    if (tagStr.isEmpty) {
+      return null;
+    }
+    return TagSuggestion(tag: tagStr);
   }
 }

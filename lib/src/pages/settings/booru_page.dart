@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:get/utils.dart';
-
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
@@ -12,6 +10,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -453,6 +452,7 @@ class _BooruPageState extends State<BooruPage> {
                 clearable: true,
                 pasteable: true,
                 resetText: () => 'rating:safe',
+                enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
               ),
               SettingsTextInput(
                 controller: limitController,

@@ -13,6 +13,9 @@ class IdolSankakuHandler extends SankakuHandler {
   IdolSankakuHandler(super.booru, super.limit);
 
   @override
+  bool get hasTagSuggestions => true;
+
+  @override
   Options? fetchSearchOptions() {
     // TODO without this and manual decode requests fail with endless redirect error. why it happens? dio doesn't consider the response data as json? some missing header in response?
     return Options(responseType: ResponseType.plain);
@@ -39,6 +42,14 @@ class IdolSankakuHandler extends SankakuHandler {
       if (token.isNotEmpty) 'x-rails-token': token,
     };
   }
+
+  static List<String> knownUrls = [
+    'iapi.sankakucomplex.com',
+    'idol.sankakucomplex.com',
+  ];
+
+  @override
+  String get baseUrl => knownUrls.any(booru.baseURL!.contains) ? 'https://iapi.sankakucomplex.com' : booru.baseURL!;
 
   @override
   List parseListFromResponse(dynamic response) {
@@ -116,18 +127,18 @@ class IdolSankakuHandler extends SankakuHandler {
   String makeURL(String tags) {
     final tagsStr = tags.trim().isEmpty ? '' : 'tags=${tags.trim()}&';
 
-    return '${booru.baseURL}/post/index.json?${tagsStr}limit=$limit&page=$pageNum';
+    return '$baseUrl/post/index.json?${tagsStr}limit=$limit&page=$pageNum';
   }
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/tag/index.json?name=$input*&limit=10';
+    return '$baseUrl/tag/index.json?name=$input*&limit=20';
   }
 
   @override
   String makeCommentsURL(String postID, int pageNum) {
     // EXAMPLE: https://iapi.sankakucomplex.com/comment/index.json?post_id=$post_id
-    return '${booru.baseURL}/comment/index.json?post_id=$postID';
+    return '$baseUrl/comment/index.json?post_id=$postID';
   }
 
   @override
@@ -161,7 +172,7 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   String makeNotesURL(String postID) {
-    return '${booru.baseURL}/note/index.json?post_id=$postID';
+    return '$baseUrl/note/index.json?post_id=$postID';
   }
 
   @override
@@ -191,7 +202,7 @@ class IdolSankakuHandler extends SankakuHandler {
 
     try {
       final res = await DioNetwork.post(
-        '${booru.baseURL}/user/authenticate.json',
+        '$baseUrl/user/authenticate.json',
         headers: {
           'Accept-Encoding': 'gzip',
           'Cache-Control': 'no-store, no-cache, must-revalidate',

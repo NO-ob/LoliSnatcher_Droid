@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
@@ -40,9 +38,9 @@ class MediaLoading extends StatefulWidget {
   final List<String> stopReasons;
   final bool isViewed;
 
-  final RxInt total;
-  final RxInt received;
-  final RxInt startedAt;
+  final ValueNotifier<int> total;
+  final ValueNotifier<int> received;
+  final ValueNotifier<int> startedAt;
 
   final void Function()? startAction;
   final void Function()? stopAction;
@@ -57,7 +55,6 @@ class _MediaLoadingState extends State<MediaLoading> {
   bool isVisible = false;
   int _total = 0, _received = 0, _startedAt = 0;
   Timer? _checkInterval;
-  StreamSubscription? _totalListener, _receivedListener, _startedAtListener;
 
   int _prevAmount = 0, _lastAmount = 0, _prevTime = 0, _lastTime = 0;
 
@@ -72,19 +69,9 @@ class _MediaLoadingState extends State<MediaLoading> {
     _received = widget.received.value;
     _startedAt = widget.startedAt.value;
 
-    _totalListener = widget.total.listen((int value) {
-      _onBytesAdded(null, value);
-    });
-
-    _receivedListener = widget.received.listen((int value) {
-      _onBytesAdded(value, null);
-    });
-
-    _startedAtListener = widget.startedAt.listen((int value) {
-      _total = 0;
-      _received = 0;
-      _startedAt = value;
-    });
+    widget.total.addListener(onTotalChanged);
+    widget.received.addListener(onReceivedChanged);
+    widget.startedAt.addListener(onStartedAtChanged);
 
     _checkInterval?.cancel();
     _checkInterval = Timer.periodic(const Duration(milliseconds: 500), (timer) {
@@ -96,6 +83,14 @@ class _MediaLoadingState extends State<MediaLoading> {
 
     _prevTime = DateTime.now().millisecondsSinceEpoch - 1;
     _lastTime = _prevTime + 1;
+  }
+
+  void onTotalChanged() => _onBytesAdded(null, widget.total.value);
+  void onReceivedChanged() => _onBytesAdded(widget.received.value, null);
+  void onStartedAtChanged() {
+    _total = 0;
+    _received = 0;
+    _startedAt = widget.startedAt.value;
   }
 
   void _onBytesAdded(int? received, int? total) {
@@ -134,9 +129,9 @@ class _MediaLoadingState extends State<MediaLoading> {
     _prevTime = 0;
     _lastTime = 0;
 
-    _totalListener?.cancel();
-    _receivedListener?.cancel();
-    _startedAtListener?.cancel();
+    widget.total.removeListener(onTotalChanged);
+    widget.received.removeListener(onReceivedChanged);
+    widget.startedAt.removeListener(onStartedAtChanged);
     _checkInterval?.cancel();
     Debounce.cancel('loading_media_progress_${widget.item.hashCode}');
   }
@@ -221,17 +216,17 @@ class _MediaLoadingState extends State<MediaLoading> {
       }
     }
 
-    final String filesizeText = (hasProgressData && percentDone < 1) ? ('$loadedSize / $expectedSize') : '';
+    final String filesizeText = (hasProgressData && percentDone < 1) ? '$loadedSize / $expectedSize' : '';
 
     int expectedSpeed = 0;
     if (hasProgressData && _prevAmount > 0 && _lastAmount > 0) {
       expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / (nowMils - _prevTime))).round();
       // expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / speedCheckInterval)).round();
     }
-    final String expectedSpeedText = (hasProgressData && percentDone < 1) ? ('${Tools.formatBytes(expectedSpeed, 1)}/s') : '';
+    final String expectedSpeedText = (hasProgressData && percentDone < 1) ? '${Tools.formatBytes(expectedSpeed, 1)}/s' : '';
 
     final double expectedTime = hasProgressData ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed)) : 0;
-    final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? ('~${expectedTime.toStringAsFixed(1)} s') : '';
+    final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? '~${expectedTime.toStringAsFixed(1)} s' : '';
 
     final int sinceStartSeconds = (sinceStart / 1000).floor();
     final String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds}s ago' : '';

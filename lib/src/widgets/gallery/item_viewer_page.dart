@@ -1,22 +1,23 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/load_item_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
-class ItemViewerPage extends StatelessWidget {
+class ItemViewerPage extends StatefulWidget {
   const ItemViewerPage({
     required this.item,
     required this.booru,
@@ -27,11 +28,25 @@ class ItemViewerPage extends StatelessWidget {
   final Booru booru;
 
   @override
+  State<ItemViewerPage> createState() => _ItemViewerPageState();
+}
+
+class _ItemViewerPageState extends State<ItemViewerPage> {
+  late BooruItem _item;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _item = widget.item;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-    final PreferredSizeWidget appBar = _ItemViewerAppBar(item);
+    final PreferredSizeWidget appBar = _ItemViewerAppBar(_item);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -54,37 +69,54 @@ class ItemViewerPage extends StatelessWidget {
           },
           onDismissed: (_) => Navigator.of(context).pop(),
           child: Center(
-            child: Obx(
-              () {
-                final bool isVideo = item.mediaType.value.isVideo;
-                final bool isImage = item.mediaType.value.isImageOrAnimation;
-                final bool isNeedsExtraRequest = item.mediaType.value.isNeedsExtraRequest;
+            child: ValueListenableBuilder(
+              valueListenable: _item.mediaType,
+              builder: (context, mediaType, child) {
+                final bool isVideo = mediaType.isVideo;
+                final bool isImage = mediaType.isImageOrAnimation;
+                final bool isNeedToGuess = mediaType.isNeedToGuess;
+
+                final booruHandler = BooruHandlerFactory().getBooruHandler([widget.booru], 20)[0] as BooruHandler;
+                final bool isNeedToLoadItem = mediaType.isNeedToLoadItem && booruHandler.hasLoadItemSupport;
 
                 late Widget itemWidget;
                 if (isImage) {
-                  itemWidget = ImageViewer(item, isStandalone: true, key: item.key);
+                  itemWidget = ImageViewer(_item, isStandalone: true, key: _item.key);
                 } else if (isVideo) {
                   if (settingsHandler.disableVideo) {
                     itemWidget = const Center(child: Text('Video Disabled', style: TextStyle(fontSize: 20)));
                   } else {
                     if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
-                      itemWidget = VideoViewer(item, isStandalone: true, enableFullscreen: true, key: item.key);
+                      itemWidget = VideoViewer(_item, isStandalone: true, enableFullscreen: true, key: _item.key);
                     } else {
-                      itemWidget = VideoViewerPlaceholder(item: item);
+                      itemWidget = VideoViewerPlaceholder(item: _item);
                     }
                   }
-                } else if (isNeedsExtraRequest) {
+                } else if (isNeedToGuess) {
                   itemWidget = GuessExtensionViewer(
-                    item: item,
+                    item: _item,
                     onMediaTypeGuessed: (MediaType mediaType) {
-                      item.mediaType.value = mediaType;
+                      _item.mediaType.value = mediaType;
+                      _item.possibleMediaType.value = mediaType.isUnknown ? _item.possibleMediaType.value : null;
+                      setState(() {});
+                    },
+                  );
+                } else if (isNeedToLoadItem) {
+                  itemWidget = LoadItemViewer(
+                    item: _item,
+                    handler: booruHandler,
+                    onItemLoaded: (newItem) {
+                      _item = newItem;
+                      setState(() {});
                     },
                   );
                 } else {
                   itemWidget = GuessExtensionViewer(
-                    item: item,
+                    item: _item,
                     onMediaTypeGuessed: (MediaType mediaType) {
-                      item.mediaType.value = mediaType;
+                      _item.mediaType.value = mediaType;
+                      _item.possibleMediaType.value = mediaType.isUnknown ? _item.possibleMediaType.value : null;
+                      setState(() {});
                     },
                   );
                   // itemWidget = UnknownViewerPlaceholder(item: item);
@@ -130,8 +162,6 @@ class _ItemViewerAppBarState extends State<_ItemViewerAppBar> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-  late StreamSubscription<bool> appbarListener;
-
   bool isOnTop = true;
 
   @override
@@ -143,15 +173,17 @@ class _ItemViewerAppBarState extends State<_ItemViewerAppBar> {
     ServiceHandler.setSystemUiVisibility(!settingsHandler.autoHideImageBar);
     viewerHandler.displayAppbar.value = !settingsHandler.autoHideImageBar;
 
-    appbarListener = viewerHandler.displayAppbar.listen((bool value) {
-      ServiceHandler.setSystemUiVisibility(value);
-      setState(() {});
-    });
+    viewerHandler.displayAppbar.addListener(appbarListener);
+  }
+
+  void appbarListener() {
+    ServiceHandler.setSystemUiVisibility(viewerHandler.displayAppbar.value);
+    setState(() {});
   }
 
   @override
   void dispose() {
-    appbarListener.cancel();
+    viewerHandler.displayAppbar.removeListener(appbarListener);
     ServiceHandler.setSystemUiVisibility(true);
 
     super.dispose();
@@ -173,19 +205,23 @@ class _ItemViewerAppBarState extends State<_ItemViewerAppBar> {
         color: Colors.transparent,
         height: viewerHandler.displayAppbar.value ? (isOnTop ? null : (widget.defaultHeight + extraPadding)) : 0,
         padding: isOnTop ? null : EdgeInsets.only(bottom: extraPadding),
-        child: Obx(
-          () {
-            final type = widget.item.mediaType;
-
+        child: ValueListenableBuilder(
+          valueListenable: widget.item.mediaType,
+          builder: (context, type, _) {
             return AppBar(
-              title: type.value.isVideo
+              title: type.isVideo
                   ? const Text('Video')
-                  : type.value.isImageOrAnimation
+                  : type.isImageOrAnimation
                       ? const Text('Image')
                       : const Text('Viewer'),
               elevation: 0,
               backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,
+              titleTextStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
               shadowColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
               leading: IconButton(

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/agnph_handler.dart';
 import 'package:lolisnatcher/src/boorus/booru_on_rails_handler.dart';
@@ -15,6 +14,7 @@ import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
 import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/r34us_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
@@ -41,12 +41,13 @@ const String defaultInput = '';
 
 Future<void> main() async {
   // prepare/init handlers and stuff
-  final SettingsHandler settingsHandler = Get.put(SettingsHandler());
+  final SettingsHandler settingsHandler = SettingsHandler.register();
   await settingsHandler.initialize();
-  final TagHandler tagHandler = Get.put(TagHandler());
+  settingsHandler.tagTypeFetchEnabled = false;
+  settingsHandler.itemLimit = itemLimit;
+
+  final TagHandler tagHandler = TagHandler.register();
   await tagHandler.initialize();
-  SettingsHandler.instance.tagTypeFetchEnabled = false;
-  SettingsHandler.instance.itemLimit = itemLimit;
 
   group('booru tests', () {
     test('BooruOnRailsHandler', () async {
@@ -106,11 +107,10 @@ Future<void> main() async {
       final BooruHandler booruHandler = await testBooru(Booru('r34hentai', BooruType.R34Hentai, '', 'https://r34hentai.com', ''));
       expect(booruHandler, isA<PhilomenaHandler>());
     });
-    //Not in the factory?
-    /*test('R34USHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("r34US", "R34US","","https://rule34.us",""));
+    test('R34USHandler', () async {
+      final BooruHandler booruHandler = await testBooru(Booru('r34US', BooruType.R34US, '', 'https://rule34.us', ''));
       expect(booruHandler, isA<R34USHandler>());
-    });*/
+    });
     test('SankakuHandler', () async {
       // TODO doesn't parse all items correctly?
       final BooruHandler booruHandler = await testBooru(Booru('sankaku', BooruType.Sankaku, '', 'https://capi-v2.sankakucomplex.com', ''));
@@ -218,7 +218,13 @@ Future<BooruHandler> testBooru(
 Future<void> testSuggestions(BooruHandler booruHandler, {String? customSuggestionsInput}) async {
   print('Testing suggestions for ${booruHandler.booru.name}');
   final String input = customSuggestionsInput ?? 'ani'; // ani[mated]
-  final List<String> suggestions = await booruHandler.tagSearch(input);
-  expect(suggestions.isNotEmpty, equals(true));
-  expect(suggestions.length, equals(10));
+  final suggestions = await booruHandler.getTagSuggestions(input);
+  expect(suggestions.isRight(), equals(true));
+  expect(
+    suggestions.fold(
+      (e) => 0,
+      (tags) => tags.length,
+    ),
+    equals(10),
+  );
 }

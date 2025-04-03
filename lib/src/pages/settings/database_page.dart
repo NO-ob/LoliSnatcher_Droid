@@ -180,15 +180,20 @@ class _DatabasePageState extends State<DatabasePage> {
         if (isUpdating) {
           await Future.delayed(const Duration(milliseconds: 100));
           cancelToken = CancelToken();
-          final List result = await sankakuHandler.loadItem(item: item, cancelToken: cancelToken);
-          if (result[1] == false) {
+          final result = await sankakuHandler.loadItem(item: item, cancelToken: cancelToken);
+          if (result.failed) {
             safeSetState(() {
               updatingFailed += 1;
               failedItems.add(item);
             });
-            Logger.Inst().log('something went wrong updating favourites: ${result[2]}', 'DataBasePage', 'updateSankakuItems', LogTypes.exception);
-          } else if (result[1] == true) {
-            item = result[0];
+            Logger.Inst().log(
+              'something went wrong updating favourites: ${result.error}',
+              'DataBasePage',
+              'updateSankakuItems',
+              LogTypes.exception,
+            );
+          } else if (!result.failed && result.item != null) {
+            item = result.item!;
             unawaited(settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.urlUpdate));
             safeSetState(() {
               updatingDone += 1;
@@ -639,6 +644,7 @@ class _DatabasePageState extends State<DatabasePage> {
                               hintText: '(optional, may make the process slower)',
                               clearable: true,
                               pasteable: true,
+                              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                             ),
                             SettingsButton(
                               name: 'Update Sankaku URLs',

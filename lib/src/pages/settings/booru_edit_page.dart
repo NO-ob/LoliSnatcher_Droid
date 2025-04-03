@@ -3,17 +3,21 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FirstWhereOrNullExt;
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -49,19 +53,42 @@ class _BooruEditState extends State<BooruEdit> {
   TranslationsSettingsBooruEditorEn get booruEditorLoc => context.loc.settings.booruEditor;
 
   // TODO make standalone / move to handlers themselves
-  String convertSiteUrlToApi() {
+  String convertSiteUrlToApiUrl() {
     final String url = booruURLController.text;
 
-    if (url.contains('idol.sankakucomplex.com')) {
+    if (IdolSankakuHandler.knownUrls.any(url.contains)) {
       return 'https://iapi.sankakucomplex.com';
-      // booruFaviconController.text = "https://idol.sankakucomplex.com/favicon.ico";
-    } else if (url.contains('sankakucomplex.com')) {
-      // Sankaku api override
-      return 'https://capi-v2.sankakucomplex.com';
-      // booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
+    } else if (SankakuHandler.knownUrls.any(url.contains)) {
+      return 'https://sankakuapi.com';
     }
 
     return url;
+  }
+
+  String convertSiteUrlToFaviconUrl() {
+    final String url = booruURLController.text;
+
+    String faviconUrl = '${booruURLController.text}/favicon.ico';
+
+    if (url.contains('agn.ph')) {
+      faviconUrl = 'https://agn.ph/skin/Retro/favicon.ico';
+    }
+
+    if (booruURLController.text.contains('rule34.us')) {
+      faviconUrl = 'https://rule34.us/favicon.png';
+    }
+
+    if ([
+      ...SankakuHandler.knownUrls,
+      ...IdolSankakuHandler.knownUrls,
+      'sankakuapi.com',
+    ].any(url.contains)) {
+      faviconUrl = 'https://sankaku.app/images/favicon-32x32.png';
+    }
+
+    // TODO add more
+
+    return faviconUrl;
   }
 
   bool isTesting = false;
@@ -105,12 +132,42 @@ class _BooruEditState extends State<BooruEdit> {
             testButton(),
             webviewButton(),
             saveButton(),
+            ValueListenableBuilder(
+              valueListenable: settingsHandler.isDebug,
+              builder: (context, isDebug, child) {
+                return (isDebug || EnvironmentConfig.isTesting) ? child! : const SizedBox.shrink();
+              },
+              child: SettingsButton(
+                name: 'Open Alice',
+                icon: const Icon(Icons.developer_board),
+                action: settingsHandler.alice.showInspector,
+              ),
+            ),
+            Obx(() {
+              if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) && settingsHandler.enabledLogTypes.isNotEmpty) {
+                return SettingsButton(
+                  name: 'Open Logger',
+                  icon: const Icon(Icons.print),
+                  action: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => LoggerViewPage(talker: Logger.talker),
+                      ),
+                    );
+                  },
+                  drawTopBorder: true,
+                );
+              }
+
+              return const SizedBox.shrink();
+            }),
             const SettingsButton(name: '', enabled: false),
             SettingsTextInput(
               controller: booruNameController,
               title: booruEditorLoc.booruName,
               clearable: true,
               pasteable: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsTextInput(
               controller: booruURLController,
@@ -118,6 +175,7 @@ class _BooruEditState extends State<BooruEdit> {
               inputType: TextInputType.url,
               clearable: true,
               pasteable: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsDropdown(
               value: selectedBooruType,
@@ -136,14 +194,31 @@ class _BooruEditState extends State<BooruEdit> {
               title: booruEditorLoc.booruFavicon,
               hintText: booruEditorLoc.booruFaviconPlaceholder,
               inputType: TextInputType.url,
-              clearable: true,
-              pasteable: true,
+              onChanged: (_) {
+                setState(() {});
+              },
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+              trailingIcon: SizedBox(
+                height: 24,
+                width: 24,
+                child: Image(
+                  image: NetworkImage(booruFaviconController.text),
+                  fit: BoxFit.fill,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.error,
+                    size: 24,
+                    color: Colors.redAccent,
+                  ),
+                  loadingBuilder: (context, child, loadingProgress) => loadingProgress == null ? child : const CircularProgressIndicator(),
+                ),
+              ),
             ),
             SettingsTextInput(
               controller: booruDefTagsController,
               title: booruEditorLoc.booruDefTags,
               clearable: true,
               pasteable: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
@@ -169,6 +244,7 @@ class _BooruEditState extends State<BooruEdit> {
               clearable: true,
               pasteable: true,
               drawTopBorder: true,
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsTextInput(
               controller: booruAPIKeyController,
@@ -177,6 +253,7 @@ class _BooruEditState extends State<BooruEdit> {
               hintText: booruEditorLoc.canBeBlankPlaceholder,
               clearable: true,
               obscureable: shouldObscureApiKey(),
+              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SizedBox(height: MediaQuery.sizeOf(context).height * 0.2),
           ],
@@ -287,17 +364,10 @@ class _BooruEditState extends State<BooruEdit> {
         if (booruURLController.text.endsWith('/')) {
           booruURLController.text = booruURLController.text.substring(0, booruURLController.text.length - 1);
         }
-        // autofill favicon if not specified
-        if (booruFaviconController.text.trim().isEmpty) {
-          booruFaviconController.text = '${booruURLController.text}/favicon.ico';
-        }
-        // TODO make a list of default favicons for boorus where ^default^ one won't work
-        if (booruURLController.text.contains('agn.ph')) {
-          booruFaviconController.text = 'https://agn.ph/skin/Retro/favicon.ico';
-        }
 
-        // some boorus have their api url different from main host
-        booruURLController.text = convertSiteUrlToApi();
+        booruURLController.text = convertSiteUrlToApiUrl();
+
+        booruFaviconController.text = booruFaviconController.text.trim().isEmpty ? convertSiteUrlToFaviconUrl() : booruFaviconController.text;
 
         //Call the booru test
         Booru testBooru;
@@ -541,8 +611,12 @@ class _BooruEditState extends State<BooruEdit> {
             }
           }
 
-          // force global restate
-          searchHandler.rootRestate();
+          unawaited(
+            Future.delayed(const Duration(seconds: 1)).then((_) {
+              // force global restate
+              searchHandler.rootRestate?.call();
+            }),
+          );
 
           Navigator.of(context).pop(true);
         }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
@@ -44,10 +45,11 @@ class TagsFiltersList extends StatelessWidget {
           SettingsTextInput(
             controller: tagSearchController,
             title: 'Search filters (${isSearchActive ? '$filteredCount/$originalCount' : '$originalCount'})',
-            forceLabelOnTop: true,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
             clearable: true,
             pasteable: true,
             onChanged: onSearchTextChanged,
+            enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
           ),
           //
           if (filteredTagsList.isEmpty)

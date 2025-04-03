@@ -1,6 +1,5 @@
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 
 class HistoryItem {
   HistoryItem(

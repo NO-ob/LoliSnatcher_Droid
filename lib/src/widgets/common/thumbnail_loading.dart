@@ -1,8 +1,4 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-
-import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -31,9 +27,9 @@ class ThumbnailLoading extends StatefulWidget {
   final bool isDone;
   final bool isFailed;
 
-  final RxInt total;
-  final RxInt received;
-  final RxInt startedAt;
+  final ValueNotifier<int> total;
+  final ValueNotifier<int> received;
+  final ValueNotifier<int> startedAt;
 
   final String? errorCode;
 
@@ -48,7 +44,6 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
 
   bool isVisible = false;
   int _total = 0, _received = 0, _startedAt = 0;
-  StreamSubscription? _totalListener, _receivedListener, _startedAtListener;
 
   @override
   void initState() {
@@ -58,19 +53,17 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
     _received = widget.received.value;
     _startedAt = widget.startedAt.value;
 
-    _totalListener = widget.total.listen((int value) {
-      _onBytesAdded(null, value);
-    });
+    widget.total.addListener(onTotalChanged);
+    widget.received.addListener(onReceivedChanged);
+    widget.startedAt.addListener(onStartedAtChanged);
+  }
 
-    _receivedListener = widget.received.listen((int value) {
-      _onBytesAdded(value, null);
-    });
-
-    _startedAtListener = widget.startedAt.listen((int value) {
-      _total = 0;
-      _received = 0;
-      _startedAt = value;
-    });
+  void onTotalChanged() => _onBytesAdded(null, widget.total.value);
+  void onReceivedChanged() => _onBytesAdded(widget.received.value, null);
+  void onStartedAtChanged() {
+    _total = 0;
+    _received = 0;
+    _startedAt = widget.startedAt.value;
   }
 
   void _onBytesAdded(int? received, int? total) {
@@ -98,9 +91,9 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
     _received = 0;
     _startedAt = 0;
 
-    _totalListener?.cancel();
-    _receivedListener?.cancel();
-    _startedAtListener?.cancel();
+    widget.total.removeListener(onTotalChanged);
+    widget.received.removeListener(onReceivedChanged);
+    widget.startedAt.removeListener(onStartedAtChanged);
     Debounce.cancel('loading_thumbnail_progress_${widget.item.hashCode}');
   }
 

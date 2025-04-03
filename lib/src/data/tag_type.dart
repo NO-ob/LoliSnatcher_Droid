@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 
 enum TagType {
   artist,
@@ -74,7 +74,7 @@ enum TagType {
       case none:
         return 'None/General';
       default:
-        return name.capitalizeFirst!;
+        return name.capitalizeFirst;
     }
   }
 }

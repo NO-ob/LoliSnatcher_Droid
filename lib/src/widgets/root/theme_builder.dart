@@ -7,7 +7,10 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/theme_handler.dart';
 
 class ThemeBuilder extends StatelessWidget {
-  const ThemeBuilder({required this.child, super.key});
+  const ThemeBuilder({
+    required this.child,
+    super.key,
+  });
 
   final Widget child;
 
@@ -28,6 +31,7 @@ class ThemeBuilder extends StatelessWidget {
         theme: theme,
         themeMode: settingsHandler.themeMode.value,
         isAmoled: settingsHandler.isAmoled.value,
+        context: context,
       );
 
       return Theme(

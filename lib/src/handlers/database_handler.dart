@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:sqflite/sqflite.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -362,9 +364,6 @@ class DBHandler {
     // final Duration diff = end.difference(start);
     // print('Searching DB took: ${diff.inMilliseconds} ms');
 
-    Logger.Inst().log('got results from db', 'DBHandler', 'searchDB', LogTypes.booruHandlerInfo);
-    Logger.Inst().log(result.toString(), 'DBHandler', 'searchDB', LogTypes.booruHandlerInfo);
-
     if (result != null && result.isNotEmpty) {
       // start = DateTime.now();
 
@@ -478,9 +477,6 @@ class DBHandler {
           'GROUP BY bi.id;');
     }
 
-    Logger.Inst().log('got results from db', 'DBHandler', 'searchDBCount', LogTypes.booruHandlerInfo);
-    Logger.Inst().log(result.toString(), 'DBHandler', 'searchDBCount', LogTypes.booruHandlerInfo);
-
     if (result != null && result.isNotEmpty) {
       if (result.length > 1) {
         return result.length;
@@ -499,8 +495,16 @@ class DBHandler {
     List? result;
     result = await db?.rawQuery('SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1');
 
-    Logger.Inst().log('got results from db', 'DBHandler', 'getFavouritesCount', LogTypes.booruHandlerInfo);
-    Logger.Inst().log(result.toString(), 'DBHandler', 'getFavouritesCount', LogTypes.booruHandlerInfo);
+    if (result != null) {
+      return result.first['count'];
+    } else {
+      return 0;
+    }
+  }
+
+  Future<int> getSnatchedCount() async {
+    List? result;
+    result = await db?.rawQuery('SELECT COUNT(*) as count FROM BooruItem WHERE isSnatched = 1');
 
     if (result != null) {
       return result.first['count'];
@@ -641,7 +645,7 @@ class DBHandler {
   }
 
   /// Get search history entries
-  Future<List<Map<String, dynamic>>> getSearchHistory() async {
+  Future<List<HistoryItem>> getSearchHistory() async {
     final metaData = await db?.rawQuery('SELECT * FROM SearchHistory GROUP BY searchText, booruName ORDER BY id DESC');
     final List<Map<String, dynamic>> result = [];
     metaData?.forEach((s) {
@@ -654,7 +658,25 @@ class DBHandler {
         'timestamp': s['timestamp'].toString(),
       });
     });
-    return result;
+    return List.from(result.map(HistoryItem.fromMap));
+  }
+
+  Future<List<HistoryItem>> getLatestSearchHistory() async {
+    final metaData = await db?.rawQuery(
+      'SELECT * FROM (SELECT * FROM SearchHistory ORDER BY timestamp DESC LIMIT 20)',
+    );
+    final List<Map<String, dynamic>> result = [];
+    metaData?.forEach((s) {
+      result.add({
+        'id': s['id'],
+        'searchText': s['searchText'].toString(),
+        'booruType': s['booruType'].toString(),
+        'booruName': s['booruName'].toString(),
+        'isFavourite': s['isFavourite'].toString(),
+        'timestamp': s['timestamp'].toString(),
+      });
+    });
+    return List.from(result.map(HistoryItem.fromMap));
   }
 
   Future<List<String>> getSearchHistoryByInput(String queryStr, int limit) async {
@@ -699,8 +721,6 @@ class DBHandler {
     }
     // print("getTrackedValues: ${DateTime.now().difference(startTime).inMilliseconds}ms"); // performance test
     if (result != null && result.isNotEmpty) {
-      Logger.Inst().log('file url is: ${item.fileURL}', 'DBHandler', 'getTrackedValues', LogTypes.booruHandlerInfo);
-      Logger.Inst().log(result.toString(), 'DBHandler', 'getTrackedValues', LogTypes.booruHandlerInfo);
       values[0] = Tools.intToBool(result.first['isSnatched']);
       values[1] = Tools.intToBool(result.first['isFavourite']);
     }
@@ -745,8 +765,6 @@ class DBHandler {
     if (result != null) {
       for (final BooruItem item in items) {
         final res = result.firstWhere((el) => el['postURL'].toString() == item.postURL, orElse: () => {'isSnatched': 0, 'isFavourite': 0});
-        // Logger.Inst().log("file url is: $fileURL", "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
-        Logger.Inst().log(res.toString(), 'DBHandler', 'getTrackedValues', LogTypes.booruHandlerInfo);
         values.add([Tools.intToBool(res['isSnatched']), Tools.intToBool(res['isFavourite'])]);
       }
     }
@@ -755,7 +773,7 @@ class DBHandler {
 
   /// Deletes booruItems which are no longer favourited or snatched
   Future<bool> deleteUntracked() async {
-    final result = await db?.rawQuery('SELECT id FROM BooruItem WHERE isFavourite = 0 and isSnatched = 0');
+    final result = await db?.rawQuery('SELECT id FROM BooruItem WHERE (isFavourite = 0 OR isFavourite IS NULL) AND (isSnatched = 0 OR isSnatched IS NULL)');
     if (result != null && result.isNotEmpty) {
       await deleteItem(result.map((r) => r['id'].toString()).toList());
     }
@@ -764,9 +782,13 @@ class DBHandler {
 
   /// Deletes a BooruItem and its tags from the database
   Future<void> deleteItem(List<String> itemIDs) async {
-    Logger.Inst().log('DBHandler deleting: $itemIDs', 'DBHandler', 'deleteItem', LogTypes.booruHandlerInfo);
-    final String questionMarks = List.generate(itemIDs.length, (_) => '?').join(',');
-    await db?.rawDelete('DELETE FROM BooruItem WHERE id IN ($questionMarks)', itemIDs);
-    await db?.rawDelete('DELETE FROM ImageTag WHERE booruItemID IN ($questionMarks)', itemIDs);
+    Logger.Inst().log('DBHandler deleting ${itemIDs.length} items', 'DBHandler', 'deleteItem', LogTypes.booruHandlerInfo);
+    const int chunkSize = 900;
+    for (int i = 0; i < (itemIDs.length / chunkSize).ceil(); i++) {
+      final chunk = itemIDs.sublist(i * chunkSize, min(itemIDs.length, (i + 1) * chunkSize));
+      final String questionMarks = List.generate(chunk.length, (_) => '?').join(',');
+      await db?.rawDelete('DELETE FROM BooruItem WHERE id IN ($questionMarks)', chunk);
+      await db?.rawDelete('DELETE FROM ImageTag WHERE booruItemID IN ($questionMarks)', chunk);
+    }
   }
 }

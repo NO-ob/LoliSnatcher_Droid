@@ -6,9 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:alice_lightweight/alice.dart';
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:fvp/fvp.dart' as fvp;
 import 'package:get/get.dart';
+import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/gen/strings.g.dart';
@@ -37,8 +37,17 @@ import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
 export 'package:lolisnatcher/gen/strings.g.dart';
 
 /// This class is used loading from and writing settings to files
-class SettingsHandler extends GetxController {
-  static SettingsHandler get instance => Get.find<SettingsHandler>();
+class SettingsHandler {
+  static SettingsHandler get instance => GetIt.instance<SettingsHandler>();
+
+  static SettingsHandler register() {
+    if (!GetIt.instance.isRegistered<SettingsHandler>()) {
+      GetIt.instance.registerSingleton(SettingsHandler());
+    }
+    return instance;
+  }
+
+  static void unregister() => GetIt.instance.unregister<SettingsHandler>();
 
   static bool get isDesktopPlatform => Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
@@ -47,26 +56,27 @@ class SettingsHandler extends GetxController {
   late Alice alice;
 
   // service vars
-  RxBool isInit = false.obs, isPostInit = false.obs;
-  RxString postInitMessage = ''.obs;
+  final RxBool isInit = false.obs, isPostInit = false.obs;
+  final RxString postInitMessage = ''.obs;
   String cachePath = '';
   String path = '';
   String boorusPath = '';
 
-  Rx<UpdateInfo?> updateInfo = Rxn(null);
+  final Rx<UpdateInfo?> updateInfo = Rxn(null);
 
   ////////////////////////////////////////////////////
 
   // runtime settings vars
   bool hasHydrus = false;
-  RxList<LogTypes> enabledLogTypes = RxList.from(EnvironmentConfig.isTesting ? [...LogTypes.values] : []);
-  RxString discordURL = RxString(Constants.discordURL);
+  final RxList<LogTypes> enabledLogTypes = RxList.from(EnvironmentConfig.isTesting ? [...LogTypes.values] : []);
+  final RxString discordURL = RxString(Constants.discordURL);
 
   // debug toggles
-  RxBool isDebug = (kDebugMode || false).obs;
-  RxBool showFPS = false.obs;
-  RxBool showPerf = false.obs;
-  RxBool showImageStats = false.obs;
+  final RxBool isDebug = (kDebugMode || false).obs;
+  final RxBool showFps = false.obs;
+  final RxBool showPerf = false.obs;
+  final RxBool showImageStats = false.obs;
+  final RxBool showVideoStats = false.obs;
   bool blurImages = kDebugMode ? Constants.blurImagesDefaultDev : false;
 
   ////////////////////////////////////////////////////
@@ -80,8 +90,8 @@ class SettingsHandler extends GetxController {
   String galleryMode = 'Full Res';
   String snatchMode = 'Full Res';
   String shareAction = 'Ask';
-  Rx<AppMode> appMode = AppMode.defaultValue.obs;
-  Rx<HandSide> handSide = HandSide.defaultValue.obs;
+  final Rx<AppMode> appMode = AppMode.defaultValue.obs;
+  final Rx<HandSide> handSide = HandSide.defaultValue.obs;
   String galleryBarPosition = 'Top';
   String galleryScrollDirection = 'Horizontal';
   String extPathOverride = '';
@@ -113,6 +123,7 @@ class SettingsHandler extends GetxController {
   int volumeButtonsScrollSpeed = 200;
   int galleryAutoScrollTime = 4000;
   int cacheSize = 3;
+  int autoLockTimeout = 120;
 
   double mousewheelScrollSpeed = 10;
   double preloadSizeLimit = 0.2;
@@ -153,6 +164,7 @@ class SettingsHandler extends GetxController {
   bool useVolumeButtonsForScroll = false;
   bool shitDevice = false;
   bool disableVideo = false;
+  bool longTapFastForwardVideo = false;
   bool enableDrawerMascot = false;
   bool allowSelfSignedCerts = false;
   bool wakeLockEnabled = true;
@@ -171,33 +183,36 @@ class SettingsHandler extends GetxController {
   bool disableImageScaling = false;
   bool gifsAsThumbnails = false;
   bool desktopListsDrag = false;
-  RxList<Booru> booruList = RxList<Booru>([]);
+  bool showBottomSearchbar = true;
+  bool showSearchbarQuickActions = false;
+  bool autofocusSearchbar = true;
+  final RxBool useLockscreen = false.obs;
+  final RxBool blurOnLeave = false.obs;
+  final RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
   // themes wip
-  Rx<ThemeItem> theme = ThemeItem(
+  final Rx<ThemeItem> theme = ThemeItem(
     name: 'Pink',
     primary: Colors.pink[200],
     accent: Colors.pink[600],
-  ).obs
-    ..listen((ThemeItem theme) {
-      // print('newTheme ${theme.name} ${theme.primary}');
-    });
+  ).obs;
 
-  Rx<Color?> customPrimaryColor = Colors.pink[200].obs;
-  Rx<Color?> customAccentColor = Colors.pink[600].obs;
+  final Rx<Color?> customPrimaryColor = Colors.pink[200]!.obs;
+  final Rx<Color?> customAccentColor = Colors.pink[600]!.obs;
 
-  Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
-  RxBool useDynamicColor = false.obs;
-  RxBool isAmoled = false.obs;
+  final Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
+  final RxBool useDynamicColor = false.obs;
+  final RxBool isAmoled = false.obs;
 
-  Rxn<AppLocale> locale = Rxn<AppLocale>(null);
+  final Rxn<AppLocale> locale = Rxn<AppLocale>(null);
   ////////////////////////////////////////////////////
 
   // list of setting names which shouldnt be synced with other devices
   List<String> deviceSpecificSettings = [
     'shitDevice',
     'disableVideo',
+    'longTapFastForwardVideo',
     'thumbnailCache',
     'mediaCache',
     'dbEnabled',
@@ -234,16 +249,23 @@ class SettingsHandler extends GetxController {
     'gifsAsThumbnails',
     'cacheDuration',
     'cacheSize',
+    'autoLockTimeout',
     'enableDrawerMascot',
     'drawerMascotPathOverride',
     'allowSelfSignedCerts',
-    'showFPS',
+    'showFps',
     'showPerf',
     'showImageStats',
+    'showVideoStats',
     'isDebug',
     'desktopListsDrag',
     'incognitoKeyboard',
     'backupPath',
+    'showBottomSearchbar',
+    'showSearchbarQuickActions',
+    'autofocusSearchbar',
+    'useLockscreen',
+    'blurOnLeave',
   ];
 
   // default values and possible options map for validation
@@ -411,49 +433,64 @@ class SettingsHandler extends GetxController {
         'limit': {
           'type': 'int',
           'default': Constants.defaultItemLimit,
+          'step': 10,
           'upperLimit': 100,
           'lowerLimit': 10,
         },
         'portraitColumns': {
           'type': 'int',
           'default': 2,
+          'step': 1,
           'upperLimit': 100,
           'lowerLimit': 1,
         },
         'landscapeColumns': {
           'type': 'int',
           'default': 4,
+          'step': 1,
           'upperLimit': 100,
           'lowerLimit': 1,
         },
         'preloadCount': {
           'type': 'int',
           'default': 1,
+          'step': 1,
           'upperLimit': 3,
           'lowerLimit': 0,
         },
         'snatchCooldown': {
           'type': 'int',
           'default': 250,
+          'step': 50,
           'upperLimit': 10000,
           'lowerLimit': 0,
         },
         'volumeButtonsScrollSpeed': {
           'type': 'int',
           'default': 200,
+          'step': 10,
           'upperLimit': 1000000,
           'lowerLimit': 0,
         },
         'galleryAutoScrollTime': {
           'type': 'int',
           'default': 4000,
+          'step': 100,
           'upperLimit': 100000,
           'lowerLimit': 100,
         },
         'cacheSize': {
           'type': 'int',
           'default': 3,
+          'step': 1,
           'upperLimit': 10,
+          'lowerLimit': 0,
+        },
+        'autoLockTimeout': {
+          'type': 'int',
+          'default': 120,
+          'step': 10,
+          'upperLimit': double.infinity,
           'lowerLimit': 0,
         },
 
@@ -538,6 +575,10 @@ class SettingsHandler extends GetxController {
           'type': 'bool',
           'default': false,
         },
+        'longTapFastForwardVideo': {
+          'type': 'bool',
+          'default': false,
+        },
         'enableDrawerMascot': {
           'type': 'bool',
           'default': false,
@@ -614,6 +655,26 @@ class SettingsHandler extends GetxController {
           'type': 'bool',
           'default': true,
         },
+        'showBottomSearchbar': {
+          'type': 'bool',
+          'default': true,
+        },
+        'showSearchbarQuickActions': {
+          'type': 'bool',
+          'default': false,
+        },
+        'autofocusSearchbar': {
+          'type': 'bool',
+          'default': true,
+        },
+        'useLockscreen': {
+          'type': 'bool',
+          'default': false,
+        },
+        'blurOnLeave': {
+          'type': 'bool',
+          'default': false,
+        },
 
         // other
         'buttonOrder': {
@@ -667,23 +728,23 @@ class SettingsHandler extends GetxController {
           'options': ThemeMode.values,
         },
         'useDynamicColor': {
-          'type': 'rxbool',
-          'default': false.obs,
+          'type': 'bool',
+          'default': false,
         },
         'isAmoled': {
-          'type': 'rxbool',
-          'default': false.obs,
+          'type': 'bool',
+          'default': false,
         },
         'locale': {
           'type': 'locale',
           'default': null,
         },
         'customPrimaryColor': {
-          'type': 'rxcolor',
+          'type': 'color',
           'default': Colors.pink[200],
         },
         'customAccentColor': {
-          'type': 'rxcolor',
+          'type': 'color',
           'default': Colors.pink[600],
         },
       };
@@ -693,6 +754,10 @@ class SettingsHandler extends GetxController {
 
     if (toJSON) {
       value = getByString(name);
+    }
+
+    if (value is Rx) {
+      value = value.value;
     }
 
     if (settingParams == null) {
@@ -745,28 +810,11 @@ class SettingsHandler extends GetxController {
             return value;
           }
 
-        case 'rxbool':
-          if (toJSON) {
-            // rxbool to bool
-            return (value as RxBool).value;
-          } else {
-            // bool to rxbool
-            if (value is RxBool) {
-              return value;
-            } else if (value is bool) {
-              return value.obs;
-            } else {
-              throw Exception('value "$value" for $name is not a rxbool');
-            }
-          }
-
         case 'appMode':
           if (toJSON) {
-            // rxobject to string
-            return (value as Rx<AppMode>).value.toString();
+            return (value as AppMode).toString();
           } else {
             if (value is String) {
-              // string to rxobject
               return AppMode.fromString(value);
             } else {
               return settingParams['default'];
@@ -775,11 +823,9 @@ class SettingsHandler extends GetxController {
 
         case 'handSide':
           if (toJSON) {
-            // rxobject to string
-            return (value as Rx<HandSide>).value.toString();
+            return (value as HandSide).toString();
           } else {
             if (value is String) {
-              // string to rxobject
               return HandSide.fromString(value);
             } else {
               return settingParams['default'];
@@ -799,11 +845,9 @@ class SettingsHandler extends GetxController {
 
         case 'logTypesList':
           if (toJSON) {
-            // rxobject to list<string>
-            return (value as RxList<LogTypes>).map((el) => el.toString()).toList();
+            return (value as List<LogTypes>).map((el) => el.toString()).toList();
           } else {
             if (value is List) {
-              // list<string> to list<LogTypes>
               return List<String>.from(value).map(LogTypes.fromString).toList();
             } else {
               return settingParams['default'];
@@ -812,11 +856,9 @@ class SettingsHandler extends GetxController {
 
         case 'theme':
           if (toJSON) {
-            // rxobject to string
-            return (value as Rx<ThemeItem>).value.name;
+            return (value as ThemeItem).name;
           } else {
             if (value is String) {
-              // string to rxobject
               final ThemeItem findTheme =
                   List<ThemeItem>.from(settingParams['options']!).firstWhere((el) => el.name == value, orElse: () => settingParams['default']);
               return findTheme;
@@ -827,11 +869,9 @@ class SettingsHandler extends GetxController {
 
         case 'themeMode':
           if (toJSON) {
-            // rxobject to string
-            return (value as Rx<ThemeMode>).value.toString().split('.')[1]; // ThemeMode.dark => dark
+            return (value as ThemeMode).name; // ThemeMode.dark => dark
           } else {
             if (value is String) {
-              // string to rxobject
               final List<ThemeMode> findMode = ThemeMode.values.where((element) => element.toString() == 'ThemeMode.$value').toList();
               if (findMode.isNotEmpty) {
                 // if theme mode is present
@@ -845,12 +885,12 @@ class SettingsHandler extends GetxController {
             }
           }
 
-        case 'rxcolor':
+        case 'color':
           if (toJSON) {
-            // rxobject to int
-            return (value as Rx<Color?>).value?.value32bit ?? Colors.pink.value32bit; // Color => int
+            // TODO replace value with toARGB32() in the next flutter release
+            // ignore: deprecated_member_use
+            return (value as Color?)?.value ?? Colors.pink.value; // Color => int
           } else {
-            // int to rxobject
             if (value is int) {
               return Color(value);
             } else {
@@ -1047,6 +1087,8 @@ class SettingsHandler extends GetxController {
         return preloadSizeLimit;
       case 'disableVideo':
         return disableVideo;
+      case 'longTapFastForwardVideo':
+        return longTapFastForwardVideo;
       case 'shitDevice':
         return shitDevice;
       case 'galleryAutoScrollTime':
@@ -1069,8 +1111,20 @@ class SettingsHandler extends GetxController {
         return cacheDuration;
       case 'cacheSize':
         return cacheSize;
+      case 'autoLockTimeout':
+        return autoLockTimeout;
       case 'allowSelfSignedCerts':
         return allowSelfSignedCerts;
+      case 'showBottomSearchbar':
+        return showBottomSearchbar;
+      case 'showSearchbarQuickActions':
+        return showSearchbarQuickActions;
+      case 'autofocusSearchbar':
+        return autofocusSearchbar;
+      case 'useLockscreen':
+        return useLockscreen;
+      case 'blurOnLeave':
+        return blurOnLeave;
       case 'enabledLogTypes':
         return enabledLogTypes;
 
@@ -1262,6 +1316,9 @@ class SettingsHandler extends GetxController {
       case 'disableVideo':
         disableVideo = validatedValue;
         break;
+      case 'longTapFastForwardVideo':
+        longTapFastForwardVideo = validatedValue;
+        break;
       case 'shitDevice':
         shitDevice = validatedValue;
         break;
@@ -1294,6 +1351,9 @@ class SettingsHandler extends GetxController {
         break;
       case 'cacheSize':
         cacheSize = validatedValue;
+        break;
+      case 'autoLockTimeout':
+        autoLockTimeout = validatedValue;
         break;
       case 'prefBooru':
         prefBooru = validatedValue;
@@ -1379,6 +1439,21 @@ class SettingsHandler extends GetxController {
       case 'altVideoPlayerHWDEC':
         altVideoPlayerHWDEC = validatedValue;
         break;
+      case 'showBottomSearchbar':
+        showBottomSearchbar = validatedValue;
+        break;
+      case 'showSearchbarQuickActions':
+        showSearchbarQuickActions = validatedValue;
+        break;
+      case 'autofocusSearchbar':
+        autofocusSearchbar = validatedValue;
+        break;
+      case 'useLockscreen':
+        useLockscreen.value = validatedValue;
+        break;
+      case 'blurOnLeave':
+        blurOnLeave.value = validatedValue;
+        break;
 
       // theme stuff
       case 'appMode':
@@ -1394,10 +1469,10 @@ class SettingsHandler extends GetxController {
         themeMode.value = validatedValue;
         break;
       case 'useDynamicColor':
-        useDynamicColor = validatedValue;
+        useDynamicColor.value = validatedValue;
         break;
       case 'isAmoled':
-        isAmoled = validatedValue;
+        isAmoled.value = validatedValue;
         break;
       case 'customPrimaryColor':
         customPrimaryColor.value = validatedValue;
@@ -1453,6 +1528,7 @@ class SettingsHandler extends GetxController {
       'mousewheelScrollSpeed': validateValue('mousewheelScrollSpeed', null, toJSON: true),
       'preloadSizeLimit': validateValue('preloadSizeLimit', null, toJSON: true),
       'disableVideo': validateValue('disableVideo', null, toJSON: true),
+      'longTapFastForwardVideo': validateValue('longTapFastForwardVideo', null, toJSON: true),
       'shitDevice': validateValue('shitDevice', null, toJSON: true),
       'galleryAutoScrollTime': validateValue('galleryAutoScrollTime', null, toJSON: true),
       'zoomButtonPosition': validateValue('zoomButtonPosition', null, toJSON: true),
@@ -1463,6 +1539,7 @@ class SettingsHandler extends GetxController {
       'desktopListsDrag': validateValue('desktopListsDrag', null, toJSON: true),
       'cacheDuration': validateValue('cacheDuration', null, toJSON: true),
       'cacheSize': validateValue('cacheSize', null, toJSON: true),
+      'autoLockTimeout': validateValue('autoLockTimeout', null, toJSON: true),
       'allowSelfSignedCerts': validateValue('allowSelfSignedCerts', null, toJSON: true),
       'enabledLogTypes': validateValue('enabledLogTypes', null, toJSON: true),
       'wakeLockEnabled': validateValue('wakeLockEnabled', null, toJSON: true),
@@ -1481,6 +1558,11 @@ class SettingsHandler extends GetxController {
       'altVideoPlayerHwAccel': validateValue('altVideoPlayerHwAccel', null, toJSON: true),
       'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
       'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
+      'showBottomSearchbar': validateValue('showBottomSearchbar', null, toJSON: true),
+      'showSearchbarQuickActions': validateValue('showSearchbarQuickActions', null, toJSON: true),
+      'autofocusSearchbar': validateValue('autofocusSearchbar', null, toJSON: true),
+      'useLockscreen': validateValue('useLockscreen', null, toJSON: true),
+      'blurOnLeave': validateValue('blurOnLeave', null, toJSON: true),
 
       //TODO
       'buttonOrder': buttonOrder.map((e) => e[0]).toList(),
@@ -1676,7 +1758,10 @@ class SettingsHandler extends GetxController {
     }
 
     // Force enable logging on test builds
-    enabledLogTypes.value = EnvironmentConfig.isTesting ? [...LogTypes.values] : [...enabledLogTypes];
+    enabledLogTypes.value = EnvironmentConfig.isTesting ? [...LogTypes.values] : [...enabledLogTypes.value];
+
+    // force mobile app mode, until we redo UI for desktop and start doing builds again
+    appMode.value = AppMode.Mobile;
 
     return true;
   }
@@ -1695,7 +1780,11 @@ class SettingsHandler extends GetxController {
     if (restate) {
       final searchHandler = SearchHandler.instance;
       searchHandler.filterCurrentFetched(); // refilter fetched because user could have changed the filtering settings
-      searchHandler.rootRestate(); // force global state update to redraw stuff
+      unawaited(
+        Future.delayed(const Duration(seconds: 1)).then((_) {
+          searchHandler.rootRestate?.call(); // force global state update to redraw stuff
+        }),
+      );
     }
     return true;
   }
@@ -2057,7 +2146,7 @@ class SettingsHandler extends GetxController {
 
       SettingsPageOpen(
         context: ctx,
-        page: () => Scaffold(
+        page: (_) => Scaffold(
           appBar: AppBar(
             title: Text(
               '${isDiffVersion ? loc.settings.checkForUpdates.updateAvailable : '${loc.settings.checkForUpdates.updateChangelog}:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
