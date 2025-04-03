@@ -139,9 +139,7 @@ class _LoliControlsState extends State<LoliControls> {
   void _dispose() {
     controller.removeListener(_updateState);
 
-    if (_latestValue.playbackSpeed != 1) {
-      controller.setPlaybackSpeed(1);
-    }
+    controller.setPlaybackSpeed(1);
     doubleTapped = false;
     holdingDown = false;
     speedSetManually = false;
@@ -531,7 +529,7 @@ class _LoliControlsState extends State<LoliControls> {
         if (chosenSpeed != null) {
           await controller.setPlaybackSpeed(chosenSpeed);
           setState(() {
-            speedSetManually = true;
+            speedSetManually = chosenSpeed != 1;
           });
         }
 
@@ -715,6 +713,11 @@ class _LoliControlsState extends State<LoliControls> {
       (Timer t) {
         if (holdingDown && pointerCount != 1) {
           onHitAreaLongPressUp();
+        }
+        if (pointerCount == 0 && !speedSetManually) {
+          // reset speed when there are no fingers detected and it wasn't set through dialog
+          // required because video controller wrongly reports that speed is reset and speed may not reset properly if it was changed during buffering
+          controller.setPlaybackSpeed(1);
         }
       },
     );
@@ -1040,10 +1043,8 @@ class _PlaybackSpeedDialogState extends State<_PlaybackSpeedDialog> {
 
   Future<void> resetValue() async {
     selectedIndex.value = widget.speeds.indexOf(1);
-    await controller.animateToPage(
+    controller.jumpToPage(
       selectedIndex.value,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
     );
     confirmValue();
   }
