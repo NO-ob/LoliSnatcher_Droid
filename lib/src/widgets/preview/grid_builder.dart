@@ -24,6 +24,10 @@ class GridBuilder extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
 
+    final String previewDisplay = (settingsHandler.previewDisplay == 'Staggered' && !searchHandler.currentBooruHandler.hasSizeData)
+        ? settingsHandler.previewDisplayFallback
+        : settingsHandler.previewDisplay;
+
     final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
     return ValueListenableBuilder(
@@ -33,7 +37,7 @@ class GridBuilder extends StatelessWidget {
         itemCount: currentFetched.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columnCount,
-          childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9 / 16,
+          childAspectRatio: previewDisplay == 'Square' ? 1 : 9 / 16,
           mainAxisSpacing: 4,
           crossAxisSpacing: 4,
         ),

@@ -26,7 +26,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   final TextEditingController columnsPortraitController = TextEditingController();
   final TextEditingController mouseSpeedController = TextEditingController();
 
-  late String previewMode, previewDisplay, scrollGridButtonsPosition;
+  late String previewMode, previewDisplay, previewDisplayFallback, scrollGridButtonsPosition;
   late bool showBottomSearchbar, showSearchbarQuickActions, autofocusSearchbar, disableVibration;
   late AppMode appMode;
   late HandSide handSide;
@@ -43,6 +43,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     autofocusSearchbar = settingsHandler.autofocusSearchbar;
     disableVibration = settingsHandler.disableVibration;
     previewDisplay = settingsHandler.previewDisplay;
+    previewDisplayFallback = settingsHandler.previewDisplayFallback;
     previewMode = settingsHandler.previewMode;
     scrollGridButtonsPosition = settingsHandler.scrollGridButtonsPosition;
     mouseSpeedController.text = settingsHandler.mousewheelScrollSpeed.toString();
@@ -70,6 +71,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.disableVibration = disableVibration;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
+    settingsHandler.previewDisplayFallback = previewDisplayFallback;
     settingsHandler.scrollGridButtonsPosition = scrollGridButtonsPosition;
     if (int.parse(columnsLandscapeController.text) < 1) {
       columnsLandscapeController.text = 1.toString();
@@ -336,6 +338,37 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: 'Preview display',
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                child: previewDisplay == 'Staggered'
+                    ? SettingsOptionsList(
+                        value: previewDisplayFallback,
+                        items: settingsHandler.map['previewDisplayFallback']!['options'],
+                        itemTitleBuilder: (item) => switch (item) {
+                          'Square' => '${item!} (1:1)',
+                          'Rectangle' => '${item!} (9:16)',
+                          _ => item ?? '?',
+                        },
+                        itemLeadingBuilder: (item) {
+                          return switch (item) {
+                            'Square' => const Icon(Icons.crop_square_outlined),
+                            'Rectangle' => Transform.rotate(
+                                angle: pi / 2,
+                                child: const Icon(Icons.crop_16_9),
+                              ),
+                            _ => const Icon(null),
+                          };
+                        },
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            previewDisplayFallback = newValue ?? settingsHandler.map['previewDisplayFallback']!['default'];
+                          });
+                        },
+                        title: 'Preview display fallback',
+                        subtitle: const Text('This will be used when Staggered option is not possible'),
+                      )
+                    : const SizedBox(width: double.infinity),
               ),
               SettingsToggle(
                 value: settingsHandler.disableImageScaling,
