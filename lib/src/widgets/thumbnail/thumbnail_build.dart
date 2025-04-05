@@ -4,6 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
+import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -89,11 +92,14 @@ class ThumbnailBuild extends StatelessWidget {
                     ),
                   //
                   const Spacer(),
+
+                  // Merge/favourites/downloads booru favicon widgets
                   Builder(
                     builder: (context) {
-                      if (searchHandler.currentSecondaryBoorus.value?.isNotEmpty == true) {
-                        final handler = searchHandler.currentBooruHandler as MergebooruHandler;
-                        final fetchedMap = handler.fetchedMap;
+                      final List<Widget> widgets = [];
+                      // Merge booru
+                      if (searchHandler.currentBooruHandler is MergebooruHandler) {
+                        final fetchedMap = (searchHandler.currentBooruHandler as MergebooruHandler).fetchedMap;
 
                         Booru? booru;
                         int? booruIndex;
@@ -112,8 +118,70 @@ class ThumbnailBuild extends StatelessWidget {
 
                         if (booruIndex != null) {
                           booruIndex += 1;
+                          widgets.add(
+                            Text(
+                              '$booruIndex',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                                height: 1,
+                              ),
+                            ),
+                          );
                         }
+                        widgets.add(
+                          BooruFavicon(booru, size: 16),
+                        );
+                      }
 
+                      // Favourites/Downloads booru
+                      Booru? getMergeEntryBooru() {
+                        final fetchedMap = (searchHandler.currentBooruHandler as MergebooruHandler).fetchedMap;
+                        for (int i = 0; i < fetchedMap.entries.length; i++) {
+                          final entry = fetchedMap.entries.elementAt(i);
+                          if (entry.value.items.contains(item)) {
+                            return entry.value.booru;
+                          }
+                        }
+                        return null;
+                      }
+
+                      final bool isMergeEntryFromFavsOrDls = searchHandler.currentBooruHandler is MergebooruHandler &&
+                          [BooruType.Favourites, BooruType.Downloads].contains(getMergeEntryBooru()?.type);
+                      if (searchHandler.currentBooruHandler is FavouritesHandler ||
+                          searchHandler.currentBooruHandler is DownloadsHandler ||
+                          isMergeEntryFromFavsOrDls) {
+                        final itemFileHost = Uri.tryParse(item.fileURL)?.host;
+                        final itemPostHost = Uri.tryParse(item.postURL)?.host;
+                        final Booru? possibleBooru = settingsHandler.booruList.firstWhereOrNull((e) {
+                          final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
+                          return (itemFileHost != null &&
+                                  booruHost != null &&
+                                  itemFileHost.isNotEmpty == true &&
+                                  booruHost.isNotEmpty == true &&
+                                  itemFileHost.contains(booruHost)) ||
+                              (itemPostHost != null &&
+                                  booruHost != null &&
+                                  itemPostHost.isNotEmpty == true &&
+                                  booruHost.isNotEmpty == true &&
+                                  itemPostHost.contains(booruHost));
+                        });
+                        if (possibleBooru?.type != BooruType.Favourites && possibleBooru?.type != BooruType.Downloads) {
+                          final possibleFaviconUrl = possibleBooru?.faviconURL ?? (itemPostHost != null ? 'https://$itemPostHost/favicon.ico' : null);
+
+                          widgets.add(
+                            BooruFavicon(
+                              possibleBooru,
+                              customFaviconUrl: possibleFaviconUrl,
+                              size: 16,
+                            ),
+                          );
+                        }
+                      }
+
+                      //
+
+                      if (widgets.isNotEmpty) {
                         return Container(
                           padding: const EdgeInsets.all(2),
                           decoration: BoxDecoration(
@@ -122,18 +190,8 @@ class ThumbnailBuild extends StatelessWidget {
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              if (booruIndex != null)
-                                Text(
-                                  '$booruIndex ',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                    height: 1,
-                                  ),
-                                ),
-                              BooruFavicon(booru, size: 16),
-                            ],
+                            spacing: 2,
+                            children: widgets,
                           ),
                         );
                       }

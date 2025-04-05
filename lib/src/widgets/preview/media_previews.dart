@@ -6,6 +6,7 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
+import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/preview/waterfall_view.dart';
 
@@ -86,6 +87,11 @@ class _MediaPreviewsState extends State<MediaPreviews> {
                 );
               },
               trailingIcon: const Icon(Icons.exit_to_app),
+            ),
+            SettingsButton(
+              name: 'Settings',
+              icon: const Icon(Icons.settings),
+              page: () => const SettingsPage(),
             ),
           ],
         ),

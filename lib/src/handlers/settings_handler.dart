@@ -87,6 +87,7 @@ class SettingsHandler {
   String videoCacheMode = 'Stream';
   String prefBooru = '';
   String previewDisplay = 'Square';
+  String previewDisplayFallback = 'Square';
   String galleryMode = 'Full Res';
   String snatchMode = 'Full Res';
   String shareAction = 'Ask';
@@ -282,6 +283,11 @@ class SettingsHandler {
           'type': 'stringFromList',
           'default': 'Square',
           'options': <String>['Square', 'Rectangle', 'Staggered'],
+        },
+        'previewDisplayFallback': {
+          'type': 'stringFromList',
+          'default': 'Square',
+          'options': <String>['Square', 'Rectangle'],
         },
         'shareAction': {
           'type': 'stringFromList',
@@ -1027,6 +1033,8 @@ class SettingsHandler {
         return videoCacheMode;
       case 'previewDisplay':
         return previewDisplay;
+      case 'previewDisplayFallback':
+        return previewDisplayFallback;
       case 'galleryMode':
         return galleryMode;
       case 'snatchMode':
@@ -1223,6 +1231,9 @@ class SettingsHandler {
         break;
       case 'previewDisplay':
         previewDisplay = validatedValue;
+        break;
+      case 'previewDisplayFallback':
+        previewDisplayFallback = validatedValue;
         break;
       case 'galleryMode':
         galleryMode = validatedValue;
@@ -1500,6 +1511,7 @@ class SettingsHandler {
       'previewMode': validateValue('previewMode', null, toJSON: true),
       'videoCacheMode': validateValue('videoCacheMode', null, toJSON: true),
       'previewDisplay': validateValue('previewDisplay', null, toJSON: true),
+      'previewDisplayFallback': validateValue('previewDisplayFallback', null, toJSON: true),
       'galleryMode': validateValue('galleryMode', null, toJSON: true),
       'snatchMode': validateValue('snatchMode', null, toJSON: true),
       'shareAction': validateValue('shareAction', null, toJSON: true),

@@ -811,8 +811,6 @@ abstract class BooruHandler {
   String? get metatagsCheatSheetLink => null;
 
   List<MetaTag> availableMetaTags() {
-    return [
-      GenericMetaTag(),
-    ];
+    return [];
   }
 }

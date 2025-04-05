@@ -653,16 +653,23 @@ class MainSearchTagChip extends StatelessWidget {
           ];
           final bool hasSecondaryBoorus = usedBoorus.length > 1;
 
-          final bool isExclude = formattedTag.startsWith('-');
-          final bool isOr = formattedTag.startsWith('~');
-          final bool isBoolMod = isExclude || isOr;
+          bool isExclude = formattedTag.startsWith('-');
+          bool isOr = formattedTag.startsWith('~');
+          bool isBoolMod = isExclude || isOr;
           formattedTag = formattedTag.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').trim();
 
           final bool isNumberMod = formattedTag.startsWith(RegExp(r'\d+#'));
-          final int? booruNumber = int.tryParse(isNumberMod ? tag.split('#')[0] : '');
+          final int? booruNumber = int.tryParse(isNumberMod ? formattedTag.split('#')[0] : '');
           final bool hasBooruNumber = booruNumber != null;
           final bool isValidNumberMod = booruNumber != null && booruNumber > 0 && hasSecondaryBoorus && booruNumber <= usedBoorus.length;
           formattedTag = formattedTag.replaceAll(RegExp(r'^\d+#'), '').trim();
+
+          // do it twitce because it will be false for mergebooru
+          // (because proper tag query syntax is to place booru number in front of tag and all modifiers)
+          isExclude = isExclude || formattedTag.startsWith('-');
+          isOr = isOr || formattedTag.startsWith('~');
+          isBoolMod = isExclude || isOr;
+          formattedTag = formattedTag.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').trim();
 
           final String rawTag = formattedTag;
 
@@ -1018,6 +1025,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
   void initState() {
     super.initState();
 
+    final tags = searchHandler.currentBooruHandler.availableMetaTags();
+
     suggestionTextController = RichTextController(
       text: '',
       onMatch: (_) {},
@@ -1025,8 +1034,10 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
       regExpDotAll: true,
       regExpMultiLine: true,
       regExpUnicode: true,
-      targetMatches: searchHandler.currentBooruHandler
-          .availableMetaTags()
+      targetMatches: [
+        ...tags,
+        if (tags.isEmpty) GenericMetaTag(),
+      ]
           .map(
             (e) => MatchTargetItem(
               regex: e.keyDividerMatcher,
@@ -1126,7 +1137,6 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
         bool isCancelled = false;
 
         final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
-        metaTags.removeWhere((mt) => mt is GenericMetaTag);
         final MetaTag? metaTag = metaTags.firstWhereOrNull((p) => p.keyParser(suggestionTextControllerRawInput) != null);
         if (metaTag != null) {
           if (metaTag.hasAutoComplete) {
@@ -1938,8 +1948,6 @@ class AddMetatagBottomSheet extends StatelessWidget {
     final searchHandler = SearchHandler.instance;
 
     final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
-    metaTags.removeWhere((mt) => mt is GenericMetaTag);
-
     if (metaTags.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pop();
@@ -2791,7 +2799,6 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
   @override
   Widget build(BuildContext context) {
     List<MetaTag> metaTags = searchHandler.currentBooruHandler.availableMetaTags();
-    metaTags.removeWhere((mt) => mt is GenericMetaTag);
     bool overflows = false;
     if (metaTags.length > 15) {
       // show only first 15 tags (only danbooru has this much right now) to motivate user to open bottom sheet dialog with full list

@@ -334,7 +334,7 @@ class _HistoryListState extends State<HistoryList> {
           ),
           onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
           minLeadingWidth: 24,
-          leading: BooruFavicon(booru!),
+          leading: BooruFavicon(booru),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -358,7 +358,7 @@ class _HistoryListState extends State<HistoryList> {
               isExpanded: false,
             ),
           ),
-          subtitle: Text(booru.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
+          subtitle: Text(booru?.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
         ),
       ),
     );

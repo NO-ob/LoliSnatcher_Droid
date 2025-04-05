@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/response_error.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -81,5 +82,17 @@ class FavouritesHandler extends BooruHandler {
   Future<void> searchCount(String input) async {
     totalCount.value = await SettingsHandler.instance.dbHandler.searchDBCount(input);
     return;
+  }
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    return [
+      SortMetaTag(
+        values: [
+          MetaTagValue(name: 'Random', value: 'random'),
+        ],
+      ),
+      StringMetaTag(name: 'Site', keyName: 'site'),
+    ];
   }
 }

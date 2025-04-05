@@ -267,6 +267,7 @@ class _BooruEditState extends State<BooruEdit> {
       case BooruType.Sankaku:
       case BooruType.IdolSankaku:
       case BooruType.R34Hentai:
+      case BooruType.InkBunny:
         return context.loc.password;
       default:
         return context.loc.apiKey;
