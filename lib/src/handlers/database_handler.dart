@@ -286,16 +286,17 @@ class DBHandler {
     searchTags = searchTagsString.trim().split(' ').where((tag) => tag.isNotEmpty).toList();
 
     // this adds support of filtering by posturls which have site:*some text* as their substring
-    String siteSearch = searchTags.firstWhere((tag) => tag.startsWith('site:'), orElse: () => '');
+    String siteSearch = searchTags.firstWhere((tag) => tag.startsWith('site:') || tag.startsWith('-site:'), orElse: () => '');
     String siteQuery = '';
     if (siteSearch.isNotEmpty) {
       searchTags.remove(siteSearch);
-      siteSearch = siteSearch.replaceAll('site:', '');
-      siteQuery = "bi.postURL LIKE '%$siteSearch%' ";
+      final bool isExclude = siteSearch.startsWith('-site:');
+      siteSearch = siteSearch.replaceAll('-site:', '').replaceAll('site:', '');
+      siteQuery = "bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$siteSearch%' ";
     }
 
     if (searchTags.where((element) => element.startsWith('-')).isNotEmpty) {
-      excludeTags = searchTags.where((element) => element.startsWith('-')).map((tag) => tag.replaceAll('-', '')).toList();
+      excludeTags = searchTags.where((element) => element.startsWith('-')).map((tag) => tag.replaceAll(RegExp('^-'), '')).toList();
       searchTags = searchTags.where((element) => !element.startsWith('-')).toList();
     } else {
       excludeTags = [];
@@ -427,12 +428,12 @@ class DBHandler {
     if (siteSearch.isNotEmpty) {
       searchTags.remove(siteSearch);
       final bool isExclude = siteSearch.startsWith('-site:');
-      siteSearch = siteSearch.replaceAll('site:', '').replaceAll('-site:', '');
+      siteSearch = siteSearch.replaceAll('-site:', '').replaceAll('site:', '');
       siteQuery = "bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$siteSearch%' ";
     }
 
     if (searchTags.where((element) => element.startsWith('-')).isNotEmpty) {
-      excludeTags = searchTags.where((element) => element.startsWith('-')).map((tag) => tag.replaceAll('-', '')).toList();
+      excludeTags = searchTags.where((element) => element.startsWith('-')).map((tag) => tag.replaceAll(RegExp('^-'), '')).toList();
       searchTags = searchTags.where((element) => !element.startsWith('-')).toList();
     } else {
       excludeTags = [];

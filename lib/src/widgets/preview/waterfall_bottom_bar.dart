@@ -653,9 +653,9 @@ class MainSearchTagChip extends StatelessWidget {
           ];
           final bool hasSecondaryBoorus = usedBoorus.length > 1;
 
-          final bool isExclude = formattedTag.startsWith('-');
-          final bool isOr = formattedTag.startsWith('~');
-          final bool isBoolMod = isExclude || isOr;
+          bool isExclude = formattedTag.startsWith('-');
+          bool isOr = formattedTag.startsWith('~');
+          bool isBoolMod = isExclude || isOr;
           formattedTag = formattedTag.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').trim();
 
           final bool isNumberMod = formattedTag.startsWith(RegExp(r'\d+#'));
@@ -663,6 +663,13 @@ class MainSearchTagChip extends StatelessWidget {
           final bool hasBooruNumber = booruNumber != null;
           final bool isValidNumberMod = booruNumber != null && booruNumber > 0 && hasSecondaryBoorus && booruNumber <= usedBoorus.length;
           formattedTag = formattedTag.replaceAll(RegExp(r'^\d+#'), '').trim();
+
+          // do it twitce because it will be false for mergebooru
+          // (because proper tag query syntax is to place booru number in front of tag and all modifiers)
+          isExclude = isExclude || formattedTag.startsWith('-');
+          isOr = isOr || formattedTag.startsWith('~');
+          isBoolMod = isExclude || isOr;
+          formattedTag = formattedTag.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').trim();
 
           final String rawTag = formattedTag;
 

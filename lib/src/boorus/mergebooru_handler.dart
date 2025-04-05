@@ -57,7 +57,7 @@ class MergebooruHandler extends BooruHandler {
     int fetchedMax = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
       final String currentTags =
-          tags.replaceAll(RegExp('[-~:]?(?!' '${i + 1}' r')\d+#[A-Za-z0-9\_\-~:]*'), '').replaceAll('  ', ' ').replaceAll(RegExp(r'\d+#'), '').trim();
+          tags.replaceAll(RegExp('(?!' '${i + 1}' r')\d+#[A-Za-z0-9\_\-~:]*'), '').replaceAll('  ', ' ').replaceAll(RegExp(r'\d+#'), '').trim();
       Logger.Inst().log('TAGS FOR #$i are: $currentTags', 'MergeBooruHandler', 'Search', LogTypes.booruHandlerInfo);
       booruHandlers[i].pageNum = pageNum + booruHandlerPageNums[i];
       final List<BooruItem> tmpFetched = (await booruHandlers[i].search(currentTags, null)) ?? [];
@@ -228,7 +228,9 @@ class MergebooruHandler extends BooruHandler {
   Future<void> searchCount(String input) async {
     int result = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
-      await booruHandlers[i].searchCount(input);
+      final String currentTags =
+          input.replaceAll(RegExp('(?!' '${i + 1}' r')\d+#[A-Za-z0-9\_\-~:]*'), '').replaceAll('  ', ' ').replaceAll(RegExp(r'\d+#'), '').trim();
+      await booruHandlers[i].searchCount(currentTags);
       result += booruHandlers[i].totalCount.value;
     }
     totalCount.value = result;
