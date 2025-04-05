@@ -18,12 +18,14 @@ class BooruFavicon extends StatefulWidget {
     this.booru, {
     this.size = defaultSize,
     this.color,
+    this.customFaviconUrl,
     super.key,
   });
 
-  final Booru booru;
+  final Booru? booru;
   final double size;
   final Color? color;
+  final String? customFaviconUrl;
 
   static const double defaultSize = 20;
 
@@ -44,7 +46,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
   @override
   void didUpdateWidget(BooruFavicon oldWidget) {
     // force redraw on tab change
-    if (oldWidget.booru.faviconURL != widget.booru.faviconURL) {
+    if (oldWidget.booru?.faviconURL != widget.booru?.faviconURL || oldWidget.customFaviconUrl != widget.customFaviconUrl) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         restartLoading();
       });
@@ -54,7 +56,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
 
   Future<ImageProvider> getImageProvider() async {
     cancelToken ??= CancelToken();
-    final String url = widget.booru.faviconURL!;
+    final String url = widget.booru?.faviconURL ?? widget.customFaviconUrl ?? '';
     final bool isAvif = url.contains('.avif');
     return ResizeImage(
       isAvif
@@ -125,7 +127,9 @@ class _BooruFaviconState extends State<BooruFavicon> {
     }
     disposables();
 
-    isIcon = widget.booru.type == BooruType.Favourites || widget.booru.type == BooruType.Downloads || widget.booru.type == null;
+    isIcon = widget.booru?.type == BooruType.Favourites ||
+        widget.booru?.type == BooruType.Downloads ||
+        (widget.booru?.type == null && widget.customFaviconUrl == null);
 
     isFailed = false;
     errorCode = null;
@@ -150,7 +154,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
         },
         onError: (e, s) {
           Logger.Inst().log(
-            'Failed to load favicon: ${widget.booru.faviconURL}',
+            'Failed to load favicon: ${widget.booru?.faviconURL ?? widget.customFaviconUrl}',
             'Favicon',
             'build',
             LogTypes.imageLoadingError,
@@ -200,7 +204,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
         alignment: Alignment.center,
         children: [
           if (isIcon)
-            switch (widget.booru.type) {
+            switch (widget.booru?.type) {
               BooruType.Favourites => Icon(Icons.favorite, color: Colors.red, size: size),
               BooruType.Downloads => Icon(Icons.file_download_outlined, size: size),
               _ => Icon(CupertinoIcons.question, size: size),

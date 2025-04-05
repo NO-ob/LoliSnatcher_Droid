@@ -24,9 +24,6 @@ class MergebooruHandler extends BooruHandler {
 
   Map<int, ({Booru booru, List<BooruItem> items})> fetchedMap = {};
 
-  int innerLimit = 0;
-  bool hasGelbooruV1 = false;
-
   @override
   bool get hasSizeData => booruHandlers.every((e) => e.hasSizeData);
 
@@ -38,7 +35,17 @@ class MergebooruHandler extends BooruHandler {
 
   @override
   List<MetaTag> availableMetaTags() {
-    return booruHandlers.first.availableMetaTags();
+    final List<MetaTag> tags = [];
+    for (int i = 0; i < booruHandlers.length; i++) {
+      final booruTags = booruHandlers[i].availableMetaTags();
+      for (final tag in booruTags) {
+        if (!tags.contains(tag)) {
+          tags.add(tag);
+        }
+      }
+    }
+
+    return tags;
   }
 
   @override
@@ -47,7 +54,6 @@ class MergebooruHandler extends BooruHandler {
       pageNum = pageNumCustom;
     }
     final Map<int, ({Booru booru, List<BooruItem> items})> tmpFetchedMap = {};
-    final List<bool> isGelbooruV1List = [];
     int fetchedMax = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
       final String currentTags =
@@ -64,31 +70,44 @@ class MergebooruHandler extends BooruHandler {
           ),
         ),
       ]);
-      if (booruHandlers[i].booru.type == BooruType.GelbooruV1) {
-        isGelbooruV1List.add(true);
-      } else {
-        isGelbooruV1List.add(false);
-      }
       fetchedMax += tmpFetched.length;
     }
     int innerFetchedOffset = 0;
     int innerFetchedIndex = -1;
     final List<BooruItem> newItems = [];
     do {
-      innerFetchedIndex = (innerLimit * pageNum) + innerFetchedOffset;
+      innerFetchedIndex = (limit * pageNum) + innerFetchedOffset;
       for (int i = 0; i < tmpFetchedMap.entries.length; i++) {
         final items = tmpFetchedMap[i]!.items;
+
+        final booru = tmpFetchedMap[i]!.booru;
+        final bool isMd5LessBooru = [
+          BooruType.Favourites,
+          BooruType.Downloads,
+          BooruType.BooruOnRails,
+          BooruType.Philomena,
+          BooruType.Rainbooru,
+          BooruType.Szurubooru,
+          BooruType.World,
+        ].any((t) => t == booru.type);
+
         if (innerFetchedIndex < items.length) {
-          if (hasGelbooruV1 && isGelbooruV1List[i] == false) {
+          if (booru.type == BooruType.GelbooruV1) {
             if (items[innerFetchedIndex].md5String != null) {
               items[innerFetchedIndex].md5String = makeSha1Hash(items[innerFetchedIndex].md5String!);
             }
           }
-          if (!hashInFetched(
-            fetched,
-            items[innerFetchedIndex].md5String,
-            items[innerFetchedIndex].fileURL,
-          )) {
+
+          if (isMd5LessBooru
+              ? !itemInFetched(
+                  fetched,
+                  items[innerFetchedIndex],
+                )
+              : !hashInFetched(
+                  fetched,
+                  items[innerFetchedIndex].md5String,
+                  items[innerFetchedIndex].fileURL,
+                )) {
             newItems.add(items[innerFetchedIndex]);
 
             if (fetchedMap[i] == null) {
@@ -119,7 +138,7 @@ class MergebooruHandler extends BooruHandler {
             LogTypes.booruHandlerInfo,
           );
           Logger.Inst().log(
-            'innerLimit $innerLimit, pageNum: $pageNum',
+            'pageNum: $pageNum',
             'MergeBooruHandler',
             'Search',
             LogTypes.booruHandlerInfo,
@@ -178,17 +197,22 @@ class MergebooruHandler extends BooruHandler {
     return false;
   }
 
+  bool itemInFetched(List<BooruItem> fetched, BooruItem item) {
+    for (int i = 0; i < fetched.length; i++) {
+      if (fetched[i].fileURL == item.fileURL || fetched[i].postURL == item.postURL) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void setupMerge(List<Booru> boorus) {
-    innerLimit = (limit / boorus.length).ceil();
     booruList.addAll(boorus);
     for (final element in booruList) {
-      final List factoryResults = BooruHandlerFactory().getBooruHandler([element], innerLimit);
+      final List factoryResults = BooruHandlerFactory().getBooruHandler([element], null);
       booruHandlers.add(factoryResults[0]);
       booruHandlerPageNums.add(factoryResults[1]);
       Logger.Inst().log('SETUP MERGE ADDING: ${element.name}', 'MergeBooruHandler', 'setupMerge', LogTypes.booruHandlerInfo);
-      if (element.type == BooruType.GelbooruV1) {
-        hasGelbooruV1 = true;
-      }
     }
   }
 

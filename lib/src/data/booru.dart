@@ -75,4 +75,24 @@ class Booru {
   String toString() {
     return 'Name: $name, Type: $type, BaseURL: $baseURL, FaviconURL: $faviconURL, APIKey: $apiKey, UserID: $userID';
   }
+
+  Booru copyWith({
+    String? name,
+    BooruType? type,
+    String? faviconURL,
+    String? baseURL,
+    String? defTags,
+    String? apiKey,
+    String? userID,
+  }) {
+    return Booru.withKey(
+      name ?? this.name,
+      type ?? this.type,
+      faviconURL ?? this.faviconURL,
+      baseURL ?? this.baseURL,
+      defTags ?? this.defTags,
+      apiKey ?? this.apiKey,
+      userID ?? this.userID,
+    );
+  }
 }
