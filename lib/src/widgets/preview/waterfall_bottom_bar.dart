@@ -659,7 +659,7 @@ class MainSearchTagChip extends StatelessWidget {
           formattedTag = formattedTag.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').trim();
 
           final bool isNumberMod = formattedTag.startsWith(RegExp(r'\d+#'));
-          final int? booruNumber = int.tryParse(isNumberMod ? tag.split('#')[0] : '');
+          final int? booruNumber = int.tryParse(isNumberMod ? formattedTag.split('#')[0] : '');
           final bool hasBooruNumber = booruNumber != null;
           final bool isValidNumberMod = booruNumber != null && booruNumber > 0 && hasSecondaryBoorus && booruNumber <= usedBoorus.length;
           formattedTag = formattedTag.replaceAll(RegExp(r'^\d+#'), '').trim();
