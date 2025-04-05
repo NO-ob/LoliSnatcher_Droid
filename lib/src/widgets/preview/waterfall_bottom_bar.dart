@@ -1018,6 +1018,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
   void initState() {
     super.initState();
 
+    final tags = searchHandler.currentBooruHandler.availableMetaTags();
+
     suggestionTextController = RichTextController(
       text: '',
       onMatch: (_) {},
@@ -1025,8 +1027,10 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
       regExpDotAll: true,
       regExpMultiLine: true,
       regExpUnicode: true,
-      targetMatches: searchHandler.currentBooruHandler
-          .availableMetaTags()
+      targetMatches: [
+        ...tags,
+        if (tags.isEmpty) GenericMetaTag(),
+      ]
           .map(
             (e) => MatchTargetItem(
               regex: e.keyDividerMatcher,
@@ -1126,7 +1130,6 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
         bool isCancelled = false;
 
         final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
-        metaTags.removeWhere((mt) => mt is GenericMetaTag);
         final MetaTag? metaTag = metaTags.firstWhereOrNull((p) => p.keyParser(suggestionTextControllerRawInput) != null);
         if (metaTag != null) {
           if (metaTag.hasAutoComplete) {
@@ -1938,8 +1941,6 @@ class AddMetatagBottomSheet extends StatelessWidget {
     final searchHandler = SearchHandler.instance;
 
     final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
-    metaTags.removeWhere((mt) => mt is GenericMetaTag);
-
     if (metaTags.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.of(context).pop();
@@ -2791,7 +2792,6 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
   @override
   Widget build(BuildContext context) {
     List<MetaTag> metaTags = searchHandler.currentBooruHandler.availableMetaTags();
-    metaTags.removeWhere((mt) => mt is GenericMetaTag);
     bool overflows = false;
     if (metaTags.length > 15) {
       // show only first 15 tags (only danbooru has this much right now) to motivate user to open bottom sheet dialog with full list
