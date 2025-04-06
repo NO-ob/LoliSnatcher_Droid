@@ -180,11 +180,8 @@ class ImageWriter {
       fileName = '${item.fileNameExtras}.${item.fileExt!}';
     } else if (booru.type == BooruType.Hydrus) {
       fileName = '${item.fileNameExtras}_${item.md5String}.${item.fileExt}';
-    } else if (booru.baseURL!.contains('yande.re')) {
-      fileName = 'yandere_${item.md5String}.${item.fileExt}';
-    } else if (booru.baseURL!.contains('paheal.net')) {
-      final bool needsExt = item.fileNameExtras.endsWith(item.fileExt!);
-      fileName = '${booru.name}_${item.md5String}_${item.fileNameExtras}${needsExt ? '' : item.fileExt}';
+    } else if (booru.baseURL!.contains('yande.re') || booru.baseURL!.contains('paheal.net')) {
+      fileName = '${booru.name}_${item.md5String}.${item.fileExt}';
     } else {
       fileName = '${booru.name!}_${item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex)}';
     }
