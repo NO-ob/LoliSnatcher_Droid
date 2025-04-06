@@ -220,7 +220,7 @@ class ShimmieHtmlHandler extends BooruHandler {
         fileWidth: fileWidth,
         fileHeight: fileHeight,
         tagsList: tags,
-        md5String: fileURL.split('/').last,
+        md5String: fileURL.split('/').last.split('?').first,
         postURL: makePostURL(id),
         serverId: id,
       );
