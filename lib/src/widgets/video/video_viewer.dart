@@ -767,12 +767,20 @@ class VideoViewerState extends State<VideoViewer> {
                                     );
                                   },
                                   child: ValueListenableBuilder(
-                                    valueListenable: isZoomed,
-                                    builder: (context, isZoomed, _) {
-                                      return LoliControls(
-                                        useLongTapFastForward: !isZoomed && settingsHandler.longTapFastForwardVideo,
-                                      );
+                                    // without this there will be two instances of LoliControls
+                                    // which will cancel each other's actions (i.e. long tap to fast forward)
+                                    valueListenable: viewerHandler.isFullscreen,
+                                    builder: (context, isFullscreen, child) {
+                                      return isFullscreen ? const SizedBox.shrink() : child!;
                                     },
+                                    child: ValueListenableBuilder(
+                                      valueListenable: isZoomed,
+                                      builder: (context, isZoomed, _) {
+                                        return LoliControls(
+                                          useLongTapFastForward: !isZoomed && settingsHandler.longTapFastForwardVideo,
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
