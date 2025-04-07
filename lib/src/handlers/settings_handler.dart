@@ -181,6 +181,7 @@ class SettingsHandler {
   bool gifsAsThumbnails = false;
   bool desktopListsDrag = false;
   bool showBottomSearchbar = true;
+  bool useTopSearchbarInput = false;
   bool showSearchbarQuickActions = false;
   bool autofocusSearchbar = true;
   final RxBool useLockscreen = false.obs;
@@ -256,6 +257,7 @@ class SettingsHandler {
     'incognitoKeyboard',
     'backupPath',
     'showBottomSearchbar',
+    'useTopSearchbarInput',
     'showSearchbarQuickActions',
     'autofocusSearchbar',
     'useLockscreen',
@@ -657,6 +659,10 @@ class SettingsHandler {
         'showBottomSearchbar': {
           'type': 'bool',
           'default': true,
+        },
+        'useTopSearchbarInput': {
+          'type': 'bool',
+          'default': false,
         },
         'showSearchbarQuickActions': {
           'type': 'bool',
@@ -1103,6 +1109,8 @@ class SettingsHandler {
         return allowSelfSignedCerts;
       case 'showBottomSearchbar':
         return showBottomSearchbar;
+      case 'useTopSearchbarInput':
+        return useTopSearchbarInput;
       case 'showSearchbarQuickActions':
         return showSearchbarQuickActions;
       case 'autofocusSearchbar':
@@ -1429,6 +1437,9 @@ class SettingsHandler {
       case 'showBottomSearchbar':
         showBottomSearchbar = validatedValue;
         break;
+      case 'useTopSearchbarInput':
+        useTopSearchbarInput = validatedValue;
+        break;
       case 'showSearchbarQuickActions':
         showSearchbarQuickActions = validatedValue;
         break;
@@ -1544,6 +1555,7 @@ class SettingsHandler {
       'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
       'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
       'showBottomSearchbar': validateValue('showBottomSearchbar', null, toJSON: true),
+      'useTopSearchbarInput': validateValue('useTopSearchbarInput', null, toJSON: true),
       'showSearchbarQuickActions': validateValue('showSearchbarQuickActions', null, toJSON: true),
       'autofocusSearchbar': validateValue('autofocusSearchbar', null, toJSON: true),
       'useLockscreen': validateValue('useLockscreen', null, toJSON: true),

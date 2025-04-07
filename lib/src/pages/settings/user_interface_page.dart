@@ -27,7 +27,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   final TextEditingController mouseSpeedController = TextEditingController();
 
   late String previewMode, previewDisplay, previewDisplayFallback, scrollGridButtonsPosition;
-  late bool showBottomSearchbar, showSearchbarQuickActions, autofocusSearchbar, disableVibration;
+  late bool showBottomSearchbar, useTopSearchbarInput, showSearchbarQuickActions, autofocusSearchbar, disableVibration;
   late AppMode appMode;
   late HandSide handSide;
 
@@ -39,6 +39,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     appMode = settingsHandler.appMode.value;
     handSide = settingsHandler.handSide.value;
     showBottomSearchbar = settingsHandler.showBottomSearchbar;
+    useTopSearchbarInput = settingsHandler.useTopSearchbarInput;
     showSearchbarQuickActions = settingsHandler.showSearchbarQuickActions;
     autofocusSearchbar = settingsHandler.autofocusSearchbar;
     disableVibration = settingsHandler.disableVibration;
@@ -66,6 +67,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.appMode.value = appMode;
     settingsHandler.handSide.value = handSide;
     settingsHandler.showBottomSearchbar = showBottomSearchbar;
+    settingsHandler.useTopSearchbarInput = useTopSearchbarInput;
     settingsHandler.showSearchbarQuickActions = showSearchbarQuickActions;
     settingsHandler.autofocusSearchbar = autofocusSearchbar;
     settingsHandler.disableVibration = disableVibration;
@@ -205,6 +207,15 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: 'Show search bar in preview grid',
+              ),
+              SettingsToggle(
+                value: useTopSearchbarInput,
+                onChanged: (newValue) {
+                  setState(() {
+                    useTopSearchbarInput = newValue;
+                  });
+                },
+                title: 'Move input to top in search view',
               ),
               SettingsToggle(
                 value: showSearchbarQuickActions,

@@ -1566,266 +1566,288 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: Column(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Scrollbar(
-                      controller: suggestionsScrollController,
-                      interactive: true,
-                      scrollbarOrientation: settingsHandler.handSide.value.isLeft ? ScrollbarOrientation.left : ScrollbarOrientation.right,
-                      child: RefreshIndicator(
-                        triggerMode: RefreshIndicatorTriggerMode.anywhere,
-                        strokeWidth: 4,
-                        color: Theme.of(context).colorScheme.secondary,
-                        // edgeOffset: MediaQuery.paddingOf(context).top,
-                        onRefresh: runSearch,
-                        child: FadingEdgeScrollView.fromScrollView(
-                          child: ListView.builder(
-                            reverse: true,
-                            controller: suggestionsScrollController,
-                            physics: const AlwaysScrollableScrollPhysics(
-                              parent: BouncingScrollPhysics(),
-                            ),
-                            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                            padding: EdgeInsets.only(
-                              top: MediaQuery.paddingOf(context).top + 16,
-                              bottom: 12,
-                            ),
-                            itemCount: suggestedTags.isEmpty ? 1 : min(100, suggestedTags.length),
-                            itemBuilder: (context, index) {
-                              if (suggestedTags.isEmpty) {
-                                if (loading) {
-                                  return const SizedBox.shrink();
-                                } else if (failed) {
-                                  return Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: runSearch,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Center(
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              const Icon(Icons.refresh),
-                                              const SizedBox(width: 8),
-                                              Expanded(
-                                                child: Text(
-                                                  'Failed to load suggestions, tap to retry${failedMsg?.isNotEmpty == true ? '\n\n[$failedMsg]' : ''}',
-                                                  style: Theme.of(context).textTheme.bodyLarge,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                if (suggestionTextControllerRawInput.isEmpty) {
-                                  return SuggestionsMainContent(
-                                    onMetatagSelect: onMetatagSelect,
-                                  );
-                                }
-
-                                return Center(
-                                  child: Container(
-                                    height: constraints.maxHeight - 32,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Kaomoji(
-                                          type: KaomojiType.shrug,
-                                          style: TextStyle(fontSize: 40),
-                                        ),
-                                        Text(
-                                          searchHandler.currentBooruHandler.hasTagSuggestions
-                                              ? 'No suggestions found'
-                                              : 'Tag suggestions are not available for this booru',
-                                          style: Theme.of(context).textTheme.bodyLarge,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }
-
-                              final TagSuggestion tag = suggestedTags[index];
-
-                              return Container(
-                                height: kMinInteractiveDimension + (tag.hasDescription ? 8 : 0),
-                                alignment: Alignment.centerLeft,
-                                child: Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: () => onSuggestionTap(tag),
-                                    onLongPress: () => onSuggestionLongTap(tag),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 4,
-                                      ),
+    List<Widget> widgets = [
+      Expanded(
+        child: Stack(
+          children: [
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return Scrollbar(
+                  controller: suggestionsScrollController,
+                  interactive: true,
+                  scrollbarOrientation: settingsHandler.handSide.value.isLeft ? ScrollbarOrientation.left : ScrollbarOrientation.right,
+                  child: RefreshIndicator(
+                    triggerMode: RefreshIndicatorTriggerMode.anywhere,
+                    strokeWidth: 4,
+                    color: Theme.of(context).colorScheme.secondary,
+                    // edgeOffset: MediaQuery.paddingOf(context).top,
+                    onRefresh: runSearch,
+                    child: FadingEdgeScrollView.fromScrollView(
+                      child: ListView.builder(
+                        reverse: !settingsHandler.useTopSearchbarInput,
+                        controller: suggestionsScrollController,
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
+                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: EdgeInsets.only(
+                          top: MediaQuery.paddingOf(context).top + 16,
+                          bottom: 12,
+                        ),
+                        itemCount: suggestedTags.isEmpty ? 1 : min(100, suggestedTags.length),
+                        itemBuilder: (context, index) {
+                          if (suggestedTags.isEmpty) {
+                            if (loading) {
+                              return const SizedBox.shrink();
+                            } else if (failed) {
+                              return Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: runSearch,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Center(
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          if (tag.icon != null)
-                                            Padding(
-                                              padding: const EdgeInsets.only(right: 8),
-                                              child: tag.icon,
-                                            ),
-                                          //
+                                          const Icon(Icons.refresh),
+                                          const SizedBox(width: 8),
                                           Expanded(
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                TagSuggestionText(
-                                                  tag: tag,
-                                                  searchText: suggestionTextControllerRawInput,
-                                                ),
-                                                if (tag.hasDescription)
-                                                  Text(
-                                                    tag.description!,
-                                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
-                                                        ),
-                                                  ),
-                                              ],
+                                            child: Text(
+                                              'Failed to load suggestions, tap to retry${failedMsg?.isNotEmpty == true ? '\n\n[$failedMsg]' : ''}',
+                                              style: Theme.of(context).textTheme.bodyLarge,
                                             ),
                                           ),
-                                          //
-                                          if (tag.count > 0)
-                                            Padding(
-                                              padding: const EdgeInsets.only(left: 12),
-                                              child: Text(
-                                                // TODO locale
-                                                NumberFormat.compact(locale: 'en').format(tag.count),
-                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
-                                                      height: 1,
-                                                    ),
-                                              ),
-                                            ),
                                         ],
                                       ),
                                     ),
                                   ),
                                 ),
                               );
-                            },
-                          ),
-                        ),
+                            }
+
+                            if (suggestionTextControllerRawInput.isEmpty) {
+                              return SuggestionsMainContent(
+                                onMetatagSelect: onMetatagSelect,
+                              );
+                            }
+
+                            return Center(
+                              child: Container(
+                                height: constraints.maxHeight - 32,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Kaomoji(
+                                      type: KaomojiType.shrug,
+                                      style: TextStyle(fontSize: 40),
+                                    ),
+                                    Text(
+                                      searchHandler.currentBooruHandler.hasTagSuggestions
+                                          ? 'No suggestions found'
+                                          : 'Tag suggestions are not available for this booru',
+                                      style: Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+
+                          final TagSuggestion tag = suggestedTags[index];
+
+                          return Container(
+                            height: kMinInteractiveDimension + (tag.hasDescription ? 8 : 0),
+                            alignment: Alignment.centerLeft,
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => onSuggestionTap(tag),
+                                onLongPress: () => onSuggestionLongTap(tag),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 4,
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      if (tag.icon != null)
+                                        Padding(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          child: tag.icon,
+                                        ),
+                                      //
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            TagSuggestionText(
+                                              tag: tag,
+                                              searchText: suggestionTextControllerRawInput,
+                                            ),
+                                            if (tag.hasDescription)
+                                              Text(
+                                                tag.description!,
+                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
+                                                    ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      //
+                                      if (tag.count > 0)
+                                        Padding(
+                                          padding: const EdgeInsets.only(left: 12),
+                                          child: Text(
+                                            // TODO locale
+                                            NumberFormat.compact(locale: 'en').format(tag.count),
+                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
+                                                  height: 1,
+                                                ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            //
+            if (loading)
+              const Positioned(
+                bottom: 16,
+                right: 16,
+                child: CircularProgressIndicator(),
+              ),
+          ],
+        ),
+      ),
+      // Search bar
+      SizedBox(
+        height: MainSearchBar.height,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Hero(
+            tag: 'mainSearchBar-${widget.subTag}',
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+              ),
+              child: MainSearchBar(
+                onChipTap: onChipTap,
+                onChipLongTap: onChipLongTap,
+                onChipDeleteTap: onChipDeleteTap,
+                onResetTap: onResetTap,
+                onSearchTap: onSearchTap,
+                onSearchLongTap: onSearchLongTap,
+                scrollController: searchBarScrollController,
+                selectedTagIndex: tagToEditIndex,
+              ),
+            ),
+          ),
+        ),
+      ),
+      // Suggestions text input
+      KeyboardActions(
+        enable: settingsHandler.showSearchbarQuickActions && (Platform.isAndroid || Platform.isIOS),
+        config: buildConfig(),
+        autoScroll: false,
+        overscroll: 0,
+        isDialog: false,
+        child: ValueListenableBuilder(
+          valueListenable: suggestionTextFocusNodeHasFocus,
+          builder: (context, suggestionTextFocusNodeHasFocus, __) => Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: SettingsTextInput(
+                  controller: suggestionTextController,
+                  focusNode: suggestionTextFocusNode,
+                  title: 'Search for tags',
+                  hintText: 'Search for tags',
+                  clearable: true,
+                  onSubmitted: onSuggestionTextSubmitted,
+                  onSubmittedLongTap: (_) => onSuggestionLongTap(
+                    TagSuggestion(tag: suggestionTextControllerRawInput),
+                  ),
+                  onlyInput: true,
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  textInputAction: TextInputAction.search,
+                  enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+                  showSubmitButton: (text) => !settingsHandler.showSearchbarQuickActions && text.isNotEmpty,
+                  submitIcon: Icons.add_rounded,
+                  prefixIcon: IconButton(
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+              ),
+              //
+              if (settingsHandler.useTopSearchbarInput)
+                const SizedBox(height: 4)
+              else if (settingsHandler.showSearchbarQuickActions && (Platform.isAndroid || Platform.isIOS))
+                KeyboardVisibilityBuilder(
+                  builder: (context, isKbVisible) {
+                    return AnimatedSize(
+                      duration: const Duration(milliseconds: 200),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: (isKbVisible || (suggestionTextFocusNodeHasFocus && (Platform.isAndroid || Platform.isIOS)))
+                            ? 0 // keyboardActionsHeight
+                            : MediaQuery.paddingOf(context).bottom,
+                        // child: ColoredBox(color: Colors.yellow.withValues(alpha: 0.2)),
                       ),
                     );
                   },
-                ),
-                //
-                if (loading)
-                  const Positioned(
-                    bottom: 16,
-                    right: 16,
-                    child: CircularProgressIndicator(),
-                  ),
-              ],
-            ),
+                )
+              else
+                SizedBox(height: MediaQuery.paddingOf(context).bottom),
+            ],
           ),
-          // Search bar
-          SizedBox(
-            height: MainSearchBar.height,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Hero(
-                tag: 'mainSearchBar-${widget.subTag}',
-                child: ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context).copyWith(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
-                    ),
-                  ),
-                  child: MainSearchBar(
-                    onChipTap: onChipTap,
-                    onChipLongTap: onChipLongTap,
-                    onChipDeleteTap: onChipDeleteTap,
-                    onResetTap: onResetTap,
-                    onSearchTap: onSearchTap,
-                    onSearchLongTap: onSearchLongTap,
-                    scrollController: searchBarScrollController,
-                    selectedTagIndex: tagToEditIndex,
-                  ),
-                ),
-              ),
-            ),
+        ),
+      ),
+    ];
+
+    if (settingsHandler.useTopSearchbarInput) {
+      widgets = widgets.reversed.toList();
+      if (settingsHandler.showSearchbarQuickActions) {
+        widgets.add(
+          KeyboardVisibilityBuilder(
+            builder: (context, isKbVisible) {
+              return isKbVisible ? SizedBox(height: keyboardActionsHeight) : const SizedBox.shrink();
+            },
           ),
-          // Suggestions text input
-          KeyboardActions(
-            enable: settingsHandler.showSearchbarQuickActions && (Platform.isAndroid || Platform.isIOS),
-            config: buildConfig(),
-            autoScroll: false,
-            overscroll: 0,
-            isDialog: false,
-            child: ValueListenableBuilder(
-              valueListenable: suggestionTextFocusNodeHasFocus,
-              builder: (context, suggestionTextFocusNodeHasFocus, __) => Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: SettingsTextInput(
-                      controller: suggestionTextController,
-                      focusNode: suggestionTextFocusNode,
-                      title: 'Search for tags',
-                      hintText: 'Search for tags',
-                      clearable: true,
-                      onSubmitted: onSuggestionTextSubmitted,
-                      onSubmittedLongTap: (_) => onSuggestionLongTap(
-                        TagSuggestion(tag: suggestionTextControllerRawInput),
-                      ),
-                      onlyInput: true,
-                      floatingLabelBehavior: FloatingLabelBehavior.never,
-                      textInputAction: TextInputAction.search,
-                      enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
-                      showSubmitButton: (text) => !settingsHandler.showSearchbarQuickActions && text.isNotEmpty,
-                      submitIcon: Icons.add_rounded,
-                      prefixIcon: IconButton(
-                        icon: const Icon(Icons.arrow_back_rounded),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ),
-                  ),
-                  if (settingsHandler.showSearchbarQuickActions && (Platform.isAndroid || Platform.isIOS))
-                    KeyboardVisibilityBuilder(
-                      builder: (context, isKbVisible) {
-                        return AnimatedSize(
-                          duration: const Duration(milliseconds: 200),
-                          child: SizedBox(
-                            width: double.infinity,
-                            height: (isKbVisible || (suggestionTextFocusNodeHasFocus && (Platform.isAndroid || Platform.isIOS)))
-                                ? 0 // keyboardActionsHeight
-                                : MediaQuery.paddingOf(context).bottom,
-                            // child: ColoredBox(color: Colors.yellow.withValues(alpha: 0.2)),
-                          ),
-                        );
-                      },
-                    )
-                  else
-                    SizedBox(height: MediaQuery.paddingOf(context).bottom),
-                ],
-              ),
-            ),
-          ),
-        ],
+        );
+      }
+    }
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      body: SafeArea(
+        top: settingsHandler.useTopSearchbarInput,
+        bottom: settingsHandler.useTopSearchbarInput,
+        child: Column(
+          children: widgets,
+        ),
       ),
     );
   }
