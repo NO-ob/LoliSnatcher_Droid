@@ -18,6 +18,7 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/pulse_widget.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
+import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class ThumbnailBuild extends StatelessWidget {
   const ThumbnailBuild({
@@ -170,10 +171,29 @@ class ThumbnailBuild extends StatelessWidget {
                           final possibleFaviconUrl = possibleBooru?.faviconURL ?? (itemPostHost != null ? 'https://$itemPostHost/favicon.ico' : null);
 
                           widgets.add(
-                            BooruFavicon(
-                              possibleBooru,
-                              customFaviconUrl: possibleFaviconUrl,
-                              size: 16,
+                            GestureDetector(
+                              onTap: possibleBooru != null
+                                  ? () {
+                                      final String? url = possibleBooru.baseURL;
+                                      if (url == null || url.isEmpty) {
+                                        return;
+                                      }
+
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => InAppWebviewView(
+                                            initialUrl: url,
+                                            userAgent: Tools.browserUserAgent,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  : null,
+                              child: BooruFavicon(
+                                possibleBooru,
+                                customFaviconUrl: possibleFaviconUrl,
+                                size: 16,
+                              ),
                             ),
                           );
                         }

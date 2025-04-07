@@ -245,6 +245,7 @@ class ImageViewerState extends State<ImageViewer> {
             cancelToken: cancelToken,
             headers: await Tools.getFileCustomHeaders(
               widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+              item: widget.booruItem,
               checkForReferer: true,
             ),
             withCache: settingsHandler.mediaCache,
@@ -260,6 +261,7 @@ class ImageViewerState extends State<ImageViewer> {
             cancelToken: cancelToken,
             headers: await Tools.getFileCustomHeaders(
               widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+              item: widget.booruItem,
               checkForReferer: true,
             ),
             withCache: settingsHandler.mediaCache,

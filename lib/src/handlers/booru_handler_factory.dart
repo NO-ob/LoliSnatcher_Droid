@@ -17,8 +17,8 @@ import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34hentai_handler.dart';
-import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34us_handler.dart';
+import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
@@ -32,7 +32,7 @@ class BooruHandlerFactory {
   late BooruHandler booruHandler;
   int pageNum = -1;
 
-  List getBooruHandler(List<Booru> boorus, int? customLimit) {
+  ({BooruHandler booruHandler, int startingPage}) getBooruHandler(List<Booru> boorus, int? customLimit) {
     final int limit = customLimit ?? SettingsHandler.instance.itemLimit;
 
     if (boorus.length == 1) {
@@ -152,6 +152,6 @@ class BooruHandlerFactory {
       booruHandler = MergebooruHandler(Booru('Merge', BooruType.Merge, '', '', ''), limit);
       (booruHandler as MergebooruHandler).setupMerge(boorus);
     }
-    return [booruHandler, pageNum];
+    return (booruHandler: booruHandler, startingPage: pageNum);
   }
 }

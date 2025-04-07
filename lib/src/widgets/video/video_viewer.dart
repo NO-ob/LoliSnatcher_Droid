@@ -125,6 +125,7 @@ class VideoViewerState extends State<VideoViewer> {
       widget.booruItem.fileURL,
       headers: await Tools.getFileCustomHeaders(
         widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+        item: widget.booruItem,
         checkForReferer: true,
       ),
       cancelToken: cancelToken,
@@ -153,6 +154,7 @@ class VideoViewerState extends State<VideoViewer> {
       widget.booruItem.fileURL,
       headers: await Tools.getFileCustomHeaders(
         widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+        item: widget.booruItem,
         checkForReferer: true,
       ),
       cancelToken: sizeCancelToken,
@@ -452,6 +454,7 @@ class VideoViewerState extends State<VideoViewer> {
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
         httpHeaders: await Tools.getFileCustomHeaders(
           widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+          item: widget.booruItem,
           checkForReferer: true,
         ),
       );

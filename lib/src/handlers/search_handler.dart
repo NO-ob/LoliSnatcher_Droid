@@ -1235,12 +1235,9 @@ class SearchTab {
     if (secondaryBoorus?.isNotEmpty == true) {
       tempBooruList.addAll(secondaryBoorus!);
     }
-    final List temp = BooruHandlerFactory().getBooruHandler(tempBooruList, null);
-    final BooruHandler handlerTemp = temp[0] as BooruHandler;
-    final int pageNumTemp = temp[1] as int;
-
-    booruHandler = handlerTemp;
-    booruHandler.pageNum = pageNumTemp;
+    final temp = BooruHandlerFactory().getBooruHandler(tempBooruList, null);
+    booruHandler = temp.booruHandler;
+    booruHandler.pageNum = temp.startingPage;
   }
   // unique id to use for booru controller
   final String id = uuid.v4();

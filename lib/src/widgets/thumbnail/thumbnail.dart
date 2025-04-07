@@ -2,14 +2,21 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 
+import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
+import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
@@ -48,7 +55,7 @@ class _ThumbnailState extends State<Thumbnail> {
       isLoadedExtra = ValueNotifier(false),
       failedRendering = ValueNotifier(false);
   final ValueNotifier<String?> errorCode = ValueNotifier(null);
-  CancelToken? mainCancelToken, extraCancelToken;
+  CancelToken? mainCancelToken, extraCancelToken, loadItemCancelToken;
 
   Timer? debounceLoading;
 
@@ -90,7 +97,7 @@ class _ThumbnailState extends State<Thumbnail> {
         ? CustomNetworkAvifImage(
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
-            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, item: widget.item, checkForReferer: true),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
             fileNameExtras: widget.item.fileNameExtras,
@@ -106,7 +113,7 @@ class _ThumbnailState extends State<Thumbnail> {
         : CustomNetworkImage(
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
-            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, item: widget.item, checkForReferer: true),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
             fileNameExtras: widget.item.fileNameExtras,
@@ -184,8 +191,8 @@ class _ThumbnailState extends State<Thumbnail> {
     if (error is DioException && CancelToken.isCancel(error)) {
       // print('Canceled by user: $error');
     } else {
-      if (restartedCount < 5) {
-        // attempt to reload 5 times with a 1s delay
+      if (restartedCount < (kDebugMode ? 1 : 3)) {
+        // attempt to reload 3 times with a 1s delay
         Debounce.debounce(
           tag: 'thumbnail_reload_${widget.item.hashCode}',
           callback: () {
@@ -284,6 +291,56 @@ class _ThumbnailState extends State<Thumbnail> {
     }
   }
 
+  Future<void> attemptToLoadItemsAndRestart() async {
+    if (failedRendering.value) {
+      failedRendering.value = false;
+      unawaited(cleanProviderCache());
+    }
+
+    disposables();
+
+    total.value = 0;
+    received.value = 0;
+    startedAt.value = 0;
+
+    isLoaded.value = false;
+    isLoadedExtra.value = false;
+    isFromCache.value = null;
+    isFailed.value = false;
+    errorCode.value = null;
+
+    final itemFileHost = Uri.tryParse(widget.item.fileURL)?.host;
+    final itemPostHost = Uri.tryParse(widget.item.postURL)?.host;
+    final Booru? possibleBooru = settingsHandler.booruList.firstWhereOrNull((e) {
+      final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
+      return (itemFileHost != null &&
+              booruHost != null &&
+              itemFileHost.isNotEmpty == true &&
+              booruHost.isNotEmpty == true &&
+              itemFileHost.contains(booruHost)) ||
+          (itemPostHost != null &&
+              booruHost != null &&
+              itemPostHost.isNotEmpty == true &&
+              booruHost.isNotEmpty == true &&
+              (itemPostHost.contains(booruHost) || (SankakuHandler.knownUrls.contains(itemPostHost) && SankakuHandler.knownUrls.contains(booruHost))));
+    });
+
+    loadItemCancelToken?.cancel();
+    loadItemCancelToken = CancelToken();
+    if (possibleBooru != null) {
+      final handler = BooruHandlerFactory().getBooruHandler([possibleBooru], null).booruHandler;
+      if (handler.hasLoadItemSupport) {
+        await handler.loadItem(
+          item: widget.item,
+          cancelToken: loadItemCancelToken,
+          withCapcthaCheck: true,
+        );
+      }
+    }
+
+    selectThumbProvider();
+  }
+
   void restartLoading() {
     if (failedRendering.value) {
       failedRendering.value = false;
@@ -341,6 +398,11 @@ class _ThumbnailState extends State<Thumbnail> {
       extraCancelToken?.cancel();
     }
     extraCancelToken = null;
+
+    if (!(loadItemCancelToken?.isCancelled ?? true)) {
+      loadItemCancelToken?.cancel();
+    }
+    loadItemCancelToken = null;
 
     // evict from memory cache only when in grid
     if (widget.isStandalone) {
@@ -526,9 +588,27 @@ class _ThumbnailState extends State<Thumbnail> {
                                   total: total,
                                   received: received,
                                   startedAt: startedAt,
+                                  retryText: (searchHandler.currentBooruHandler is FavouritesHandler || searchHandler.currentBooruHandler is DownloadsHandler)
+                                      ? 'Tap to update data or retry'
+                                      : null,
+                                  retryIcon: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    spacing: 4,
+                                    children: [
+                                      Icon(Icons.download),
+                                      Text('/'),
+                                      Icon(Icons.refresh),
+                                    ],
+                                  ),
                                   restartAction: () {
                                     restartedCount = 0;
-                                    restartLoading();
+
+                                    if (searchHandler.currentBooruHandler is FavouritesHandler || searchHandler.currentBooruHandler is DownloadsHandler) {
+                                      attemptToLoadItemsAndRestart();
+                                    } else {
+                                      restartLoading();
+                                    }
                                   },
                                   errorCode: errorCode,
                                 );

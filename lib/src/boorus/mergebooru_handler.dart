@@ -209,9 +209,9 @@ class MergebooruHandler extends BooruHandler {
   void setupMerge(List<Booru> boorus) {
     booruList.addAll(boorus);
     for (final element in booruList) {
-      final List factoryResults = BooruHandlerFactory().getBooruHandler([element], null);
-      booruHandlers.add(factoryResults[0]);
-      booruHandlerPageNums.add(factoryResults[1]);
+      final factoryResults = BooruHandlerFactory().getBooruHandler([element], null);
+      booruHandlers.add(factoryResults.booruHandler);
+      booruHandlerPageNums.add(factoryResults.startingPage);
       Logger.Inst().log('SETUP MERGE ADDING: ${element.name}', 'MergeBooruHandler', 'setupMerge', LogTypes.booruHandlerInfo);
     }
   }

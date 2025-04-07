@@ -660,9 +660,9 @@ class _BooruEditState extends State<BooruEdit> {
         ))[0];
       }
     } else {
-      final List temp = BooruHandlerFactory().getBooruHandler([booru], 5);
-      test = temp[0];
-      test.pageNum = temp[1];
+      final temp = BooruHandlerFactory().getBooruHandler([booru], 5);
+      test = temp.booruHandler;
+      test.pageNum = temp.startingPage;
       test.pageNum++;
 
       testFetched = (await test.search(

@@ -13,8 +13,8 @@ import 'package:lolisnatcher/src/boorus/ink_bunny_handler.dart';
 import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
-import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34us_handler.dart';
+import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
@@ -165,10 +165,10 @@ Future<BooruHandler> testBooru(
   bool withImages = runWithImages,
   String? customSuggestionsInput,
 }) async {
-  final List temp = BooruHandlerFactory().getBooruHandler([booru], null);
-  final BooruHandler booruHandler = temp[0] as BooruHandler;
+  final temp = BooruHandlerFactory().getBooruHandler([booru], null);
+  final booruHandler = temp.booruHandler;
   // +1 because starting page number is out of range
-  booruHandler.pageNum = (temp[1] as int) + 1;
+  booruHandler.pageNum = temp.startingPage + 1;
 
   final List<BooruItem> fetched = await booruHandler.search(defaultInput, booruHandler.pageNum);
   if (booruHandler.errorString.isNotEmpty) {

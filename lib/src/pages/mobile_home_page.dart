@@ -452,7 +452,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
         // TODO detect when item data is outdated?
         // TODO expand to other boorus?
         final temp = BooruHandlerFactory().getBooruHandler([record.booru], 10);
-        final sankakuHandler = temp[0] as SankakuHandler;
+        final sankakuHandler = temp.booruHandler as SankakuHandler;
         await sankakuHandler.loadItem(item: record.item);
       } catch (_) {}
     }

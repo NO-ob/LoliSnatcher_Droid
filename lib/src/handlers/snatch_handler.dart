@@ -115,7 +115,7 @@ class SnatchHandler {
           // TODO detect when item data is outdated?
           // TODO expand to other boorus?
           final temp = BooruHandlerFactory().getBooruHandler([booru], 10);
-          final sankakuHandler = temp[0] as SankakuHandler;
+          final sankakuHandler = temp.booruHandler as SankakuHandler;
           // refetch data only on smaller-ish batches, otherwise they will most likely rate limit the user
           if (items.length <= 20) {
             for (final item in items) {
@@ -361,9 +361,9 @@ class SnatchHandler {
       limit = 100;
     }
 
-    final List temp = BooruHandlerFactory().getBooruHandler([booru], limit);
-    booruHandler = temp[0] as BooruHandler;
-    booruHandler.pageNum = temp[1] as int;
+    final temp = BooruHandlerFactory().getBooruHandler([booru], limit);
+    booruHandler = temp.booruHandler;
+    booruHandler.pageNum = temp.startingPage;
     booruHandler.pageNum++;
 
     FlashElements.showSnackbar(

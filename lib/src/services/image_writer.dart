@@ -55,7 +55,7 @@ class ImageWriter {
       final headers = {
         'Accept': '*/*',
         'Content-Type': '*/*',
-        ...await Tools.getFileCustomHeaders(booru, checkForReferer: true),
+        ...await Tools.getFileCustomHeaders(booru, item: item, checkForReferer: true),
       };
 
       final String url = ((settingsHandler.snatchMode == 'Sample' && item.sampleURL.isNotEmpty) ? item.sampleURL : item.fileURL);

@@ -6,7 +6,6 @@ import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -76,7 +75,7 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
                 final bool isImage = mediaType.isImageOrAnimation;
                 final bool isNeedToGuess = mediaType.isNeedToGuess;
 
-                final booruHandler = BooruHandlerFactory().getBooruHandler([widget.booru], 20)[0] as BooruHandler;
+                final booruHandler = BooruHandlerFactory().getBooruHandler([widget.booru], 20).booruHandler;
                 final bool isNeedToLoadItem = mediaType.isNeedToLoadItem && booruHandler.hasLoadItemSupport;
 
                 late Widget itemWidget;

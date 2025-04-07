@@ -150,6 +150,7 @@ class SankakuHandler extends BooruHandler {
           item.fileURL = current['file_url'];
           item.sampleURL = current['sample_url'];
           item.thumbnailURL = current['preview_url'];
+          item.isUpdated = true;
         }
         return (item: item, failed: false, error: null);
       }

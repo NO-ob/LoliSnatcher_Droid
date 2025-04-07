@@ -16,6 +16,8 @@ class ThumbnailLoading extends StatefulWidget {
     required this.received,
     required this.startedAt,
     required this.restartAction,
+    this.retryText,
+    this.retryIcon,
     this.errorCode,
     super.key,
   });
@@ -31,6 +33,8 @@ class ThumbnailLoading extends StatefulWidget {
   final ValueNotifier<int> received;
   final ValueNotifier<int> startedAt;
 
+  final String? retryText;
+  final Widget? retryIcon;
   final String? errorCode;
 
   final void Function()? restartAction;
@@ -132,52 +136,56 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
 
     if (widget.isFailed) {
       return Center(
-        child: InkWell(
-          onTap: widget.restartAction,
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            height: 90,
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.broken_image),
-                const BorderedText(
-                  strokeWidth: 2,
-                  child: Text(
-                    'ERROR',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: InkWell(
+            onTap: widget.restartAction,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  widget.retryIcon ?? const Icon(Icons.broken_image),
+                  const BorderedText(
+                    strokeWidth: 2,
+                    child: Text(
+                      'ERROR',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                ),
-                const BorderedText(
-                  strokeWidth: 2,
-                  child: Text(
-                    'Tap to retry!',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                if (widget.errorCode?.isNotEmpty == true)
                   BorderedText(
                     strokeWidth: 2,
                     child: Text(
-                      widget.errorCode!,
+                      widget.retryText ?? 'Tap to retry',
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.white,
                       ),
                     ),
                   ),
-              ],
+                  if (widget.errorCode?.isNotEmpty == true)
+                    BorderedText(
+                      strokeWidth: 2,
+                      child: Text(
+                        widget.errorCode!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

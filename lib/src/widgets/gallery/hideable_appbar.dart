@@ -857,6 +857,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         cancelToken: shareCancelToken,
         headers: await Tools.getFileCustomHeaders(
           searchHandler.currentBooru,
+          item: item,
           checkForReferer: true,
         ),
         onReceiveProgress: (int received, int total) {

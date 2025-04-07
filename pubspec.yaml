@@ -23,6 +23,7 @@ dependencies:
   crypto: ^3.0.6
   cupertino_icons: ^1.0.8
   dio: ^5.8.0+1
+  dio_http2_adapter: ^2.6.0
   dynamic_color: ^1.7.0
   equatable: ^2.0.7
   external_video_player_launcher: ^0.0.3
