@@ -13,8 +13,8 @@ import 'package:lolisnatcher/src/boorus/ink_bunny_handler.dart';
 import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
-import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34us_handler.dart';
+import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
@@ -113,7 +113,7 @@ Future<void> main() async {
     });
     test('SankakuHandler', () async {
       // TODO doesn't parse all items correctly?
-      final BooruHandler booruHandler = await testBooru(Booru('sankaku', BooruType.Sankaku, '', 'https://capi-v2.sankakucomplex.com', ''));
+      final BooruHandler booruHandler = await testBooru(Booru('sankaku', BooruType.Sankaku, '', 'https://sankakuapi.com', ''));
       expect(booruHandler, isA<SankakuHandler>());
     });
     test('IdolSankakuHandler', () async {

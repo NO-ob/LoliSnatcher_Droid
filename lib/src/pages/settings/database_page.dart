@@ -105,9 +105,12 @@ class _DatabasePageState extends State<DatabasePage> {
     final List<Booru> sankakuBoorus = [];
 
     for (int i = 0; i < settingsHandler.booruList.length; i++) {
-      if (settingsHandler.booruList[i].baseURL == 'https://capi-v2.sankakucomplex.com') {
-        // TODO add support for idol (if possible, it seems that idol uses old api which doesn't allow what sankaku does)
-        // || settingsHandler.booruList[i].baseURL == 'https://iapi.sankakucomplex.com'
+      if (settingsHandler.booruList[i].type == BooruType.Sankaku &&
+          [
+            ...SankakuHandler.knownUrls,
+            'sankakuapi.com',
+          ].any((e) => settingsHandler.booruList[i].baseURL?.contains(e) ?? false)) {
+        // TODO add support for idol (if possible, it seems that idol uses old api which doesn't allow item refresh (parse html then?))
         sankakuBoorus.add(settingsHandler.booruList[i]);
       }
     }
