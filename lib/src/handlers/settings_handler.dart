@@ -2143,75 +2143,77 @@ class SettingsHandler {
               'Update ${isDiffVersion ? 'Available!' : 'Changelog:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
             ),
           ),
-          body: Column(
-            children: [
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (isDiffVersion) ...[
-                        const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (isDiffVersion) ...[
+                          const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
+                          const Text(''),
+                        ],
+                        Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         const Text(''),
+                        const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text(''),
+                        Text(updateInfo.value!.changelog),
+                        // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
                       ],
-                      Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const Text(''),
-                      const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const Text(''),
-                      Text(updateInfo.value!.changelog),
-                      // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                        },
+                        icon: const Icon(Icons.close),
+                        label: Text(isDiffVersion ? 'Later' : 'Close'),
+                      ),
+                      const SizedBox(width: 16),
+                      if (isFromStore && updateInfo.value!.isInStore)
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // try {
+                            //   launchUrlString("market://details?id=" + updateInfo.value!.storePackage);
+                            // } on PlatformException catch(e) {
+                            //   launchUrlString("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
+                            // }
+                            launchUrlString(
+                              'https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}',
+                              mode: LaunchMode.externalApplication,
+                            );
+                            Navigator.of(ctx).pop();
+                          },
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Visit Play Store'),
+                        )
+                      else
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            launchUrlString(
+                              updateInfo.value!.githubURL,
+                              mode: LaunchMode.externalApplication,
+                            );
+                            Navigator.of(ctx).pop();
+                          },
+                          icon: const Icon(Icons.exit_to_app),
+                          label: const Text('Visit Releases'),
+                        ),
                     ],
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                      },
-                      icon: const Icon(Icons.close),
-                      label: Text(isDiffVersion ? 'Later' : 'Close'),
-                    ),
-                    const SizedBox(width: 16),
-                    if (isFromStore && updateInfo.value!.isInStore)
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          // try {
-                          //   launchUrlString("market://details?id=" + updateInfo.value!.storePackage);
-                          // } on PlatformException catch(e) {
-                          //   launchUrlString("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
-                          // }
-                          launchUrlString(
-                            'https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}',
-                            mode: LaunchMode.externalApplication,
-                          );
-                          Navigator.of(ctx).pop();
-                        },
-                        icon: const Icon(Icons.play_arrow),
-                        label: const Text('Visit Play Store'),
-                      )
-                    else
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          launchUrlString(
-                            updateInfo.value!.githubURL,
-                            mode: LaunchMode.externalApplication,
-                          );
-                          Navigator.of(ctx).pop();
-                        },
-                        icon: const Icon(Icons.exit_to_app),
-                        label: const Text('Visit Releases'),
-                      ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ).open();
