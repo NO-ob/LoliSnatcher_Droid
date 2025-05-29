@@ -60,7 +60,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Duplicate file detected!'),
-          content: Text('The file "$fileName" already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.'),
+          content: Text(
+            'The file "$fileName" already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.',
+          ),
           actions: [
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -144,7 +146,8 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
           child: Stack(
             children: [
               ListView(
-                children: [
+                children:
+                    [
                       SettingsButton(
                         name: 'Select backup directory',
                         action: () async {
@@ -163,7 +166,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       Container(
                         margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                         width: double.infinity,
-                        child: Text(backupPath.isNotEmpty ? 'Backup path is: $backupPath' : 'No backup directory selected'),
+                        child: Text(
+                          backupPath.isNotEmpty ? 'Backup path is: $backupPath' : 'No backup directory selected',
+                        ),
                       ),
                       Container(
                         margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
@@ -190,7 +195,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                     }
                                   }
                                   if (backupPath.isNotEmpty) {
-                                    await ServiceHandler.writeImage(await file.readAsBytes(), 'settings', 'text/json', 'json', backupPath);
+                                    await ServiceHandler.writeImage(
+                                      await file.readAsBytes(),
+                                      'settings',
+                                      'text/json',
+                                      'json',
+                                      backupPath,
+                                    );
                                     showSnackbar(context, 'Settings saved to settings.json', false);
                                   } else {
                                     showSnackbar(context, 'No access to backup folder!', true);
@@ -211,7 +222,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 setState(() {});
                                 try {
                                   if (backupPath.isNotEmpty) {
-                                    final Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'settings.json');
+                                    final Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(
+                                      backupPath,
+                                      'settings.json',
+                                    );
                                     if (settingsFileBytes != null) {
                                       final File newFile = File('${await ServiceHandler.getConfigDir()}settings.json');
                                       if (!(await newFile.exists())) {
@@ -240,7 +254,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 inProgress = true;
                                 setState(() {});
                                 try {
-                                  final List<Booru> booruList = settingsHandler.booruList.where((e) => BooruType.saveable.contains(e.type)).toList();
+                                  final List<Booru> booruList = settingsHandler.booruList
+                                      .where((e) => BooruType.saveable.contains(e.type))
+                                      .toList();
                                   if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'boorus.json')) {
                                     final bool res = await detectedDuplicateFile('boorus.json');
                                     if (!res) {
@@ -251,7 +267,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                     }
                                   }
                                   if (backupPath.isNotEmpty) {
-                                    await ServiceHandler.writeImage(utf8.encode(json.encode(booruList)), 'boorus', 'text', 'json', backupPath);
+                                    await ServiceHandler.writeImage(
+                                      utf8.encode(json.encode(booruList)),
+                                      'boorus',
+                                      'text',
+                                      'json',
+                                      backupPath,
+                                    );
                                     showSnackbar(context, 'Boorus saved to boorus.json', false);
                                   } else {
                                     showSnackbar(context, 'No access to backup folder!', true);
@@ -271,7 +293,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 setState(() {});
                                 try {
                                   if (backupPath.isNotEmpty) {
-                                    final Uint8List? booruFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'boorus.json');
+                                    final Uint8List? booruFileBytes = await ServiceHandler.getFileFromSAFDirectory(
+                                      backupPath,
+                                      'boorus.json',
+                                    );
                                     String boorusJSONString = '';
                                     if (booruFileBytes != null) {
                                       boorusJSONString = String.fromCharCodes(booruFileBytes);
@@ -279,12 +304,17 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                     if (boorusJSONString.isNotEmpty) {
                                       final List<dynamic> json = jsonDecode(boorusJSONString);
                                       final String configBoorusPath = '${await ServiceHandler.getConfigDir()}boorus/';
-                                      final Directory configBoorusDir = await Directory(configBoorusPath).create(recursive: true);
+                                      final Directory configBoorusDir = await Directory(
+                                        configBoorusPath,
+                                      ).create(recursive: true);
                                       if (json.isNotEmpty) {
                                         for (int i = 0; i < json.length; i++) {
                                           final Booru booru = Booru.fromMap(json[i]);
                                           final bool alreadyExists =
-                                              settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
+                                              settingsHandler.booruList.indexWhere(
+                                                (el) => el.baseURL == booru.baseURL && el.name == booru.name,
+                                              ) !=
+                                              -1;
                                           final bool isAllowed = BooruType.saveable.contains(booru.type);
                                           if (!alreadyExists && isAllowed) {
                                             final File booruFile = File('${configBoorusDir.path}${booru.name}.json');
@@ -350,13 +380,18 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             ),
                             SettingsButton(
                               name: 'Restore database',
-                              subtitle: const Text('store.db (May take a while depending on the size of the database, will restart the app on success)'),
+                              subtitle: const Text(
+                                'store.db (May take a while depending on the size of the database, will restart the app on success)',
+                              ),
                               action: () async {
                                 inProgress = true;
                                 setState(() {});
                                 try {
                                   if (backupPath.isNotEmpty) {
-                                    final fileExists = await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db');
+                                    final fileExists = await ServiceHandler.existsFileFromSAFDirectory(
+                                      backupPath,
+                                      'store.db',
+                                    );
                                     if (!fileExists) {
                                       showSnackbar(context, 'No restore file Found!', true);
                                       inProgress = false;
@@ -393,7 +428,11 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                     settingsHandler.dbHandler = DBHandler();
                                     await settingsHandler.dbHandler.dbConnect(newFile.path);
                                     //
-                                    showSnackbar(context, 'Database restored from backup! App will restart in a few seconds!', false);
+                                    showSnackbar(
+                                      context,
+                                      'Database restored from backup! App will restart in a few seconds!',
+                                      false,
+                                    );
                                     await Future.delayed(const Duration(seconds: 3));
                                     unawaited(ServiceHandler.restartApp());
                                   } else {
@@ -424,7 +463,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                     }
                                   }
                                   if (backupPath.isNotEmpty) {
-                                    await ServiceHandler.writeImage(utf8.encode(json.encode(tagHandler.toList())), 'tags', 'text', 'json', backupPath);
+                                    await ServiceHandler.writeImage(
+                                      utf8.encode(json.encode(tagHandler.toList())),
+                                      'tags',
+                                      'text',
+                                      'json',
+                                      backupPath,
+                                    );
                                     showSnackbar(context, 'Tags saved to tags.json', false);
                                   } else {
                                     showSnackbar(context, 'No access to backup folder!', true);
@@ -446,7 +491,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 setState(() {});
                                 try {
                                   if (backupPath.isNotEmpty) {
-                                    final Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'tags.json');
+                                    final Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(
+                                      backupPath,
+                                      'tags.json',
+                                    );
                                     String tagJSONString = '';
                                     if (tagFileBytes != null) {
                                       tagJSONString = String.fromCharCodes(tagFileBytes);

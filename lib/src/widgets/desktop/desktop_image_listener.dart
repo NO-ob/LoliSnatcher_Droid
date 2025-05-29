@@ -183,7 +183,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                   },
                   child: Obx(
                     () => Icon(
-                      item.isFavourite.value == true ? Icons.favorite : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
+                      item.isFavourite.value == true
+                          ? Icons.favorite
+                          : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
                     ),
                   ),
                 ),

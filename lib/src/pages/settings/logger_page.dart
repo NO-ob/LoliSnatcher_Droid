@@ -141,8 +141,8 @@ class LoggerViewPage extends StatelessWidget {
       body: Theme(
         data: Theme.of(context).copyWith(
           colorScheme: Theme.of(context).colorScheme.copyWith(
-                primaryContainer: Colors.blue[800],
-              ),
+            primaryContainer: Colors.blue[800],
+          ),
         ),
         child: TalkerView(
           controller: Logger.viewController,

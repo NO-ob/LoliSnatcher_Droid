@@ -27,12 +27,12 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   Map<String, TagType> get tagTypeMap => {
-        '5': TagType.meta,
-        '3': TagType.copyright,
-        '4': TagType.character,
-        '1': TagType.artist,
-        '0': TagType.none,
-      };
+    '5': TagType.meta,
+    '3': TagType.copyright,
+    '4': TagType.character,
+    '1': TagType.artist,
+    '0': TagType.none,
+  };
 
   @override
   Map<String, String> getHeaders() {
@@ -59,7 +59,10 @@ class GelbooruHandler extends BooruHandler {
       // gelbooru returns xml response if request was denied for some reason
       // i.e. user hit a rate limit because he didn't include api key
       parsedResponse = XmlDocument.parse(response.data);
-      final String? errorMessage = (parsedResponse as XmlDocument).getElement('response')?.getAttribute('reason')?.toString();
+      final String? errorMessage = (parsedResponse as XmlDocument)
+          .getElement('response')
+          ?.getAttribute('reason')
+          ?.toString();
       if (errorMessage != null) {
         throw Exception(errorMessage);
       }
@@ -145,12 +148,12 @@ class GelbooruHandler extends BooruHandler {
   // ----------------- Tag suggestions and tag handler stuff
 
   Map<String, TagType> get tagSuggestionsTypeMap => {
-        'metadata': TagType.meta,
-        'copyright': TagType.copyright,
-        'character': TagType.character,
-        'artist': TagType.artist,
-        'tag': TagType.none,
-      };
+    'metadata': TagType.meta,
+    'copyright': TagType.copyright,
+    'character': TagType.character,
+    'artist': TagType.artist,
+    'tag': TagType.none,
+  };
 
   @override
   String makeTagURL(String input) {
@@ -177,7 +180,8 @@ class GelbooruHandler extends BooruHandler {
     // record tag data for future use
     final String rawTagType = (responseItem['category'] ?? responseItem['type'])?.toString() ?? '';
     TagType tagType = TagType.none;
-    if (rawTagType.isNotEmpty && (tagTypeMap.containsKey(rawTagType) || tagSuggestionsTypeMap.containsKey(rawTagType))) {
+    if (rawTagType.isNotEmpty &&
+        (tagTypeMap.containsKey(rawTagType) || tagSuggestionsTypeMap.containsKey(rawTagType))) {
       tagType = tagTypeMap[rawTagType] ?? tagSuggestionsTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);

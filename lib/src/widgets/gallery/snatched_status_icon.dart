@@ -42,7 +42,10 @@ class _SnatchedStatusIconState extends State<SnatchedStatusIcon> {
 
     final String extPath = SettingsHandler.instance.extPathOverride;
     if (extPath.isNotEmpty) {
-      fileExists = await ServiceHandler.existsFileFromSAFDirectory(extPath, ImageWriter().getFilename(widget.item, widget.booru));
+      fileExists = await ServiceHandler.existsFileFromSAFDirectory(
+        extPath,
+        ImageWriter().getFilename(widget.item, widget.booru),
+      );
     } else {
       fileExists = await File(await ImageWriter().getFilePath(widget.item, widget.booru)).exists();
     }

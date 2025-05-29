@@ -196,7 +196,10 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
                         child: ListView(
                           children: [
                             Text(
-                              globalWindowsCookies[WebUri(widget.initialUrl).host]?.map((e) => '${e.name}\n->\n${e.value}').join('\n\n') ?? '',
+                              globalWindowsCookies[WebUri(widget.initialUrl).host]
+                                      ?.map((e) => '${e.name}\n->\n${e.value}')
+                                      .join('\n\n') ??
+                                  '',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Theme.of(context).colorScheme.onSurface,

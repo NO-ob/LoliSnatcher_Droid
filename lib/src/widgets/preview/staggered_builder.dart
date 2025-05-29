@@ -28,7 +28,9 @@ class StaggeredBuilder extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
 
-    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait)
+        ? settingsHandler.portraitColumns
+        : settingsHandler.landscapeColumns;
 
     return ValueListenableBuilder(
       valueListenable: searchHandler.currentTab.booruHandler.filteredFetched,

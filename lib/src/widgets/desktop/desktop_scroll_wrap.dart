@@ -62,8 +62,9 @@ class DesktopScrollWrap extends StatelessWidget {
           },
         ),
         customMouseWheelScrollConfig: CustomMouseWheelScrollConfig(
-          scrollAmountMultiplier:
-              SettingsHandler.instance.appMode.value.isDesktop == true ? (settingsHandler.mousewheelScrollSpeed / 3) : settingsHandler.mousewheelScrollSpeed,
+          scrollAmountMultiplier: SettingsHandler.instance.appMode.value.isDesktop == true
+              ? (settingsHandler.mousewheelScrollSpeed / 3)
+              : settingsHandler.mousewheelScrollSpeed,
         ),
         child: child,
       );

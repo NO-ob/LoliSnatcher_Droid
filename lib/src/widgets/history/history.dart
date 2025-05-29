@@ -44,7 +44,11 @@ class _HistoryListState extends State<HistoryList> {
   bool get isFilterActive => filteredHistory.length != history.length;
 
   bool get areThereErrors =>
-      isLoading || (history.isEmpty) || (filteredHistory.isEmpty) || (!settingsHandler.searchHistoryEnabled) || (!settingsHandler.dbEnabled);
+      isLoading ||
+      (history.isEmpty) ||
+      (filteredHistory.isEmpty) ||
+      (!settingsHandler.searchHistoryEnabled) ||
+      (!settingsHandler.dbEnabled);
 
   @override
   void initState() {
@@ -66,7 +70,9 @@ class _HistoryListState extends State<HistoryList> {
     isLoading = true;
     setState(() {});
 
-    history = (settingsHandler.dbEnabled && settingsHandler.searchHistoryEnabled) ? await settingsHandler.dbHandler.getSearchHistory() : [];
+    history = (settingsHandler.dbEnabled && settingsHandler.searchHistoryEnabled)
+        ? await settingsHandler.dbHandler.getSearchHistory()
+        : [];
 
     history.sort(compareFavourites);
     filteredHistory = history;
@@ -95,9 +101,15 @@ class _HistoryListState extends State<HistoryList> {
           // TODO copy filtering logic from tabboxdialog
           final String filter = filterSearchController.text.toLowerCase();
           final bool textFilter = h.searchText.toLowerCase().contains(filter);
-          final bool booruFilter = h.booruName.toLowerCase().contains(filter) || (h.booruType != null && h.booruType!.name.toLowerCase().contains(filter));
-          final bool unknownFilter = 'unknown'.contains(filter) &&
-              settingsHandler.booruList.firstWhereOrNull((booru) => h.booruName == booru.name && h.booruType == booru.type) == null;
+          final bool booruFilter =
+              h.booruName.toLowerCase().contains(filter) ||
+              (h.booruType != null && h.booruType!.name.toLowerCase().contains(filter));
+          final bool unknownFilter =
+              'unknown'.contains(filter) &&
+              settingsHandler.booruList.firstWhereOrNull(
+                    (booru) => h.booruName == booru.name && h.booruType == booru.type,
+                  ) ==
+                  null;
           return textFilter || booruFilter || unknownFilter;
         }
       }).toList();
@@ -217,7 +229,10 @@ class _HistoryListState extends State<HistoryList> {
 
                 Navigator.of(context).pop();
               },
-              leading: Icon(entry.isFavourite ? Icons.favorite_border : Icons.favorite, color: entry.isFavourite ? Colors.grey : Colors.red),
+              leading: Icon(
+                entry.isFavourite ? Icons.favorite_border : Icons.favorite,
+                color: entry.isFavourite ? Colors.grey : Colors.red,
+              ),
               title: Text(entry.isFavourite ? 'Remove from Favourites' : 'Set as Favourite'),
             ),
             //
@@ -275,15 +290,23 @@ class _HistoryListState extends State<HistoryList> {
       },
       pageFuture: (page) => _loadPage(page, pageSize),
       pageSize: pageSize,
-      thumbBuilder: (Color backgroundColor, Color drawColor, double height, int index, bool alwaysVisibleScrollThumb, Animation<double> thumbAnimation) {
-        final HistoryItem item = filteredHistory[index];
-        return CustomScrollBarThumb(
-          backgroundColor: backgroundColor,
-          drawColor: drawColor,
-          height: height * 1.2, // 48
-          title: '${formatDate(item.timestamp, withTime: false)} ${item.isFavourite ? '❤' : ''}',
-        );
-      },
+      thumbBuilder:
+          (
+            Color backgroundColor,
+            Color drawColor,
+            double height,
+            int index,
+            bool alwaysVisibleScrollThumb,
+            Animation<double> thumbAnimation,
+          ) {
+            final HistoryItem item = filteredHistory[index];
+            return CustomScrollBarThumb(
+              backgroundColor: backgroundColor,
+              drawColor: drawColor,
+              height: height * 1.2, // 48
+              title: '${formatDate(item.timestamp, withTime: false)} ${item.isFavourite ? '❤' : ''}',
+            );
+          },
       thumbBackgroundColor: Theme.of(context).colorScheme.surface,
       thumbDrawColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.5),
       startIndex: 0,
@@ -304,7 +327,9 @@ class _HistoryListState extends State<HistoryList> {
     final HistoryItem currentEntry = fromFiltered ? filteredHistory[index] : history[index];
     Booru? booru;
     if (settingsHandler.booruList.isNotEmpty) {
-      booru = settingsHandler.booruList.firstWhereOrNull((b) => b.type == currentEntry.booruType && b.name == currentEntry.booruName);
+      booru = settingsHandler.booruList.firstWhereOrNull(
+        (b) => b.type == currentEntry.booruType && b.name == currentEntry.booruName,
+      );
     }
 
     final bool showCheckbox = isActive;
@@ -493,7 +518,9 @@ class _HistoryListState extends State<HistoryList> {
                     child: ListView(
                       shrinkWrap: true,
                       children: [
-                        Text('Are you sure you want to delete ${selectedEntries.length} ${Tools.pluralize('item', selectedEntries.length)}?'),
+                        Text(
+                          'Are you sure you want to delete ${selectedEntries.length} ${Tools.pluralize('item', selectedEntries.length)}?',
+                        ),
                         const SizedBox(height: 10),
                         ...selectedEntries.map((HistoryItem entry) {
                           final int index = history.indexOf(entry);
@@ -564,10 +591,10 @@ class _HistoryListState extends State<HistoryList> {
           Text(
             '${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'}',
             style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.normal,
-                ),
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontSize: 12,
+              fontWeight: FontWeight.normal,
+            ),
           ),
         ],
       ),
@@ -592,6 +619,8 @@ String formatDate(String timestamp, {bool withTime = true}) {
   final String hourStr = searchDate.hour.toString().padLeft(2, '0');
   final String minuteStr = searchDate.minute.toString().padLeft(2, '0');
   final String secondStr = searchDate.second.toString().padLeft(2, '0');
-  final String searchDateStr = withTime ? '$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr' : '$dayStr.$monthStr.$yearStr';
+  final String searchDateStr = withTime
+      ? '$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr'
+      : '$dayStr.$monthStr.$yearStr';
   return searchDateStr;
 }

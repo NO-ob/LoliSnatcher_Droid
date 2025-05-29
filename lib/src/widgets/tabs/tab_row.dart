@@ -121,7 +121,8 @@ class TabRow extends StatelessWidget {
 
               final bool isColored = !tagData.tagType.isNone || isMetaTag;
 
-              final Color usedColor = (isColored ? (isMetaTag ? Colors.pink : tagData.tagType.getColour()) : null) ??
+              final Color usedColor =
+                  (isColored ? (isMetaTag ? Colors.pink : tagData.tagType.getColour()) : null) ??
                   color ??
                   (tab.tags == '' ? Colors.grey : null) ??
                   Theme.of(context).colorScheme.onSurface;
@@ -142,8 +143,8 @@ class TabRow extends StatelessWidget {
                       color: prefix == '-'
                           ? Colors.redAccent
                           : prefix == '~'
-                              ? Colors.purpleAccent
-                              : Colors.transparent,
+                          ? Colors.purpleAccent
+                          : Colors.transparent,
                     ),
                   ),
                 );

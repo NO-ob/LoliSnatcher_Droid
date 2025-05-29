@@ -90,8 +90,9 @@ class TabButtons extends StatelessWidget {
           icon: const Icon(Icons.add_circle_outline),
           color: iconColor,
           onPressed: () {
-            final String defaultText =
-                searchHandler.currentBooru.defTags?.isNotEmpty == true ? searchHandler.currentBooru.defTags! : SettingsHandler.instance.defTags;
+            final String defaultText = searchHandler.currentBooru.defTags?.isNotEmpty == true
+                ? searchHandler.currentBooru.defTags!
+                : SettingsHandler.instance.defTags;
             // add new tab to the list end and switch to it
             searchHandler.searchTextController.text = defaultText;
             searchHandler.addTabByString(defaultText, switchToNew: true);

@@ -74,7 +74,9 @@ class ImageViewerState extends State<ImageViewer> {
 
   void onSize(int? size) {
     // TODO find a way to stop loading based on size when caching is enabled
-    final int? maxSize = settingsHandler.preloadSizeLimit == 0 ? null : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
+    final int? maxSize = settingsHandler.preloadSizeLimit == 0
+        ? null
+        : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
     if (size == null) {
       return;
     } else if (size == 0) {
@@ -149,7 +151,9 @@ class ImageViewerState extends State<ImageViewer> {
     }
   }
 
-  bool get useFullImage => settingsHandler.galleryMode == 'Full Res' ? !widget.booruItem.toggleQuality.value : widget.booruItem.toggleQuality.value;
+  bool get useFullImage => settingsHandler.galleryMode == 'Full Res'
+      ? !widget.booruItem.toggleQuality.value
+      : widget.booruItem.toggleQuality.value;
 
   Future<void> initViewer(bool ignoreTagsCheck) async {
     widget.booruItem.isNoScale.addListener(noScaleListener);
@@ -214,11 +218,15 @@ class ImageViewerState extends State<ImageViewer> {
       return;
     }
 
-    widthLimit = settingsHandler.disableImageScaling ? null : (maxWidth * MediaQuery.devicePixelRatioOf(context) * 2).round();
+    widthLimit = settingsHandler.disableImageScaling
+        ? null
+        : (maxWidth * MediaQuery.devicePixelRatioOf(context) * 2).round();
   }
 
   Future<ImageProvider> getImageProvider() async {
-    if ((settingsHandler.galleryMode == 'Sample' && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
+    if ((settingsHandler.galleryMode == 'Sample' &&
+            widget.booruItem.sampleURL.isNotEmpty &&
+            widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
         widget.booruItem.sampleURL == widget.booruItem.fileURL) {
       // use sample file if (sample gallery quality && sampleUrl exists && sampleUrl is not the same as thumbnailUrl) OR sampleUrl is the same as full res fileUrl
       imageFolder = 'samples';
@@ -273,7 +281,10 @@ class ImageViewerState extends State<ImageViewer> {
           );
 
     // scale image only if it's not an animation, scaling is allowed and item is not marked as noScale
-    if (!widget.booruItem.mediaType.value.isAnimation && !settingsHandler.disableImageScaling && !widget.booruItem.isNoScale.value && (widthLimit ?? 0) > 0) {
+    if (!widget.booruItem.mediaType.value.isAnimation &&
+        !settingsHandler.disableImageScaling &&
+        !widget.booruItem.isNoScale.value &&
+        (widthLimit ?? 0) > 0) {
       // resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
       provider = ResizeImage(
         provider,
@@ -321,7 +332,8 @@ class ImageViewerState extends State<ImageViewer> {
     cancelToken = null;
 
     // evict image from memory cache if it's media type or it's an animation and gifsAsThumbnails is disabled
-    if (imageFolder == 'media' || (!widget.booruItem.mediaType.value.isAnimation || !settingsHandler.gifsAsThumbnails)) {
+    if (imageFolder == 'media' ||
+        (!widget.booruItem.mediaType.value.isAnimation || !settingsHandler.gifsAsThumbnails)) {
       mainProvider.value?.evict();
       // mainProvider.value?.evict().then((bool success) {
       //   if(success) {
@@ -342,7 +354,10 @@ class ImageViewerState extends State<ImageViewer> {
     // print(scaleState);
 
     // manual zoom || double tap || double tap AFTER double tap
-    isZoomed.value = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
+    isZoomed.value =
+        scaleState == PhotoViewScaleState.zoomedIn ||
+        scaleState == PhotoViewScaleState.covering ||
+        scaleState == PhotoViewScaleState.originalSize;
     viewerHandler.setZoomed(widget.key, isZoomed.value);
   }
 
@@ -507,7 +522,9 @@ class ImageViewerState extends State<ImageViewer> {
                                     // TODO will cause scaling issues on desktop, fix when we'll get back to it
                                     customSize: Size(mqSize.width, mqSize.height),
                                     // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                                    filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
+                                    filterQuality: widget.booruItem.isLong
+                                        ? FilterQuality.medium
+                                        : FilterQuality.medium,
                                     minScale: PhotoViewComputedScale.contained,
                                     maxScale: PhotoViewComputedScale.covered * 8,
                                     initialScale: PhotoViewComputedScale.contained,

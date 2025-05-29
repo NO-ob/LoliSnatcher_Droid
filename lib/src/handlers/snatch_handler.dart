@@ -167,119 +167,131 @@ class SnatchHandler {
   }
 
   Future snatch(SnatchItem item) async {
-    status.value = queuedList.isNotEmpty ? '0/${item.booruItems.length}/${queuedList.length}' : '0/${item.booruItems.length}';
+    status.value = queuedList.isNotEmpty
+        ? '0/${item.booruItems.length}/${queuedList.length}'
+        : '0/${item.booruItems.length}';
     current.value = item;
 
     // writeMultipleFake(item.booruItems, item.booru, item.cooldown).listen(
     ImageWriter()
         .writeMultiple(
-      item.booruItems,
-      item.booru,
-      item.cooldown,
-      onProgress,
-      item.ignoreExists,
-      onCancelTokenCreate,
-    )
+          item.booruItems,
+          item.booru,
+          item.cooldown,
+          onProgress,
+          item.ignoreExists,
+          onCancelTokenCreate,
+        )
         .listen(
-      (Map<String, dynamic> data) {
-        final int snatched = data['snatched']! as int;
-        final List<BooruItem> exists = data['exists'] ?? [];
-        final List<BooruItem> failed = data['failed'] ?? [];
-        final List<BooruItem> cancelled = data['cancelled'] ?? [];
-        final bool isLastMessage = data['exists'] != null && data['failed'] != null && data['cancelled'] != null;
+          (Map<String, dynamic> data) {
+            final int snatched = data['snatched']! as int;
+            final List<BooruItem> exists = data['exists'] ?? [];
+            final List<BooruItem> failed = data['failed'] ?? [];
+            final List<BooruItem> cancelled = data['cancelled'] ?? [];
+            final bool isLastMessage = data['exists'] != null && data['failed'] != null && data['cancelled'] != null;
 
-        // last yield in stream will send fetch results counters
-        // but show this message only when queue is empty => snatching is complete
-        if (SettingsHandler.instance.downloadNotifications && isLastMessage) {
-          if (current.value!.booruItems.length == 1) {
-            FlashElements.showSnackbar(
-              duration: const Duration(seconds: 2),
-              position: Positions.top,
-              title: const Text(
-                'Item Snatched',
-                style: TextStyle(fontSize: 20),
-              ),
-              content: Row(
-                children: [
-                  if (exists.isNotEmpty || failed.isNotEmpty || cancelled.isNotEmpty || queuedList.isNotEmpty)
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (exists.isNotEmpty) const Text('Item was already snatched before'),
-                          if (failed.isNotEmpty) const Text('Failed to snatch the item'),
-                          if (cancelled.isNotEmpty) const Text('Item was cancelled'),
-                          if (queuedList.isNotEmpty) const Text('Starting next queue item...'),
-                        ],
-                      ),
-                    ),
-                  const SizedBox(width: 8),
-                  SizedBox(
-                    width: 64,
-                    height: 64,
-                    child: ThumbnailBuild(
-                      item: current.value!.booruItems.first,
-                      selectable: false,
-                      simple: true,
-                    ),
+            // last yield in stream will send fetch results counters
+            // but show this message only when queue is empty => snatching is complete
+            if (SettingsHandler.instance.downloadNotifications && isLastMessage) {
+              if (current.value!.booruItems.length == 1) {
+                FlashElements.showSnackbar(
+                  duration: const Duration(seconds: 2),
+                  position: Positions.top,
+                  title: const Text(
+                    'Item Snatched',
+                    style: TextStyle(fontSize: 20),
                   ),
-                  const SizedBox(width: 8),
-                ],
-              ),
-              leadingIcon: Icons.done_all,
-              sideColor: failed.isNotEmpty ? Colors.red : ((exists.isNotEmpty || cancelled.isNotEmpty) ? Colors.yellow : Colors.green),
-            );
-          } else {
-            FlashElements.showSnackbar(
-              duration: const Duration(seconds: 2),
-              position: Positions.top,
-              title: const Text('Items Snatched', style: TextStyle(fontSize: 20)),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Snatched: ${queueProgress.value} ${Tools.pluralize('item', queueProgress.value)}"),
-                  if (exists.isNotEmpty)
-                    Text('${exists.length} ${Tools.pluralize('file', exists.length)} ${exists.length == 1 ? 'was' : 'were'} already snatched'),
-                  if (failed.isNotEmpty) Text('Failed to snatch ${failed.length} ${Tools.pluralize('file', failed.length)}'),
-                  if (cancelled.isNotEmpty) Text('Cancelled ${cancelled.length} ${Tools.pluralize('file', cancelled.length)}'),
-                  if (queuedList.isNotEmpty) const Text('Starting next queue item...'),
-                ],
-              ),
-              leadingIcon: Icons.done_all,
-              sideColor: failed.isNotEmpty ? Colors.red : ((exists.isNotEmpty || cancelled.isNotEmpty) ? Colors.yellow : Colors.green),
-            );
-          }
-        }
+                  content: Row(
+                    children: [
+                      if (exists.isNotEmpty || failed.isNotEmpty || cancelled.isNotEmpty || queuedList.isNotEmpty)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (exists.isNotEmpty) const Text('Item was already snatched before'),
+                              if (failed.isNotEmpty) const Text('Failed to snatch the item'),
+                              if (cancelled.isNotEmpty) const Text('Item was cancelled'),
+                              if (queuedList.isNotEmpty) const Text('Starting next queue item...'),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(width: 8),
+                      SizedBox(
+                        width: 64,
+                        height: 64,
+                        child: ThumbnailBuild(
+                          item: current.value!.booruItems.first,
+                          selectable: false,
+                          simple: true,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                  leadingIcon: Icons.done_all,
+                  sideColor: failed.isNotEmpty
+                      ? Colors.red
+                      : ((exists.isNotEmpty || cancelled.isNotEmpty) ? Colors.yellow : Colors.green),
+                );
+              } else {
+                FlashElements.showSnackbar(
+                  duration: const Duration(seconds: 2),
+                  position: Positions.top,
+                  title: const Text('Items Snatched', style: TextStyle(fontSize: 20)),
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Snatched: ${queueProgress.value} ${Tools.pluralize('item', queueProgress.value)}"),
+                      if (exists.isNotEmpty)
+                        Text(
+                          '${exists.length} ${Tools.pluralize('file', exists.length)} ${exists.length == 1 ? 'was' : 'were'} already snatched',
+                        ),
+                      if (failed.isNotEmpty)
+                        Text('Failed to snatch ${failed.length} ${Tools.pluralize('file', failed.length)}'),
+                      if (cancelled.isNotEmpty)
+                        Text('Cancelled ${cancelled.length} ${Tools.pluralize('file', cancelled.length)}'),
+                      if (queuedList.isNotEmpty) const Text('Starting next queue item...'),
+                    ],
+                  ),
+                  leadingIcon: Icons.done_all,
+                  sideColor: failed.isNotEmpty
+                      ? Colors.red
+                      : ((exists.isNotEmpty || cancelled.isNotEmpty) ? Colors.yellow : Colors.green),
+                );
+              }
+            }
 
-        if (isLastMessage) {
-          existsItems.addAll(exists.map((e) => (booru: item.booru, item: e)));
-          failedItems.addAll(failed.map((e) => (booru: item.booru, item: e)));
-          cancelledItems.addAll(cancelled.map((e) => (booru: item.booru, item: e)));
-        }
+            if (isLastMessage) {
+              existsItems.addAll(exists.map((e) => (booru: item.booru, item: e)));
+              failedItems.addAll(failed.map((e) => (booru: item.booru, item: e)));
+              cancelledItems.addAll(cancelled.map((e) => (booru: item.booru, item: e)));
+            }
 
-        cancelToken = null;
-        status.value = queuedList.isNotEmpty ? '$snatched/${item.booruItems.length}/${queuedList.length}' : '$snatched/${item.booruItems.length}';
-        queueProgress.value = queueProgress.value + 1;
-        received.value = 0;
-        total.value = 0;
-      },
-      onDone: () {
-        cancelToken = null;
-        status.value = '';
-        current.value = null;
-        queueProgress.value = 0;
-        received.value = 0;
-        total.value = 0;
+            cancelToken = null;
+            status.value = queuedList.isNotEmpty
+                ? '$snatched/${item.booruItems.length}/${queuedList.length}'
+                : '$snatched/${item.booruItems.length}';
+            queueProgress.value = queueProgress.value + 1;
+            received.value = 0;
+            total.value = 0;
+          },
+          onDone: () {
+            cancelToken = null;
+            status.value = '';
+            current.value = null;
+            queueProgress.value = 0;
+            received.value = 0;
+            total.value = 0;
 
-        if (active.value) {
-          if (queuedList.isNotEmpty) {
-            snatch(queuedList.removeAt(0));
-          } else {
-            active.value = false;
-          }
-        }
-      },
-    );
+            if (active.value) {
+              if (queuedList.isNotEmpty) {
+                snatch(queuedList.removeAt(0));
+              } else {
+                active.value = false;
+              }
+            }
+          },
+        );
   }
 
   void queuedListListener() {

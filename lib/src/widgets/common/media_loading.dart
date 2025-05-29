@@ -205,8 +205,9 @@ class _MediaLoadingState extends State<MediaLoading> {
       if (isVideo) {
         percentDoneText = (percentDone == 1) ? 'Rendering...' : '${(percentDone * 100).toStringAsFixed(2)}%';
       } else {
-        percentDoneText =
-            (percentDone == 1) ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...' : '${(percentDone * 100).toStringAsFixed(2)}%';
+        percentDoneText = (percentDone == 1)
+            ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...'
+            : '${(percentDone * 100).toStringAsFixed(2)}%';
       }
     } else {
       if (isVideo) {
@@ -223,10 +224,16 @@ class _MediaLoadingState extends State<MediaLoading> {
       expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / (nowMils - _prevTime))).round();
       // expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / speedCheckInterval)).round();
     }
-    final String expectedSpeedText = (hasProgressData && percentDone < 1) ? '${Tools.formatBytes(expectedSpeed, 1)}/s' : '';
+    final String expectedSpeedText = (hasProgressData && percentDone < 1)
+        ? '${Tools.formatBytes(expectedSpeed, 1)}/s'
+        : '';
 
-    final double expectedTime = hasProgressData ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed)) : 0;
-    final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? '~${expectedTime.toStringAsFixed(1)} s' : '';
+    final double expectedTime = hasProgressData
+        ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed))
+        : 0;
+    final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1)
+        ? '~${expectedTime.toStringAsFixed(1)} s'
+        : '';
 
     final int sinceStartSeconds = (sinceStart / 1000).floor();
     final String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds}s ago' : '';

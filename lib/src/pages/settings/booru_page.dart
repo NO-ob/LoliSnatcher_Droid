@@ -235,7 +235,9 @@ class _BooruPageState extends State<BooruPage> {
       // do nothing if no selected or selected "Favourites/Dowloads"
       // TODO update all tabs with old booru with a new one
       // TODO if you open edit after already editing - it will open old instance + possible exception due to old data
-      page: (selectedBooru != null && BooruType.saveable.contains(selectedBooru?.type)) ? () => BooruEdit(selectedBooru!) : null,
+      page: (selectedBooru != null && BooruType.saveable.contains(selectedBooru?.type))
+          ? () => BooruEdit(selectedBooru!)
+          : null,
     );
   }
 
@@ -261,7 +263,9 @@ class _BooruPageState extends State<BooruPage> {
         }
 
         // TODO reset all tabs to next available booru?
-        final List<SearchTab> tabsWithBooru = searchHandler.list.where((tab) => tab.selectedBooru.value.name == selectedBooru?.name).toList();
+        final List<SearchTab> tabsWithBooru = searchHandler.list
+            .where((tab) => tab.selectedBooru.value.name == selectedBooru?.name)
+            .toList();
         if (tabsWithBooru.isNotEmpty) {
           FlashElements.showSnackbar(
             context: context,
@@ -317,7 +321,10 @@ class _BooruPageState extends State<BooruPage> {
                       FlashElements.showSnackbar(
                         context: context,
                         title: const Text('Error!', style: TextStyle(fontSize: 20)),
-                        content: const Text('Something went wrong during deletion of a Booru config!', style: TextStyle(fontSize: 16)),
+                        content: const Text(
+                          'Something went wrong during deletion of a Booru config!',
+                          style: TextStyle(fontSize: 16),
+                        ),
                         leadingIcon: Icons.warning_amber,
                         leadingIconColor: Colors.red,
                         sideColor: Colors.red,
@@ -479,7 +486,10 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
               text: TextSpan(
                 children: [
                   const TextSpan(text: 'Change to: '),
-                  TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(
+                    text: selectedBooru.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   WidgetSpan(
                     child: BooruFavicon(selectedBooru),
                   ),
@@ -491,7 +501,10 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
               text: TextSpan(
                 children: [
                   const TextSpan(text: 'Tap [No] to keep current: '),
-                  TextSpan(text: initBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(
+                    text: initBooru.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   WidgetSpan(child: BooruFavicon(initBooru)),
                 ],
               ),
@@ -500,7 +513,10 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
               text: TextSpan(
                 children: [
                   const TextSpan(text: 'Tap [Yes] to change to: '),
-                  TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(
+                    text: selectedBooru.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   WidgetSpan(
                     child: BooruFavicon(selectedBooru),
                   ),

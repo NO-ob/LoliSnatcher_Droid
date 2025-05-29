@@ -140,7 +140,10 @@ class DesktopHome extends StatelessWidget {
                         ),
                         child: Center(
                           child: FittedBox(
-                            child: Text('${searchHandler.currentSelected.length}', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                            child: Text(
+                              '${searchHandler.currentSelected.length}',
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                            ),
                           ),
                         ),
                       ),

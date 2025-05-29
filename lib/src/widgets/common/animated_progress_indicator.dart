@@ -3,11 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-enum IndicatorStyle {
-  circular,
-  square,
-  linear;
-}
+enum IndicatorStyle { circular, square, linear }
 
 const double _kMinCircularProgressIndicatorSize = 36;
 
@@ -122,11 +118,18 @@ class AnimatedProgressIndicatorState extends State<AnimatedProgressIndicator> wi
       animation: curve,
       builder: (BuildContext context, Widget? child) {
         final ProgressIndicatorThemeData indicatorTheme = ProgressIndicatorTheme.of(context);
-        final Color backgroundColor = backgroundColorTween?.evaluate(curve) ??
+        final Color backgroundColor =
+            backgroundColorTween?.evaluate(curve) ??
             widget.backgroundColor ??
-            (widget.indicatorStyle == IndicatorStyle.linear ? indicatorTheme.linearTrackColor : indicatorTheme.circularTrackColor) ??
+            (widget.indicatorStyle == IndicatorStyle.linear
+                ? indicatorTheme.linearTrackColor
+                : indicatorTheme.circularTrackColor) ??
             Theme.of(context).colorScheme.surface;
-        final Color valueColor = valueColorTween?.evaluate(curve) ?? widget.valueColor ?? indicatorTheme.color ?? Theme.of(context).colorScheme.surface;
+        final Color valueColor =
+            valueColorTween?.evaluate(curve) ??
+            widget.valueColor ??
+            indicatorTheme.color ??
+            Theme.of(context).colorScheme.surface;
         final double minHeight = widget.minHeight ?? indicatorTheme.linearMinHeight ?? 4.0;
 
         switch (widget.indicatorStyle) {
@@ -381,7 +384,12 @@ class LinearProgressIndicatorPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     final double clampedValue = value.clamp(0.0, 1.0);
     final Path linePath = Path();
-    linePath.addRRect(RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width * clampedValue, size.height), Radius.circular(borderRadius)));
+    linePath.addRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width * clampedValue, size.height),
+        Radius.circular(borderRadius),
+      ),
+    );
     canvas.drawPath(linePath, trackPaint);
   }
 

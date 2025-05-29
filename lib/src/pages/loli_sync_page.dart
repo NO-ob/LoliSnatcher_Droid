@@ -45,7 +45,13 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   SyncSide syncSide = SyncSide.none;
 
-  bool favourites = false, favouritesv2 = false, snatched = false, settings = false, booru = false, tabs = false, tags = false;
+  bool favourites = false,
+      favouritesv2 = false,
+      snatched = false,
+      settings = false,
+      booru = false,
+      tabs = false,
+      tags = false;
   int favToggleCount = 0;
   String tabsMode = 'Merge';
   String tagsMode = 'PreferTypeIfNone';
@@ -275,7 +281,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                               ),
                               Text('If you want to sync from the beginning leave this field blank'),
                               Text(''),
-                              Text('Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X'),
+                              Text(
+                                'Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X',
+                              ),
                               Text('Order of favs: From oldest (0) to newest (X)'),
                             ],
                           );
@@ -325,7 +333,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                               ),
                               Text('If you want to sync from the beginning leave this field blank'),
                               Text(''),
-                              Text('Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X'),
+                              Text(
+                                'Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X',
+                              ),
                               Text('Order of favs: From oldest (0) to newest (X)'),
                             ],
                           );
@@ -391,7 +401,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                                 'Merge: Merge the tabs from this device on the other device, tabs with unknown boorus and already existing tabs will be ignored',
                               ),
                               Text(''),
-                              Text('Replace: Completely replace the tabs on the other device with the tabs from this device'),
+                              Text(
+                                'Replace: Completely replace the tabs on the other device with the tabs from this device',
+                              ),
                             ],
                           );
                         },
@@ -433,7 +445,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                           return const SettingsDialog(
                             title: Text('Tags sync mode'),
                             contentItems: [
-                              Text("PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn't on this device it will be skipped"),
+                              Text(
+                                "PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn't on this device it will be skipped",
+                              ),
                               Text(''),
                               Text(
                                 'Overwrite: All tags will be added, if a tag and tag type exists on the other device it will be overwritten',
@@ -544,7 +558,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         ),
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: const Text('Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed'),
+          child: const Text(
+            'Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed',
+          ),
         ),
         SettingsOptionsList(
           value: selectedInterface,

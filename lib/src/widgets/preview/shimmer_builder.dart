@@ -39,7 +39,9 @@ class ThumbnailsShimmerList extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final String displayType = settingsHandler.previewDisplay;
     final int previewCount = settingsHandler.itemLimit;
-    final int columnCount = MediaQuery.orientationOf(context) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+    final int columnCount = MediaQuery.orientationOf(context) == Orientation.portrait
+        ? settingsHandler.portraitColumns
+        : settingsHandler.landscapeColumns;
 
     return SliverGrid.builder(
       addAutomaticKeepAlives: false,
@@ -76,7 +78,8 @@ class ShimmerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerLoading(
       isLoading: isLoading,
-      child: child ??
+      child:
+          child ??
           Container(
             width: double.maxFinite,
             height: double.maxFinite,
@@ -87,16 +90,16 @@ class ShimmerCard extends StatelessWidget {
 }
 
 LinearGradient _shimmerGradient(Color c1, Color c2, Color c3) => LinearGradient(
-      colors: [c1, c2, c3],
-      stops: const [
-        0.1,
-        0.3,
-        0.4,
-      ],
-      begin: const Alignment(-1, -0.3),
-      end: const Alignment(1, 0.3),
-      tileMode: TileMode.clamp,
-    );
+  colors: [c1, c2, c3],
+  stops: const [
+    0.1,
+    0.3,
+    0.4,
+  ],
+  begin: const Alignment(-1, -0.3),
+  end: const Alignment(1, 0.3),
+  tileMode: TileMode.clamp,
+);
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -127,7 +130,8 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    _shimmerController = AnimationController.unbounded(vsync: this)..repeat(min: -0.5, max: 1.5, period: const Duration(milliseconds: 1000));
+    _shimmerController = AnimationController.unbounded(vsync: this)
+      ..repeat(min: -0.5, max: 1.5, period: const Duration(milliseconds: 1000));
   }
 
   void activateChild() {
@@ -155,12 +159,12 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
   }
 
   LinearGradient get gradient => LinearGradient(
-        colors: widget.linearGradient.colors,
-        stops: widget.linearGradient.stops,
-        begin: widget.linearGradient.begin,
-        end: widget.linearGradient.end,
-        transform: _SlidingGradientTransform(slidePercent: _shimmerController.value),
-      );
+    colors: widget.linearGradient.colors,
+    stops: widget.linearGradient.stops,
+    begin: widget.linearGradient.begin,
+    end: widget.linearGradient.end,
+    transform: _SlidingGradientTransform(slidePercent: _shimmerController.value),
+  );
 
   bool get isSized {
     final RenderObject? renderObj = context.findRenderObject();

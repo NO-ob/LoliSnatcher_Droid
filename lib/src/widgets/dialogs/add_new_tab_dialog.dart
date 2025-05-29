@@ -43,7 +43,8 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   List<Booru> secondaryBoorus = [];
   TabAddMode addMode = TabAddMode.end; // prev, next, end
   _Querymode queryMode = _Querymode.defaultTags;
-  final TextEditingController customTagsController = TextEditingController(), customPageController = TextEditingController();
+  final TextEditingController customTagsController = TextEditingController(),
+      customPageController = TextEditingController();
   GlobalKey secondaryBoorusDropdownKey = GlobalKey();
 
   @override
@@ -208,7 +209,8 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                             addSecondaryBoorus = v;
                             if (secondaryBoorus.isEmpty) {
                               WidgetsBinding.instance.addPostFrameCallback(
-                                (_) => (secondaryBoorusDropdownKey.currentWidget as LoliMultiselectDropdown<Booru>?)?.showDialog(context),
+                                (_) => (secondaryBoorusDropdownKey.currentWidget as LoliMultiselectDropdown<Booru>?)
+                                    ?.showDialog(context),
                               );
                             }
                           });

@@ -82,8 +82,8 @@ class RenderTransparentPointer extends RenderProxyBox {
   RenderTransparentPointer({
     RenderBox? child,
     bool transparent = true,
-  })  : _transparent = transparent,
-        super(child);
+  }) : _transparent = transparent,
+       super(child);
 
   bool get transparent => _transparent;
   bool _transparent;

@@ -58,7 +58,10 @@ class BooruItem {
   }
 
   late Key key;
-  String fileURL, sampleURL, thumbnailURL, postURL;
+  String fileURL;
+  String sampleURL;
+  String thumbnailURL;
+  String postURL;
   List<String> tagsList;
   late Rx<MediaType> mediaType;
   Rxn<MediaType> possibleMediaType = Rxn<MediaType>(null);
@@ -66,12 +69,28 @@ class BooruItem {
   RxBool isNoScale = false.obs, toggleQuality = false.obs;
   bool isUpdated = false;
 
-  String? fileExt, serverId, rating, score, uploaderName, description, md5String, postDate, postDateFormat;
+  String? fileExt;
+  String? serverId;
+  String? rating;
+  String? score;
+  String? uploaderName;
+  String? description;
+  String? md5String;
+  String? postDate;
+  String? postDateFormat;
   String fileNameExtras;
   List<String>? sources;
   RxList<NoteItem> notes = RxList([]);
   bool? hasNotes, hasComments;
-  double? fileWidth, fileHeight, fileAspectRatio, sampleWidth, sampleHeight, sampleAspectRatio, previewWidth, previewHeight, previewAspectRatio;
+  double? fileWidth;
+  double? fileHeight;
+  double? fileAspectRatio;
+  double? sampleWidth;
+  double? sampleHeight;
+  double? sampleAspectRatio;
+  double? previewWidth;
+  double? previewHeight;
+  double? previewAspectRatio;
   int? fileSize;
 
   bool get isLong {

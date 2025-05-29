@@ -275,14 +275,21 @@ class _DebugPageState extends State<DebugPage> {
                       name: 'Vibrate',
                       action: () {
                         print('Vibrate $vDuration $vAmplitude');
-                        ServiceHandler.vibrate(flutterWay: vFlutterway, duration: vDuration.round(), amplitude: vAmplitude.round());
+                        ServiceHandler.vibrate(
+                          flutterWay: vFlutterway,
+                          duration: vDuration.round(),
+                          amplitude: vAmplitude.round(),
+                        );
                       },
                     ),
                   ],
                 ),
               ],
 
-              SettingsButton(name: 'Res: ${MediaQuery.of(context).size.width.toPrecision(4)}x${MediaQuery.of(context).size.height.toPrecision(4)}'),
+              SettingsButton(
+                name:
+                    'Res: ${MediaQuery.of(context).size.width.toPrecision(4)}x${MediaQuery.of(context).size.height.toPrecision(4)}',
+              ),
               SettingsButton(name: 'Pixel Ratio: ${MediaQuery.of(context).devicePixelRatio.toPrecision(4)}'),
 
               const SettingsButton(name: '', enabled: false),

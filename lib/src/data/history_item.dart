@@ -12,12 +12,14 @@ class HistoryItem {
   );
 
   HistoryItem.fromMap(Map<String, dynamic> map)
-      : id = map['id'] as int,
-        searchText = map['searchText'] as String,
-        booruType = BooruType.values.firstWhereOrNull((element) => map['booruType'].toString().toLowerCase() == element.name.toLowerCase()),
-        booruName = map['booruName'] as String,
-        isFavourite = map['isFavourite'] == '1',
-        timestamp = map['timestamp'] as String;
+    : id = map['id'] as int,
+      searchText = map['searchText'] as String,
+      booruType = BooruType.values.firstWhereOrNull(
+        (element) => map['booruType'].toString().toLowerCase() == element.name.toLowerCase(),
+      ),
+      booruName = map['booruName'] as String,
+      isFavourite = map['isFavourite'] == '1',
+      timestamp = map['timestamp'] as String;
 
   final int id;
   final String searchText;

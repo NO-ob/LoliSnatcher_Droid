@@ -58,7 +58,9 @@ class ImageWriter {
         ...await Tools.getFileCustomHeaders(booru, checkForReferer: true),
       };
 
-      final String url = ((settingsHandler.snatchMode == 'Sample' && item.sampleURL.isNotEmpty) ? item.sampleURL : item.fileURL);
+      final String url = ((settingsHandler.snatchMode == 'Sample' && item.sampleURL.isNotEmpty)
+          ? item.sampleURL
+          : item.fileURL);
 
       final cancelToken = CancelToken();
       if (onCancelTokenCreate != null) {
@@ -96,7 +98,9 @@ class ImageWriter {
 
       try {
         if (settingsHandler.jsonWrite) {
-          if (Platform.isAndroid && settingsHandler.extPathOverride.isNotEmpty && await ServiceHandler.getAndroidSDKVersion() >= 31) {
+          if (Platform.isAndroid &&
+              settingsHandler.extPathOverride.isNotEmpty &&
+              await ServiceHandler.getAndroidSDKVersion() >= 31) {
             final String? safPath = await ServiceHandler.createFileStreamFromSAFDirectory(
               fileNameWoutExt,
               'application/json',
@@ -255,7 +259,10 @@ class ImageWriter {
       // print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive: true);
 
-      final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
+      final String fileName = sanitizeName(
+        clearName ? parseThumbUrlToName(fileURL) : fileURL,
+        fileNameExtras: fileNameExtras,
+      );
       image = File(cachePath + fileName);
       await image.writeAsBytes(bytes, flush: true);
     } catch (e) {
@@ -306,13 +313,21 @@ class ImageWriter {
     }
   }
 
-  Future<String?> getCachePath(String fileURL, String typeFolder, {required String fileNameExtras, bool clearName = true}) async {
+  Future<String?> getCachePath(
+    String fileURL,
+    String typeFolder, {
+    required String fileNameExtras,
+    bool clearName = true,
+  }) async {
     String cachePath;
     try {
       await setPaths();
       cachePath = '$cacheRootPath$typeFolder/';
 
-      final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
+      final String fileName = sanitizeName(
+        clearName ? parseThumbUrlToName(fileURL) : fileURL,
+        fileNameExtras: fileNameExtras,
+      );
       final File cacheFile = File(cachePath + fileName);
       if (await cacheFile.exists()) {
         if (await cacheFile.length() > 0) {
@@ -341,7 +356,10 @@ class ImageWriter {
     String cachePath;
     cachePath = '$cacheRootPath$typeFolder/';
 
-    final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
+    final String fileName = sanitizeName(
+      clearName ? parseThumbUrlToName(fileURL) : fileURL,
+      fileNameExtras: fileNameExtras,
+    );
     return cachePath + fileName;
   }
 
@@ -395,7 +413,8 @@ class ImageWriter {
               final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
               final DateTime lastModified = await file.lastModified();
               if (isStaleClearActive) {
-                final bool isStale = (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < timeNow;
+                final bool isStale =
+                    (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < timeNow;
                 if (isNotExcludedExt && isStale) {
                   await file.delete();
                 }
@@ -440,7 +459,9 @@ class ImageWriter {
 
       final Directory cacheDir = Directory(cacheDirPath);
       if (await cacheDir.exists()) {
-        final List<File> files = (await cacheDir.list(recursive: true, followLinks: false).toList()).whereType<File>().toList();
+        final List<File> files = (await cacheDir.list(recursive: true, followLinks: false).toList())
+            .whereType<File>()
+            .toList();
         for (final File file in files) {
           currentCacheSize += await file.length();
         }

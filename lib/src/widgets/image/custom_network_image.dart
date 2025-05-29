@@ -16,7 +16,8 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/image/abstract_custom_network_image.dart' as custom_network_image;
 
 @immutable
-class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetworkImage> implements custom_network_image.CustomNetworkImage {
+class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetworkImage>
+    implements custom_network_image.CustomNetworkImage {
   const CustomNetworkImage(
     this.url, {
     this.scale = 1.0,
@@ -260,7 +261,8 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
 }
 
 @immutable
-class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNetworkImage> implements custom_network_image.CustomNetworkImage {
+class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNetworkImage>
+    implements custom_network_image.CustomNetworkImage {
   const CustomNetworkAvifImage(
     this.url, {
     this.scale = 1.0,

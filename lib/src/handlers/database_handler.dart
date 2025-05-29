@@ -45,38 +45,48 @@ class DBHandler {
   }
 
   Future<bool> updateTable() async {
-    await db?.execute('CREATE TABLE IF NOT EXISTS BooruItem '
-        '(id INTEGER PRIMARY KEY, '
-        'thumbnailURL TEXT, '
-        'sampleURL TEXT, '
-        'fileURL TEXT, '
-        'postURL TEXT, '
-        'mediaType TEXT, '
-        'isSnatched INTEGER, '
-        'isFavourite INTEGER '
-        ')');
-    await db?.execute('CREATE TABLE IF NOT EXISTS Tag ( '
-        'id INTEGER PRIMARY KEY, '
-        'name TEXT '
-        'tagType TEXT '
-        'updatedAt INTEGER '
-        ')');
-    await db?.execute('CREATE TABLE IF NOT EXISTS ImageTag ( '
-        'tagID INTEGER, '
-        'booruItemID INTEGER '
-        ')');
-    await db?.execute('CREATE TABLE IF NOT EXISTS SearchHistory ( '
-        'id INTEGER PRIMARY KEY, '
-        'booruType TEXT, '
-        'booruName TEXT, '
-        'searchText TEXT, '
-        'isFavourite INTEGER, '
-        'timestamp TEXT DEFAULT CURRENT_TIMESTAMP '
-        ')');
-    await db?.execute('CREATE TABLE IF NOT EXISTS TabRestore ( '
-        'id INTEGER PRIMARY KEY, '
-        'restore TEXT '
-        ')');
+    await db?.execute(
+      'CREATE TABLE IF NOT EXISTS BooruItem '
+      '(id INTEGER PRIMARY KEY, '
+      'thumbnailURL TEXT, '
+      'sampleURL TEXT, '
+      'fileURL TEXT, '
+      'postURL TEXT, '
+      'mediaType TEXT, '
+      'isSnatched INTEGER, '
+      'isFavourite INTEGER '
+      ')',
+    );
+    await db?.execute(
+      'CREATE TABLE IF NOT EXISTS Tag ( '
+      'id INTEGER PRIMARY KEY, '
+      'name TEXT '
+      'tagType TEXT '
+      'updatedAt INTEGER '
+      ')',
+    );
+    await db?.execute(
+      'CREATE TABLE IF NOT EXISTS ImageTag ( '
+      'tagID INTEGER, '
+      'booruItemID INTEGER '
+      ')',
+    );
+    await db?.execute(
+      'CREATE TABLE IF NOT EXISTS SearchHistory ( '
+      'id INTEGER PRIMARY KEY, '
+      'booruType TEXT, '
+      'booruName TEXT, '
+      'searchText TEXT, '
+      'isFavourite INTEGER, '
+      'timestamp TEXT DEFAULT CURRENT_TIMESTAMP '
+      ')',
+    );
+    await db?.execute(
+      'CREATE TABLE IF NOT EXISTS TabRestore ( '
+      'id INTEGER PRIMARY KEY, '
+      'restore TEXT '
+      ')',
+    );
     try {
       if (!await columnExists('SearchHistory', 'isFavourite')) {
         await db?.execute('ALTER TABLE SearchHistory ADD COLUMN isFavourite INTEGER;');
@@ -100,7 +110,9 @@ class DBHandler {
   }
 
   Future<bool> columnExists(String tableName, String columnName) async {
-    final List<Map<String, Object?>>? result = await db?.rawQuery("SELECT COUNT(*) AS count FROM pragma_table_info('$tableName') WHERE name='$columnName'");
+    final List<Map<String, Object?>>? result = await db?.rawQuery(
+      "SELECT COUNT(*) AS count FROM pragma_table_info('$tableName') WHERE name='$columnName'",
+    );
     if (result != null && result.isNotEmpty) {
       if ((result[0]['count'] ?? 0) == 1) {
         return true;
@@ -130,7 +142,12 @@ class DBHandler {
 
   /// Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
   Future<String?> updateBooruItem(BooruItem item, BooruUpdateMode mode) async {
-    Logger.Inst().log('updateBooruItem called fileURL is: ${item.fileURL}', 'DBHandler', 'updateBooruItem', LogTypes.booruHandlerInfo);
+    Logger.Inst().log(
+      'updateBooruItem called fileURL is: ${item.fileURL}',
+      'DBHandler',
+      'updateBooruItem',
+      LogTypes.booruHandlerInfo,
+    );
     String? itemID = await getItemID(item.postURL);
     String resultStr = '';
     if (itemID == null || itemID.isEmpty) {
@@ -226,8 +243,10 @@ class DBHandler {
   }
 
   Future<List<String>> getItemIDs(List<String> postURLs) async {
-    final List? result =
-        await db?.rawQuery("SELECT id, postURL FROM BooruItem WHERE postURL IN (${List.generate(postURLs.length, (_) => '?').join(',')})", postURLs);
+    final List? result = await db?.rawQuery(
+      "SELECT id, postURL FROM BooruItem WHERE postURL IN (${List.generate(postURLs.length, (_) => '?').join(',')})",
+      postURLs,
+    );
 
     final List<String> ids = List.generate(postURLs.length, (index) => '');
     if (result != null && result.isNotEmpty) {
@@ -293,7 +312,10 @@ class DBHandler {
     searchTags = searchTagsString.trim().split(' ').where((tag) => tag.isNotEmpty).toList();
 
     // this adds support of filtering by posturls which have site:*some text* as their substring
-    String siteSearch = searchTags.firstWhere((tag) => tag.startsWith('site:') || tag.startsWith('-site:'), orElse: () => '');
+    String siteSearch = searchTags.firstWhere(
+      (tag) => tag.startsWith('site:') || tag.startsWith('-site:'),
+      orElse: () => '',
+    );
     String siteQuery = '';
     if (siteSearch.isNotEmpty) {
       searchTags.remove(siteSearch);
@@ -303,7 +325,10 @@ class DBHandler {
     }
 
     if (searchTags.where((element) => element.startsWith('-')).isNotEmpty) {
-      excludeTags = searchTags.where((element) => element.startsWith('-')).map((tag) => tag.replaceAll(RegExp('^-'), '')).toList();
+      excludeTags = searchTags
+          .where((element) => element.startsWith('-'))
+          .map((tag) => tag.replaceAll(RegExp('^-'), ''))
+          .toList();
       searchTags = searchTags.where((element) => !element.startsWith('-')).toList();
     } else {
       excludeTags = [];
@@ -320,7 +345,9 @@ class DBHandler {
     }
 
     if (searchTags.isNotEmpty || excludeTags.isNotEmpty) {
-      final String searchPart = searchTags.isNotEmpty ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) " : '';
+      final String searchPart = searchTags.isNotEmpty
+          ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
+          : '';
 
       final andStr1 = siteQuery.isNotEmpty || searchPart.isNotEmpty ? 'AND' : '';
       final andStr2 = siteQuery.isNotEmpty && searchPart.isNotEmpty ? 'AND' : '';
@@ -329,13 +356,13 @@ class DBHandler {
 
       final String excludePart = excludeTags.isNotEmpty
           ? 'LEFT JOIN ('
-              '  SELECT bi.id '
-              '  FROM BooruItem AS bi '
-              '  JOIN ImageTag AS it ON bi.id = it.booruItemID '
-              '  JOIN Tag AS t ON it.tagID = t.id '
-              "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
-              ') AS ei ON bi.id = ei.id '
-              'WHERE ei.id IS NULL AND $filterMode $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr '
+                '  SELECT bi.id '
+                '  FROM BooruItem AS bi '
+                '  JOIN ImageTag AS it ON bi.id = it.booruItemID '
+                '  JOIN Tag AS t ON it.tagID = t.id '
+                "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
+                ') AS ei ON bi.id = ei.id '
+                'WHERE ei.id IS NULL AND $filterMode $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr '
           : 'WHERE                   $filterMode $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr ';
 
       final String havingPart = searchTags.isNotEmpty ? 'HAVING COUNT(DISTINCT t.id) = ${searchTags.length} ' : '';
@@ -379,7 +406,9 @@ class DBHandler {
       final List<dynamic>? tags = await getTagsList(List<int>.from(result.map((e) => e['dbid'])));
 
       final List<BooruItem> items = result.map((r) {
-        final List<String> itemTags = List<String>.from(tags?.where((el) => el['booruItemID'] == r['dbid']).map((el) => el['name'].toString()) ?? []);
+        final List<String> itemTags = List<String>.from(
+          tags?.where((el) => el['booruItemID'] == r['dbid']).map((el) => el['name'].toString()) ?? [],
+        );
         final BooruItem item = BooruItem.fromDBRow(r, itemTags);
         if (mode == 'loliSyncFav') {
           item.isSnatched.value = false;
@@ -400,9 +429,11 @@ class DBHandler {
   /// Gets a list of tags related to given posts ids
   Future<dynamic> getTagsList(List<int> postIDs) async {
     final List<String> postIDsString = postIDs.map((id) => "'$id'").toList();
-    final List? result = await db?.rawQuery('SELECT ImageTag.booruItemID, Tag.name FROM Tag '
-        'INNER JOIN ImageTag on Tag.id = ImageTag.tagID '
-        "WHERE ImageTag.booruItemID IN (${postIDsString.join(',')})");
+    final List? result = await db?.rawQuery(
+      'SELECT ImageTag.booruItemID, Tag.name FROM Tag '
+      'INNER JOIN ImageTag on Tag.id = ImageTag.tagID '
+      "WHERE ImageTag.booruItemID IN (${postIDsString.join(',')})",
+    );
     return result;
   }
 
@@ -430,7 +461,10 @@ class DBHandler {
     searchTags = searchTagsString.split(' ').where((tag) => tag.isNotEmpty).toList();
 
     // this adds support of filtering by posturls which have site:*some text* as their substring
-    String siteSearch = searchTags.firstWhere((tag) => tag.startsWith('site:') || tag.startsWith('-site:'), orElse: () => '');
+    String siteSearch = searchTags.firstWhere(
+      (tag) => tag.startsWith('site:') || tag.startsWith('-site:'),
+      orElse: () => '',
+    );
     String siteQuery = '';
     if (siteSearch.isNotEmpty) {
       searchTags.remove(siteSearch);
@@ -440,7 +474,10 @@ class DBHandler {
     }
 
     if (searchTags.where((element) => element.startsWith('-')).isNotEmpty) {
-      excludeTags = searchTags.where((element) => element.startsWith('-')).map((tag) => tag.replaceAll(RegExp('^-'), '')).toList();
+      excludeTags = searchTags
+          .where((element) => element.startsWith('-'))
+          .map((tag) => tag.replaceAll(RegExp('^-'), ''))
+          .toList();
       searchTags = searchTags.where((element) => !element.startsWith('-')).toList();
     } else {
       excludeTags = [];
@@ -449,20 +486,22 @@ class DBHandler {
     final filterMode = isDownloads ? 'bi.isSnatched = 1' : 'bi.isFavourite = 1';
 
     if (searchTags.isNotEmpty || excludeTags.isNotEmpty) {
-      final String searchPart = searchTags.isNotEmpty ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) " : '';
+      final String searchPart = searchTags.isNotEmpty
+          ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
+          : '';
 
       final andStr1 = siteQuery.isNotEmpty || searchPart.isNotEmpty ? 'AND' : '';
       final andStr2 = siteQuery.isNotEmpty && searchPart.isNotEmpty ? 'AND' : '';
 
       final String excludePart = excludeTags.isNotEmpty
           ? 'LEFT JOIN ('
-              '  SELECT bi.id '
-              '  FROM BooruItem AS bi '
-              '  JOIN ImageTag AS it ON bi.id = it.booruItemID '
-              '  JOIN Tag AS t ON it.tagID = t.id '
-              "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
-              ') AS ei ON bi.id = ei.id '
-              'WHERE ei.id IS NULL AND $filterMode $andStr1 $siteQuery $andStr2 $searchPart '
+                '  SELECT bi.id '
+                '  FROM BooruItem AS bi '
+                '  JOIN ImageTag AS it ON bi.id = it.booruItemID '
+                '  JOIN Tag AS t ON it.tagID = t.id '
+                "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
+                ') AS ei ON bi.id = ei.id '
+                'WHERE ei.id IS NULL AND $filterMode $andStr1 $siteQuery $andStr2 $searchPart '
           : 'WHERE                   $filterMode $andStr1 $siteQuery $andStr2 $searchPart ';
 
       final String havingPart = searchTags.isNotEmpty ? 'HAVING COUNT(DISTINCT t.id) = ${searchTags.length} ' : '';
@@ -480,10 +519,12 @@ class DBHandler {
     } else {
       final andStr1 = siteQuery.isNotEmpty ? 'AND' : '';
 
-      result = await db?.rawQuery('SELECT COUNT(*) as count '
-          'FROM BooruItem AS bi '
-          'WHERE $siteQuery $andStr1 $filterMode '
-          'GROUP BY bi.id;');
+      result = await db?.rawQuery(
+        'SELECT COUNT(*) as count '
+        'FROM BooruItem AS bi '
+        'WHERE $siteQuery $andStr1 $filterMode '
+        'GROUP BY bi.id;',
+      );
     }
 
     if (result != null && result.isNotEmpty) {
@@ -556,10 +597,18 @@ class DBHandler {
     for (final tag in tags) {
       id = await getTagID(tag.fullString);
       if (id.isEmpty) {
-        final result = await db?.rawInsert('INSERT INTO Tag(name, tagType, updatedAt) VALUES(?,?,?)', [tag.fullString, tag.tagType.name, tag.updatedAt]);
+        final result = await db?.rawInsert('INSERT INTO Tag(name, tagType, updatedAt) VALUES(?,?,?)', [
+          tag.fullString,
+          tag.tagType.name,
+          tag.updatedAt,
+        ]);
         id = result?.toString();
       } else {
-        await db?.rawUpdate('UPDATE Tag SET tagType = ?,updatedAt = ? WHERE id = ?', [tag.tagType.name, tag.updatedAt, id]);
+        await db?.rawUpdate('UPDATE Tag SET tagType = ?,updatedAt = ? WHERE id = ?', [
+          tag.tagType.name,
+          tag.updatedAt,
+          id,
+        ]);
       }
     }
     return;
@@ -579,7 +628,9 @@ class DBHandler {
   /// Get a list of tags from the database based on an input
   Future<List<String>> getTags(String queryStr, int limit) async {
     final List<String> tags = [];
-    final result = await db?.rawQuery('SELECT DISTINCT name FROM Tag WHERE lower(name) LIKE (?) LIMIT $limit', ['${queryStr.toLowerCase()}%']);
+    final result = await db?.rawQuery('SELECT DISTINCT name FROM Tag WHERE lower(name) LIKE (?) LIMIT $limit', [
+      '${queryStr.toLowerCase()}%',
+    ]);
     if (result != null && result.isNotEmpty) {
       for (int i = 0; i < result.length; i++) {
         tags.add(result[i]['name'].toString());
@@ -632,8 +683,10 @@ class DBHandler {
 
     // remove non-favourite duplicates of new entry
     const String notFavouriteQuery = "(isFavourite != '1' OR isFavourite is null)";
-    await db
-        ?.rawDelete('DELETE FROM SearchHistory WHERE searchText=? AND booruType=? AND booruName=? AND $notFavouriteQuery;', [searchText, booruType, booruName]);
+    await db?.rawDelete(
+      'DELETE FROM SearchHistory WHERE searchText=? AND booruType=? AND booruName=? AND $notFavouriteQuery;',
+      [searchText, booruType, booruName],
+    );
 
     final favouriteDuplicates = await db?.rawQuery(
       "SELECT * FROM SearchHistory WHERE searchText=? AND booruType=? AND booruName=? AND isFavourite == '1';",
@@ -641,7 +694,11 @@ class DBHandler {
     );
     if (favouriteDuplicates == null || favouriteDuplicates.isEmpty) {
       // insert new entry only if it wasn't favourited before
-      await db?.rawInsert('INSERT INTO SearchHistory(searchText, booruType, booruName) VALUES(?,?,?)', [searchText, booruType, booruName]);
+      await db?.rawInsert('INSERT INTO SearchHistory(searchText, booruType, booruName) VALUES(?,?,?)', [
+        searchText,
+        booruType,
+        booruName,
+      ]);
     } else {
       // otherwise update the last seartch time
       await db?.rawUpdate(
@@ -693,8 +750,10 @@ class DBHandler {
 
   Future<List<String>> getSearchHistoryByInput(String queryStr, int limit) async {
     final List<String> tags = [];
-    final result =
-        await db?.rawQuery('SELECT DISTINCT searchText FROM SearchHistory WHERE lower(searchText) LIKE (?) LIMIT $limit', ['${queryStr.toLowerCase()}%']);
+    final result = await db?.rawQuery(
+      'SELECT DISTINCT searchText FROM SearchHistory WHERE lower(searchText) LIKE (?) LIMIT $limit',
+      ['${queryStr.toLowerCase()}%'],
+    );
     if (result != null && result.isNotEmpty) {
       for (int i = 0; i < result.length; i++) {
         tags.add(result[i]['searchText'].toString());
@@ -725,7 +784,9 @@ class DBHandler {
     List? result;
 
     // DateTime startTime = DateTime.now();
-    if (item.fileURL.contains('sankakucomplex.com') || item.fileURL.contains('rule34.xxx') || item.fileURL.contains('paheal.net')) {
+    if (item.fileURL.contains('sankakucomplex.com') ||
+        item.fileURL.contains('rule34.xxx') ||
+        item.fileURL.contains('paheal.net')) {
       // compare by post url, not file url (for example: r34xxx changes urls based on country)
       result = await db?.rawQuery('SELECT isFavourite, isSnatched FROM BooruItem WHERE postURL = ?', [item.postURL]);
     } else {
@@ -746,7 +807,9 @@ class DBHandler {
     final List<String> queryParts = [];
     final List<String> queryArgs = [];
     for (final BooruItem item in items) {
-      if (item.fileURL.contains('sankakucomplex.com') || item.fileURL.contains('rule34.xxx') || item.fileURL.contains('paheal.net')) {
+      if (item.fileURL.contains('sankakucomplex.com') ||
+          item.fileURL.contains('rule34.xxx') ||
+          item.fileURL.contains('paheal.net')) {
         // compare by post url, not file url (for example: r34xxx changes urls based on country)
         // TODO merge them by type? i.e. - (postURL in [] OR fileURL in [])
         queryParts.add('postURL = ?');
@@ -758,12 +821,18 @@ class DBHandler {
     }
 
     // DateTime startTime = DateTime.now();
-    final List? result = await db?.rawQuery("SELECT fileURL, postURL, isFavourite, isSnatched FROM BooruItem WHERE ${queryParts.join(' OR ')};", queryArgs);
+    final List? result = await db?.rawQuery(
+      "SELECT fileURL, postURL, isFavourite, isSnatched FROM BooruItem WHERE ${queryParts.join(' OR ')};",
+      queryArgs,
+    );
     // print("Query took ${DateTime.now().difference(startTime).inMilliseconds}ms"); // performance test
 
     if (result != null) {
       for (final BooruItem item in items) {
-        final res = result.firstWhere((el) => el['postURL'].toString() == item.postURL, orElse: () => {'isSnatched': 0, 'isFavourite': 0});
+        final res = result.firstWhere(
+          (el) => el['postURL'].toString() == item.postURL,
+          orElse: () => {'isSnatched': 0, 'isFavourite': 0},
+        );
         values.add([Tools.intToBool(res['isSnatched']), Tools.intToBool(res['isFavourite'])]);
       }
     }
@@ -772,7 +841,9 @@ class DBHandler {
 
   /// Deletes booruItems which are no longer favourited or snatched
   Future<bool> deleteUntracked() async {
-    final result = await db?.rawQuery('SELECT id FROM BooruItem WHERE (isFavourite = 0 OR isFavourite IS NULL) AND (isSnatched = 0 OR isSnatched IS NULL)');
+    final result = await db?.rawQuery(
+      'SELECT id FROM BooruItem WHERE (isFavourite = 0 OR isFavourite IS NULL) AND (isSnatched = 0 OR isSnatched IS NULL)',
+    );
     if (result != null && result.isNotEmpty) {
       await deleteItem(result.map((r) => r['id'].toString()).toList());
     }
@@ -781,7 +852,12 @@ class DBHandler {
 
   /// Deletes a BooruItem and its tags from the database
   Future<void> deleteItem(List<String> itemIDs) async {
-    Logger.Inst().log('DBHandler deleting ${itemIDs.length} items', 'DBHandler', 'deleteItem', LogTypes.booruHandlerInfo);
+    Logger.Inst().log(
+      'DBHandler deleting ${itemIDs.length} items',
+      'DBHandler',
+      'deleteItem',
+      LogTypes.booruHandlerInfo,
+    );
     const int chunkSize = 1000;
     for (int i = 0; i < (itemIDs.length / chunkSize).ceil(); i++) {
       final chunk = itemIDs.sublist(i * chunkSize, min(itemIDs.length, (i + 1) * chunkSize));
@@ -802,7 +878,8 @@ class DBHandler {
 
   Future<void> convertGelbooruFromImg3toImg4(ValueChanged<String>? onStatusUpdate) async {
     // gelbooru moved all images from img3 server to img4
-    final List<Map<String, dynamic>> items = await db?.rawQuery(
+    final List<Map<String, dynamic>> items =
+        await db?.rawQuery(
           "SELECT id, fileURL, sampleURL, thumbnailURL FROM BooruItem WHERE fileURL LIKE '%img3%' OR sampleURL LIKE '%img3%' OR thumbnailURL LIKE '%img3%';",
         ) ??
         [];

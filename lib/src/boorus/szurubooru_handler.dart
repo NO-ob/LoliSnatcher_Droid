@@ -68,7 +68,8 @@ class SzurubooruHandler extends BooruHandler {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'User-Agent': Tools.browserUserAgent,
-      if (booru.apiKey?.isNotEmpty == true) 'Authorization': "Token ${base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))}",
+      if (booru.apiKey?.isNotEmpty == true)
+        'Authorization': "Token ${base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))}",
     };
   }
 

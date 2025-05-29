@@ -76,7 +76,10 @@ class AGNPHHandler extends BooruHandler {
 
   Future<void> getTagsLater(String postID, int fetchedIndex) async {
     try {
-      final response = await DioNetwork.get('${booru.baseURL}/gallery/post/show/$postID/?api=xml', headers: getHeaders());
+      final response = await DioNetwork.get(
+        '${booru.baseURL}/gallery/post/show/$postID/?api=xml',
+        headers: getHeaders(),
+      );
       Logger.Inst().log('Getting post data: $postID', className, 'getTagsLater', LogTypes.booruHandlerRawFetched);
       if (response.statusCode == 200) {
         Logger.Inst().log('Got data for: $postID', className, 'getTagsLater', LogTypes.booruHandlerRawFetched);
@@ -89,7 +92,12 @@ class AGNPHHandler extends BooruHandler {
         }
         fetched.elementAt(fetchedIndex).tagsList = tagStr.split(' ');
       } else {
-        Logger.Inst().log('AGNPHHandler failed to get post', 'AGNPHHandler', 'getTagsLater', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log(
+          'AGNPHHandler failed to get post',
+          'AGNPHHandler',
+          'getTagsLater',
+          LogTypes.booruHandlerFetchFailed,
+        );
       }
     } catch (e, s) {
       Logger.Inst().log(

@@ -24,7 +24,9 @@ class WorldXyzHandler extends BooruHandler {
   List parseListFromResponse(dynamic response) {
     final Map<String, dynamic> parsedResponse = response.data;
     try {
-      totalCount.value = totalCount.value > 0 ? totalCount.value : int.tryParse(parsedResponse['totalCount'] ?? '0') ?? 0;
+      totalCount.value = totalCount.value > 0
+          ? totalCount.value
+          : int.tryParse(parsedResponse['totalCount'] ?? '0') ?? 0;
       cursor = parsedResponse['cursor'] ?? '';
     } catch (_) {}
     return (parsedResponse['items'] ?? []) as List;
@@ -104,7 +106,8 @@ class WorldXyzHandler extends BooruHandler {
     };
 
     final Map<String, dynamic> files = current['files'] ?? {};
-    final List<int> availableFileTypes = files.keys.map((e) => int.tryParse(e) ?? 0).toList()..sort((a, b) => a.compareTo(b));
+    final List<int> availableFileTypes = files.keys.map((e) => int.tryParse(e) ?? 0).toList()
+      ..sort((a, b) => a.compareTo(b));
 
     final String id = current['id'].toString();
     // remove last 3 numbers of the id
@@ -127,7 +130,8 @@ class WorldXyzHandler extends BooruHandler {
       fileURL: fileUrl,
       sampleURL: sampleUrl,
       thumbnailURL: thumbnailUrl,
-      fileHeight: double.tryParse(current['height']?.toString() ?? ''), fileWidth: double.tryParse(current['width']?.toString() ?? ''),
+      fileHeight: double.tryParse(current['height']?.toString() ?? ''),
+      fileWidth: double.tryParse(current['width']?.toString() ?? ''),
       tagsList: [],
       postURL: makePostURL(id),
       serverId: id,
@@ -180,8 +184,12 @@ class WorldXyzHandler extends BooruHandler {
       cursor = '';
     }
 
-    final List<String> includeTags =
-        input.split(' ').where((f) => !f.startsWith('-')).map((tag) => tag.replaceAll(RegExp('_'), ' ')).where((f) => f.isNotEmpty).toList();
+    final List<String> includeTags = input
+        .split(' ')
+        .where((f) => !f.startsWith('-'))
+        .map((tag) => tag.replaceAll(RegExp('_'), ' '))
+        .where((f) => f.isNotEmpty)
+        .toList();
     final List<String> excludeTags = input
         .split(' ')
         .where((f) => f.startsWith('-'))
@@ -287,11 +295,11 @@ class WorldXyzHandler extends BooruHandler {
 
   @override
   Map<String, TagType> get tagTypeMap => {
-        '1': TagType.none,
-        '2': TagType.copyright,
-        '4': TagType.character,
-        '8': TagType.artist,
-      };
+    '1': TagType.none,
+    '2': TagType.copyright,
+    '4': TagType.character,
+    '8': TagType.artist,
+  };
 
   @override
   TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {

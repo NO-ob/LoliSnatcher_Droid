@@ -113,13 +113,16 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   onChanged: (AppMode? newValue) async {
                     bool confirmation = false;
                     if ((Platform.isAndroid || Platform.isIOS) && newValue?.isDesktop == true) {
-                      confirmation = await showDialog<bool>(
+                      confirmation =
+                          await showDialog<bool>(
                             context: context,
                             builder: (BuildContext context) {
                               return const SettingsDialog(
                                 title: Text('App UI mode'),
                                 contentItems: [
-                                  Text('Are you sure you want to use Desktop mode? It may cause problems on Mobile devices and is considered DEPRECATED.'),
+                                  Text(
+                                    'Are you sure you want to use Desktop mode? It may cause problems on Mobile devices and is considered DEPRECATED.',
+                                  ),
                                 ],
                                 actionButtons: [
                                   CancelButton(),
@@ -164,8 +167,12 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                               Text(
                                 '[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.',
                               ),
-                              Text('If you are on android versions below 11 you can remove the appMode line from /LoliSnatcher/config/settings.json'),
-                              Text('If you are on android 11 or higher you will have to wipe app data via system settings'),
+                              Text(
+                                'If you are on android versions below 11 you can remove the appMode line from /LoliSnatcher/config/settings.json',
+                              ),
+                              Text(
+                                'If you are on android 11 or higher you will have to wipe app data via system settings',
+                              ),
                             ],
                           );
                         },
@@ -313,10 +320,14 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                           title: Text('Preview quality'),
                           contentItems: [
                             Text('This setting changes the resolution of images in the preview grid'),
-                            Text(' - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads'),
+                            Text(
+                              ' - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads',
+                            ),
                             Text(' - Thumbnail - Low resolution'),
                             Text(' '),
-                            Text('[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid'),
+                            Text(
+                              '[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid',
+                            ),
                           ],
                         );
                       },
@@ -336,9 +347,9 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   return switch (item) {
                     'Square' => const Icon(Icons.crop_square_outlined),
                     'Rectangle' => Transform.rotate(
-                        angle: pi / 2,
-                        child: const Icon(Icons.crop_16_9),
-                      ),
+                      angle: pi / 2,
+                      child: const Icon(Icons.crop_16_9),
+                    ),
                     'Staggered' => const Icon(Icons.dashboard_outlined),
                     _ => const Icon(null),
                   };
@@ -365,15 +376,16 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                           return switch (item) {
                             'Square' => const Icon(Icons.crop_square_outlined),
                             'Rectangle' => Transform.rotate(
-                                angle: pi / 2,
-                                child: const Icon(Icons.crop_16_9),
-                              ),
+                              angle: pi / 2,
+                              child: const Icon(Icons.crop_16_9),
+                            ),
                             _ => const Icon(null),
                           };
                         },
                         onChanged: (String? newValue) {
                           setState(() {
-                            previewDisplayFallback = newValue ?? settingsHandler.map['previewDisplayFallback']!['default'];
+                            previewDisplayFallback =
+                                newValue ?? settingsHandler.map['previewDisplayFallback']!['default'];
                           });
                         },
                         title: 'Preview display fallback',
@@ -448,7 +460,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 items: settingsHandler.map['scrollGridButtonsPosition']!['options'],
                 onChanged: (String? newValue) {
                   setState(() {
-                    scrollGridButtonsPosition = newValue ?? settingsHandler.map['scrollGridButtonsPosition']!['default'];
+                    scrollGridButtonsPosition =
+                        newValue ?? settingsHandler.map['scrollGridButtonsPosition']!['default'];
                   });
                 },
                 title: 'Scroll previews buttons position',

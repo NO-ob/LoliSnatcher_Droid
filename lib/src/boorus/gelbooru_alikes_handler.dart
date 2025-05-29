@@ -35,12 +35,12 @@ class GelbooruAlikesHandler extends BooruHandler {
 
   @override
   Map<String, TagType> get tagTypeMap => {
-        '5': TagType.meta,
-        '3': TagType.copyright,
-        '4': TagType.character,
-        '1': TagType.artist,
-        '0': TagType.none,
-      };
+    '5': TagType.meta,
+    '3': TagType.copyright,
+    '4': TagType.character,
+    '1': TagType.artist,
+    '0': TagType.none,
+  };
 
   @override
   List parseListFromResponse(dynamic response) {
@@ -75,7 +75,8 @@ class GelbooruAlikesHandler extends BooruHandler {
         final String fileExt = Tools.getFileExt(getAttrOrElem(current, 'file_url')!.toString());
         fileURL = '${booru.baseURL}/images/$directory/$hash.$fileExt';
 
-        final bool isSample = !fileURL.endsWith('.webm') && getAttrOrElem(current, 'sample_url')!.toString().contains('/samples/');
+        final bool isSample =
+            !fileURL.endsWith('.webm') && getAttrOrElem(current, 'sample_url')!.toString().contains('/samples/');
         // String sampleExt = Tools.getFileExt(getAttrOrElem(current, "sample_url")!.toString());
         sampleURL = isSample ? getAttrOrElem(current, 'sample_url')!.toString() : fileURL;
         // sampleURL = "${booru.baseURL}/${isSample ? "samples" : "images"}/$directory/${isSample ? "sample_" : ""}$hash.$sampleExt";
@@ -121,8 +122,8 @@ class GelbooruAlikesHandler extends BooruHandler {
         item.possibleMediaType.value = (tags.contains('gif') || tags.contains('animated_gif'))
             ? MediaType.animation
             : (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
-                ? MediaType.video
-                : null;
+            ? MediaType.video
+            : null;
         item.mediaType.value = MediaType.needToGuess;
       }
 
@@ -290,8 +291,12 @@ class GelbooruAlikesHandler extends BooruHandler {
                       content: content.text.trim(),
                       authorName: header.querySelector('a')?.text.trim(),
                       postID: postID,
-                      score: scoreRegex.hasMatch(headerSecondRowText) ? int.tryParse(scoreRegex.firstMatch(headerSecondRowText)!.group(1)!) : null,
-                      createDate: timeRegex.hasMatch(headerSecondRowText) ? timeRegex.firstMatch(headerSecondRowText)!.group(1)!.trim() : null,
+                      score: scoreRegex.hasMatch(headerSecondRowText)
+                          ? int.tryParse(scoreRegex.firstMatch(headerSecondRowText)!.group(1)!)
+                          : null,
+                      createDate: timeRegex.hasMatch(headerSecondRowText)
+                          ? timeRegex.firstMatch(headerSecondRowText)!.group(1)!.trim()
+                          : null,
                       createDateFormat: 'yyyy-MM-dd HH:mm:ss',
                     ),
                   );
@@ -464,8 +469,9 @@ class GelbooruAlikesHandler extends BooruHandler {
   }
 
   @override
-  String? get metatagsCheatSheetLink =>
-      isR34xxx ? 'https://rule34.xxx/index.php?page=help&topic=cheatsheet' : 'https://gelbooru.com/index.php?page=help&topic=cheatsheet';
+  String? get metatagsCheatSheetLink => isR34xxx
+      ? 'https://rule34.xxx/index.php?page=help&topic=cheatsheet'
+      : 'https://gelbooru.com/index.php?page=help&topic=cheatsheet';
 
   @override
   List<MetaTag> availableMetaTags() {

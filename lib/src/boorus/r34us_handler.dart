@@ -48,10 +48,13 @@ class R34USHandler extends BooruHandler {
       final mediaType = (tags.contains('gif') || tags.contains('animated_gif'))
           ? MediaType.animation
           : tags.contains('video') || (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
-              ? MediaType.video
-              : null;
+          ? MediaType.video
+          : null;
 
-      String fullURL = thumbURL.replaceFirst('thumbnail', 'image').replaceFirst('thumbnail_', '').replaceFirst('.jpg', '.jpeg');
+      String fullURL = thumbURL
+          .replaceFirst('thumbnail', 'image')
+          .replaceFirst('thumbnail_', '')
+          .replaceFirst('.jpg', '.jpeg');
       if (mediaType == MediaType.video) fullURL = fullURL.replaceFirst(RegExp(r'img\d+'), 'video');
 
       final BooruItem item = BooruItem(
@@ -94,7 +97,9 @@ class R34USHandler extends BooruHandler {
         item.sampleURL = div.attributes['src'] ?? div.attributes['poster'] ?? item.sampleURL;
         item.fileHeight = double.tryParse(div.attributes['height'] ?? '');
         item.fileWidth = double.tryParse(div.attributes['width'] ?? '');
-        item.fileAspectRatio = (item.fileWidth != null && item.fileHeight != null) ? item.fileWidth! / item.fileHeight! : null;
+        item.fileAspectRatio = (item.fileWidth != null && item.fileHeight != null)
+            ? item.fileWidth! / item.fileHeight!
+            : null;
         item.fileExt = Tools.getFileExt(item.fileURL);
         item.possibleMediaType.value = null;
         item.mediaType.value = MediaType.fromExtension(item.fileExt);

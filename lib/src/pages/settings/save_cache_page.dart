@@ -28,7 +28,12 @@ class _SaveCachePageState extends State<SaveCachePage> {
   final TextEditingController cacheSizeController = TextEditingController();
 
   late String videoCacheMode, extPathOverride, snatchMode;
-  bool jsonWrite = false, thumbnailCache = true, mediaCache = false, downloadNotifications = true, snatchOnFavourite = false, favouriteOnSnatch = false;
+  bool jsonWrite = false,
+      thumbnailCache = true,
+      mediaCache = false,
+      downloadNotifications = true,
+      snatchOnFavourite = false,
+      favouriteOnSnatch = false;
 
   static const List<_CacheType> cacheTypes = [
     _CacheType('Total', null),
@@ -84,7 +89,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
       cacheStats = [];
     }
 
-    final cacheTypesToGet = folder == null ? cacheTypes : cacheTypes.where((e) => e.folder == folder || e.folder == null).toList();
+    final cacheTypesToGet = folder == null
+        ? cacheTypes
+        : cacheTypes.where((e) => e.folder == folder || e.folder == null).toList();
 
     for (final _CacheType type in cacheTypesToGet) {
       final ReceivePort receivePort = ReceivePort();
@@ -160,7 +167,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
     final int fileCount = stat['fileNum'] ?? 0;
     final bool isEmpty = stat['fileNum'] == 0 || stat['totalSize'] == 0;
     final bool isLoading = stat['type'] == 'loading';
-    final String text = isLoading ? 'Loading...' : (isEmpty ? 'Empty' : '$size in $fileCount ${Tools.pluralize('file', fileCount)}');
+    final String text = isLoading
+        ? 'Loading...'
+        : (isEmpty ? 'Empty' : '$size in $fileCount ${Tools.pluralize('file', fileCount)}');
 
     final bool allowedToClear = folder != null && folder != 'favicons' && !isEmpty;
 
@@ -289,7 +298,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 },
                 enabled: !Platform.isAndroid || extPathOverride.isNotEmpty,
                 title: 'Write image data to JSON on save',
-                subtitle: (!Platform.isAndroid || extPathOverride.isNotEmpty) ? null : const Text('Requires custom storage directory'),
+                subtitle: (!Platform.isAndroid || extPathOverride.isNotEmpty)
+                    ? null
+                    : const Text('Requires custom storage directory'),
               ),
               SettingsButton(
                 name: 'Set storage directory',
@@ -389,12 +400,15 @@ class _SaveCachePageState extends State<SaveCachePage> {
                           title: const Text('Video cache modes'),
                           contentItems: [
                             const Text("- Stream - Don't cache, start playing as soon as possible"),
-                            const Text('- Cache - Saves the file to device storage, plays only when download is complete'),
+                            const Text(
+                              '- Cache - Saves the file to device storage, plays only when download is complete',
+                            ),
                             const Text('- Stream+Cache - Mix of both, but currently leads to double download'),
                             const Text(''),
                             const Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
                             const Text(''),
-                            if (SettingsHandler.isDesktopPlatform) const Text('[Warning]: On desktop Stream mode can work incorrectly for some Boorus.'),
+                            if (SettingsHandler.isDesktopPlatform)
+                              const Text('[Warning]: On desktop Stream mode can work incorrectly for some Boorus.'),
                           ],
                         );
                       },

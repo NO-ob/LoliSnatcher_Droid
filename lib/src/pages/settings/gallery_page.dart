@@ -24,7 +24,12 @@ class _GalleryPageState extends State<GalleryPage> {
       enableHeroTransitions = true,
       disableCustomPageTransitions = false,
       disableVibration = false;
-  late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
+  late String galleryMode,
+      galleryBarPosition,
+      galleryScrollDirection,
+      shareAction,
+      zoomButtonPosition,
+      changePageButtonsPosition;
 
   List<List<String>>? buttonOrder;
 
@@ -234,7 +239,8 @@ class _GalleryPageState extends State<GalleryPage> {
                 items: settingsHandler.map['changePageButtonsPosition']!['options'],
                 onChanged: (String? newValue) {
                   setState(() {
-                    changePageButtonsPosition = newValue ?? settingsHandler.map['changePageButtonsPosition']!['default'];
+                    changePageButtonsPosition =
+                        newValue ?? settingsHandler.map['changePageButtonsPosition']!['default'];
                   });
                 },
                 title: 'Change page buttons position',
@@ -365,7 +371,9 @@ class _GalleryPageState extends State<GalleryPage> {
 
               SettingsDropdown(
                 value: shareAction,
-                items: (settingsHandler.map['shareAction']!['options'] as List<String>).where((element) => hasHydrus || element != 'Hydrus').toList(),
+                items: (settingsHandler.map['shareAction']!['options'] as List<String>)
+                    .where((element) => hasHydrus || element != 'Hydrus')
+                    .toList(),
                 onChanged: (String? newValue) {
                   setState(() {
                     shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
@@ -383,8 +391,12 @@ class _GalleryPageState extends State<GalleryPage> {
                           contentItems: [
                             const Text('- Ask - always ask what to share'),
                             const Text('- Post URL'),
-                            const Text('- File URL - shares direct link to the original file (may not work with some sites)'),
-                            const Text('- File - shares the file itself, may take some time to load, progress will be shown on the Share button'),
+                            const Text(
+                              '- File URL - shares direct link to the original file (may not work with some sites)',
+                            ),
+                            const Text(
+                              '- File - shares the file itself, may take some time to load, progress will be shown on the Share button',
+                            ),
                             if (hasHydrus) const Text('- Hydrus - sends the post url to Hydrus for import'),
                             const Text(''),
                             const Text(
@@ -441,8 +453,8 @@ class _GalleryPageState extends State<GalleryPage> {
                   },
                 ),
               ),
-              //////////////////////////////////////////
 
+              //////////////////////////////////////////
               SettingsToggle(
                 value: useVolumeButtonsForScroll,
                 onChanged: (newValue) {

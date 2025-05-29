@@ -77,14 +77,17 @@ class FlashElements {
       return;
     }
 
-    final BuildContext contextToUse = (context != null && context.mounted) ? context : NavigationHandler.instance.navigatorKey.currentContext!;
+    final BuildContext contextToUse = (context != null && context.mounted)
+        ? context
+        : NavigationHandler.instance.navigatorKey.currentContext!;
     // TODO can this cause an exception? maybe change to WidgetsBinding ?
     final screenSize = MediaQuery.sizeOf(contextToUse);
     // Get theme here instead of inside the dialogs themselves, since the dialog could close after the page is changed
     // therefore causing an exception, because this context is not available anymore
     final ThemeData themeData = Theme.of(contextToUse);
 
-    final bool isDesktop = !ignoreDesktopCheck && (SettingsHandler.instance.appMode.value.isDesktop || SettingsHandler.isDesktopPlatform);
+    final bool isDesktop =
+        !ignoreDesktopCheck && (SettingsHandler.instance.appMode.value.isDesktop || SettingsHandler.isDesktopPlatform);
     final bool isTooWide = screenSize.width > 500;
     final bool isDark = themeData.brightness == Brightness.dark;
 
@@ -119,7 +122,8 @@ class FlashElements {
                   dismissDirections: const [],
                   shadowColor: Colors.black.withValues(alpha: 0.4),
                   elevation: 8,
-                  icon: overrideLeadingIconWidget ??
+                  icon:
+                      overrideLeadingIconWidget ??
                       Padding(
                         padding: const EdgeInsets.all(12),
                         child: Icon(
@@ -129,7 +133,9 @@ class FlashElements {
                         ),
                       ),
                   shouldIconPulse: shouldLeadingPulse,
-                  primaryAction: primaryActionBuilder != null ? primaryActionBuilder(controller) : _defaultPrimaryAction(themeData, controller),
+                  primaryAction: primaryActionBuilder != null
+                      ? primaryActionBuilder(controller)
+                      : _defaultPrimaryAction(themeData, controller),
                   actions: actionsBuilder != null ? actionsBuilder(controller) : null,
                 ),
               ),
@@ -154,27 +160,28 @@ class FlashElements {
             FlashDismissDirection.startToEnd,
             FlashDismissDirection.endToStart,
           ],
-          slideAnimationCreator: (
-            BuildContext context,
-            FlashPosition? position,
-            Animation<double> parent,
-            Curve curve,
-            Curve? reverseCurve,
-          ) {
-            Animatable<Offset> animatable;
-            if (position == FlashPosition.top) {
-              animatable = Tween<Offset>(begin: Offset.zero, end: Offset.zero);
-            } else if (position == FlashPosition.bottom) {
-              animatable = Tween<Offset>(begin: Offset.zero, end: Offset.zero);
-            } else {
-              animatable = Tween<Offset>(begin: Offset.zero, end: Offset.zero);
-            }
-            return CurvedAnimation(
-              parent: parent,
-              curve: curve,
-              reverseCurve: reverseCurve,
-            ).drive(animatable);
-          },
+          slideAnimationCreator:
+              (
+                BuildContext context,
+                FlashPosition? position,
+                Animation<double> parent,
+                Curve curve,
+                Curve? reverseCurve,
+              ) {
+                Animatable<Offset> animatable;
+                if (position == FlashPosition.top) {
+                  animatable = Tween<Offset>(begin: Offset.zero, end: Offset.zero);
+                } else if (position == FlashPosition.bottom) {
+                  animatable = Tween<Offset>(begin: Offset.zero, end: Offset.zero);
+                } else {
+                  animatable = Tween<Offset>(begin: Offset.zero, end: Offset.zero);
+                }
+                return CurvedAnimation(
+                  parent: parent,
+                  curve: curve,
+                  reverseCurve: reverseCurve,
+                ).drive(animatable);
+              },
           child: DefaultTextStyle(
             style: TextStyle(color: themeData.colorScheme.onSurface),
             child: GestureDetector(
@@ -201,7 +208,8 @@ class FlashElements {
                 shadowColor: Colors.black.withValues(alpha: 0.4),
                 elevation: 8,
                 backgroundColor: themeData.colorScheme.surface,
-                icon: overrideLeadingIconWidget ??
+                icon:
+                    overrideLeadingIconWidget ??
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Icon(
@@ -211,7 +219,9 @@ class FlashElements {
                       ),
                     ),
                 shouldIconPulse: shouldLeadingPulse,
-                primaryAction: primaryActionBuilder != null ? primaryActionBuilder(controller) : _defaultPrimaryAction(themeData, controller),
+                primaryAction: primaryActionBuilder != null
+                    ? primaryActionBuilder(controller)
+                    : _defaultPrimaryAction(themeData, controller),
                 actions: actionsBuilder != null ? actionsBuilder(controller) : null,
               ),
             ),

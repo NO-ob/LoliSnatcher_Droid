@@ -48,7 +48,8 @@ class _NotesRendererState extends State<NotesRenderer> {
   CancelToken? cancelToken;
   final List<NoteBuild> notesMap = [];
 
-  bool get currentItemHasNotes => item.fileURL.isNotEmpty && searchHandler.currentBooruHandler.hasNotesSupport && item.hasNotes == true;
+  bool get currentItemHasNotes =>
+      item.fileURL.isNotEmpty && searchHandler.currentBooruHandler.hasNotesSupport && item.hasNotes == true;
 
   @override
   void initState() {
@@ -176,7 +177,8 @@ class _NotesRendererState extends State<NotesRenderer> {
     }
 
     final viewScale = viewerHandler.viewState.value?.scale;
-    screenToImageRatio = viewScale ?? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight));
+    screenToImageRatio =
+        viewScale ?? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight));
 
     final bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
     final bool isUsingCustomAnim = !settingsHandler.disableCustomPageTransitions;
@@ -379,7 +381,8 @@ class _NoteBuildContent extends StatelessWidget {
             color: const Color(0xFFFFF176).withValues(alpha: 0.5),
           ),
         ),
-        child: (width > 30 && height > 30) // don't show if too small
+        child:
+            (width > 30 && height > 30) // don't show if too small
             ? Padding(
                 padding: const EdgeInsets.all(1),
                 child: Text.rich(

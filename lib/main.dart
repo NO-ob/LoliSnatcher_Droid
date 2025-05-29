@@ -482,7 +482,9 @@ class _AppLifecycleOverlayState extends State<AppLifecycleOverlay> with WidgetsB
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     setState(() {
-      _shouldOverlay = widget.shouldOverlay && AppLifecycleState.values.where((s) => s != AppLifecycleState.resumed).any((s) => state == s);
+      _shouldOverlay =
+          widget.shouldOverlay &&
+          AppLifecycleState.values.where((s) => s != AppLifecycleState.resumed).any((s) => state == s);
     });
   }
 

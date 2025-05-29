@@ -154,10 +154,20 @@ class ServiceHandler {
     return result;
   }
 
-  static Future<String?> createFileStreamFromSAFDirectory(String fileName, String mediaType, String fileExt, String savePath) async {
+  static Future<String?> createFileStreamFromSAFDirectory(
+    String fileName,
+    String mediaType,
+    String fileExt,
+    String savePath,
+  ) async {
     String? result;
     try {
-      result = await platform.invokeMethod('createFileStream', {'fileName': fileName, 'mediaType': mediaType, 'fileExt': fileExt, 'savePath': savePath});
+      result = await platform.invokeMethod('createFileStream', {
+        'fileName': fileName,
+        'mediaType': mediaType,
+        'fileExt': fileExt,
+        'savePath': savePath,
+      });
       log('created file $fileName $result');
     } catch (e) {
       log(e);
@@ -235,7 +245,11 @@ class ServiceHandler {
   static Future<bool> copySafFileToDir(String safUri, String fileName, String targetPath) async {
     bool result = false;
     try {
-      result = await platform.invokeMethod('copySafFileToDir', {'uri': safUri, 'fileName': fileName, 'targetPath': targetPath});
+      result = await platform.invokeMethod('copySafFileToDir', {
+        'uri': safUri,
+        'fileName': fileName,
+        'targetPath': targetPath,
+      });
     } catch (e) {
       log(e);
       result = false;
@@ -306,7 +320,8 @@ class ServiceHandler {
     String result = '';
     try {
       if (Platform.isAndroid) {
-        result = "${await platform.invokeMethod("getPicturesPath")}/LoliSnatcher/"; // "${await getExtDir()}/Pictures/LoliSnatcher/";
+        result =
+            "${await platform.invokeMethod("getPicturesPath")}/LoliSnatcher/"; // "${await getExtDir()}/Pictures/LoliSnatcher/";
       } else if (Platform.isLinux) {
         result = '${await getExtDir()}/Pictures/LoliSnatcher/';
       } else if (Platform.isWindows) {

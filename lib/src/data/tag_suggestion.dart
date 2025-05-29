@@ -28,12 +28,11 @@ class TagSuggestion {
     int? count,
     TagType? type,
     Widget? icon,
-  }) =>
-      TagSuggestion(
-        tag: tag ?? this.tag,
-        description: description ?? this.description,
-        count: count ?? this.count,
-        type: type ?? this.type,
-        icon: icon ?? this.icon,
-      );
+  }) => TagSuggestion(
+    tag: tag ?? this.tag,
+    description: description ?? this.description,
+    count: count ?? this.count,
+    type: type ?? this.type,
+    icon: icon ?? this.icon,
+  );
 }

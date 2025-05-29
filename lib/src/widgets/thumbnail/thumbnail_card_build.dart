@@ -51,12 +51,17 @@ class ThumbnailCardBuild extends StatelessWidget {
         child: Obx(() {
           // print('ThumbnailCardBuild obx: $index');
           final bool isSelected = searchHandler.currentSelected.contains(item);
-          final bool isCurrent = (settingsHandler.appMode.value.isDesktop || viewerHandler.inViewer.value) && searchHandler.viewedIndex.value == index;
+          final bool isCurrent =
+              (settingsHandler.appMode.value.isDesktop || viewerHandler.inViewer.value) &&
+              searchHandler.viewedIndex.value == index;
           final bool isCurrentlyBeingSnatched =
-              snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;
+              snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item &&
+              snatchHandler.total.value != 0;
 
           final bool showBorder = isCurrent || isSelected || isCurrentlyBeingSnatched;
-          final Color borderColor = isCurrentlyBeingSnatched ? Colors.transparent : Theme.of(context).colorScheme.secondary;
+          final Color borderColor = isCurrentlyBeingSnatched
+              ? Colors.transparent
+              : Theme.of(context).colorScheme.secondary;
           final double borderRadius = isCurrentlyBeingSnatched ? 10 : 4;
           final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
           final double borderWidth = defaultBorderWidth * (isCurrentlyBeingSnatched ? 3 : 1);

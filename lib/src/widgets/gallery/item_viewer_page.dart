@@ -58,7 +58,9 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
       body: PhotoViewGestureDetectorScope(
         axis: Axis.values,
         child: Dismissible(
-          direction: settingsHandler.galleryScrollDirection == 'Vertical' ? DismissDirection.horizontal : DismissDirection.vertical,
+          direction: settingsHandler.galleryScrollDirection == 'Vertical'
+              ? DismissDirection.horizontal
+              : DismissDirection.vertical,
           key: const Key('viewerPageDismissibleKey'),
           resizeDuration: null,
           dismissThresholds: const {
@@ -212,8 +214,8 @@ class _ItemViewerAppBarState extends State<_ItemViewerAppBar> {
               title: type.isVideo
                   ? const Text('Video')
                   : type.isImageOrAnimation
-                      ? const Text('Image')
-                      : const Text('Viewer'),
+                  ? const Text('Image')
+                  : const Text('Viewer'),
               elevation: 0,
               backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,

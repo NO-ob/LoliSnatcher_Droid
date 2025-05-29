@@ -24,11 +24,14 @@ class GridBuilder extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
 
-    final String previewDisplay = (settingsHandler.previewDisplay == 'Staggered' && !searchHandler.currentBooruHandler.hasSizeData)
+    final String previewDisplay =
+        (settingsHandler.previewDisplay == 'Staggered' && !searchHandler.currentBooruHandler.hasSizeData)
         ? settingsHandler.previewDisplayFallback
         : settingsHandler.previewDisplay;
 
-    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait)
+        ? settingsHandler.portraitColumns
+        : settingsHandler.landscapeColumns;
 
     return ValueListenableBuilder(
       valueListenable: searchHandler.currentTab.booruHandler.filteredFetched,

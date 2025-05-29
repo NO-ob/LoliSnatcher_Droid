@@ -64,7 +64,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     // enable volume buttons if opened page is a video AND appbar is visible
     final BooruItem item = searchHandler.currentFetched[widget.initialIndex];
     final bool isVideo = item.mediaType.value.isVideo;
-    final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
+    final bool isVolumeAllowed =
+        !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
     setVolumeListener();
   }
@@ -127,7 +128,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         // axis: Axis.vertical, // photo_view doesn't support locking both axises, so we use custom fork to fix this
         axis: Axis.values,
         child: Dismissible(
-          direction: settingsHandler.galleryScrollDirection == 'Vertical' ? DismissDirection.horizontal : DismissDirection.vertical,
+          direction: settingsHandler.galleryScrollDirection == 'Vertical'
+              ? DismissDirection.horizontal
+              : DismissDirection.vertical,
           // background: Container(color: Colors.black.withValues(alpha: 0.3)),
           key: const Key('imagePageDismissibleKey'),
           resizeDuration: null, // Duration(milliseconds: 100),
@@ -147,12 +150,14 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
                 // detect only key DOWN events
                 if (event.runtimeType == KeyDownEvent) {
-                  if (event.physicalKey == PhysicalKeyboardKey.arrowLeft || event.physicalKey == PhysicalKeyboardKey.keyH) {
+                  if (event.physicalKey == PhysicalKeyboardKey.arrowLeft ||
+                      event.physicalKey == PhysicalKeyboardKey.keyH) {
                     // prev page on Left Arrow or H
                     if (searchHandler.viewedIndex.value > 0) {
                       controller.jumpToPage(searchHandler.viewedIndex.value - 1);
                     }
-                  } else if (event.physicalKey == PhysicalKeyboardKey.arrowRight || event.physicalKey == PhysicalKeyboardKey.keyL) {
+                  } else if (event.physicalKey == PhysicalKeyboardKey.arrowRight ||
+                      event.physicalKey == PhysicalKeyboardKey.keyL) {
                     // next page on Right Arrow or L
                     if (searchHandler.viewedIndex.value < searchHandler.currentFetched.length - 1) {
                       controller.jumpToPage(searchHandler.viewedIndex.value + 1);
@@ -199,13 +204,18 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                       }
 
                       final int preloadCount = settingsHandler.preloadCount;
-                      final bool isSankaku = [BooruType.Sankaku, BooruType.IdolSankaku].any((t) => t == searchHandler.currentBooru.type);
+                      final bool isSankaku = [
+                        BooruType.Sankaku,
+                        BooruType.IdolSankaku,
+                      ].any((t) => t == searchHandler.currentBooru.type);
 
                       return PreloadPageView.builder(
                         controller: controller,
                         preloadPagesCount: preloadCount,
                         // allowImplicitScrolling: true,
-                        scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
+                        scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical'
+                            ? Axis.vertical
+                            : Axis.horizontal,
                         physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
                         itemCount: searchHandler.currentFetched.length,
                         itemBuilder: (context, index) {
@@ -214,7 +224,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                           final bool isVideo = item.mediaType.value.isVideo;
                           final bool isImage = item.mediaType.value.isImageOrAnimation;
                           final bool isNeedToGuess = item.mediaType.value.isNeedToGuess;
-                          final bool isNeedToLoadItem = item.mediaType.value.isNeedToLoadItem && searchHandler.currentBooruHandler.hasLoadItemSupport;
+                          final bool isNeedToLoadItem =
+                              item.mediaType.value.isNeedToLoadItem &&
+                              searchHandler.currentBooruHandler.hasLoadItemSupport;
                           // print(fileURL);
                           // print('isVideo: '+isVideo.toString());
 
@@ -236,7 +248,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                               item: item,
                               onMediaTypeGuessed: (MediaType mediaType) {
                                 item.mediaType.value = mediaType;
-                                item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
+                                item.possibleMediaType.value = mediaType.isUnknown
+                                    ? item.possibleMediaType.value
+                                    : null;
                                 setState(() {});
                               },
                             );
@@ -254,7 +268,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                               item: item,
                               onMediaTypeGuessed: (MediaType mediaType) {
                                 item.mediaType.value = mediaType;
-                                item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
+                                item.possibleMediaType.value = mediaType.isUnknown
+                                    ? item.possibleMediaType.value
+                                    : null;
                                 setState(() {});
                               },
                             );
@@ -268,7 +284,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                               final int distanceFromCurrent = (viewedIndex - index).abs();
                               // don't render more than 3 videos at once, chance to crash is too high otherwise
                               // disabled video preload for sankaku because their videos cause crashes if loading/rendering(?) more than one at a time
-                              final bool isNear = distanceFromCurrent <= (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
+                              final bool isNear =
+                                  distanceFromCurrent <=
+                                  (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
                               if (!isViewed && !isNear) {
                                 // don't render if out of preload range
                                 return Center(child: Container(color: Colors.black));
@@ -321,7 +339,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
                           // enable volume buttons if new page is a video AND appbar is visible
                           final bool isVideo = item.mediaType.value.isVideo;
-                          final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
+                          final bool isVolumeAllowed =
+                              !settingsHandler.useVolumeButtonsForScroll ||
+                              (isVideo && viewerHandler.displayAppbar.value);
                           ServiceHandler.setVolumeButtons(isVolumeAllowed);
                         },
                       );
@@ -341,8 +361,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         data: Theme.of(context).copyWith(
           // copy existing main app theme, but make background semitransparent
           drawerTheme: Theme.of(context).drawerTheme.copyWith(
-                backgroundColor: Theme.of(context).canvasColor.withValues(alpha: 0.66),
-              ),
+            backgroundColor: Theme.of(context).canvasColor.withValues(alpha: 0.66),
+          ),
         ),
         child: SizedBox(
           width: maxWidth,

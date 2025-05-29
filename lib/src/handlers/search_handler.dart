@@ -171,7 +171,9 @@ class SearchHandler {
       );
 
       final SettingsHandler settingsHandler = SettingsHandler.instance;
-      final String defaultText = currentBooru.defTags?.isNotEmpty == true ? currentBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = currentBooru.defTags?.isNotEmpty == true
+          ? currentBooru.defTags!
+          : settingsHandler.defTags;
       searchTextController.text = defaultText;
 
       final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
@@ -205,7 +207,9 @@ class SearchHandler {
       );
 
       final SettingsHandler settingsHandler = SettingsHandler.instance;
-      final String defaultText = currentBooru.defTags?.isNotEmpty == true ? currentBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = currentBooru.defTags?.isNotEmpty == true
+          ? currentBooru.defTags!
+          : settingsHandler.defTags;
       searchTextController.text = defaultText;
 
       final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
@@ -263,7 +267,8 @@ class SearchHandler {
   }
 
   // grid scroll controller
-  AutoScrollController gridScrollController = AutoScrollController(); // will be overwritten on the first render because there is hasClients check
+  AutoScrollController gridScrollController =
+      AutoScrollController(); // will be overwritten on the first render because there is hasClients check
   RxDouble scrollOffset = 0.0.obs;
   // stream that will notify it's listeners about scroll events of the grid controller
   StreamController<ScrollUpdateNotification>? _scrollStream;
@@ -288,7 +293,8 @@ class SearchHandler {
     }
   }
 
-  List<String> get searchTextControllerTags => searchTextController.text.trim().split(' ').where((t) => t.isNotEmpty).toList();
+  List<String> get searchTextControllerTags =>
+      searchTextController.text.trim().split(' ').where((t) => t.isNotEmpty).toList();
 
   void removeTagFromSearch(String tag) {
     if (tag.isNotEmpty) {
@@ -419,7 +425,9 @@ class SearchHandler {
       }
     }
 
-    final tabsContainingTag = list.where((tab) => tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim()));
+    final tabsContainingTag = list.where(
+      (tab) => tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim()),
+    );
     if (tabsContainingTag.isNotEmpty) {
       return HasTabWithTagResult.containsTag;
     }
@@ -498,7 +506,10 @@ class SearchHandler {
         }
 
         final res = await currentBooruHandler.loadItem(item: item);
-        if (res.failed || res.item == null || res.item!.tagsList.isEmpty || res.item!.mediaType.value.isNeedToLoadItem) {
+        if (res.failed ||
+            res.item == null ||
+            res.item!.tagsList.isEmpty ||
+            res.item!.mediaType.value.isNeedToLoadItem) {
           return item.isFavourite.value;
         }
       }
@@ -624,7 +635,8 @@ class SearchHandler {
 
     // Notify about ratings change on gelbooru and danbooru
     if (text.contains('rating:safe')) {
-      final bool isOnBooruWhereRatingsChanged = (booru.type == BooruType.Gelbooru && booru.baseURL!.contains('gelbooru.com')) ||
+      final bool isOnBooruWhereRatingsChanged =
+          (booru.type == BooruType.Gelbooru && booru.baseURL!.contains('gelbooru.com')) ||
           (booru.type == BooruType.Danbooru && booru.baseURL!.contains('danbooru.donmai.us'));
       if (isOnBooruWhereRatingsChanged) {
         FlashElements.showSnackbar(
@@ -852,8 +864,8 @@ class SearchHandler {
               'Restored ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)} from previous session!',
             ),
             if (foundBrokenItem)
-              // notify user if there was unknown booru or invalid entry in the list
-              ...[
+            // notify user if there was unknown booru or invalid entry in the list
+            ...[
               const Text(
                 'Some restored tabs had unknown boorus or broken characters.',
               ),
@@ -877,7 +889,9 @@ class SearchHandler {
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
-      final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = defaultBooru.defTags?.isNotEmpty == true
+          ? defaultBooru.defTags!
+          : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         final SearchTab newTab = SearchTab(defaultBooru, null, defaultText);
         list.add(newTab);
@@ -1038,7 +1052,9 @@ class SearchHandler {
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
-      final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = defaultBooru.defTags?.isNotEmpty == true
+          ? defaultBooru.defTags!
+          : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         list.add(
           SearchTab(defaultBooru, null, defaultText),
@@ -1061,7 +1077,8 @@ class SearchHandler {
           list.any(
             (tab) =>
                 tab.selectedBooru.value.name == newTab.selectedBooru.value.name &&
-                tab.secondaryBoorus.value?.map((t) => t.name).toList() == newTab.secondaryBoorus.value?.map((t) => t.name).toList() &&
+                tab.secondaryBoorus.value?.map((t) => t.name).toList() ==
+                    newTab.secondaryBoorus.value?.map((t) => t.name).toList() &&
                 tab.tags == newTab.tags,
           )) {
         restoredTabs.add(newTab);
@@ -1120,12 +1137,15 @@ class SearchHandler {
     final List<SearchTab> tabList = list;
     final int tabIndex = currentIndex;
     final bool onlyDefaultTab =
-        tabList.length == 1 && tabList[0].booruHandler.booru.name == settingsHandler.prefBooru && tabList[0].tags == settingsHandler.defTags;
+        tabList.length == 1 &&
+        tabList[0].booruHandler.booru.name == settingsHandler.prefBooru &&
+        tabList[0].tags == settingsHandler.defTags;
     if (!onlyDefaultTab && settingsHandler.booruList.isNotEmpty) {
       final List<String> dump = tabList.map((tab) {
         final String tags = tab.tags;
         final String booruName = tab.selectedBooru.value.name ?? 'unknown';
-        final List<String> secondaryBoorusNames = tab.secondaryBoorus.value?.map((b) => b.name ?? 'unknown').toList() ?? [];
+        final List<String> secondaryBoorusNames =
+            tab.secondaryBoorus.value?.map((b) => b.name ?? 'unknown').toList() ?? [];
         final bool selected = tab == tabList[tabIndex];
 
         return jsonEncode(
@@ -1148,7 +1168,9 @@ class SearchHandler {
     final booruList = SettingsHandler.instance.booruList;
 
     final Booru selectedBooru = booruList.firstWhere((b) => b.name == backup.booru);
-    final List<Booru> secondaryBoorus = backup.secondaryBoorus.map((b) => booruList.firstWhere((booru) => booru.name == b)).toList();
+    final List<Booru> secondaryBoorus = backup.secondaryBoorus
+        .map((b) => booruList.firstWhere((booru) => booru.name == b))
+        .toList();
 
     return SearchTab(
       selectedBooru,
@@ -1174,7 +1196,9 @@ class SearchHandler {
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
-      final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = defaultBooru.defTags?.isNotEmpty == true
+          ? defaultBooru.defTags!
+          : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         final SearchTab newTab = SearchTab(defaultBooru, null, defaultText);
         list.clear();
@@ -1353,7 +1377,10 @@ enum HasTabWithTagResult {
   bool get isOnlyTagDifferentBooru => this == HasTabWithTagResult.onlyTagDifferentBooru;
   bool get isContainsTag => this == HasTabWithTagResult.containsTag;
   bool get isNoTag => this == HasTabWithTagResult.noTag;
-  bool get hasTag => this == HasTabWithTagResult.onlyTag || this == HasTabWithTagResult.onlyTagDifferentBooru || this == HasTabWithTagResult.containsTag;
+  bool get hasTag =>
+      this == HasTabWithTagResult.onlyTag ||
+      this == HasTabWithTagResult.onlyTagDifferentBooru ||
+      this == HasTabWithTagResult.containsTag;
 }
 
 enum TabAddMode {

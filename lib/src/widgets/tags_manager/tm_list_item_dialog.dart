@@ -42,7 +42,9 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final String staleText = DateTime.fromMillisecondsSinceEpoch(widget.tag.updatedAt).add(const Duration(milliseconds: Constants.tagStaleTime)).toString();
+    final String staleText = DateTime.fromMillisecondsSinceEpoch(
+      widget.tag.updatedAt,
+    ).add(const Duration(milliseconds: Constants.tagStaleTime)).toString();
 
     return SettingsDialog(
       contentItems: [

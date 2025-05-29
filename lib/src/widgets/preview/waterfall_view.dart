@@ -119,7 +119,8 @@ class _WaterfallViewState extends State<WaterfallView> {
     });
 
     // check if grid type changed when changing tab
-    final bool newIsStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
+    final bool newIsStaggered =
+        settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
     if (isStaggered != newIsStaggered) {
       isStaggered = newIsStaggered;
       setState(() {});
@@ -149,8 +150,15 @@ class _WaterfallViewState extends State<WaterfallView> {
       // TODO disable when not in focus (i.e. opened settings/drawer), right now if focus is lost, this widget can't regain it
       if (dir != 0 && scrollDone == true) {
         scrollDone = false;
-        final double offset = max(searchHandler.gridScrollController.offset + (settingsHandler.volumeButtonsScrollSpeed * dir), -20);
-        await searchHandler.gridScrollController.animateTo(offset, duration: const Duration(milliseconds: 200), curve: Curves.linear);
+        final double offset = max(
+          searchHandler.gridScrollController.offset + (settingsHandler.volumeButtonsScrollSpeed * dir),
+          -20,
+        );
+        await searchHandler.gridScrollController.animateTo(
+          offset,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+        );
         scrollDone = true;
       }
     }
@@ -168,7 +176,9 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   void jumpTo(int newIndex) {
-    if (!searchHandler.gridScrollController.hasClients || newIndex == -1 || (!viewerHandler.inViewer.value && isMobile)) {
+    if (!searchHandler.gridScrollController.hasClients ||
+        newIndex == -1 ||
+        (!viewerHandler.inViewer.value && isMobile)) {
       return;
     }
 
@@ -186,7 +196,9 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   void afterSearch() {
-    if ((searchHandler.currentFetched.isNotEmpty && searchHandler.currentFetched.length < (settingsHandler.itemLimit + 1)) && !isMobile) {
+    if ((searchHandler.currentFetched.isNotEmpty &&
+            searchHandler.currentFetched.length < (settingsHandler.itemLimit + 1)) &&
+        !isMobile) {
       if (searchHandler.viewedItem.value.fileURL.isEmpty) {
         final BooruItem item = searchHandler.setViewedItem(0);
         viewerHandler.setCurrent(item.key);
@@ -233,7 +245,9 @@ class _WaterfallViewState extends State<WaterfallView> {
           barrierColor: Colors.black26,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return const ZoomPageTransitionsBuilder().buildTransitions(
-              MaterialPageRoute(builder: (_) => const SizedBox.shrink()), // is not used anywhere, but function requires it to get allowSnapshotting from it
+              MaterialPageRoute(
+                builder: (_) => const SizedBox.shrink(),
+              ), // is not used anywhere, but function requires it to get allowSnapshotting from it
               context,
               animation,
               secondaryAnimation,
@@ -285,7 +299,8 @@ class _WaterfallViewState extends State<WaterfallView> {
   @override
   Widget build(BuildContext context) {
     // check if grid type changed when rebuilding the widget (must happen only on start and when saving settings)
-    final bool newIsStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
+    final bool newIsStaggered =
+        settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
     if (isStaggered != newIsStaggered) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         isStaggered = newIsStaggered;
@@ -314,7 +329,9 @@ class _WaterfallViewState extends State<WaterfallView> {
             interactive: true,
             thickness: 8,
             thumbVisibility: true,
-            scrollbarOrientation: settingsHandler.handSide.value.isLeft ? ScrollbarOrientation.left : ScrollbarOrientation.right,
+            scrollbarOrientation: settingsHandler.handSide.value.isLeft
+                ? ScrollbarOrientation.left
+                : ScrollbarOrientation.right,
             child: RefreshIndicator(
               triggerMode: RefreshIndicatorTriggerMode.anywhere,
               displacement: 40,
@@ -331,7 +348,8 @@ class _WaterfallViewState extends State<WaterfallView> {
                     child: ShimmerWrap(
                       enabled: !SettingsHandler.instance.shitDevice,
                       child: Obx(() {
-                        final bool isLoadingAndNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
+                        final bool isLoadingAndNoItems =
+                            searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
 
                         if (isLoadingAndNoItems) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -390,28 +408,35 @@ class _WaterfallViewState extends State<WaterfallView> {
                   ),
                   Positioned(
                     bottom: MediaQuery.viewPaddingOf(context).bottom + 120,
-                    right: settingsHandler.scrollGridButtonsPosition == 'Right' ? MediaQuery.sizeOf(context).width * 0.07 : null,
-                    left: settingsHandler.scrollGridButtonsPosition == 'Left' ? MediaQuery.sizeOf(context).width * 0.07 : null,
+                    right: settingsHandler.scrollGridButtonsPosition == 'Right'
+                        ? MediaQuery.sizeOf(context).width * 0.07
+                        : null,
+                    left: settingsHandler.scrollGridButtonsPosition == 'Left'
+                        ? MediaQuery.sizeOf(context).width * 0.07
+                        : null,
                     child: Obx(() {
-                      final bool isLoadingAndNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
+                      final bool isLoadingAndNoItems =
+                          searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
 
                       return AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
                         child:
-                            (isLoadingAndNoItems || settingsHandler.scrollGridButtonsPosition == 'Disabled' || settingsHandler.appMode.value.isDesktop == true)
-                                ? const SizedBox.shrink()
-                                : WaterfallScrollButtons(
-                                    onTap: (bool forward) {
-                                      if (forward) {
-                                        navigationHandler.floatingHeaderKey.currentState?.hide();
-                                        navigationHandler.bottomBarKey.currentState?.hide();
-                                      } else {
-                                        navigationHandler.floatingHeaderKey.currentState?.show();
-                                        navigationHandler.bottomBarKey.currentState?.show();
-                                      }
-                                      // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
-                                    },
-                                  ),
+                            (isLoadingAndNoItems ||
+                                settingsHandler.scrollGridButtonsPosition == 'Disabled' ||
+                                settingsHandler.appMode.value.isDesktop == true)
+                            ? const SizedBox.shrink()
+                            : WaterfallScrollButtons(
+                                onTap: (bool forward) {
+                                  if (forward) {
+                                    navigationHandler.floatingHeaderKey.currentState?.hide();
+                                    navigationHandler.bottomBarKey.currentState?.hide();
+                                  } else {
+                                    navigationHandler.floatingHeaderKey.currentState?.show();
+                                    navigationHandler.bottomBarKey.currentState?.show();
+                                  }
+                                  // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
+                                },
+                              ),
                       );
                     }),
                   ),
@@ -427,11 +452,15 @@ class _WaterfallViewState extends State<WaterfallView> {
             // print(notif.metrics); // pixels before viewport, in viewport, after viewport
 
             final bool isNotAtStart = notif.metrics.pixels > 0;
-            final bool isAtOrNearEdge = notif.metrics.atEdge ||
+            final bool isAtOrNearEdge =
+                notif.metrics.atEdge ||
                 notif.metrics.pixels >
                     (notif.metrics.maxScrollExtent -
-                        (notif.metrics.extentInside * 2)); // trigger new page when at edge or scroll position is less than 2 viewports
-            final bool isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
+                        (notif.metrics.extentInside *
+                            2)); // trigger new page when at edge or scroll position is less than 2 viewports
+            final bool isScreenFilled =
+                notif.metrics.extentBefore != 0 ||
+                notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
 
             if (!searchHandler.isLoading.value) {
               if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
@@ -471,8 +500,10 @@ class WaterfallScrollButtons extends StatelessWidget {
           scrollController.offset,
         ),
       );
-      final bool closestEdgeIsTop = scrollController.offset < scrollController.position.maxScrollExtent - scrollController.offset;
-      if (leftTillClosestEdge < viewportHeight / 2 && ((forward && !closestEdgeIsTop) || (!forward && closestEdgeIsTop))) {
+      final bool closestEdgeIsTop =
+          scrollController.offset < scrollController.position.maxScrollExtent - scrollController.offset;
+      if (leftTillClosestEdge < viewportHeight / 2 &&
+          ((forward && !closestEdgeIsTop) || (!forward && closestEdgeIsTop))) {
         nextOffset = (forward ? 1 : -1) * (leftTillClosestEdge * 1.2);
       } else {
         nextOffset = (scrollController.position.viewportDimension * 0.9) * (forward ? 1 : -1);
