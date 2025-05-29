@@ -512,7 +512,7 @@ class ImageViewerState extends State<ImageViewer> {
                                     loadingBuilder: (context, event) {
                                       return const SizedBox.shrink();
                                     },
-                                    errorBuilder: (_, error, __) {
+                                    errorBuilder: (_, error, _) {
                                       WidgetsBinding.instance.addPostFrameCallback((_) {
                                         onError(error);
                                       });

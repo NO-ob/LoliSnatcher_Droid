@@ -267,7 +267,7 @@ class MainDrawer extends StatelessWidget {
                     }),
                     ValueListenableBuilder(
                       valueListenable: LocalAuthHandler.instance.deviceSupportsBiometrics,
-                      builder: (_, deviceSupportsBiometrics, __) => ValueListenableBuilder(
+                      builder: (_, deviceSupportsBiometrics, _) => ValueListenableBuilder(
                         valueListenable: SettingsHandler.instance.useLockscreen,
                         builder: (_, useLockscreen, child) {
                           if (deviceSupportsBiometrics && useLockscreen) {

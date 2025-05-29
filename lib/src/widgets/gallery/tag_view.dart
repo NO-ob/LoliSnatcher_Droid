@@ -1401,7 +1401,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                             onTap: () {
                                               Navigator.of(context).push(
                                                 PageRouteBuilder(
-                                                  pageBuilder: (_, __, ___) => ItemViewerPage(
+                                                  pageBuilder: (_, _, _) => ItemViewerPage(
                                                     item: preview!.booruHandler.filteredFetched[index],
                                                     booru: preview!.booruHandler.booru,
                                                   ),

@@ -1563,7 +1563,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                       const SizedBox(width: 10),
                       ValueListenableBuilder(
                         valueListenable: suggestionTextController,
-                        builder: (context, _, __) {
+                        builder: (context, _, _) {
                           return ElevatedButton(
                             onPressed: suggestionTextControllerRawInput.isEmpty
                                 ? onSearchTap
@@ -1819,7 +1819,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
         isDialog: false,
         child: ValueListenableBuilder(
           valueListenable: suggestionTextFocusNodeHasFocus,
-          builder: (context, suggestionTextFocusNodeHasFocus, __) => Column(
+          builder: (context, suggestionTextFocusNodeHasFocus, _) => Column(
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),

@@ -239,7 +239,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
       await Navigator.of(context).push(
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => GalleryViewPage(index),
+          pageBuilder: (_, _, _) => GalleryViewPage(index),
           opaque: false,
           transitionDuration: const Duration(milliseconds: 300),
           barrierColor: Colors.black26,

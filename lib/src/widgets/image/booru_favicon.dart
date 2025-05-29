@@ -221,7 +221,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
               fit: BoxFit.fill,
               filterQuality: FilterQuality.medium,
               isAntiAlias: true,
-              errorBuilder: (_, Object exception, ___) {
+              errorBuilder: (_, _, _) {
                 return FaviconError(
                   iconSize: size,
                   color: widget.color ?? Theme.of(context).colorScheme.onSurface,

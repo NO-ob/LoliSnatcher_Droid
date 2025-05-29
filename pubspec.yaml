@@ -45,7 +45,7 @@ dependencies:
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
   font_awesome_flutter: ^10.8.0
   fpdart: ^1.1.1
-  fvp: ^0.31.2
+  fvp: ^0.32.0
   get_it: ^8.0.3
   get: ^5.0.0-release-candidate-9.3.2 # ^4.7.2
   google_fonts: ^6.2.1
@@ -109,7 +109,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.14.3
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 
 

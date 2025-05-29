@@ -1192,7 +1192,7 @@ class _PlaybackSpeedDialogState extends State<_PlaybackSpeedDialog> {
             const SizedBox(height: 12),
             ValueListenableBuilder(
               valueListenable: selectedIndex,
-              builder: (context, _, __) {
+              builder: (context, _, _) {
                 return SizedBox(
                   height: 50,
                   child: PageView.builder(
