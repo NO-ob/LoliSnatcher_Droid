@@ -124,7 +124,8 @@ class ImageViewerState extends State<ImageViewer> {
     super.initState();
     viewerHandler.addViewed(widget.key);
 
-    isViewed.value = widget.isStandalone ||
+    isViewed.value =
+        widget.isStandalone ||
         (settingsHandler.appMode.value.isMobile
             ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
             : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
@@ -405,7 +406,10 @@ class ImageViewerState extends State<ImageViewer> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Thumbnail(item: widget.booruItem),
+                Thumbnail(
+                  item: widget.booruItem,
+                  isStandalone: false,
+                ),
                 //
                 ValueListenableBuilder(
                   valueListenable: isLoaded,

@@ -113,15 +113,18 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
 
     // return buildElement(context);
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.linear,
-      opacity: showLoading ? 1 : 0,
-      onEnd: () {
-        isVisible = showLoading;
-        updateState();
-      },
-      child: buildElement(context),
+    return Material(
+      color: Colors.transparent,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.linear,
+        opacity: showLoading ? 1 : 0,
+        onEnd: () {
+          isVisible = showLoading;
+          updateState();
+        },
+        child: buildElement(context),
+      ),
     );
   }
 
@@ -159,7 +162,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
                 const BorderedText(
                   strokeWidth: 2,
                   child: Text(
-                    'Tap to retry!',
+                    'Tap to retry',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.white,

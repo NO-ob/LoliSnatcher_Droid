@@ -946,11 +946,14 @@ class SettingsHandler {
     return true;
   }
 
-  Future<bool> loadDatabase() async {
+  Future<bool> loadDatabase(ValueChanged<String> onStatusUpdate) async {
     try {
       if (!Tools.isTestMode) {
         if (dbEnabled) {
-          await dbHandler.dbConnect(path);
+          await dbHandler.dbConnect(
+            path,
+            onStatusUpdate: onStatusUpdate,
+          );
         } else {
           dbHandler = DBHandler();
         }
@@ -2296,7 +2299,9 @@ class SettingsHandler {
       }
 
       postInitMessage.value = 'Loading Database...';
-      await loadDatabase();
+      await loadDatabase((newStatus) {
+        postInitMessage.value = 'Fixing data in the database...\nThis may take some time\n$newStatus';
+      });
       await indexDatabase();
       if (booruList.isEmpty) {
         postInitMessage.value = 'Loading Boorus...';

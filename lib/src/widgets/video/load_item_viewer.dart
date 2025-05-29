@@ -85,7 +85,10 @@ class _LoadItemViewerState extends State<LoadItemViewer> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Thumbnail(item: widget.item),
+          Thumbnail(
+            item: widget.item,
+            isStandalone: false,
+          ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             margin: const EdgeInsets.all(16),

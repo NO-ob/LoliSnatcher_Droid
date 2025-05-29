@@ -281,7 +281,7 @@ class ThemeHandler {
         contentTextStyle: TextStyle(color: Colors.white),
       );
 
-  CardTheme cardTheme(ColorScheme colorScheme) => CardTheme(
+  CardThemeData cardTheme(ColorScheme colorScheme) => CardThemeData(
         color: colorScheme.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -403,7 +403,7 @@ class ThemeHandler {
         endShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
       );
 
-  TabBarTheme tabBarTheme(ColorScheme colorScheme) => TabBarTheme(
+  TabBarThemeData tabBarTheme(ColorScheme colorScheme) => TabBarThemeData(
         labelColor: colorScheme.secondary,
         unselectedLabelColor: isDark ? Colors.grey[300]! : Colors.grey[900]!,
         labelStyle: const TextStyle(fontWeight: FontWeight.w600),

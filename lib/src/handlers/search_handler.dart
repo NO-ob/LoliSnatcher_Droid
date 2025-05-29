@@ -786,7 +786,7 @@ class SearchHandler {
 
   // bool to notify the main build that tab restoratiuon is complete
   RxBool isRestored = false.obs;
-  RxBool canBackup = true.obs;
+  RxBool canBackup = false.obs;
 
   // keeps track of the last time tabs were backupped
   DateTime lastBackupTime = DateTime.now();
@@ -1183,6 +1183,9 @@ class SearchHandler {
       }
       searchTextController.text = defaultText;
     }
+
+    // allow backup only after restoring to avoid long operations (i.e. database fixes) delaying restore and therefore causing backup to run before tabs were restored
+    canBackup.value = true;
   }
 
   void mergeTabs(String tabStr) {

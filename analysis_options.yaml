@@ -17,9 +17,13 @@ analyzer:
   exclude:
     - lib/generated_plugin_registrant.dart
 
+formatter:
+  page_width: 120
+  trailing_commas: preserve
+
 linter:
   rules:
-    # TODO some are set to false, because right now they are not useful, but could be later
+    # TODO some are set to false, but could be useful later
     always_declare_return_types: true
     always_put_required_named_parameters_first: true
     always_use_package_imports: true
@@ -74,8 +78,8 @@ linter:
     exhaustive_cases: true
     file_names: true
     hash_and_equals: true
-    implicit_call_tearoffs: true
     implementation_imports: true
+    implicit_call_tearoffs: true
     implicit_reopen: true
     invalid_case_patterns: true
     join_return_with_assignment: true
@@ -151,8 +155,8 @@ linter:
     type_init_formals: true
     unawaited_futures: true
     unnecessary_await_in_return: true
-    # unnecessary_breaks: true # fluter/dart doesn't have case fallthrough in switches after dart 3.0
     unnecessary_brace_in_string_interps: true
+    unnecessary_breaks: false # fluter/dart doesn't have case fallthrough in switches after dart 3.0
     unnecessary_const: true
     unnecessary_constructor_name: true
     unnecessary_getters_setters: true

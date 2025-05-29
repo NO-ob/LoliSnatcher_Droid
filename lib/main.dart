@@ -11,8 +11,8 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
+import 'package:lemberfpsmonitor/lemberfpsmonitor.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:statsfl/statsfl.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -262,11 +262,10 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
       builder: (context, maxFps, child) {
         return Obx(
           () {
-            return StatsFl(
-              isEnabled: settingsHandler.showFps.value,
-              width: 400,
-              height: 50,
-              maxFps: maxFps,
+            return FPSMonitor(
+              showFPSChart: settingsHandler.showFps.value,
+              maxFPS: maxFps,
+              onFPSChanged: (_) {},
               showText: true,
               sampleTime: .2,
               totalTime: 10,

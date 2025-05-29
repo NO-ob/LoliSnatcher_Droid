@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:sqflite/sqflite.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -26,7 +28,10 @@ class DBHandler {
   Database? db;
 
   /// Connects to the database file and create the database if the tables dont exist
-  Future<bool> dbConnect(String path) async {
+  Future<bool> dbConnect(
+    String path, {
+    ValueChanged<String>? onStatusUpdate,
+  }) async {
     // await Sqflite.devSetDebugModeOn(true);
     if (Platform.isAndroid || Platform.isIOS) {
       db = await openDatabase('${path}store.db', version: 1, singleInstance: false);
@@ -34,6 +39,7 @@ class DBHandler {
       db = await databaseFactory.openDatabase('${path}store.db');
     }
     await updateTable();
+    await fixBooruItems(onStatusUpdate);
     await deleteUntracked();
     return true;
   }
@@ -163,6 +169,7 @@ class DBHandler {
   }
 
   Future<Map<String, int>> updateMultipleBooruItems(List<BooruItem> items, BooruUpdateMode mode) async {
+    // TODO rewrite using batch
     final List<String> itemIDs = await getItemIDs(items.map((item) => item.postURL).toList());
 
     int saved = 0, exist = 0;
@@ -531,6 +538,7 @@ class DBHandler {
       return;
     }
     String? id = '';
+    // TODO rewrite using batch
     for (final tag in tags) {
       id = await getTagID(tag);
       if (id.isEmpty) {
@@ -544,6 +552,7 @@ class DBHandler {
   /// Adds tags for a BooruItem to the database
   Future<void> updateTagsFromObjects(List<Tag> tags) async {
     String? id = '';
+    // TODO rewrite using batch
     for (final tag in tags) {
       id = await getTagID(tag.fullString);
       if (id.isEmpty) {
@@ -558,6 +567,7 @@ class DBHandler {
 
   /// Gets a tag id from the database
   Future<String> getTagID(String tagName) async {
+    // TODO rewrite using batch
     final result = await db?.rawQuery('SELECT id FROM Tag WHERE name IN (?)', [tagName]);
     if (result != null && result.isNotEmpty) {
       return result.first['id'].toString();
@@ -747,19 +757,6 @@ class DBHandler {
       }
     }
 
-    // DEBUG output query string
-    // String query = "SELECT fileURL, postURL, isFavourite, isSnatched FROM BooruItem WHERE ";
-    // for (int i = 0; i < queryParts.length; i++) {
-    //   query += queryParts[i].replaceFirst('?', "'${queryArgs[i]}'");
-    //   if (i < queryParts.length - 1) {
-    //     query += " OR ";
-    //   }
-    // }
-    // // split string into chunks of 1000, otherwise console could slice off the last part
-    // for(int i = 0; i < (query.length / 1000).ceil(); i++) {
-    //   print(query.substring(i * 1000, min(query.length, (i + 1) * 1000)));
-    // }
-
     // DateTime startTime = DateTime.now();
     final List? result = await db?.rawQuery("SELECT fileURL, postURL, isFavourite, isSnatched FROM BooruItem WHERE ${queryParts.join(' OR ')};", queryArgs);
     // print("Query took ${DateTime.now().difference(startTime).inMilliseconds}ms"); // performance test
@@ -785,12 +782,46 @@ class DBHandler {
   /// Deletes a BooruItem and its tags from the database
   Future<void> deleteItem(List<String> itemIDs) async {
     Logger.Inst().log('DBHandler deleting ${itemIDs.length} items', 'DBHandler', 'deleteItem', LogTypes.booruHandlerInfo);
-    const int chunkSize = 900;
+    const int chunkSize = 1000;
     for (int i = 0; i < (itemIDs.length / chunkSize).ceil(); i++) {
       final chunk = itemIDs.sublist(i * chunkSize, min(itemIDs.length, (i + 1) * chunkSize));
-      final String questionMarks = List.generate(chunk.length, (_) => '?').join(',');
-      await db?.rawDelete('DELETE FROM BooruItem WHERE id IN ($questionMarks)', chunk);
-      await db?.rawDelete('DELETE FROM ImageTag WHERE booruItemID IN ($questionMarks)', chunk);
+      final batch = db?.batch();
+      for (final id in chunk) {
+        batch?.rawDelete('DELETE FROM BooruItem WHERE id = ?', [id]);
+        batch?.rawDelete('DELETE FROM ImageTag WHERE booruItemID = ?', [id]);
+      }
+      await batch?.commit(noResult: true);
+    }
+  }
+
+  //
+
+  Future<void> fixBooruItems(ValueChanged<String>? onStatusUpdate) async {
+    await convertGelbooruFromImg3toImg4(onStatusUpdate);
+  }
+
+  Future<void> convertGelbooruFromImg3toImg4(ValueChanged<String>? onStatusUpdate) async {
+    // gelbooru moved all images from img3 server to img4
+    final List<Map<String, dynamic>> items = await db?.rawQuery(
+          "SELECT id, fileURL, sampleURL, thumbnailURL FROM BooruItem WHERE fileURL LIKE '%img3%' OR sampleURL LIKE '%img3%' OR thumbnailURL LIKE '%img3%';",
+        ) ??
+        [];
+
+    const int chunkSize = 1000;
+    for (int i = 0; i < (items.length / chunkSize).ceil(); i++) {
+      final batch = db?.batch();
+      final chunk = items.sublist(i * chunkSize, min(items.length, (i + 1) * chunkSize));
+      onStatusUpdate?.call('Gelbooru: ${i * chunkSize}/${items.length}');
+      for (final Map<String, dynamic> item in chunk) {
+        final String newFileURL = item['fileURL'].toString().replaceFirst('img3', 'img4');
+        final String newSampleURL = item['sampleURL'].toString().replaceFirst('img3', 'img4');
+        final String newThumbnailURL = item['thumbnailURL'].toString().replaceFirst('img3', 'img4');
+        batch?.rawUpdate(
+          'UPDATE BooruItem SET fileURL = ?, sampleURL = ?, thumbnailURL = ? WHERE id = ?;',
+          [newFileURL, newSampleURL, newThumbnailURL, item['id']],
+        );
+      }
+      await batch?.commit(noResult: true);
     }
   }
 }

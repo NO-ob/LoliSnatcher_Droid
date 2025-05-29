@@ -16,12 +16,12 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   Map<String, TagType> get tagTypeMap => {
-        '5': TagType.meta,
-        '3': TagType.copyright,
-        '4': TagType.character,
-        '1': TagType.artist,
-        '0': TagType.none,
-      };
+    '5': TagType.meta,
+    '3': TagType.copyright,
+    '4': TagType.character,
+    '1': TagType.artist,
+    '0': TagType.none,
+  };
 
   @override
   bool get hasSizeData => true;
@@ -75,7 +75,9 @@ class DanbooruHandler extends BooruHandler {
       headers: headers,
       queryParameters: queryParams,
       options: fetchSearchOptions(),
-      customInterceptor: withCaptchaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Tools.appUserAgent) : null,
+      customInterceptor: withCaptchaCheck
+          ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Tools.appUserAgent)
+          : null,
     );
   }
 
@@ -116,7 +118,10 @@ class DanbooruHandler extends BooruHandler {
         );
 
         final bool isZip = current['file_url'].toString().endsWith('.zip');
-        final String? dateStr = current['created_at']?.toString().substring(0, current['created_at']!.toString().length - 6);
+        final String? dateStr = current['created_at']?.toString().substring(
+          0,
+          current['created_at']!.toString().length - 6,
+        );
         final BooruItem item = BooruItem(
           fileURL: isZip ? current['large_file_url'].toString() : current['file_url'].toString(),
           sampleURL: current['large_file_url'].toString(),
@@ -208,9 +213,9 @@ class DanbooruHandler extends BooruHandler {
   @override
   CommentItem? parseComment(dynamic responseItem, int index) {
     final String? dateStr = responseItem['created_at']?.toString().substring(
-          0,
-          responseItem['created_at']!.toString().length - 6,
-        );
+      0,
+      responseItem['created_at']!.toString().length - 6,
+    );
     return CommentItem(
       id: responseItem['id'].toString(),
       title: responseItem['post_id'].toString(),

@@ -73,12 +73,6 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   Future<ImageProvider> getImageProvider(bool isMain) async {
-    // if(widget.item.isHated.value) {
-    //   // pixelate hated images
-    //   // flutter 3.3 broke image pixelazation from very small width memoryimage
-    //   return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: 10);
-    // }
-
     if (isMain) {
       mainCancelToken ??= CancelToken();
     } else {
@@ -120,15 +114,15 @@ class _ThumbnailState extends State<Thumbnail> {
             },
           );
 
-    // return empty image if no size rectrictions were calculated (propably happens because widget is not mounted)
-    if (settingsHandler.disableImageScaling || (thumbWidth == null && thumbHeight == null)) {
+    if (thumbWidth == null && thumbHeight == null) {
       return provider;
     }
 
     return ResizeImage(
       provider,
       width: thumbWidth?.round(),
-      height: thumbWidth == null ? thumbHeight?.round() : null,
+      height: thumbHeight?.round(),
+      policy: ResizeImagePolicy.fit,
       allowUpscaling: false,
     );
   }
@@ -138,38 +132,45 @@ class _ThumbnailState extends State<Thumbnail> {
       return;
     }
 
-    final double widthLimit = constraints.maxWidth * MediaQuery.devicePixelRatioOf(context) * 1;
+    final double widthLimit = constraints.maxWidth * MediaQuery.devicePixelRatioOf(context);
     double thumbRatio = 1;
     final bool hasSizeData = widget.item.fileHeight != null && widget.item.fileWidth != null;
 
-    if (widget.isStandalone) {
+    if (!widget.isStandalone) {
       thumbWidth = widthLimit;
-    } else {
-      switch (settingsHandler.previewDisplay) {
-        case 'Rectangle':
-        case 'Staggered':
-          // thumbRatio = 16 / 9;
-          if (hasSizeData) {
-            // if api gives size data
-            thumbRatio = widget.item.fileAspectRatio!;
-            if (thumbRatio < 1) {
-              // vertical image - resize to width
-              thumbWidth = widthLimit;
-            } else {
-              // horizontal image - resize to height
-              thumbHeight = widthLimit * thumbRatio;
-            }
-          } else {
-            thumbWidth = widthLimit;
-          }
-          break;
+      return;
+    }
 
-        case 'Square':
-        default:
-          // otherwise resize to widthLimit
+    switch (settingsHandler.previewDisplay) {
+      case 'Rectangle':
+        thumbRatio = 16 / 9;
+        thumbWidth = widthLimit;
+        thumbHeight = widthLimit * thumbRatio;
+        break;
+
+      case 'Staggered':
+        if (hasSizeData) {
+          // if api gives size data
+          thumbRatio = widget.item.fileAspectRatio!;
+          if (thumbRatio < 1) {
+            // vertical image - resize to width
+            thumbWidth = widthLimit;
+          } else {
+            // horizontal image - resize to height
+            thumbHeight = widthLimit * thumbRatio;
+          }
+        } else {
+          thumbRatio = 16 / 9;
           thumbWidth = widthLimit;
-          break;
-      }
+          thumbHeight = widthLimit * thumbRatio;
+        }
+        break;
+
+      case 'Square':
+      default:
+        thumbWidth = widthLimit;
+        thumbHeight = widthLimit;
+        break;
     }
 
     // print('thumbWidth: $thumbWidth thumbHeight: $thumbHeight');
@@ -210,17 +211,22 @@ class _ThumbnailState extends State<Thumbnail> {
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
+    final bool isSampleGif = widget.item.sampleURL.contains('.gif');
     final bool isGifSampleNotAllowed =
-        widget.item.mediaType.value.isAnimation && ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated : true);
+        widget.item.mediaType.value.isAnimation &&
+        ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated : true);
 
-    isThumbQuality = settingsHandler.previewMode == 'Thumbnail' ||
+    isThumbQuality =
+        settingsHandler.previewMode == 'Thumbnail' ||
         (isGifSampleNotAllowed ||
             widget.item.mediaType.value.isVideo ||
             widget.item.mediaType.value.isNeedToGuess ||
             widget.item.mediaType.value.isNeedToLoadItem) ||
         (!widget.isStandalone && widget.item.fileURL == widget.item.sampleURL);
-    thumbURL = isThumbQuality == true ? widget.item.thumbnailURL : widget.item.sampleURL;
-    thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
+    thumbURL = isThumbQuality == true
+        ? widget.item.thumbnailURL
+        : (!isSampleGif || isGifSampleNotAllowed ? widget.item.sampleURL : widget.item.thumbnailURL);
+    thumbFolder = (isThumbQuality == true || thumbURL == widget.item.thumbnailURL) ? 'thumbnails' : 'samples';
 
     // delay loading a little to improve performance when scrolling fast, ignore delay if it's a standalone widget (i.e. not in a list)
     debounceLoading = Timer(
@@ -308,12 +314,16 @@ class _ThumbnailState extends State<Thumbnail> {
   Future<void> cleanProviderCache() async {
     if (mainProvider.value != null) {
       final CustomNetworkImage usedMainProvider =
-          (mainProvider.value is ResizeImage ? (mainProvider.value! as ResizeImage).imageProvider : mainProvider.value!) as CustomNetworkImage;
+          (mainProvider.value is ResizeImage ? (mainProvider.value! as ResizeImage).imageProvider : mainProvider.value!)
+              as CustomNetworkImage;
       await usedMainProvider.deleteCacheFile();
     }
     if (extraProvider.value != null) {
       final CustomNetworkImage usedExtraProvider =
-          (extraProvider.value is ResizeImage ? (extraProvider.value! as ResizeImage).imageProvider : extraProvider.value!) as CustomNetworkImage;
+          (extraProvider.value is ResizeImage
+                  ? (extraProvider.value! as ResizeImage).imageProvider
+                  : extraProvider.value!)
+              as CustomNetworkImage;
       await usedExtraProvider.deleteCacheFile();
     }
   }
@@ -367,13 +377,24 @@ class _ThumbnailState extends State<Thumbnail> {
         });
 
         // take smallest dimension for hated icon container
-        final double iconSize = (constraints.maxHeight < constraints.maxWidth ? constraints.maxHeight : constraints.maxWidth) * 0.75;
+        final double iconSize =
+            (constraints.maxHeight < constraints.maxWidth ? constraints.maxHeight : constraints.maxWidth) * 0.75;
 
         final bool useExtra = isThumbQuality == false && !widget.item.isHated;
 
         return Stack(
           alignment: Alignment.center,
           children: [
+            ValueListenableBuilder(
+              valueListenable: isFailed,
+              builder: (context, isFailed, _) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  color: isFailed ? Colors.red.withValues(alpha: 0.1) : Colors.transparent,
+                );
+              },
+            ),
+            //
             if (useExtra) // fetch small low quality thumbnail while loading a sample
               ValueListenableBuilder(
                 valueListenable: isLoadedExtra,
@@ -405,6 +426,7 @@ class _ThumbnailState extends State<Thumbnail> {
                           image: extraProvider,
                           fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                           isAntiAlias: true,
+                          filterQuality: FilterQuality.medium,
                           width: double.infinity,
                           height: double.infinity,
                           errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {

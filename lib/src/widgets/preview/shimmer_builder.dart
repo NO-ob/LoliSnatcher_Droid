@@ -121,11 +121,31 @@ class Shimmer extends StatefulWidget {
 class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
 
+  int activeChildren = 0;
+
   @override
   void initState() {
     super.initState();
 
     _shimmerController = AnimationController.unbounded(vsync: this)..repeat(min: -0.5, max: 1.5, period: const Duration(milliseconds: 1000));
+  }
+
+  void activateChild() {
+    activeChildren++;
+    if (!_shimmerController.isAnimating) {
+      _shimmerController.repeat(min: -0.5, max: 1.5, period: const Duration(milliseconds: 1000));
+    }
+  }
+
+  void deactivateChild() {
+    if (activeChildren <= 0) {
+      return;
+    }
+
+    activeChildren--;
+    if (activeChildren <= 0) {
+      _shimmerController.stop();
+    }
   }
 
   @override
@@ -158,8 +178,12 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
     required RenderBox descendant,
     Offset offset = Offset.zero,
   }) {
-    final shimmerBox = context.findRenderObject() as RenderBox?;
-    return descendant.localToGlobal(offset, ancestor: shimmerBox);
+    try {
+      final shimmerBox = context.findRenderObject() as RenderBox?;
+      return descendant.localToGlobal(offset, ancestor: shimmerBox);
+    } catch (_) {
+      return Offset.zero;
+    }
   }
 
   Listenable get shimmerChanges => _shimmerController;
@@ -201,63 +225,85 @@ class ShimmerLoading extends StatefulWidget {
 
 class _ShimmerLoadingState extends State<ShimmerLoading> {
   Listenable? _shimmerChanges;
+  final ValueNotifier<int> _shimmerUpdateIndex = ValueNotifier(0);
+
+  ShimmerState? _shimmerState;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final bool isChanged = _shimmerState != Shimmer.of(context);
+    _shimmerState = Shimmer.of(context);
     _shimmerChanges?.removeListener(_onShimmerChange);
-    _shimmerChanges = Shimmer.of(context)?.shimmerChanges;
+    _shimmerChanges = _shimmerState?.shimmerChanges;
     _shimmerChanges?.addListener(_onShimmerChange);
+    _shimmerState?.activateChild();
+
+    if (isChanged && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {});
+      });
+    }
   }
 
   @override
   void dispose() {
+    _shimmerState?.deactivateChild();
     _shimmerChanges?.removeListener(_onShimmerChange);
     super.dispose();
   }
 
   void _onShimmerChange() {
+    final prevIsLoading = widget.isLoading;
     if (widget.isLoading) {
-      setState(() {
-        // update the shimmer painting.
+      // update the shimmer painting.
+      if (_shimmerUpdateIndex.value == 100_000) {
+        _shimmerUpdateIndex.value = 0;
+      } else {
+        _shimmerUpdateIndex.value++;
+      }
+    }
+
+    if (prevIsLoading != widget.isLoading && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {});
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // if (!widget.isLoading) {
-    //   return widget.child;
-    // }
-
-    // Collect ancestor shimmer info.
-    final shimmer = Shimmer.of(context);
-    final RenderObject? renderObj = context.findRenderObject();
-    if (shimmer == null || !shimmer.isSized || renderObj == null) {
-      // The ancestor Shimmer widget has not laid
-      // itself out yet. Return an empty box.
-      return const SizedBox.shrink();
-    }
-    final shimmerSize = shimmer.size;
-    final gradient = shimmer.gradient;
-    // TODO exception here after new page loads
-    final offsetWithinShimmer = shimmer.getDescendantOffset(
-      descendant: renderObj as RenderBox,
-    );
-
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       child: widget.isLoading
-          ? ShaderMask(
-              blendMode: BlendMode.srcATop,
-              shaderCallback: (bounds) {
-                return gradient.createShader(
-                  Rect.fromLTWH(
-                    -offsetWithinShimmer.dx,
-                    -offsetWithinShimmer.dy,
-                    shimmerSize.width,
-                    shimmerSize.height,
-                  ),
+          ? ValueListenableBuilder<int>(
+              valueListenable: _shimmerUpdateIndex,
+              builder: (context, _, child) {
+                final RenderObject? renderObj = context.findRenderObject();
+                if (_shimmerState == null || !_shimmerState!.isSized || renderObj == null || !renderObj.attached) {
+                  // The ancestor Shimmer widget has not laid
+                  // itself out yet. Return an empty box.
+                  return widget.child;
+                }
+
+                return ShaderMask(
+                  blendMode: BlendMode.srcATop,
+                  shaderCallback: (bounds) {
+                    final shimmerSize = _shimmerState!.size;
+                    final gradient = _shimmerState!.gradient;
+                    final offsetWithinShimmer = _shimmerState!.getDescendantOffset(
+                      descendant: renderObj as RenderBox,
+                    );
+                    return gradient.createShader(
+                      Rect.fromLTWH(
+                        -offsetWithinShimmer.dx,
+                        -offsetWithinShimmer.dy,
+                        shimmerSize.width,
+                        shimmerSize.height,
+                      ),
+                    );
+                  },
+                  child: child,
                 );
               },
               child: widget.child,

@@ -167,7 +167,9 @@ class VideoViewerState extends State<VideoViewer> {
     total.value = size;
     // TODO find a way to stop loading based on size when caching is enabled
 
-    final int? maxSize = settingsHandler.preloadSizeLimit == 0 ? null : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
+    final int? maxSize = settingsHandler.preloadSizeLimit == 0
+        ? null
+        : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
     // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
       killLoading(['File is zero bytes']);
@@ -244,7 +246,8 @@ class VideoViewerState extends State<VideoViewer> {
     viewController.outputStateStream.listen(onViewStateChanged);
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
-    isViewed.value = widget.isStandalone ||
+    isViewed.value =
+        widget.isStandalone ||
         (settingsHandler.appMode.value.isMobile
             ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
             : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
@@ -261,8 +264,10 @@ class VideoViewerState extends State<VideoViewer> {
 
   void indexListener() {
     final bool prevViewed = isViewed.value;
-    final bool isCurrentIndex = widget.isStandalone || searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem);
-    final bool isCurrentItem = widget.isStandalone || searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    final bool isCurrentIndex =
+        widget.isStandalone || searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem);
+    final bool isCurrentItem =
+        widget.isStandalone || searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
       isViewed.value = true;
     } else {
@@ -359,7 +364,10 @@ class VideoViewerState extends State<VideoViewer> {
 
     final bool prevIsZoomed = isZoomed.value;
 
-    isZoomed.value = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
+    isZoomed.value =
+        scaleState == PhotoViewScaleState.zoomedIn ||
+        scaleState == PhotoViewScaleState.covering ||
+        scaleState == PhotoViewScaleState.originalSize;
     viewerHandler.setZoomed(widget.key, isZoomed.value);
     if (prevIsZoomed != isZoomed.value) {
       updateState();
@@ -665,6 +673,7 @@ class VideoViewerState extends State<VideoViewer> {
                   ? const SizedBox.shrink()
                   : Thumbnail(
                       item: widget.booruItem,
+                      isStandalone: false,
                     ),
             ),
             AnimatedSwitcher(
@@ -673,7 +682,9 @@ class VideoViewerState extends State<VideoViewer> {
                   ? const SizedBox.shrink()
                   : MediaLoading(
                       item: widget.booruItem,
-                      hasProgress: settingsHandler.mediaCache && (forceCache.value || settingsHandler.videoCacheMode != 'Stream'),
+                      hasProgress:
+                          settingsHandler.mediaCache &&
+                          (forceCache.value || settingsHandler.videoCacheMode != 'Stream'),
                       isFromCache: isFromCache.value,
                       isDone: isVideoInited,
                       isTooBig: isTooBig > 0,
@@ -761,7 +772,9 @@ class VideoViewerState extends State<VideoViewer> {
                                       builder: (context, isAuthenticated, _) {
                                         return AnimatedSwitcher(
                                           duration: const Duration(milliseconds: 200),
-                                          child: (isViewed && isAuthenticated != false) ? child : const SizedBox.shrink(),
+                                          child: (isViewed && isAuthenticated != false)
+                                              ? child
+                                              : const SizedBox.shrink(),
                                         );
                                       },
                                     );

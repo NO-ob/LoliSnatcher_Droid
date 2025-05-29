@@ -24,6 +24,7 @@ class VideoViewerPlaceholder extends StatelessWidget {
         children: [
           Thumbnail(
             item: item,
+            isStandalone: false,
           ),
           // Image.network(item.thumbnailURL, fit: BoxFit.fill),
           SizedBox(
