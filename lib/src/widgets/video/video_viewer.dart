@@ -668,7 +668,7 @@ class VideoViewerState extends State<VideoViewer> {
         children: [
           AnimatedOpacity(
             duration: const Duration(milliseconds: 300),
-            opacity: isVideoInited ? 1 : 0,
+            opacity: isVideoInited ? 0 : 1,
             child: ValueListenableBuilder(
               valueListenable: isViewed,
               builder: (context, isViewed, child) {
@@ -684,6 +684,7 @@ class VideoViewerState extends State<VideoViewer> {
               ),
             ),
           ),
+          //
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: isVideoInited

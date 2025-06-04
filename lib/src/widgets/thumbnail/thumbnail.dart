@@ -428,8 +428,8 @@ class _ThumbnailState extends State<Thumbnail> {
                           fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                           isAntiAlias: true,
                           filterQuality: FilterQuality.medium,
-                          width: widget.isStandalone ? double.infinity : null,
-                          height: widget.isStandalone ? double.infinity : null,
+                          width: double.infinity,
+                          height: double.infinity,
                           errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                             if (widget.isStandalone) {
                               return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withValues(alpha: 0.5));
@@ -475,8 +475,8 @@ class _ThumbnailState extends State<Thumbnail> {
                         fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                         isAntiAlias: true,
                         filterQuality: FilterQuality.medium,
-                        width: widget.isStandalone ? double.infinity : null,
-                        height: widget.isStandalone ? double.infinity : null,
+                        width: double.infinity,
+                        height: double.infinity,
                         errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                           if (widget.isStandalone) {
                             return Icon(Icons.broken_image, size: 30, color: Colors.white.withValues(alpha: 0.5));

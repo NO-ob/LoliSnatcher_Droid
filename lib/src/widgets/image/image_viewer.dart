@@ -410,9 +410,15 @@ class ImageViewerState extends State<ImageViewer> {
         alignment: Alignment.center,
         fit: StackFit.expand,
         children: [
-          AnimatedOpacity(
-            duration: const Duration(milliseconds: 300),
-            opacity: isLoaded.value ? 1 : 0,
+          ValueListenableBuilder(
+            valueListenable: isLoaded,
+            builder: (context, isLoaded, child) {
+              return AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: isLoaded ? 0 : 1,
+                child: child,
+              );
+            },
             child: ValueListenableBuilder(
               valueListenable: isViewed,
               builder: (context, isViewed, child) {
@@ -498,7 +504,9 @@ class ImageViewerState extends State<ImageViewer> {
                 builder: (context, isLoaded, child) {
                   return AnimatedOpacity(
                     opacity: isLoaded ? 1 : 0,
-                    duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                    duration: Duration(
+                      milliseconds: (settingsHandler.appMode.value.isDesktop || isViewed.value) ? 50 : 300,
+                    ),
                     child: child,
                   );
                 },
@@ -506,7 +514,9 @@ class ImageViewerState extends State<ImageViewer> {
                   valueListenable: mainProvider,
                   builder: (context, mainProvider, _) {
                     return AnimatedSwitcher(
-                      duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                      duration: Duration(
+                        milliseconds: (settingsHandler.appMode.value.isDesktop || isViewed.value) ? 50 : 300,
+                      ),
                       child: mainProvider == null
                           ? const SizedBox.shrink()
                           : PhotoView(
