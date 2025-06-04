@@ -262,6 +262,10 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
       builder: (context, maxFps, child) {
         return Obx(
           () {
+            if (!settingsHandler.showFps.value) {
+              return child!;
+            }
+
             return FPSMonitor(
               showFPSChart: settingsHandler.showFps.value,
               maxFPS: maxFps,
@@ -270,18 +274,26 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
               sampleTime: .2,
               totalTime: 10,
               align: Alignment.bottomLeft,
-              child: ImageStats(
-                isEnabled: settingsHandler.showImageStats.value,
-                width: 120,
-                height: 100,
-                align: Alignment.centerLeft,
-                child: child!,
-              ),
+              child: child,
             );
           },
         );
       },
-      child: widget.child,
+      child: Obx(
+        () {
+          if (!settingsHandler.showImageStats.value) {
+            return widget.child;
+          }
+
+          return ImageStats(
+            isEnabled: settingsHandler.showImageStats.value,
+            width: 120,
+            height: 100,
+            align: Alignment.centerLeft,
+            child: widget.child,
+          );
+        },
+      ),
     );
   }
 }
@@ -495,8 +507,8 @@ class _AppLifecycleOverlayState extends State<AppLifecycleOverlay> with WidgetsB
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.sizeOf(context).height,
+            width: MediaQuery.sizeOf(context).width,
             color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
             child: widget.child,
           ),

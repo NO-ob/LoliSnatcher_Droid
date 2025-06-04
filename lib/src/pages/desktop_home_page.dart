@@ -97,7 +97,8 @@ class DesktopHome extends StatelessWidget {
                     icon: const Icon(Icons.save),
                     iconOnly: true,
                     action: () async {
-                      await getPerms();
+                      if (!await setPermissions()) return;
+
                       // call a function to save the currently viewed image when the save button is pressed
                       if (searchHandler.currentSelected.isNotEmpty) {
                         snatchHandler.queue(

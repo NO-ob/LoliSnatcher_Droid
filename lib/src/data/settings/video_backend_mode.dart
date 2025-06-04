@@ -26,6 +26,7 @@ enum VideoBackendMode {
     return VideoBackendMode.normal;
   }
 
+  bool get isDefault => this == defaultValue;
   bool get isNormal => this == VideoBackendMode.normal;
   bool get isMpv => this == VideoBackendMode.mpv;
   bool get isMdk => this == VideoBackendMode.mdk;

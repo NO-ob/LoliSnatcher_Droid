@@ -180,7 +180,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
         if (allowedToClear) {
           FlashElements.showSnackbar(
             context: context,
-            position: Positions.top,
+            position: FlashPosition.top,
             duration: const Duration(seconds: 2),
             title: const Text(
               'Cache cleared!',
@@ -457,7 +457,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 action: () async {
                   FlashElements.showSnackbar(
                     context: context,
-                    position: Positions.top,
+                    position: FlashPosition.top,
                     title: const Text(
                       'Cache cleared!',
                       style: TextStyle(fontSize: 20),

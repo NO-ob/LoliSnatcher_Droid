@@ -1233,7 +1233,7 @@ class _PlaybackSpeedDialogState extends State<_PlaybackSpeedDialog> {
               },
             ),
             const SizedBox(height: 24),
-            SizedBox(height: MediaQuery.of(context).padding.bottom),
+            SizedBox(height: MediaQuery.paddingOf(context).bottom),
           ],
         ),
       ),

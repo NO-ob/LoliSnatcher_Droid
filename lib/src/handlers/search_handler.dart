@@ -416,20 +416,31 @@ class SearchHandler {
   }
 
   HasTabWithTagResult hasTabWithTag(String tag) {
-    final tabsWithOnlyTag = list.where((tab) => tab.tags.toLowerCase().trim() == tag.toLowerCase().trim());
+    tag = tag.toLowerCase().trim();
+    List<SearchTab> tabsWithOnlyTag = list.where((tab) => tab.tags == tag).toList();
     if (tabsWithOnlyTag.isNotEmpty) {
-      if (tabsWithOnlyTag.any((tab) => tab.selectedBooru.value == currentBooru)) {
-        return HasTabWithTagResult.onlyTag;
-      } else {
-        return HasTabWithTagResult.onlyTagDifferentBooru;
+      tabsWithOnlyTag = tabsWithOnlyTag.where((tab) => tab.tags.toLowerCase().trim() == tag).toList();
+      if (tabsWithOnlyTag.isNotEmpty) {
+        if (tabsWithOnlyTag.any((tab) => tab.selectedBooru.value == currentBooru)) {
+          return HasTabWithTagResult.onlyTag;
+        } else {
+          return HasTabWithTagResult.onlyTagDifferentBooru;
+        }
       }
     }
 
-    final tabsContainingTag = list.where(
-      (tab) => tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim()),
-    );
+    List<SearchTab> tabsContainingTag = list
+        .where(
+          (tab) => tab.tags.contains(tag),
+        )
+        .toList();
     if (tabsContainingTag.isNotEmpty) {
-      return HasTabWithTagResult.containsTag;
+      tabsContainingTag = tabsContainingTag
+          .where((tab) => tab.tags.toLowerCase().trim().split(' ').contains(tag))
+          .toList();
+      if (tabsContainingTag.isNotEmpty) {
+        return HasTabWithTagResult.containsTag;
+      }
     }
 
     return HasTabWithTagResult.noTag;

@@ -100,7 +100,7 @@ android {
         }
 
         debug {
-            signingConfig signingConfigs.debug
+            signingConfig keystoreProperties['storeFile'] ? signingConfigs.release : signingConfigs.debug
         }
     }
     buildFeatures {

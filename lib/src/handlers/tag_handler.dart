@@ -308,7 +308,7 @@ class TagHandler {
   Future<void> saveTags() async {
     tagSaveActive = true;
     final SettingsHandler settings = SettingsHandler.instance;
-    await getPerms();
+    await getStoragePermission();
     prevLength = tagMap.entries.length;
     if (settings.dbEnabled) {
       //await settings.dbHandler.updateTagsFromObjects(toList());

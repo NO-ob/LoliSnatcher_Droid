@@ -17,11 +17,11 @@ class VideoSettingsPage extends StatefulWidget {
 class _VideoSettingsPageState extends State<VideoSettingsPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-  bool autoPlay = true,
-      startVideosMuted = false,
-      disableVideo = false,
-      longTapFastForwardVideo = false,
-      altVideoPlayerHwAccel = true;
+  bool autoPlay = true;
+  bool startVideosMuted = false;
+  bool disableVideo = false;
+  bool longTapFastForwardVideo = false;
+  bool altVideoPlayerHwAccel = true;
   VideoBackendMode videoBackendMode = SettingsHandler.isDesktopPlatform
       ? VideoBackendMode.mpv
       : VideoBackendMode.normal;

@@ -366,7 +366,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget imageStack = LayoutBuilder(
+    Widget imageStack = LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           calcThumbWidth(constraints);
@@ -385,15 +385,16 @@ class _ThumbnailState extends State<Thumbnail> {
         return Stack(
           alignment: Alignment.center,
           children: [
-            ValueListenableBuilder(
-              valueListenable: isFailed,
-              builder: (context, isFailed, _) {
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  color: isFailed ? Colors.red.withValues(alpha: 0.1) : Colors.transparent,
-                );
-              },
-            ),
+            if (widget.isStandalone)
+              ValueListenableBuilder(
+                valueListenable: isFailed,
+                builder: (context, isFailed, _) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    color: isFailed ? Colors.red.withValues(alpha: 0.1) : Colors.transparent,
+                  );
+                },
+              ),
             //
             if (useExtra) // fetch small low quality thumbnail while loading a sample
               ValueListenableBuilder(
@@ -427,8 +428,8 @@ class _ThumbnailState extends State<Thumbnail> {
                           fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                           isAntiAlias: true,
                           filterQuality: FilterQuality.medium,
-                          width: double.infinity,
-                          height: double.infinity,
+                          width: widget.isStandalone ? double.infinity : null,
+                          height: widget.isStandalone ? double.infinity : null,
                           errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                             if (widget.isStandalone) {
                               return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withValues(alpha: 0.5));
@@ -474,8 +475,8 @@ class _ThumbnailState extends State<Thumbnail> {
                         fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                         isAntiAlias: true,
                         filterQuality: FilterQuality.medium,
-                        width: double.infinity,
-                        height: double.infinity,
+                        width: widget.isStandalone ? double.infinity : null,
+                        height: widget.isStandalone ? double.infinity : null,
                         errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                           if (widget.isStandalone) {
                             return Icon(Icons.broken_image, size: 30, color: Colors.white.withValues(alpha: 0.5));
@@ -490,33 +491,34 @@ class _ThumbnailState extends State<Thumbnail> {
               ),
             ),
             //
-            ValueListenableBuilder(
-              valueListenable: isLoaded,
-              builder: (context, isLoaded, _) {
-                return ValueListenableBuilder(
-                  valueListenable: isLoadedExtra,
-                  builder: (context, isLoadedExtra, _) {
-                    return ValueListenableBuilder(
-                      valueListenable: isFailed,
-                      builder: (context, isFailed, _) {
-                        final bool isAnyLoaded = isLoaded || isLoadedExtra;
-                        final bool showShimmer = !isAnyLoaded && !isFailed;
+            if (widget.isStandalone)
+              ValueListenableBuilder(
+                valueListenable: isLoaded,
+                builder: (context, isLoaded, _) {
+                  return ValueListenableBuilder(
+                    valueListenable: isLoadedExtra,
+                    builder: (context, isLoadedExtra, _) {
+                      return ValueListenableBuilder(
+                        valueListenable: isFailed,
+                        builder: (context, isFailed, _) {
+                          final bool isAnyLoaded = isLoaded || isLoadedExtra;
+                          final bool showShimmer = !isAnyLoaded && !isFailed;
 
-                        return AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: isAnyLoaded
-                              ? const SizedBox.shrink()
-                              : ShimmerCard(
-                                  isLoading: showShimmer,
-                                  child: showShimmer ? null : const SizedBox.shrink(),
-                                ),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: isAnyLoaded
+                                ? const SizedBox.shrink()
+                                : ShimmerCard(
+                                    isLoading: showShimmer,
+                                    child: showShimmer ? null : const SizedBox.shrink(),
+                                  ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             //
             if (widget.isStandalone)
               ValueListenableBuilder(
@@ -564,7 +566,7 @@ class _ThumbnailState extends State<Thumbnail> {
                 ),
               ),
             //
-            if (widget.item.isHated)
+            if (widget.isStandalone && widget.item.isHated)
               Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -583,6 +585,11 @@ class _ThumbnailState extends State<Thumbnail> {
       },
     );
 
+    imageStack = Material(
+      color: Colors.transparent,
+      child: imageStack,
+    );
+
     // print('building thumb ${searchHandler.getItemIndex(widget.item)}');
 
     if (widget.isStandalone && widget.useHero) {
@@ -599,10 +606,7 @@ class _ThumbnailState extends State<Thumbnail> {
         ),
       );
     } else {
-      return ColoredBox(
-        color: Colors.black,
-        child: imageStack,
-      );
+      return imageStack;
     }
   }
 }

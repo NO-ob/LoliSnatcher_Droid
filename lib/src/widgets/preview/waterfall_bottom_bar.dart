@@ -213,7 +213,7 @@ class WaterfallBottomBarState extends State<WaterfallBottomBar> with TickerProvi
                   0,
                   showSearchBar ? (MainSearchBar.height + bottomPadding) * animValue : bottomPadding,
                 ),
-                child: AnimatedContainer(
+                child: AnimatedPadding(
                   duration: const Duration(milliseconds: 100),
                   padding: EdgeInsets.only(
                     left: (settingsHandler.scrollGridButtonsPosition == 'Left' ? buttonPadding : 0) + 10,
@@ -1409,7 +1409,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 Navigator.of(context).pop();
               },
             ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom),
+            SizedBox(height: MediaQuery.paddingOf(context).bottom),
           ],
         );
       },

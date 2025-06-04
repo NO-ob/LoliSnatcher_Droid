@@ -458,7 +458,7 @@ class _BooruEditState extends State<BooruEdit> {
           return;
         }
 
-        await getPerms();
+        await getStoragePermission();
         final Booru newBooru = (booruAPIKeyController.text == '' && booruUserIDController.text == '')
             ? Booru(
                 booruNameController.text,

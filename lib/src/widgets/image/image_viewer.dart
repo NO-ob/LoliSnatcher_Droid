@@ -136,6 +136,14 @@ class ImageViewerState extends State<ImageViewer> {
     // debug output
     viewController.outputStateStream.listen(onViewStateChanged);
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
+
+    // calcWidthLimit(MediaQuery.sizeOf(context).width);
+    calcWidthLimit(WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width);
+
+    if (isFirstBuild.value) {
+      isFirstBuild.value = false;
+      initViewer(false);
+    }
   }
 
   void indexListener() {
@@ -395,154 +403,145 @@ class ImageViewerState extends State<ImageViewer> {
   Widget build(BuildContext context) {
     // print('!!! Build media ${searchHandler.getItemIndex(widget.booruItem)} $isViewed !!!');
 
-    return ValueListenableBuilder(
-      valueListenable: isViewed,
-      builder: (context, isViewed, child) {
-        return Hero(
-          tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
-          child: child!,
-        );
-      },
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final mqSize = MediaQuery.sizeOf(context);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            calcWidthLimit(mqSize.width);
-
-            if (isFirstBuild.value) {
-              isFirstBuild.value = false;
-              initViewer(false);
-            }
-          });
-
-          return Material(
-            // without this every text element will have broken styles on first frames
-            color: Colors.black,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Thumbnail(
-                  item: widget.booruItem,
-                  isStandalone: false,
-                ),
-                //
-                ValueListenableBuilder(
-                  valueListenable: isLoaded,
-                  builder: (context, isLoaded, _) {
-                    return ValueListenableBuilder(
-                      valueListenable: isViewed,
-                      builder: (context, isViewed, _) {
-                        return ValueListenableBuilder(
-                          valueListenable: isStopped,
-                          builder: (context, isStopped, _) {
-                            return ValueListenableBuilder(
-                              valueListenable: isFromCache,
-                              builder: (context, isFromCache, _) {
-                                return ValueListenableBuilder(
-                                  valueListenable: stopReason,
-                                  builder: (context, stopReason, _) {
-                                    return MediaLoading(
-                                      item: widget.booruItem,
-                                      hasProgress: true,
-                                      isFromCache: isFromCache,
-                                      isDone: isLoaded,
-                                      isTooBig: isTooBig > 0,
-                                      isStopped: isStopped,
-                                      stopReasons: stopReason,
-                                      isViewed: isViewed,
-                                      total: total,
-                                      received: received,
-                                      startedAt: startedAt,
-                                      startAction: () {
-                                        if (isTooBig == 1) {
-                                          isTooBig = 2;
-                                        }
-                                        initViewer(true);
-                                      },
-                                      stopAction: () {
-                                        killLoading(['Stopped by User']);
-                                      },
-                                    );
-                                  },
-                                );
+    return Material(
+      // without this every text element will have broken styles on first frames
+      color: Colors.transparent,
+      child: Stack(
+        alignment: Alignment.center,
+        fit: StackFit.expand,
+        children: [
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 300),
+            opacity: isLoaded.value ? 1 : 0,
+            child: ValueListenableBuilder(
+              valueListenable: isViewed,
+              builder: (context, isViewed, child) {
+                return Hero(
+                  tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
+                  child: child!,
+                );
+              },
+              child: Thumbnail(
+                item: widget.booruItem,
+                isStandalone: false,
+                useHero: false,
+              ),
+            ),
+          ),
+          //
+          ValueListenableBuilder(
+            valueListenable: isLoaded,
+            builder: (context, isLoaded, _) {
+              return ValueListenableBuilder(
+                valueListenable: isViewed,
+                builder: (context, isViewed, _) {
+                  return ValueListenableBuilder(
+                    valueListenable: isStopped,
+                    builder: (context, isStopped, _) {
+                      return ValueListenableBuilder(
+                        valueListenable: isFromCache,
+                        builder: (context, isFromCache, _) {
+                          return ValueListenableBuilder(
+                            valueListenable: stopReason,
+                            builder: (context, stopReason, _) {
+                              return MediaLoading(
+                                item: widget.booruItem,
+                                hasProgress: true,
+                                isFromCache: isFromCache,
+                                isDone: isLoaded,
+                                isTooBig: isTooBig > 0,
+                                isStopped: isStopped,
+                                stopReasons: stopReason,
+                                isViewed: isViewed,
+                                total: total,
+                                received: received,
+                                startedAt: startedAt,
+                                startAction: () {
+                                  if (isTooBig == 1) {
+                                    isTooBig = 2;
+                                  }
+                                  initViewer(true);
+                                },
+                                stopAction: () {
+                                  killLoading(['Stopped by User']);
+                                },
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
+          //
+          Listener(
+            onPointerSignal: (pointerSignal) {
+              if (mainProvider.value == null || !SettingsHandler.isDesktopPlatform) {
+                return;
+              }
+              if (pointerSignal is PointerScrollEvent) {
+                scrollZoomImage(pointerSignal.scrollDelta.dy);
+              }
+            },
+            child: ImageFiltered(
+              enabled: settingsHandler.blurImages,
+              imageFilter: ImageFilter.blur(
+                sigmaX: 30,
+                sigmaY: 30,
+                tileMode: TileMode.decal,
+              ),
+              child: ValueListenableBuilder(
+                valueListenable: isLoaded,
+                builder: (context, isLoaded, child) {
+                  return AnimatedOpacity(
+                    opacity: isLoaded ? 1 : 0,
+                    duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                    child: child,
+                  );
+                },
+                child: ValueListenableBuilder(
+                  valueListenable: mainProvider,
+                  builder: (context, mainProvider, _) {
+                    return AnimatedSwitcher(
+                      duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                      child: mainProvider == null
+                          ? const SizedBox.shrink()
+                          : PhotoView(
+                              imageProvider: mainProvider,
+                              gaplessPlayback: true,
+                              loadingBuilder: (context, event) {
+                                return const SizedBox.shrink();
                               },
-                            );
-                          },
-                        );
-                      },
+                              errorBuilder: (_, error, _) {
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  onError(error);
+                                });
+                                return const SizedBox.shrink();
+                              },
+                              backgroundDecoration: const BoxDecoration(color: Colors.transparent),
+                              // to avoid flickering during hero transition
+                              // TODO will cause scaling issues on desktop, fix when we'll get back to it
+                              customSize: MediaQuery.sizeOf(context),
+                              // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                              filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
+                              minScale: PhotoViewComputedScale.contained,
+                              maxScale: PhotoViewComputedScale.covered * 8,
+                              initialScale: PhotoViewComputedScale.contained,
+                              enableRotation: settingsHandler.allowRotation,
+                              basePosition: Alignment.center,
+                              controller: viewController,
+                              scaleStateController: scaleController,
+                            ),
                     );
                   },
                 ),
-                //
-                Listener(
-                  onPointerSignal: (pointerSignal) {
-                    if (mainProvider.value == null || !SettingsHandler.isDesktopPlatform) {
-                      return;
-                    }
-                    if (pointerSignal is PointerScrollEvent) {
-                      scrollZoomImage(pointerSignal.scrollDelta.dy);
-                    }
-                  },
-                  child: ImageFiltered(
-                    enabled: settingsHandler.blurImages,
-                    imageFilter: ImageFilter.blur(
-                      sigmaX: 30,
-                      sigmaY: 30,
-                      tileMode: TileMode.decal,
-                    ),
-                    child: ValueListenableBuilder(
-                      valueListenable: isLoaded,
-                      builder: (context, isLoaded, child) {
-                        return AnimatedOpacity(
-                          opacity: isLoaded ? 1 : 0,
-                          duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-                          child: child,
-                        );
-                      },
-                      child: ValueListenableBuilder(
-                        valueListenable: mainProvider,
-                        builder: (context, mainProvider, _) {
-                          return AnimatedSwitcher(
-                            duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-                            child: mainProvider == null
-                                ? const SizedBox.shrink()
-                                : PhotoView(
-                                    imageProvider: mainProvider,
-                                    gaplessPlayback: true,
-                                    loadingBuilder: (context, event) {
-                                      return const SizedBox.shrink();
-                                    },
-                                    errorBuilder: (_, error, _) {
-                                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                                        onError(error);
-                                      });
-                                      return const SizedBox.shrink();
-                                    },
-                                    // to avoid flickering during hero transition
-                                    // TODO will cause scaling issues on desktop, fix when we'll get back to it
-                                    customSize: Size(mqSize.width, mqSize.height),
-                                    // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                                    filterQuality: widget.booruItem.isLong
-                                        ? FilterQuality.medium
-                                        : FilterQuality.medium,
-                                    minScale: PhotoViewComputedScale.contained,
-                                    maxScale: PhotoViewComputedScale.covered * 8,
-                                    initialScale: PhotoViewComputedScale.contained,
-                                    enableRotation: settingsHandler.allowRotation,
-                                    basePosition: Alignment.center,
-                                    controller: viewController,
-                                    scaleStateController: scaleController,
-                                  ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

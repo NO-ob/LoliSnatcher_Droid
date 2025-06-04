@@ -1775,7 +1775,7 @@ class SettingsHandler {
   }
 
   Future<bool> saveSettings({required bool restate}) async {
-    await getPerms();
+    await getStoragePermission();
     if (path == '') {
       await setConfigDir();
     }
@@ -2256,7 +2256,7 @@ class SettingsHandler {
     }
 
     try {
-      await getPerms();
+      await getStoragePermission();
       await loadSettings();
     } catch (e, s) {
       Logger.Inst().log(

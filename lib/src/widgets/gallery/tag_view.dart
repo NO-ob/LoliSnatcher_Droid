@@ -61,6 +61,7 @@ class _TagViewState extends State<TagView> {
 
   late BooruItem item;
   List<String> tags = [], filteredTags = [];
+  Map<String, HasTabWithTagResult> tabMatchesMap = {};
   bool? sortTags;
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
@@ -80,7 +81,7 @@ class _TagViewState extends State<TagView> {
     // copy tags to avoid changing the original array
     tags = [...item.tagsList];
     filteredTags = [...tags];
-    parseSortGroupTags();
+    WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
 
     searchHandler.viewedItem.addListener(itemListener);
 
@@ -135,29 +136,29 @@ class _TagViewState extends State<TagView> {
   }
 
   List<String> filterTags(List<String> tagsToFilter) {
-    final List<String> filteredTags = [];
+    final List<String> tags = [];
     if (searchController.text.isEmpty) {
       return tagsToFilter;
     }
 
     for (int i = 0; i < tagsToFilter.length; i++) {
       if (tagsToFilter[i].toLowerCase().contains(searchController.text.toLowerCase())) {
-        filteredTags.add(tagsToFilter[i]);
+        tags.add(tagsToFilter[i]);
       }
     }
-    return filteredTags;
+    return tags;
   }
 
   void sortAndGroupTagsList() {
     if (sortTags == null) {
       tags = [...item.tagsList];
-      groupTagsList();
     } else {
       tags.sort((a, b) => sortTags == true ? a.compareTo(b) : b.compareTo(a));
       filteredTags = [
         ...filterTags([...tags]),
       ];
     }
+    groupTagsList();
   }
 
   void groupTagsList() {
@@ -186,9 +187,16 @@ class _TagViewState extends State<TagView> {
     ];
   }
 
+  void cacheTabMatchData() {
+    for (final tag in filteredTags) {
+      tabMatchesMap[tag] = searchHandler.hasTabWithTag(tag);
+    }
+  }
+
   void parseSortGroupTags() {
     parseTags();
     sortAndGroupTagsList();
+    cacheTabMatchData();
     setState(() {});
   }
 
@@ -206,104 +214,6 @@ class _TagViewState extends State<TagView> {
         );
       }
     });
-  }
-
-  Widget infoBuild() {
-    final String fileName = Tools.getFileName(item.fileURL);
-    final String fileUrl = item.fileURL;
-    final String fileRes = (item.fileWidth != null && item.fileHeight != null)
-        ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}'
-        : '';
-    final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
-    final String itemId = item.serverId ?? '';
-    final String rating = item.rating ?? '';
-    final String score = item.score ?? '';
-    final String md5 = item.md5String ?? '';
-    final List<String> sources = item.sources ?? [];
-    final bool tagsAvailable = tags.isNotEmpty || supportsItemUpdate;
-    String postDate = item.postDate ?? '';
-    final String postDateFormat = item.postDateFormat ?? '';
-    String formattedDate = '';
-    if (postDate.isNotEmpty && postDateFormat.isNotEmpty) {
-      try {
-        // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
-        // remove timezones from strings until they fix it
-        DateTime parsedDate;
-        if (postDateFormat == 'unix') {
-          parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
-        } else if (postDateFormat == 'iso') {
-          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
-          parsedDate = DateTime.parse(postDate).toLocal();
-        } else {
-          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
-          parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();
-        }
-        // print(postDate);
-        formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
-      } catch (e) {
-        print('Date Parse Error :: $postDate $postDateFormat :: $e');
-      }
-    }
-
-    return SliverList(
-      delegate: SliverChildListDelegate(
-        [
-          if (settingsHandler.isDebug.value) infoText('Filename', fileName),
-          infoText('URL', fileUrl),
-          infoText('Post URL', item.postURL),
-          infoText('ID', itemId),
-          infoText('Rating', rating),
-          infoText('Score', score),
-          infoText('Resolution', fileRes),
-          infoText('Size', fileSize),
-          infoText('MD5', md5),
-          infoText('Posted', formattedDate, canCopy: false),
-          commentsButton(),
-          notesButton(),
-          sourcesList(sources),
-          if (tagsAvailable) ...[
-            Divider(
-              height: 2,
-              thickness: 2,
-              color: Colors.grey[800]!.withValues(alpha: 0.66),
-            ),
-            tagsButton(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
-                    filled: false,
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-                child: SettingsTextInput(
-                  key: searchKey,
-                  controller: searchController,
-                  focusNode: searchFocusNode,
-                  title: 'Search tags',
-                  onlyInput: true,
-                  clearable: true,
-                  pasteable: true,
-                  onChanged: (_) {
-                    parseSortGroupTags();
-                  },
-                  enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
-                ),
-              ),
-            ),
-          ],
-        ],
-        addAutomaticKeepAlives: false,
-      ),
-    );
   }
 
   Widget tagsButton() {
@@ -770,9 +680,7 @@ class _TagViewState extends State<TagView> {
     );
   }
 
-  Widget tagsItemBuilder(BuildContext context, int index) {
-    final String currentTag = filteredTags[index];
-
+  Widget tagsItemBuilder(BuildContext context, String currentTag) {
     final bool isHated = tagsData.hatedTags.contains(currentTag);
     final bool isLoved = tagsData.lovedTags.contains(currentTag);
     final bool isSound = tagsData.soundTags.contains(currentTag);
@@ -783,7 +691,9 @@ class _TagViewState extends State<TagView> {
             .split(' ')
             .indexWhere((tag) => tag == currentTag.toLowerCase() || tag == '-${currentTag.toLowerCase()}') !=
         -1;
-    final HasTabWithTagResult hasTabWithTag = searchHandler.hasTabWithTag(currentTag);
+    final HasTabWithTagResult hasTabWithTag = tabMatchesMap.containsKey(currentTag)
+        ? tabMatchesMap[currentTag]!
+        : HasTabWithTagResult.noTag;
 
     final List<_TagInfoIcon> tagIconAndColor = [];
     if (isAi) {
@@ -980,49 +890,138 @@ class _TagViewState extends State<TagView> {
 
   @override
   Widget build(BuildContext context) {
+    final String fileName = Tools.getFileName(item.fileURL);
+    final String fileUrl = item.fileURL;
+    final String fileRes = (item.fileWidth != null && item.fileHeight != null)
+        ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}'
+        : '';
+    final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
+    final String itemId = item.serverId ?? '';
+    final String rating = item.rating ?? '';
+    final String score = item.score ?? '';
+    final String md5 = item.md5String ?? '';
+    final List<String> sources = item.sources ?? [];
+    final bool tagsAvailable = tags.isNotEmpty || supportsItemUpdate;
+    String postDate = item.postDate ?? '';
+    final String postDateFormat = item.postDateFormat ?? '';
+    String formattedDate = '';
+    if (postDate.isNotEmpty && postDateFormat.isNotEmpty) {
+      try {
+        // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
+        // remove timezones from strings until they fix it
+        DateTime parsedDate;
+        if (postDateFormat == 'unix') {
+          parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
+        } else if (postDateFormat == 'iso') {
+          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateTime.parse(postDate).toLocal();
+        } else {
+          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();
+        }
+        // print(postDate);
+        formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
+      } catch (e) {
+        print('Date Parse Error :: $postDate $postDateFormat :: $e');
+      }
+    }
+
     return Scrollbar(
       interactive: true,
       controller: scrollController,
       child: DesktopScrollWrap(
         controller: scrollController,
-        child: FadingEdgeScrollView.fromScrollView(
-          child: CustomScrollView(
-            controller: scrollController,
-            physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-            slivers: [
-              infoBuild(),
-              SliverToBoxAdapter(
-                child: (filteredTags.isEmpty && tags.isNotEmpty)
-                    ? const Column(
-                        children: [
-                          Kaomoji(
-                            type: KaomojiType.shrug,
-                            style: TextStyle(fontSize: 40),
+        child: CustomScrollView(
+          controller: scrollController,
+          physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  if (settingsHandler.isDebug.value) infoText('Filename', fileName),
+                  infoText('URL', fileUrl),
+                  infoText('Post URL', item.postURL),
+                  infoText('ID', itemId),
+                  infoText('Rating', rating),
+                  infoText('Score', score),
+                  infoText('Resolution', fileRes),
+                  infoText('Size', fileSize),
+                  infoText('MD5', md5),
+                  infoText('Posted', formattedDate, canCopy: false),
+                  commentsButton(),
+                  notesButton(),
+                  sourcesList(sources),
+                  if (tagsAvailable) ...[
+                    Divider(
+                      height: 2,
+                      thickness: 2,
+                      color: Colors.grey[800]!.withValues(alpha: 0.66),
+                    ),
+                    tagsButton(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+                            filled: false,
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          Text(
-                            'No tags found',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          SizedBox(height: 60),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
+                        ),
+                        child: SettingsTextInput(
+                          key: searchKey,
+                          controller: searchController,
+                          focusNode: searchFocusNode,
+                          title: 'Search tags',
+                          onlyInput: true,
+                          clearable: true,
+                          pasteable: true,
+                          onChanged: (_) {
+                            parseSortGroupTags();
+                          },
+                          enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  tagsItemBuilder,
-                  addAutomaticKeepAlives: false,
-                  // add empty items to allow a bit of overscroll for easier reachability
-                  childCount: filteredTags.length,
-                ),
+            ),
+            SliverToBoxAdapter(
+              child: (filteredTags.isEmpty && tags.isNotEmpty)
+                  ? const Column(
+                      children: [
+                        Kaomoji(
+                          type: KaomojiType.shrug,
+                          style: TextStyle(fontSize: 40),
+                        ),
+                        Text(
+                          'No tags found',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        SizedBox(height: 60),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (c, i) => tagsItemBuilder(c, filteredTags[i]),
+                childCount: filteredTags.length,
               ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.viewInsetsOf(context).bottom,
-                ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: MediaQuery.viewInsetsOf(context).bottom,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

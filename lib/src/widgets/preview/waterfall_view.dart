@@ -209,17 +209,15 @@ class _WaterfallViewState extends State<WaterfallView> {
   void viewerCallback() {
     viewerHandler.dropCurrent();
 
-    for (final item in searchHandler.currentFetched) {
-      if (item.toggleQuality.value) {
-        item.toggleQuality.value = false;
+    // do cleanup after a delay to avoid animation stutter when leaving the viewer (especially when there are thousands of items)
+    Future.delayed(const Duration(milliseconds: 500), () {
+      for (final item in searchHandler.currentFetched) {
+        if (item.toggleQuality.value) {
+          item.toggleQuality.value = false;
+        }
       }
-    }
-    for (final item in searchHandler.currentFetched) {
-      if (item.toggleQuality.value) {
-        item.toggleQuality.value = false;
-      }
-    }
-    searchHandler.filterCurrentFetched();
+      searchHandler.filterCurrentFetched();
+    });
   }
 
   Future<void> onTap(int index, BooruItem item) async {
@@ -471,8 +469,10 @@ class _WaterfallViewState extends State<WaterfallView> {
           },
         ),
         //
-        WaterfallBottomBar(
-          key: navigationHandler.bottomBarKey,
+        RepaintBoundary(
+          child: WaterfallBottomBar(
+            key: navigationHandler.bottomBarKey,
+          ),
         ),
       ],
     );

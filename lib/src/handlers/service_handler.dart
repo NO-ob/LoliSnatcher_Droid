@@ -292,18 +292,16 @@ class ServiceHandler {
     return result;
   }
 
-  static Future<String> testSAFPersistence() async {
+  static Future<bool> testSAFPersistence(String path) async {
     log('test saf persistence');
     String result = '';
-    const String safuri = 'content://com.android.externalstorage.documents/tree/1206-2917%3ALolisnatcher';
     try {
-      result = await platform.invokeMethod('testSAF', {'uri': safuri});
+      result = await platform.invokeMethod('testSAF', {'uri': path});
       log('got saf result $result');
     } catch (e) {
       log(e);
     }
-    // final Directory dir = Directory(result);
-    return result;
+    return result == 'ok';
   }
 
   static Future<String> getDocumentsDir() async {

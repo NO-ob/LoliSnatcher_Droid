@@ -196,7 +196,7 @@ class SnatchHandler {
               if (current.value!.booruItems.length == 1) {
                 FlashElements.showSnackbar(
                   duration: const Duration(seconds: 2),
-                  position: Positions.top,
+                  position: FlashPosition.top,
                   title: const Text(
                     'Item Snatched',
                     style: TextStyle(fontSize: 20),
@@ -236,7 +236,7 @@ class SnatchHandler {
               } else {
                 FlashElements.showSnackbar(
                   duration: const Duration(seconds: 2),
-                  position: Positions.top,
+                  position: FlashPosition.top,
                   title: const Text('Items Snatched', style: TextStyle(fontSize: 20)),
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -324,7 +324,7 @@ class SnatchHandler {
               'Added ${booruItems.length} items to snatch queue',
               style: const TextStyle(fontSize: 20),
             ),
-            position: Positions.top,
+            position: FlashPosition.top,
             duration: const Duration(seconds: 2),
             leadingIcon: Icons.info_outline,
             sideColor: Colors.green,
@@ -337,7 +337,7 @@ class SnatchHandler {
               'Added item to snatch queue',
               style: TextStyle(fontSize: 20),
             ),
-            position: Positions.top,
+            position: FlashPosition.top,
             duration: const Duration(seconds: 2),
             leadingIcon: Icons.info_outline,
             sideColor: Colors.green,
@@ -380,7 +380,7 @@ class SnatchHandler {
 
     FlashElements.showSnackbar(
       title: const Text('Snatching Images', style: TextStyle(fontSize: 20)),
-      position: Positions.top,
+      position: FlashPosition.top,
       content: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

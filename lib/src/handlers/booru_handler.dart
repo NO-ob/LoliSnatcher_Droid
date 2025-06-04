@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:get/get.dart' hide Response;
@@ -56,6 +58,8 @@ abstract class BooruHandler {
   void filterFetched() {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
+    final List<BooruItem> itemsBeforeFilter = [...filteredFetched];
+
     final List<BooruItem> filteredItems = [];
     for (final item in fetched) {
       if (settingsHandler.filterHated && item.isHated) {
@@ -86,7 +90,9 @@ abstract class BooruHandler {
       filteredItems.add(item);
     }
 
-    filteredFetched.value = filteredItems;
+    if (!listEquals(itemsBeforeFilter, filteredItems)) {
+      filteredFetched.value = filteredItems;
+    }
   }
 
   String get className => runtimeType.toString();

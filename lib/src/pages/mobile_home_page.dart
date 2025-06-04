@@ -164,12 +164,16 @@ class _MobileHomeState extends State<MobileHome> {
             isDrawerOpened = isOpen;
           }, // return  true (open) or false (close)
 
-          leftChild: settingsHandler.handSide.value.isLeft
-              ? const MainDrawer()
-              : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
-          rightChild: settingsHandler.handSide.value.isRight
-              ? const MainDrawer()
-              : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
+          leftChild: RepaintBoundary(
+            child: settingsHandler.handSide.value.isLeft
+                ? const MainDrawer()
+                : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
+          ),
+          rightChild: RepaintBoundary(
+            child: settingsHandler.handSide.value.isRight
+                ? const MainDrawer()
+                : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
+          ),
 
           // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
           scaffold: Scaffold(
@@ -209,17 +213,19 @@ class MainDrawer extends StatelessWidget {
         child: Drawer(
           child: Column(
             children: [
-              Obx(() {
-                if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
-                  return Container(
-                    height: MainSearchBar.height,
-                    margin: const EdgeInsets.fromLTRB(2, 24, 2, 12),
-                    child: const MainSearchBarWithActions('drawer'),
-                  );
-                } else {
-                  return const SizedBox.shrink();
-                }
-              }),
+              RepaintBoundary(
+                child: Obx(() {
+                  if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+                    return Container(
+                      height: MainSearchBar.height,
+                      margin: const EdgeInsets.fromLTRB(2, 24, 2, 12),
+                      child: const MainSearchBarWithActions('drawer'),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                }),
+              ),
               const TabSelector(),
               Expanded(
                 child: ListView(
@@ -404,8 +410,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
   bool updating = false;
 
   Future<void> onStartSnatching(BuildContext context, bool isLongTap) async {
-    final bool permsRes = await getPerms();
-    if (!permsRes) {
+    if (!await setPermissions()) {
       FlashElements.showSnackbar(
         context: context,
         title: const Text('Please provide Storage permissions', style: TextStyle(fontSize: 20)),

@@ -512,7 +512,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
         autoScrollState(!autoScroll);
         break;
       case 'snatch':
-        await getPerms();
+        if (!await setPermissions()) return;
+
         // call a function to save the currently viewed image when the save button is pressed
         snatchHandler.queue(
           [item],
@@ -603,7 +604,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                     ),
                     onTap: () async {
-                      await getPerms();
+                      if (!await setPermissions()) return;
+
                       snatchHandler.queue(
                         [item],
                         searchHandler.currentBooru,
