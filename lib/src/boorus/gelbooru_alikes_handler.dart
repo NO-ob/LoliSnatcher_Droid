@@ -20,7 +20,7 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 // TODO json parser? (add &json=1 to urls)
-// rule34.xxx, safebooru.org, realbooru.com
+// rule34.xxx, safebooru.org
 
 class GelbooruAlikesHandler extends BooruHandler {
   GelbooruAlikesHandler(super.booru, super.limit);
@@ -66,23 +66,6 @@ class GelbooruAlikesHandler extends BooruHandler {
         previewURL = booru.baseURL! + previewURL;
       }
 
-      if (booru.baseURL!.contains('realbooru.com')) {
-        // The api is shit and returns a bunch of broken urls so the urls need to be constructed,
-        // We also cant trust the directory variable in the json because it is wrong on old posts
-        final String hash = getAttrOrElem(current, 'md5')!.toString();
-        final String directory = '${hash.substring(0, 2)}/${hash.substring(2, 4)}';
-        // Hash and file can be mismatched so we only use file for file ext
-        final String fileExt = Tools.getFileExt(getAttrOrElem(current, 'file_url')!.toString());
-        fileURL = '${booru.baseURL}/images/$directory/$hash.$fileExt';
-
-        final bool isSample =
-            !fileURL.endsWith('.webm') && getAttrOrElem(current, 'sample_url')!.toString().contains('/samples/');
-        // String sampleExt = Tools.getFileExt(getAttrOrElem(current, "sample_url")!.toString());
-        sampleURL = isSample ? getAttrOrElem(current, 'sample_url')!.toString() : fileURL;
-        // sampleURL = "${booru.baseURL}/${isSample ? "samples" : "images"}/$directory/${isSample ? "sample_" : ""}$hash.$sampleExt";
-
-        previewURL = '${booru.baseURL}/thumbnails/$directory/thumbnail_$hash.jpg';
-      }
       if (booru.baseURL!.contains('furry.booru.org')) {
         previewURL = previewURL.replaceFirst('.png', '.jpg');
         if (sampleURL != fileURL && sampleURL.contains('samples')) {
@@ -115,17 +98,6 @@ class GelbooruAlikesHandler extends BooruHandler {
         postDate: getAttrOrElem(current, 'created_at')?.toString(), // Fri Jun 18 02:13:45 -0500 2021
         postDateFormat: 'EEE MMM dd HH:mm:ss  yyyy', // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
       );
-
-      if (booru.baseURL!.contains('realbooru.com')) {
-        // the api is even shittier now and they don't even return correct file extensions
-        // now we'll have to either rely on tags and make a bunch of requests for each item to get the real file ext
-        item.possibleMediaType.value = (tags.contains('gif') || tags.contains('animated_gif'))
-            ? MediaType.animation
-            : (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
-            ? MediaType.video
-            : null;
-        item.mediaType.value = MediaType.needToGuess;
-      }
 
       return item;
     } else {

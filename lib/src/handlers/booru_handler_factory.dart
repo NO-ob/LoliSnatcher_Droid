@@ -17,8 +17,9 @@ import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34hentai_handler.dart';
-import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34us_handler.dart';
+import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/realbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
@@ -112,6 +113,9 @@ class BooruHandlerFactory {
         case BooruType.Rainbooru:
           pageNum = 0;
           booruHandler = RainbooruHandler(booru, limit);
+          break;
+        case BooruType.Realbooru:
+          booruHandler = RealbooruHandler(booru, limit);
           break;
         case BooruType.R34Hentai:
           pageNum = 0;
