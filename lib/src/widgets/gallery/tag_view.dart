@@ -1403,7 +1403,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                               Navigator.of(context).push(
                                                 PageRouteBuilder(
                                                   pageBuilder: (_, _, _) => ItemViewerPage(
-                                                    item: preview!.booruHandler.filteredFetched[index],
+                                                    items: preview!.booruHandler.filteredFetched,
+                                                    initialIndex: index,
                                                     booru: preview!.booruHandler.booru,
                                                   ),
                                                   opaque: false,

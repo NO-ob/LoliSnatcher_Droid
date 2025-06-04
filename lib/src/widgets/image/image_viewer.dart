@@ -11,7 +11,6 @@ import 'package:photo_view/photo_view.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -22,14 +21,14 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 class ImageViewer extends StatefulWidget {
   const ImageViewer(
     this.booruItem, {
-    this.isStandalone = false,
-    this.customBooru,
+    required this.booru,
+    required this.isViewed,
     super.key,
   });
 
   final BooruItem booruItem;
-  final bool isStandalone;
-  final Booru? customBooru;
+  final Booru booru;
+  final bool isViewed;
 
   @override
   State<ImageViewer> createState() => ImageViewerState();
@@ -37,19 +36,18 @@ class ImageViewer extends StatefulWidget {
 
 class ImageViewerState extends State<ImageViewer> {
   final settingsHandler = SettingsHandler.instance;
-  final searchHandler = SearchHandler.instance;
   final viewerHandler = ViewerHandler.instance;
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
 
   final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
-  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true),
-      isLoaded = ValueNotifier(false),
-      isViewed = ValueNotifier(false),
-      isFromCache = ValueNotifier(false),
-      isZoomed = ValueNotifier(false),
-      isStopped = ValueNotifier(false);
+  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true);
+  final ValueNotifier<bool> isLoaded = ValueNotifier(false);
+  final ValueNotifier<bool> isViewed = ValueNotifier(false);
+  final ValueNotifier<bool> isFromCache = ValueNotifier(false);
+  final ValueNotifier<bool> isZoomed = ValueNotifier(false);
+  final ValueNotifier<bool> isStopped = ValueNotifier(false);
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   final ValueNotifier<List<String>> stopReason = ValueNotifier([]);
 
@@ -59,18 +57,6 @@ class ImageViewerState extends State<ImageViewer> {
   String imageFolder = 'media';
   int? widthLimit;
   CancelToken? cancelToken;
-
-  @override
-  void didUpdateWidget(ImageViewer oldWidget) {
-    // force redraw on item data change
-    if (oldWidget.booruItem != widget.booruItem) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        killLoading([]);
-        initViewer(false);
-      });
-    }
-    super.didUpdateWidget(oldWidget);
-  }
 
   void onSize(int? size) {
     // TODO find a way to stop loading based on size when caching is enabled
@@ -124,14 +110,10 @@ class ImageViewerState extends State<ImageViewer> {
   @override
   void initState() {
     super.initState();
-    viewerHandler.addViewed(widget.key);
 
-    isViewed.value =
-        widget.isStandalone ||
-        (settingsHandler.appMode.value.isMobile
-            ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
-            : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL);
-    searchHandler.viewedIndex.addListener(indexListener);
+    isViewed.value = widget.isViewed;
+
+    viewerHandler.addViewed(widget.key);
 
     // debug output
     viewController.outputStateStream.listen(onViewStateChanged);
@@ -146,17 +128,25 @@ class ImageViewerState extends State<ImageViewer> {
     }
   }
 
-  void indexListener() {
-    final bool prevViewed = isViewed.value;
-    final bool isCurrentIndex = searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem);
-    final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-
-    isViewed.value = settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem;
-
-    if (prevViewed != isViewed.value && !isViewed.value) {
-      // reset zoom if not viewed
-      resetZoom();
+  @override
+  void didUpdateWidget(ImageViewer oldWidget) {
+    // force redraw on item data change
+    if (oldWidget.booruItem != widget.booruItem) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        killLoading([]);
+        initViewer(false);
+      });
     }
+
+    if (oldWidget.isViewed != widget.isViewed) {
+      isViewed.value = widget.isViewed;
+      if (!isViewed.value) {
+        // reset zoom if not viewed
+        resetZoom();
+      }
+    }
+
+    super.didUpdateWidget(oldWidget);
   }
 
   bool get useFullImage => settingsHandler.galleryMode == 'Full Res'
@@ -261,7 +251,7 @@ class ImageViewerState extends State<ImageViewer> {
             url,
             cancelToken: cancelToken,
             headers: await Tools.getFileCustomHeaders(
-              widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+              widget.booru,
               checkForReferer: true,
             ),
             withCache: settingsHandler.mediaCache,
@@ -276,7 +266,7 @@ class ImageViewerState extends State<ImageViewer> {
             url,
             cancelToken: cancelToken,
             headers: await Tools.getFileCustomHeaders(
-              widget.isStandalone ? widget.customBooru : searchHandler.currentBooru,
+              widget.booru,
               checkForReferer: true,
             ),
             withCache: settingsHandler.mediaCache,
@@ -322,8 +312,6 @@ class ImageViewerState extends State<ImageViewer> {
   @override
   void dispose() {
     disposables();
-
-    searchHandler.viewedIndex.removeListener(indexListener);
 
     viewerHandler.removeViewed(widget.key);
     super.dispose();
@@ -401,8 +389,6 @@ class ImageViewerState extends State<ImageViewer> {
 
   @override
   Widget build(BuildContext context) {
-    // print('!!! Build media ${searchHandler.getItemIndex(widget.booruItem)} $isViewed !!!');
-
     return Material(
       // without this every text element will have broken styles on first frames
       color: Colors.transparent,

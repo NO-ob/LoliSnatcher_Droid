@@ -247,7 +247,14 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
                             late Widget itemWidget;
                             if (isImage) {
-                              itemWidget = ImageViewer(item, key: item.key);
+                              itemWidget = Obx(
+                                () => ImageViewer(
+                                  item,
+                                  booru: searchHandler.currentBooru,
+                                  isViewed: searchHandler.viewedIndex.value == index,
+                                  key: item.key,
+                                ),
+                              );
                             } else if (isVideo) {
                               if (settingsHandler.disableVideo) {
                                 itemWidget = const Center(
@@ -255,7 +262,15 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                                 );
                               } else {
                                 if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
-                                  itemWidget = VideoViewer(item, enableFullscreen: true, key: item.key);
+                                  itemWidget = Obx(
+                                    () => VideoViewer(
+                                      item,
+                                      booru: searchHandler.currentBooru,
+                                      isViewed: searchHandler.viewedIndex.value == index,
+                                      enableFullscreen: true,
+                                      key: item.key,
+                                    ),
+                                  );
                                 } else {
                                   itemWidget = VideoViewerPlaceholder(item: item);
                                 }
