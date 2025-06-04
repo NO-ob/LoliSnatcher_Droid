@@ -127,7 +127,9 @@ class _TagViewState extends State<TagView> {
       }
       loadingUpdate = false;
       setState(() {});
-      parseSortGroupTags();
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => parseSortGroupTags(),
+      );
     }
   }
 
