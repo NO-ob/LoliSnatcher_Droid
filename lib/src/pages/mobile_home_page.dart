@@ -253,8 +253,7 @@ class MainDrawer extends StatelessWidget {
                     }),
                     //
                     Obx(() {
-                      if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) &&
-                          settingsHandler.enabledLogTypes.isNotEmpty) {
+                      if (settingsHandler.isDebug.value || EnvironmentConfig.isTesting) {
                         return SettingsButton(
                           name: 'Open Logger',
                           icon: const Icon(Icons.print),

@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -297,8 +298,14 @@ class _DebugPageState extends State<DebugPage> {
 
               SettingsButton(
                 name: 'Logger',
-                icon: const Icon(Icons.print),
-                page: () => const LoggerPage(),
+                action: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => LoggerViewPage(talker: Logger.talker),
+                    ),
+                  );
+                },
+                trailingIcon: const Icon(Icons.print),
               ),
 
               SettingsButton(

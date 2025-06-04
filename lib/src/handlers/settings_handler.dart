@@ -64,7 +64,6 @@ class SettingsHandler {
 
   // runtime settings vars
   bool hasHydrus = false;
-  final RxList<LogTypes> enabledLogTypes = RxList.from(EnvironmentConfig.isTesting ? [...LogTypes.values] : []);
   final RxString discordURL = RxString(Constants.discordURL);
 
   // debug toggles
@@ -426,10 +425,6 @@ class SettingsHandler {
     'lovedTags': {
       'type': 'stringList',
       'default': <String>[],
-    },
-    'enabledLogTypes': {
-      'type': 'logTypesList',
-      'default': <LogTypes>[],
     },
 
     // int
@@ -848,17 +843,6 @@ class SettingsHandler {
             }
           }
 
-        case 'logTypesList':
-          if (toJSON) {
-            return (value as List<LogTypes>).map((el) => el.toString()).toList();
-          } else {
-            if (value is List) {
-              return List<String>.from(value).map(LogTypes.fromString).toList();
-            } else {
-              return settingParams['default'];
-            }
-          }
-
         case 'theme':
           if (toJSON) {
             return (value as ThemeItem).name;
@@ -1129,8 +1113,6 @@ class SettingsHandler {
         return useLockscreen;
       case 'blurOnLeave':
         return blurOnLeave;
-      case 'enabledLogTypes':
-        return enabledLogTypes;
 
       case 'prefBooru':
         return prefBooru;
@@ -1393,9 +1375,6 @@ class SettingsHandler {
       case 'allowSelfSignedCerts':
         allowSelfSignedCerts = validatedValue;
         break;
-      case 'enabledLogTypes':
-        enabledLogTypes.value = validatedValue;
-        break;
       case 'wakeLockEnabled':
         wakeLockEnabled = validatedValue;
         break;
@@ -1547,7 +1526,6 @@ class SettingsHandler {
       'cacheSize': validateValue('cacheSize', null, toJSON: true),
       'autoLockTimeout': validateValue('autoLockTimeout', null, toJSON: true),
       'allowSelfSignedCerts': validateValue('allowSelfSignedCerts', null, toJSON: true),
-      'enabledLogTypes': validateValue('enabledLogTypes', null, toJSON: true),
       'wakeLockEnabled': validateValue('wakeLockEnabled', null, toJSON: true),
       'tagTypeFetchEnabled': validateValue('tagTypeFetchEnabled', null, toJSON: true),
       'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
@@ -1764,9 +1742,6 @@ class SettingsHandler {
         s: s,
       );
     }
-
-    // Force enable logging on test builds
-    enabledLogTypes.value = EnvironmentConfig.isTesting ? [...LogTypes.values] : [...enabledLogTypes.value];
 
     // force mobile app mode, until we redo UI for desktop and start doing builds again
     appMode.value = AppMode.Mobile;

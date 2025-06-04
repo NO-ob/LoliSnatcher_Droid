@@ -180,7 +180,6 @@ class SettingsPage extends StatelessWidget {
                 },
                 trailingIcon: const Icon(Icons.exit_to_app),
               ),
-              const LogsEnabledWarning(),
               Obx(() {
                 if (settingsHandler.isDebug.value) {
                   return SettingsButton(
@@ -275,44 +274,5 @@ class _VersionButtonState extends State<VersionButton> {
       },
       drawBottomBorder: false,
     );
-  }
-}
-
-class LogsEnabledWarning extends StatelessWidget {
-  const LogsEnabledWarning({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final enabledLogTypes = [
-        ...SettingsHandler.instance.enabledLogTypes,
-      ];
-
-      if (enabledLogTypes.isEmpty) {
-        return const SizedBox.shrink();
-      }
-
-      return SettingsButton(
-        name: 'You have enabled logging for:',
-        subtitle: Text(
-          '${enabledLogTypes.map((e) => e.toString())}',
-          style: const TextStyle(fontSize: 12),
-        ),
-        icon: const Icon(Icons.warning_amber, color: Colors.yellow),
-        action: () {
-          FlashElements.showSnackbar(
-            context: context,
-            title: const Text(
-              'Logging enabled',
-              style: TextStyle(fontSize: 18),
-            ),
-            content: const Text('You can disable logging in the debug settings'),
-            leadingIcon: Icons.warning_amber,
-            leadingIconColor: Colors.yellow,
-            sideColor: Colors.yellow,
-          );
-        },
-      );
-    });
   }
 }
