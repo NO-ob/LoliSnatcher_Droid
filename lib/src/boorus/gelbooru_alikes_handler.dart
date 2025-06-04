@@ -440,6 +440,8 @@ class GelbooruAlikesHandler extends BooruHandler {
     }
   }
 
+  //
+
   @override
   String? get metatagsCheatSheetLink => isR34xxx
       ? 'https://rule34.xxx/index.php?page=help&topic=cheatsheet'
