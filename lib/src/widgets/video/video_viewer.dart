@@ -715,100 +715,104 @@ class VideoViewerState extends State<VideoViewer> {
                   ),
           ),
           //
-          AnimatedSwitcher(
-            duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 200),
-            child: isVideoInited
-                ? Listener(
-                    onPointerSignal: (pointerSignal) {
-                      if (SettingsHandler.isDesktopPlatform && pointerSignal is PointerScrollEvent) {
-                        scrollZoomImage(pointerSignal.scrollDelta.dy);
-                      }
-                    },
-                    child: Stack(
-                      children: [
-                        ImageFiltered(
-                          enabled: settingsHandler.blurImages,
-                          imageFilter: ImageFilter.blur(
-                            sigmaX: 30,
-                            sigmaY: 30,
-                            tileMode: TileMode.decal,
-                          ),
-                          child: PhotoView.customChild(
-                            childSize: childSize,
-                            customSize: MediaQuery.sizeOf(context),
-                            backgroundDecoration: const BoxDecoration(
-                              color: Colors.transparent,
+          Positioned.fill(
+            child: AnimatedSwitcher(
+              duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 200),
+              child: isVideoInited
+                  ? Listener(
+                      onPointerSignal: (pointerSignal) {
+                        if (SettingsHandler.isDesktopPlatform && pointerSignal is PointerScrollEvent) {
+                          scrollZoomImage(pointerSignal.scrollDelta.dy);
+                        }
+                      },
+                      child: Stack(
+                        children: [
+                          ImageFiltered(
+                            enabled: settingsHandler.blurImages,
+                            imageFilter: ImageFilter.blur(
+                              sigmaX: 30,
+                              sigmaY: 30,
+                              tileMode: TileMode.decal,
                             ),
-                            minScale: PhotoViewComputedScale.contained,
-                            maxScale: PhotoViewComputedScale.covered * 8,
-                            initialScale: PhotoViewComputedScale.contained,
-                            basePosition: Alignment.center,
-                            controller: viewController,
-                            scaleStateController: scaleController,
-                            enableRotation: settingsHandler.allowRotation,
-                            child: ValueListenableBuilder(
-                              valueListenable: localAuthHandler.isAuthenticated,
-                              builder: (context, isAuthenticated, child) {
-                                if (isAuthenticated != false) {
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    pauseCheckTimer?.cancel();
-                                  });
-
-                                  return child!;
-                                } else {
-                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    pauseOnAppLock();
-                                  });
-
-                                  return const Center(child: CircularProgressIndicator());
-                                }
-                              },
-                              child: Chewie(controller: chewieController.value!),
-                            ),
-                          ),
-                        ),
-                        ChewieControllerProvider(
-                          controller: chewieController.value!,
-                          child: TransparentPointer(
-                            child: SafeArea(
-                              top: false,
+                            child: PhotoView.customChild(
+                              childSize: childSize,
+                              customSize: MediaQuery.sizeOf(context),
+                              backgroundDecoration: const BoxDecoration(
+                                color: Colors.transparent,
+                              ),
+                              minScale: PhotoViewComputedScale.contained,
+                              maxScale: PhotoViewComputedScale.covered * 8,
+                              initialScale: PhotoViewComputedScale.contained,
+                              basePosition: Alignment.center,
+                              controller: viewController,
+                              scaleStateController: scaleController,
+                              enableRotation: settingsHandler.allowRotation,
                               child: ValueListenableBuilder(
-                                valueListenable: isViewed,
-                                builder: (context, isViewed, child) {
-                                  return ValueListenableBuilder(
-                                    valueListenable: localAuthHandler.isAuthenticated,
-                                    builder: (context, isAuthenticated, _) {
-                                      return AnimatedSwitcher(
-                                        duration: const Duration(milliseconds: 200),
-                                        child: (isViewed && isAuthenticated != false) ? child : const SizedBox.shrink(),
-                                      );
-                                    },
-                                  );
+                                valueListenable: localAuthHandler.isAuthenticated,
+                                builder: (context, isAuthenticated, child) {
+                                  if (isAuthenticated != false) {
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      pauseCheckTimer?.cancel();
+                                    });
+
+                                    return child!;
+                                  } else {
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      pauseOnAppLock();
+                                    });
+
+                                    return const Center(child: CircularProgressIndicator());
+                                  }
                                 },
+                                child: Chewie(controller: chewieController.value!),
+                              ),
+                            ),
+                          ),
+                          ChewieControllerProvider(
+                            controller: chewieController.value!,
+                            child: TransparentPointer(
+                              child: SafeArea(
+                                top: false,
                                 child: ValueListenableBuilder(
-                                  // without this there will be two instances of LoliControls
-                                  // which will cancel each other's actions (i.e. long tap to fast forward)
-                                  valueListenable: viewerHandler.isFullscreen,
-                                  builder: (context, isFullscreen, child) {
-                                    return isFullscreen ? const SizedBox.shrink() : child!;
+                                  valueListenable: isViewed,
+                                  builder: (context, isViewed, child) {
+                                    return ValueListenableBuilder(
+                                      valueListenable: localAuthHandler.isAuthenticated,
+                                      builder: (context, isAuthenticated, _) {
+                                        return AnimatedSwitcher(
+                                          duration: const Duration(milliseconds: 200),
+                                          child: (isViewed && isAuthenticated != false)
+                                              ? child
+                                              : const SizedBox.shrink(),
+                                        );
+                                      },
+                                    );
                                   },
                                   child: ValueListenableBuilder(
-                                    valueListenable: isZoomed,
-                                    builder: (context, isZoomed, _) {
-                                      return LoliControls(
-                                        useLongTapFastForward: !isZoomed && settingsHandler.longTapFastForwardVideo,
-                                      );
+                                    // without this there will be two instances of LoliControls
+                                    // which will cancel each other's actions (i.e. long tap to fast forward)
+                                    valueListenable: viewerHandler.isFullscreen,
+                                    builder: (context, isFullscreen, child) {
+                                      return isFullscreen ? const SizedBox.shrink() : child!;
                                     },
+                                    child: ValueListenableBuilder(
+                                      valueListenable: isZoomed,
+                                      builder: (context, isZoomed, _) {
+                                        return LoliControls(
+                                          useLongTapFastForward: !isZoomed && settingsHandler.longTapFastForwardVideo,
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                : const SizedBox.shrink(),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
           ),
         ],
       ),

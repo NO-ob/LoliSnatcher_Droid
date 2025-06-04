@@ -2130,7 +2130,7 @@ class SettingsHandler {
         sideColor: Colors.green,
         leadingIcon: Icons.update,
         leadingIconColor: Colors.green,
-        actionsBuilder: (controller) {
+        actionsBuilder: (context, controller) {
           return [
             ElevatedButton.icon(
               onPressed: () {

@@ -841,7 +841,7 @@ class _TagViewState extends State<TagView> {
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.fiber_new,
                         sideColor: Colors.green,
-                        primaryActionBuilder: (controller) {
+                        primaryActionBuilder: (context, controller) {
                           return Row(
                             children: [
                               IconButton(

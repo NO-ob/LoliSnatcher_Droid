@@ -114,8 +114,8 @@ class FlashElements {
     FlashPosition position = FlashPosition.bottom,
     bool asDialog = false,
     bool ignoreDesktopCheck = false,
-    List<Widget>? Function(FlashController)? actionsBuilder,
-    Widget? Function(FlashController)? primaryActionBuilder,
+    List<Widget>? Function(BuildContext, FlashController)? actionsBuilder,
+    Widget? Function(BuildContext, FlashController)? primaryActionBuilder,
   }) async {
     // do nothing if in test mode
     if (Tools.isTestMode) {
@@ -215,9 +215,9 @@ class FlashElements {
                       ),
                   shouldIconPulse: shouldLeadingPulse,
                   primaryAction: primaryActionBuilder != null
-                      ? primaryActionBuilder(controller)
+                      ? primaryActionBuilder(context, controller)
                       : _defaultPrimaryAction(themeData, controller),
-                  actions: actionsBuilder != null ? actionsBuilder(controller) : null,
+                  actions: actionsBuilder != null ? actionsBuilder(context, controller) : null,
                 ),
               ),
             ),
@@ -231,7 +231,7 @@ class FlashElements {
       context: contextToUse,
       duration: duration,
       persistent: true, // true - toast is not a part of navigation tree
-      builder: (_, controller) {
+      builder: (context, controller) {
         addController(usedKey, controller);
 
         return FlashBar(
@@ -281,9 +281,9 @@ class FlashElements {
               ),
           shouldIconPulse: shouldLeadingPulse,
           primaryAction: primaryActionBuilder != null
-              ? primaryActionBuilder(controller)
+              ? primaryActionBuilder(context, controller)
               : _defaultPrimaryAction(themeData, controller),
-          actions: actionsBuilder != null ? actionsBuilder(controller) : null,
+          actions: actionsBuilder != null ? actionsBuilder(context, controller) : null,
         );
       },
     );

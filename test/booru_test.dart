@@ -15,6 +15,7 @@ import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34us_handler.dart';
 import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/realbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
@@ -51,11 +52,16 @@ Future<void> main() async {
 
   group('booru tests', () {
     test('BooruOnRailsHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('twibooru', BooruType.BooruOnRails, '', 'https://twibooru.org', ''));
+      final BooruHandler booruHandler = await testBooru(
+        Booru('twibooru', BooruType.BooruOnRails, '', 'https://twibooru.org', ''),
+      );
       expect(booruHandler, isA<BooruOnRailsHandler>());
     });
     test('DanbooruHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('danbooru', BooruType.Danbooru, '', 'https://danbooru.donmai.us/', ''), hardFetchedLength: false);
+      final BooruHandler booruHandler = await testBooru(
+        Booru('danbooru', BooruType.Danbooru, '', 'https://danbooru.donmai.us/', ''),
+        hardFetchedLength: false,
+      );
       expect(booruHandler, isA<DanbooruHandler>());
     });
     test('e621Handler', () async {
@@ -65,46 +71,69 @@ Future<void> main() async {
 
     group('GelbooruAlikesHandler(s)', () {
       test('Rule34xxx', () async {
-        final BooruHandler booruHandler = await testBooru(Booru('rule34', BooruType.Gelbooru, '', 'https://rule34.xxx', ''), hardFetchedLength: false);
+        final BooruHandler booruHandler = await testBooru(
+          Booru('rule34', BooruType.Gelbooru, '', 'https://rule34.xxx', ''),
+          hardFetchedLength: false,
+        );
         expect(booruHandler, isA<GelbooruAlikesHandler>());
       });
       test('Safebooru', () async {
-        final BooruHandler booruHandler = await testBooru(Booru('safebooru', BooruType.Gelbooru, '', 'https://safebooru.org', ''));
-        expect(booruHandler, isA<GelbooruAlikesHandler>());
-      });
-      test('Realbooru', () async {
-        // TODO first page doesn't give correct amount of items? api side problem?
-        final BooruHandler booruHandler = await testBooru(Booru('realbooru', BooruType.Gelbooru, '', 'https://realbooru.com', ''), hardFetchedLength: false);
+        final BooruHandler booruHandler = await testBooru(
+          Booru('safebooru', BooruType.Gelbooru, '', 'https://safebooru.org', ''),
+        );
         expect(booruHandler, isA<GelbooruAlikesHandler>());
       });
     });
+    test('Realbooru', () async {
+      final BooruHandler booruHandler = await testBooru(
+        Booru('realbooru', BooruType.Realbooru, '', 'https://realbooru.com', ''),
+        hardFetchedLength: false,
+      );
+      expect(booruHandler, isA<RealbooruHandler>());
+    });
     test('GelbooruHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('gelbooru', BooruType.Gelbooru, '', 'https://gelbooru.com', ''));
+      final BooruHandler booruHandler = await testBooru(
+        Booru('gelbooru', BooruType.Gelbooru, '', 'https://gelbooru.com', ''),
+      );
       expect(booruHandler, isA<GelbooruHandler>());
     });
     test('GelbooruV1Handler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('os tan', BooruType.GelbooruV1, '', 'https://os-tan.booru.org', ''), hardFetchedLength: false);
+      final BooruHandler booruHandler = await testBooru(
+        Booru('os tan', BooruType.GelbooruV1, '', 'https://os-tan.booru.org', ''),
+        hardFetchedLength: false,
+      );
       expect(booruHandler, isA<GelbooruV1Handler>());
     });
     test('InkBunnyHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('inkbunny', BooruType.InkBunny, '', 'https://inkbunny.net', ''), hardFetchedLength: false);
+      final BooruHandler booruHandler = await testBooru(
+        Booru('inkbunny', BooruType.InkBunny, '', 'https://inkbunny.net', ''),
+        hardFetchedLength: false,
+      );
       expect(booruHandler, isA<InkBunnyHandler>());
     });
     test('MoebooruHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('lolibooru', BooruType.Moebooru, '', 'https://lolibooru.moe', ''));
+      final BooruHandler booruHandler = await testBooru(
+        Booru('lolibooru', BooruType.Moebooru, '', 'https://lolibooru.moe', ''),
+      );
       expect(booruHandler, isA<MoebooruHandler>());
     });
     test('NyanPalsHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('nyanpals', BooruType.NyanPals, '', 'https://nyanpals.com', ''));
+      final BooruHandler booruHandler = await testBooru(
+        Booru('nyanpals', BooruType.NyanPals, '', 'https://nyanpals.com', ''),
+      );
       expect(booruHandler, isA<NyanPalsHandler>());
     });
     test('PhilomenaHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('derpibooru', BooruType.Philomena, '', 'https://derpibooru.org', ''));
+      final BooruHandler booruHandler = await testBooru(
+        Booru('derpibooru', BooruType.Philomena, '', 'https://derpibooru.org', ''),
+      );
       expect(booruHandler, isA<PhilomenaHandler>());
     });
     test('R34HentaiHandler', () async {
       // requires USA proxy
-      final BooruHandler booruHandler = await testBooru(Booru('r34hentai', BooruType.R34Hentai, '', 'https://r34hentai.com', ''));
+      final BooruHandler booruHandler = await testBooru(
+        Booru('r34hentai', BooruType.R34Hentai, '', 'https://r34hentai.com', ''),
+      );
       expect(booruHandler, isA<PhilomenaHandler>());
     });
     test('R34USHandler', () async {
@@ -113,29 +142,43 @@ Future<void> main() async {
     });
     test('SankakuHandler', () async {
       // TODO doesn't parse all items correctly?
-      final BooruHandler booruHandler = await testBooru(Booru('sankaku', BooruType.Sankaku, '', 'https://sankakuapi.com', ''));
+      final BooruHandler booruHandler = await testBooru(
+        Booru('sankaku', BooruType.Sankaku, '', 'https://sankakuapi.com', ''),
+      );
       expect(booruHandler, isA<SankakuHandler>());
     });
     test('IdolSankakuHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('idolsankaku', BooruType.IdolSankaku, '', 'https://iapi.sankakucomplex.com', ''));
+      final BooruHandler booruHandler = await testBooru(
+        Booru('idolsankaku', BooruType.IdolSankaku, '', 'https://iapi.sankakucomplex.com', ''),
+      );
       expect(booruHandler, isA<IdolSankakuHandler>());
     });
     test('ShimmieHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('r34 paheal', BooruType.Shimmie, '', 'https://rule34.paheal.net', ''));
+      final BooruHandler booruHandler = await testBooru(
+        Booru('r34 paheal', BooruType.Shimmie, '', 'https://rule34.paheal.net', ''),
+      );
       expect(booruHandler, isA<ShimmieHandler>());
     });
     test('SzurubooruHandler', () async {
-      final BooruHandler booruHandler =
-          await testBooru(Booru('xivbooru', BooruType.Szurubooru, '', 'http://xivbooru.com', ''), customSuggestionsInput: 'tat'); // tat[too]
+      final BooruHandler booruHandler = await testBooru(
+        Booru('xivbooru', BooruType.Szurubooru, '', 'http://xivbooru.com', ''),
+        customSuggestionsInput: 'tat',
+      ); // tat[too]
       expect(booruHandler, isA<SzurubooruHandler>());
     });
     group('WorldXyzHandler', () {
       test('World', () async {
-        final BooruHandler booruHandler = await testBooru(Booru('r34world', BooruType.World, '', 'https://rule34.world', ''), hardFetchedLength: false);
+        final BooruHandler booruHandler = await testBooru(
+          Booru('r34world', BooruType.World, '', 'https://rule34.world', ''),
+          hardFetchedLength: false,
+        );
         expect(booruHandler, isA<WorldXyzHandler>());
       });
       test('Xyz', () async {
-        final BooruHandler booruHandler = await testBooru(Booru('r34xyz', BooruType.World, '', 'https://rule34.xyz', ''), hardFetchedLength: false);
+        final BooruHandler booruHandler = await testBooru(
+          Booru('r34xyz', BooruType.World, '', 'https://rule34.xyz', ''),
+          hardFetchedLength: false,
+        );
         expect(booruHandler, isA<WorldXyzHandler>());
       });
     });
@@ -152,7 +195,10 @@ Future<void> main() async {
       expect(booruHandler, isA<AGNPHHandler>());
     });
     test('RainbooruHandler', () async {
-      final BooruHandler booruHandler = await testBooru(Booru('rainbooru', BooruType.Rainbooru, '', 'https://www.rainbooru.org', ''), hardFetchedLength: false);
+      final BooruHandler booruHandler = await testBooru(
+        Booru('rainbooru', BooruType.Rainbooru, '', 'https://www.rainbooru.org', ''),
+        hardFetchedLength: false,
+      );
       expect(booruHandler, isA<RainbooruHandler>());
     });
   });
