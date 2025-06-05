@@ -133,7 +133,7 @@ class FlashElements {
 
     final BuildContext contextToUse = (context != null && context.mounted)
         ? context
-        : NavigationHandler.instance.navigatorKey.currentContext!;
+        : NavigationHandler.instance.navContext;
     // TODO can this cause an exception? maybe change to WidgetsBinding ?
     final screenSize = MediaQuery.sizeOf(contextToUse);
     // Get theme here instead of inside the dialogs themselves, since the dialog could close after the page is changed

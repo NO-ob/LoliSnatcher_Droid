@@ -63,11 +63,11 @@ void main() async {
   // load settings before first render to get theme data early
   NavigationHandler.register();
   ViewerHandler.register();
-  await SettingsHandler.register().initialize();
   SearchHandler.register();
   SnatchHandler.register();
   TagHandler.register();
   NotifyHandler.register();
+  await SettingsHandler.register().initialize();
   LocalAuthHandler.register();
 
   await ServiceHandler.setSystemUiVisibility(true);
@@ -249,7 +249,7 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
       if (currentMode.refreshRate > maxFps.value) {
         maxFps.value = currentMode.refreshRate.round();
       }
-      Logger.Inst().log('Set max fps to $maxFps', 'MainApp', 'setMaxFPS', null);
+      Logger.Inst().log('Set max fps to ${maxFps.value}', 'MainApp', 'setMaxFPS', null);
     }
   }
 

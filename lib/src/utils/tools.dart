@@ -221,7 +221,7 @@ class Tools {
             hasCaptchaContent)) {
       captchaScreenActive = true;
       await Navigator.push(
-        NavigationHandler.instance.navigatorKey.currentContext!,
+        NavigationHandler.instance.navContext,
         MaterialPageRoute(
           builder: (context) => InAppWebviewView(
             initialUrl: '${uri.scheme}://$host',

@@ -119,8 +119,7 @@ class ImageViewerState extends State<ImageViewer> {
     viewController.outputStateStream.listen(onViewStateChanged);
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
-    // calcWidthLimit(MediaQuery.sizeOf(context).width);
-    calcWidthLimit(WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width);
+    calcWidthLimit(MediaQuery.sizeOf(NavigationHandler.instance.navContext).width);
 
     if (isFirstBuild.value) {
       isFirstBuild.value = false;
@@ -172,7 +171,7 @@ class ImageViewerState extends State<ImageViewer> {
 
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
-    final MediaQueryData mQuery = MediaQuery.of(NavigationHandler.instance.navigatorKey.currentContext!);
+    final mQuery = MediaQuery.of(NavigationHandler.instance.navContext);
     widthLimit = settingsHandler.disableImageScaling ? null : (mQuery.size.width * mQuery.devicePixelRatio * 2).round();
 
     mainProvider.value ??= await getImageProvider();
@@ -218,7 +217,7 @@ class ImageViewerState extends State<ImageViewer> {
 
     widthLimit = settingsHandler.disableImageScaling
         ? null
-        : (maxWidth * MediaQuery.devicePixelRatioOf(context) * 2).round();
+        : (maxWidth * MediaQuery.devicePixelRatioOf(NavigationHandler.instance.navContext) * 2).round();
   }
 
   Future<ImageProvider> getImageProvider() async {
