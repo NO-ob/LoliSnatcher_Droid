@@ -424,6 +424,10 @@ class VideoViewerState extends State<VideoViewer> {
       } else {
         ServiceHandler.setVolumeButtons(viewerHandler.displayAppbar.value); // same as app bar value
       }
+    } else {
+      if (videoController.value?.value.isPlaying == true) {
+        videoController.value?.pause();
+      }
     }
 
     if (!isStopped.value && videoController.value?.value.hasError == true) {
@@ -519,7 +523,7 @@ class VideoViewerState extends State<VideoViewer> {
     );
 
     if (settingsHandler.startVideosMuted) {
-      await chewieController.value!.setVolume(0);
+      await videoController.value?.setVolume(0);
     }
 
     if (!forceCache.value) {
@@ -542,6 +546,10 @@ class VideoViewerState extends State<VideoViewer> {
     }
 
     await Future.wait([videoController.value!.initialize()]);
+
+    if (settingsHandler.autoPlayEnabled) {
+      await videoController.value!.play();
+    }
 
     forceCache.value = false;
 
