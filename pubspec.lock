@@ -117,10 +117,10 @@ packages:
     dependency: transitive
     description:
       name: checked_yaml
-      sha256: feb6bed21949061731a7a75fc5d2aa727cf160b91af9a3e464c5e3a32e28b5ff
+      sha256: "959525d3162f249993882720d52b7e0c833978df229be20702b33d48d91de70f"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   chewie:
     dependency: "direct main"
     description:
@@ -165,10 +165,10 @@ packages:
     dependency: "direct main"
     description:
       name: country_flags
-      sha256: "66726c7070d60c2f90c4a1d58980e9188fa04335d6287e98aef835461019c3c2"
+      sha256: "78a7bf8aabd7ae1a90087f0c517471ac9ebfe07addc652692f58da0f0f833196"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.0"
+    version: "3.3.0"
   cronet_http:
     dependency: transitive
     description:
@@ -825,14 +825,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.25"
-  json2yaml:
-    dependency: transitive
-    description:
-      name: json2yaml
-      sha256: da94630fbc56079426fdd167ae58373286f603371075b69bf46d848d63ba3e51
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
   json_annotation:
     dependency: transitive
     description:
@@ -966,10 +958,10 @@ packages:
     dependency: "direct main"
     description:
       name: material_color_utilities
-      sha256: afaac3ebbf67448ab81c891b8e1f2f4d3e7bc19aa36d269c0257b54bc0d9aa79
+      sha256: "9c337007e82b1889149c82ed242ed1cb24a66044e30979c44912381e9be4c48b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.12.0"
+    version: "0.13.0"
   media_kit:
     dependency: "direct main"
     description:
@@ -1365,18 +1357,18 @@ packages:
     dependency: "direct main"
     description:
       name: slang
-      sha256: a2422a1a60d17d37bce226467caf2487c975804255e3d2d10bc4078c442b1a8c
+      sha256: "6668a08355b370d5cb5446fc869c4492ed23c6433934fe88228876460fedac22"
       url: "https://pub.dev"
     source: hosted
-    version: "4.6.0"
+    version: "4.7.2"
   slang_flutter:
     dependency: "direct main"
     description:
       name: slang_flutter
-      sha256: afd0058c027dd8a3ee9aab9dfabb828bd4e6b7207d50896dc5ec02c71d8f8b9f
+      sha256: fff13b6fc8b0378ee23856c4f9fd7f8e2777b430090681f4d19ab14c47de9bc6
       url: "https://pub.dev"
     source: hosted
-    version: "4.6.0"
+    version: "4.7.0"
   source_span:
     dependency: transitive
     description:
