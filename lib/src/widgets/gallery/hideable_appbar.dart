@@ -161,15 +161,19 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
       final bool isImageItem = item.mediaType.value.isImageOrAnimation;
       final bool isScaleButton = btn[0] == 'reloadnoscale';
-      final bool isScaleAllowed =
-          isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
+      final bool isScaleAllowed = isScaleButton
+          ? (isImageItem && !settingsHandler.disableImageScaling)
+          : true; // allow reloadnoscale button if not a video and scaling is not disabled
 
       final bool isQualityButton = btn[0] == 'toggle_quality';
-      final bool isQualityAllowed =
-          isQualityButton ? (isImageItem && item.sampleURL != item.fileURL) : true; // allow toggle_quality button if image and sample != full
+      final bool isQualityAllowed = isQualityButton
+          ? (isImageItem && item.sampleURL != item.fileURL)
+          : true; // allow toggle_quality button if image and sample != full
 
       final bool isFavButton = btn[0] == 'favourite';
-      final bool isFavAllowed = isFavButton ? settingsHandler.dbEnabled : true; // allow favourite button if db is enabled
+      final bool isFavAllowed = isFavButton
+          ? settingsHandler.dbEnabled
+          : true; // allow favourite button if db is enabled
 
       final bool isExtPlayer = btn[0] == 'external_player';
       final bool isExtPlayerAllowed = isExtPlayer ? (Platform.isAndroid && item.mediaType.value.isVideo) : true;
@@ -221,7 +225,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
       final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'autoscroll') != -1;
       final bool isSelectOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'select') != -1;
 
-      final bool isSelected = searchHandler.currentSelected.contains(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
+      final bool isSelected = searchHandler.currentSelected.contains(
+        searchHandler.currentFetched[searchHandler.viewedIndex.value],
+      );
 
       actions.add(
         PopupMenuButton(
@@ -315,7 +321,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
             duration: const Duration(milliseconds: 200),
             crossFadeState: isFav == true ? CrossFadeState.showFirst : CrossFadeState.showSecond,
             firstChild: const Icon(Icons.favorite),
-            secondChild: Icon(isFav == true ? Icons.favorite : (isFav == false ? Icons.favorite_border : CupertinoIcons.heart_slash)),
+            secondChild: Icon(
+              isFav == true ? Icons.favorite : (isFav == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
+            ),
           );
         });
       case 'share':
@@ -329,7 +337,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
         icon = Icons.refresh;
         break;
       case 'toggle_quality':
-        final bool isHq = settingsHandler.galleryMode == 'Full Res' ? !item.toggleQuality.value : item.toggleQuality.value;
+        final bool isHq = settingsHandler.galleryMode == 'Full Res'
+            ? !item.toggleQuality.value
+            : item.toggleQuality.value;
         icon = isHq ? Icons.high_quality : Icons.high_quality_outlined;
       case 'external_player':
         icon = Icons.exit_to_app;
@@ -404,7 +414,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
         }
 
         final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
-        final bool isBeingSnatched = snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;
+        final bool isBeingSnatched =
+            snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item &&
+            snatchHandler.total.value != 0;
         if (!isBeingSnatched) {
           return null;
         } else {
@@ -466,7 +478,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
         label = item.isNoScale.value ? 'Reload with scaling' : defaultLabel;
         break;
       case 'toggle_quality':
-        final bool isHq = settingsHandler.galleryMode == 'Full Res' ? !item.toggleQuality.value : item.toggleQuality.value;
+        final bool isHq = settingsHandler.galleryMode == 'Full Res'
+            ? !item.toggleQuality.value
+            : item.toggleQuality.value;
         label = isHq ? 'Load Sample Quality' : 'Load High Quality';
         break;
       default:
@@ -498,7 +512,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
         autoScrollState(!autoScroll);
         break;
       case 'snatch':
-        await getPerms();
+        if (!await setPermissions()) return;
+
         // call a function to save the currently viewed image when the save button is pressed
         snatchHandler.queue(
           [item],
@@ -577,7 +592,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
                         Navigator.of(context).pop();
                       },
                       leading: item.isSnatched.value == true ? const Icon(Icons.clear) : const Icon(Icons.check),
-                      title: item.isSnatched.value == true ? const Text('Drop snatched status') : const Text('Set snatched status'),
+                      title: item.isSnatched.value == true
+                          ? const Text('Drop snatched status')
+                          : const Text('Set snatched status'),
                     ),
                   //
                   const SizedBox(height: 16),
@@ -587,7 +604,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                     ),
                     onTap: () async {
-                      await getPerms();
+                      if (!await setPermissions()) return;
+
                       snatchHandler.queue(
                         [item],
                         searchHandler.currentBooru,
@@ -740,7 +758,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
                 if (alreadyLoadingSame)
                   const Text('Already downloading this file for sharing, do you want to abort?')
                 else
-                  const Text('Already downloading file for sharing, do you want to abort current file and share a new file?'),
+                  const Text(
+                    'Already downloading file for sharing, do you want to abort current file and share a new file?',
+                  ),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -822,7 +842,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
     if (path != null) {
       // File is already in cache - share from there
-      await ServiceHandler.loadShareFileIntent(path, '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}');
+      await ServiceHandler.loadShareFileIntent(
+        path,
+        '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}',
+      );
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
@@ -871,15 +894,23 @@ class _HideableAppBarState extends State<HideableAppBar> {
         },
       );
 
-      final File cacheFile = File(await imageWriter.getCachePath(item.fileURL, 'media', fileNameExtras: item.fileNameExtras) ?? '');
+      final File cacheFile = File(
+        await imageWriter.getCachePath(item.fileURL, 'media', fileNameExtras: item.fileNameExtras) ?? '',
+      );
       if (await cacheFile.exists()) {
         path = cacheFile.path;
-        await ServiceHandler.loadShareFileIntent(path, '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}');
+        await ServiceHandler.loadShareFileIntent(
+          path,
+          '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}',
+        );
       } else {
         FlashElements.showSnackbar(
           context: context,
           title: const Text('Error!', style: TextStyle(fontSize: 20)),
-          content: const Text('Something went wrong when saving the File before Sharing', style: TextStyle(fontSize: 16)),
+          content: const Text(
+            'Something went wrong when saving the File before Sharing',
+            style: TextStyle(fontSize: 16),
+          ),
           leadingIcon: Icons.warning_amber,
           leadingIconColor: Colors.red,
           sideColor: Colors.red,
@@ -1041,7 +1072,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
           child: Obx(
             () => AppBar(
               // toolbarHeight: widget.defaultHeight,
-              elevation: searchHandler.viewedIndex.value == 0 ? 0 : 0, // hack to force restate to rebuild actions // set to zero to disable a shadow behind
+              elevation: searchHandler.viewedIndex.value == 0
+                  ? 0
+                  : 0, // hack to force restate to rebuild actions // set to zero to disable a shadow behind
               backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,
               shadowColor: Colors.transparent,

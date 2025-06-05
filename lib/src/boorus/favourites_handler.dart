@@ -64,8 +64,10 @@ class FavouritesHandler extends BooruHandler {
     CancelToken? cancelToken,
   }) async {
     try {
-      final List<TagSuggestion> tags =
-          (await SettingsHandler.instance.dbHandler.getTags(input, limit)).map((t) => TagSuggestion(tag: t)).where((t) => t.tag.trim().isNotEmpty).toList();
+      final List<TagSuggestion> tags = (await SettingsHandler.instance.dbHandler.getTags(
+        input,
+        limit,
+      )).map((t) => TagSuggestion(tag: t)).where((t) => t.tag.trim().isNotEmpty).toList();
       return Right(tags);
     } catch (e, s) {
       return Left(

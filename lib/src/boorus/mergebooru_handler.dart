@@ -56,8 +56,18 @@ class MergebooruHandler extends BooruHandler {
     final Map<int, ({Booru booru, List<BooruItem> items})> tmpFetchedMap = {};
     int fetchedMax = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
-      final String currentTags =
-          tags.replaceAll(RegExp('(?!' '${i + 1}' r')\d+#[A-Za-z0-9\_\-~:]*'), '').replaceAll('  ', ' ').replaceAll(RegExp(r'\d+#'), '').trim();
+      final String currentTags = tags
+          .replaceAll(
+            RegExp(
+              '(?!'
+              '${i + 1}'
+              r')\d+#[A-Za-z0-9\_\-~:]*',
+            ),
+            '',
+          )
+          .replaceAll('  ', ' ')
+          .replaceAll(RegExp(r'\d+#'), '')
+          .trim();
       Logger.Inst().log('TAGS FOR #$i are: $currentTags', 'MergeBooruHandler', 'Search', LogTypes.booruHandlerInfo);
       booruHandlers[i].pageNum = pageNum + booruHandlerPageNums[i];
       final List<BooruItem> tmpFetched = (await booruHandlers[i].search(currentTags, null)) ?? [];
@@ -212,7 +222,12 @@ class MergebooruHandler extends BooruHandler {
       final factoryResults = BooruHandlerFactory().getBooruHandler([element], null);
       booruHandlers.add(factoryResults.booruHandler);
       booruHandlerPageNums.add(factoryResults.startingPage);
-      Logger.Inst().log('SETUP MERGE ADDING: ${element.name}', 'MergeBooruHandler', 'setupMerge', LogTypes.booruHandlerInfo);
+      Logger.Inst().log(
+        'SETUP MERGE ADDING: ${element.name}',
+        'MergeBooruHandler',
+        'setupMerge',
+        LogTypes.booruHandlerInfo,
+      );
     }
   }
 
@@ -228,8 +243,18 @@ class MergebooruHandler extends BooruHandler {
   Future<void> searchCount(String input) async {
     int result = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
-      final String currentTags =
-          input.replaceAll(RegExp('(?!' '${i + 1}' r')\d+#[A-Za-z0-9\_\-~:]*'), '').replaceAll('  ', ' ').replaceAll(RegExp(r'\d+#'), '').trim();
+      final String currentTags = input
+          .replaceAll(
+            RegExp(
+              '(?!'
+              '${i + 1}'
+              r')\d+#[A-Za-z0-9\_\-~:]*',
+            ),
+            '',
+          )
+          .replaceAll('  ', ' ')
+          .replaceAll(RegExp(r'\d+#'), '')
+          .trim();
       await booruHandlers[i].searchCount(currentTags);
       result += booruHandlers[i].totalCount.value;
     }

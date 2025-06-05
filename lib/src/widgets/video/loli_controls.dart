@@ -1,6 +1,7 @@
 // ignore_for_file: implementation_imports
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' hide e;
 
 import 'package:flutter/material.dart';
@@ -221,7 +222,14 @@ class _LoliControlsState extends State<LoliControls> {
                       Container(
                         width: 130,
                         alignment: Alignment.center,
-                        child: chewieController.isLive ? const Expanded(child: Text('LIVE', style: TextStyle(color: Colors.white))) : _buildPosition(iconColor),
+                        child: chewieController.isLive
+                            ? const Expanded(
+                                child: Text(
+                                  'LIVE',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              )
+                            : _buildPosition(iconColor),
                       ),
                     ],
                   ),
@@ -405,7 +413,11 @@ class _LoliControlsState extends State<LoliControls> {
             // color: Colors.yellow.withValues(alpha: 0.66),
             color: Colors.transparent,
             padding: EdgeInsets.only(
-              top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) + barHeight + 16,
+              top:
+                  MediaQuery.paddingOf(context).top +
+                  (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) +
+                  barHeight +
+                  16,
               bottom: MediaQuery.paddingOf(context).bottom + (isFullScreen ? 0 : (isTopAppbar ? kToolbarHeight : 0)),
             ),
             child: child,
@@ -436,7 +448,9 @@ class _LoliControlsState extends State<LoliControls> {
               Center(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 100),
-                  child: displayBufferingIndicator ? const CircularProgressIndicator(strokeWidth: 5) : const SizedBox.shrink(),
+                  child: displayBufferingIndicator
+                      ? const CircularProgressIndicator(strokeWidth: 5)
+                      : const SizedBox.shrink(),
                 ),
               ),
             ],
@@ -460,43 +474,47 @@ class _LoliControlsState extends State<LoliControls> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              {'isInit': _latestValue.isInitialized},
-              {'isPlaying': _latestValue.isPlaying},
-              {'isBuffering': _latestValue.isBuffering},
-              {'position': _latestValue.position.toString().replaceAll(RegExp(r'000$'), '')},
-              {'duration': _latestValue.duration.toString().replaceAll(RegExp(r'000$'), '')},
-              {'isCompleted': _latestValue.isCompleted},
-              {'volume': _latestValue.volume},
-              {'playbackSpeed': _latestValue.playbackSpeed},
-              {'isFullScreen': chewieController.isFullScreen},
-              {'aspectRatio': _latestValue.aspectRatio.toStringAsFixed(2)},
-              // ignore: prefer_interpolation_to_compose_strings
-              {'size': _latestValue.size.width.truncateTrailingZeroes(2) + 'x' + _latestValue.size.height.truncateTrailingZeroes(2)},
-              {'pointerCount': pointerCount},
-            ]
-                .map(
-                  (e) => Row(
-                    children: [
-                      Text(
-                        '${e.keys.first}: ',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.white,
-                        ),
+            children:
+                [
+                      {'isInit': _latestValue.isInitialized},
+                      {'isPlaying': _latestValue.isPlaying},
+                      {'isBuffering': _latestValue.isBuffering},
+                      {'position': _latestValue.position.toString().replaceAll(RegExp(r'000$'), '')},
+                      {'duration': _latestValue.duration.toString().replaceAll(RegExp(r'000$'), '')},
+                      {'isCompleted': _latestValue.isCompleted},
+                      {'volume': _latestValue.volume},
+                      {'playbackSpeed': _latestValue.playbackSpeed},
+                      {'isFullScreen': chewieController.isFullScreen},
+                      {'aspectRatio': _latestValue.aspectRatio.toStringAsFixed(2)},
+                      // ignore: prefer_interpolation_to_compose_strings
+                      {
+                        'size':
+                            '${_latestValue.size.width.truncateTrailingZeroes(2)}x${_latestValue.size.height.truncateTrailingZeroes(2)}',
+                      },
+                      {'pointerCount': pointerCount},
+                    ]
+                    .map(
+                      (e) => Row(
+                        children: [
+                          Text(
+                            '${e.keys.first}: ',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            e.values.first.toString(),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        e.values.first.toString(),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-                .toList(),
+                    )
+                    .toList(),
           ),
         ),
       );
@@ -656,22 +674,23 @@ class _LoliControlsState extends State<LoliControls> {
     final hoursString = hours >= 10
         ? '$hours'
         : hours == 0
-            ? '00'
-            : '0$hours';
+        ? '00'
+        : '0$hours';
 
     final minutesString = minutes >= 10
         ? '$minutes'
         : minutes == 0
-            ? '00'
-            : '0$minutes';
+        ? '00'
+        : '0$minutes';
 
     final secondsString = seconds >= 10
         ? '$seconds'
         : seconds == 0
-            ? '00'
-            : '0$seconds';
+        ? '00'
+        : '0$seconds';
 
-    final formattedTime = '${hoursString == '00' ? '' : '$hoursString:'}${minutesString == '00' ? '' : minutesString}:$secondsString';
+    final formattedTime =
+        '${hoursString == '00' ? '' : '$hoursString:'}${minutesString == '00' ? '' : minutesString}:$secondsString';
 
     return formattedTime;
   }
@@ -777,11 +796,47 @@ class _LoliControlsState extends State<LoliControls> {
     }
   }
 
+  /// Gets the current buffering state of the video player.
+  ///
+  /// For Android, it will use a workaround due to a [bug](https://github.com/flutter/flutter/issues/165149)
+  /// affecting the `video_player` plugin, preventing it from getting the
+  /// actual buffering state. This currently results in the `VideoPlayerController` always buffering,
+  /// thus breaking UI elements.
+  ///
+  /// For this, the actual buffer position is used to determine if the video is
+  /// buffering or not. See Issue [#912](https://github.com/fluttercommunity/chewie/pull/912) for more details.
+  bool getIsBuffering() {
+    final VideoPlayerValue value = controller.value;
+
+    if (Platform.isAndroid) {
+      if (value.isBuffering) {
+        // -> Check if we actually buffer, as android has a bug preventing to
+        //    get the correct buffering state from this single bool.
+        final int position = value.position.inMilliseconds;
+        // Special case, if the video is finished, we don't want to show the
+        // buffering indicator anymore
+        if (position >= value.duration.inMilliseconds) {
+          return false;
+        } else {
+          final int buffer = value.buffered.lastOrNull?.end.inMilliseconds ?? -1;
+          return position >= buffer;
+        }
+      } else {
+        // -> No buffering
+        return false;
+      }
+    }
+
+    return value.isBuffering;
+  }
+
   void _updateState() {
     if (!mounted) return;
 
+    final bool isBuffering = getIsBuffering();
+
     if (chewieController.progressIndicatorDelay != null) {
-      if (controller.value.isBuffering && !controller.value.isPlaying) {
+      if (isBuffering) {
         bufferingDisplayTimer ??= Timer(
           chewieController.progressIndicatorDelay!,
           bufferingTimerTimeout,
@@ -792,7 +847,7 @@ class _LoliControlsState extends State<LoliControls> {
         displayBufferingIndicator = false;
       }
     } else {
-      displayBufferingIndicator = controller.value.isBuffering && !controller.value.isPlaying;
+      displayBufferingIndicator = isBuffering;
     }
 
     setState(() {
@@ -876,7 +931,9 @@ class _LoliControlsState extends State<LoliControls> {
         }
 
         // Add to last skip amount if it's still visible
-        _lastDoubleTapAmount = (tapSide == _lastDoubleTapSide && !isAtVideoEdge) ? (_lastDoubleTapAmount + skipSeconds) : skipSeconds;
+        _lastDoubleTapAmount = (tapSide == _lastDoubleTapSide && !isAtVideoEdge)
+            ? (_lastDoubleTapAmount + skipSeconds)
+            : skipSeconds;
         _lastDoubleTapSide = tapSide;
       });
       _startDoubleTapTimer();
@@ -911,7 +968,8 @@ class _LoliControlsState extends State<LoliControls> {
 
   void onHitAreaLongPressMove(LongPressMoveUpdateDetails details) {
     setState(() {
-      longTapFastForwardSpeed = 2 +
+      longTapFastForwardSpeed =
+          2 +
           (double.tryParse(
                 (details.offsetFromOrigin.dx / (MediaQuery.sizeOf(context).width / 6)).toStringAsFixed(1),
               ) ??
@@ -981,7 +1039,8 @@ class _LoliControlsState extends State<LoliControls> {
         barHeight: 5,
         handleHeight: _hideStuff ? 3 : 6,
         drawShadow: true,
-        colors: chewieController.materialProgressColors ??
+        colors:
+            chewieController.materialProgressColors ??
             ChewieProgressColors(
               playedColor: Theme.of(context).colorScheme.secondary,
               handleColor: Theme.of(context).colorScheme.secondary,
@@ -1133,7 +1192,7 @@ class _PlaybackSpeedDialogState extends State<_PlaybackSpeedDialog> {
             const SizedBox(height: 12),
             ValueListenableBuilder(
               valueListenable: selectedIndex,
-              builder: (context, _, __) {
+              builder: (context, _, _) {
                 return SizedBox(
                   height: 50,
                   child: PageView.builder(
@@ -1162,8 +1221,8 @@ class _PlaybackSpeedDialogState extends State<_PlaybackSpeedDialog> {
                               '${widget.speeds[i].truncateTrailingZeroes(2)}x',
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: i == selectedIndex.value ? Theme.of(context).colorScheme.secondary : null,
-                                  ),
+                                color: i == selectedIndex.value ? Theme.of(context).colorScheme.secondary : null,
+                              ),
                             ),
                           ),
                         ),
@@ -1174,7 +1233,7 @@ class _PlaybackSpeedDialogState extends State<_PlaybackSpeedDialog> {
               },
             ),
             const SizedBox(height: 24),
-            SizedBox(height: MediaQuery.of(context).padding.bottom),
+            SizedBox(height: MediaQuery.paddingOf(context).bottom),
           ],
         ),
       ),

@@ -47,10 +47,25 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   //This function decides what media widget to return
   Widget getImageWidget() {
     if (item.mediaType.value.isImageOrAnimation) {
-      return ImageViewer(item, key: item.key);
+      return Obx(
+        () => ImageViewer(
+          item,
+          booru: searchHandler.currentBooru,
+          isViewed: searchHandler.viewedItem.value.fileURL == item.fileURL,
+          key: item.key,
+        ),
+      );
     } else if (item.mediaType.value.isVideo) {
       if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
-        return VideoViewer(item, enableFullscreen: true, key: item.key);
+        return Obx(
+          () => VideoViewer(
+            item,
+            booru: searchHandler.currentBooru,
+            isViewed: searchHandler.viewedItem.value.fileURL == item.fileURL,
+            enableFullscreen: true,
+            key: item.key,
+          ),
+        );
       } else {
         return VideoViewerPlaceholder(item: item);
       }
@@ -183,7 +198,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                   },
                   child: Obx(
                     () => Icon(
-                      item.isFavourite.value == true ? Icons.favorite : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
+                      item.isFavourite.value == true
+                          ? Icons.favorite
+                          : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
                     ),
                   ),
                 ),

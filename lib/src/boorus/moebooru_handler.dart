@@ -19,12 +19,12 @@ class MoebooruHandler extends BooruHandler {
 
   @override
   Map<String, TagType> get tagTypeMap => {
-        '5': TagType.meta,
-        '3': TagType.copyright,
-        '4': TagType.character,
-        '1': TagType.artist,
-        '0': TagType.none,
-      };
+    '5': TagType.meta,
+    '3': TagType.copyright,
+    '4': TagType.character,
+    '1': TagType.artist,
+    '0': TagType.none,
+  };
 
   @override
   List parseListFromResponse(dynamic response) {

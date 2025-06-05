@@ -74,7 +74,11 @@ class DioNetwork {
       InterceptorsWrapper(
         onResponse: (Response response, ResponseInterceptorHandler handler) async {
           // print('[response]');
-          final bool captchaWasDetected = await Tools.checkForCaptcha(response, response.realUri, customUserAgent: customUserAgent);
+          final bool captchaWasDetected = await Tools.checkForCaptcha(
+            response,
+            response.realUri,
+            customUserAgent: customUserAgent,
+          );
           if (!captchaWasDetected) {
             return handler.next(response);
           }
@@ -347,28 +351,30 @@ class DioNetwork {
         subscription.pause();
 
         // Write file asynchronously
-        asyncWrite = ServiceHandler.writeStreamToFileFromSAFDirectory(fileUri!, data).then((result) {
-          if (!result) {
-            throw Exception('Did not write file bytes');
-          }
+        asyncWrite = ServiceHandler.writeStreamToFileFromSAFDirectory(fileUri!, data)
+            .then((result) {
+              if (!result) {
+                throw Exception('Did not write file bytes');
+              }
 
-          // Notify progress
-          received += data.length;
+              // Notify progress
+              received += data.length;
 
-          onReceiveProgress?.call(received, total);
+              onReceiveProgress?.call(received, total);
 
-          if (cancelToken == null || !cancelToken.isCancelled) {
-            subscription.resume();
-          }
-        }).catchError((dynamic e, StackTrace s) async {
-          try {
-            await subscription.cancel();
-          } finally {
-            completer.completeError(
-              DioMixin.assureDioException(e, response.requestOptions),
-            );
-          }
-        });
+              if (cancelToken == null || !cancelToken.isCancelled) {
+                subscription.resume();
+              }
+            })
+            .catchError((dynamic e, StackTrace s) async {
+              try {
+                await subscription.cancel();
+              } finally {
+                completer.completeError(
+                  DioMixin.assureDioException(e, response.requestOptions),
+                );
+              }
+            });
       },
       onDone: () async {
         try {

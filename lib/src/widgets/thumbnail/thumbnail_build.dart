@@ -47,6 +47,7 @@ class ThumbnailBuild extends StatelessWidget {
             isStandalone: true,
             useHero: selectable,
           ),
+
           // Image(
           //   image: ResizeImage(NetworkImage(item.thumbnailURL),
           //   width: (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context) / 3).round()),
@@ -56,7 +57,6 @@ class ThumbnailBuild extends StatelessWidget {
           //   width: double.infinity,
           //   height: double.infinity,
           // ),
-
           if (!simple)
             Container(
               alignment: Alignment.topCenter,
@@ -147,7 +147,8 @@ class ThumbnailBuild extends StatelessWidget {
                         return null;
                       }
 
-                      final bool isMergeEntryFromFavsOrDls = searchHandler.currentBooruHandler is MergebooruHandler &&
+                      final bool isMergeEntryFromFavsOrDls =
+                          searchHandler.currentBooruHandler is MergebooruHandler &&
                           [BooruType.Favourites, BooruType.Downloads].contains(getMergeEntryBooru()?.type);
                       if (searchHandler.currentBooruHandler is FavouritesHandler ||
                           searchHandler.currentBooruHandler is DownloadsHandler ||
@@ -168,7 +169,9 @@ class ThumbnailBuild extends StatelessWidget {
                                   itemPostHost.contains(booruHost));
                         });
                         if (possibleBooru?.type != BooruType.Favourites && possibleBooru?.type != BooruType.Downloads) {
-                          final possibleFaviconUrl = possibleBooru?.faviconURL ?? (itemPostHost != null ? 'https://$itemPostHost/favicon.ico' : null);
+                          final possibleFaviconUrl =
+                              possibleBooru?.faviconURL ??
+                              (itemPostHost != null ? 'https://$itemPostHost/favicon.ico' : null);
 
                           widgets.add(
                             GestureDetector(
@@ -316,9 +319,11 @@ class _ThumbnailBottomRightIcons extends StatelessWidget {
       // final bool isHated = tagsData.hatedTags.isNotEmpty;
       final bool isSnatched = item.isSnatched.value == true;
 
-      final bool isInQueueToBeSnatched = snatchHandler.current.value?.booruItems.any((booruItem) => booruItem == item) == true;
+      final bool isInQueueToBeSnatched =
+          snatchHandler.current.value?.booruItems.any((booruItem) => booruItem == item) == true;
       final bool isCurrentlyBeingSnatched =
-          snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;
+          snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item &&
+          snatchHandler.total.value != 0;
 
       int bottomRightAmount = 0;
       if (isFavOrLoved) bottomRightAmount += 1;
@@ -387,7 +392,10 @@ class _ThumbnailBottomRightIcons extends StatelessWidget {
               //     size: 14,
               //   ),
               //
-              if (isCurrentlyBeingSnatched || isInQueueToBeSnatched) const PulseWidget(child: snatchedIcon) else if (isSnatched) snatchedIcon,
+              if (isCurrentlyBeingSnatched || isInQueueToBeSnatched)
+                const PulseWidget(child: snatchedIcon)
+              else if (isSnatched)
+                snatchedIcon,
               //
               if (isAi)
                 const FaIcon(

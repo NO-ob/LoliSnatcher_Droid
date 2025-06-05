@@ -187,7 +187,9 @@ class _MainAppBarState extends State<MainAppBar> {
             NavigationHandler.instance.bottomBarKey.currentState?.hide();
           }
         },
-        leading: settingsHandler.handSide.value.isLeft ? menuButton(InnerDrawerDirection.start) : snatcherButton(InnerDrawerDirection.start),
+        leading: settingsHandler.handSide.value.isLeft
+            ? menuButton(InnerDrawerDirection.start)
+            : snatcherButton(InnerDrawerDirection.start),
         title: const ActiveTitle(),
         toolbarHeight: MainAppBar.height,
         flexibleSpace: settingsHandler.shitDevice
@@ -203,7 +205,10 @@ class _MainAppBarState extends State<MainAppBar> {
                 ),
               ),
         actions: [
-          if (settingsHandler.handSide.value.isRight) menuButton(InnerDrawerDirection.end) else snatcherButton(InnerDrawerDirection.end),
+          if (settingsHandler.handSide.value.isRight)
+            menuButton(InnerDrawerDirection.end)
+          else
+            snatcherButton(InnerDrawerDirection.end),
           const SizedBox(width: 8),
         ],
       ),

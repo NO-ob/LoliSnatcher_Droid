@@ -171,7 +171,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                     width: double.infinity,
                     child: Text(
-                      backupPath.isNotEmpty ? backupLoc.backupPathMsg(backupPath: backupPath) : backupLoc.noBackupDirSelected,
+                      backupPath.isNotEmpty
+                          ? backupLoc.backupPathMsg(backupPath: backupPath)
+                          : backupLoc.noBackupDirSelected,
                     ),
                   ),
                   Container(
@@ -236,7 +238,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         inProgress = true;
                         setState(() {});
                         try {
-                          final Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'settings.json');
+                          final Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(
+                            backupPath,
+                            'settings.json',
+                          );
                           if (settingsFileBytes != null) {
                             final File newFile = File('${await ServiceHandler.getConfigDir()}settings.json');
                             if (!(await newFile.exists())) {
@@ -278,7 +283,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         inProgress = true;
                         setState(() {});
                         try {
-                          final List<Booru> booruList = settingsHandler.booruList.where((e) => BooruType.saveable.contains(e.type)).toList();
+                          final List<Booru> booruList = settingsHandler.booruList
+                              .where((e) => BooruType.saveable.contains(e.type))
+                              .toList();
                           if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'boorus.json')) {
                             final bool res = await detectedDuplicateFile('boorus.json');
                             if (!res) {
@@ -327,7 +334,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         inProgress = true;
                         setState(() {});
                         try {
-                          final Uint8List? booruFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'boorus.json');
+                          final Uint8List? booruFileBytes = await ServiceHandler.getFileFromSAFDirectory(
+                            backupPath,
+                            'boorus.json',
+                          );
                           String boorusJSONString = '';
                           if (booruFileBytes != null) {
                             boorusJSONString = String.fromCharCodes(booruFileBytes);
@@ -335,12 +345,17 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             if (boorusJSONString.isNotEmpty) {
                               final List<dynamic> json = jsonDecode(boorusJSONString);
                               final String configBoorusPath = '${await ServiceHandler.getConfigDir()}boorus/';
-                              final Directory configBoorusDir = await Directory(configBoorusPath).create(recursive: true);
+                              final Directory configBoorusDir = await Directory(
+                                configBoorusPath,
+                              ).create(recursive: true);
                               if (json.isNotEmpty) {
                                 for (int i = 0; i < json.length; i++) {
                                   final Booru booru = Booru.fromMap(json[i]);
                                   final bool alreadyExists =
-                                      settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
+                                      settingsHandler.booruList.indexWhere(
+                                        (el) => el.baseURL == booru.baseURL && el.name == booru.name,
+                                      ) !=
+                                      -1;
                                   final bool isAllowed = BooruType.saveable.contains(booru.type);
                                   if (!alreadyExists && isAllowed) {
                                     final File booruFile = File('${configBoorusDir.path}${booru.name}.json');
@@ -573,7 +588,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         inProgress = true;
                         setState(() {});
                         try {
-                          final Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath, 'tags.json');
+                          final Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(
+                            backupPath,
+                            'tags.json',
+                          );
                           String tagJSONString = '';
                           if (tagFileBytes != null) {
                             tagJSONString = String.fromCharCodes(tagFileBytes);

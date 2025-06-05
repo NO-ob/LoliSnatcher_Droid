@@ -17,8 +17,14 @@ class VideoSettingsPage extends StatefulWidget {
 class _VideoSettingsPageState extends State<VideoSettingsPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-  bool autoPlay = true, startVideosMuted = false, disableVideo = false, longTapFastForwardVideo = false, altVideoPlayerHwAccel = true;
-  VideoBackendMode videoBackendMode = SettingsHandler.isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.normal;
+  bool autoPlay = true;
+  bool startVideosMuted = false;
+  bool disableVideo = false;
+  bool longTapFastForwardVideo = false;
+  bool altVideoPlayerHwAccel = true;
+  VideoBackendMode videoBackendMode = SettingsHandler.isDesktopPlatform
+      ? VideoBackendMode.mpv
+      : VideoBackendMode.normal;
   late String altVideoPlayerVO, altVideoPlayerHWDEC, videoCacheMode;
 
   @override
@@ -161,8 +167,10 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                   itemSubtitleBuilder: (item) => switch (item) {
                     VideoBackendMode.normal =>
                       'Based on exoplayer. Has best device compatibility, may have issues with 4K videos, some codecs or older devices',
-                    VideoBackendMode.mpv => 'Based on libmpv, has advanced settings which may help fix problems with some codecs/devices\n[MAY CAUSE CRASHES]',
-                    VideoBackendMode.mdk => 'Based on libmdk, may have better performance for some codecs/devices\n[MAY CAUSE CRASHES]',
+                    VideoBackendMode.mpv =>
+                      'Based on libmpv, has advanced settings which may help fix problems with some codecs/devices\n[MAY CAUSE CRASHES]',
+                    VideoBackendMode.mdk =>
+                      'Based on libmdk, may have better performance for some codecs/devices\n[MAY CAUSE CRASHES]',
                     _ => '',
                   },
                   onChanged: (newValue) {
@@ -219,7 +227,8 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                               },
                               onChanged: (String? newValue) {
                                 setState(() {
-                                  altVideoPlayerHWDEC = newValue ?? settingsHandler.map['altVideoPlayerHWDEC']!['default'];
+                                  altVideoPlayerHWDEC =
+                                      newValue ?? settingsHandler.map['altVideoPlayerHWDEC']!['default'];
                                 });
                               },
                               title: 'MPV: HWDEC',
@@ -247,13 +256,19 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                                       title: const Text('Video cache modes'),
                                       contentItems: [
                                         const Text("- Stream - Don't cache, start playing as soon as possible"),
-                                        const Text('- Cache - Saves the file to device storage, plays only when download is complete'),
-                                        const Text('- Stream+Cache - Mix of both, but currently leads to double download'),
+                                        const Text(
+                                          '- Cache - Saves the file to device storage, plays only when download is complete',
+                                        ),
+                                        const Text(
+                                          '- Stream+Cache - Mix of both, but currently leads to double download',
+                                        ),
                                         const Text(''),
                                         const Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
                                         const Text(''),
                                         if (SettingsHandler.isDesktopPlatform)
-                                          const Text('[Warning]: On desktop Stream mode can work incorrectly for some Boorus.'),
+                                          const Text(
+                                            '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
+                                          ),
                                       ],
                                     );
                                   },

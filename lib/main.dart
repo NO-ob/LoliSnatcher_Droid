@@ -12,8 +12,8 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart' hide Translations;
+import 'package:lemberfpsmonitor/lemberfpsmonitor.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:statsfl/statsfl.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -266,27 +266,38 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
       builder: (context, maxFps, child) {
         return Obx(
           () {
-            return StatsFl(
-              isEnabled: settingsHandler.showFps.value,
-              width: 400,
-              height: 50,
-              maxFps: maxFps,
+            if (!settingsHandler.showFps.value) {
+              return child!;
+            }
+
+            return FPSMonitor(
+              showFPSChart: settingsHandler.showFps.value,
+              maxFPS: maxFps,
+              onFPSChanged: (_) {},
               showText: true,
               sampleTime: .2,
               totalTime: 10,
               align: Alignment.bottomLeft,
-              child: ImageStats(
-                isEnabled: settingsHandler.showImageStats.value,
-                width: 120,
-                height: 100,
-                align: Alignment.centerLeft,
-                child: child!,
-              ),
+              child: child,
             );
           },
         );
       },
-      child: widget.child,
+      child: Obx(
+        () {
+          if (!settingsHandler.showImageStats.value) {
+            return widget.child;
+          }
+
+          return ImageStats(
+            isEnabled: settingsHandler.showImageStats.value,
+            width: 120,
+            height: 100,
+            align: Alignment.centerLeft,
+            child: widget.child,
+          );
+        },
+      ),
     );
   }
 }
@@ -486,7 +497,9 @@ class _AppLifecycleOverlayState extends State<AppLifecycleOverlay> with WidgetsB
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     setState(() {
-      _shouldOverlay = widget.shouldOverlay && AppLifecycleState.values.where((s) => s != AppLifecycleState.resumed).any((s) => state == s);
+      _shouldOverlay =
+          widget.shouldOverlay &&
+          AppLifecycleState.values.where((s) => s != AppLifecycleState.resumed).any((s) => state == s);
     });
   }
 
@@ -497,8 +510,8 @@ class _AppLifecycleOverlayState extends State<AppLifecycleOverlay> with WidgetsB
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.sizeOf(context).height,
+            width: MediaQuery.sizeOf(context).width,
             color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
             child: widget.child,
           ),

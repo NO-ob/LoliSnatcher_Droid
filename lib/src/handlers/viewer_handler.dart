@@ -194,7 +194,9 @@ class ViewerHandler {
   }
 
   // Related to videos
-  bool videoAutoMute = kDebugMode ? Constants.blurImagesDefaultDev : false; // hold volume button in VideoViewer to mute videos globally
+  bool videoAutoMute = kDebugMode
+      ? Constants.blurImagesDefaultDev
+      : false; // hold volume button in VideoViewer to mute videos globally
 
   // ViewerHandler() {
   //   // debug: print keys list changes

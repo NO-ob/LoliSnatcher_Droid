@@ -30,7 +30,10 @@ class GelbooruV1Handler extends BooruHandler {
     if (imgItem?.attributes['src'] != null && linkItem?.attributes['id'] != null) {
       final String id = linkItem.attributes['id'].substring(1);
       final String thumbURL = imgItem.attributes['src'];
-      final String fileURL = thumbURL.replaceFirst('thumbs', 'img').replaceFirst('thumbnails', 'images').replaceFirst('thumbnail_', '');
+      final String fileURL = thumbURL
+          .replaceFirst('thumbs', 'img')
+          .replaceFirst('thumbnails', 'images')
+          .replaceFirst('thumbnail_', '');
       final List<String> tags = imgItem.attributes['title']!.split(' ');
       final BooruItem item = BooruItem(
         fileURL: fileURL,

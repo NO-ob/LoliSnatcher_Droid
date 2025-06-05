@@ -39,7 +39,8 @@ class _PrivacyPageState extends State<PrivacyPage> {
 
     settingsHandler.blurOnLeave.value = blurOnLeave;
     settingsHandler.useLockscreen.value = useLockscreen;
-    settingsHandler.autoLockTimeout = int.tryParse(autoLockTimeoutController.text) ?? settingsHandler.map['autoLockTimeout']!['default'];
+    settingsHandler.autoLockTimeout =
+        int.tryParse(autoLockTimeoutController.text) ?? settingsHandler.map['autoLockTimeout']!['default'];
     settingsHandler.incognitoKeyboard = incognitoKeyboard;
     final bool result = await settingsHandler.saveSettings(restate: false);
 

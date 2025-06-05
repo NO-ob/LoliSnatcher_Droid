@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:xml/xml.dart';
@@ -14,6 +15,7 @@ import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class GelbooruHandler extends BooruHandler {
@@ -27,12 +29,12 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   Map<String, TagType> get tagTypeMap => {
-        '5': TagType.meta,
-        '3': TagType.copyright,
-        '4': TagType.character,
-        '1': TagType.artist,
-        '0': TagType.none,
-      };
+    '5': TagType.meta,
+    '3': TagType.copyright,
+    '4': TagType.character,
+    '1': TagType.artist,
+    '0': TagType.none,
+  };
 
   @override
   Map<String, String> getHeaders() {
@@ -59,7 +61,10 @@ class GelbooruHandler extends BooruHandler {
       // gelbooru returns xml response if request was denied for some reason
       // i.e. user hit a rate limit because he didn't include api key
       parsedResponse = XmlDocument.parse(response.data);
-      final String? errorMessage = (parsedResponse as XmlDocument).getElement('response')?.getAttribute('reason')?.toString();
+      final String? errorMessage = (parsedResponse as XmlDocument)
+          .getElement('response')
+          ?.getAttribute('reason')
+          ?.toString();
       if (errorMessage != null) {
         throw Exception(errorMessage);
       }
@@ -145,12 +150,12 @@ class GelbooruHandler extends BooruHandler {
   // ----------------- Tag suggestions and tag handler stuff
 
   Map<String, TagType> get tagSuggestionsTypeMap => {
-        'metadata': TagType.meta,
-        'copyright': TagType.copyright,
-        'character': TagType.character,
-        'artist': TagType.artist,
-        'tag': TagType.none,
-      };
+    'metadata': TagType.meta,
+    'copyright': TagType.copyright,
+    'character': TagType.character,
+    'artist': TagType.artist,
+    'tag': TagType.none,
+  };
 
   @override
   String makeTagURL(String input) {
@@ -177,7 +182,8 @@ class GelbooruHandler extends BooruHandler {
     // record tag data for future use
     final String rawTagType = (responseItem['category'] ?? responseItem['type'])?.toString() ?? '';
     TagType tagType = TagType.none;
-    if (rawTagType.isNotEmpty && (tagTypeMap.containsKey(rawTagType) || tagSuggestionsTypeMap.containsKey(rawTagType))) {
+    if (rawTagType.isNotEmpty &&
+        (tagTypeMap.containsKey(rawTagType) || tagSuggestionsTypeMap.containsKey(rawTagType))) {
       tagType = tagTypeMap[rawTagType] ?? tagSuggestionsTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);
@@ -382,4 +388,77 @@ class GelbooruHandler extends BooruHandler {
       ComparableNumberMetaTag(name: 'Height', keyName: 'height'),
     ];
   }
+
+  //
+
+  @override
+  bool get hasLoadItemSupport => true;
+
+  @override
+  bool get shouldUpdateIteminTagView => true;
+
+  @override
+  Future<({BooruItem? item, bool failed, String? error})> loadItem({
+    required BooruItem item,
+    CancelToken? cancelToken,
+    bool withCapcthaCheck = false,
+  }) async {
+    try {
+      final response = await DioNetwork.get(
+        item.postURL,
+        headers: {
+          ...getHeaders(),
+        },
+        options: Options(
+          sendTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+        cancelToken: cancelToken,
+        customInterceptor: withCapcthaCheck ? DioNetwork.captchaInterceptor : null,
+      );
+
+      if (response.statusCode != 200) {
+        return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
+      } else {
+        final html = parse(response.data);
+        final sidebar = html.getElementById('tag-list');
+        final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright'));
+        addTagsWithType(copyrightTags, TagType.copyright);
+        final characterTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-character'));
+        addTagsWithType(characterTags, TagType.character);
+        final artistTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-artist'));
+        addTagsWithType(artistTags, TagType.artist);
+        final generalTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-general'));
+        addTagsWithType(generalTags, TagType.none);
+        final metaTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-metadata'));
+        addTagsWithType(metaTags, TagType.meta);
+        item.isUpdated = true;
+        return (item: item, failed: false, error: null);
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'loadItem',
+        LogTypes.exception,
+        s: s,
+      );
+      return (item: null, failed: true, error: e.toString());
+    }
+  }
+}
+
+List<String> _tagsFromHtml(List<Element>? elements) {
+  if (elements == null || elements.isEmpty) {
+    return [];
+  }
+
+  final tags = <String>[];
+  for (final element in elements) {
+    final tag = element.getElementsByTagName('a').firstWhereOrNull((e) => e.text.isNotEmpty && e.text != '?');
+    if (tag != null) {
+      tags.add(tag.text.replaceAll(' ', '_'));
+    }
+  }
+  return tags;
 }

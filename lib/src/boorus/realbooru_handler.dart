@@ -10,8 +10,8 @@ import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
-class R34USHandler extends BooruHandler {
-  R34USHandler(super.booru, super.limit);
+class RealbooruHandler extends BooruHandler {
+  RealbooruHandler(super.booru, super.limit);
 
   @override
   String validateTags(String tags) {
@@ -31,14 +31,14 @@ class R34USHandler extends BooruHandler {
   @override
   List parseListFromResponse(dynamic response) {
     final document = parse(response.data);
-    return document.querySelectorAll('div.thumbail-container > div');
+    return document.querySelectorAll('.items > div');
   }
 
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
     final current = responseItem.children[0];
     if (current.firstChild!.attributes['src'] != null) {
-      final String id = current.attributes['id']!;
+      final String id = current.attributes['id']!.replaceAll('p', '');
       final String thumbURL = current.firstChild!.attributes['src']!;
       final List<String> tags = [];
       current.firstChild!.attributes['title']!.split(', ').forEach((tag) {
@@ -87,8 +87,8 @@ class R34USHandler extends BooruHandler {
         return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
         final html = parse(response.data);
-        Element? div = html.querySelector('div.content_push > img');
-        div ??= html.querySelector('div.content_push > video');
+        Element? div = html.querySelector('div.imageContainer > img');
+        div ??= html.querySelector('div.imageContainer > video');
         if (div == null) {
           return (item: null, failed: true, error: 'Failed to parse html');
         }
@@ -104,16 +104,16 @@ class R34USHandler extends BooruHandler {
         item.possibleMediaType.value = null;
         item.mediaType.value = MediaType.fromExtension(item.fileExt);
 
-        final sidebar = html.getElementById('tag-list');
-        final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('copyright-tag'));
+        final sidebar = html.getElementById('tagLink');
+        final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('copyright'));
         addTagsWithType(copyrightTags, TagType.copyright);
-        final characterTags = _tagsFromHtml(sidebar?.getElementsByClassName('character-tag'));
+        final characterTags = _tagsFromHtml(sidebar?.getElementsByClassName('character'));
         addTagsWithType(characterTags, TagType.character);
-        final artistTags = _tagsFromHtml(sidebar?.getElementsByClassName('artist-tag'));
+        final artistTags = _tagsFromHtml(sidebar?.getElementsByClassName('model'));
         addTagsWithType(artistTags, TagType.artist);
-        final generalTags = _tagsFromHtml(sidebar?.getElementsByClassName('general-tag'));
+        final generalTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-general'));
         addTagsWithType(generalTags, TagType.none);
-        final metaTags = _tagsFromHtml(sidebar?.getElementsByClassName('metadata-tag'));
+        final metaTags = _tagsFromHtml(sidebar?.getElementsByClassName('metadata'));
         addTagsWithType(metaTags, TagType.meta);
         item.isUpdated = true;
       }
@@ -138,12 +138,12 @@ class R34USHandler extends BooruHandler {
 
   @override
   String makePostURL(String id) {
-    return '${booru.baseURL}/index.php?r=posts/view&id=$id';
+    return '${booru.baseURL}/index.php?page=post&s=view&id=$id';
   }
 
   @override
   String makeURL(String tags) {
-    return "${booru.baseURL}/index.php?r=posts/index&q=${tags.replaceAll(" ", "+")}&page=$pageNum";
+    return "${booru.baseURL}/index.php?page=post&s=list&tags=${tags.replaceAll(" ", "+")}&pid=${pageNum * limit}";
   }
 }
 

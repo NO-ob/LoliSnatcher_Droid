@@ -212,24 +212,24 @@ class _ThemePageState extends State<ThemePage> {
                       ThemeMode.dark => const Icon(Icons.dark_mode),
                       ThemeMode.light => const Icon(Icons.light_mode),
                       ThemeMode.system => Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            ClipPath(
-                              clipper: _SunClipper(),
-                              child: const Padding(
-                                padding: EdgeInsets.only(right: 8),
-                                child: Icon(Icons.light_mode),
-                              ),
+                        alignment: Alignment.center,
+                        children: [
+                          ClipPath(
+                            clipper: _SunClipper(),
+                            child: const Padding(
+                              padding: EdgeInsets.only(right: 8),
+                              child: Icon(Icons.light_mode),
                             ),
-                            ClipPath(
-                              clipper: _MoonClipper(),
-                              child: const Padding(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Icon(Icons.dark_mode),
-                              ),
+                          ),
+                          ClipPath(
+                            clipper: _MoonClipper(),
+                            child: const Padding(
+                              padding: EdgeInsets.only(left: 5),
+                              child: Icon(Icons.dark_mode),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
+                      ),
                       _ => const SizedBox.shrink(),
                     },
                   );
@@ -277,7 +277,8 @@ class _ThemePageState extends State<ThemePage> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: (Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white).withValues(alpha: 0.6),
+                                color: (Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white)
+                                    .withValues(alpha: 0.6),
                                 width: 1,
                               ),
                               shape: BoxShape.rectangle,
@@ -314,13 +315,13 @@ class _ThemePageState extends State<ThemePage> {
                         Text(value ?? ''),
                         switch (value) {
                           'Halloween' => const Padding(
-                              padding: EdgeInsets.only(left: 8),
-                              child: FaIcon(FontAwesomeIcons.ghost),
-                            ),
+                            padding: EdgeInsets.only(left: 8),
+                            child: FaIcon(FontAwesomeIcons.ghost),
+                          ),
                           'Custom' => const Padding(
-                              padding: EdgeInsets.only(left: 8),
-                              child: Icon(Icons.build),
-                            ),
+                            padding: EdgeInsets.only(left: 8),
+                            child: Icon(Icons.build),
+                          ),
                           _ => const SizedBox.shrink(),
                         },
                       ],
@@ -356,7 +357,8 @@ class _ThemePageState extends State<ThemePage> {
                     height: 44,
                     hasBorder: true,
                     borderRadius: 4,
-                    borderColor: (Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white).withValues(alpha: 0.6),
+                    borderColor: (Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white)
+                        .withValues(alpha: 0.6),
                     color: primaryPickerColor!,
                   ),
                 ),
@@ -389,7 +391,8 @@ class _ThemePageState extends State<ThemePage> {
                     height: 44,
                     hasBorder: true,
                     borderRadius: 4,
-                    borderColor: (Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white).withValues(alpha: 0.6),
+                    borderColor: (Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white)
+                        .withValues(alpha: 0.6),
                     color: accentPickerColor!,
                   ),
                 ),

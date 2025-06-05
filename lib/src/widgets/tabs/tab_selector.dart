@@ -87,7 +87,9 @@ class TabSelector extends StatelessWidget {
       final theme = Theme.of(context);
       final inputDecoration = theme.inputDecorationTheme;
 
-      final EdgeInsetsGeometry margin = withBorder ? const EdgeInsets.fromLTRB(5, 8, 5, 8) : const EdgeInsets.fromLTRB(0, 16, 0, 0);
+      final EdgeInsetsGeometry margin = withBorder
+          ? const EdgeInsets.fromLTRB(5, 8, 5, 8)
+          : const EdgeInsets.fromLTRB(0, 16, 0, 0);
       const EdgeInsetsGeometry contentPadding = EdgeInsets.symmetric(horizontal: 16);
 
       final dropdown = LoliDropdown(
@@ -109,7 +111,9 @@ class TabSelector extends StatelessWidget {
           }
 
           return Container(
-            padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.all(5) : const EdgeInsets.only(left: 16, right: 16),
+            padding: settingsHandler.appMode.value.isDesktop
+                ? const EdgeInsets.all(5)
+                : const EdgeInsets.only(left: 16, right: 16),
             height: kMinInteractiveDimension,
             decoration: isCurrent
                 ? BoxDecoration(
@@ -152,7 +156,8 @@ class TabSelector extends StatelessWidget {
                             ),
                             children: [
                               TextSpan(
-                                text: 'Tab | ${(currentTabIndex + 1).toFormattedString()}/${totalTabs.toFormattedString()}',
+                                text:
+                                    'Tab | ${(currentTabIndex + 1).toFormattedString()}/${totalTabs.toFormattedString()}',
                               ),
                               if (totalCount > 0) ...[
                                 const TextSpan(text: ' | '),
@@ -181,19 +186,25 @@ class TabSelector extends StatelessWidget {
                       contentPadding: contentPadding,
                       border: inputDecoration.border?.copyWith(
                         borderSide: BorderSide(
-                          color: withBorder ? (inputDecoration.border?.borderSide.color ?? Colors.transparent) : Colors.transparent,
+                          color: withBorder
+                              ? (inputDecoration.border?.borderSide.color ?? Colors.transparent)
+                              : Colors.transparent,
                           width: 1,
                         ),
                       ),
                       enabledBorder: inputDecoration.enabledBorder?.copyWith(
                         borderSide: BorderSide(
-                          color: withBorder ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent) : Colors.transparent,
+                          color: withBorder
+                              ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent)
+                              : Colors.transparent,
                           width: 1,
                         ),
                       ),
                       focusedBorder: inputDecoration.focusedBorder?.copyWith(
                         borderSide: BorderSide(
-                          color: withBorder ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent) : Colors.transparent,
+                          color: withBorder
+                              ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent)
+                              : Colors.transparent,
                           width: 2,
                         ),
                       ),
@@ -289,7 +300,8 @@ class TabSelector extends StatelessWidget {
                                             else
                                               currentTab.booruHandler.booru.name ?? '',
                                             //
-                                            for (final booru in (currentTab.secondaryBoorus.value ?? <Booru>[])) booru.name ?? '',
+                                            for (final booru in (currentTab.secondaryBoorus.value ?? <Booru>[]))
+                                              booru.name ?? '',
                                           ].join(', '),
                                           style: inputDecoration.labelStyle?.copyWith(
                                             fontSize: 14,
@@ -473,8 +485,13 @@ class _TabManagerPageState extends State<TabManagerPage> {
     }
 
     if (loadedFilter != null) {
-      filteredTabs =
-          filteredTabs.where((t) => loadedFilter == true ? t.booruHandler.filteredFetched.isNotEmpty : t.booruHandler.filteredFetched.isEmpty).toList();
+      filteredTabs = filteredTabs
+          .where(
+            (t) => loadedFilter == true
+                ? t.booruHandler.filteredFetched.isNotEmpty
+                : t.booruHandler.filteredFetched.isEmpty,
+          )
+          .toList();
     }
 
     if (tagTypeFilter != null) {
@@ -504,13 +521,20 @@ class _TabManagerPageState extends State<TabManagerPage> {
         }
       }
 
-      final List<SearchTab> duplicateTabs = freqMap.entries.where((e) => e.value.length > 1).expand<SearchTab>((e) => e.value).toList();
+      final List<SearchTab> duplicateTabs = freqMap.entries
+          .where((e) => e.value.length > 1)
+          .expand<SearchTab>((e) => e.value)
+          .toList();
       filteredTabs = searchHandler.list.where(duplicateTabs.contains).toList();
     }
 
     if (isMultiBooruMode != null) {
       filteredTabs = filteredTabs
-          .where((tab) => isMultiBooruMode == false ? (tab.secondaryBoorus.value?.isEmpty ?? true) : tab.secondaryBoorus.value?.isNotEmpty == true)
+          .where(
+            (tab) => isMultiBooruMode == false
+                ? (tab.secondaryBoorus.value?.isEmpty ?? true)
+                : tab.secondaryBoorus.value?.isNotEmpty == true,
+          )
           .toList();
     }
 
@@ -1113,10 +1137,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
             RichText(
               text: TextSpan(
                 style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                    ),
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
+                ),
                 children: [
                   if (isFilterActive) ...[
                     const WidgetSpan(
@@ -1155,10 +1179,15 @@ class _TabManagerPageState extends State<TabManagerPage> {
                         return SettingsDialog(
                           title: Text(sortingMode.isNone ? 'Shuffle tabs' : 'Sort tabs'),
                           contentItems: [
-                            Text(sortingMode.isNone ? 'Shuffle tabs order randomly?' : 'Save tabs in current sorting order?'),
+                            Text(
+                              sortingMode.isNone
+                                  ? 'Shuffle tabs order randomly?'
+                                  : 'Save tabs in current sorting order?',
+                            ),
                             if (!sortingMode.isNone)
                               Text(
-                                '${sortingMode.isAnyBooru ? 'By Booru' : ''} Alphabetically ${sortingMode.isAnyReverse ? '(reversed)' : ''}'.trim(),
+                                '${sortingMode.isAnyBooru ? 'By Booru' : ''} Alphabetically ${sortingMode.isAnyReverse ? '(reversed)' : ''}'
+                                    .trim(),
                               ),
                           ],
                           actionButtons: [
@@ -1251,7 +1280,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
                   controller: scrollController,
                   thickness: 8,
                   interactive: true,
-                  scrollbarOrientation: settingsHandler.handSide.value.isLeft ? ScrollbarOrientation.left : ScrollbarOrientation.right,
+                  scrollbarOrientation: settingsHandler.handSide.value.isLeft
+                      ? ScrollbarOrientation.left
+                      : ScrollbarOrientation.right,
                   child: DesktopScrollWrap(
                     controller: scrollController,
                     child: ReorderableListView.builder(
@@ -1467,9 +1498,9 @@ class TabManagerItem extends StatelessWidget {
     this.filterText,
     super.key,
   }) : assert(
-          !isFiltered || (index != null && originalIndex != null),
-          'originalIndex must be provided if isFiltered is true',
-        );
+         !isFiltered || (index != null && originalIndex != null),
+         'originalIndex must be provided if isFiltered is true',
+       );
 
   final SearchTab tab;
   final int? index;
@@ -1489,8 +1520,8 @@ class TabManagerItem extends StatelessWidget {
     final BorderRadius radius = BorderRadius.circular(10);
 
     final subtitleStyle = Theme.of(context).textTheme.bodySmall!.copyWith(
-          color: Theme.of(context).textTheme.bodySmall!.color,
-        );
+      color: Theme.of(context).textTheme.bodySmall!.color,
+    );
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),

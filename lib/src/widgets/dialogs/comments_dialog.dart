@@ -61,7 +61,10 @@ class _CommentsDialogState extends State<CommentsDialog> {
     if (!isCompleted) {
       if (widget.item.serverId != null) {
         setState(() {}); // set state to update the loading indicator
-        final List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, page);
+        final List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(
+          widget.item.serverId!,
+          page,
+        );
         if (fetched.isEmpty || comments.contains(fetched.first)) {
           isCompleted = true;
         }
@@ -96,10 +99,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
       children: [
         if (isLoading)
           const Center(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(18, 50, 18, 18),
-              child: CircularProgressIndicator(),
-            ),
+            child: Padding(padding: EdgeInsets.fromLTRB(18, 50, 18, 18), child: CircularProgressIndicator()),
           )
         else if (notSupported)
           const Center(
@@ -133,7 +133,9 @@ class _CommentsDialogState extends State<CommentsDialog> {
 
   bool onScroll(ScrollUpdateNotification notif) {
     final bool isNotAtStart = notif.metrics.pixels > 0;
-    final bool isAtOrNearEdge = notif.metrics.atEdge || notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2));
+    final bool isAtOrNearEdge =
+        notif.metrics.atEdge ||
+        notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2));
     final bool isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0;
 
     if (!isLoading && !isCompleted) {
@@ -155,7 +157,9 @@ class _CommentsDialogState extends State<CommentsDialog> {
         child: Scrollbar(
           controller: scrollController,
           interactive: true,
-          scrollbarOrientation: settingsHandler.handSide.value.isLeft ? ScrollbarOrientation.left : ScrollbarOrientation.right,
+          scrollbarOrientation: settingsHandler.handSide.value.isLeft
+              ? ScrollbarOrientation.left
+              : ScrollbarOrientation.right,
           child: RefreshIndicator(
             triggerMode: RefreshIndicatorTriggerMode.anywhere,
             strokeWidth: 4,
@@ -176,7 +180,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
                     return _CommentsHeader(item: widget.item);
                   }
 
-                  return areThereErrors
+                  return areThereErrors //
                       ? errorEntryBuild(context, index)
                       : _CommentEntry(
                           comment: comments[index - 1],
@@ -234,7 +238,6 @@ class _CommentEntry extends StatelessWidget {
         .replaceAll('said:', 'said: ')
         // .replaceAll(RegExp(r'\[\w+\]'), '[') // probably not correct to do, will trigger on everything that has [smth]
         // .replaceAll(RegExp(r'\[\/\w+\]'), ']\n')
-
         // move three dots away from everything
         .replaceAll('...', ' ... ')
         // multiple spaces to one
@@ -329,7 +332,10 @@ class _CommentEntry extends StatelessWidget {
                         if (comment.authorName?.isNotEmpty == true)
                           Padding(
                             padding: const EdgeInsets.all(4),
-                            child: SelectableText(comment.authorName!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            child: SelectableText(
+                              comment.authorName!,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         Padding(
                           padding: const EdgeInsets.all(4),

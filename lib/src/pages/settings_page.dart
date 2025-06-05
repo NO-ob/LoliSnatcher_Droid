@@ -186,7 +186,6 @@ class SettingsPage extends StatelessWidget {
                 },
                 trailingIcon: const Icon(Icons.exit_to_app),
               ),
-              const LogsEnabledWarning(),
               Obx(() {
                 if (settingsHandler.isDebug.value) {
                   return SettingsButton(
@@ -223,7 +222,9 @@ class _VersionButtonState extends State<VersionButton> {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     final String verText = '${context.loc.settings.version}: ${Constants.appVersion} (${Constants.appBuildNumber})';
-    const String buildTypeText = EnvironmentConfig.isFromStore ? '/ Play' : (EnvironmentConfig.isTesting ? '/ Test' : (kDebugMode ? '/ Debug' : ''));
+    const String buildTypeText = EnvironmentConfig.isFromStore
+        ? '/ Play'
+        : (EnvironmentConfig.isTesting ? '/ Test' : (kDebugMode ? '/ Debug' : ''));
 
     return SettingsButton(
       name: '$verText $buildTypeText'.trim(),
@@ -279,44 +280,5 @@ class _VersionButtonState extends State<VersionButton> {
       },
       drawBottomBorder: false,
     );
-  }
-}
-
-class LogsEnabledWarning extends StatelessWidget {
-  const LogsEnabledWarning({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Obx(() {
-      final enabledLogTypes = [
-        ...SettingsHandler.instance.enabledLogTypes,
-      ];
-
-      if (enabledLogTypes.isEmpty) {
-        return const SizedBox.shrink();
-      }
-
-      return SettingsButton(
-        name: '${context.loc.settings.logging.enabledLogTypes}:',
-        subtitle: Text(
-          '${enabledLogTypes.map((e) => e.toString())}',
-          style: const TextStyle(fontSize: 12),
-        ),
-        icon: const Icon(Icons.warning_amber, color: Colors.yellow),
-        action: () {
-          FlashElements.showSnackbar(
-            context: context,
-            title: Text(
-              context.loc.settings.logging.enabledMsg,
-              style: const TextStyle(fontSize: 18),
-            ),
-            content: Text(context.loc.settings.logging.disableTip),
-            leadingIcon: Icons.warning_amber,
-            leadingIconColor: Colors.yellow,
-            sideColor: Colors.yellow,
-          );
-        },
-      );
-    });
   }
 }

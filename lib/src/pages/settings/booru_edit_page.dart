@@ -144,7 +144,7 @@ class _BooruEditState extends State<BooruEdit> {
               ),
             ),
             Obx(() {
-              if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) && settingsHandler.enabledLogTypes.isNotEmpty) {
+              if (settingsHandler.isDebug.value || EnvironmentConfig.isTesting) {
                 return SettingsButton(
                   name: 'Open Logger',
                   icon: const Icon(Icons.print),
@@ -209,7 +209,8 @@ class _BooruEditState extends State<BooruEdit> {
                     size: 24,
                     color: Colors.redAccent,
                   ),
-                  loadingBuilder: (context, child, loadingProgress) => loadingProgress == null ? child : const CircularProgressIndicator(),
+                  loadingBuilder: (context, child, loadingProgress) =>
+                      loadingProgress == null ? child : const CircularProgressIndicator(),
                 ),
               ),
             ),
@@ -368,7 +369,9 @@ class _BooruEditState extends State<BooruEdit> {
 
         booruURLController.text = convertSiteUrlToApiUrl();
 
-        booruFaviconController.text = booruFaviconController.text.trim().isEmpty ? convertSiteUrlToFaviconUrl() : booruFaviconController.text;
+        booruFaviconController.text = booruFaviconController.text.trim().isEmpty
+            ? convertSiteUrlToFaviconUrl()
+            : booruFaviconController.text;
 
         //Call the booru test
         Booru testBooru;
@@ -437,7 +440,7 @@ class _BooruEditState extends State<BooruEdit> {
                   ),
               ],
             ),
-            actionsBuilder: (controller) {
+            actionsBuilder: (context, controller) {
               return [
                 if (errorString.trim().isNotEmpty)
                   ElevatedButton.icon(
@@ -498,7 +501,7 @@ class _BooruEditState extends State<BooruEdit> {
           return;
         }
 
-        await getPerms();
+        await getStoragePermission();
         final Booru newBooru = (booruAPIKeyController.text == '' && booruUserIDController.text == '')
             ? Booru(
                 booruNameController.text,
@@ -545,7 +548,8 @@ class _BooruEditState extends State<BooruEdit> {
               }
 
               final bool oldEditBooruExists =
-                  settingsHandler.booruList[i].baseURL == widget.booru.baseURL && settingsHandler.booruList[i].name == widget.booru.name;
+                  settingsHandler.booruList[i].baseURL == widget.booru.baseURL &&
+                  settingsHandler.booruList[i].name == widget.booru.name;
               if (!booruExists && oldEditBooruExists) {
                 // remove the old config (same url and name as the start booru)
                 settingsHandler.booruList.removeAt(i);
@@ -600,13 +604,16 @@ class _BooruEditState extends State<BooruEdit> {
           }
 
           if (searchHandler.list.firstWhereOrNull(
-                (tab) => tab.selectedBooru.value.type == newBooru.type && tab.selectedBooru.value.baseURL == newBooru.baseURL,
+                (tab) =>
+                    tab.selectedBooru.value.type == newBooru.type &&
+                    tab.selectedBooru.value.baseURL == newBooru.baseURL,
               ) !=
               null) {
             // if the booru is already selected in any tab, update the booru to a new one
             // (only if their type and baseurl are the same, otherwise main booru selector will set the value to null and user has to reselect the booru)
             for (final tab in searchHandler.list) {
-              if (tab.selectedBooru.value.type == newBooru.type && tab.selectedBooru.value.baseURL == newBooru.baseURL) {
+              if (tab.selectedBooru.value.type == newBooru.type &&
+                  tab.selectedBooru.value.baseURL == newBooru.baseURL) {
                 tab.selectedBooru.value = newBooru;
               }
             }
@@ -665,7 +672,8 @@ class _BooruEditState extends State<BooruEdit> {
       test.pageNum = temp.startingPage;
       test.pageNum++;
 
-      testFetched = (await test.search(
+      testFetched =
+          (await test.search(
             ' ',
             null,
             withCaptchaCheck: withCaptchaCheck,

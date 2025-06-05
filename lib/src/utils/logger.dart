@@ -9,9 +9,6 @@ import 'package:talker_dio_logger/talker_dio_logger.dart';
 // ignore: implementation_imports
 import 'package:talker_flutter/src/controller/talker_view_controller.dart';
 
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
-
 class Logger {
   static Logger? _loggerInstance;
 
@@ -77,16 +74,6 @@ class Logger {
     LogTypes? logType, {
     StackTrace? s,
   }) {
-    if (!Tools.isTestMode) {
-      // don't call handlers when in test mode
-      // don't check which types are ignored in test mode and output everything
-      final bool allowedToLog = logType == null || logType == LogTypes.exception || SettingsHandler.instance.enabledLogTypes.contains(logType);
-      if (!allowedToLog) {
-        // Ignore unselected log types
-        return;
-      }
-    }
-
     String logStr = '';
     try {
       logStr = object is String ? object : '$object';
@@ -193,5 +180,5 @@ enum LogLevel {
   error,
   debug,
   verbose,
-  wtf;
+  wtf,
 }

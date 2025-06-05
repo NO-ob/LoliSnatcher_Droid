@@ -129,10 +129,12 @@ class TagHandler {
       BooruHandler booruHandler = temp.booruHandler;
       if (booruHandler.shouldPopulateTags == false) {
         // if current booru doesn't support tag data, use other booru (if available) that supports it
-        final boorusWithTagPopulation =
-            SettingsHandler.instance.booruList.where((b) => BooruHandlerFactory().getBooruHandler([b], null).booruHandler.shouldPopulateTags == true);
-        booruHandler =
-            boorusWithTagPopulation.isEmpty ? booruHandler : BooruHandlerFactory().getBooruHandler([boorusWithTagPopulation.first], null).booruHandler;
+        final boorusWithTagPopulation = SettingsHandler.instance.booruList.where(
+          (b) => BooruHandlerFactory().getBooruHandler([b], null).booruHandler.shouldPopulateTags == true,
+        );
+        booruHandler = boorusWithTagPopulation.isEmpty
+            ? booruHandler
+            : BooruHandlerFactory().getBooruHandler([boorusWithTagPopulation.first], null).booruHandler;
       }
 
       int tagCounter = 0;
@@ -188,7 +190,12 @@ class TagHandler {
   }
 
   void queue(List<String> untypedTags, Booru booru, int cooldown) {
-    Logger.Inst().log('Added ${untypedTags.length} tags to queue from ${booru.name}', 'TagHandler', 'queue', LogTypes.tagHandlerInfo);
+    Logger.Inst().log(
+      'Added ${untypedTags.length} tags to queue from ${booru.name}',
+      'TagHandler',
+      'queue',
+      LogTypes.tagHandlerInfo,
+    );
     if (untypedTags.isNotEmpty) {
       untypedQueue.value.add(UntypedCollection(untypedTags, cooldown, booru));
     }
@@ -301,7 +308,7 @@ class TagHandler {
   Future<void> saveTags() async {
     tagSaveActive = true;
     final SettingsHandler settings = SettingsHandler.instance;
-    await getPerms();
+    await getStoragePermission();
     prevLength = tagMap.entries.length;
     if (settings.dbEnabled) {
       //await settings.dbHandler.updateTagsFromObjects(toList());

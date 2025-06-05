@@ -41,7 +41,10 @@ class PhilomenaHandler extends BooruHandler {
         fileURL = booru.baseURL! + fileURL;
       }
 
-      final List<String> currentTags = current['tags'].toString().substring(1, current['tags'].toString().length - 1).split(', ');
+      final List<String> currentTags = current['tags']
+          .toString()
+          .substring(1, current['tags'].toString().length - 1)
+          .split(', ');
       for (int x = 0; x < currentTags.length; x++) {
         if (currentTags[x].contains(' ')) {
           currentTags[x] = currentTags[x].replaceAll(' ', '+');

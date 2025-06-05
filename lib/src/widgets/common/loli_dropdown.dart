@@ -111,10 +111,12 @@ class LoliDropdown<T> extends StatelessWidget {
       children: [
         InputDecorator(
           decoration: InputDecoration(
-            label: labelBuilder?.call() ??
+            label:
+                labelBuilder?.call() ??
                 RichText(
                   text: TextSpan(
-                    style: labelStyle ??
+                    style:
+                        labelStyle ??
                         inputDecoration.labelStyle?.copyWith(
                           color: labelColor ?? inputDecoration.labelStyle?.color,
                         ),
@@ -125,26 +127,33 @@ class LoliDropdown<T> extends StatelessWidget {
                     ],
                   ),
                 ),
-            labelStyle: labelStyle ??
+            labelStyle:
+                labelStyle ??
                 inputDecoration.labelStyle?.copyWith(
                   color: labelColor ?? inputDecoration.labelStyle?.color,
                 ),
             contentPadding: contentPadding,
             border: inputDecoration.border?.copyWith(
               borderSide: BorderSide(
-                color: withBorder ? (inputDecoration.border?.borderSide.color ?? Colors.transparent) : Colors.transparent,
+                color: withBorder
+                    ? (inputDecoration.border?.borderSide.color ?? Colors.transparent)
+                    : Colors.transparent,
                 width: 1,
               ),
             ),
             enabledBorder: inputDecoration.enabledBorder?.copyWith(
               borderSide: BorderSide(
-                color: withBorder ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent) : Colors.transparent,
+                color: withBorder
+                    ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent)
+                    : Colors.transparent,
                 width: 1,
               ),
             ),
             focusedBorder: inputDecoration.focusedBorder?.copyWith(
               borderSide: BorderSide(
-                color: withBorder ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent) : Colors.transparent,
+                color: withBorder
+                    ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent)
+                    : Colors.transparent,
                 width: 2,
               ),
             ),
@@ -455,10 +464,12 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
       children: [
         InputDecorator(
           decoration: InputDecoration(
-            label: labelBuilder?.call() ??
+            label:
+                labelBuilder?.call() ??
                 RichText(
                   text: TextSpan(
-                    style: labelStyle ??
+                    style:
+                        labelStyle ??
                         inputDecoration.labelStyle?.copyWith(
                           color: labelColor ?? inputDecoration.labelStyle?.color,
                         ),
@@ -469,26 +480,33 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
                     ],
                   ),
                 ),
-            labelStyle: labelStyle ??
+            labelStyle:
+                labelStyle ??
                 inputDecoration.labelStyle?.copyWith(
                   color: labelColor ?? inputDecoration.labelStyle?.color,
                 ),
             contentPadding: contentPadding,
             border: inputDecoration.border?.copyWith(
               borderSide: BorderSide(
-                color: withBorder ? (inputDecoration.border?.borderSide.color ?? Colors.transparent) : Colors.transparent,
+                color: withBorder
+                    ? (inputDecoration.border?.borderSide.color ?? Colors.transparent)
+                    : Colors.transparent,
                 width: 1,
               ),
             ),
             enabledBorder: inputDecoration.enabledBorder?.copyWith(
               borderSide: BorderSide(
-                color: withBorder ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent) : Colors.transparent,
+                color: withBorder
+                    ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent)
+                    : Colors.transparent,
                 width: 1,
               ),
             ),
             focusedBorder: inputDecoration.focusedBorder?.copyWith(
               borderSide: BorderSide(
-                color: withBorder ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent) : Colors.transparent,
+                color: withBorder
+                    ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent)
+                    : Colors.transparent,
                 width: 2,
               ),
             ),

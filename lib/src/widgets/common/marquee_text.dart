@@ -94,7 +94,8 @@ class MarqueeText extends StatelessWidget {
           maxFontSize: fontSize,
           maxLines: 1,
           stepGranularity: stepGranularity,
-          style: style?.copyWith(
+          style:
+              style?.copyWith(
                 color: style?.color ?? Theme.of(context).colorScheme.onSurface,
               ) ??
               defaultStyle.copyWith(
@@ -125,7 +126,8 @@ class MarqueeText extends StatelessWidget {
         maxFontSize: fontSize,
         maxLines: 1,
         stepGranularity: stepGranularity,
-        style: style?.copyWith(
+        style:
+            style?.copyWith(
               color: style?.color ?? Theme.of(context).colorScheme.onSurface,
             ) ??
             defaultStyle.copyWith(
@@ -143,7 +145,8 @@ class MarqueeText extends StatelessWidget {
           showFadingOnlyWhenScrolling: false,
           startAfter: startAfter,
           pauseAfterRound: pauseAfterRound,
-          style: style?.copyWith(
+          style:
+              style?.copyWith(
                 color: style?.color ?? Theme.of(context).colorScheme.onSurface,
               ) ??
               defaultStyle.copyWith(

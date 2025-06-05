@@ -102,11 +102,21 @@ class LoliSync {
         final int amount = int.parse(req.uri.queryParameters['amount']!);
         final int offset = int.parse(req.uri.queryParameters['offset']!);
         final int size = int.parse(req.uri.queryParameters['size']!);
-        Logger.Inst().log('request to update booru batch recieved', 'LoliSync', 'storeBooruItem', LogTypes.loliSyncInfo);
+        Logger.Inst().log(
+          'request to update booru batch recieved',
+          'LoliSync',
+          'storeBooruItem',
+          LogTypes.loliSyncInfo,
+        );
         final String content = await utf8.decoder.bind(req).join();
-        final List<BooruItem> items = List.from(jsonDecode(content)).map((e) => BooruItem.fromJSON(jsonEncode(e))).toList();
+        final List<BooruItem> items = List.from(
+          jsonDecode(content),
+        ).map((e) => BooruItem.fromJSON(jsonEncode(e))).toList();
         if (settingsHandler.dbEnabled) {
-          final Map<String, int> result = await settingsHandler.dbHandler.updateMultipleBooruItems(items, BooruUpdateMode.sync);
+          final Map<String, int> result = await settingsHandler.dbHandler.updateMultipleBooruItems(
+            items,
+            BooruUpdateMode.sync,
+          );
           final int saved = result['saved'] ?? 0;
           final int exist = result['exist'] ?? 0;
 
@@ -207,7 +217,8 @@ class LoliSync {
           //     }
           //   }
           // }
-          final bool alreadyExists = settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
+          final bool alreadyExists =
+              settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
           if (!alreadyExists) {
             await settingsHandler.saveBooru(booru);
           }
@@ -339,9 +350,10 @@ class LoliSync {
   Future<String> sendBooruBatch(List<BooruItem> items, int count, int offset) async {
     final int lastIndex = offset + items.length;
     Logger.Inst().log('Sending batch $offset-$lastIndex / $count', 'LoliSync', 'sendBooruItem', LogTypes.loliSyncInfo);
-    final HttpClientRequest request = await HttpClient().post(ip, port, '/lolisync/boorubatch?amount=$count&offset=$offset&size=${items.length}')
-      ..headers.contentType = ContentType.json
-      ..write(jsonEncode(items.map((e) => e.toJson()).toList()));
+    final HttpClientRequest request =
+        await HttpClient().post(ip, port, '/lolisync/boorubatch?amount=$count&offset=$offset&size=${items.length}')
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode(items.map((e) => e.toJson()).toList()));
     final HttpClientResponse response = await request.close();
     final String responseStr = await utf8.decoder.bind(response).join();
     return responseStr;
@@ -349,9 +361,10 @@ class LoliSync {
 
   Future<String> sendBooruItem(BooruItem item, int favouritesCount, int current) async {
     Logger.Inst().log('Sending item $current / $favouritesCount', 'LoliSync', 'sendBooruItem', LogTypes.loliSyncInfo);
-    final HttpClientRequest request = await HttpClient().post(ip, port, '/lolisync/booruitem?amount=$favouritesCount&current=$current')
-      ..headers.contentType = ContentType.json
-      ..write(jsonEncode(item.toJson())); /*3*/
+    final HttpClientRequest request =
+        await HttpClient().post(ip, port, '/lolisync/booruitem?amount=$favouritesCount&current=$current')
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode(item.toJson())); /*3*/
     final HttpClientResponse response = await request.close();
     final String responseStr = await utf8.decoder.bind(response).join();
     return responseStr;
@@ -369,9 +382,10 @@ class LoliSync {
 
   Future<String> sendBooru(Booru booru, int booruCount, int current) async {
     Logger.Inst().log('Sending item $current / $booruCount', 'LoliSync', 'sendBooru', LogTypes.loliSyncInfo);
-    final HttpClientRequest request = await HttpClient().post(ip, port, '/lolisync/booru?amount=$booruCount&current=$current')
-      ..headers.contentType = ContentType.json
-      ..write(jsonEncode(booru.toJson()));
+    final HttpClientRequest request =
+        await HttpClient().post(ip, port, '/lolisync/booru?amount=$booruCount&current=$current')
+          ..headers.contentType = ContentType.json
+          ..write(jsonEncode(booru.toJson()));
     final HttpClientResponse response = await request.close();
     final String responseStr = await utf8.decoder.bind(response).join();
     return responseStr;
@@ -500,7 +514,9 @@ class LoliSync {
 
           yield 'Sync starting $address';
           yield 'Preparing data';
-          final int count = isSnatched ? await settingsHandler.dbHandler.getSnatchedCount() : await settingsHandler.dbHandler.getFavouritesCount();
+          final int count = isSnatched
+              ? await settingsHandler.dbHandler.getSnatchedCount()
+              : await settingsHandler.dbHandler.getFavouritesCount();
           yield 'Items count: $count';
           if (count > 0) {
             const int limit = 100;
@@ -523,7 +539,12 @@ class LoliSync {
                   isSnatched ? 'loliSyncSnatch' : 'loliSyncFav',
                   isDownloads: isSnatched,
                 );
-                Logger.Inst().log('fetched is ${fetched.length} i is $i', 'LoliSync', 'startSync', LogTypes.loliSyncInfo);
+                Logger.Inst().log(
+                  'fetched is ${fetched.length} i is $i',
+                  'LoliSync',
+                  'startSync',
+                  LogTypes.loliSyncInfo,
+                );
 
                 final String resp = await sendBooruBatch(fetched, count, offset);
                 final int updatedCount = offset + fetched.length;
@@ -551,9 +572,20 @@ class LoliSync {
               if (!syncKilled) {
                 final int offset = i * limit;
                 yield 'Fetching items $offset / $favouritesCount';
-                final List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB('', offset.toString(), limit.toString(), 'ASC', 'loliSyncFav');
+                final List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB(
+                  '',
+                  offset.toString(),
+                  limit.toString(),
+                  'ASC',
+                  'loliSyncFav',
+                );
                 yield 'Fetched ${fetched.length} favourites';
-                Logger.Inst().log('fetched is ${fetched.length} i is $i', 'LoliSync', 'startSync', LogTypes.loliSyncInfo);
+                Logger.Inst().log(
+                  'fetched is ${fetched.length} i is $i',
+                  'LoliSync',
+                  'startSync',
+                  LogTypes.loliSyncInfo,
+                );
                 for (int x = 0; x < fetched.length; x++) {
                   final int count = offset + x;
                   if (count < favouritesCount) {
@@ -583,7 +615,9 @@ class LoliSync {
         case 'Booru':
           yield 'Sync Starting $address';
           yield 'Preparing booru data';
-          final List<Booru> booruList = settingsHandler.booruList.where((e) => BooruType.saveable.contains(e.type)).toList();
+          final List<Booru> booruList = settingsHandler.booruList
+              .where((e) => BooruType.saveable.contains(e.type))
+              .toList();
           final int booruCount = booruList.length;
           if (booruCount > 0) {
             for (int i = 0; i < booruCount; i++) {

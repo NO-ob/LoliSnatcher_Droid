@@ -30,7 +30,7 @@ Future<void> initProxy() async {
   addedRootCert = true;
 
   SocksProxy.initProxy(
-    onCreate: (client) => client.badCertificateCallback = (_, __, ___) {
+    onCreate: (client) => client.badCertificateCallback = (_, _, _) {
       return settingsHandler.allowSelfSignedCerts;
     },
     findProxy: (_) {

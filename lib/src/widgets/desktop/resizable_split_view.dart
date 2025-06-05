@@ -15,8 +15,8 @@ class ResizableSplitView extends StatefulWidget {
     this.direction = SplitDirection.horizontal,
     this.onRatioChange,
     super.key,
-  })  : assert(startRatio >= 0 && startRatio <= 1, 'startRatio must be between 0 and 1'),
-        assert(minRatio >= 0 && minRatio <= 1, 'minRatio must be between 0 and 1');
+  }) : assert(startRatio >= 0 && startRatio <= 1, 'startRatio must be between 0 and 1'),
+       assert(minRatio >= 0 && minRatio <= 1, 'minRatio must be between 0 and 1');
 
   final Widget firstChild;
   final Widget secondChild;
@@ -83,7 +83,9 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
     return LayoutBuilder(
       builder: (context, BoxConstraints constraints) {
         assert(_ratio <= 1 && _ratio >= 0, 'ratio must be between 0 and 1');
-        final double directionSize = widget.direction == SplitDirection.horizontal ? constraints.maxWidth : constraints.maxHeight;
+        final double directionSize = widget.direction == SplitDirection.horizontal
+            ? constraints.maxWidth
+            : constraints.maxHeight;
         _maxSize ??= directionSize - _dividerWidth;
         if (_maxSize != directionSize) {
           _maxSize = directionSize - _dividerWidth;
@@ -108,7 +110,9 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
                     width: widget.direction == SplitDirection.horizontal ? _dividerWidth : constraints.maxWidth,
                     height: widget.direction == SplitDirection.horizontal ? constraints.maxHeight : _dividerWidth,
                     child: RotationTransition(
-                      turns: widget.direction == SplitDirection.horizontal ? const AlwaysStoppedAnimation(0.25) : const AlwaysStoppedAnimation(0.50),
+                      turns: widget.direction == SplitDirection.horizontal
+                          ? const AlwaysStoppedAnimation(0.25)
+                          : const AlwaysStoppedAnimation(0.50),
                       child: const Icon(Icons.drag_handle),
                     ),
                   ),

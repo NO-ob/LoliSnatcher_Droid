@@ -61,6 +61,7 @@ class _TagViewState extends State<TagView> {
 
   late BooruItem item;
   List<String> tags = [], filteredTags = [];
+  Map<String, HasTabWithTagResult> tabMatchesMap = {};
   bool? sortTags;
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
@@ -80,7 +81,7 @@ class _TagViewState extends State<TagView> {
     // copy tags to avoid changing the original array
     tags = [...item.tagsList];
     filteredTags = [...tags];
-    parseSortGroupTags();
+    WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
 
     searchHandler.viewedItem.addListener(itemListener);
 
@@ -103,7 +104,9 @@ class _TagViewState extends State<TagView> {
     super.dispose();
   }
 
-  bool get supportsItemUpdate => searchHandler.currentBooruHandler.hasLoadItemSupport && searchHandler.currentBooruHandler.shouldUpdateIteminTagView;
+  bool get supportsItemUpdate =>
+      searchHandler.currentBooruHandler.hasLoadItemSupport &&
+      searchHandler.currentBooruHandler.shouldUpdateIteminTagView;
 
   Future<void> reloadItemData({
     bool initial = false,
@@ -124,7 +127,9 @@ class _TagViewState extends State<TagView> {
       }
       loadingUpdate = false;
       setState(() {});
-      parseSortGroupTags();
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => parseSortGroupTags(),
+      );
     }
   }
 
@@ -133,29 +138,29 @@ class _TagViewState extends State<TagView> {
   }
 
   List<String> filterTags(List<String> tagsToFilter) {
-    final List<String> filteredTags = [];
+    final List<String> tags = [];
     if (searchController.text.isEmpty) {
       return tagsToFilter;
     }
 
     for (int i = 0; i < tagsToFilter.length; i++) {
       if (tagsToFilter[i].toLowerCase().contains(searchController.text.toLowerCase())) {
-        filteredTags.add(tagsToFilter[i]);
+        tags.add(tagsToFilter[i]);
       }
     }
-    return filteredTags;
+    return tags;
   }
 
   void sortAndGroupTagsList() {
     if (sortTags == null) {
       tags = [...item.tagsList];
-      groupTagsList();
     } else {
       tags.sort((a, b) => sortTags == true ? a.compareTo(b) : b.compareTo(a));
       filteredTags = [
         ...filterTags([...tags]),
       ];
     }
+    groupTagsList();
   }
 
   void groupTagsList() {
@@ -184,9 +189,16 @@ class _TagViewState extends State<TagView> {
     ];
   }
 
+  void cacheTabMatchData() {
+    for (final tag in filteredTags) {
+      tabMatchesMap[tag] = searchHandler.hasTabWithTag(tag);
+    }
+  }
+
   void parseSortGroupTags() {
     parseTags();
     sortAndGroupTagsList();
+    cacheTabMatchData();
     setState(() {});
   }
 
@@ -204,102 +216,6 @@ class _TagViewState extends State<TagView> {
         );
       }
     });
-  }
-
-  Widget infoBuild() {
-    final String fileName = Tools.getFileName(item.fileURL);
-    final String fileUrl = item.fileURL;
-    final String fileRes = (item.fileWidth != null && item.fileHeight != null) ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}' : '';
-    final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
-    final String itemId = item.serverId ?? '';
-    final String rating = item.rating ?? '';
-    final String score = item.score ?? '';
-    final String md5 = item.md5String ?? '';
-    final List<String> sources = item.sources ?? [];
-    final bool tagsAvailable = tags.isNotEmpty || supportsItemUpdate;
-    String postDate = item.postDate ?? '';
-    final String postDateFormat = item.postDateFormat ?? '';
-    String formattedDate = '';
-    if (postDate.isNotEmpty && postDateFormat.isNotEmpty) {
-      try {
-        // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
-        // remove timezones from strings until they fix it
-        DateTime parsedDate;
-        if (postDateFormat == 'unix') {
-          parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
-        } else if (postDateFormat == 'iso') {
-          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
-          parsedDate = DateTime.parse(postDate).toLocal();
-        } else {
-          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
-          parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();
-        }
-        // print(postDate);
-        formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
-      } catch (e) {
-        print('Date Parse Error :: $postDate $postDateFormat :: $e');
-      }
-    }
-
-    return SliverList(
-      delegate: SliverChildListDelegate(
-        [
-          if (settingsHandler.isDebug.value) infoText('Filename', fileName),
-          infoText('URL', fileUrl),
-          infoText('Post URL', item.postURL),
-          infoText('ID', itemId),
-          infoText('Rating', rating),
-          infoText('Score', score),
-          infoText('Resolution', fileRes),
-          infoText('Size', fileSize),
-          infoText('MD5', md5),
-          infoText('Posted', formattedDate, canCopy: false),
-          commentsButton(),
-          notesButton(),
-          sourcesList(sources),
-          if (tagsAvailable) ...[
-            Divider(
-              height: 2,
-              thickness: 2,
-              color: Colors.grey[800]!.withValues(alpha: 0.66),
-            ),
-            tagsButton(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
-                        filled: false,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                ),
-                child: SettingsTextInput(
-                  key: searchKey,
-                  controller: searchController,
-                  focusNode: searchFocusNode,
-                  title: 'Search tags',
-                  onlyInput: true,
-                  clearable: true,
-                  pasteable: true,
-                  onChanged: (_) {
-                    parseSortGroupTags();
-                  },
-                  enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
-                ),
-              ),
-            ),
-          ],
-        ],
-        addAutomaticKeepAlives: false,
-      ),
-    );
   }
 
   Widget tagsButton() {
@@ -766,19 +682,20 @@ class _TagViewState extends State<TagView> {
     );
   }
 
-  Widget tagsItemBuilder(BuildContext context, int index) {
-    final String currentTag = filteredTags[index];
-
+  Widget tagsItemBuilder(BuildContext context, String currentTag) {
     final bool isHated = tagsData.hatedTags.contains(currentTag);
     final bool isLoved = tagsData.lovedTags.contains(currentTag);
     final bool isSound = tagsData.soundTags.contains(currentTag);
     final bool isAi = tagsData.aiTags.contains(currentTag);
-    final bool isInSearch = searchHandler.searchTextController.text
+    final bool isInSearch =
+        searchHandler.searchTextController.text
             .toLowerCase()
             .split(' ')
             .indexWhere((tag) => tag == currentTag.toLowerCase() || tag == '-${currentTag.toLowerCase()}') !=
         -1;
-    final HasTabWithTagResult hasTabWithTag = searchHandler.hasTabWithTag(currentTag);
+    final HasTabWithTagResult hasTabWithTag = tabMatchesMap.containsKey(currentTag)
+        ? tabMatchesMap[currentTag]!
+        : HasTabWithTagResult.noTag;
 
     final List<_TagInfoIcon> tagIconAndColor = [];
     if (isAi) {
@@ -865,7 +782,10 @@ class _TagViewState extends State<TagView> {
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: const Text('This tag is already in the current search query:', style: TextStyle(fontSize: 18)),
+                        title: const Text(
+                          'This tag is already in the current search query:',
+                          style: TextStyle(fontSize: 18),
+                        ),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.warning_amber,
                         leadingIconColor: Colors.yellow,
@@ -923,7 +843,7 @@ class _TagViewState extends State<TagView> {
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.fiber_new,
                         sideColor: Colors.green,
-                        primaryActionBuilder: (controller) {
+                        primaryActionBuilder: (context, controller) {
                           return Row(
                             children: [
                               IconButton(
@@ -972,49 +892,138 @@ class _TagViewState extends State<TagView> {
 
   @override
   Widget build(BuildContext context) {
+    final String fileName = Tools.getFileName(item.fileURL);
+    final String fileUrl = item.fileURL;
+    final String fileRes = (item.fileWidth != null && item.fileHeight != null)
+        ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}'
+        : '';
+    final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
+    final String itemId = item.serverId ?? '';
+    final String rating = item.rating ?? '';
+    final String score = item.score ?? '';
+    final String md5 = item.md5String ?? '';
+    final List<String> sources = item.sources ?? [];
+    final bool tagsAvailable = tags.isNotEmpty || supportsItemUpdate;
+    String postDate = item.postDate ?? '';
+    final String postDateFormat = item.postDateFormat ?? '';
+    String formattedDate = '';
+    if (postDate.isNotEmpty && postDateFormat.isNotEmpty) {
+      try {
+        // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
+        // remove timezones from strings until they fix it
+        DateTime parsedDate;
+        if (postDateFormat == 'unix') {
+          parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
+        } else if (postDateFormat == 'iso') {
+          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateTime.parse(postDate).toLocal();
+        } else {
+          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();
+        }
+        // print(postDate);
+        formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
+      } catch (e) {
+        print('Date Parse Error :: $postDate $postDateFormat :: $e');
+      }
+    }
+
     return Scrollbar(
       interactive: true,
       controller: scrollController,
       child: DesktopScrollWrap(
         controller: scrollController,
-        child: FadingEdgeScrollView.fromScrollView(
-          child: CustomScrollView(
-            controller: scrollController,
-            physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-            slivers: [
-              infoBuild(),
-              SliverToBoxAdapter(
-                child: (filteredTags.isEmpty && tags.isNotEmpty)
-                    ? const Column(
-                        children: [
-                          Kaomoji(
-                            type: KaomojiType.shrug,
-                            style: TextStyle(fontSize: 40),
+        child: CustomScrollView(
+          controller: scrollController,
+          physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  if (settingsHandler.isDebug.value) infoText('Filename', fileName),
+                  infoText('URL', fileUrl),
+                  infoText('Post URL', item.postURL),
+                  infoText('ID', itemId),
+                  infoText('Rating', rating),
+                  infoText('Score', score),
+                  infoText('Resolution', fileRes),
+                  infoText('Size', fileSize),
+                  infoText('MD5', md5),
+                  infoText('Posted', formattedDate, canCopy: false),
+                  commentsButton(),
+                  notesButton(),
+                  sourcesList(sources),
+                  if (tagsAvailable) ...[
+                    Divider(
+                      height: 2,
+                      thickness: 2,
+                      color: Colors.grey[800]!.withValues(alpha: 0.66),
+                    ),
+                    tagsButton(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+                            filled: false,
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          Text(
-                            'No tags found',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          SizedBox(height: 60),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
+                        ),
+                        child: SettingsTextInput(
+                          key: searchKey,
+                          controller: searchController,
+                          focusNode: searchFocusNode,
+                          title: 'Search tags',
+                          onlyInput: true,
+                          clearable: true,
+                          pasteable: true,
+                          onChanged: (_) {
+                            parseSortGroupTags();
+                          },
+                          enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  tagsItemBuilder,
-                  addAutomaticKeepAlives: false,
-                  // add empty items to allow a bit of overscroll for easier reachability
-                  childCount: filteredTags.length,
-                ),
+            ),
+            SliverToBoxAdapter(
+              child: (filteredTags.isEmpty && tags.isNotEmpty)
+                  ? const Column(
+                      children: [
+                        Kaomoji(
+                          type: KaomojiType.shrug,
+                          style: TextStyle(fontSize: 40),
+                        ),
+                        Text(
+                          'No tags found',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        SizedBox(height: 60),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (c, i) => tagsItemBuilder(c, filteredTags[i]),
+                childCount: filteredTags.length,
               ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.viewInsetsOf(context).bottom,
-                ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: MediaQuery.viewInsetsOf(context).bottom,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1161,7 +1170,9 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
                 ),
               ),
             ),
-          const Text('You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:'),
+          const Text(
+            'You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:',
+          ),
           const SizedBox(height: 16),
           SelectableLinkify(
             key: ValueKey('selection-$selectionKeyIndex'),
@@ -1217,7 +1228,10 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
                   children: [
                     const Icon(Icons.select_all, size: 30),
                     const SizedBox(width: 8),
-                    if (selectedText.isNotEmpty) Expanded(child: Text(selectedText)) else const Text('[No text selected]'),
+                    if (selectedText.isNotEmpty)
+                      Expanded(child: Text(selectedText))
+                    else
+                      const Text('[No text selected]'),
                   ],
                 ),
               ),
@@ -1304,122 +1318,125 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                 onTap: loadPreview,
               )
             : ((loading || failed)
-                ? ListTile(
-                    leading: Icon(
-                      loading ? Icons.search : Icons.restart_alt,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    trailing: loading ? const CircularProgressIndicator() : null,
-                    title: loading ? const Text('Preview is loading...') : const Text('Failed to load preview'),
-                    subtitle: failed ? const Text('Tap to try again') : null,
-                    onTap: failed ? loadPreview : null,
-                  )
-                : Column(
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.search),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Preview:',
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          const SizedBox(width: 8),
-                          BooruFavicon(preview!.booruHandler.booru),
-                          const SizedBox(width: 4),
-                          Text(
-                            preview!.booruHandler.booru.name ?? '',
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          const SizedBox(width: 4),
-                          IconButton(
-                            onPressed: loadPreview,
-                            icon: const Icon(Icons.refresh),
-                          ),
-                        ],
+                  ? ListTile(
+                      leading: Icon(
+                        loading ? Icons.search : Icons.restart_alt,
+                        color: Theme.of(context).iconTheme.color,
                       ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 180,
-                        width: MediaQuery.sizeOf(context).width,
-                        child: FadingEdgeScrollView.fromScrollView(
-                          child: ListView.builder(
-                            controller: scrollController,
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: preview!.booruHandler.filteredFetched.isEmpty ? 1 : preview!.booruHandler.filteredFetched.length,
-                            itemBuilder: (context, index) {
-                              if (preview!.booruHandler.filteredFetched.isEmpty) {
-                                return const Center(
-                                  child: Column(
-                                    // mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                      trailing: loading ? const CircularProgressIndicator() : null,
+                      title: loading ? const Text('Preview is loading...') : const Text('Failed to load preview'),
+                      subtitle: failed ? const Text('Tap to try again') : null,
+                      onTap: failed ? loadPreview : null,
+                    )
+                  : Column(
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.search),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Preview:',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            const SizedBox(width: 8),
+                            BooruFavicon(preview!.booruHandler.booru),
+                            const SizedBox(width: 4),
+                            Text(
+                              preview!.booruHandler.booru.name ?? '',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            const SizedBox(width: 4),
+                            IconButton(
+                              onPressed: loadPreview,
+                              icon: const Icon(Icons.refresh),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 180,
+                          width: MediaQuery.sizeOf(context).width,
+                          child: FadingEdgeScrollView.fromScrollView(
+                            child: ListView.builder(
+                              controller: scrollController,
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: preview!.booruHandler.filteredFetched.isEmpty
+                                  ? 1
+                                  : preview!.booruHandler.filteredFetched.length,
+                              itemBuilder: (context, index) {
+                                if (preview!.booruHandler.filteredFetched.isEmpty) {
+                                  return const Center(
+                                    child: Column(
+                                      // mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Kaomoji(
+                                          type: KaomojiType.shrug,
+                                          style: TextStyle(fontSize: 24),
+                                        ),
+                                        Text(
+                                          'Nothing found',
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
+
+                                return Container(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  height: 180,
+                                  width: 120,
+                                  child: Stack(
                                     children: [
-                                      Kaomoji(
-                                        type: KaomojiType.shrug,
-                                        style: TextStyle(fontSize: 24),
+                                      ThumbnailBuild(
+                                        item: preview!.booruHandler.filteredFetched[index],
+                                        selectable: false,
                                       ),
-                                      Text(
-                                        'Nothing found',
-                                        style: TextStyle(fontSize: 16),
+                                      Positioned.fill(
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(4),
+                                            onTap: () {
+                                              Navigator.of(context).push(
+                                                PageRouteBuilder(
+                                                  pageBuilder: (_, _, _) => ItemViewerPage(
+                                                    items: preview!.booruHandler.filteredFetched,
+                                                    initialIndex: index,
+                                                    booru: preview!.booruHandler.booru,
+                                                  ),
+                                                  opaque: false,
+                                                  transitionDuration: const Duration(milliseconds: 300),
+                                                  barrierColor: Colors.black26,
+                                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                                    return const ZoomPageTransitionsBuilder().buildTransitions(
+                                                      MaterialPageRoute(
+                                                        builder: (_) => const SizedBox.shrink(),
+                                                      ),
+                                                      context,
+                                                      animation,
+                                                      secondaryAnimation,
+                                                      child,
+                                                    );
+                                                  },
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 );
-                              }
-
-                              return Container(
-                                padding: const EdgeInsets.only(right: 8),
-                                height: 180,
-                                width: 120,
-                                child: Stack(
-                                  children: [
-                                    ThumbnailBuild(
-                                      item: preview!.booruHandler.filteredFetched[index],
-                                      selectable: false,
-                                    ),
-                                    Positioned.fill(
-                                      child: Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          borderRadius: BorderRadius.circular(4),
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              PageRouteBuilder(
-                                                pageBuilder: (_, __, ___) => ItemViewerPage(
-                                                  item: preview!.booruHandler.filteredFetched[index],
-                                                  booru: preview!.booruHandler.booru,
-                                                ),
-                                                opaque: false,
-                                                transitionDuration: const Duration(milliseconds: 300),
-                                                barrierColor: Colors.black26,
-                                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                                  return const ZoomPageTransitionsBuilder().buildTransitions(
-                                                    MaterialPageRoute(
-                                                      builder: (_) => const SizedBox.shrink(),
-                                                    ),
-                                                    context,
-                                                    animation,
-                                                    secondaryAnimation,
-                                                    child,
-                                                  );
-                                                },
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                  )),
+                        const SizedBox(height: 12),
+                      ],
+                    )),
       ),
     );
   }

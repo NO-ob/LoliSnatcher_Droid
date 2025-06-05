@@ -18,6 +18,7 @@ enum BooruType {
   NyanPals,
   Philomena,
   Rainbooru,
+  Realbooru,
   R34Hentai,
   R34US,
   Sankaku,

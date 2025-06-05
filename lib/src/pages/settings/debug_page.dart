@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -124,15 +125,16 @@ class _DebugPageState extends State<DebugPage> {
                   },
                   title: 'Blur images + mute videos [DEV only]',
                 ),
-              SettingsToggle(
-                value: settingsHandler.desktopListsDrag,
-                onChanged: (newValue) {
-                  setState(() {
-                    settingsHandler.desktopListsDrag = newValue;
-                  });
-                },
-                title: 'Enable drag scroll on lists [Desktop only]',
-              ),
+              if (SettingsHandler.isDesktopPlatform)
+                SettingsToggle(
+                  value: settingsHandler.desktopListsDrag,
+                  onChanged: (newValue) {
+                    setState(() {
+                      settingsHandler.desktopListsDrag = newValue;
+                    });
+                  },
+                  title: 'Enable drag scroll on lists [Desktop only]',
+                ),
 
               SettingsButton(
                 name: 'Animation speed ($timeDilation)',
@@ -275,22 +277,35 @@ class _DebugPageState extends State<DebugPage> {
                       name: 'Vibrate',
                       action: () {
                         print('Vibrate $vDuration $vAmplitude');
-                        ServiceHandler.vibrate(flutterWay: vFlutterway, duration: vDuration.round(), amplitude: vAmplitude.round());
+                        ServiceHandler.vibrate(
+                          flutterWay: vFlutterway,
+                          duration: vDuration.round(),
+                          amplitude: vAmplitude.round(),
+                        );
                       },
                     ),
                   ],
                 ),
               ],
 
-              SettingsButton(name: 'Res: ${MediaQuery.of(context).size.width.toPrecision(4)}x${MediaQuery.of(context).size.height.toPrecision(4)}'),
-              SettingsButton(name: 'Pixel Ratio: ${MediaQuery.of(context).devicePixelRatio.toPrecision(4)}'),
+              SettingsButton(
+                name:
+                    'Res: ${MediaQuery.sizeOf(context)..width.toPrecision(4)}x${MediaQuery.sizeOf(context).height.toPrecision(4)}',
+              ),
+              SettingsButton(name: 'Pixel Ratio: ${MediaQuery.devicePixelRatioOf(context).toPrecision(4)}'),
 
               const SettingsButton(name: '', enabled: false),
 
               SettingsButton(
                 name: 'Logger',
-                icon: const Icon(Icons.print),
-                page: () => const LoggerPage(),
+                action: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => LoggerViewPage(talker: Logger.talker),
+                    ),
+                  );
+                },
+                trailingIcon: const Icon(Icons.print),
               ),
 
               SettingsButton(
@@ -304,6 +319,71 @@ class _DebugPageState extends State<DebugPage> {
                 action: () async {
                   await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteAllCookies();
                   globalWindowsCookies.clear();
+                },
+              ),
+
+              const SettingsButton(name: '', enabled: false),
+              SettingsButton(
+                name: 'Flash normal',
+                icon: const Icon(Icons.flash_on),
+                action: () async {
+                  FlashElements.showSnackbar(
+                    title: const Text('Flash'),
+                    context: context,
+                    duration: null,
+                    key: 'flash',
+                  );
+                },
+              ),
+              SettingsButton(
+                name: 'Flash (unique)',
+                icon: const Icon(Icons.flash_on),
+                action: () async {
+                  FlashElements.showSnackbar(
+                    title: const Text('Flash Unique'),
+                    context: context,
+                    duration: null,
+                    key: 'flash-unique',
+                    isKeyUnique: true,
+                  );
+                },
+              ),
+              SettingsButton(
+                name: 'Dismiss all flashes',
+                icon: const Icon(Icons.flash_on),
+                action: () async {
+                  await FlashElements.dismissAll();
+                },
+              ),
+              SettingsButton(
+                name: 'Print flashes info',
+                icon: const Icon(Icons.flash_on),
+                action: () async {
+                  await FlashElements.dismissAll();
+                  await Future.delayed(const Duration(seconds: 1));
+                  FlashElements.cleanAllDisposedControllers();
+                  final Map<String, List<String>> flashes = FlashElements.controllersMap.map(
+                    (k, v) => MapEntry(
+                      k,
+                      v.map((e) => e is DefaultFlashController ? 'Tip' : 'Dialog').toList(),
+                    ),
+                  );
+
+                  FlashElements.showSnackbar(
+                    title: const Text('Flash print'),
+                    context: context,
+                    duration: null,
+                    tapToClose: true,
+                    content: Text(flashes.toString()),
+                    position: FlashPosition.top,
+                    key: 'flash-print',
+                    isKeyUnique: true,
+                  );
+
+                  FlashElements.showSnackbar(
+                    title: const Text('Dialog'),
+                    asDialog: true,
+                  );
                 },
               ),
 

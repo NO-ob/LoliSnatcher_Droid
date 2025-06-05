@@ -38,8 +38,11 @@ class R34HentaiHandler extends ShimmieHandler {
     final double? thumbHeight = double.tryParse(current.firstChild!.attributes['height'] ?? '');
     final double? fileWidth = double.tryParse(current.attributes['data-width'] ?? '');
     final double? fileHeight = double.tryParse(current.attributes['data-height'] ?? '');
-    final String fileURL =
-        thumbURL.replaceFirst('_thumbs', '_images').replaceFirst('thumbnails', 'images').replaceFirst('thumbnail_', '').replaceFirst('.jpg', '.$fileExt');
+    final String fileURL = thumbURL
+        .replaceFirst('_thumbs', '_images')
+        .replaceFirst('thumbnails', 'images')
+        .replaceFirst('thumbnail_', '')
+        .replaceFirst('.jpg', '.$fileExt');
     final List<String> tags = current.attributes['data-tags']?.split(' ') ?? [];
 
     final BooruItem item = BooruItem(

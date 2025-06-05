@@ -238,7 +238,9 @@ class _BooruPageState extends State<BooruPage> {
       // do nothing if no selected or selected "Favourites/Dowloads"
       // TODO update all tabs with old booru with a new one
       // TODO if you open edit after already editing - it will open old instance + possible exception due to old data
-      page: (selectedBooru != null && BooruType.saveable.contains(selectedBooru?.type)) ? () => BooruEdit(selectedBooru!) : null,
+      page: (selectedBooru != null && BooruType.saveable.contains(selectedBooru?.type))
+          ? () => BooruEdit(selectedBooru!)
+          : null,
     );
   }
 
@@ -267,7 +269,9 @@ class _BooruPageState extends State<BooruPage> {
         }
 
         // TODO reset all tabs to next available booru?
-        final List<SearchTab> tabsWithBooru = searchHandler.list.where((tab) => tab.selectedBooru.value.name == selectedBooru?.name).toList();
+        final List<SearchTab> tabsWithBooru = searchHandler.list
+            .where((tab) => tab.selectedBooru.value.name == selectedBooru?.name)
+            .toList();
         if (tabsWithBooru.isNotEmpty) {
           FlashElements.showSnackbar(
             context: context,
@@ -517,7 +521,10 @@ Future<bool?> askToChangePrefBooru(
               text: TextSpan(
                 children: [
                   TextSpan(text: booruLoc.changeTo),
-                  TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(
+                    text: selectedBooru.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   WidgetSpan(
                     child: BooruFavicon(selectedBooru),
                   ),
@@ -529,7 +536,10 @@ Future<bool?> askToChangePrefBooru(
               text: TextSpan(
                 children: [
                   TextSpan(text: booruLoc.keepCurrentBooru),
-                  TextSpan(text: initBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(
+                    text: initBooru.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   WidgetSpan(child: BooruFavicon(initBooru)),
                 ],
               ),
@@ -538,7 +548,10 @@ Future<bool?> askToChangePrefBooru(
               text: TextSpan(
                 children: [
                   TextSpan(text: booruLoc.changeToNewBooru),
-                  TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(
+                    text: selectedBooru.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   WidgetSpan(
                     child: BooruFavicon(selectedBooru),
                   ),

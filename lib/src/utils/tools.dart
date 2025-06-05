@@ -14,6 +14,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
@@ -187,12 +188,15 @@ class Tools {
 
   static const String appUserAgent = 'LoliSnatcher_Droid/${Constants.appVersion}';
   static String get browserUserAgent {
-    return (isTestMode || SettingsHandler.instance.customUserAgent.isEmpty) ? appUserAgent : SettingsHandler.instance.customUserAgent;
+    return (isTestMode || SettingsHandler.instance.customUserAgent.isEmpty)
+        ? appUserAgent
+        : SettingsHandler.instance.customUserAgent;
   }
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
 
-  static bool get isOnPlatformWithWebviewSupport => Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isMacOS;
+  static bool get isOnPlatformWithWebviewSupport =>
+      Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isMacOS;
 
   static const String captchaCheckHeader = 'LSCaptchaCheck';
 
@@ -203,7 +207,18 @@ class Tools {
 
     final String host = uri.host;
 
-    if (isOnPlatformWithWebviewSupport && (response?.statusCode == 503 || response?.statusCode == 403)) {
+    final Map<String, String> knownCaptchaStrings = {
+      'booru.allthefallen.moe': 'processChallenge',
+    };
+    final String? textToFind = knownCaptchaStrings.entries.firstWhereOrNull((e) => host.contains(e.key))?.value;
+    final bool hasCaptchaContent = (textToFind == null || response?.data is! String)
+        ? false
+        : response?.data.toString().contains(textToFind) ?? false;
+
+    if (isOnPlatformWithWebviewSupport &&
+        (response?.statusCode == HttpStatus.forbidden ||
+            response?.statusCode == HttpStatus.serviceUnavailable ||
+            hasCaptchaContent)) {
       captchaScreenActive = true;
       await Navigator.push(
         NavigationHandler.instance.navigatorKey.currentContext!,

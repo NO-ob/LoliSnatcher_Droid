@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
@@ -177,10 +176,6 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   bool get hasSignInSupport => true;
-
-  String generateSha1(String str) {
-    return sha1.convert(utf8.encode(str)).toString();
-  }
 
   String token = '';
 

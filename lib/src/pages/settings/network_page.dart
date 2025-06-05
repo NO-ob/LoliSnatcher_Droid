@@ -183,8 +183,9 @@ class _NetworkPageState extends State<NetworkPage> {
                 onChanged: (newValue) async {
                   selectedBooru = newValue;
                   if (newValue != null) {
-                    selectedBooruCookies =
-                        await CookieManager.instance(webViewEnvironment: webViewEnvironment).getCookies(url: WebUri(selectedBooru!.baseURL!));
+                    selectedBooruCookies = await CookieManager.instance(
+                      webViewEnvironment: webViewEnvironment,
+                    ).getCookies(url: WebUri(selectedBooru!.baseURL!));
                     if (Platform.isWindows) {
                       selectedBooruCookies.addAll(globalWindowsCookies[selectedBooru!.baseURL!] ?? []);
                     }
@@ -226,7 +227,9 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
                 action: () async {
                   if (selectedBooru != null) {
-                    await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteCookies(url: WebUri(selectedBooru!.baseURL!));
+                    await CookieManager.instance(
+                      webViewEnvironment: webViewEnvironment,
+                    ).deleteCookies(url: WebUri(selectedBooru!.baseURL!));
                     globalWindowsCookies[selectedBooru!.baseURL!]?.clear();
                     FlashElements.showSnackbar(
                       context: context,

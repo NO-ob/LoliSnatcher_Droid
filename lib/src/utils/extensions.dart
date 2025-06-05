@@ -7,14 +7,13 @@ extension UIExtras on Widget {
     Color? color,
     double? strokeWidth,
     BorderRadius? borderRadius,
-  }) =>
-      Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: color ?? Colors.black, width: strokeWidth ?? 1),
-          borderRadius: borderRadius,
-        ),
-        child: this,
-      );
+  }) => Container(
+    decoration: BoxDecoration(
+      border: Border.all(color: color ?? Colors.black, width: strokeWidth ?? 1),
+      borderRadius: borderRadius,
+    ),
+    child: this,
+  );
 
   Widget padded(double padding) => Padding(padding: EdgeInsets.all(padding), child: this);
 
@@ -71,7 +70,8 @@ extension DoubleExtras on double {
     return (this * mod).round().toDouble() / mod;
   }
 
-  String truncateTrailingZeroes(int? fractionDigits) => toStringAsFixed(fractionDigits ?? toString().split('.')[1].length).replaceAllMapped(
+  String truncateTrailingZeroes(int? fractionDigits) =>
+      toStringAsFixed(fractionDigits ?? toString().split('.')[1].length).replaceAllMapped(
         RegExp(r'(\.\d*?[1-9]|)\.?0+$'),
         (match) => '${match[1] == '.' ? '' : match[1]}',
       );
@@ -83,9 +83,9 @@ extension BoolExtras on bool {
 
 String formatNumber(num number) {
   final String formattedPart = number.toString().replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (Match match) => '${match[1]} ',
-      );
+    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+    (Match match) => '${match[1]} ',
+  );
   return formattedPart.trim();
 }
 
