@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -19,16 +21,17 @@ import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 class Thumbnail extends StatefulWidget {
   const Thumbnail({
     required this.item,
+    required this.booru,
     this.isStandalone = false,
     this.useHero = true,
     super.key,
   });
 
   final BooruItem item;
+  final Booru booru;
 
   /// set to true when used in a list
   final bool isStandalone;
-
   final bool useHero;
 
   @override
@@ -37,16 +40,15 @@ class Thumbnail extends StatefulWidget {
 
 class _ThumbnailState extends State<Thumbnail> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final SearchHandler searchHandler = SearchHandler.instance;
 
   final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
   int restartedCount = 0;
   final ValueNotifier<bool?> isFromCache = ValueNotifier(null);
-  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true),
-      isFailed = ValueNotifier(false),
-      isLoaded = ValueNotifier(false),
-      isLoadedExtra = ValueNotifier(false),
-      failedRendering = ValueNotifier(false);
+  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true);
+  final ValueNotifier<bool> isFailed = ValueNotifier(false);
+  final ValueNotifier<bool> isLoaded = ValueNotifier(false);
+  final ValueNotifier<bool> isLoadedExtra = ValueNotifier(false);
+  final ValueNotifier<bool> failedRendering = ValueNotifier(false);
   final ValueNotifier<String?> errorCode = ValueNotifier(null);
   CancelToken? mainCancelToken, extraCancelToken;
 
@@ -84,7 +86,11 @@ class _ThumbnailState extends State<Thumbnail> {
         ? CustomNetworkAvifImage(
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
-            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            headers: await Tools.getFileCustomHeaders(
+              widget.booru,
+              item: widget.item,
+              checkForReferer: true,
+            ),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
             fileNameExtras: widget.item.fileNameExtras,
@@ -100,7 +106,11 @@ class _ThumbnailState extends State<Thumbnail> {
         : CustomNetworkImage(
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
-            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            headers: await Tools.getFileCustomHeaders(
+              widget.booru,
+              item: widget.item,
+              checkForReferer: true,
+            ),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
             fileNameExtras: widget.item.fileNameExtras,
@@ -185,8 +195,8 @@ class _ThumbnailState extends State<Thumbnail> {
     if (error is DioException && CancelToken.isCancel(error)) {
       // print('Canceled by user: $error');
     } else {
-      if (restartedCount < 5) {
-        // attempt to reload 5 times with a 1s delay
+      if (restartedCount < (kDebugMode ? 1 : 3)) {
+        // attempt to reload 3 times with a 1s delay
         Debounce.debounce(
           tag: 'thumbnail_reload_${widget.item.hashCode}',
           callback: () {
@@ -589,8 +599,6 @@ class _ThumbnailState extends State<Thumbnail> {
       color: Colors.transparent,
       child: imageStack,
     );
-
-    // print('building thumb ${searchHandler.getItemIndex(widget.item)}');
 
     if (widget.isStandalone && widget.useHero) {
       return HeroMode(
