@@ -10,10 +10,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 // TODO media actions, video pause/mute... global controller
 
@@ -105,29 +102,26 @@ class ViewerHandler {
     // addPostFrameCallback waits until widget is built to avoid calling setState in it while other setState is active
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = currentKey.value?.currentState;
-      switch (state?.widget.runtimeType) {
-        case const (ImageViewer):
+      switch (state?.widget) {
+        case ImageViewer():
           final widgetState = state! as ImageViewerState;
           isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isLoaded.value;
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
           break;
-        case const (VideoViewer):
+        case VideoViewer():
           final widgetState = state! as VideoViewerState;
           isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isVideoInited;
           isFullscreen.value = widgetState.chewieController.value?.isFullScreen ?? false;
           viewState.value = widgetState.viewController.value;
           break;
-        case const (VideoViewerPlaceholder):
-        case const (UnknownViewerPlaceholder):
-        case const (GuessExtensionViewer):
+        default:
+          isZoomed.value = false;
           isLoaded.value = true;
           isFullscreen.value = false;
           viewState.value = null;
-          break;
-        default:
           break;
       }
     });
@@ -155,6 +149,32 @@ class ViewerHandler {
   void doubleTapZoom() {
     final dynamic state = currentKey.value?.currentState;
     state?.doubleTapZoom?.call();
+  }
+
+  void toggleMuteAllVideos({bool mute = true}) {
+    for (final key in activeKeys) {
+      final state = key?.currentState;
+      switch (state?.widget) {
+        case VideoViewer():
+          (state as VideoViewerState?)?.videoController.value?.setVolume(mute ? 0 : 1);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  void pauseAllVideos() {
+    for (final key in activeKeys) {
+      final state = key?.currentState;
+      switch (state?.widget) {
+        case VideoViewer():
+          (state as VideoViewerState?)?.videoController.value?.pause();
+          break;
+        default:
+          break;
+      }
+    }
   }
 
   void setViewValue(Key? key, PhotoViewControllerValue value) {

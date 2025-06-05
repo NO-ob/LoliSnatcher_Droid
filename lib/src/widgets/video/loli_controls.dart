@@ -602,6 +602,7 @@ class _LoliControlsState extends State<LoliControls> {
         ServiceHandler.vibrate();
 
         viewerHandler.videoAutoMute = !viewerHandler.videoAutoMute;
+        viewerHandler.toggleMuteAllVideos(mute: viewerHandler.videoAutoMute);
         if (viewerHandler.videoAutoMute && _latestValue.volume != 0) {
           controller.setVolume(0);
         } else if (!viewerHandler.videoAutoMute && _latestValue.volume == 0) {

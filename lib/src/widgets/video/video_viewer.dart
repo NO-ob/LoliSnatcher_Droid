@@ -525,7 +525,7 @@ class VideoViewerState extends State<VideoViewer> {
       // ],
     );
 
-    if (settingsHandler.startVideosMuted) {
+    if (settingsHandler.startVideosMuted || viewerHandler.videoAutoMute) {
       await videoController.value?.setVolume(0);
     }
 

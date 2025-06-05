@@ -1396,6 +1396,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                           child: InkWell(
                                             borderRadius: BorderRadius.circular(4),
                                             onTap: () {
+                                              ViewerHandler.instance.pauseAllVideos();
                                               Navigator.of(context).push(
                                                 PageRouteBuilder(
                                                   pageBuilder: (_, _, _) => ItemViewerPage(
