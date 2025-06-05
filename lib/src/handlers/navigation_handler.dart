@@ -19,6 +19,8 @@ class NavigationHandler {
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
+  BuildContext get navContext => navigatorKey.currentContext!;
+
   final GlobalKey<CustomFloatingHeaderState> floatingHeaderKey = GlobalKey<CustomFloatingHeaderState>();
   final GlobalKey<WaterfallBottomBarState> bottomBarKey = GlobalKey<WaterfallBottomBarState>();
 }

@@ -47,7 +47,7 @@ Future<bool> showStorageNeedsUpdateDialog() async {
   final String extPath = SettingsHandler.instance.extPathOverride;
   // TODO better dialog style
   final res = await showDialog(
-    context: NavigationHandler.instance.navigatorKey.currentContext!,
+    context: NavigationHandler.instance.navContext,
     barrierDismissible: false,
     builder: (context) {
       return AlertDialog(

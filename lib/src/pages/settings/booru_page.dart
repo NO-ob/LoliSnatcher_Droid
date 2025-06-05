@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -94,7 +93,7 @@ class _BooruPageState extends State<BooruPage> {
       selectedBooru = settingsHandler.booruList[0];
     }
     if (selectedBooru != null) {
-      final res = await askToChangePrefBooru(initPrefBooru, selectedBooru!);
+      final res = await askToChangePrefBooru(context, initPrefBooru, selectedBooru!);
       if (res == true) {
         settingsHandler.prefBooru = selectedBooru?.name ?? '';
       } else if (res == false && initPrefBooru != null) {
@@ -474,11 +473,15 @@ class _BooruPageState extends State<BooruPage> {
   }
 }
 
-Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async {
+Future<bool?> askToChangePrefBooru(
+  BuildContext context,
+  Booru? initBooru,
+  Booru selectedBooru,
+) async {
   if (initBooru != null && initBooru.name != selectedBooru.name) {
     return showDialog<bool>(
-      context: NavigationHandler.instance.navigatorKey.currentContext!,
-      builder: (BuildContext context) {
+      context: context,
+      builder: (context) {
         return SettingsDialog(
           title: const Text('Change default Booru?'),
           contentItems: [

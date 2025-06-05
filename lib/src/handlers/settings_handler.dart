@@ -2127,7 +2127,7 @@ class SettingsHandler {
 
       final bool isDiffVersion = Constants.appBuildNumber < updateInfo.value!.buildNumber;
 
-      final ctx = NavigationHandler.instance.navigatorKey.currentContext!;
+      final ctx = NavigationHandler.instance.navContext;
 
       SettingsPageOpen(
         context: ctx,
