@@ -73,7 +73,7 @@ class _TagViewState extends State<TagView> {
   @override
   void initState() {
     super.initState();
-    searchHandler.searchTextController.addListener(onMainSearchTextChanged);
+    searchHandler.searchTextController.addListener(parseSortGroupTags);
 
     searchFocusNode.addListener(searchFocusListener);
 
@@ -96,7 +96,7 @@ class _TagViewState extends State<TagView> {
   @override
   void dispose() {
     cancelToken?.cancel();
-    searchHandler.searchTextController.removeListener(onMainSearchTextChanged);
+    searchHandler.searchTextController.removeListener(parseSortGroupTags);
     searchController.dispose();
     searchFocusNode.removeListener(searchFocusListener);
     searchFocusNode.dispose();
@@ -199,10 +199,6 @@ class _TagViewState extends State<TagView> {
     parseTags();
     sortAndGroupTagsList();
     cacheTabMatchData();
-    setState(() {});
-  }
-
-  void onMainSearchTextChanged() {
     setState(() {});
   }
 
@@ -868,8 +864,7 @@ class _TagViewState extends State<TagView> {
                           );
                         },
                       );
-                      sortAndGroupTagsList();
-                      setState(() {});
+                      parseSortGroupTags();
                     },
                   ),
                 ),
