@@ -7,13 +7,10 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 
-import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
-import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
@@ -26,16 +23,17 @@ import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 class Thumbnail extends StatefulWidget {
   const Thumbnail({
     required this.item,
+    required this.booru,
     this.isStandalone = false,
     this.useHero = true,
     super.key,
   });
 
   final BooruItem item;
+  final Booru booru;
 
   /// set to true when used in a list
   final bool isStandalone;
-
   final bool useHero;
 
   @override
@@ -44,16 +42,15 @@ class Thumbnail extends StatefulWidget {
 
 class _ThumbnailState extends State<Thumbnail> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final SearchHandler searchHandler = SearchHandler.instance;
 
   final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
   int restartedCount = 0;
   final ValueNotifier<bool?> isFromCache = ValueNotifier(null);
-  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true),
-      isFailed = ValueNotifier(false),
-      isLoaded = ValueNotifier(false),
-      isLoadedExtra = ValueNotifier(false),
-      failedRendering = ValueNotifier(false);
+  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true);
+  final ValueNotifier<bool> isFailed = ValueNotifier(false);
+  final ValueNotifier<bool> isLoaded = ValueNotifier(false);
+  final ValueNotifier<bool> isLoadedExtra = ValueNotifier(false);
+  final ValueNotifier<bool> failedRendering = ValueNotifier(false);
   final ValueNotifier<String?> errorCode = ValueNotifier(null);
   CancelToken? mainCancelToken, extraCancelToken, loadItemCancelToken;
 
@@ -92,7 +89,7 @@ class _ThumbnailState extends State<Thumbnail> {
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
             headers: await Tools.getFileCustomHeaders(
-              searchHandler.currentBooru,
+              widget.booru,
               item: widget.item,
               checkForReferer: true,
             ),
@@ -112,7 +109,7 @@ class _ThumbnailState extends State<Thumbnail> {
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
             headers: await Tools.getFileCustomHeaders(
-              searchHandler.currentBooru,
+              widget.booru,
               item: widget.item,
               checkForReferer: true,
             ),
@@ -622,8 +619,8 @@ class _ThumbnailState extends State<Thumbnail> {
                                   received: received,
                                   startedAt: startedAt,
                                   retryText:
-                                      (searchHandler.currentBooruHandler is FavouritesHandler ||
-                                          searchHandler.currentBooruHandler is DownloadsHandler)
+                                      (widget.booru.type?.isFavourites == true ||
+                                          widget.booru.type?.isDownloads == true)
                                       ? 'Tap to update data or retry'
                                       : null,
                                   retryIcon: const Row(
@@ -639,8 +636,8 @@ class _ThumbnailState extends State<Thumbnail> {
                                   restartAction: () {
                                     restartedCount = 0;
 
-                                    if (searchHandler.currentBooruHandler is FavouritesHandler ||
-                                        searchHandler.currentBooruHandler is DownloadsHandler) {
+                                    if (widget.booru.type?.isFavourites == true ||
+                                        widget.booru.type?.isDownloads == true) {
                                       attemptToLoadItemsAndRestart();
                                     } else {
                                       restartLoading();
@@ -681,8 +678,6 @@ class _ThumbnailState extends State<Thumbnail> {
       color: Colors.transparent,
       child: imageStack,
     );
-
-    // print('building thumb ${searchHandler.getItemIndex(widget.item)}');
 
     if (widget.isStandalone && widget.useHero) {
       return HeroMode(
