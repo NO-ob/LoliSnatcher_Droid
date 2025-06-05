@@ -91,7 +91,11 @@ class _ThumbnailState extends State<Thumbnail> {
         ? CustomNetworkAvifImage(
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
-            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, item: widget.item, checkForReferer: true),
+            headers: await Tools.getFileCustomHeaders(
+              searchHandler.currentBooru,
+              item: widget.item,
+              checkForReferer: true,
+            ),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
             fileNameExtras: widget.item.fileNameExtras,
@@ -107,7 +111,11 @@ class _ThumbnailState extends State<Thumbnail> {
         : CustomNetworkImage(
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
-            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, item: widget.item, checkForReferer: true),
+            headers: await Tools.getFileCustomHeaders(
+              searchHandler.currentBooru,
+              item: widget.item,
+              checkForReferer: true,
+            ),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
             fileNameExtras: widget.item.fileNameExtras,
@@ -328,7 +336,8 @@ class _ThumbnailState extends State<Thumbnail> {
               booruHost != null &&
               itemPostHost.isNotEmpty == true &&
               booruHost.isNotEmpty == true &&
-              (itemPostHost.contains(booruHost) || (SankakuHandler.knownUrls.contains(itemPostHost) && SankakuHandler.knownUrls.contains(booruHost))));
+              (itemPostHost.contains(booruHost) ||
+                  (SankakuHandler.knownUrls.contains(itemPostHost) && SankakuHandler.knownUrls.contains(booruHost))));
     });
 
     loadItemCancelToken?.cancel();
@@ -612,7 +621,9 @@ class _ThumbnailState extends State<Thumbnail> {
                                   total: total,
                                   received: received,
                                   startedAt: startedAt,
-                                  retryText: (searchHandler.currentBooruHandler is FavouritesHandler || searchHandler.currentBooruHandler is DownloadsHandler)
+                                  retryText:
+                                      (searchHandler.currentBooruHandler is FavouritesHandler ||
+                                          searchHandler.currentBooruHandler is DownloadsHandler)
                                       ? 'Tap to update data or retry'
                                       : null,
                                   retryIcon: const Row(
@@ -628,7 +639,8 @@ class _ThumbnailState extends State<Thumbnail> {
                                   restartAction: () {
                                     restartedCount = 0;
 
-                                    if (searchHandler.currentBooruHandler is FavouritesHandler || searchHandler.currentBooruHandler is DownloadsHandler) {
+                                    if (searchHandler.currentBooruHandler is FavouritesHandler ||
+                                        searchHandler.currentBooruHandler is DownloadsHandler) {
                                       attemptToLoadItemsAndRestart();
                                     } else {
                                       restartLoading();

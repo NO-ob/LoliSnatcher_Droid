@@ -141,7 +141,8 @@ class e621Handler extends BooruHandler {
     return {
       'Accept': 'text/html,application/xml,application/json',
       'User-Agent': Tools.browserUserAgent,
-      if (userName != null && apiKey != null) 'Authorization': "Basic ${base64.encode(utf8.encode("$userName:$apiKey"))}",
+      if (userName != null && apiKey != null)
+        'Authorization': "Basic ${base64.encode(utf8.encode("$userName:$apiKey"))}",
     };
   }
 
