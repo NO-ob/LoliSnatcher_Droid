@@ -3,9 +3,12 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/pages/settings/network_page.dart';
+import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -20,10 +23,20 @@ class DioNetwork {
     // dio.options.receiveTimeout = Duration(seconds: 30);
     // dio.options.sendTimeout = Duration(seconds: 10);
 
-    if (Tools.isTestMode || SettingsHandler.instance.isDebug.value) {
-      dio.interceptors.add(Logger.dioInterceptor!);
-      dio.interceptors.add(SettingsHandler.instance.alice.getDioInterceptor());
+    final settingsHandler = SettingsHandler.instance;
+
+    dio.interceptors.add(Logger.dioInterceptor!);
+    dio.interceptors.add(settingsHandler.alice.getDioInterceptor());
+
+    final proxyType = ProxyType.fromName(settingsHandler.proxyType);
+    if (proxyType.isDirect || (proxyType.isSystem && systemProxyAddress.isEmpty) || getProxyConfigAddress().isEmpty) {
+      dio.httpClientAdapter = Http2Adapter(
+        ConnectionManager(
+          idleTimeout: const Duration(seconds: 30),
+        ),
+      );
     }
+
     return dio;
   }
 

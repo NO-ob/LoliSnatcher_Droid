@@ -113,7 +113,7 @@ class _DatabasePageState extends State<DatabasePage> {
     final List<Booru> sankakuBoorus = [];
 
     for (int i = 0; i < settingsHandler.booruList.length; i++) {
-      if (settingsHandler.booruList[i].type == BooruType.Sankaku &&
+      if (settingsHandler.booruList[i].type?.isSankaku == true &&
           [
             ...SankakuHandler.knownUrls,
             'sankakuapi.com',
@@ -179,14 +179,14 @@ class _DatabasePageState extends State<DatabasePage> {
     }
 
     for (final Booru sankakuBooru in sankakuBoorus) {
-      final SankakuHandler sankakuHandler = sankakuBooru.type == BooruType.IdolSankaku
+      final SankakuHandler sankakuHandler = sankakuBooru.type?.isIdolSankaku == true
           ? IdolSankakuHandler(sankakuBooru, 10)
           : SankakuHandler(sankakuBooru, 10);
       updatingItems = customItems?.isNotEmpty == true
           ? customItems!
           : await settingsHandler.dbHandler.getSankakuItems(
               search: sankakuSearchController.text,
-              idol: sankakuBooru.type == BooruType.IdolSankaku,
+              idol: sankakuBooru.type?.isIdolSankaku == true,
             );
 
       safeSetState(() {});

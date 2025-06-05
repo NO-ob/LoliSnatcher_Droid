@@ -124,17 +124,17 @@ class TagHandler {
 
       Logger.Inst().log('Snatching tags: ${untyped.tags}', 'TagHandler', 'getTagTypes', LogTypes.tagHandlerInfo);
       tagFetchActive.value = true;
-      final List temp = BooruHandlerFactory().getBooruHandler([untyped.booru], null);
+      final temp = BooruHandlerFactory().getBooruHandler([untyped.booru], null);
 
-      BooruHandler booruHandler = temp[0];
+      BooruHandler booruHandler = temp.booruHandler;
       if (booruHandler.shouldPopulateTags == false) {
         // if current booru doesn't support tag data, use other booru (if available) that supports it
         final boorusWithTagPopulation = SettingsHandler.instance.booruList.where(
-          (b) => (BooruHandlerFactory().getBooruHandler([b], null)[0] as BooruHandler?)?.shouldPopulateTags == true,
+          (b) => BooruHandlerFactory().getBooruHandler([b], null).booruHandler.shouldPopulateTags == true,
         );
         booruHandler = boorusWithTagPopulation.isEmpty
-            ? temp[0]
-            : BooruHandlerFactory().getBooruHandler([boorusWithTagPopulation.first], null)[0];
+            ? booruHandler
+            : BooruHandlerFactory().getBooruHandler([boorusWithTagPopulation.first], null).booruHandler;
       }
 
       int tagCounter = 0;

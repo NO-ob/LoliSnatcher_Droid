@@ -1799,7 +1799,7 @@ class SettingsHandler {
               await booruFile.delete();
             }
 
-            if (booruFromFile.type == BooruType.Hydrus) {
+            if (booruFromFile.type?.isHydrus == true) {
               hasHydrus = true;
             }
           }
@@ -1856,7 +1856,7 @@ class SettingsHandler {
       // print(sorted);
     }
 
-    final int favsIndex = sorted.indexWhere((el) => el.type == BooruType.Favourites);
+    final int favsIndex = sorted.indexWhere((el) => el.type?.isFavourites == true);
     if (favsIndex != -1) {
       // move favourites to the end
       final Booru tmp = sorted.elementAt(favsIndex);
@@ -1864,7 +1864,7 @@ class SettingsHandler {
       sorted.add(tmp);
     }
 
-    final int dlsIndex = sorted.indexWhere((el) => el.type == BooruType.Downloads);
+    final int dlsIndex = sorted.indexWhere((el) => el.type?.isDownloads == true);
     if (dlsIndex != -1) {
       // move downloads to the end
       final Booru tmp = sorted.elementAt(dlsIndex);

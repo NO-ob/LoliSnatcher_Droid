@@ -9,7 +9,6 @@ import 'package:preload_page_view/preload_page_view.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -100,7 +99,7 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
               final bool isImage = item.mediaType.value.isImageOrAnimation;
               final bool isNeedToGuess = item.mediaType.value.isNeedToGuess;
 
-              final booruHandler = BooruHandlerFactory().getBooruHandler([widget.booru], 20)[0] as BooruHandler;
+              final booruHandler = BooruHandlerFactory().getBooruHandler([widget.booru], 20).booruHandler;
               final bool isNeedToLoadItem = item.mediaType.value.isNeedToLoadItem && booruHandler.hasLoadItemSupport;
 
               late Widget itemWidget;
@@ -136,12 +135,16 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
                       },
                     );
                   } else {
-                    itemWidget = VideoViewerPlaceholder(item: item);
+                    itemWidget = VideoViewerPlaceholder(
+                      item: item,
+                      booru: widget.booru,
+                    );
                   }
                 }
               } else if (isNeedToGuess) {
                 itemWidget = GuessExtensionViewer(
                   item: item,
+                  booru: widget.booru,
                   onMediaTypeGuessed: (MediaType mediaType) {
                     item.mediaType.value = mediaType;
                     item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
@@ -160,6 +163,7 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
               } else {
                 itemWidget = GuessExtensionViewer(
                   item: item,
+                  booru: widget.booru,
                   onMediaTypeGuessed: (MediaType mediaType) {
                     item.mediaType.value = mediaType;
                     item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;

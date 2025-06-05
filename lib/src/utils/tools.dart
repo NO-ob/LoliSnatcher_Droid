@@ -107,25 +107,27 @@ class Tools {
   // unified http headers list generator for dio in thumb/media/video loaders
   static Future<Map<String, String>> getFileCustomHeaders(
     Booru? booru, {
+    BooruItem? item,
     bool checkForReferer = false,
   }) async {
-    if (booru == null) return {};
+    final host = Uri.parse((booru?.baseURL?.isNotEmpty == true ? booru?.baseURL : item?.postURL) ?? '').host;
+    if (host.isEmpty) return {};
 
     // a few boorus don't work without a browser useragent
     final Map<String, String> headers = {'User-Agent': browserUserAgent};
-    if (booru.baseURL?.contains('danbooru.donmai.us') ?? false) {
+    if (host.contains('danbooru.donmai.us')) {
       headers['User-Agent'] = appUserAgent;
     }
     if ([
       ...SankakuHandler.knownUrls,
       'sankakuapi.com',
-    ].any(booru.baseURL!.contains)) {
+    ].any(host.contains)) {
       headers['User-Agent'] = Constants.sankakuAppUserAgent;
     }
 
     if (!isTestMode) {
       try {
-        final cookiesStr = await getCookies(booru.baseURL!);
+        final cookiesStr = await getCookies(host);
         if (cookiesStr.isNotEmpty) {
           headers['Cookie'] = cookiesStr;
         }
@@ -136,11 +138,11 @@ class Tools {
 
     // some boorus require referer header
     if (checkForReferer) {
-      switch (booru.type) {
+      switch (booru?.type) {
         case BooruType.World:
-          if (booru.baseURL!.contains('rule34.xyz')) {
+          if (host.contains('rule34.xyz')) {
             headers['Referer'] = 'https://rule34xyz.b-cdn.net';
-          } else if (booru.baseURL!.contains('rule34.world')) {
+          } else if (host.contains('rule34.world')) {
             headers['Referer'] = 'https://rule34storage.b-cdn.net';
           }
           break;

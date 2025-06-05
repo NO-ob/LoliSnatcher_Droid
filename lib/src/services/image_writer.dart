@@ -6,7 +6,6 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
@@ -55,7 +54,7 @@ class ImageWriter {
       final headers = {
         'Accept': '*/*',
         'Content-Type': '*/*',
-        ...await Tools.getFileCustomHeaders(booru, checkForReferer: true),
+        ...await Tools.getFileCustomHeaders(booru, item: item, checkForReferer: true),
       };
 
       final String url = ((settingsHandler.snatchMode == 'Sample' && item.sampleURL.isNotEmpty)
@@ -180,9 +179,9 @@ class ImageWriter {
     final int queryLastIndex = item.fileURL.lastIndexOf('?');
     final int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
     String fileName = '';
-    if (booru.type == BooruType.BooruOnRails || booru.type == BooruType.Philomena) {
+    if (booru.type?.isBooruOnRails == true || booru.type?.isPhilomena == true) {
       fileName = '${item.fileNameExtras}.${item.fileExt!}';
-    } else if (booru.type == BooruType.Hydrus) {
+    } else if (booru.type?.isHydrus == true) {
       fileName = '${item.fileNameExtras}_${item.md5String}.${item.fileExt}';
     } else if (booru.baseURL!.contains('yande.re') || booru.baseURL!.contains('paheal.net')) {
       fileName = '${booru.name}_${item.md5String}.${item.fileExt}';

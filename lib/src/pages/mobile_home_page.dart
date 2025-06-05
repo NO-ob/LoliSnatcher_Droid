@@ -11,7 +11,6 @@ import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart' hide FirstWhereOrNullExt;
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
-import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -457,13 +456,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
       updating = true;
     });
 
-    if (record.booru.type == BooruType.Sankaku) {
+    final booruHandler = BooruHandlerFactory().getBooruHandler([record.booru], 10).booruHandler;
+    if (booruHandler.hasLoadItemSupport) {
       try {
-        // TODO detect when item data is outdated?
-        // TODO expand to other boorus?
-        final temp = BooruHandlerFactory().getBooruHandler([record.booru], 10);
-        final sankakuHandler = temp[0] as SankakuHandler;
-        await sankakuHandler.loadItem(item: record.item);
+        await booruHandler.loadItem(item: record.item);
       } catch (_) {}
     }
     snatchHandler.onRetryItem(
@@ -1006,7 +1002,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           icon: const Icon(Icons.file_download_outlined),
                                           action: () {
                                             final Booru? downloadsBooru = settingsHandler.booruList.firstWhereOrNull(
-                                              (booru) => booru.type == BooruType.Downloads,
+                                              (booru) => booru.type?.isDownloads == true,
                                             );
                                             final bool hasDownloads = downloadsBooru != null;
 

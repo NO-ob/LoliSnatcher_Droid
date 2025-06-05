@@ -67,37 +67,50 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
           ),
         );
       } else {
-        return VideoViewerPlaceholder(item: item);
+        return Obx(
+          () => VideoViewerPlaceholder(
+            item: item,
+            booru: searchHandler.currentBooru,
+          ),
+        );
       }
     } else if (item.mediaType.value.isNeedToGuess) {
-      return GuessExtensionViewer(
-        item: item,
-        onMediaTypeGuessed: (MediaType mediaType) {
-          item.mediaType.value = mediaType;
-          item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
-          updateState();
-        },
+      return Obx(
+        () => GuessExtensionViewer(
+          item: item,
+          booru: searchHandler.currentBooru,
+          onMediaTypeGuessed: (MediaType mediaType) {
+            item.mediaType.value = mediaType;
+            item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
+            updateState();
+          },
+        ),
       );
     } else if (item.mediaType.value.isNeedToGuess && searchHandler.currentBooruHandler.hasLoadItemSupport) {
-      return LoadItemViewer(
-        item: item,
-        handler: searchHandler.currentBooruHandler,
-        onItemLoaded: (newItem) {
-          final index = searchHandler.currentFetched.indexOf(newItem);
-          if (index != -1) {
-            searchHandler.currentFetched[index] = newItem;
-            setState(() {});
-          }
-        },
+      return Obx(
+        () => LoadItemViewer(
+          item: item,
+          handler: searchHandler.currentBooruHandler,
+          onItemLoaded: (newItem) {
+            final index = searchHandler.currentFetched.indexOf(newItem);
+            if (index != -1) {
+              searchHandler.currentFetched[index] = newItem;
+              setState(() {});
+            }
+          },
+        ),
       );
     } else {
-      return GuessExtensionViewer(
-        item: item,
-        onMediaTypeGuessed: (MediaType mediaType) {
-          item.mediaType.value = mediaType;
-          item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
-          updateState();
-        },
+      return Obx(
+        () => GuessExtensionViewer(
+          item: item,
+          booru: searchHandler.currentBooru,
+          onMediaTypeGuessed: (MediaType mediaType) {
+            item.mediaType.value = mediaType;
+            item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
+            updateState();
+          },
+        ),
       );
       // return UnknownViewerPlaceholder(item: item);
     }

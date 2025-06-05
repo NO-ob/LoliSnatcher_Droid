@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:get/get.dart' hide FirstWhereOrNullExt;
 
@@ -417,11 +418,49 @@ class _BooruEditState extends State<BooruEdit> {
         } else {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text('No Data Returned', style: TextStyle(fontSize: 20)),
-            content: Text(
-              "Entered Information may be incorrect, booru doesn't allow api access or there was a network error. $errorString",
-              style: const TextStyle(fontSize: 16),
+            duration: const Duration(seconds: 5),
+            title: const Text(
+              'No data received',
+              style: TextStyle(fontSize: 20),
             ),
+            content: Column(
+              children: [
+                const Text(
+                  "Entered information may be incorrect, booru doesn't allow api access or there was a network error",
+                  style: TextStyle(fontSize: 16),
+                ),
+                if (errorString.trim().isNotEmpty)
+                  Text(
+                    'Error: $errorString',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+              ],
+            ),
+            actionsBuilder: (context, controller) {
+              return [
+                if (errorString.trim().isNotEmpty)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: errorString));
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: const Text(
+                          'Copied',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        sideColor: Colors.green,
+                        leadingIcon: Icons.check,
+                        leadingIconColor: Colors.green,
+                        duration: const Duration(seconds: 2),
+                      );
+                    },
+                    icon: const Icon(Icons.copy),
+                    label: const Text(
+                      'Copy error text',
+                    ),
+                  ),
+              ];
+            },
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -617,9 +656,9 @@ class _BooruEditState extends State<BooruEdit> {
         ))[0];
       }
     } else {
-      final List temp = BooruHandlerFactory().getBooruHandler([booru], 5);
-      test = temp[0];
-      test.pageNum = temp[1];
+      final temp = BooruHandlerFactory().getBooruHandler([booru], 5);
+      test = temp.booruHandler;
+      test.pageNum = temp.startingPage;
       test.pageNum++;
 
       testFetched =

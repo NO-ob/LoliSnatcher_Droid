@@ -74,4 +74,33 @@ enum BooruType {
         return name;
     }
   }
+
+  bool get isAutodetect => this == BooruType.Autodetect;
+  bool get isAGNPH => this == BooruType.AGNPH;
+  bool get isBooruOnRails => this == BooruType.BooruOnRails;
+  bool get isDanbooru => this == BooruType.Danbooru;
+  bool get isE621 => this == BooruType.e621;
+  //bool get isFurAffinity => this == BooruType.FurAffinity;
+  bool get isGelbooru => this == BooruType.Gelbooru;
+  bool get isGelbooruV1 => this == BooruType.GelbooruV1;
+  bool get isHydrus => this == BooruType.Hydrus;
+  bool get isInkBunny => this == BooruType.InkBunny;
+  bool get isMoebooru => this == BooruType.Moebooru;
+  bool get isNyanPals => this == BooruType.NyanPals;
+  bool get isPhilomena => this == BooruType.Philomena;
+  bool get isRainbooru => this == BooruType.Rainbooru;
+  bool get isRealbooru => this == BooruType.Realbooru;
+  bool get isR34Hentai => this == BooruType.R34Hentai;
+  bool get isR34US => this == BooruType.R34US;
+  bool get isSankaku => this == BooruType.Sankaku;
+  bool get isIdolSankaku => this == BooruType.IdolSankaku;
+  bool get isShimmie => this == BooruType.Shimmie;
+  bool get isSzurubooru => this == BooruType.Szurubooru;
+  bool get isWildCritters => this == BooruType.WildCritters;
+  bool get isWorld => this == BooruType.World;
+
+  bool get isGelbooruAlike => this == BooruType.GelbooruAlike;
+  bool get isMerge => this == BooruType.Merge;
+  bool get isDownloads => this == BooruType.Downloads;
+  bool get isFavourites => this == BooruType.Favourites;
 }

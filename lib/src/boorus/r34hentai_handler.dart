@@ -4,9 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/parser.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -94,15 +92,7 @@ class R34HentaiHandler extends ShimmieHandler {
         options: Options(
           contentType: 'application/x-www-form-urlencoded',
         ),
-        headers: await Tools.getFileCustomHeaders(
-          Booru(
-            'R34Hentai',
-            BooruType.R34Hentai,
-            '${booru.baseURL}/favicon.ico',
-            booru.baseURL,
-            '',
-          ),
-        ),
+        headers: await Tools.getFileCustomHeaders(booru),
       );
       setCookies = res.headers['set-cookie'];
     } catch (e) {
@@ -172,15 +162,7 @@ class R34HentaiHandler extends ShimmieHandler {
       try {
         final res = await DioNetwork.get(
           '${booru.baseURL}/user_admin/logout',
-          headers: await Tools.getFileCustomHeaders(
-            Booru(
-              'R34Hentai',
-              BooruType.R34Hentai,
-              '${booru.baseURL}/favicon.ico',
-              booru.baseURL,
-              '',
-            ),
-          ),
+          headers: await Tools.getFileCustomHeaders(booru),
         );
         success = res.statusCode == 200;
       } catch (e) {
@@ -209,11 +191,6 @@ class _R34HentaiHandlerDummy extends R34HentaiHandler {
   @override
   Future<bool> searchSetup() async {
     return true;
-  }
-
-  @override
-  Future<void> afterParseResponse(List<BooruItem> newItems) async {
-    failedItems.clear();
   }
 }
 

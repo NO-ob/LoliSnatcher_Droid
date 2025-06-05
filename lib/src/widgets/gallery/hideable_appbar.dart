@@ -683,7 +683,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   Future<void> shareHydrusAction(BooruItem item) async {
     if (settingsHandler.hasHydrus) {
-      final Booru hydrus = settingsHandler.booruList.where((element) => element.type == BooruType.Hydrus).first;
+      final Booru? hydrus = settingsHandler.booruList.firstWhereOrNull((element) => element.type?.isHydrus == true);
+      if (hydrus == null) return;
       final HydrusHandler hydrusHandler = HydrusHandler(hydrus, 10);
 
       final res = await showDialog(
@@ -880,6 +881,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         cancelToken: shareCancelToken,
         headers: await Tools.getFileCustomHeaders(
           searchHandler.currentBooru,
+          item: item,
           checkForReferer: true,
         ),
         onReceiveProgress: (int received, int total) {

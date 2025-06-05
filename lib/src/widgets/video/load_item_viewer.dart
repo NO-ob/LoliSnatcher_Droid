@@ -87,6 +87,7 @@ class _LoadItemViewerState extends State<LoadItemViewer> {
         children: [
           Thumbnail(
             item: widget.item,
+            booru: widget.handler.booru,
             isStandalone: false,
           ),
           Container(

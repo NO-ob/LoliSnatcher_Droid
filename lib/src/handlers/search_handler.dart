@@ -12,7 +12,6 @@ import 'package:get_it/get_it.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -285,7 +284,7 @@ class SearchHandler {
   final TextEditingController searchTextController = TextEditingController();
   void addTagToSearch(String tag) {
     if (tag.isNotEmpty) {
-      if (currentBooru.type == BooruType.Hydrus) {
+      if (currentBooru.type?.isHydrus == true) {
         searchTextController.text += ', $tag';
       } else {
         searchTextController.text += ' $tag';
@@ -647,8 +646,8 @@ class SearchHandler {
     // Notify about ratings change on gelbooru and danbooru
     if (text.contains('rating:safe')) {
       final bool isOnBooruWhereRatingsChanged =
-          (booru.type == BooruType.Gelbooru && booru.baseURL!.contains('gelbooru.com')) ||
-          (booru.type == BooruType.Danbooru && booru.baseURL!.contains('danbooru.donmai.us'));
+          (booru.type?.isGelbooru == true && booru.baseURL!.contains('gelbooru.com')) ||
+          (booru.type?.isDanbooru == true && booru.baseURL!.contains('danbooru.donmai.us'));
       if (isOnBooruWhereRatingsChanged) {
         FlashElements.showSnackbar(
           duration: null,
@@ -1273,12 +1272,9 @@ class SearchTab {
     if (secondaryBoorus?.isNotEmpty == true) {
       tempBooruList.addAll(secondaryBoorus!);
     }
-    final List temp = BooruHandlerFactory().getBooruHandler(tempBooruList, null);
-    final BooruHandler handlerTemp = temp[0] as BooruHandler;
-    final int pageNumTemp = temp[1] as int;
-
-    booruHandler = handlerTemp;
-    booruHandler.pageNum = pageNumTemp;
+    final temp = BooruHandlerFactory().getBooruHandler(tempBooruList, null);
+    booruHandler = temp.booruHandler;
+    booruHandler.pageNum = temp.startingPage;
   }
   // unique id to use for booru controller
   final String id = uuid.v4();
