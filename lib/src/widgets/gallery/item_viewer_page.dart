@@ -135,12 +135,16 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
                       },
                     );
                   } else {
-                    itemWidget = VideoViewerPlaceholder(item: item);
+                    itemWidget = VideoViewerPlaceholder(
+                      item: item,
+                      booru: widget.booru,
+                    );
                   }
                 }
               } else if (isNeedToGuess) {
                 itemWidget = GuessExtensionViewer(
                   item: item,
+                  booru: widget.booru,
                   onMediaTypeGuessed: (MediaType mediaType) {
                     item.mediaType.value = mediaType;
                     item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
@@ -159,6 +163,7 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
               } else {
                 itemWidget = GuessExtensionViewer(
                   item: item,
+                  booru: widget.booru,
                   onMediaTypeGuessed: (MediaType mediaType) {
                     item.mediaType.value = mediaType;
                     item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;

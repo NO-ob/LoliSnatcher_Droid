@@ -4,8 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
-import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -110,16 +108,13 @@ class SnatchHandler {
 
     final List<SnatchItem> snatchItems = [];
     booruItemsMap.forEach((booru, items) async {
-      if (booru.type == BooruType.Sankaku) {
+      final booruHandler = BooruHandlerFactory().getBooruHandler([booru], 10).booruHandler;
+      if (booruHandler.hasLoadItemSupport) {
         try {
-          // TODO detect when item data is outdated?
-          // TODO expand to other boorus?
-          final temp = BooruHandlerFactory().getBooruHandler([booru], 10);
-          final sankakuHandler = temp.booruHandler as SankakuHandler;
           // refetch data only on smaller-ish batches, otherwise they will most likely rate limit the user
           if (items.length <= 20) {
             for (final item in items) {
-              await sankakuHandler.loadItem(item: item);
+              await booruHandler.loadItem(item: item);
               await Future.delayed(const Duration(milliseconds: 100));
             }
           }
@@ -221,6 +216,7 @@ class SnatchHandler {
                         height: 64,
                         child: ThumbnailBuild(
                           item: current.value!.booruItems.first,
+                          booru: current.value!.booru,
                           selectable: false,
                           simple: true,
                         ),
@@ -349,6 +345,7 @@ class SnatchHandler {
                   height: 64,
                   child: ThumbnailBuild(
                     item: booruItems.first,
+                    booru: booru,
                     selectable: false,
                     simple: true,
                   ),

@@ -24,6 +24,10 @@ class DioNetwork {
     // dio.options.sendTimeout = Duration(seconds: 10);
 
     final settingsHandler = SettingsHandler.instance;
+
+    dio.interceptors.add(Logger.dioInterceptor!);
+    dio.interceptors.add(settingsHandler.alice.getDioInterceptor());
+
     final proxyType = ProxyType.fromName(settingsHandler.proxyType);
     if (proxyType.isDirect || (proxyType.isSystem && systemProxyAddress.isEmpty) || getProxyConfigAddress().isEmpty) {
       dio.httpClientAdapter = Http2Adapter(
@@ -33,10 +37,6 @@ class DioNetwork {
       );
     }
 
-    if (Tools.isTestMode || settingsHandler.isDebug.value) {
-      dio.interceptors.add(Logger.dioInterceptor!);
-      dio.interceptors.add(settingsHandler.alice.getDioInterceptor());
-    }
     return dio;
   }
 

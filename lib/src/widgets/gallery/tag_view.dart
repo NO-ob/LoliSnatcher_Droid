@@ -307,8 +307,8 @@ class _TagViewState extends State<TagView> {
         SettingsPageOpen(
           context: context,
           page: (_) => CommentsDialog(
-            index: searchHandler.viewedIndex.value,
             item: searchHandler.viewedItem.value,
+            handler: searchHandler.currentBooruHandler,
           ),
         ).open();
       },
@@ -1387,6 +1387,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                     children: [
                                       ThumbnailBuild(
                                         item: preview!.booruHandler.filteredFetched[index],
+                                        booru: preview!.booruHandler.booru,
                                         selectable: false,
                                       ),
                                       Positioned.fill(
@@ -1395,6 +1396,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                           child: InkWell(
                                             borderRadius: BorderRadius.circular(4),
                                             onTap: () {
+                                              ViewerHandler.instance.pauseAllVideos();
                                               Navigator.of(context).push(
                                                 PageRouteBuilder(
                                                   pageBuilder: (_, _, _) => ItemViewerPage(

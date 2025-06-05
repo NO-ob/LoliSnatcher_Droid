@@ -97,7 +97,30 @@ class ThumbnailCardBuild extends StatelessWidget {
                     onSecondaryTap?.call(index, item);
                   },
                   // TODO make inkwell ripple work with thumbnail (currently can't just use stack because thumbnail must be clickable too (i.e. checkbox))
-                  child: ThumbnailBuild(item: item),
+                  child: Obx(
+                    () {
+                      final bool hasSelected = searchHandler.currentSelected.isNotEmpty;
+                      final selectedIndex = searchHandler.currentSelected.indexOf(item);
+                      final isSelected = selectedIndex != -1;
+
+                      return ThumbnailBuild(
+                        item: item,
+                        booru: searchHandler.currentBooru,
+                        handler: searchHandler.currentBooruHandler,
+                        selectable: true,
+                        selectedIndex: selectedIndex == -1 ? null : selectedIndex,
+                        onSelected: hasSelected
+                            ? () {
+                                if (isSelected) {
+                                  searchHandler.currentTab.selected.remove(item);
+                                } else {
+                                  searchHandler.currentTab.selected.add(item);
+                                }
+                              }
+                            : null,
+                      );
+                    },
+                  ),
                 ),
               ),
               if (isCurrentlyBeingSnatched)

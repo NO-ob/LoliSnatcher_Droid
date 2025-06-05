@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -317,7 +316,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void tagStuff() {
     input = searchHandler.searchTextController.text;
-    if (searchHandler.currentBooru.type == BooruType.Hydrus) {
+    if (searchHandler.currentBooru.type?.isHydrus == true) {
       splitInput = input.trim().split(',');
     } else {
       splitInput = input.trim().split(' ');
@@ -348,7 +347,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     if (cursorPos < 0) cursorPos = 0;
     int tmpStartIndex = cursorPos - 1;
     while (tmpStartIndex > 0 &&
-        (searchHandler.currentBooru.type == BooruType.Hydrus
+        (searchHandler.currentBooru.type?.isHydrus == true
             ? input[tmpStartIndex] != ','
             : input[tmpStartIndex] != ' ')) {
       tmpStartIndex--;
@@ -359,7 +358,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       replaceString = lastTag;
     } else {
       int endIndex = input.indexOf(' ', cursorPos);
-      if (searchHandler.currentBooru.type == BooruType.Hydrus) {
+      if (searchHandler.currentBooru.type?.isHydrus == true) {
         if (tmpStartIndex == -1) {
           endIndex = input.length;
         } else {
@@ -564,7 +563,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           final bool isExclude = RegExp('^-').hasMatch(replaceString.replaceAll(RegExp(r'\d+#'), ''));
                           final bool isOr = RegExp('^~').hasMatch(replaceString.replaceAll(RegExp(r'\d+#'), ''));
                           String newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag;
-                          if (searchHandler.currentBooru.type == BooruType.Hydrus) {
+                          if (searchHandler.currentBooru.type?.isHydrus == true) {
                             final String tagWithSpaces = newTag.replaceAll(RegExp('_'), ' ');
                             newTag = '$tagWithSpaces,';
                           } else {
@@ -582,7 +581,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           } else if (startIndex == -1) {
                             newInput =
                                 newTag +
-                                (searchHandler.currentBooru.type == BooruType.Hydrus ? ',' : ' ') +
+                                (searchHandler.currentBooru.type?.isHydrus == true ? ',' : ' ') +
                                 searchHandler.searchTextController.text;
                           } else {
                             newInput = searchHandler.searchTextController.text + newTag;

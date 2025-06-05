@@ -272,39 +272,52 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                                     ),
                                   );
                                 } else {
-                                  itemWidget = VideoViewerPlaceholder(item: item);
+                                  itemWidget = Obx(
+                                    () => VideoViewerPlaceholder(
+                                      item: item,
+                                      booru: searchHandler.currentBooru,
+                                    ),
+                                  );
                                 }
                               }
                             } else if (isNeedToGuess) {
-                              itemWidget = GuessExtensionViewer(
-                                item: item,
-                                onMediaTypeGuessed: (MediaType mediaType) {
-                                  item.mediaType.value = mediaType;
-                                  item.possibleMediaType.value = mediaType.isUnknown
-                                      ? item.possibleMediaType.value
-                                      : null;
-                                  setState(() {});
-                                },
+                              itemWidget = Obx(
+                                () => GuessExtensionViewer(
+                                  item: item,
+                                  booru: searchHandler.currentBooru,
+                                  onMediaTypeGuessed: (MediaType mediaType) {
+                                    item.mediaType.value = mediaType;
+                                    item.possibleMediaType.value = mediaType.isUnknown
+                                        ? item.possibleMediaType.value
+                                        : null;
+                                    setState(() {});
+                                  },
+                                ),
                               );
                             } else if (isNeedToLoadItem) {
-                              itemWidget = LoadItemViewer(
-                                item: item,
-                                handler: searchHandler.currentBooruHandler,
-                                onItemLoaded: (newItem) {
-                                  searchHandler.currentFetched[index] = newItem;
-                                  setState(() {});
-                                },
+                              itemWidget = Obx(
+                                () => LoadItemViewer(
+                                  item: item,
+                                  handler: searchHandler.currentBooruHandler,
+                                  onItemLoaded: (newItem) {
+                                    searchHandler.currentFetched[index] = newItem;
+                                    setState(() {});
+                                  },
+                                ),
                               );
                             } else {
-                              itemWidget = GuessExtensionViewer(
-                                item: item,
-                                onMediaTypeGuessed: (MediaType mediaType) {
-                                  item.mediaType.value = mediaType;
-                                  item.possibleMediaType.value = mediaType.isUnknown
-                                      ? item.possibleMediaType.value
-                                      : null;
-                                  setState(() {});
-                                },
+                              itemWidget = Obx(
+                                () => GuessExtensionViewer(
+                                  item: item,
+                                  booru: searchHandler.currentBooru,
+                                  onMediaTypeGuessed: (MediaType mediaType) {
+                                    item.mediaType.value = mediaType;
+                                    item.possibleMediaType.value = mediaType.isUnknown
+                                        ? item.possibleMediaType.value
+                                        : null;
+                                    setState(() {});
+                                  },
+                                ),
                               );
                               // itemWidget = UnknownViewerPlaceholder(item: item);
                             }

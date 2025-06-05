@@ -131,8 +131,8 @@ class _BooruFaviconState extends State<BooruFavicon> {
     disposables();
 
     isIcon =
-        widget.booru?.type == BooruType.Favourites ||
-        widget.booru?.type == BooruType.Downloads ||
+        widget.booru?.type?.isFavourites == true ||
+        widget.booru?.type?.isDownloads == true ||
         (widget.booru?.type == null && widget.customFaviconUrl == null);
 
     isFailed = false;

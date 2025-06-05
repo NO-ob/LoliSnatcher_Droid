@@ -102,7 +102,7 @@ class MergebooruHandler extends BooruHandler {
         ].any((t) => t == booru.type);
 
         if (innerFetchedIndex < items.length) {
-          if (booru.type == BooruType.GelbooruV1) {
+          if (booru.type?.isGelbooruV1 == true) {
             if (items[innerFetchedIndex].md5String != null) {
               items[innerFetchedIndex].md5String = makeSha1Hash(items[innerFetchedIndex].md5String!);
             }

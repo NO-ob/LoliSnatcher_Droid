@@ -33,11 +33,11 @@ class ThumbnailLoading extends StatefulWidget {
   final ValueNotifier<int> received;
   final ValueNotifier<int> startedAt;
 
+  final void Function()? restartAction;
   final String? retryText;
   final Widget? retryIcon;
-  final String? errorCode;
 
-  final void Function()? restartAction;
+  final String? errorCode;
 
   @override
   State<ThumbnailLoading> createState() => _ThumbnailLoadingState();

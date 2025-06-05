@@ -33,7 +33,10 @@ class BooruHandlerFactory {
   late BooruHandler booruHandler;
   int pageNum = -1;
 
-  ({BooruHandler booruHandler, int startingPage}) getBooruHandler(List<Booru> boorus, int? customLimit) {
+  ({BooruHandler booruHandler, int startingPage}) getBooruHandler(
+    List<Booru> boorus,
+    int? customLimit,
+  ) {
     final int limit = customLimit ?? SettingsHandler.instance.itemLimit;
 
     if (boorus.length == 1) {
@@ -156,6 +159,10 @@ class BooruHandlerFactory {
       booruHandler = MergebooruHandler(Booru('Merge', BooruType.Merge, '', '', ''), limit);
       (booruHandler as MergebooruHandler).setupMerge(boorus);
     }
-    return (booruHandler: booruHandler, startingPage: pageNum);
+
+    return (
+      booruHandler: booruHandler,
+      startingPage: pageNum,
+    );
   }
 }

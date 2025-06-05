@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
@@ -10,11 +11,13 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 class GuessExtensionViewer extends StatefulWidget {
   const GuessExtensionViewer({
     required this.item,
+    required this.booru,
     required this.onMediaTypeGuessed,
     super.key,
   });
 
   final BooruItem item;
+  final Booru booru;
   final Function(MediaType) onMediaTypeGuessed;
 
   @override
@@ -143,6 +146,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
         children: [
           Thumbnail(
             item: widget.item,
+            booru: widget.booru,
             isStandalone: false,
           ),
           Container(

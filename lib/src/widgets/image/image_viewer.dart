@@ -252,7 +252,6 @@ class ImageViewerState extends State<ImageViewer> {
             headers: await Tools.getFileCustomHeaders(
               widget.booru,
               item: widget.booruItem,
-
               checkForReferer: true,
             ),
             withCache: settingsHandler.mediaCache,
@@ -417,6 +416,7 @@ class ImageViewerState extends State<ImageViewer> {
               },
               child: Thumbnail(
                 item: widget.booruItem,
+                booru: widget.booru,
                 isStandalone: false,
                 useHero: false,
               ),
