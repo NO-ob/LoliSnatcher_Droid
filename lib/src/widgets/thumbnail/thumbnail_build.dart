@@ -10,7 +10,7 @@ import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -23,18 +23,25 @@ import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 class ThumbnailBuild extends StatelessWidget {
   const ThumbnailBuild({
     required this.item,
+    required this.booru,
+    this.handler,
+    this.selectedIndex,
     this.selectable = true,
+    this.onSelected,
     this.simple = false,
     super.key,
   });
 
   final BooruItem item;
+  final Booru booru;
+  final BooruHandler? handler;
+  final int? selectedIndex;
   final bool selectable;
+  final void Function()? onSelected;
   final bool simple;
 
   @override
   Widget build(BuildContext context) {
-    final SearchHandler searchHandler = SearchHandler.instance;
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     return ClipRRect(
@@ -44,7 +51,7 @@ class ThumbnailBuild extends StatelessWidget {
         children: [
           Thumbnail(
             item: item,
-            booru: searchHandler.currentBooru,
+            booru: booru,
             isStandalone: true,
             useHero: selectable,
           ),
@@ -95,13 +102,14 @@ class ThumbnailBuild extends StatelessWidget {
                   //
                   const Spacer(),
 
+                  // TODO move all this away from this widget
                   // Merge/favourites/downloads booru favicon widgets
                   Builder(
                     builder: (context) {
                       final List<Widget> widgets = [];
                       // Merge booru
-                      if (searchHandler.currentBooruHandler is MergebooruHandler) {
-                        final fetchedMap = (searchHandler.currentBooruHandler as MergebooruHandler).fetchedMap;
+                      if (handler is MergebooruHandler) {
+                        final fetchedMap = (handler! as MergebooruHandler).fetchedMap;
 
                         Booru? booru;
                         int? booruIndex;
@@ -138,7 +146,7 @@ class ThumbnailBuild extends StatelessWidget {
 
                       // Favourites/Downloads booru
                       Booru? getMergeEntryBooru() {
-                        final fetchedMap = (searchHandler.currentBooruHandler as MergebooruHandler).fetchedMap;
+                        final fetchedMap = (handler! as MergebooruHandler).fetchedMap;
                         for (int i = 0; i < fetchedMap.entries.length; i++) {
                           final entry = fetchedMap.entries.elementAt(i);
                           if (entry.value.items.contains(item)) {
@@ -149,11 +157,9 @@ class ThumbnailBuild extends StatelessWidget {
                       }
 
                       final bool isMergeEntryFromFavsOrDls =
-                          searchHandler.currentBooruHandler is MergebooruHandler &&
+                          handler is MergebooruHandler &&
                           [BooruType.Favourites, BooruType.Downloads].contains(getMergeEntryBooru()?.type);
-                      if (searchHandler.currentBooruHandler is FavouritesHandler ||
-                          searchHandler.currentBooruHandler is DownloadsHandler ||
-                          isMergeEntryFromFavsOrDls) {
+                      if (handler is FavouritesHandler || handler is DownloadsHandler || isMergeEntryFromFavsOrDls) {
                         final itemFileHost = Uri.tryParse(item.fileURL)?.host;
                         final itemPostHost = Uri.tryParse(item.postURL)?.host;
                         final Booru? possibleBooru = settingsHandler.booruList.firstWhereOrNull((e) {
@@ -235,49 +241,63 @@ class ThumbnailBuild extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Obx(() {
-                    final selected = searchHandler.currentSelected;
+                  Builder(
+                    builder: (context) {
+                      Widget bottomLeftWidget = const SizedBox.shrink();
+                      if (selectable && onSelected != null) {
+                        final bool isSelected = selectedIndex != null && selectedIndex != -1;
 
-                    Widget bottomLeftWidget = const SizedBox.shrink();
-                    if (selected.isNotEmpty && selectable) {
-                      final bool isSelected = selected.contains(item);
-                      final int selectedIndex = selected.indexOf(item);
-
-                      bottomLeftWidget = Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.66),
-                          borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
-                        ),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: isSelected,
-                              onChanged: (bool? value) {
-                                if (value != null) {
-                                  if (value) {
-                                    searchHandler.currentTab.selected.add(item);
-                                  } else {
-                                    searchHandler.currentTab.selected.remove(item);
-                                  }
-                                }
-                              },
+                        bottomLeftWidget = GestureDetector(
+                          onTap: onSelected,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 3),
+                            constraints: const BoxConstraints(
+                              minWidth: kMinInteractiveDimension - 2,
+                              minHeight: kMinInteractiveDimension - 8,
                             ),
-                            if (isSelected)
-                              Text(
-                                (selectedIndex + 1).toString(),
-                                style: const TextStyle(fontSize: 12, color: Colors.white),
-                              ),
-                          ],
-                        ),
-                      );
-                    }
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.66),
+                              borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
+                            ),
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: isSelected
+                                  ? Container(
+                                      height: 20,
+                                      constraints: const BoxConstraints(minWidth: 20),
+                                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.secondary,
+                                        borderRadius: const BorderRadius.all(Radius.circular(4)),
+                                      ),
+                                      child: Text(
+                                        ((selectedIndex ?? 0) + 1).toString(),
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Theme.of(context).colorScheme.onSecondary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    )
+                                  : Checkbox(
+                                      value: isSelected,
+                                      onChanged: (_) {
+                                        onSelected?.call();
+                                      },
+                                    ),
+                            ),
+                          ),
+                        );
+                      }
 
-                    return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: bottomLeftWidget,
-                    );
-                  }),
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: bottomLeftWidget,
+                      );
+                    },
+                  ),
                   //
                   Flexible(
                     child: _ThumbnailBottomRightIcons(item),

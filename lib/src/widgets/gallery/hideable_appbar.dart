@@ -774,6 +774,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                           height: thumbHeight,
                           child: ThumbnailBuild(
                             item: sharedItem!,
+                            booru: searchHandler.currentBooru,
                             selectable: false,
                           ),
                         ),
@@ -795,6 +796,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                             height: thumbHeight,
                             child: ThumbnailBuild(
                               item: item,
+                              booru: searchHandler.currentBooru,
                               selectable: false,
                             ),
                           ),

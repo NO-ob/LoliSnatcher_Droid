@@ -580,6 +580,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           height: 150,
                                           child: ThumbnailBuild(
                                             item: item,
+                                            booru: snatchHandler.current.value!.booru,
+                                            handler: searchHandler.currentBooruHandler,
                                             selectable: false,
                                           ),
                                         ),
@@ -673,6 +675,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                         height: 134,
                                         child: ThumbnailBuild(
                                           item: lastItem,
+                                          booru: queue.booru,
+                                          handler: searchHandler.currentBooruHandler,
                                           selectable: false,
                                         ),
                                       ),
@@ -685,6 +689,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                       height: 150,
                                       child: ThumbnailBuild(
                                         item: firstItem,
+                                        booru: queue.booru,
+                                        handler: searchHandler.currentBooruHandler,
                                         selectable: false,
                                       ),
                                     ),
@@ -733,6 +739,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                     height: 150,
                                     child: ThumbnailBuild(
                                       item: record.item,
+                                      booru: record.booru,
+                                      handler: searchHandler.currentBooruHandler,
                                       selectable: false,
                                     ),
                                   ),

@@ -6,9 +6,10 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
@@ -23,13 +24,13 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class CommentsDialog extends StatefulWidget {
   const CommentsDialog({
-    required this.index,
     required this.item,
+    required this.handler,
     super.key,
   });
 
-  final int index;
   final BooruItem item;
+  final BooruHandler handler;
 
   @override
   State<CommentsDialog> createState() => _CommentsDialogState();
@@ -37,7 +38,6 @@ class CommentsDialog extends StatefulWidget {
 
 class _CommentsDialogState extends State<CommentsDialog> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final SearchHandler searchHandler = SearchHandler.instance;
 
   List<CommentItem> comments = [];
   ScrollController scrollController = ScrollController();
@@ -61,7 +61,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
     if (!isCompleted) {
       if (widget.item.serverId != null) {
         setState(() {}); // set state to update the loading indicator
-        final List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(
+        final List<CommentItem> fetched = await widget.handler.getComments(
           widget.item.serverId!,
           page,
         );
@@ -177,7 +177,10 @@ class _CommentsDialogState extends State<CommentsDialog> {
                 scrollDirection: Axis.vertical,
                 itemBuilder: (context, index) {
                   if (index == 0) {
-                    return _CommentsHeader(item: widget.item);
+                    return _CommentsHeader(
+                      item: widget.item,
+                      booru: widget.handler.booru,
+                    );
                   }
 
                   return areThereErrors //
@@ -408,9 +411,11 @@ class _CommentEntry extends StatelessWidget {
 class _CommentsHeader extends StatelessWidget {
   const _CommentsHeader({
     required this.item,
+    required this.booru,
   });
 
   final BooruItem item;
+  final Booru booru;
 
   @override
   Widget build(BuildContext context) {
@@ -449,6 +454,7 @@ class _CommentsHeader extends StatelessWidget {
                   enabled: false,
                   child: ThumbnailBuild(
                     item: item,
+                    booru: booru,
                     selectable: false,
                   ),
                 ),
