@@ -124,18 +124,22 @@ class _ThumbnailState extends State<Thumbnail> {
             },
           );
 
-    if (thumbWidth == null && thumbHeight == null) {
-      return provider;
+    // on desktop devicePixelRatio is not working?
+    final bool shouldResize = (thumbWidth != null || thumbHeight != null) && !SettingsHandler.isDesktopPlatform;
+    final bool shouldPixelate = widget.item.isHated && settingsHandler.shitDevice;
+
+    if (shouldResize || shouldPixelate) {
+      return ResizeImage(
+        provider,
+        // when in low performance mode - resize hated images to 10px to simulate blur effect
+        width: shouldPixelate ? 10 : thumbWidth?.round(),
+        height: shouldPixelate ? 10 : thumbHeight?.round(),
+        policy: ResizeImagePolicy.fit,
+        allowUpscaling: false,
+      );
     }
 
-    return ResizeImage(
-      provider,
-      // when in low performance mode - resize hated images to 10px to simulate blur effect
-      width: (widget.item.isHated && settingsHandler.shitDevice) ? 10 : thumbWidth?.round(),
-      height: (widget.item.isHated && settingsHandler.shitDevice) ? 10 : thumbHeight?.round(),
-      policy: ResizeImagePolicy.fit,
-      allowUpscaling: false,
-    );
+    return provider;
   }
 
   void calcThumbWidth(BoxConstraints constraints) {
