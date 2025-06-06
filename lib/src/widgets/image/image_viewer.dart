@@ -491,7 +491,7 @@ class ImageViewerState extends State<ImageViewer> {
                 valueListenable: isLoaded,
                 builder: (context, isLoaded, child) {
                   return AnimatedOpacity(
-                    opacity: isLoaded ? 1 : 0,
+                    opacity: (settingsHandler.shitDevice || isLoaded) ? 1 : 0,
                     duration: Duration(
                       milliseconds: (settingsHandler.appMode.value.isDesktop || isViewed.value) ? 50 : 300,
                     ),

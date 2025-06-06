@@ -256,29 +256,24 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                                 ),
                               );
                             } else if (isVideo) {
-                              if (settingsHandler.disableVideo) {
-                                itemWidget = const Center(
-                                  child: Text('Video Disabled', style: TextStyle(fontSize: 20)),
+                              if (!settingsHandler.disableVideo &&
+                                  (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux)) {
+                                itemWidget = Obx(
+                                  () => VideoViewer(
+                                    item,
+                                    booru: searchHandler.currentBooru,
+                                    isViewed: searchHandler.viewedIndex.value == index,
+                                    enableFullscreen: true,
+                                    key: item.key,
+                                  ),
                                 );
                               } else {
-                                if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
-                                  itemWidget = Obx(
-                                    () => VideoViewer(
-                                      item,
-                                      booru: searchHandler.currentBooru,
-                                      isViewed: searchHandler.viewedIndex.value == index,
-                                      enableFullscreen: true,
-                                      key: item.key,
-                                    ),
-                                  );
-                                } else {
-                                  itemWidget = Obx(
-                                    () => VideoViewerPlaceholder(
-                                      item: item,
-                                      booru: searchHandler.currentBooru,
-                                    ),
-                                  );
-                                }
+                                itemWidget = Obx(
+                                  () => VideoViewerPlaceholder(
+                                    item: item,
+                                    booru: searchHandler.currentBooru,
+                                  ),
+                                );
                               }
                             } else if (isNeedToGuess) {
                               itemWidget = Obx(

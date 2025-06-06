@@ -169,21 +169,99 @@ class _MediaLoadingState extends State<MediaLoading> {
       return const SizedBox.shrink();
     }
 
-    if (settingsHandler.shitDevice) {
-      if (settingsHandler.loadingGif) {
-        return const Center(
-          child: Image(image: AssetImage('assets/images/loading.gif')),
-        );
-      } else {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      }
-    }
-
     final bool hasProgressData = widget.hasProgress && (_total > 0);
     final int expectedBytes = hasProgressData ? _received : 0;
     final int totalBytes = hasProgressData ? _total : 0;
+    final double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
+
+    if (settingsHandler.shitDevice) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: widget.isStopped
+              ? [
+                  ...widget.stopReasons.map((String reason) {
+                    return LoadingText(
+                      text: reason,
+                      fontSize: 18,
+                    );
+                  }),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    icon: const Icon(
+                      Icons.play_arrow,
+                      size: 40,
+                      color: Colors.blue,
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.black54),
+                      fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
+                    ),
+                    label: LoadingText(
+                      text: (widget.isTooBig || widget.item.isHated) ? 'Load Anyway' : 'Restart Loading',
+                      fontSize: 16,
+                      color: Colors.blue,
+                    ),
+                    onPressed: () {
+                      widget.startAction?.call();
+                    },
+                  ),
+                ]
+              : [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    margin: const EdgeInsets.all(16),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          height: 48,
+                          width: 48,
+                          child: CircularProgressIndicator(
+                            value: percentDone == 0 ? null : percentDone,
+                          ),
+                        ),
+                        Text(
+                          '${(percentDone * 100).toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (percentDone < 1)
+                    ElevatedButton.icon(
+                      icon: Icon(
+                        Icons.stop,
+                        size: 40,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.black54),
+                        fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
+                      ),
+                      label: LoadingText(
+                        text: 'Stop Loading',
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      onPressed: () {
+                        widget.stopAction?.call();
+                      },
+                    ),
+                ],
+        ),
+      );
+    }
 
     const double speedCheckInterval = 1000 / 4;
     if (hasProgressData && (nowMils - _lastTime) > speedCheckInterval) {
@@ -194,7 +272,6 @@ class _MediaLoadingState extends State<MediaLoading> {
       _lastTime = nowMils;
     }
 
-    final double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
     final String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
     final String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
 

@@ -243,9 +243,11 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
     _shimmerChanges?.addListener(_onShimmerChange);
     _shimmerState?.activateChild();
 
-    if (isChanged && mounted) {
+    if (isChanged) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
     }
   }
@@ -268,9 +270,11 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
       }
     }
 
-    if (prevIsLoading != widget.isLoading && mounted) {
+    if (prevIsLoading != widget.isLoading) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
     }
   }

@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/pages/settings/database_page.dart';
 import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
 import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
 import 'package:lolisnatcher/src/pages/settings/network_page.dart';
+import 'package:lolisnatcher/src/pages/settings/performance_page.dart';
 import 'package:lolisnatcher/src/pages/settings/privacy_page.dart';
 import 'package:lolisnatcher/src/pages/settings/save_cache_page.dart';
 import 'package:lolisnatcher/src/pages/settings/tags_filters_page.dart';
@@ -123,7 +124,7 @@ class SettingsPage extends StatelessWidget {
               ),
               SettingsButton(
                 name: 'Network',
-                icon: const Icon(Icons.network_check),
+                icon: const Icon(Icons.wifi),
                 page: () => const NetworkPage(),
               ),
               SettingsButton(
@@ -133,6 +134,14 @@ class SettingsPage extends StatelessWidget {
                   size: 20,
                 ),
                 page: () => const PrivacyPage(),
+              ),
+              SettingsButton(
+                name: 'Performance',
+                icon: const Icon(
+                  Icons.speed,
+                  size: 20,
+                ),
+                page: () => const PerformancePage(),
               ),
               SettingsButton(
                 name: 'LoliSync',
