@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -51,7 +52,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
   StreamSubscription? volumeListener;
   final GlobalKey<ScaffoldState> viewerScaffoldKey = GlobalKey<ScaffoldState>();
 
-  final ValueNotifier<Color> bgColor = ValueNotifier(Colors.transparent);
+  bool isOpeningAnimation = true;
+  final ValueNotifier<double> dismissProgress = ValueNotifier(1);
 
   @override
   void initState() {
@@ -72,7 +74,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     setVolumeListener();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      bgColor.value = Colors.black;
+      dismissProgress.value = 0;
+      await Future.delayed(const Duration(milliseconds: 420));
+      isOpeningAnimation = false;
     });
   }
 
@@ -146,14 +150,41 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
             DismissDirection.startToEnd: 0.3,
             DismissDirection.endToStart: 0.3,
           }, // Amount of swiped away which triggers dismiss
+          onUpdate: (dismissUpdateDetails) => dismissProgress.value =
+              (dismissUpdateDetails.progress * (1 / (settingsHandler.galleryScrollDirection == 'Vertical' ? 0.3 : 0.2)))
+                  .clamp(0, 1),
           onDismissed: (_) => Navigator.of(context).pop(),
           child: ValueListenableBuilder(
-            valueListenable: bgColor,
-            builder: (context, bgColor, child) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 350),
-                color: bgColor,
-                child: child,
+            valueListenable: dismissProgress,
+            builder: (context, dismissProgress, child) {
+              return Transform.scale(
+                scale: isOpeningAnimation
+                    ? 1
+                    : lerpDouble(
+                        1,
+                        0.75,
+                        dismissProgress,
+                      ),
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: isOpeningAnimation ? 400 : 10),
+                  decoration: BoxDecoration(
+                    color: settingsHandler.shitDevice
+                        ? Colors.black
+                        : Color.lerp(
+                            Colors.black,
+                            Colors.transparent,
+                            dismissProgress,
+                          ),
+                    borderRadius: (settingsHandler.shitDevice || isOpeningAnimation)
+                        ? null
+                        : BorderRadius.lerp(
+                            BorderRadius.zero,
+                            BorderRadius.circular(16),
+                            dismissProgress,
+                          ),
+                  ),
+                  child: child,
+                ),
               );
             },
             child: Center(
@@ -256,29 +287,24 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                                 ),
                               );
                             } else if (isVideo) {
-                              if (settingsHandler.disableVideo) {
-                                itemWidget = const Center(
-                                  child: Text('Video Disabled', style: TextStyle(fontSize: 20)),
+                              if (!settingsHandler.disableVideo &&
+                                  (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux)) {
+                                itemWidget = Obx(
+                                  () => VideoViewer(
+                                    item,
+                                    booru: searchHandler.currentBooru,
+                                    isViewed: searchHandler.viewedIndex.value == index,
+                                    enableFullscreen: true,
+                                    key: item.key,
+                                  ),
                                 );
                               } else {
-                                if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
-                                  itemWidget = Obx(
-                                    () => VideoViewer(
-                                      item,
-                                      booru: searchHandler.currentBooru,
-                                      isViewed: searchHandler.viewedIndex.value == index,
-                                      enableFullscreen: true,
-                                      key: item.key,
-                                    ),
-                                  );
-                                } else {
-                                  itemWidget = Obx(
-                                    () => VideoViewerPlaceholder(
-                                      item: item,
-                                      booru: searchHandler.currentBooru,
-                                    ),
-                                  );
-                                }
+                                itemWidget = Obx(
+                                  () => VideoViewerPlaceholder(
+                                    item: item,
+                                    booru: searchHandler.currentBooru,
+                                  ),
+                                );
                               }
                             } else if (isNeedToGuess) {
                               itemWidget = Obx(
@@ -394,8 +420,26 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                         );
                       }),
                     ),
-                    NotesRenderer(controller),
-                    GalleryButtons(pageController: controller),
+                    ValueListenableBuilder(
+                      valueListenable: dismissProgress,
+                      builder: (context, dismissProgress, child) {
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: dismissProgress == 0 ? child : const SizedBox.shrink(),
+                        );
+                      },
+                      child: NotesRenderer(controller),
+                    ),
+                    ValueListenableBuilder(
+                      valueListenable: dismissProgress,
+                      builder: (context, dismissProgress, child) {
+                        return AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: dismissProgress == 0 ? child : const SizedBox.shrink(),
+                        );
+                      },
+                      child: GalleryButtons(pageController: controller),
+                    ),
                     const ViewerTutorial(),
                   ],
                 ),

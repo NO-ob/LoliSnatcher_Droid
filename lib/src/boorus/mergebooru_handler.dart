@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/data/response_error.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class MergebooruHandler extends BooruHandler {
@@ -28,10 +29,11 @@ class MergebooruHandler extends BooruHandler {
   bool get hasSizeData => booruHandlers.every((e) => e.hasSizeData);
 
   @override
-  bool get hasTagSuggestions => booruHandlers.first.hasTagSuggestions;
+  bool get hasTagSuggestions => booruHandlers.firstWhereOrNull((e) => e.hasTagSuggestions) != null;
 
   @override
-  String? get metatagsCheatSheetLink => booruHandlers.first.metatagsCheatSheetLink;
+  String? get metatagsCheatSheetLink =>
+      booruHandlers.firstWhereOrNull((e) => e.metatagsCheatSheetLink != null)?.metatagsCheatSheetLink;
 
   @override
   List<MetaTag> availableMetaTags() {
@@ -91,7 +93,7 @@ class MergebooruHandler extends BooruHandler {
         final items = tmpFetchedMap[i]!.items;
 
         final booru = tmpFetchedMap[i]!.booru;
-        final bool isMd5LessBooru = [
+        final bool isBooruWithoutMd5 = [
           BooruType.Favourites,
           BooruType.Downloads,
           BooruType.BooruOnRails,
@@ -108,7 +110,7 @@ class MergebooruHandler extends BooruHandler {
             }
           }
 
-          if (isMd5LessBooru
+          if (isBooruWithoutMd5
               ? !itemInFetched(
                   fetched,
                   items[innerFetchedIndex],
@@ -236,7 +238,17 @@ class MergebooruHandler extends BooruHandler {
     String input, {
     CancelToken? cancelToken,
   }) async {
-    return booruHandlers.first.getTagSuggestions(input, cancelToken: cancelToken);
+    final res = booruHandlers
+        .firstWhereOrNull((e) => e.hasTagSuggestions)
+        ?.getTagSuggestions(
+          input,
+          cancelToken: cancelToken,
+        );
+    if (res == null) {
+      return const Right([]);
+    } else {
+      return res;
+    }
   }
 
   @override

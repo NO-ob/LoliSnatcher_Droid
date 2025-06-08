@@ -279,15 +279,17 @@ class ImageViewerState extends State<ImageViewer> {
             },
           );
 
-    // scale image only if it's not an animation, scaling is allowed and item is not marked as noScale
+    // scale image only if it's not an animation, scaling is allowed, not on desktop and item is not marked as noScale
     if (!widget.booruItem.mediaType.value.isAnimation &&
         !settingsHandler.disableImageScaling &&
+        !SettingsHandler.isDesktopPlatform &&
         !widget.booruItem.isNoScale.value &&
         (widthLimit ?? 0) > 0) {
       // resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
       provider = ResizeImage(
         provider,
         width: widthLimit,
+        policy: ResizeImagePolicy.fit,
         allowUpscaling: false,
       );
     }
@@ -491,7 +493,7 @@ class ImageViewerState extends State<ImageViewer> {
                 valueListenable: isLoaded,
                 builder: (context, isLoaded, child) {
                   return AnimatedOpacity(
-                    opacity: isLoaded ? 1 : 0,
+                    opacity: (settingsHandler.shitDevice || isLoaded) ? 1 : 0,
                     duration: Duration(
                       milliseconds: (settingsHandler.appMode.value.isDesktop || isViewed.value) ? 50 : 300,
                     ),

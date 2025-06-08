@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'package:external_video_player_launcher/external_video_player_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class VideoViewerPlaceholder extends StatelessWidget {
@@ -30,23 +30,57 @@ class VideoViewerPlaceholder extends StatelessWidget {
             booru: booru,
             isStandalone: false,
           ),
-          // Image.network(item.thumbnailURL, fit: BoxFit.fill),
           SizedBox(
-            width: MediaQuery.sizeOf(context).width / 3,
-            child: SettingsButton(
-              name: Platform.isLinux ? 'Open Video in External Player' : 'Open Video in Browser',
-              action: () {
-                if (Platform.isLinux) {
-                  Process.run('mpv', ['--loop', item.fileURL]);
-                } else {
-                  launchUrlString(
-                    item.fileURL,
-                    mode: LaunchMode.externalApplication,
-                  );
-                }
-              },
-              icon: const Icon(Icons.play_arrow),
-              drawTopBorder: true,
+            width: MediaQuery.sizeOf(context).width - 60,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 24,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Videos disabled or not supported',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                if (Platform.isLinux || Platform.isAndroid)
+                  ElevatedButton.icon(
+                    label: const Text('Open video in external player'),
+                    icon: const Icon(Icons.play_arrow),
+                    onPressed: () {
+                      if (Platform.isLinux) {
+                        Process.run('mpv', ['--loop', item.fileURL]);
+                      } else if (Platform.isAndroid) {
+                        ExternalVideoPlayerLauncher.launchOtherPlayer(
+                          item.fileURL,
+                          MIME.video,
+                          null,
+                        );
+                      }
+                    },
+                  ),
+                //
+                ElevatedButton.icon(
+                  label: const Text('Open video in browser'),
+                  icon: const Icon(Icons.public),
+                  onPressed: () {
+                    launchUrlString(
+                      item.fileURL,
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ],

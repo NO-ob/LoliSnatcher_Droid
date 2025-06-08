@@ -396,9 +396,9 @@ class _BooruEditState extends State<BooruEdit> {
         }
         isTesting = true;
         setState(() {});
-        final List<dynamic> testResults = await booruTest(testBooru, selectedBooruType);
-        final BooruType? testBooruType = testResults[0];
-        final String errorString = testResults[1].isNotEmpty ? 'Error text: "${testResults[1]}"' : '';
+        final testResults = await booruTest(testBooru, selectedBooruType);
+        final BooruType? testBooruType = testResults.booruType;
+        final String errorString = testResults.errorString?.isNotEmpty == true ? testResults.errorString! : '';
 
         // If a booru type is returned set the widget state
         if (testBooruType != null) {
@@ -635,13 +635,13 @@ class _BooruEditState extends State<BooruEdit> {
   /// This function will use the Base URL the user has entered and call a search up to three times
   /// if the searches return null each time it tries the search it uses a different
   /// type of BooruHandler
-  Future<List<dynamic>> booruTest(
+  Future<({BooruType? booruType, String? errorString})> booruTest(
     Booru booru,
     BooruType userBooruType, {
     bool withCaptchaCheck = true,
   }) async {
     BooruType? booruType;
-    String? errorString = '';
+    String? errorString;
     BooruHandler test;
     List<BooruItem> testFetched = [];
     booru.type = userBooruType;
@@ -649,12 +649,12 @@ class _BooruEditState extends State<BooruEdit> {
     if (userBooruType == BooruType.Hydrus) {
       final HydrusHandler hydrusHandler = HydrusHandler(booru, 20);
       if (await hydrusHandler.verifyApiAccess()) {
-        return [userBooruType, ''];
+        return (booruType: userBooruType, errorString: null);
       }
-      return [
-        '',
-        booruEditorLoc.failedVerifyApiHydrus,
-      ];
+      return (
+        booruType: null,
+        errorString: booruEditorLoc.failedVerifyApiHydrus,
+      );
     }
 
     if (userBooruType == BooruType.Autodetect) {
@@ -664,7 +664,7 @@ class _BooruEditState extends State<BooruEdit> {
           booru,
           typeList.elementAt(i),
           withCaptchaCheck: false,
-        ))[0];
+        )).booruType;
       }
     } else {
       final temp = BooruHandlerFactory().getBooruHandler([booru], 5);
@@ -700,11 +700,11 @@ class _BooruEditState extends State<BooruEdit> {
           'booruTest',
           LogTypes.booruHandlerInfo,
         );
-        return [booruType, ''];
+        return (booruType: booruType, errorString: errorString);
       }
     }
 
-    return [booruType, errorString];
+    return (booruType: booruType, errorString: errorString);
   }
 }
 

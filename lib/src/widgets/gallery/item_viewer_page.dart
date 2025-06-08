@@ -116,30 +116,25 @@ class _ItemViewerPageState extends State<ItemViewerPage> {
                   },
                 );
               } else if (isVideo) {
-                if (settingsHandler.disableVideo) {
-                  itemWidget = const Center(
-                    child: Text('Video Disabled', style: TextStyle(fontSize: 20)),
+                if (!settingsHandler.disableVideo &&
+                    (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux)) {
+                  itemWidget = ValueListenableBuilder(
+                    valueListenable: page,
+                    builder: (context, page, child) {
+                      return VideoViewer(
+                        item,
+                        booru: widget.booru,
+                        isViewed: page == index,
+                        enableFullscreen: true,
+                        key: item.key,
+                      );
+                    },
                   );
                 } else {
-                  if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
-                    itemWidget = ValueListenableBuilder(
-                      valueListenable: page,
-                      builder: (context, page, child) {
-                        return VideoViewer(
-                          item,
-                          booru: widget.booru,
-                          isViewed: page == index,
-                          enableFullscreen: true,
-                          key: item.key,
-                        );
-                      },
-                    );
-                  } else {
-                    itemWidget = VideoViewerPlaceholder(
-                      item: item,
-                      booru: widget.booru,
-                    );
-                  }
+                  itemWidget = VideoViewerPlaceholder(
+                    item: item,
+                    booru: widget.booru,
+                  );
                 }
               } else if (isNeedToGuess) {
                 itemWidget = GuessExtensionViewer(

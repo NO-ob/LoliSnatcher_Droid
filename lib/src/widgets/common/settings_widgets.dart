@@ -472,6 +472,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.trailingIcon,
+    this.contentPadding,
     this.itemBuilder,
     this.itemFilter,
     this.selectedItemBuilder,
@@ -492,6 +493,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget? trailingIcon;
+  final EdgeInsets? contentPadding;
   final Widget Function(T?)? itemBuilder;
   final bool Function(T?)? itemFilter;
   final Widget Function(T?)? selectedItemBuilder;
@@ -581,6 +583,7 @@ class SettingsDropdown<T> extends StatelessWidget {
                   )
                 : null),
         dense: false,
+        contentPadding: contentPadding,
         shape: Border(
           // draw top border when item is in the middle of other items, but they are not listtile
           top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
@@ -823,6 +826,7 @@ class SettingsTextInput extends StatefulWidget {
     this.submitIcon,
     this.showSubmitButton,
     this.prefixIcon,
+    this.contextMenuBuilder,
     super.key,
   });
 
@@ -862,6 +866,7 @@ class SettingsTextInput extends StatefulWidget {
   final IconData? submitIcon;
   final bool Function(String)? showSubmitButton;
   final Widget? prefixIcon;
+  final Widget Function(BuildContext, EditableTextState)? contextMenuBuilder;
 
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
@@ -1067,6 +1072,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         autocorrect: widget.autocorrect,
         enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
         scrollPadding: const EdgeInsets.all(kToolbarHeight),
+        contextMenuBuilder: widget.contextMenuBuilder,
         decoration: InputDecoration(
           labelText: widget.title,
           hintText: widget.hintText,

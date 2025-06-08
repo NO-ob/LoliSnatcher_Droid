@@ -109,8 +109,9 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                         return const SettingsDialog(
                           title: Text('Disable videos'),
                           contentItems: [
-                            Text('Useful on low end devices that crash when trying to load videos.'),
-                            Text("Replaces video with text that says 'Video disabled'."),
+                            Text(
+                              'Useful on low end devices that crash when trying to load videos. Gives options to view video in external player or browser instead.',
+                            ),
                           ],
                         );
                       },

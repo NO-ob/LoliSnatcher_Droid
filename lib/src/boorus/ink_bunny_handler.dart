@@ -252,7 +252,7 @@ class InkBunnyHandler extends BooruHandler {
           }
         }
       } else {
-        tagStr += '${tagList[i]},';
+        tagStr += '${tagList[i]}${i < tagList.length - 1 ? ',' : ''}';
       }
     }
 
@@ -261,7 +261,7 @@ class InkBunnyHandler extends BooruHandler {
     //I have removed the code that was using the results id before we will see how this is without using that.
 
     //The type variable filters by file type so we only fetch those that are supported by the app
-    return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr&username=$artist&get_rid=yes&type=1,2,3,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes&orderby=$order&page=$pageNum";
+    return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr${artist.isEmpty ? '' : '&username=$artist'}&get_rid=yes&type=1,2,3,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes${order.isEmpty ? '' : '&orderby=$order'}&page=$pageNum";
   }
 
   @override

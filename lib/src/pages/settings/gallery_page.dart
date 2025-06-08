@@ -19,7 +19,6 @@ class _GalleryPageState extends State<GalleryPage> {
       allowRotation = false,
       loadingGif = false,
       useVolumeButtonsForScroll = false,
-      shitDevice = false,
       wakeLockEnabled = true,
       enableHeroTransitions = true,
       disableCustomPageTransitions = false,
@@ -62,7 +61,6 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
     preloadAmountController.text = settingsHandler.preloadCount.toString();
     preloadSizeController.text = settingsHandler.preloadSizeLimit.toString();
-    shitDevice = settingsHandler.shitDevice;
     loadingGif = settingsHandler.loadingGif;
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
     enableHeroTransitions = settingsHandler.enableHeroTransitions;
@@ -79,7 +77,6 @@ class _GalleryPageState extends State<GalleryPage> {
     super.dispose();
   }
 
-  //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
@@ -96,7 +93,6 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.hideNotes = hideNotes;
     settingsHandler.allowRotation = allowRotation;
     settingsHandler.loadingGif = loadingGif;
-    settingsHandler.shitDevice = shitDevice;
     settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     settingsHandler.wakeLockEnabled = wakeLockEnabled;
     settingsHandler.enableHeroTransitions = enableHeroTransitions;
@@ -411,50 +407,6 @@ class _GalleryPageState extends State<GalleryPage> {
                   },
                 ),
               ),
-
-              SettingsToggle(
-                value: shitDevice,
-                onChanged: (newValue) {
-                  setState(() {
-                    shitDevice = newValue;
-                    if (shitDevice) {
-                      preloadAmountController.text = '0';
-                      preloadSizeController.text = '0.2';
-                      galleryMode = 'Sample';
-                      settingsHandler.autoPlayEnabled = false;
-                      settingsHandler.disableImageScaling = false;
-                      settingsHandler.previewMode = 'Thumbnail';
-                    }
-                  });
-                },
-                title: 'Low performance mode',
-                trailingIcon: IconButton(
-                  icon: const Icon(Icons.help_outline),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Low performance mode'),
-                          contentItems: [
-                            Text('Recommended for old devices and devices with RAM ~2GB.'),
-                            Text(''),
-                            Text('- Disables loading progress information'),
-                            Text('- Sets optimal settings for:'),
-                            Text('   - Image quality'),
-                            Text('   - Preview quality'),
-                            Text('   - Preload amount'),
-                            Text('   - Video autoplay'),
-                            Text("   - Don't scale images"),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-
-              //////////////////////////////////////////
               SettingsToggle(
                 value: useVolumeButtonsForScroll,
                 onChanged: (newValue) {

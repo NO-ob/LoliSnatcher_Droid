@@ -1838,6 +1838,30 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                   textInputAction: TextInputAction.search,
                   enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                   showSubmitButton: (text) => !settingsHandler.showSearchbarQuickActions && text.isNotEmpty,
+                  contextMenuBuilder: (context, editableTextState) {
+                    final List<ContextMenuButtonItem> buttonItems = editableTextState.contextMenuButtonItems;
+
+                    if (!suggestionTextController.text.contains(' ')) {
+                      buttonItems.insert(
+                        0,
+                        ContextMenuButtonItem(
+                          label: 'Prefix',
+                          onPressed: () {
+                            ContextMenuController.removeAny();
+                            showDialog<String>(
+                              context: context,
+                              builder: (context) => _PrefixEditDialog(suggestionTextController),
+                            );
+                          },
+                        ),
+                      );
+                    }
+
+                    return AdaptiveTextSelectionToolbar.buttonItems(
+                      anchors: editableTextState.contextMenuAnchors,
+                      buttonItems: buttonItems,
+                    );
+                  },
                   submitIcon: Icons.add_rounded,
                   prefixIcon: IconButton(
                     icon: const Icon(Icons.arrow_back_rounded),
@@ -2997,6 +3021,131 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PrefixEditDialog extends StatelessWidget {
+  const _PrefixEditDialog(this.controller);
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final searchHandler = SearchHandler.instance;
+
+    return AlertDialog(
+      title: const Text('Prefix'),
+      content: ValueListenableBuilder(
+        valueListenable: controller,
+        builder: (context, value, child) {
+          String text = value.text;
+          bool isExclude = text.startsWith('-');
+          bool isOr = text.startsWith('~');
+          text = text.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').trim();
+
+          final bool isNumberMod = text.startsWith(RegExp(r'\d+#'));
+          final int? booruNumber = int.tryParse(isNumberMod ? text.split('#')[0] : '');
+          final bool hasBooruNumber = booruNumber != null;
+          final List<Booru> usedBoorus = [
+            searchHandler.currentTab.selectedBooru.value,
+            ...(searchHandler.currentTab.secondaryBoorus.value ?? <Booru>[]),
+          ];
+          final bool hasSecondaryBoorus = usedBoorus.length > 1;
+          final bool isValidNumberMod =
+              hasBooruNumber && booruNumber > 0 && hasSecondaryBoorus && booruNumber <= usedBoorus.length;
+          final selectedBooru = isValidNumberMod ? usedBoorus[booruNumber - 1] : null;
+          text = text.replaceAll(RegExp(r'^\d+#'), '').trim();
+
+          // do it twitce because it will be false for mergebooru
+          // (because proper tag query syntax is to place booru number in front of tag and all modifiers)
+          isExclude = isExclude || text.startsWith('-');
+          isOr = isOr || text.startsWith('~');
+          text = text.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').trim();
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 12,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  controller.text = isExclude ? text : '-$text';
+                  if (isValidNumberMod) controller.text = '$booruNumber#${controller.text}';
+                },
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Exclude (—)',
+                      ),
+                    ),
+                    IgnorePointer(
+                      ignoring: true,
+                      child: Checkbox(
+                        value: isExclude,
+                        onChanged: (_) {},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  controller.text = isOr ? text : '~$text';
+                  if (isValidNumberMod) controller.text = '$booruNumber#${controller.text}';
+                },
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text('Or (~)'),
+                    ),
+                    IgnorePointer(
+                      ignoring: true,
+                      child: Checkbox(
+                        value: isOr,
+                        onChanged: (_) {},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (hasSecondaryBoorus)
+                SettingsDropdown(
+                  value: selectedBooru,
+                  items: usedBoorus,
+                  onChanged: (Booru? newBooru) {
+                    if (selectedBooru == newBooru) {
+                      newBooru = null;
+                    }
+
+                    controller.text =
+                        '${newBooru == null ? '' : usedBoorus.indexOf(newBooru) + 1}${newBooru == null ? '' : '#'}${isExclude ? '-' : ''}${isOr ? '~' : ''}$text';
+                  },
+                  title: 'Booru (N#)',
+                  contentPadding: EdgeInsets.zero,
+                  itemBuilder: (booru) {
+                    if (booru == null) {
+                      return const Text('');
+                    }
+
+                    return Row(
+                      spacing: 6,
+                      children: [
+                        Text('${usedBoorus.indexOf(booru) + 1}#'),
+                        BooruFavicon(booru),
+                        Expanded(
+                          child: Text(booru.name ?? ''),
+                        ),
+                      ],
+                    );
+                  },
+                  drawBottomBorder: false,
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

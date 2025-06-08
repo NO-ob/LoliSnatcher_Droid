@@ -126,17 +126,22 @@ class _ThumbnailState extends State<Thumbnail> {
             },
           );
 
-    if (thumbWidth == null && thumbHeight == null) {
-      return provider;
+    // on desktop devicePixelRatio is not working?
+    final bool shouldResize = (thumbWidth != null || thumbHeight != null) && !SettingsHandler.isDesktopPlatform;
+    final bool shouldPixelate = widget.item.isHated && settingsHandler.shitDevice;
+
+    if (shouldResize || shouldPixelate) {
+      return ResizeImage(
+        provider,
+        // when in low performance mode - resize hated images to 10px to simulate blur effect
+        width: shouldPixelate ? 10 : thumbWidth?.round(),
+        height: shouldPixelate ? 10 : thumbHeight?.round(),
+        policy: ResizeImagePolicy.fit,
+        allowUpscaling: false,
+      );
     }
 
-    return ResizeImage(
-      provider,
-      width: thumbWidth?.round(),
-      height: thumbHeight?.round(),
-      policy: ResizeImagePolicy.fit,
-      allowUpscaling: false,
-    );
+    return provider;
   }
 
   void calcThumbWidth(BoxConstraints constraints) {
@@ -162,7 +167,6 @@ class _ThumbnailState extends State<Thumbnail> {
 
       case 'Staggered':
         if (hasSizeData) {
-          // if api gives size data
           thumbRatio = widget.item.fileAspectRatio!;
           if (thumbRatio < 1) {
             // vertical image - resize to width
@@ -184,8 +188,6 @@ class _ThumbnailState extends State<Thumbnail> {
         thumbHeight = widthLimit;
         break;
     }
-
-    // print('thumbWidth: $thumbWidth thumbHeight: $thumbHeight');
   }
 
   void onBytesAdded(int receivedNew, int? totalNew) {
@@ -195,7 +197,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
   void onError(Object error, {bool delayed = false}) {
     if (error is DioException && CancelToken.isCancel(error)) {
-      // print('Canceled by user: $error');
+      //
     } else {
       if (restartedCount < (kDebugMode ? 1 : 3)) {
         // attempt to reload 3 times with a 1s delay
@@ -215,7 +217,6 @@ class _ThumbnailState extends State<Thumbnail> {
           errorCode.value = null;
         }
       }
-      // print('Dio request cancelled: $thumbURL $error');
     }
   }
 
@@ -249,7 +250,7 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   Future<void> startDownloading() async {
-    final bool useExtra = isThumbQuality == false && !widget.item.isHated;
+    final bool useExtra = isThumbQuality == false && !widget.item.isHated && !settingsHandler.shitDevice;
 
     mainProvider.value = await getImageProvider(true);
     mainImageStream?.removeListener(mainImageListener!);
@@ -448,7 +449,7 @@ class _ThumbnailState extends State<Thumbnail> {
         final double iconSize =
             (constraints.maxHeight < constraints.maxWidth ? constraints.maxHeight : constraints.maxWidth) * 0.75;
 
-        final bool useExtra = isThumbQuality == false && !widget.item.isHated;
+        final bool useExtra = isThumbQuality == false && !widget.item.isHated && !settingsHandler.shitDevice;
 
         return Stack(
           alignment: Alignment.center,
@@ -517,7 +518,7 @@ class _ThumbnailState extends State<Thumbnail> {
               builder: (context, isLoaded, child) {
                 return AnimatedOpacity(
                   // fade in image
-                  opacity: (!widget.isStandalone || isLoaded) ? 1 : 0,
+                  opacity: (settingsHandler.shitDevice || !widget.isStandalone || isLoaded) ? 1 : 0,
                   duration: const Duration(milliseconds: 300),
                   child: child,
                 );
@@ -525,7 +526,7 @@ class _ThumbnailState extends State<Thumbnail> {
               child: AnimatedSwitcher(
                 duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
                 child: ImageFiltered(
-                  enabled: settingsHandler.blurImages || widget.item.isHated,
+                  enabled: settingsHandler.blurImages || (widget.item.isHated && !settingsHandler.shitDevice),
                   imageFilter: ImageFilter.blur(
                     sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
                     sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
@@ -559,7 +560,7 @@ class _ThumbnailState extends State<Thumbnail> {
               ),
             ),
             //
-            if (widget.isStandalone)
+            if (widget.isStandalone && !settingsHandler.shitDevice)
               ValueListenableBuilder(
                 valueListenable: isLoaded,
                 builder: (context, isLoaded, _) {
@@ -681,7 +682,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
     if (widget.isStandalone && widget.useHero) {
       return HeroMode(
-        enabled: settingsHandler.enableHeroTransitions,
+        enabled: settingsHandler.enableHeroTransitions && !settingsHandler.shitDevice,
         child: Hero(
           tag: 'imageHero${widget.item.hashCode}',
           placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
