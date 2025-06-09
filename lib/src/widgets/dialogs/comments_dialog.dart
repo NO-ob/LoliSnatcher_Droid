@@ -151,7 +151,18 @@ class _CommentsDialogState extends State<CommentsDialog> {
     final bool areThereErrors = (isLoading && comments.isEmpty) || notSupported || comments.isEmpty;
 
     return SettingsPageDialog(
-      title: Text('Comments ${comments.isEmpty ? '' : '(${comments.length})'}'.trim()),
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Comments'),
+          if (comments.isNotEmpty)
+            Text(
+              '${comments.length}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+        ],
+      ),
       content: NotificationListener<ScrollUpdateNotification>(
         onNotification: onScroll,
         child: Scrollbar(
@@ -329,41 +340,44 @@ class _CommentEntry extends StatelessWidget {
                             : Center(child: Text(comment.authorName?.substring(0, 2) ?? '?')),
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (comment.authorName?.isNotEmpty == true)
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (comment.authorName?.isNotEmpty == true)
+                            Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: SelectableText(
+                                comment.authorName!,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           Padding(
                             padding: const EdgeInsets.all(4),
-                            child: SelectableText(
-                              comment.authorName!,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            child: Row(
+                              children: [
+                                if (comment.title?.isNotEmpty == true)
+                                  SelectableText(
+                                    comment.title!,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                const SizedBox(width: 5),
+                                if (comment.createDate?.isNotEmpty == true)
+                                  Text(
+                                    formatDate(comment.createDate!, comment.createDateFormat!),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                    ),
+                                  ),
+                                const SizedBox(width: 15),
+                                scoreText(comment.score),
+                              ],
                             ),
                           ),
-                        Padding(
-                          padding: const EdgeInsets.all(4),
-                          child: Row(
-                            children: [
-                              if (comment.title?.isNotEmpty == true)
-                                SelectableText(
-                                  comment.title!,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              const SizedBox(width: 5),
-                              if (comment.createDate?.isNotEmpty == true)
-                                Text(
-                                  formatDate(comment.createDate!, comment.createDateFormat!),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                                  ),
-                                ),
-                              const SizedBox(width: 15),
-                              scoreText(comment.score),
-                            ],
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
