@@ -31,7 +31,6 @@ class ViewerHandler {
   // Key of the currently viewed media widget
   final Rxn<GlobalKey> currentKey = Rxn(null);
 
-  // Add media widget key
   void addViewed(Key? key) {
     if (key == null || activeKeys.contains(key)) {
       return;
@@ -42,7 +41,6 @@ class ViewerHandler {
     }
   }
 
-  // Remove media widget key
   void removeViewed(Key? key) {
     if (key == null || !activeKeys.contains(key)) {
       return;
@@ -53,7 +51,6 @@ class ViewerHandler {
     }
   }
 
-  // Set the key of current viewed widget
   void setCurrent(Key? key) {
     if (key == null || currentKey.value == key) {
       return;
@@ -66,20 +63,19 @@ class ViewerHandler {
   }
 
   // Drop the key of viewed widget and reset the handler state
-  // (used when user exits the viewerpage)
+  // (used when user exits the viewer page)
   void dropCurrent() {
     currentKey.value = null;
     resetState();
   }
 
-  // Viewer state stuff
   final RxBool inViewer = false.obs; // is in viewerpage
-  final RxBool displayAppbar = true.obs; // is gallery toolbar visible
+  final RxBool displayAppbar = true.obs; // is viewer toolbar visible
   final RxBool isZoomed = false.obs; // is current item zoomed in
   final RxBool isLoaded = false.obs; // is current item loaded
-  final Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view controller value
-  final RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoViewer)
-  final RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
+  final Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view controller value (used by notes renderer)
+  final RxBool isFullscreen = false.obs; // is viewing video in fullscreen (mobile app mode)
+  final RxBool isDesktopFullscreen = false.obs; // is viewing video in fullscreen (desktop app mode)
 
   final RxBool showNotes = true.obs;
 
@@ -93,7 +89,6 @@ class ViewerHandler {
     viewState.value = null;
   }
 
-  // Get zoom state of new current item
   void setNewState(Key? key) {
     if (key == null || currentKey.value != key) {
       return;
@@ -127,7 +122,6 @@ class ViewerHandler {
     });
   }
 
-  // Set zoom state, called by the current item itself
   void setZoomed(Key? key, bool isZoom) {
     if (key == null || currentKey.value != key) {
       return;
@@ -136,19 +130,36 @@ class ViewerHandler {
     isZoomed.value = isZoom;
   }
 
-  // toggle item's zoom state
   void toggleZoom() {
     isZoomed.value ? resetZoom() : doubleTapZoom();
   }
 
   void resetZoom() {
     final dynamic state = currentKey.value?.currentState;
-    state?.resetZoom?.call();
+    switch (state?.widget) {
+      case ImageViewer():
+        (state as ImageViewerState?)?.resetZoom();
+        break;
+      case VideoViewer():
+        (state as VideoViewerState?)?.resetZoom();
+        break;
+      default:
+        break;
+    }
   }
 
   void doubleTapZoom() {
     final dynamic state = currentKey.value?.currentState;
-    state?.doubleTapZoom?.call();
+    switch (state?.widget) {
+      case ImageViewer():
+        (state as ImageViewerState?)?.doubleTapZoom();
+        break;
+      case VideoViewer():
+        (state as VideoViewerState?)?.doubleTapZoom();
+        break;
+      default:
+        break;
+    }
   }
 
   void toggleMuteAllVideos({bool mute = true}) {
@@ -245,23 +256,7 @@ class ViewerHandler {
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
   }
 
-  // Related to videos
   bool videoAutoMute = kDebugMode
       ? Constants.blurImagesDefaultDev
       : false; // hold volume button in VideoViewer to mute videos globally
-
-  // ViewerHandler() {
-  //   // debug: print keys list changes
-  //   activeKeys.listen((keys) {
-  //     print('Viewing: $keys');
-  //   });
-
-  //   currentKey.listen((key) {
-  //     // debug: print current key change and what widget it represents
-  //     dynamic widget = key?.currentState?.widget;
-  //     print('Current: $key');
-  //     print('Current url: ${widget?.booruItem?.fileURL}');
-  //     print('Widget type: ${widget.runtimeType}');
-  //   });
-  // }
 }
