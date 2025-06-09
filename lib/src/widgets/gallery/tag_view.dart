@@ -70,22 +70,32 @@ class _TagViewState extends State<TagView> {
   CancelToken? cancelToken;
   bool loadingUpdate = false, failedUpdate = false;
 
+  Timer? sortTimer;
+
   @override
   void initState() {
     super.initState();
-    searchHandler.searchTextController.addListener(parseSortGroupTags);
+    searchHandler.searchTextController.addListener(parseSortGroupTagsWithoutCache);
 
     searchFocusNode.addListener(searchFocusListener);
 
     item = searchHandler.viewedItem.value;
-    // copy tags to avoid changing the original array
     tags = [...item.tagsList];
     filteredTags = [...tags];
     WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
 
     searchHandler.viewedItem.addListener(itemListener);
 
-    reloadItemData(initial: true);
+    reloadItemData(initial: true).then((_) async {
+      await Future.delayed(const Duration(seconds: 3));
+      if (mounted) {
+        parseSortGroupTagsWithoutCache();
+        sortTimer = Timer.periodic(
+          const Duration(seconds: 5),
+          (_) => parseSortGroupTagsWithoutCache(),
+        );
+      }
+    });
   }
 
   void itemListener() {
@@ -96,7 +106,8 @@ class _TagViewState extends State<TagView> {
   @override
   void dispose() {
     cancelToken?.cancel();
-    searchHandler.searchTextController.removeListener(parseSortGroupTags);
+    sortTimer?.cancel();
+    searchHandler.searchTextController.removeListener(parseSortGroupTagsWithoutCache);
     searchController.dispose();
     searchFocusNode.removeListener(searchFocusListener);
     searchFocusNode.dispose();
@@ -195,10 +206,18 @@ class _TagViewState extends State<TagView> {
     }
   }
 
-  void parseSortGroupTags() {
+  void parseSortGroupTagsWithoutCache() {
+    parseSortGroupTags(updateCache: false);
+  }
+
+  void parseSortGroupTags({
+    bool updateCache = true,
+  }) {
     parseTags();
     sortAndGroupTagsList();
-    cacheTabMatchData();
+    if (updateCache) {
+      cacheTabMatchData();
+    }
     setState(() {});
   }
 
@@ -595,7 +614,7 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.addTagToList('loved', tag);
                   searchHandler.filterCurrentFetched();
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop(true);
                 },
               ),
@@ -606,7 +625,7 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.addTagToList('hated', tag);
                   searchHandler.filterCurrentFetched();
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
               ),
@@ -619,7 +638,7 @@ class _TagViewState extends State<TagView> {
                 title: const Text('Remove from Loved'),
                 onTap: () {
                   settingsHandler.removeTagFromList('loved', tag);
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
               ),
@@ -632,7 +651,7 @@ class _TagViewState extends State<TagView> {
                 title: const Text('Remove from Hated'),
                 onTap: () {
                   settingsHandler.removeTagFromList('hated', tag);
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
               ),
@@ -653,12 +672,12 @@ class _TagViewState extends State<TagView> {
                       if (newValue != null && item.tagType != newValue) {
                         item.tagType = newValue;
                         tagHandler.putTag(item, dbEnabled: settingsHandler.dbEnabled);
-                        parseSortGroupTags();
+                        parseSortGroupTagsWithoutCache();
                       }
                     },
                   ),
                 );
-                parseSortGroupTags();
+                parseSortGroupTagsWithoutCache();
               },
             ),
             //
@@ -832,6 +851,8 @@ class _TagViewState extends State<TagView> {
                     onPressed: () {
                       searchHandler.addTabByString(currentTag);
 
+                      parseSortGroupTags();
+
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
@@ -864,7 +885,6 @@ class _TagViewState extends State<TagView> {
                           );
                         },
                       );
-                      parseSortGroupTags();
                     },
                   ),
                 ),
@@ -980,7 +1000,7 @@ class _TagViewState extends State<TagView> {
                           clearable: true,
                           pasteable: true,
                           onChanged: (_) {
-                            parseSortGroupTags();
+                            parseSortGroupTagsWithoutCache();
                           },
                           enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                         ),
