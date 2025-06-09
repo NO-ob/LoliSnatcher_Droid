@@ -177,6 +177,38 @@ class ViewerHandler {
     }
   }
 
+  void hideExtraUi() {
+    for (final key in activeKeys) {
+      final state = key?.currentState;
+      switch (state?.widget) {
+        case ImageViewer():
+          (state as ImageViewerState?)?.showLoading.value = false;
+          break;
+        case VideoViewer():
+          (state as VideoViewerState?)?.showControls.value = false;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  void showExtraUi() {
+    for (final key in activeKeys) {
+      final state = key?.currentState;
+      switch (state?.widget) {
+        case ImageViewer():
+          (state as ImageViewerState?)?.showLoading.value = true;
+          break;
+        case VideoViewer():
+          (state as VideoViewerState?)?.showControls.value = true;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   void setViewValue(Key? key, PhotoViewControllerValue value) {
     if (key == null || currentKey.value != key) {
       return;

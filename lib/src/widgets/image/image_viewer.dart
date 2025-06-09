@@ -48,6 +48,7 @@ class ImageViewerState extends State<ImageViewer> {
   final ValueNotifier<bool> isFromCache = ValueNotifier(false);
   final ValueNotifier<bool> isZoomed = ValueNotifier(false);
   final ValueNotifier<bool> isStopped = ValueNotifier(false);
+  final ValueNotifier<bool> showLoading = ValueNotifier(true);
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   final ValueNotifier<List<String>> stopReason = ValueNotifier([]);
 
@@ -426,51 +427,60 @@ class ImageViewerState extends State<ImageViewer> {
           ),
           //
           ValueListenableBuilder(
-            valueListenable: isLoaded,
-            builder: (context, isLoaded, _) {
-              return ValueListenableBuilder(
-                valueListenable: isViewed,
-                builder: (context, isViewed, _) {
-                  return ValueListenableBuilder(
-                    valueListenable: isStopped,
-                    builder: (context, isStopped, _) {
-                      return ValueListenableBuilder(
-                        valueListenable: isFromCache,
-                        builder: (context, isFromCache, _) {
-                          return ValueListenableBuilder(
-                            valueListenable: stopReason,
-                            builder: (context, stopReason, _) {
-                              return MediaLoading(
-                                item: widget.booruItem,
-                                hasProgress: true,
-                                isFromCache: isFromCache,
-                                isDone: isLoaded,
-                                isTooBig: isTooBig > 0,
-                                isStopped: isStopped,
-                                stopReasons: stopReason,
-                                isViewed: isViewed,
-                                total: total,
-                                received: received,
-                                startedAt: startedAt,
-                                startAction: () {
-                                  if (isTooBig == 1) {
-                                    isTooBig = 2;
-                                  }
-                                  initViewer(true);
-                                },
-                                stopAction: () {
-                                  killLoading(['Stopped by User']);
-                                },
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
+            valueListenable: showLoading,
+            builder: (context, showLoading, child) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: showLoading ? child : const SizedBox.shrink(),
               );
             },
+            child: ValueListenableBuilder(
+              valueListenable: isLoaded,
+              builder: (context, isLoaded, _) {
+                return ValueListenableBuilder(
+                  valueListenable: isViewed,
+                  builder: (context, isViewed, _) {
+                    return ValueListenableBuilder(
+                      valueListenable: isStopped,
+                      builder: (context, isStopped, _) {
+                        return ValueListenableBuilder(
+                          valueListenable: isFromCache,
+                          builder: (context, isFromCache, _) {
+                            return ValueListenableBuilder(
+                              valueListenable: stopReason,
+                              builder: (context, stopReason, _) {
+                                return MediaLoading(
+                                  item: widget.booruItem,
+                                  hasProgress: true,
+                                  isFromCache: isFromCache,
+                                  isDone: isLoaded,
+                                  isTooBig: isTooBig > 0,
+                                  isStopped: isStopped,
+                                  stopReasons: stopReason,
+                                  isViewed: isViewed,
+                                  total: total,
+                                  received: received,
+                                  startedAt: startedAt,
+                                  startAction: () {
+                                    if (isTooBig == 1) {
+                                      isTooBig = 2;
+                                    }
+                                    initViewer(true);
+                                  },
+                                  stopAction: () {
+                                    killLoading(['Stopped by User']);
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
           //
           Listener(

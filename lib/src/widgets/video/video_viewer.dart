@@ -62,6 +62,7 @@ class VideoViewerState extends State<VideoViewer> {
   final ValueNotifier<bool> isStopped = ValueNotifier(false);
   final ValueNotifier<bool> isViewed = ValueNotifier(false);
   final ValueNotifier<bool> isZoomed = ValueNotifier(false);
+  final ValueNotifier<bool> showControls = ValueNotifier(true);
   final ValueNotifier<bool> forceCache = ValueNotifier(false);
   final ValueNotifier<List<String>> stopReason = ValueNotifier([]);
   Timer? bufferingTimer, pauseCheckTimer;
@@ -651,34 +652,38 @@ class VideoViewerState extends State<VideoViewer> {
             ),
           ),
           //
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: isVideoInited
-                ? const SizedBox.shrink()
-                : MediaLoading(
-                    item: widget.booruItem,
-                    hasProgress:
-                        settingsHandler.mediaCache && (forceCache.value || settingsHandler.videoCacheMode != 'Stream'),
-                    isFromCache: isFromCache.value,
-                    isDone: isVideoInited,
-                    isTooBig: isTooBig > 0,
-                    isStopped: isStopped.value,
-                    stopReasons: stopReason.value,
-                    isViewed: isViewed.value,
-                    total: total,
-                    received: received,
-                    startedAt: startedAt,
-                    startAction: () {
-                      if (isTooBig == 1) {
-                        isTooBig = 2;
-                      }
-                      initVideo(true);
-                      updateState();
-                    },
-                    stopAction: () {
-                      killLoading(['Stopped by User']);
-                    },
-                  ),
+          ValueListenableBuilder(
+            valueListenable: showControls,
+            builder: (context, showControls, child) {
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: (isVideoInited || !showControls) ? const SizedBox.shrink() : child,
+              );
+            },
+            child: MediaLoading(
+              item: widget.booruItem,
+              hasProgress:
+                  settingsHandler.mediaCache && (forceCache.value || settingsHandler.videoCacheMode != 'Stream'),
+              isFromCache: isFromCache.value,
+              isDone: isVideoInited,
+              isTooBig: isTooBig > 0,
+              isStopped: isStopped.value,
+              stopReasons: stopReason.value,
+              isViewed: isViewed.value,
+              total: total,
+              received: received,
+              startedAt: startedAt,
+              startAction: () {
+                if (isTooBig == 1) {
+                  isTooBig = 2;
+                }
+                initVideo(true);
+                updateState();
+              },
+              stopAction: () {
+                killLoading(['Stopped by User']);
+              },
+            ),
           ),
           //
           Positioned.fill(
@@ -755,19 +760,31 @@ class VideoViewerState extends State<VideoViewer> {
                                     );
                                   },
                                   child: ValueListenableBuilder(
-                                    // without this there will be two instances of LoliControls
-                                    // which will cancel each other's actions (i.e. long tap to fast forward)
-                                    valueListenable: viewerHandler.isFullscreen,
-                                    builder: (context, isFullscreen, child) {
-                                      return isFullscreen ? const SizedBox.shrink() : child!;
+                                    valueListenable: showControls,
+                                    builder: (context, showControls, child) {
+                                      return AnimatedSwitcher(
+                                        duration: const Duration(milliseconds: 200),
+                                        child: showControls ? child : const SizedBox.shrink(),
+                                      );
                                     },
                                     child: ValueListenableBuilder(
-                                      valueListenable: isZoomed,
-                                      builder: (context, isZoomed, _) {
-                                        return LoliControls(
-                                          useLongTapFastForward: !isZoomed && settingsHandler.longTapFastForwardVideo,
+                                      // without this there will be two instances of LoliControls
+                                      // which will cancel each other's actions (i.e. long tap to fast forward)
+                                      valueListenable: viewerHandler.isFullscreen,
+                                      builder: (context, isFullscreen, child) {
+                                        return AnimatedSwitcher(
+                                          duration: const Duration(milliseconds: 200),
+                                          child: isFullscreen ? const SizedBox.shrink() : child,
                                         );
                                       },
+                                      child: ValueListenableBuilder(
+                                        valueListenable: isZoomed,
+                                        builder: (context, isZoomed, _) {
+                                          return LoliControls(
+                                            useLongTapFastForward: !isZoomed && settingsHandler.longTapFastForwardVideo,
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ),
                                 ),
