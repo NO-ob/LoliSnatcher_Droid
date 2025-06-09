@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:get/get.dart' hide FirstWhereOrNullExt;
-
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
@@ -15,7 +13,6 @@ import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -130,35 +127,6 @@ class _BooruEditState extends State<BooruEdit> {
             testButton(),
             webviewButton(),
             saveButton(),
-            ValueListenableBuilder(
-              valueListenable: settingsHandler.isDebug,
-              builder: (context, isDebug, child) {
-                return (isDebug || EnvironmentConfig.isTesting) ? child! : const SizedBox.shrink();
-              },
-              child: SettingsButton(
-                name: 'Open Alice',
-                icon: const Icon(Icons.developer_board),
-                action: settingsHandler.alice.showInspector,
-              ),
-            ),
-            Obx(() {
-              if (settingsHandler.isDebug.value || EnvironmentConfig.isTesting) {
-                return SettingsButton(
-                  name: 'Open Logger',
-                  icon: const Icon(Icons.print),
-                  action: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => LoggerViewPage(talker: Logger.talker),
-                      ),
-                    );
-                  },
-                  drawTopBorder: true,
-                );
-              }
-
-              return const SizedBox.shrink();
-            }),
             const SettingsButton(name: '', enabled: false),
             SettingsTextInput(
               controller: booruNameController,

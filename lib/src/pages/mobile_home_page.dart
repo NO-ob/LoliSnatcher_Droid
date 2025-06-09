@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -20,12 +19,10 @@ import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
-import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/pages/snatcher_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
-import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -236,39 +233,6 @@ class MainDrawer extends StatelessWidget {
                     const TabButtons(true, WrapAlignment.spaceEvenly),
                     const SizedBox(height: 12),
                     const MergeBooruToggleAndSelector(),
-                    //
-                    Obx(() {
-                      if (settingsHandler.isDebug.value) {
-                        return SettingsButton(
-                          name: 'Open Alice',
-                          icon: const Icon(Icons.developer_board),
-                          action: () {
-                            settingsHandler.alice.showInspector();
-                          },
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    }),
-                    //
-                    Obx(() {
-                      if (settingsHandler.isDebug.value || EnvironmentConfig.isTesting) {
-                        return SettingsButton(
-                          name: 'Open Logger',
-                          icon: const Icon(Icons.print),
-                          action: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => LoggerViewPage(talker: Logger.talker),
-                              ),
-                            );
-                          },
-                          drawTopBorder: true,
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    }),
                     ValueListenableBuilder(
                       valueListenable: LocalAuthHandler.instance.deviceSupportsBiometrics,
                       builder: (_, deviceSupportsBiometrics, _) => ValueListenableBuilder(
@@ -321,15 +285,6 @@ class MainDrawer extends StatelessWidget {
                         return const SizedBox.shrink();
                       }
                     }),
-                    if (kDebugMode)
-                      SettingsToggle(
-                        value: settingsHandler.blurImages,
-                        onChanged: (newValue) {
-                          settingsHandler.blurImages = newValue;
-                          searchHandler.rootRestate?.call();
-                        },
-                        title: 'Blur [DEV]',
-                      ),
                     //
                     Obx(() {
                       if (settingsHandler.updateInfo.value != null &&

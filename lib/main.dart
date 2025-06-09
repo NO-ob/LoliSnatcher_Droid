@@ -35,6 +35,7 @@ import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/root/dev_overlay.dart';
 import 'package:lolisnatcher/src/widgets/root/image_stats.dart';
 import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
@@ -89,6 +90,7 @@ class _MainAppState extends State<MainApp> {
   final TagHandler tagHandler = TagHandler.instance;
   final NotifyHandler notifyHandler = NotifyHandler.instance;
   final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
+  OverlayScreen? overlayScreen;
 
   @override
   void initState() {
@@ -107,10 +109,40 @@ class _MainAppState extends State<MainApp> {
       settingsHandler.postInitMessage.value = 'Restoring tabs...';
       await searchHandler.restoreTabs();
     });
+
+    settingsHandler.isDebug.addListener(devOverlayListener);
+  }
+
+  void registerGlobalOverlay(BuildContext context) {
+    if (overlayScreen == null) {
+      overlayScreen = OverlayScreen.of(context);
+      createOverlays();
+      removeOverlays();
+    }
+  }
+
+  void createOverlays() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (settingsHandler.isDebug.value) {
+        overlayScreen?.insert(const DevOverlayContent(), 'devOverlay');
+      }
+    });
+  }
+
+  void removeOverlays() {
+    if (!settingsHandler.isDebug.value) {
+      overlayScreen?.remove('devOverlay');
+    }
+  }
+
+  void devOverlayListener() {
+    createOverlays();
+    removeOverlays();
   }
 
   @override
   void dispose() {
+    settingsHandler.isDebug.removeListener(devOverlayListener);
     NotifyHandler.unregister();
     NavigationHandler.unregister();
     ViewerHandler.unregister();
@@ -174,7 +206,17 @@ class _MainAppState extends State<MainApp> {
                     home: const Home(),
                     builder: (_, child) => Stack(
                       children: [
-                        child ?? const SizedBox.shrink(),
+                        Overlay(
+                          initialEntries: [
+                            OverlayEntry(
+                              builder: (context) {
+                                registerGlobalOverlay(context);
+
+                                return child ?? const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        ),
                         // Blur overlay
                         Overlay(
                           initialEntries: [
