@@ -38,15 +38,6 @@ class TagChip extends StatelessWidget {
       tagPins.add(TagPin(content: multiIndex, color: Colors.purple));
     }
 
-    // shorten stuff like order, sort, rating, ...
-    final Map<String, String> modifierMap = searchHandler.currentBooruHandler.tagModifierMap;
-    modifierMap.forEach((modifier, displayValue) {
-      if (stringContent.toLowerCase().startsWith(modifier)) {
-        stringContent = stringContent.toLowerCase().replaceFirst(modifier, '');
-        tagPins.add(TagPin(content: displayValue, color: Colors.purple));
-      }
-    });
-
     // color tag bg with their tag type corresponding color
     // (no type == blue here for cosmetic purposes, everywhere else they have no color)
     Color chipColour = color ?? tagHandler.getTag(stringContent).getColour();

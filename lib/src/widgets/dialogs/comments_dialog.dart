@@ -51,12 +51,14 @@ class _CommentsDialogState extends State<CommentsDialog> {
   }
 
   Future<void> getComments({bool initial = false}) async {
-    page = initial ? 0 : page + 1;
+    page = page + 1;
     if (initial) {
+      page = 0;
       isCompleted = false;
       notSupported = false;
       comments.clear();
     }
+
     isLoading = true;
     if (!isCompleted) {
       if (widget.item.serverId != null) {
@@ -76,19 +78,6 @@ class _CommentsDialogState extends State<CommentsDialog> {
         notSupported = true;
       }
     }
-
-    // comments = [
-    //   ...comments,
-    //   ...List.generate(4000, (i) => CommentItem(
-    //     id: 'id',
-    //     title: 'title',
-    //     content: 'Comment content',
-    //     authorID: "creator_id",
-    //     authorName: "creator",
-    //     avatarUrl: null,
-    //     postID: "post_id",
-    //   ))
-    // ];
 
     isLoading = false;
     setState(() {});

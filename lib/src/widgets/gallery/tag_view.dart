@@ -13,7 +13,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
@@ -516,7 +515,7 @@ class _TagViewState extends State<TagView> {
             ),
             const SizedBox(height: 10),
             //
-            if (searchHandler.currentBooru.type != BooruType.Merge) TagContentPreview(tag: tag),
+            if (searchHandler.currentBooru.type?.isMerge != true) TagContentPreview(tag: tag),
             //
             ListTile(
               leading: Icon(

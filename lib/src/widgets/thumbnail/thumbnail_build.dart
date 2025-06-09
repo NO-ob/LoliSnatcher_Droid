@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
 import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
@@ -145,7 +144,7 @@ class ThumbnailBuild extends StatelessWidget {
                       }
 
                       // Favourites/Downloads booru
-                      Booru? getMergeEntryBooru() {
+                      Booru? getMergeBooruEntry() {
                         final fetchedMap = (handler! as MergebooruHandler).fetchedMap;
                         for (int i = 0; i < fetchedMap.entries.length; i++) {
                           final entry = fetchedMap.entries.elementAt(i);
@@ -156,9 +155,10 @@ class ThumbnailBuild extends StatelessWidget {
                         return null;
                       }
 
+                      final booru = getMergeBooruEntry();
                       final bool isMergeEntryFromFavsOrDls =
                           handler is MergebooruHandler &&
-                          [BooruType.Favourites, BooruType.Downloads].contains(getMergeEntryBooru()?.type);
+                          (booru?.type?.isFavourites == true || booru?.type?.isDownloads == true);
                       if (handler is FavouritesHandler || handler is DownloadsHandler || isMergeEntryFromFavsOrDls) {
                         final itemFileHost = Uri.tryParse(item.fileURL)?.host;
                         final itemPostHost = Uri.tryParse(item.postURL)?.host;
@@ -175,7 +175,7 @@ class ThumbnailBuild extends StatelessWidget {
                                   booruHost.isNotEmpty == true &&
                                   itemPostHost.contains(booruHost));
                         });
-                        if (possibleBooru?.type != BooruType.Favourites && possibleBooru?.type != BooruType.Downloads) {
+                        if (possibleBooru?.type?.isFavourites != true && possibleBooru?.type?.isDownloads != true) {
                           final possibleFaviconUrl =
                               possibleBooru?.faviconURL ??
                               (itemPostHost != null ? 'https://$itemPostHost/favicon.ico' : null);
