@@ -130,7 +130,7 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
           ),
           clipBehavior: Clip.antiAlias,
           child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 100),
             alignment: Alignment.topCenter,
             clipBehavior: Clip.none,
             child: SizedBox(

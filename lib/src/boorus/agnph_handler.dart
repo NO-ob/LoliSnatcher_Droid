@@ -52,7 +52,7 @@ class AGNPHHandler extends BooruHandler {
         fileURL: fileURL,
         sampleURL: sampleURL,
         thumbnailURL: thumbnailURL,
-        tagsList: [],
+        tagsList: const [],
         postURL: makePostURL(responseItem.getElement('id')?.innerText ?? ''),
         fileWidth: double.tryParse(responseItem.getElement('width')?.innerText ?? ''),
         fileHeight: double.tryParse(responseItem.getElement('height')?.innerText ?? ''),

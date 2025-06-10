@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 
 class TagChip extends StatelessWidget {
@@ -15,7 +14,6 @@ class TagChip extends StatelessWidget {
   final Widget? trailing;
   final Color? color;
 
-  final SearchHandler searchHandler = SearchHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
 
   @override

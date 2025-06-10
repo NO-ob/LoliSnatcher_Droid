@@ -497,7 +497,7 @@ class _GalleryPageState extends State<GalleryPage> {
                             Text(' - Volume Down - next item'),
                             Text(' - Volume Up - previous item'),
                             Text(''),
-                            Text('On videos:'),
+                            Text('In viewer:'),
                             Text(' - Toolbar visible - controls volume'),
                             Text(' - Toolbar hidden - controls scrolling'),
                           ],

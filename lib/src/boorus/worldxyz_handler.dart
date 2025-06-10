@@ -132,7 +132,7 @@ class WorldXyzHandler extends BooruHandler {
       thumbnailURL: thumbnailUrl,
       fileHeight: double.tryParse(current['height']?.toString() ?? ''),
       fileWidth: double.tryParse(current['width']?.toString() ?? ''),
-      tagsList: [],
+      tagsList: const [],
       postURL: makePostURL(id),
       serverId: id,
       // use views as score, people don't rate stuff here often

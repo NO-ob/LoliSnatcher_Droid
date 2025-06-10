@@ -462,8 +462,8 @@ class SearchHandler {
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   Booru get currentBooru => currentTab.selectedBooru.value;
   Rxn<List<Booru>?> get currentSecondaryBoorus => currentTab.secondaryBoorus;
-  List<BooruItem> get currentSelected => currentTab.selected;
-  List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
+  RxList<BooruItem> get currentSelected => currentTab.selected;
+  RxList<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
   void filterCurrentFetched() {
     if (list.isNotEmpty) {
       currentBooruHandler.filterFetched();
@@ -475,7 +475,7 @@ class SearchHandler {
     fileURL: '',
     sampleURL: '',
     thumbnailURL: '',
-    tagsList: [],
+    tagsList: const [],
     postURL: '',
   ).obs;
 
@@ -488,7 +488,7 @@ class SearchHandler {
             fileURL: '',
             sampleURL: '',
             thumbnailURL: '',
-            tagsList: [],
+            tagsList: const [],
             postURL: '',
           );
     viewedItem.value = newItem;
@@ -500,89 +500,6 @@ class SearchHandler {
     // print('old $oldIndex | new $newIndex index \n new item ${newItem.toString()}');
 
     return newItem;
-  }
-
-  Future<bool?> toggleItemFavourite(
-    int itemIndex, {
-    bool? forcedValue,
-    bool skipSnatching = false,
-  }) async {
-    final BooruItem item = currentFetched[itemIndex];
-    if (item.isFavourite.value != null) {
-      if (item.tagsList.isEmpty || item.mediaType.value.isNeedToLoadItem) {
-        // try to update the item before favouriting, do nothing on fail
-        if (!currentBooruHandler.hasLoadItemSupport) {
-          return item.isFavourite.value;
-        }
-
-        final res = await currentBooruHandler.loadItem(item: item);
-        if (res.failed ||
-            res.item == null ||
-            res.item!.tagsList.isEmpty ||
-            res.item!.mediaType.value.isNeedToLoadItem) {
-          return item.isFavourite.value;
-        }
-      }
-
-      if (forcedValue == null) {
-        await ServiceHandler.vibrate();
-      }
-
-      final bool newValue = forcedValue ?? (item.isFavourite.value == true ? false : true);
-      item.isFavourite.value = newValue;
-
-      final SettingsHandler settingsHandler = SettingsHandler.instance;
-      if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue && item.isSnatched.value != true) {
-        SnatchHandler.instance.queue(
-          [item],
-          currentBooru,
-          settingsHandler.snatchCooldown,
-          false,
-        );
-      }
-      await settingsHandler.dbHandler.updateBooruItem(
-        item,
-        BooruUpdateMode.local,
-      );
-
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        // update filtered items list in case user has favourites filter enabled
-        await Future.delayed(const Duration(milliseconds: 200));
-        filterCurrentFetched();
-      });
-    }
-    return item.isFavourite.value;
-  }
-
-  Future<void> updateFavForMultipleItems(
-    List<BooruItem> items, {
-    required bool newValue,
-    bool skipSnatching = false,
-  }) async {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue) {
-      SnatchHandler.instance.queue(
-        items.where((e) => e.isSnatched.value != true).toList(),
-        currentBooru,
-        settingsHandler.snatchCooldown,
-        false,
-      );
-    }
-
-    for (final BooruItem item in items) {
-      item.isFavourite.value = newValue;
-    }
-
-    await settingsHandler.dbHandler.updateMultipleBooruItems(
-      items,
-      BooruUpdateMode.local,
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // update filtered items list in case user has favourites filter enabled
-      await Future.delayed(const Duration(milliseconds: 200));
-      filterCurrentFetched();
-    });
   }
 
   // runs search on current tab
@@ -1290,10 +1207,93 @@ class SearchTab {
     fileURL: '',
     sampleURL: '',
     thumbnailURL: '',
-    tagsList: [],
+    tagsList: const [],
     postURL: '',
   ).obs;
   RxList<BooruItem> selected = RxList<BooruItem>.from([]);
+
+  Future<bool?> toggleItemFavourite(
+    int itemIndex, {
+    bool? forcedValue,
+    bool skipSnatching = false,
+  }) async {
+    final BooruItem item = booruHandler.filteredFetched[itemIndex];
+    if (item.isFavourite.value != null) {
+      if (item.tagsList.isEmpty || item.mediaType.value.isNeedToLoadItem) {
+        // try to update the item before favouriting, do nothing on fail
+        if (!booruHandler.hasLoadItemSupport) {
+          return item.isFavourite.value;
+        }
+
+        final res = await booruHandler.loadItem(item: item);
+        if (res.failed ||
+            res.item == null ||
+            res.item!.tagsList.isEmpty ||
+            res.item!.mediaType.value.isNeedToLoadItem) {
+          return item.isFavourite.value;
+        }
+      }
+
+      if (forcedValue == null) {
+        await ServiceHandler.vibrate();
+      }
+
+      final bool newValue = forcedValue ?? (item.isFavourite.value == true ? false : true);
+      item.isFavourite.value = newValue;
+
+      final SettingsHandler settingsHandler = SettingsHandler.instance;
+      if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue && item.isSnatched.value != true) {
+        SnatchHandler.instance.queue(
+          [item],
+          booruHandler.booru,
+          settingsHandler.snatchCooldown,
+          false,
+        );
+      }
+      await settingsHandler.dbHandler.updateBooruItem(
+        item,
+        BooruUpdateMode.local,
+      );
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // update filtered items list in case user has favourites filter enabled
+        await Future.delayed(const Duration(milliseconds: 200));
+        booruHandler.filterFetched();
+      });
+    }
+    return item.isFavourite.value;
+  }
+
+  Future<void> updateFavForMultipleItems(
+    List<BooruItem> items, {
+    required bool newValue,
+    bool skipSnatching = false,
+  }) async {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue) {
+      SnatchHandler.instance.queue(
+        items.where((e) => e.isSnatched.value != true).toList(),
+        booruHandler.booru,
+        settingsHandler.snatchCooldown,
+        false,
+      );
+    }
+
+    for (final BooruItem item in items) {
+      item.isFavourite.value = newValue;
+    }
+
+    await settingsHandler.dbHandler.updateMultipleBooruItems(
+      items,
+      BooruUpdateMode.local,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // update filtered items list in case user has favourites filter enabled
+      await Future.delayed(const Duration(milliseconds: 200));
+      booruHandler.filterFetched();
+    });
+  }
 
   @override
   String toString() {

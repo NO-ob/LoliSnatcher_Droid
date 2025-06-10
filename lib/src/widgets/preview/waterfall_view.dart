@@ -51,9 +51,6 @@ class _WaterfallViewState extends State<WaterfallView> {
 
     viewerHandler.inViewer.value = false;
 
-    // scroll to current viewed item
-    searchHandler.viewedIndex.addListener(viewedIndexListener);
-
     // listen to current tab change to restore the scroll value
     searchHandler.index.addListener(tabIndexListener);
 
@@ -78,15 +75,6 @@ class _WaterfallViewState extends State<WaterfallView> {
     );
 
     isStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
-  }
-
-  void viewedIndexListener() {
-    if (isMobile) {
-      jumpTo(searchHandler.viewedIndex.value);
-    } else {
-      // don't auto scroll on viewed index change on desktop
-      // call jumpTo only when viewed item is possibly out of view (i.e. selected by arrow keys)
-    }
   }
 
   void tabIdListener() {
@@ -166,7 +154,6 @@ class _WaterfallViewState extends State<WaterfallView> {
 
   @override
   void dispose() {
-    searchHandler.viewedIndex.removeListener(viewedIndexListener);
     searchHandler.index.removeListener(tabIndexListener);
     searchHandler.tabId.removeListener(tabIdListener);
     searchHandler.isLoading.removeListener(isLoadingListener);
@@ -220,9 +207,18 @@ class _WaterfallViewState extends State<WaterfallView> {
     });
   }
 
-  Future<void> onTap(int index, BooruItem item) async {
-    // Load the image viewer
+  void onViewerPageChanged(int index) {
+    if (isMobile) {
+      jumpTo(index);
+      final viewedItem = searchHandler.setViewedItem(index);
+      viewerHandler.setCurrent(viewedItem.key);
+    } else {
+      // don't auto scroll on viewed index change on desktop
+      // call jumpTo only when viewed item is possibly out of view (i.e. selected by arrow keys)
+    }
+  }
 
+  Future<void> onTap(int index) async {
     final BooruItem viewedItem = searchHandler.setViewedItem(index);
     viewerHandler.setCurrent(viewedItem.key);
 
@@ -237,7 +233,11 @@ class _WaterfallViewState extends State<WaterfallView> {
 
       await Navigator.of(context).push(
         PageRouteBuilder(
-          pageBuilder: (_, _, _) => GalleryViewPage(index),
+          pageBuilder: (_, _, _) => GalleryViewPage(
+            tab: searchHandler.currentTab,
+            initialIndex: index,
+            onPageChanged: onViewerPageChanged,
+          ),
           opaque: false,
           transitionDuration: const Duration(milliseconds: 300),
           barrierColor: Colors.black26,
@@ -255,6 +255,8 @@ class _WaterfallViewState extends State<WaterfallView> {
         ),
       );
 
+      searchHandler.setViewedItem(-1);
+
       viewerHandler.inViewer.value = false;
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
 
@@ -269,11 +271,12 @@ class _WaterfallViewState extends State<WaterfallView> {
     }
   }
 
-  Future<void> onDoubleTap(int index, BooruItem item) async {
-    await searchHandler.toggleItemFavourite(index);
+  Future<void> onDoubleTap(int index) async {
+    await searchHandler.currentTab.toggleItemFavourite(index);
   }
 
-  Future<void> onLongPress(int index, BooruItem item) async {
+  Future<void> onLongPress(int index) async {
+    final BooruItem item = searchHandler.currentFetched[index];
     await ServiceHandler.vibrate();
 
     if (searchHandler.currentSelected.contains(item)) {
@@ -283,7 +286,8 @@ class _WaterfallViewState extends State<WaterfallView> {
     }
   }
 
-  void onSecondaryTap(int index, BooruItem item) {
+  void onSecondaryTap(int index) {
+    final BooruItem item = searchHandler.currentFetched[index];
     Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
     FlashElements.showSnackbar(
       duration: const Duration(seconds: 2),
@@ -308,6 +312,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
     final bool changedOrientation = MediaQuery.orientationOf(context) != currentOrientation;
     if (changedOrientation && viewerHandler.inViewer.value) {
+      // try to keep the scroll position at currently viewed itemwhen screen orientation changes
       currentOrientation = MediaQuery.orientationOf(context);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         searchHandler.gridScrollController.scrollToIndex(
@@ -382,19 +387,31 @@ class _WaterfallViewState extends State<WaterfallView> {
                                   }
 
                                   if (isStaggered) {
-                                    return StaggeredBuilder(
+                                    return Obx(
+                                      () => StaggeredBuilder(
+                                        tab: searchHandler.currentTab,
+                                        scrollController: searchHandler.gridScrollController,
+                                        highlightedIndex: searchHandler.viewedIndex.value,
+                                        onSelected: onLongPress,
+                                        onTap: onTap,
+                                        onDoubleTap: onDoubleTap,
+                                        onLongPress: onLongPress,
+                                        onSecondaryTap: onSecondaryTap,
+                                      ),
+                                    );
+                                  }
+
+                                  return Obx(
+                                    () => GridBuilder(
+                                      tab: searchHandler.currentTab,
+                                      scrollController: searchHandler.gridScrollController,
+                                      highlightedIndex: searchHandler.viewedIndex.value,
+                                      onSelected: onLongPress,
                                       onTap: onTap,
                                       onDoubleTap: onDoubleTap,
                                       onLongPress: onLongPress,
                                       onSecondaryTap: onSecondaryTap,
-                                    );
-                                  }
-
-                                  return GridBuilder(
-                                    onTap: onTap,
-                                    onDoubleTap: onDoubleTap,
-                                    onLongPress: onLongPress,
-                                    onSecondaryTap: onSecondaryTap,
+                                    ),
                                   );
                                 },
                               ),

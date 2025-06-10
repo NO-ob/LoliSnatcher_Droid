@@ -81,8 +81,7 @@ class ImageViewerState extends State<ImageViewer> {
       ]);
     }
 
-    if (size > 0 && widget.booruItem.fileSize == null) {
-      // set item file size if it wasn't received from api
+    if (size > 0) {
       widget.booruItem.fileSize = size;
     }
   }
@@ -407,6 +406,7 @@ class ImageViewerState extends State<ImageViewer> {
       isTooBig = 2;
     }
     isStopped.value = false;
+    startedAt.value = DateTime.now().millisecondsSinceEpoch;
     await tryToLoadAndUpdateItem(
       widget.booruItem,
       loadItemCancelToken,
@@ -492,8 +492,8 @@ class ImageViewerState extends State<ImageViewer> {
                                   total: total,
                                   received: received,
                                   startedAt: startedAt,
-                                  startAction: onRestart,
-                                  stopAction: onStop,
+                                  onRestart: onRestart,
+                                  onStop: onStop,
                                 );
                               },
                             );

@@ -2,13 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import 'package:equatable/equatable.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
-class BooruItem {
+// ignore: must_be_immutable
+class BooruItem extends Equatable {
   BooruItem({
     required this.fileURL,
     required this.sampleURL,
@@ -137,6 +139,47 @@ class BooruItem {
   String toString() {
     return jsonEncode(toJson());
   }
+
+  @override
+  List<Object?> get props => [
+    key,
+    fileURL,
+    sampleURL,
+    thumbnailURL,
+    postURL,
+    tagsList,
+    mediaType,
+    possibleMediaType,
+    isSnatched,
+    isFavourite,
+    isNoScale,
+    toggleQuality,
+    isUpdated,
+    fileExt,
+    serverId,
+    rating,
+    score,
+    uploaderName,
+    description,
+    md5String,
+    postDate,
+    postDateFormat,
+    fileNameExtras,
+    sources,
+    notes,
+    hasNotes,
+    hasComments,
+    fileWidth,
+    fileHeight,
+    fileAspectRatio,
+    sampleWidth,
+    sampleHeight,
+    sampleAspectRatio,
+    previewWidth,
+    previewHeight,
+    previewAspectRatio,
+    fileSize,
+  ];
 
   static BooruItem fromJSON(String jsonString) {
     final Map<String, dynamic> json = jsonDecode(jsonString);

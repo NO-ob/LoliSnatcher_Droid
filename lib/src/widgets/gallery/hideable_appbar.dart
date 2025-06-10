@@ -38,13 +38,17 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   const HideableAppBar({
+    required this.tab,
     required this.pageController,
-    required this.onOpenDrawer,
+    this.canSelect = true,
+    this.onOpenDrawer,
     super.key,
   });
 
+  final SearchTab tab;
   final PreloadPageController pageController;
-  final VoidCallback onOpenDrawer;
+  final bool canSelect;
+  final VoidCallback? onOpenDrawer;
 
   double get defaultHeight => kToolbarHeight; // 56
 
@@ -56,10 +60,11 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
-  final SearchHandler searchHandler = SearchHandler.instance;
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SnatchHandler snatchHandler = SnatchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
+
+  final ValueNotifier<int> page = ValueNotifier(0);
 
   ImageWriter imageWriter = ImageWriter();
 
@@ -92,7 +97,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   void autoScrollState(bool newState) {
-    final bool isNotLastPage = (searchHandler.viewedIndex.value + 1) < searchHandler.currentFetched.length;
+    final bool isNotLastPage = (page.value + 1) < widget.tab.booruHandler.filteredFetched.length;
     if (autoScroll != newState) {
       if (isNotLastPage) {
         setState(() {
@@ -119,6 +124,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   void pageListener() {
+    page.value = widget.pageController.page?.round() ?? 0;
     if (autoScroll) {
       if (autoScrollTimer?.isActive == true) {
         // reset slideshow timer if user scrolled earlier
@@ -131,11 +137,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   void scrollToNextPage() {
     // Not sure if video and gifs should be autoscrolled, could maybe add a listener for video playtime so it changes at the end
-    final int viewedIndex = searchHandler.viewedIndex.value;
-    final bool isImage = searchHandler.currentFetched[viewedIndex].mediaType.value == MediaType.image;
+    final int viewedIndex = page.value;
+    final bool isImage = widget.tab.booruHandler.filteredFetched[viewedIndex].mediaType.value.isImage;
     // TODO video and gifs support
     // TODO check if item is loaded
-    if (viewedIndex < (searchHandler.currentFetched.length - 1)) {
+    if (viewedIndex < (widget.tab.booruHandler.filteredFetched.length - 1)) {
       if (isImage && autoScroll) {
         widget.pageController.jumpToPage(viewedIndex + 1);
       }
@@ -154,19 +160,19 @@ class _HideableAppBarState extends State<HideableAppBar> {
     final disabled = settingsHandler.disabledButtons;
     final List<String> filteredButtonOrder = settingsHandler.buttonOrder.where((name) {
       if (name == 'info') {
-        // Info button should always be available
-        return true;
+        // Info button should always be available (if onOpenDrawer is present)
+        return widget.onOpenDrawer != null;
       }
 
       if (disabled.contains(name)) {
         return false;
       }
 
-      if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
+      if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
         return false;
       }
 
-      final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+      final item = widget.tab.booruHandler.filteredFetched[page.value];
       final bool isImage = item.mediaType.value.isImageOrAnimation;
       final bool isVideo = item.mediaType.value.isVideo;
 
@@ -177,6 +183,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
           return isImage && !settingsHandler.disableImageScaling;
         case 'toggle_quality':
           return isImage && item.sampleURL != item.fileURL;
+        case 'select':
+          return widget.canSelect;
         case 'external_player':
           return isVideo && Platform.isAndroid;
       }
@@ -226,8 +234,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
       final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn == 'autoscroll') != -1;
       final bool isSelectOverflowed = overFlowList.indexWhere((btn) => btn == 'select') != -1;
 
-      final bool isSelected = searchHandler.currentSelected.contains(
-        searchHandler.currentFetched[searchHandler.viewedIndex.value],
+      final bool isSelected = widget.tab.selected.contains(
+        widget.tab.booruHandler.filteredFetched[page.value],
       );
 
       actions.add(
@@ -292,7 +300,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   Widget buttonIcon(String action) {
     late IconData icon;
 
-    final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+    final item = widget.tab.booruHandler.filteredFetched[page.value];
 
     switch (action) {
       case 'info':
@@ -311,8 +319,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
         // icon = isFav == true ? Icons.favorite : Icons.favorite_border;
         // early return to override with animated icon
         return Obx(() {
-          if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
-            return const Icon(Icons.favorite_border);
+          if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
+            return const Icon(CupertinoIcons.heart_slash);
           }
 
           final bool? isFav = item.isFavourite.value;
@@ -329,57 +337,59 @@ class _HideableAppBarState extends State<HideableAppBar> {
         icon = Icons.share;
         break;
       case 'select':
-        final int selectedIndex = searchHandler.currentSelected.indexOf(item);
-        final bool isSelected = selectedIndex != -1;
+        return Obx(() {
+          final int selectedIndex = widget.tab.selected.indexOf(item);
+          final bool isSelected = selectedIndex != -1;
 
-        // early return to override custom widget
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              height: 24,
-              constraints: const BoxConstraints(
-                minWidth: 20,
-                minHeight: 24,
-                maxHeight: 24,
-              ),
-              alignment: Alignment.center,
-              child: Center(
-                child: isSelected
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 2),
-                        constraints: const BoxConstraints(
-                          minWidth: 20,
-                          maxHeight: 20,
-                        ),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: const BorderRadius.all(Radius.circular(4)),
-                        ),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 20),
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            child: Text(
-                              (selectedIndex + 1).toString(),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Theme.of(context).colorScheme.onSecondary,
-                                fontWeight: FontWeight.bold,
+          // early return to override custom widget
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: 24,
+                constraints: const BoxConstraints(
+                  minWidth: 20,
+                  minHeight: 24,
+                  maxHeight: 24,
+                ),
+                alignment: Alignment.center,
+                child: Center(
+                  child: isSelected
+                      ? Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          constraints: const BoxConstraints(
+                            minWidth: 20,
+                            maxHeight: 20,
+                          ),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.secondary,
+                            borderRadius: const BorderRadius.all(Radius.circular(4)),
+                          ),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 20),
+                            child: FittedBox(
+                              fit: BoxFit.contain,
+                              child: Text(
+                                (selectedIndex + 1).toString(),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.onSecondary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
+                        )
+                      : const Icon(
+                          Icons.check_box_outline_blank,
+                          size: 24,
                         ),
-                      )
-                    : const Icon(
-                        Icons.check_box_outline_blank,
-                        size: 24,
-                      ),
+                ),
               ),
-            ),
-          ],
-        );
+            ],
+          );
+        });
       case 'reloadnoscale':
         icon = Icons.refresh;
         break;
@@ -396,16 +406,16 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   Widget buttonSubicon(String action) {
-    final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+    final item = widget.tab.booruHandler.filteredFetched[page.value];
 
     switch (action) {
       case 'snatch':
         return Obx(() {
-          if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
+          if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
             return const SizedBox.shrink();
           }
 
-          final booru = searchHandler.currentBooru;
+          final booru = widget.tab.booruHandler.booru;
 
           final bool isSnatched = item.isSnatched.value == true;
           if (!isSnatched) {
@@ -427,11 +437,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
   Widget? buttonStackWidget(String name) {
     switch (name) {
       case 'snatch':
-        if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
+        if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
           return null;
         }
 
-        final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+        final item = widget.tab.booruHandler.filteredFetched[page.value];
         final bool isBeingSnatched =
             snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item &&
             snatchHandler.total.value != 0;
@@ -475,11 +485,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
     final String defaultLabel = SettingsHandler.buttonNames[name] ?? '';
     late String label;
 
-    if (searchHandler.viewedIndex.value == -1) {
+    if (page.value == -1) {
       return defaultLabel;
     }
 
-    final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+    final item = widget.tab.booruHandler.filteredFetched[page.value];
 
     switch (name) {
       case 'autoscroll':
@@ -489,7 +499,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         label = item.isFavourite.value == true ? 'Unfavourite' : defaultLabel;
         break;
       case 'select':
-        final bool isSelected = searchHandler.currentSelected.contains(item);
+        final bool isSelected = widget.tab.selected.contains(item);
         label = isSelected ? 'Deselect' : defaultLabel;
         break;
       case 'reloadnoscale':
@@ -510,11 +520,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   Future<void> buttonClick(String action) async {
-    final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+    final item = widget.tab.booruHandler.filteredFetched[page.value];
 
     switch (action) {
       case 'info':
-        widget.onOpenDrawer();
+        widget.onOpenDrawer?.call();
         break;
       case 'open':
         // url to html encoded
@@ -535,35 +545,36 @@ class _HideableAppBarState extends State<HideableAppBar> {
         // call a function to save the currently viewed image when the save button is pressed
         snatchHandler.queue(
           [item],
-          searchHandler.currentBooru,
+          widget.tab.booruHandler.booru,
           settingsHandler.snatchCooldown,
           false,
         );
         if (settingsHandler.favouriteOnSnatch) {
-          await searchHandler.toggleItemFavourite(
-            searchHandler.viewedIndex.value,
+          await widget.tab.toggleItemFavourite(
+            page.value,
             forcedValue: true,
             skipSnatching: true,
           );
         }
         break;
       case 'favourite':
-        await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
+        await widget.tab.toggleItemFavourite(page.value);
 
         // set viewed item again in case favourites filter is enabled
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          searchHandler.setViewedItem(searchHandler.viewedIndex.value);
+          widget.tab.viewedIndex.value = page.value;
+          widget.tab.viewedItem.value = widget.tab.booruHandler.filteredFetched[page.value];
         });
         break;
       case 'share':
         onShareClick();
         break;
       case 'select':
-        final bool isSelected = searchHandler.currentSelected.contains(item);
+        final bool isSelected = widget.tab.selected.contains(item);
         if (isSelected) {
-          searchHandler.currentTab.selected.remove(item);
+          widget.tab.selected.remove(item);
         } else {
-          searchHandler.currentTab.selected.add(item);
+          widget.tab.selected.add(item);
         }
         break;
       case 'reloadnoscale':
@@ -590,7 +601,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         await showDialog(
           context: context,
           builder: (BuildContext context) {
-            final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+            final item = widget.tab.booruHandler.filteredFetched[page.value];
 
             return SettingsDialog(
               title: const Text('Snatch?'),
@@ -626,13 +637,13 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
                       snatchHandler.queue(
                         [item],
-                        searchHandler.currentBooru,
+                        widget.tab.booruHandler.booru,
                         settingsHandler.snatchCooldown,
                         true,
                       );
                       if (settingsHandler.favouriteOnSnatch) {
-                        await searchHandler.toggleItemFavourite(
-                          searchHandler.viewedIndex.value,
+                        await widget.tab.toggleItemFavourite(
+                          page.value,
                           forcedValue: true,
                           skipSnatching: true,
                         );
@@ -655,8 +666,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
     final String shareSetting = settingsHandler.shareAction;
     switch (shareSetting) {
       case 'Post URL':
-        if (searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL != '') {
-          shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
+        if (widget.tab.booruHandler.filteredFetched[page.value].postURL != '') {
+          shareTextAction(widget.tab.booruHandler.filteredFetched[page.value].postURL);
         } else {
           FlashElements.showSnackbar(
             context: context,
@@ -668,10 +679,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
         }
         break;
       case 'File URL':
-        shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].fileURL);
+        shareTextAction(widget.tab.booruHandler.filteredFetched[page.value].fileURL);
         break;
       case 'Hydrus':
-        shareHydrusAction(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
+        shareHydrusAction(widget.tab.booruHandler.filteredFetched[page.value]);
         break;
       case 'File':
         shareFileAction();
@@ -757,7 +768,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   Future<void> shareFileAction() async {
-    final BooruItem item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+    final BooruItem item = widget.tab.booruHandler.filteredFetched[page.value];
 
     final bool alreadyLoading = sharedItem != null;
     final bool alreadyLoadingSame = alreadyLoading && sharedItem == item;
@@ -792,7 +803,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                           height: thumbHeight,
                           child: ThumbnailBuild(
                             item: sharedItem!,
-                            booru: searchHandler.currentBooru,
+                            handler: widget.tab.booruHandler,
                             selectable: false,
                           ),
                         ),
@@ -814,7 +825,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                             height: thumbHeight,
                             child: ThumbnailBuild(
                               item: item,
-                              booru: searchHandler.currentBooru,
+                              handler: widget.tab.booruHandler,
                               selectable: false,
                             ),
                           ),
@@ -900,7 +911,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         cacheFilePath,
         cancelToken: shareCancelToken,
         headers: await Tools.getFileCustomHeaders(
-          searchHandler.currentBooru,
+          widget.tab.booruHandler.booru,
           item: item,
           checkForReferer: true,
         ),
@@ -959,7 +970,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
             const SizedBox(height: 15),
             Column(
               children: [
-                if (searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL != '')
+                if (widget.tab.booruHandler.filteredFetched[page.value].postURL != '')
                   ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -967,7 +978,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     ),
                     onTap: () {
                       Navigator.of(context).pop();
-                      shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
+                      shareTextAction(widget.tab.booruHandler.filteredFetched[page.value].postURL);
                     },
                     leading: const Icon(CupertinoIcons.link),
                     title: const Text('Post URL'),
@@ -980,7 +991,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   ),
                   onTap: () {
                     Navigator.of(context).pop();
-                    shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].fileURL);
+                    shareTextAction(widget.tab.booruHandler.filteredFetched[page.value].fileURL);
                   },
                   leading: const Icon(CupertinoIcons.link),
                   title: const Text('File URL'),
@@ -999,14 +1010,14 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   title: const Text('File'),
                 ),
                 const SizedBox(height: 15),
-                if (settingsHandler.hasHydrus && searchHandler.currentBooru.type?.isHydrus != true)
+                if (settingsHandler.hasHydrus && widget.tab.booruHandler.booru.type?.isHydrus != true)
                   ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                     ),
                     onTap: () async {
-                      await shareHydrusAction(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
+                      await shareHydrusAction(widget.tab.booruHandler.filteredFetched[page.value]);
                       Navigator.of(context).pop();
                     },
                     leading: const Icon(Icons.file_present),
@@ -1038,6 +1049,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
     viewerHandler.displayAppbar.addListener(appbarListener);
 
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => pageListener(),
+    );
     widget.pageController.addListener(pageListener);
 
     autoScrollProgressController = TimedProgressController(
@@ -1090,34 +1104,38 @@ class _HideableAppBarState extends State<HideableAppBar> {
           color: Colors.transparent,
           height: viewerHandler.displayAppbar.value ? (isOnTop ? null : (widget.defaultHeight + extraPadding)) : 0,
           padding: isOnTop ? null : EdgeInsets.only(bottom: extraPadding),
-          child: Obx(
-            () => AppBar(
-              // toolbarHeight: widget.defaultHeight,
-              elevation: searchHandler.viewedIndex.value == 0
-                  ? 0
-                  : 0, // hack to force restate to rebuild actions // set to zero to disable a shadow behind
-              backgroundColor: Colors.transparent,
-              foregroundColor: Colors.white,
-              shadowColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              leading: IconButton(
-                // to ignore icon change
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              title: FittedBox(
-                fit: BoxFit.fitWidth,
-                child: Obx(() {
-                  final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
-                  final String formattedTotal = searchHandler.currentFetched.length.toString();
-                  return Text(
-                    '$formattedViewedIndex/$formattedTotal',
-                    style: const TextStyle(color: Colors.white),
-                  );
-                }),
-              ),
-              actions: getActions(),
-            ),
+          child: ValueListenableBuilder(
+            valueListenable: page,
+            builder: (context, page, _) {
+              return AppBar(
+                // toolbarHeight: widget.defaultHeight,
+                elevation: 0,
+                backgroundColor: Colors.transparent,
+                foregroundColor: Colors.white,
+                shadowColor: Colors.transparent,
+                surfaceTintColor: Colors.transparent,
+                leading: IconButton(
+                  // to ignore icon change
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                title: FittedBox(
+                  fit: BoxFit.fitWidth,
+                  child: ValueListenableBuilder(
+                    valueListenable: widget.tab.booruHandler.filteredFetched,
+                    builder: (_, fetched, _) {
+                      final String formattedViewedIndex = (page + 1).toString();
+                      final String formattedTotal = fetched.length.toString();
+                      return Text(
+                        '$formattedViewedIndex/$formattedTotal',
+                        style: const TextStyle(color: Colors.white),
+                      );
+                    },
+                  ),
+                ),
+                actions: getActions(),
+              );
+            },
           ),
         ),
       ),

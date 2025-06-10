@@ -204,6 +204,7 @@ class _MainAppState extends State<MainApp> {
                     themeMode: themeMode,
                     navigatorKey: navigationHandler.navigatorKey,
                     navigatorObservers: [
+                      navigationHandler.routeObserver,
                       TalkerRouteObserver(Logger.talker),
                     ],
                     home: const Home(),
