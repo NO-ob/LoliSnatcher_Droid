@@ -145,6 +145,8 @@ class ThumbnailBuild extends StatelessWidget {
 
                       // Favourites/Downloads booru
                       Booru? getMergeBooruEntry() {
+                        if (handler is! MergebooruHandler) return null;
+
                         final fetchedMap = (handler! as MergebooruHandler).fetchedMap;
                         for (int i = 0; i < fetchedMap.entries.length; i++) {
                           final entry = fetchedMap.entries.elementAt(i);
@@ -155,11 +157,11 @@ class ThumbnailBuild extends StatelessWidget {
                         return null;
                       }
 
-                      final booru = getMergeBooruEntry();
-                      final bool isMergeEntryFromFavsOrDls =
-                          handler is MergebooruHandler &&
-                          (booru?.type?.isFavourites == true || booru?.type?.isDownloads == true);
-                      if (handler is FavouritesHandler || handler is DownloadsHandler || isMergeEntryFromFavsOrDls) {
+                      final bool isFavsOrDls =
+                          handler is FavouritesHandler ||
+                          handler is DownloadsHandler ||
+                          getMergeBooruEntry()?.type?.isFavouritesOrDownloads == true;
+                      if (isFavsOrDls) {
                         final itemFileHost = Uri.tryParse(item.fileURL)?.host;
                         final itemPostHost = Uri.tryParse(item.postURL)?.host;
                         final Booru? possibleBooru = settingsHandler.booruList.firstWhereOrNull((e) {
@@ -175,7 +177,7 @@ class ThumbnailBuild extends StatelessWidget {
                                   booruHost.isNotEmpty == true &&
                                   itemPostHost.contains(booruHost));
                         });
-                        if (possibleBooru?.type?.isFavourites != true && possibleBooru?.type?.isDownloads != true) {
+                        if (possibleBooru?.type?.isFavouritesOrDownloads != true) {
                           final possibleFaviconUrl =
                               possibleBooru?.faviconURL ??
                               (itemPostHost != null ? 'https://$itemPostHost/favicon.ico' : null);
