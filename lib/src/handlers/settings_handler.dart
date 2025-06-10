@@ -132,19 +132,34 @@ class SettingsHandler {
 
   Duration cacheDuration = Duration.zero;
 
-  static const List<List<String>> buttonList = [
-    ['autoscroll', 'Slideshow'],
-    ['snatch', 'Save'],
-    ['favourite', 'Favourite'],
-    ['info', 'Display Info'],
-    ['share', 'Share'],
-    ['select', 'Select'],
-    ['open', 'Open in Browser'],
-    ['reloadnoscale', 'Reload w/out scaling'],
-    ['toggle_quality', 'Toggle Quality'],
-    ['external_player', 'External player'],
+  // TODO convert to enum
+  static const List<String> buttonList = [
+    'autoscroll',
+    'snatch',
+    'favourite',
+    'info',
+    'share',
+    'select',
+    'open',
+    'reloadnoscale',
+    'toggle_quality',
+    'external_player',
   ];
-  List<List<String>> buttonOrder = [...buttonList];
+  static const Map<String, String> buttonNames = {
+    'autoscroll': 'Slideshow',
+    'snatch': 'Snatch',
+    'favourite': 'Favourite',
+    'info': 'Info',
+    'share': 'Share',
+    'select': 'Select',
+    'open': 'Open in browser',
+    'reloadnoscale': 'Reload w/out scaling',
+    'toggle_quality': 'Toggle quality',
+    'external_player': 'External player',
+  };
+  static final List<String> disableableButtonList = buttonList.where((e) => e != 'info').toList();
+  List<String> buttonOrder = [...buttonList];
+  List<String> disabledButtons = [];
 
   bool jsonWrite = false;
   bool autoPlayEnabled = true;
@@ -680,8 +695,17 @@ class SettingsHandler {
 
     // other
     'buttonOrder': {
-      'type': 'other',
-      'default': <List<String>>[...buttonList],
+      'type': 'stringList',
+      'default': <String>[
+        ...buttonList,
+      ],
+    },
+    'disabledButtons': {
+      'type': 'stringList',
+      'default': <String>[],
+      'options': <String>[
+        ...disableableButtonList,
+      ],
     },
     'cacheDuration': {
       'type': 'duration',
@@ -1035,6 +1059,8 @@ class SettingsHandler {
         return galleryScrollDirection;
       case 'buttonOrder':
         return buttonOrder;
+      case 'disabledButtons':
+        return disabledButtons;
       case 'hatedTags':
         return hatedTags;
       case 'lovedTags':
@@ -1242,10 +1268,12 @@ class SettingsHandler {
         galleryScrollDirection = validatedValue;
         break;
 
-      // TODO special cases
-      // case 'buttonOrder':
-      //   buttonOrder = validatedValue;
-      //   break;
+      case 'buttonOrder':
+        buttonOrder = validatedValue;
+        break;
+      case 'disabledButtons':
+        disabledButtons = validatedValue;
+        break;
       // case 'hatedTags':
       //   hatedTags = validatedValue;
       //   break;
@@ -1549,8 +1577,8 @@ class SettingsHandler {
       'useLockscreen': validateValue('useLockscreen', null, toJSON: true),
       'blurOnLeave': validateValue('blurOnLeave', null, toJSON: true),
 
-      //TODO
-      'buttonOrder': buttonOrder.map((e) => e[0]).toList(),
+      'buttonOrder': validateValue('buttonOrder', null, toJSON: true),
+      'disabledButtons': validateValue('disabledButtons', null, toJSON: true),
       'hatedTags': cleanTagsList(hatedTags),
       'lovedTags': cleanTagsList(lovedTags),
 
@@ -1611,12 +1639,12 @@ class SettingsHandler {
         // print('btnorder is a ${tempBtnOrder.runtimeType} type');
         tempBtnOrder = [];
       }
-      final List<List<String>> btnOrder = List<String>.from(tempBtnOrder)
+      final List<String> btnOrder = List<String>.from(tempBtnOrder)
           .map((bstr) {
-            final List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
+            final String button = buttonList.singleWhere((e) => e == bstr, orElse: () => '');
             return button;
           })
-          .where((el) => el[0] != 'null')
+          .where((el) => el.isNotEmpty)
           .toList();
       btnOrder.addAll(
         buttonList.where(
@@ -1626,7 +1654,35 @@ class SettingsHandler {
       buttonOrder = btnOrder;
     } catch (e, s) {
       Logger.Inst().log(
-        'Failed to parse button order $e',
+        'Failed to parse button order list $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
+    }
+
+    try {
+      final dynamic tempDisabledButtons = json['disabledButtons'];
+      if (tempDisabledButtons is List) {
+        disabledButtons = [...tempDisabledButtons];
+
+        for (final buttonName in disabledButtons) {
+          if (disableableButtonList.any((e) => e == buttonName)) {
+            // do nothing
+          } else {
+            // remove unknown and not allowed to remove buttons
+            tempDisabledButtons.remove(buttonName);
+          }
+        }
+
+        disabledButtons = [...tempDisabledButtons];
+      } else {
+        disabledButtons = [];
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse button disabled list $e',
         'SettingsHandler',
         'loadFromJSON',
         LogTypes.exception,
@@ -1689,7 +1745,14 @@ class SettingsHandler {
     }
 
     final List<String> leftoverKeys = json.keys
-        .where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element))
+        .where(
+          (e) => ![
+            'buttonOrder',
+            'disabledButtons',
+            'hatedTags',
+            'lovedTags',
+          ].contains(e),
+        )
         .toList();
     for (final String key in leftoverKeys) {
       try {

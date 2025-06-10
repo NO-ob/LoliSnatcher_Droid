@@ -438,25 +438,25 @@ class _TagViewState extends State<TagView> {
   Widget infoText(String title, String data, {bool canCopy = true}) {
     if (data.isNotEmpty) {
       return ListTile(
-        onTap: () {
-          if (canCopy) {
-            Clipboard.setData(ClipboardData(text: data));
-            FlashElements.showSnackbar(
-              context: context,
-              duration: const Duration(seconds: 2),
-              title: Text(
-                'Copied $title to clipboard!',
-                style: const TextStyle(fontSize: 20),
-              ),
-              content: Text(
-                data,
-                style: const TextStyle(fontSize: 16),
-              ),
-              leadingIcon: Icons.copy,
-              sideColor: Colors.green,
-            );
-          }
-        },
+        onTap: canCopy
+            ? () {
+                Clipboard.setData(ClipboardData(text: data));
+                FlashElements.showSnackbar(
+                  context: context,
+                  duration: const Duration(seconds: 2),
+                  title: Text(
+                    'Copied $title to clipboard!',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  content: Text(
+                    data,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  leadingIcon: Icons.copy,
+                  sideColor: Colors.green,
+                );
+              }
+            : null,
         title: Row(
           children: [
             Text('$title: ', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
@@ -907,6 +907,7 @@ class _TagViewState extends State<TagView> {
   @override
   Widget build(BuildContext context) {
     final String fileName = Tools.getFileName(item.fileURL);
+    final String fileExt = Tools.getFileExt(item.fileURL);
     final String fileUrl = item.fileURL;
     final String fileRes = (item.fileWidth != null && item.fileHeight != null)
         ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}'
@@ -956,6 +957,7 @@ class _TagViewState extends State<TagView> {
                 [
                   if (settingsHandler.isDebug.value) infoText('Filename', fileName),
                   infoText('URL', fileUrl),
+                  infoText('Extension', fileExt),
                   infoText('Post URL', item.postURL),
                   infoText('ID', itemId),
                   infoText('Rating', rating),
@@ -1398,52 +1400,46 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                   );
                                 }
 
-                                return Container(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  height: 180,
-                                  width: 120,
-                                  child: Stack(
-                                    children: [
-                                      ThumbnailBuild(
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: Container(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    height: 180,
+                                    width: 120,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(4),
+                                      onTap: () {
+                                        ViewerHandler.instance.pauseAllVideos();
+                                        Navigator.of(context).push(
+                                          PageRouteBuilder(
+                                            pageBuilder: (_, _, _) => ItemViewerPage(
+                                              items: preview!.booruHandler.filteredFetched,
+                                              initialIndex: index,
+                                              booru: preview!.booruHandler.booru,
+                                            ),
+                                            opaque: false,
+                                            transitionDuration: const Duration(milliseconds: 300),
+                                            barrierColor: Colors.black26,
+                                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                              return const ZoomPageTransitionsBuilder().buildTransitions(
+                                                MaterialPageRoute(
+                                                  builder: (_) => const SizedBox.shrink(),
+                                                ),
+                                                context,
+                                                animation,
+                                                secondaryAnimation,
+                                                child,
+                                              );
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      child: ThumbnailBuild(
                                         item: preview!.booruHandler.filteredFetched[index],
                                         booru: preview!.booruHandler.booru,
                                         selectable: false,
                                       ),
-                                      Positioned.fill(
-                                        child: Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            borderRadius: BorderRadius.circular(4),
-                                            onTap: () {
-                                              ViewerHandler.instance.pauseAllVideos();
-                                              Navigator.of(context).push(
-                                                PageRouteBuilder(
-                                                  pageBuilder: (_, _, _) => ItemViewerPage(
-                                                    items: preview!.booruHandler.filteredFetched,
-                                                    initialIndex: index,
-                                                    booru: preview!.booruHandler.booru,
-                                                  ),
-                                                  opaque: false,
-                                                  transitionDuration: const Duration(milliseconds: 300),
-                                                  barrierColor: Colors.black26,
-                                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                                    return const ZoomPageTransitionsBuilder().buildTransitions(
-                                                      MaterialPageRoute(
-                                                        builder: (_) => const SizedBox.shrink(),
-                                                      ),
-                                                      context,
-                                                      animation,
-                                                      secondaryAnimation,
-                                                      child,
-                                                    );
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 );
                               },
