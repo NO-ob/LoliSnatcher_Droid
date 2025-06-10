@@ -30,7 +30,8 @@ class _GalleryPageState extends State<GalleryPage> {
       zoomButtonPosition,
       changePageButtonsPosition;
 
-  List<List<String>>? buttonOrder;
+  late final List<String> buttonOrder;
+  late final List<String> disabledButtons;
 
   final TextEditingController preloadAmountController = TextEditingController();
   final TextEditingController preloadSizeController = TextEditingController();
@@ -45,6 +46,9 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryMode = settingsHandler.galleryMode;
     galleryBarPosition = settingsHandler.galleryBarPosition;
     buttonOrder = settingsHandler.buttonOrder;
+    disabledButtons = [
+      ...settingsHandler.disabledButtons,
+    ];
     galleryScrollDirection = settingsHandler.galleryScrollDirection;
 
     shareAction = settingsHandler.shareAction;
@@ -85,7 +89,8 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.autoHideImageBar = autoHideImageBar;
     settingsHandler.galleryMode = galleryMode;
     settingsHandler.galleryBarPosition = galleryBarPosition;
-    settingsHandler.buttonOrder = buttonOrder!;
+    settingsHandler.buttonOrder = buttonOrder;
+    settingsHandler.disabledButtons = disabledButtons;
     settingsHandler.galleryScrollDirection = galleryScrollDirection;
     settingsHandler.shareAction = shareAction;
     settingsHandler.zoomButtonPosition = zoomButtonPosition;
@@ -278,6 +283,20 @@ class _GalleryPageState extends State<GalleryPage> {
                       const Expanded(child: Text('Toolbar buttons order')),
                       IconButton(
                         icon: Icon(
+                          Icons.refresh,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            buttonOrder.clear();
+                            buttonOrder.addAll(settingsHandler.map['buttonOrder']!['default']);
+                            disabledButtons.clear();
+                            disabledButtons.addAll(settingsHandler.map['disabledButtons']!['default']);
+                          });
+                        },
+                      ),
+                      IconButton(
+                        icon: Icon(
                           Icons.help_outline,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
@@ -319,34 +338,83 @@ class _GalleryPageState extends State<GalleryPage> {
                       physics: const NeverScrollableScrollPhysics(),
                       buildDefaultDragHandles: false,
                       children: [
-                        for (int index = 0; index < buttonOrder!.length; index++)
+                        for (int index = 0; index < buttonOrder.length; index++)
                           ReorderableDelayedDragStartListener(
-                            key: ValueKey('item-#$index'),
+                            key: ValueKey('item-${buttonOrder[index]}'),
                             index: index,
-                            child: ListTile(
-                              onTap: () {
-                                FlashElements.showSnackbar(
-                                  context: context,
-                                  title: const Text(
-                                    'Long press to move items',
-                                    style: TextStyle(fontSize: 20),
+                            child: Builder(
+                              builder: (context) {
+                                final name = buttonOrder[index];
+                                final title = SettingsHandler.buttonNames[name] ?? '';
+
+                                final bool isInfo = name == 'info';
+
+                                final bool isActive = !disabledButtons.contains(name) || isInfo;
+
+                                return ListTile(
+                                  onTap: () {
+                                    if (!isInfo) {
+                                      setState(() {
+                                        if (isActive) {
+                                          disabledButtons.add(name);
+                                        } else {
+                                          disabledButtons.remove(name);
+                                        }
+                                      });
+                                    }
+
+                                    FlashElements.showSnackbar(
+                                      context: context,
+                                      title: const Text(
+                                        'Long press to move items',
+                                        style: TextStyle(fontSize: 20),
+                                      ),
+                                      key: 'toolbar-button-order',
+                                      isKeyUnique: true,
+                                      leadingIcon: Icons.warning_amber,
+                                      leadingIconColor: Colors.yellow,
+                                      sideColor: Colors.yellow,
+                                    );
+                                  },
+                                  key: Key('item-$name'),
+                                  tileColor: index.isOdd ? oddItemColor : evenItemColor,
+                                  title: Text(title),
+                                  leading: Opacity(
+                                    opacity: isInfo ? 0.5 : 1,
+                                    child: Checkbox(
+                                      key: Key('checkbox-$name'),
+                                      value: isActive,
+                                      onChanged: (_) {
+                                        if (isInfo) {
+                                          FlashElements.showSnackbar(
+                                            title: const Text(
+                                              'This button cannot be disabled',
+                                              style: TextStyle(fontSize: 20),
+                                            ),
+                                          );
+                                          return;
+                                        }
+
+                                        setState(() {
+                                          if (isActive) {
+                                            disabledButtons.add(name);
+                                          } else {
+                                            disabledButtons.remove(name);
+                                          }
+                                        });
+                                      },
+                                    ),
                                   ),
-                                  leadingIcon: Icons.warning_amber,
-                                  leadingIconColor: Colors.yellow,
-                                  sideColor: Colors.yellow,
+                                  trailing: ReorderableDragStartListener(
+                                    key: Key('draghandle-#${buttonOrder[index]}'),
+                                    index: index,
+                                    child: const IconButton(
+                                      onPressed: null,
+                                      icon: Icon(Icons.drag_handle),
+                                    ),
+                                  ),
                                 );
                               },
-                              key: Key('$index'),
-                              tileColor: index.isOdd ? oddItemColor : evenItemColor,
-                              title: Text(buttonOrder![index][1]),
-                              trailing: ReorderableDragStartListener(
-                                key: Key('draghandle-#$index'),
-                                index: index,
-                                child: const IconButton(
-                                  onPressed: null,
-                                  icon: Icon(Icons.drag_handle),
-                                ),
-                              ),
                             ),
                           ),
                       ],
@@ -355,8 +423,8 @@ class _GalleryPageState extends State<GalleryPage> {
                           if (oldIndex < newIndex) {
                             newIndex -= 1;
                           }
-                          final List<String> item = buttonOrder!.removeAt(oldIndex);
-                          buttonOrder!.insert(newIndex, item);
+                          final String item = buttonOrder.removeAt(oldIndex);
+                          buttonOrder.insert(newIndex, item);
                         });
                       },
                     ),

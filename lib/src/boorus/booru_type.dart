@@ -103,4 +103,5 @@ enum BooruType {
   bool get isMerge => this == BooruType.Merge;
   bool get isDownloads => this == BooruType.Downloads;
   bool get isFavourites => this == BooruType.Favourites;
+  bool get isFavouritesOrDownloads => isFavourites || isDownloads;
 }

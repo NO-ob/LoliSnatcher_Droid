@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
 import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
@@ -145,7 +144,9 @@ class ThumbnailBuild extends StatelessWidget {
                       }
 
                       // Favourites/Downloads booru
-                      Booru? getMergeEntryBooru() {
+                      Booru? getMergeBooruEntry() {
+                        if (handler is! MergebooruHandler) return null;
+
                         final fetchedMap = (handler! as MergebooruHandler).fetchedMap;
                         for (int i = 0; i < fetchedMap.entries.length; i++) {
                           final entry = fetchedMap.entries.elementAt(i);
@@ -156,10 +157,11 @@ class ThumbnailBuild extends StatelessWidget {
                         return null;
                       }
 
-                      final bool isMergeEntryFromFavsOrDls =
-                          handler is MergebooruHandler &&
-                          [BooruType.Favourites, BooruType.Downloads].contains(getMergeEntryBooru()?.type);
-                      if (handler is FavouritesHandler || handler is DownloadsHandler || isMergeEntryFromFavsOrDls) {
+                      final bool isFavsOrDls =
+                          handler is FavouritesHandler ||
+                          handler is DownloadsHandler ||
+                          getMergeBooruEntry()?.type?.isFavouritesOrDownloads == true;
+                      if (isFavsOrDls) {
                         final itemFileHost = Uri.tryParse(item.fileURL)?.host;
                         final itemPostHost = Uri.tryParse(item.postURL)?.host;
                         final Booru? possibleBooru = settingsHandler.booruList.firstWhereOrNull((e) {
@@ -175,7 +177,7 @@ class ThumbnailBuild extends StatelessWidget {
                                   booruHost.isNotEmpty == true &&
                                   itemPostHost.contains(booruHost));
                         });
-                        if (possibleBooru?.type != BooruType.Favourites && possibleBooru?.type != BooruType.Downloads) {
+                        if (possibleBooru?.type?.isFavouritesOrDownloads != true) {
                           final possibleFaviconUrl =
                               possibleBooru?.faviconURL ??
                               (itemPostHost != null ? 'https://$itemPostHost/favicon.ico' : null);

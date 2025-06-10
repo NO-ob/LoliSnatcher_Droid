@@ -150,13 +150,27 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
             DismissDirection.startToEnd: 0.3,
             DismissDirection.endToStart: 0.3,
           }, // Amount of swiped away which triggers dismiss
-          onUpdate: (dismissUpdateDetails) => dismissProgress.value =
-              (dismissUpdateDetails.progress * (1 / (settingsHandler.galleryScrollDirection == 'Vertical' ? 0.3 : 0.2)))
-                  .clamp(0, 1),
+          onUpdate: (dismissUpdateDetails) {
+            final prevValue = dismissProgress.value;
+            dismissProgress.value =
+                (dismissUpdateDetails.progress *
+                        (1 / (settingsHandler.galleryScrollDirection == 'Vertical' ? 0.3 : 0.2)))
+                    .clamp(0, 1);
+
+            if (prevValue != dismissProgress.value && dismissProgress.value == 1) {
+              ServiceHandler.vibrate();
+            }
+          },
           onDismissed: (_) => Navigator.of(context).pop(),
           child: ValueListenableBuilder(
             valueListenable: dismissProgress,
             builder: (context, dismissProgress, child) {
+              if (dismissProgress == 0) {
+                viewerHandler.showExtraUi();
+              } else {
+                viewerHandler.hideExtraUi();
+              }
+
               return Transform.scale(
                 scale: isOpeningAnimation
                     ? 1

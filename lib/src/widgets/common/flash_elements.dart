@@ -36,7 +36,7 @@ class FlashElements {
   static void cleanAllDisposedControllers() {
     for (final controllers in controllersMap.values) {
       controllers.removeWhere(
-        (c) => c is DefaultFlashController ? !c.isDisposed : !(c as FlashController).controller.isDismissed,
+        (c) => c is DefaultFlashController ? c.isDisposed : (c as FlashController).controller.isDismissed,
       );
     }
   }
@@ -44,7 +44,7 @@ class FlashElements {
   static bool keyHasActiveControllers(String key) {
     return controllersMap.containsKey(key) &&
         controllersMap[key]!.isNotEmpty &&
-        !controllersMap[key]!.every(
+        controllersMap[key]!.any(
           (c) => c is DefaultFlashController ? !c.isDisposed : !(c as FlashController).controller.isDismissed,
         );
   }
@@ -150,14 +150,15 @@ class FlashElements {
     cleanAllDisposedControllers();
     if (isKeyUnique && keyHasActiveControllers(usedKey)) {
       bool found = false;
-      for (final c in controllersMap[usedKey]!) {
+      final controllers = controllersMap[usedKey] ?? [];
+      for (final c in controllers) {
         try {
           if (c is DefaultFlashController ? !c.isDisposed : !(c as FlashController).controller.isDismissed) {
             unawaited(c.dismiss());
             found = true;
           }
         } catch (_) {
-          // exception (probably when accessing the animation controller when it's already disposed), try to dismiss again
+          // exception (probably when accessing the animation controller when it's already disposed), try to dismiss
           try {
             unawaited(c.dismiss());
             found = true;

@@ -8,7 +8,6 @@ import 'package:fpdart/fpdart.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:html/parser.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
@@ -41,12 +40,6 @@ abstract class BooruHandler {
   List failedItems = [];
 
   Map<String, TagType> get tagTypeMap => {};
-  Map<String, String> get tagModifierMap => {
-    'rating:': 'R',
-    'artist:': 'A',
-    'order:': 'O',
-    'sort:': 'S',
-  };
 
   RxList<BooruItem> fetched = RxList<BooruItem>([]);
   RxList<BooruItem> filteredFetched = RxList<BooruItem>([]);
@@ -70,12 +63,12 @@ abstract class BooruHandler {
         continue;
       }
 
-      final bool filterFavourites = settingsHandler.filterFavourites && booru.type != BooruType.Favourites;
+      final bool filterFavourites = settingsHandler.filterFavourites && booru.type?.isFavourites != true;
       if (filterFavourites && item.isFavourite.value == true) {
         continue;
       }
 
-      final bool filterSnatched = settingsHandler.filterSnatched && booru.type != BooruType.Downloads;
+      final bool filterSnatched = settingsHandler.filterSnatched && booru.type?.isDownloads != true;
       if (filterSnatched && item.isSnatched.value == true) {
         continue;
       }

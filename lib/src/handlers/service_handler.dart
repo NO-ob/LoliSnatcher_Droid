@@ -472,7 +472,6 @@ class ServiceHandler {
     return result;
   }
 
-  // ignore: avoid_void_async
   static Future<void> vibrate({
     bool flutterWay = false,
     int duration = 10,

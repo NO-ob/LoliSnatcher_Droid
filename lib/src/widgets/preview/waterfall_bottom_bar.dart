@@ -19,7 +19,6 @@ import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/data/meta_tag.dart';
@@ -1389,7 +1388,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 Navigator.of(context).pop();
               },
             ),
-            if (searchHandler.currentBooru.type != BooruType.Merge) TagContentPreview(tag: tag.tag),
+            if (searchHandler.currentBooru.type?.isMerge != true) TagContentPreview(tag: tag.tag),
             ListTile(
               title: const Text('Copy'),
               leading: const Icon(Icons.copy),

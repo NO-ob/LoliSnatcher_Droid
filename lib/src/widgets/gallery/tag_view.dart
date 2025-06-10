@@ -13,7 +13,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
@@ -70,22 +69,32 @@ class _TagViewState extends State<TagView> {
   CancelToken? cancelToken;
   bool loadingUpdate = false, failedUpdate = false;
 
+  Timer? sortTimer;
+
   @override
   void initState() {
     super.initState();
-    searchHandler.searchTextController.addListener(parseSortGroupTags);
+    searchHandler.searchTextController.addListener(parseSortGroupTagsWithoutCache);
 
     searchFocusNode.addListener(searchFocusListener);
 
     item = searchHandler.viewedItem.value;
-    // copy tags to avoid changing the original array
     tags = [...item.tagsList];
     filteredTags = [...tags];
     WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
 
     searchHandler.viewedItem.addListener(itemListener);
 
-    reloadItemData(initial: true);
+    reloadItemData(initial: true).then((_) async {
+      await Future.delayed(const Duration(seconds: 3));
+      if (mounted) {
+        parseSortGroupTagsWithoutCache();
+        sortTimer = Timer.periodic(
+          const Duration(seconds: 5),
+          (_) => parseSortGroupTagsWithoutCache(),
+        );
+      }
+    });
   }
 
   void itemListener() {
@@ -96,7 +105,8 @@ class _TagViewState extends State<TagView> {
   @override
   void dispose() {
     cancelToken?.cancel();
-    searchHandler.searchTextController.removeListener(parseSortGroupTags);
+    sortTimer?.cancel();
+    searchHandler.searchTextController.removeListener(parseSortGroupTagsWithoutCache);
     searchController.dispose();
     searchFocusNode.removeListener(searchFocusListener);
     searchFocusNode.dispose();
@@ -195,10 +205,18 @@ class _TagViewState extends State<TagView> {
     }
   }
 
-  void parseSortGroupTags() {
+  void parseSortGroupTagsWithoutCache() {
+    parseSortGroupTags(updateCache: false);
+  }
+
+  void parseSortGroupTags({
+    bool updateCache = true,
+  }) {
     parseTags();
     sortAndGroupTagsList();
-    cacheTabMatchData();
+    if (updateCache) {
+      cacheTabMatchData();
+    }
     setState(() {});
   }
 
@@ -420,25 +438,25 @@ class _TagViewState extends State<TagView> {
   Widget infoText(String title, String data, {bool canCopy = true}) {
     if (data.isNotEmpty) {
       return ListTile(
-        onTap: () {
-          if (canCopy) {
-            Clipboard.setData(ClipboardData(text: data));
-            FlashElements.showSnackbar(
-              context: context,
-              duration: const Duration(seconds: 2),
-              title: Text(
-                'Copied $title to clipboard!',
-                style: const TextStyle(fontSize: 20),
-              ),
-              content: Text(
-                data,
-                style: const TextStyle(fontSize: 16),
-              ),
-              leadingIcon: Icons.copy,
-              sideColor: Colors.green,
-            );
-          }
-        },
+        onTap: canCopy
+            ? () {
+                Clipboard.setData(ClipboardData(text: data));
+                FlashElements.showSnackbar(
+                  context: context,
+                  duration: const Duration(seconds: 2),
+                  title: Text(
+                    'Copied $title to clipboard!',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  content: Text(
+                    data,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  leadingIcon: Icons.copy,
+                  sideColor: Colors.green,
+                );
+              }
+            : null,
         title: Row(
           children: [
             Text('$title: ', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
@@ -497,7 +515,7 @@ class _TagViewState extends State<TagView> {
             ),
             const SizedBox(height: 10),
             //
-            if (searchHandler.currentBooru.type != BooruType.Merge) TagContentPreview(tag: tag),
+            if (searchHandler.currentBooru.type?.isMerge != true) TagContentPreview(tag: tag),
             //
             ListTile(
               leading: Icon(
@@ -595,7 +613,7 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.addTagToList('loved', tag);
                   searchHandler.filterCurrentFetched();
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop(true);
                 },
               ),
@@ -606,7 +624,7 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.addTagToList('hated', tag);
                   searchHandler.filterCurrentFetched();
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
               ),
@@ -619,7 +637,7 @@ class _TagViewState extends State<TagView> {
                 title: const Text('Remove from Loved'),
                 onTap: () {
                   settingsHandler.removeTagFromList('loved', tag);
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
               ),
@@ -632,7 +650,7 @@ class _TagViewState extends State<TagView> {
                 title: const Text('Remove from Hated'),
                 onTap: () {
                   settingsHandler.removeTagFromList('hated', tag);
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
               ),
@@ -653,12 +671,12 @@ class _TagViewState extends State<TagView> {
                       if (newValue != null && item.tagType != newValue) {
                         item.tagType = newValue;
                         tagHandler.putTag(item, dbEnabled: settingsHandler.dbEnabled);
-                        parseSortGroupTags();
+                        parseSortGroupTagsWithoutCache();
                       }
                     },
                   ),
                 );
-                parseSortGroupTags();
+                parseSortGroupTagsWithoutCache();
               },
             ),
             //
@@ -832,6 +850,8 @@ class _TagViewState extends State<TagView> {
                     onPressed: () {
                       searchHandler.addTabByString(currentTag);
 
+                      parseSortGroupTags();
+
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
@@ -864,7 +884,6 @@ class _TagViewState extends State<TagView> {
                           );
                         },
                       );
-                      parseSortGroupTags();
                     },
                   ),
                 ),
@@ -888,6 +907,7 @@ class _TagViewState extends State<TagView> {
   @override
   Widget build(BuildContext context) {
     final String fileName = Tools.getFileName(item.fileURL);
+    final String fileExt = Tools.getFileExt(item.fileURL);
     final String fileUrl = item.fileURL;
     final String fileRes = (item.fileWidth != null && item.fileHeight != null)
         ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}'
@@ -937,6 +957,7 @@ class _TagViewState extends State<TagView> {
                 [
                   if (settingsHandler.isDebug.value) infoText('Filename', fileName),
                   infoText('URL', fileUrl),
+                  infoText('Extension', fileExt),
                   infoText('Post URL', item.postURL),
                   infoText('ID', itemId),
                   infoText('Rating', rating),
@@ -980,7 +1001,7 @@ class _TagViewState extends State<TagView> {
                           clearable: true,
                           pasteable: true,
                           onChanged: (_) {
-                            parseSortGroupTags();
+                            parseSortGroupTagsWithoutCache();
                           },
                           enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                         ),
@@ -1379,52 +1400,46 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                   );
                                 }
 
-                                return Container(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  height: 180,
-                                  width: 120,
-                                  child: Stack(
-                                    children: [
-                                      ThumbnailBuild(
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: Container(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    height: 180,
+                                    width: 120,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(4),
+                                      onTap: () {
+                                        ViewerHandler.instance.pauseAllVideos();
+                                        Navigator.of(context).push(
+                                          PageRouteBuilder(
+                                            pageBuilder: (_, _, _) => ItemViewerPage(
+                                              items: preview!.booruHandler.filteredFetched,
+                                              initialIndex: index,
+                                              booru: preview!.booruHandler.booru,
+                                            ),
+                                            opaque: false,
+                                            transitionDuration: const Duration(milliseconds: 300),
+                                            barrierColor: Colors.black26,
+                                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                              return const ZoomPageTransitionsBuilder().buildTransitions(
+                                                MaterialPageRoute(
+                                                  builder: (_) => const SizedBox.shrink(),
+                                                ),
+                                                context,
+                                                animation,
+                                                secondaryAnimation,
+                                                child,
+                                              );
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      child: ThumbnailBuild(
                                         item: preview!.booruHandler.filteredFetched[index],
                                         booru: preview!.booruHandler.booru,
                                         selectable: false,
                                       ),
-                                      Positioned.fill(
-                                        child: Material(
-                                          color: Colors.transparent,
-                                          child: InkWell(
-                                            borderRadius: BorderRadius.circular(4),
-                                            onTap: () {
-                                              ViewerHandler.instance.pauseAllVideos();
-                                              Navigator.of(context).push(
-                                                PageRouteBuilder(
-                                                  pageBuilder: (_, _, _) => ItemViewerPage(
-                                                    items: preview!.booruHandler.filteredFetched,
-                                                    initialIndex: index,
-                                                    booru: preview!.booruHandler.booru,
-                                                  ),
-                                                  opaque: false,
-                                                  transitionDuration: const Duration(milliseconds: 300),
-                                                  barrierColor: Colors.black26,
-                                                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                                    return const ZoomPageTransitionsBuilder().buildTransitions(
-                                                      MaterialPageRoute(
-                                                        builder: (_) => const SizedBox.shrink(),
-                                                      ),
-                                                      context,
-                                                      animation,
-                                                      secondaryAnimation,
-                                                      child,
-                                                    );
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 );
                               },

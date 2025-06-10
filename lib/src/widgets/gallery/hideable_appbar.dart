@@ -12,7 +12,6 @@ import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -152,38 +151,42 @@ class _HideableAppBarState extends State<HideableAppBar> {
   ////////// Toolbar Stuff ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   List<Widget> getActions() {
-    final List<List<String>> filteredButtonOrder = settingsHandler.buttonOrder.where((btn) {
+    final disabled = settingsHandler.disabledButtons;
+    final List<String> filteredButtonOrder = settingsHandler.buttonOrder.where((name) {
+      if (name == 'info') {
+        // Info button should always be available
+        return true;
+      }
+
+      if (disabled.contains(name)) {
+        return false;
+      }
+
       if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
         return false;
       }
 
       final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+      final bool isImage = item.mediaType.value.isImageOrAnimation;
+      final bool isVideo = item.mediaType.value.isVideo;
 
-      final bool isImageItem = item.mediaType.value.isImageOrAnimation;
-      final bool isScaleButton = btn[0] == 'reloadnoscale';
-      final bool isScaleAllowed = isScaleButton
-          ? (isImageItem && !settingsHandler.disableImageScaling)
-          : true; // allow reloadnoscale button if not a video and scaling is not disabled
+      switch (name) {
+        case 'favourite':
+          return settingsHandler.dbEnabled;
+        case 'reloadnoscale':
+          return isImage && !settingsHandler.disableImageScaling;
+        case 'toggle_quality':
+          return isImage && item.sampleURL != item.fileURL;
+        case 'external_player':
+          return isVideo && Platform.isAndroid;
+      }
 
-      final bool isQualityButton = btn[0] == 'toggle_quality';
-      final bool isQualityAllowed = isQualityButton
-          ? (isImageItem && item.sampleURL != item.fileURL)
-          : true; // allow toggle_quality button if image and sample != full
-
-      final bool isFavButton = btn[0] == 'favourite';
-      final bool isFavAllowed = isFavButton
-          ? settingsHandler.dbEnabled
-          : true; // allow favourite button if db is enabled
-
-      final bool isExtPlayer = btn[0] == 'external_player';
-      final bool isExtPlayerAllowed = isExtPlayer ? (Platform.isAndroid && item.mediaType.value.isVideo) : true;
-
-      return isScaleAllowed && isFavAllowed && isQualityAllowed && isExtPlayerAllowed;
+      return true;
     }).toList();
 
     final List<Widget> actions = [];
-    List<List<String>> overFlowList = [];
-    List<List<String>> buttonList = [];
+    List<String> overFlowList = [];
+    List<String> buttonList = [];
     // at least first 4 buttons will show on toolbar
     final int listSplit = max(4, (MediaQuery.sizeOf(context).width / 100).floor());
     if (listSplit < filteredButtonOrder.length) {
@@ -192,9 +195,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     } else {
       buttonList = filteredButtonOrder;
     }
-    for (final value in buttonList) {
-      final String name = value[0];
-
+    for (final name in buttonList) {
       actions.add(
         ToolbarAction(
           key: ValueKey(name),
@@ -222,8 +223,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
     // all buttons after that will be in overflow menu
     if (overFlowList.isNotEmpty) {
-      final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'autoscroll') != -1;
-      final bool isSelectOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'select') != -1;
+      final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn == 'autoscroll') != -1;
+      final bool isSelectOverflowed = overFlowList.indexWhere((btn) => btn == 'select') != -1;
 
       final bool isSelected = searchHandler.currentSelected.contains(
         searchHandler.currentFetched[searchHandler.viewedIndex.value],
@@ -240,25 +241,23 @@ class _HideableAppBarState extends State<HideableAppBar> {
                 ),
               Row(
                 children: [
-                  const Icon(
-                    Icons.more_vert,
-                    color: Colors.white,
-                  ),
                   if (isSelected && isSelectOverflowed)
                     const Icon(
                       Icons.check_box,
                       color: Colors.white,
                       size: 18,
                     ),
+                  const Icon(
+                    Icons.more_vert,
+                    color: Colors.white,
+                  ),
                 ],
               ),
             ],
           ),
           color: Theme.of(context).colorScheme.surface,
           itemBuilder: (BuildContext itemBuilder) => overFlowList.map(
-            (value) {
-              final String name = value[0];
-
+            (name) {
               return PopupMenuItem(
                 padding: EdgeInsets.zero,
                 value: name,
@@ -278,7 +277,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       subIcon: buttonSubicon(name),
                       stackWidget: buttonStackWidget(name),
                     ),
-                    title: Text(buttonText(value)),
+                    title: Text(buttonText(name)),
                   ),
                 ),
               );
@@ -330,9 +329,57 @@ class _HideableAppBarState extends State<HideableAppBar> {
         icon = Icons.share;
         break;
       case 'select':
-        final bool isSelected = searchHandler.currentSelected.contains(item);
-        icon = isSelected ? Icons.check_box : Icons.check_box_outline_blank;
-        break;
+        final int selectedIndex = searchHandler.currentSelected.indexOf(item);
+        final bool isSelected = selectedIndex != -1;
+
+        // early return to override custom widget
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: 24,
+              constraints: const BoxConstraints(
+                minWidth: 20,
+                minHeight: 24,
+                maxHeight: 24,
+              ),
+              alignment: Alignment.center,
+              child: Center(
+                child: isSelected
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        constraints: const BoxConstraints(
+                          minWidth: 20,
+                          maxHeight: 20,
+                        ),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.secondary,
+                          borderRadius: const BorderRadius.all(Radius.circular(4)),
+                        ),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 20),
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: Text(
+                              (selectedIndex + 1).toString(),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).colorScheme.onSecondary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      )
+                    : const Icon(
+                        Icons.check_box_outline_blank,
+                        size: 24,
+                      ),
+              ),
+            ),
+          ],
+        );
       case 'reloadnoscale':
         icon = Icons.refresh;
         break;
@@ -370,35 +417,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
               child: SnatchedStatusIcon(item: item, booru: booru),
             );
           }
-        });
-
-      case 'select':
-        return Obx(() {
-          final int selectedIndex = searchHandler.currentSelected.indexOf(item);
-          final bool isSelected = selectedIndex != -1;
-          if (!isSelected) {
-            return const SizedBox.shrink();
-          }
-
-          return Positioned(
-            right: 4,
-            bottom: 0,
-            child: IgnorePointer(
-              ignoring: true,
-              child: Container(
-                height: 18,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: Text(
-                  '${selectedIndex + 1}',
-                  style: const TextStyle(fontSize: 11),
-                ),
-              ),
-            ),
-          );
         });
 
       default:
@@ -453,8 +471,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
     return null;
   }
 
-  String buttonText(List<String> actionAndLabel) {
-    final String action = actionAndLabel[0], defaultLabel = actionAndLabel[1];
+  String buttonText(String name) {
+    final String defaultLabel = SettingsHandler.buttonNames[name] ?? '';
     late String label;
 
     if (searchHandler.viewedIndex.value == -1) {
@@ -463,7 +481,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
     final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
 
-    switch (action) {
+    switch (name) {
       case 'autoscroll':
         label = "${autoScroll ? 'Pause' : 'Start'} $defaultLabel";
         break;
@@ -981,7 +999,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   title: const Text('File'),
                 ),
                 const SizedBox(height: 15),
-                if (settingsHandler.hasHydrus && searchHandler.currentBooru.type != BooruType.Hydrus)
+                if (settingsHandler.hasHydrus && searchHandler.currentBooru.type?.isHydrus != true)
                   ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
