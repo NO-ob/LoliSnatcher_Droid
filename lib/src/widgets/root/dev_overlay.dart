@@ -109,10 +109,10 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
     );
   }
 
+  double get totalHeight => ((btnSize + btnPadding) * (isOpen ? (kDebugMode ? 4 : 3) : 1)) + 2;
+
   @override
   Widget build(BuildContext context) {
-    final double totalHeight = ((btnSize + btnPadding) * (isOpen ? (kDebugMode ? 4 : 3) : 1)) + 2;
-
     return Positioned(
       top: top,
       left: left,
@@ -159,7 +159,15 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
                       child: buildButton(
                         isOpen ? Icons.close : Icons.add,
                         isOpen ? 'Close' : '',
-                        () => setState(() => isOpen = !isOpen),
+                        () => setState(() {
+                          isOpen = !isOpen;
+
+                          top = clampDouble(
+                            top,
+                            0 + MediaQuery.paddingOf(context).top,
+                            MediaQuery.sizeOf(context).height - totalHeight - MediaQuery.paddingOf(context).bottom,
+                          );
+                        }),
                       ),
                     ),
                     if (isOpen) ...[

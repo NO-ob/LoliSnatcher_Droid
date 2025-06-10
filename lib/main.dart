@@ -114,6 +114,9 @@ class _MainAppState extends State<MainApp> {
   }
 
   void registerGlobalOverlay(BuildContext context) {
+    if (overlayScreen?.context.mounted == false) {
+      overlayScreen = null;
+    }
     if (overlayScreen == null) {
       overlayScreen = OverlayScreen.of(context);
       createOverlays();
