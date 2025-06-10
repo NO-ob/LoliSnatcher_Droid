@@ -199,7 +199,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                       fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
                     ),
                     label: LoadingText(
-                      text: (widget.isTooBig || widget.item.isHated) ? 'Load Anyway' : 'Restart Loading',
+                      text: (widget.isTooBig || widget.item.isHated) ? 'Load anyway' : 'Restart loading',
                       fontSize: 16,
                       color: Colors.blue,
                     ),
@@ -250,7 +250,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                         fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
                       ),
                       label: LoadingText(
-                        text: 'Stop Loading',
+                        text: 'Stop loading',
                         fontSize: 18,
                         color: Theme.of(context).colorScheme.error,
                       ),
@@ -345,7 +345,7 @@ class _MediaLoadingState extends State<MediaLoading> {
             fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
           ),
           label: LoadingText(
-            text: (widget.isTooBig || widget.item.isHated) ? 'Load Anyway' : 'Restart Loading',
+            text: (widget.isTooBig || widget.item.isHated) ? 'Load anyway' : 'Restart loading',
             fontSize: 16,
             color: Colors.blue,
           ),
@@ -400,7 +400,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                 fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
               ),
               label: LoadingText(
-                text: 'Stop Loading',
+                text: 'Stop loading',
                 fontSize: 18,
                 color: Theme.of(context).colorScheme.error,
               ),

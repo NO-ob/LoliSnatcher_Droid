@@ -7,11 +7,16 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
@@ -50,7 +55,9 @@ class _ThumbnailState extends State<Thumbnail> {
   final ValueNotifier<bool> isLoadedExtra = ValueNotifier(false);
   final ValueNotifier<bool> failedRendering = ValueNotifier(false);
   final ValueNotifier<String?> errorCode = ValueNotifier(null);
-  CancelToken? mainCancelToken, extraCancelToken;
+  CancelToken? mainCancelToken, extraCancelToken, loadItemCancelToken;
+
+  late String currentUrl;
 
   Timer? debounceLoading;
 
@@ -64,11 +71,18 @@ class _ThumbnailState extends State<Thumbnail> {
   ImageStream? mainImageStream, extraImageStream;
 
   @override
+  void initState() {
+    super.initState();
+
+    currentUrl = widget.item.thumbnailURL;
+  }
+
+  @override
   void didUpdateWidget(Thumbnail oldWidget) {
     // force redraw on tab change
     if (oldWidget.item != widget.item) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        restartLoading();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await restartLoading();
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -201,8 +215,8 @@ class _ThumbnailState extends State<Thumbnail> {
         // attempt to reload 3 times with a 1s delay
         Debounce.debounce(
           tag: 'thumbnail_reload_${widget.item.hashCode}',
-          callback: () {
-            restartLoading();
+          callback: () async {
+            await restartLoading();
             restartedCount++;
           },
           duration: const Duration(seconds: 1),
@@ -301,10 +315,10 @@ class _ThumbnailState extends State<Thumbnail> {
     }
   }
 
-  void restartLoading() {
+  Future<void> restartLoading({bool withItemLoad = false}) async {
     if (failedRendering.value) {
       failedRendering.value = false;
-      cleanProviderCache();
+      unawaited(cleanProviderCache());
     }
 
     disposables();
@@ -318,6 +332,13 @@ class _ThumbnailState extends State<Thumbnail> {
     isFromCache.value = null;
     isFailed.value = false;
     errorCode.value = null;
+
+    if (withItemLoad) {
+      await tryToLoadAndUpdateItem(
+        widget.item,
+        loadItemCancelToken,
+      );
+    }
 
     selectThumbProvider();
   }
@@ -363,6 +384,11 @@ class _ThumbnailState extends State<Thumbnail> {
     }
     extraCancelToken = null;
 
+    if (!(loadItemCancelToken?.isCancelled ?? true)) {
+      loadItemCancelToken?.cancel();
+    }
+    loadItemCancelToken = null;
+
     // evict from memory cache only when in grid
     if (widget.isStandalone) {
       mainProvider.value?.evict();
@@ -384,6 +410,11 @@ class _ThumbnailState extends State<Thumbnail> {
           if (isFirstBuild.value) {
             isFirstBuild.value = false;
             selectThumbProvider();
+          }
+
+          if (currentUrl != widget.item.thumbnailURL) {
+            currentUrl = widget.item.thumbnailURL;
+            restartLoading();
           }
         });
 
@@ -552,6 +583,8 @@ class _ThumbnailState extends State<Thumbnail> {
                             return ValueListenableBuilder(
                               valueListenable: errorCode,
                               builder: (context, errorCode, child) {
+                                final bool isFavOrDls = widget.booru.type?.isFavouritesOrDownloads == true;
+
                                 return ThumbnailLoading(
                                   item: widget.item,
                                   hasProgress: true,
@@ -561,9 +594,25 @@ class _ThumbnailState extends State<Thumbnail> {
                                   total: total,
                                   received: received,
                                   startedAt: startedAt,
-                                  restartAction: () {
+                                  retryText: isFavOrDls ? 'Tap to update or retry' : null,
+                                  retryIcon: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    spacing: 4,
+                                    children: isFavOrDls
+                                        ? const [
+                                            Icon(Icons.download),
+                                            Text('/', style: TextStyle(fontSize: 20)),
+                                            Icon(Icons.refresh),
+                                          ]
+                                        : const [
+                                            Icon(Icons.refresh),
+                                          ],
+                                  ),
+                                  restartAction: () async {
                                     restartedCount = 0;
-                                    restartLoading();
+
+                                    await restartLoading(withItemLoad: isFavOrDls);
                                   },
                                   errorCode: errorCode,
                                 );
@@ -618,4 +667,62 @@ class _ThumbnailState extends State<Thumbnail> {
       return imageStack;
     }
   }
+}
+
+Future<bool> tryToLoadAndUpdateItem(
+  BooruItem item,
+  CancelToken? cancelToken,
+) async {
+  try {
+    final itemFileHost = Uri.tryParse(item.fileURL)?.host;
+    final itemPostHost = Uri.tryParse(item.postURL)?.host;
+    final Booru? possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
+      final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
+
+      return (itemFileHost?.isNotEmpty == true &&
+              booruHost?.isNotEmpty == true &&
+              itemFileHost!.contains(booruHost!)) ||
+          (itemPostHost?.isNotEmpty == true &&
+              booruHost?.isNotEmpty == true &&
+              (itemPostHost!.contains(booruHost!) ||
+                  // TODO make this booru agnostic
+                  switch (e.type) {
+                    BooruType.Sankaku =>
+                      SankakuHandler.knownUrls.contains(itemPostHost) ||
+                          SankakuHandler.knownUrls.contains(booruHost) ||
+                          booruHost.contains('sankakuapi.com'),
+                    BooruType.IdolSankaku =>
+                      IdolSankakuHandler.knownUrls.contains(itemPostHost) ||
+                          IdolSankakuHandler.knownUrls.contains(booruHost),
+                    _ => false,
+                  }));
+    });
+
+    cancelToken?.cancel();
+    cancelToken = CancelToken();
+    if (possibleBooru != null) {
+      final handler = BooruHandlerFactory().getBooruHandler([possibleBooru], null).booruHandler;
+      if (handler.hasLoadItemSupport) {
+        final result = await handler.loadItem(
+          item: item,
+          cancelToken: cancelToken,
+          withCapcthaCheck: true,
+        );
+
+        if (!result.failed && result.item != null) {
+          unawaited(
+            SettingsHandler.instance.dbHandler.updateBooruItem(
+              result.item!,
+              BooruUpdateMode.urlUpdate,
+            ),
+          );
+          return true;
+        }
+
+        return false;
+      }
+    }
+  } catch (_) {}
+
+  return false;
 }

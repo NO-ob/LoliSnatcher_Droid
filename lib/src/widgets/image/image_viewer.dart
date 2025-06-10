@@ -58,6 +58,7 @@ class ImageViewerState extends State<ImageViewer> {
   String imageFolder = 'media';
   int? widthLimit;
   CancelToken? cancelToken;
+  CancelToken? loadItemCancelToken;
 
   void onSize(int? size) {
     // TODO find a way to stop loading based on size when caching is enabled
@@ -67,7 +68,9 @@ class ImageViewerState extends State<ImageViewer> {
     if (size == null) {
       return;
     } else if (size == 0) {
-      killLoading(['File is zero bytes']);
+      killLoading([
+        'File is zero bytes',
+      ]);
     } else if (maxSize != null && (size > maxSize) && isTooBig != 2) {
       // TODO add check if resolution is too big
       isTooBig = 1;
@@ -99,11 +102,13 @@ class ImageViewerState extends State<ImageViewer> {
     } else {
       if (error is DioException) {
         killLoading([
-          'Loading Error: ${error.type.name}',
+          'Loading error: ${error.type.name}',
           if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
         ]);
       } else {
-        killLoading(['Loading Error: $error']);
+        killLoading([
+          'Loading error: $error',
+        ]);
       }
     }
   }
@@ -243,6 +248,7 @@ class ImageViewerState extends State<ImageViewer> {
     }
 
     ImageProvider provider;
+    cancelToken?.cancel();
     cancelToken = CancelToken();
     final String url = useFullImage ? widget.booruItem.fileURL : widget.booruItem.sampleURL;
     final bool isAvif = url.contains('.avif');
@@ -331,6 +337,11 @@ class ImageViewerState extends State<ImageViewer> {
     }
     cancelToken = null;
 
+    if (!(loadItemCancelToken?.isCancelled ?? true)) {
+      loadItemCancelToken?.cancel();
+    }
+    loadItemCancelToken = null;
+
     // evict image from memory cache if it's media type or it's an animation and gifsAsThumbnails is disabled
     if (imageFolder == 'media' ||
         (!widget.booruItem.mediaType.value.isAnimation || !settingsHandler.gifsAsThumbnails)) {
@@ -389,6 +400,26 @@ class ImageViewerState extends State<ImageViewer> {
   void doubleTapZoom() {
     if (!isLoaded.value) return;
     scaleController.scaleState = PhotoViewScaleState.covering;
+  }
+
+  Future<void> onRestart() async {
+    if (isTooBig == 1) {
+      isTooBig = 2;
+    }
+    isStopped.value = false;
+    await tryToLoadAndUpdateItem(
+      widget.booruItem,
+      loadItemCancelToken,
+    );
+    await initViewer(true);
+  }
+
+  Future<void> onStop({
+    List<String>? reason,
+  }) async {
+    killLoading(
+      reason ?? ['Stopped by user'],
+    );
   }
 
   @override
@@ -461,15 +492,8 @@ class ImageViewerState extends State<ImageViewer> {
                                   total: total,
                                   received: received,
                                   startedAt: startedAt,
-                                  startAction: () {
-                                    if (isTooBig == 1) {
-                                      isTooBig = 2;
-                                    }
-                                    initViewer(true);
-                                  },
-                                  stopAction: () {
-                                    killLoading(['Stopped by User']);
-                                  },
+                                  startAction: onRestart,
+                                  stopAction: onStop,
                                 );
                               },
                             );

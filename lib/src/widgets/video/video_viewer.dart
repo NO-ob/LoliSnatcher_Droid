@@ -68,6 +68,7 @@ class VideoViewerState extends State<VideoViewer> {
   Timer? bufferingTimer, pauseCheckTimer;
 
   CancelToken? cancelToken, sizeCancelToken;
+  CancelToken? loadItemCancelToken;
   DioDownloader? client, sizeClient;
   File? video;
 
@@ -105,6 +106,7 @@ class VideoViewerState extends State<VideoViewer> {
         return;
     }
 
+    cancelToken?.cancel();
     cancelToken = CancelToken();
     client = DioDownloader(
       widget.booruItem.fileURL,
@@ -134,6 +136,7 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   Future<void> getSize() async {
+    sizeCancelToken?.cancel();
     sizeCancelToken = CancelToken();
     sizeClient = DioDownloader(
       widget.booruItem.fileURL,
@@ -159,7 +162,9 @@ class VideoViewerState extends State<VideoViewer> {
         : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
     // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
-      killLoading(['File is zero bytes']);
+      killLoading([
+        'File is zero bytes',
+      ]);
     } else if (maxSize != null && (size > maxSize) && isTooBig != 2) {
       // TODO add check if resolution is too big
       isTooBig = 1;
@@ -170,8 +175,7 @@ class VideoViewerState extends State<VideoViewer> {
       ]);
     }
 
-    if (size > 0 && widget.booruItem.fileSize == null) {
-      // set item file size if it wasn't received from api
+    if (size > 0) {
       widget.booruItem.fileSize = size;
     }
   }
@@ -209,12 +213,12 @@ class VideoViewerState extends State<VideoViewer> {
     } else {
       if (error is DioException) {
         killLoading([
-          'Loading Error: ${error.type.name}',
+          'Loading error: ${error.type.name}',
           if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
         ]);
       } else {
         killLoading([
-          'Loading Error: $error',
+          'Loading error: $error',
           if (settingsHandler.videoBackendMode.isNormal) ...[
             '',
             'Try changing "Video player backend" in Settings->Video if you encounter playback issues often',
@@ -276,12 +280,15 @@ class VideoViewerState extends State<VideoViewer> {
     }
   }
 
-  void initVideo(bool ignoreTagsCheck) {
+  Future<void> initVideo(bool ignoreTagsCheck) async {
     if (widget.booruItem.isHated && !ignoreTagsCheck) {
       final tagsData = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
-      killLoading(['Contains Hated tags:', ...tagsData.hatedTags]);
+      killLoading([
+        'Contains Hated tags:',
+        ...tagsData.hatedTags,
+      ]);
     } else {
-      downloadVideo();
+      await downloadVideo();
     }
   }
 
@@ -339,9 +346,17 @@ class VideoViewerState extends State<VideoViewer> {
     if (!(cancelToken != null && cancelToken!.isCancelled)) {
       cancelToken?.cancel();
     }
+    cancelToken = null;
+
     if (!(sizeCancelToken != null && sizeCancelToken!.isCancelled)) {
       sizeCancelToken?.cancel();
     }
+    sizeCancelToken = null;
+
+    if (!(loadItemCancelToken?.isCancelled ?? true)) {
+      loadItemCancelToken?.cancel();
+    }
+    loadItemCancelToken = null;
 
     disposeClient();
   }
@@ -434,7 +449,10 @@ class VideoViewerState extends State<VideoViewer> {
     }
 
     if (!isStopped.value && videoController.value?.value.hasError == true) {
-      killLoading(['Video Error:', videoController.value!.value.errorDescription ?? '']);
+      killLoading([
+        'Video error:',
+        videoController.value!.value.errorDescription ?? '',
+      ]);
     }
   }
 
@@ -539,9 +557,9 @@ class VideoViewerState extends State<VideoViewer> {
           const int maxForceCacheSize = 1024 * 1024 * 25;
           if (!isVideoInited && (total.value == 0 || total.value < maxForceCacheSize)) {
             forceCache.value = true;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
               killLoading([]);
-              initVideo(false);
+              await initVideo(false);
               updateState();
             });
           }
@@ -616,6 +634,27 @@ class VideoViewerState extends State<VideoViewer> {
     );
   }
 
+  Future<void> onRestart() async {
+    if (isTooBig == 1) {
+      isTooBig = 2;
+    }
+    isStopped.value = false;
+    await tryToLoadAndUpdateItem(
+      widget.booruItem,
+      loadItemCancelToken,
+    );
+    forceCache.value = false;
+    updateState();
+    await initVideo(true);
+    updateState();
+  }
+
+  void onStop({List<String>? reason}) {
+    killLoading(
+      reason ?? ['Stopped by user'],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final double aspectRatio = videoController.value?.value.aspectRatio ?? 16 / 9;
@@ -673,16 +712,8 @@ class VideoViewerState extends State<VideoViewer> {
               total: total,
               received: received,
               startedAt: startedAt,
-              startAction: () {
-                if (isTooBig == 1) {
-                  isTooBig = 2;
-                }
-                initVideo(true);
-                updateState();
-              },
-              stopAction: () {
-                killLoading(['Stopped by User']);
-              },
+              startAction: onRestart,
+              stopAction: onStop,
             ),
           ),
           //
