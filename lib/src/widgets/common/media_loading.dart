@@ -20,8 +20,8 @@ class MediaLoading extends StatefulWidget {
     required this.total,
     required this.received,
     required this.startedAt,
-    required this.startAction,
-    required this.stopAction,
+    required this.onRestart,
+    required this.onStop,
     this.isTooBig = false,
     this.stopReasons = const [],
     super.key,
@@ -42,8 +42,8 @@ class MediaLoading extends StatefulWidget {
   final ValueNotifier<int> received;
   final ValueNotifier<int> startedAt;
 
-  final void Function()? startAction;
-  final void Function()? stopAction;
+  final void Function()? onRestart;
+  final void Function()? onStop;
 
   @override
   State<MediaLoading> createState() => _MediaLoadingState();
@@ -204,7 +204,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                       color: Colors.blue,
                     ),
                     onPressed: () {
-                      widget.startAction?.call();
+                      widget.onRestart?.call();
                     },
                   ),
                 ]
@@ -255,7 +255,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                         color: Theme.of(context).colorScheme.error,
                       ),
                       onPressed: () {
-                        widget.stopAction?.call();
+                        widget.onStop?.call();
                       },
                     ),
                 ],
@@ -350,7 +350,7 @@ class _MediaLoadingState extends State<MediaLoading> {
             color: Colors.blue,
           ),
           onPressed: () {
-            widget.startAction?.call();
+            widget.onRestart?.call();
           },
         ),
         if (isMovedBelow) const SizedBox(height: 60),
@@ -405,7 +405,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                 color: Theme.of(context).colorScheme.error,
               ),
               onPressed: () {
-                widget.stopAction?.call();
+                widget.onStop?.call();
               },
             ),
           if (isMovedBelow) const SizedBox(height: 60),

@@ -177,7 +177,12 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
     return Stack(
       children: [
         if (!viewerHandler.isDesktopFullscreen.value) itemWidget,
-        if (!viewerHandler.isDesktopFullscreen.value) const NotesRenderer(null),
+        if (!viewerHandler.isDesktopFullscreen.value)
+          NotesRenderer(
+            item: item,
+            handler: searchHandler.currentBooruHandler,
+            pageController: null,
+          ),
         Container(
           alignment: Alignment.topRight,
           child: Column(
@@ -237,7 +242,11 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                             Obx(
                               () => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox.shrink(),
                             ),
-                            const NotesRenderer(null),
+                            NotesRenderer(
+                              item: item,
+                              handler: searchHandler.currentBooruHandler,
+                              pageController: null,
+                            ),
                             Container(
                               padding: const EdgeInsets.all(10),
                               alignment: Alignment.topRight,

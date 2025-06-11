@@ -6,7 +6,6 @@ import 'package:get_it/get_it.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/constants.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
@@ -189,35 +188,39 @@ class ViewerHandler {
   }
 
   void hideExtraUi() {
-    for (final key in activeKeys) {
-      final state = key?.currentState;
-      switch (state?.widget) {
-        case ImageViewer():
-          (state as ImageViewerState?)?.showLoading.value = false;
-          break;
-        case VideoViewer():
-          (state as VideoViewerState?)?.showControls.value = false;
-          break;
-        default:
-          break;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final key in activeKeys) {
+        final state = key?.currentState;
+        switch (state?.widget) {
+          case ImageViewer():
+            (state as ImageViewerState?)?.showLoading.value = false;
+            break;
+          case VideoViewer():
+            (state as VideoViewerState?)?.showControls.value = false;
+            break;
+          default:
+            break;
+        }
       }
-    }
+    });
   }
 
   void showExtraUi() {
-    for (final key in activeKeys) {
-      final state = key?.currentState;
-      switch (state?.widget) {
-        case ImageViewer():
-          (state as ImageViewerState?)?.showLoading.value = true;
-          break;
-        case VideoViewer():
-          (state as VideoViewerState?)?.showControls.value = true;
-          break;
-        default:
-          break;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final key in activeKeys) {
+        final state = key?.currentState;
+        switch (state?.widget) {
+          case ImageViewer():
+            (state as ImageViewerState?)?.showLoading.value = true;
+            break;
+          case VideoViewer():
+            (state as VideoViewerState?)?.showControls.value = true;
+            break;
+          default:
+            break;
+        }
       }
-    }
+    });
   }
 
   void setViewValue(Key? key, PhotoViewControllerValue value) {
@@ -247,12 +250,10 @@ class ViewerHandler {
       ServiceHandler.vibrate();
     }
 
-    final searchHandler = SearchHandler.instance;
     final settingsHandler = SettingsHandler.instance;
 
     // enable volume buttons if current page is a video AND appbar is set to visible
-    final bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isVideo;
-    final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
+    final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || newAppbarVisibility;
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
   }
 

@@ -6,10 +6,8 @@ import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
-import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
@@ -17,6 +15,12 @@ class ThumbnailCardBuild extends StatelessWidget {
   const ThumbnailCardBuild({
     required this.index,
     required this.item,
+    required this.handler,
+    required this.scrollController,
+    this.isHighlighted = false,
+    this.selectable = true,
+    this.selectedIndex,
+    this.onSelected,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
@@ -26,39 +30,37 @@ class ThumbnailCardBuild extends StatelessWidget {
 
   final int index;
   final BooruItem item;
-  final void Function(int, BooruItem)? onTap;
-  final void Function(int, BooruItem)? onDoubleTap;
-  final void Function(int, BooruItem)? onLongPress;
-  final void Function(int, BooruItem)? onSecondaryTap;
+  final BooruHandler handler;
+  final AutoScrollController scrollController;
+  final bool isHighlighted;
+  final bool selectable;
+  final int? selectedIndex;
+  final void Function(int)? onSelected;
+  final void Function(int)? onTap;
+  final void Function(int)? onDoubleTap;
+  final void Function(int)? onLongPress;
+  final void Function(int)? onSecondaryTap;
 
   @override
   Widget build(BuildContext context) {
-    final settingsHandler = SettingsHandler.instance;
-    final searchHandler = SearchHandler.instance;
-    final viewerHandler = ViewerHandler.instance;
     final snatchHandler = SnatchHandler.instance;
-
-    // print('ThumbnailCardBuild: $index');
 
     return AutoScrollTag(
       highlightColor: Colors.red,
       key: ValueKey(index),
-      controller: searchHandler.gridScrollController,
+      controller: scrollController,
       index: index,
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(4),
         child: Obx(() {
-          // print('ThumbnailCardBuild obx: $index');
-          final bool isSelected = searchHandler.currentSelected.contains(item);
-          final bool isCurrent =
-              (settingsHandler.appMode.value.isDesktop || viewerHandler.inViewer.value) &&
-              searchHandler.viewedIndex.value == index;
           final bool isCurrentlyBeingSnatched =
               snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item &&
               snatchHandler.total.value != 0;
 
-          final bool showBorder = isCurrent || isSelected || isCurrentlyBeingSnatched;
+          final isSelected = selectable && selectedIndex != null;
+
+          final bool showBorder = isHighlighted || isSelected || isCurrentlyBeingSnatched;
           final Color borderColor = isCurrentlyBeingSnatched
               ? Colors.transparent
               : Theme.of(context).colorScheme.secondary;
@@ -84,42 +86,16 @@ class ThumbnailCardBuild extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                   highlightColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.4),
                   splashColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
-                  onTap: () {
-                    onTap?.call(index, item);
-                  },
-                  onDoubleTap: () {
-                    onDoubleTap?.call(index, item);
-                  },
-                  onLongPress: () {
-                    onLongPress?.call(index, item);
-                  },
-                  onSecondaryTap: () {
-                    onSecondaryTap?.call(index, item);
-                  },
-                  // TODO make inkwell ripple work with thumbnail (currently can't just use stack because thumbnail must be clickable too (i.e. checkbox))
-                  child: Obx(
-                    () {
-                      final bool hasSelected = searchHandler.currentSelected.isNotEmpty;
-                      final selectedIndex = searchHandler.currentSelected.indexOf(item);
-                      final isSelected = selectedIndex != -1;
-
-                      return ThumbnailBuild(
-                        item: item,
-                        booru: searchHandler.currentBooru,
-                        handler: searchHandler.currentBooruHandler,
-                        selectable: true,
-                        selectedIndex: selectedIndex == -1 ? null : selectedIndex,
-                        onSelected: hasSelected
-                            ? () {
-                                if (isSelected) {
-                                  searchHandler.currentTab.selected.remove(item);
-                                } else {
-                                  searchHandler.currentTab.selected.add(item);
-                                }
-                              }
-                            : null,
-                      );
-                    },
+                  onTap: onTap == null ? null : () => onTap?.call(index),
+                  onDoubleTap: onDoubleTap == null ? null : () => onDoubleTap?.call(index),
+                  onLongPress: onLongPress == null ? null : () => onLongPress?.call(index),
+                  onSecondaryTap: onSecondaryTap == null ? null : () => onSecondaryTap?.call(index),
+                  child: ThumbnailBuild(
+                    item: item,
+                    handler: handler,
+                    selectable: selectable,
+                    selectedIndex: isSelected ? selectedIndex : null,
+                    onSelected: onSelected == null ? null : () => onSelected!(index),
                   ),
                 ),
               ),

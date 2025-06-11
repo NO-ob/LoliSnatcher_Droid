@@ -380,7 +380,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
         isLongTap,
       );
       if (settingsHandler.favouriteOnSnatch) {
-        await searchHandler.updateFavForMultipleItems(
+        await searchHandler.currentTab.updateFavForMultipleItems(
           searchHandler.currentSelected,
           newValue: true,
           skipSnatching: true,
@@ -534,8 +534,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           height: 150,
                                           child: ThumbnailBuild(
                                             item: item,
-                                            booru: snatchHandler.current.value!.booru,
-                                            handler: searchHandler.currentBooruHandler,
+                                            handler: BooruHandlerFactory().getBooruHandler(
+                                              [snatchHandler.current.value!.booru],
+                                              null,
+                                            ).booruHandler,
                                             selectable: false,
                                           ),
                                         ),
@@ -629,8 +631,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                         height: 134,
                                         child: ThumbnailBuild(
                                           item: lastItem,
-                                          booru: queue.booru,
-                                          handler: searchHandler.currentBooruHandler,
+                                          handler: BooruHandlerFactory().getBooruHandler(
+                                            [queue.booru],
+                                            null,
+                                          ).booruHandler,
                                           selectable: false,
                                         ),
                                       ),
@@ -643,8 +647,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                       height: 150,
                                       child: ThumbnailBuild(
                                         item: firstItem,
-                                        booru: queue.booru,
-                                        handler: searchHandler.currentBooruHandler,
+                                        handler: BooruHandlerFactory().getBooruHandler(
+                                          [queue.booru],
+                                          null,
+                                        ).booruHandler,
                                         selectable: false,
                                       ),
                                     ),
@@ -693,8 +699,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                     height: 150,
                                     child: ThumbnailBuild(
                                       item: record.item,
-                                      booru: record.booru,
-                                      handler: searchHandler.currentBooruHandler,
+                                      handler: BooruHandlerFactory().getBooruHandler(
+                                        [record.booru],
+                                        null,
+                                      ).booruHandler,
                                       selectable: false,
                                     ),
                                   ),
@@ -948,7 +956,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                       }
                                                       updating = true;
                                                       setState(() {});
-                                                      await searchHandler.updateFavForMultipleItems(
+                                                      await searchHandler.currentTab.updateFavForMultipleItems(
                                                         searchHandler.currentFetched
                                                             .where(onlyUnfavs.contains)
                                                             .toList(),
@@ -973,7 +981,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                       }
                                                       updating = true;
                                                       setState(() {});
-                                                      await searchHandler.updateFavForMultipleItems(
+                                                      await searchHandler.currentTab.updateFavForMultipleItems(
                                                         searchHandler.currentFetched.where(onlyFavs.contains).toList(),
                                                         newValue: false,
                                                       );

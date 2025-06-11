@@ -8,7 +8,11 @@ import 'package:lolisnatcher/src/widgets/gallery/change_page_buttons.dart';
 import 'package:lolisnatcher/src/widgets/gallery/zoom_button.dart';
 
 class GalleryButtons extends StatefulWidget {
-  const GalleryButtons({super.key, this.pageController});
+  const GalleryButtons({
+    this.pageController,
+    super.key,
+  });
+
   final PreloadPageController? pageController;
 
   @override

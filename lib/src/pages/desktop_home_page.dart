@@ -108,7 +108,7 @@ class DesktopHome extends StatelessWidget {
                           false,
                         );
                         if (settingsHandler.favouriteOnSnatch) {
-                          await searchHandler.updateFavForMultipleItems(
+                          await searchHandler.currentTab.updateFavForMultipleItems(
                             searchHandler.currentSelected,
                             newValue: true,
                             skipSnatching: true,
@@ -206,7 +206,12 @@ class DesktopTagListener extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
         ),
-        child: const TagView(),
+        child: Obx(
+          () => TagView(
+            item: searchHandler.viewedItem.value,
+            handler: searchHandler.currentBooruHandler,
+          ),
+        ),
       );
     });
   }

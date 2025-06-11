@@ -216,7 +216,10 @@ class SnatchHandler {
                         height: 64,
                         child: ThumbnailBuild(
                           item: current.value!.booruItems.first,
-                          booru: current.value!.booru,
+                          handler: BooruHandlerFactory().getBooruHandler(
+                            [current.value!.booru],
+                            null,
+                          ).booruHandler,
                           selectable: false,
                           simple: true,
                         ),
@@ -345,7 +348,7 @@ class SnatchHandler {
                   height: 64,
                   child: ThumbnailBuild(
                     item: booruItems.first,
-                    booru: booru,
+                    handler: BooruHandlerFactory().getBooruHandler([booru], null).booruHandler,
                     selectable: false,
                     simple: true,
                   ),

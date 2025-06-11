@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/html_parse.dart';
@@ -17,7 +17,15 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 
 class NotesRenderer extends StatefulWidget {
-  const NotesRenderer(this.pageController, {super.key});
+  const NotesRenderer({
+    required this.item,
+    required this.handler,
+    required this.pageController,
+    super.key,
+  });
+
+  final BooruItem item;
+  final BooruHandler handler;
   final PreloadPageController? pageController;
 
   @override
@@ -25,7 +33,6 @@ class NotesRenderer extends StatefulWidget {
 }
 
 class _NotesRendererState extends State<NotesRenderer> {
-  final SearchHandler searchHandler = SearchHandler.instance;
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
@@ -48,8 +55,7 @@ class _NotesRendererState extends State<NotesRenderer> {
   CancelToken? cancelToken;
   final List<NoteBuild> notesMap = [];
 
-  bool get currentItemHasNotes =>
-      item.fileURL.isNotEmpty && searchHandler.currentBooruHandler.hasNotesSupport && item.hasNotes == true;
+  bool get currentItemHasNotes => item.fileURL.isNotEmpty && widget.handler.hasNotesSupport && item.hasNotes == true;
 
   @override
   void initState() {
@@ -63,14 +69,21 @@ class _NotesRendererState extends State<NotesRenderer> {
     screenHeight = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.height;
     screenRatio = screenWidth / screenHeight;
 
-    item = searchHandler.viewedItem.value;
+    item = widget.item;
     doCalculations(); // trigger calculations on init even if there is no item to init all values
     loadNotes();
-    searchHandler.viewedItem.addListener(itemListener);
 
     viewerHandler.viewState.addListener(viewStateListener);
 
     widget.pageController?.addListener(triggerCalculations);
+  }
+
+  @override
+  void didUpdateWidget(covariant NotesRenderer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.item != oldWidget.item) {
+      itemListener();
+    }
   }
 
   void updateState() {
@@ -83,7 +96,7 @@ class _NotesRendererState extends State<NotesRenderer> {
 
   void itemListener() {
     // TODO doesn't trigger for the first item after changing tabs on desktop
-    item = searchHandler.viewedItem.value;
+    item = widget.item;
     notesMap.clear();
     updateState();
     if (cancelToken != null && !cancelToken!.isCancelled) {
@@ -100,7 +113,6 @@ class _NotesRendererState extends State<NotesRenderer> {
   void dispose() {
     cancelToken?.cancel();
     widget.pageController?.removeListener(triggerCalculations);
-    searchHandler.viewedItem.removeListener(itemListener);
     viewerHandler.viewState.removeListener(viewStateListener);
     super.dispose();
   }
@@ -122,7 +134,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       cancelToken!.cancel();
     }
     cancelToken = CancelToken();
-    item.notes.value = await searchHandler.currentBooruHandler.getNotes(
+    item.notes.value = await widget.handler.getNotes(
       item.serverId!,
       cancelToken: cancelToken,
     );

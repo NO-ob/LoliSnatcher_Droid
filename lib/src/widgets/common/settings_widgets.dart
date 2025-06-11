@@ -602,6 +602,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.title,
+    this.items,
     this.itemBuilder,
     this.itemFilter,
     this.subtitle,
@@ -610,12 +611,14 @@ class SettingsBooruDropdown extends StatelessWidget {
     this.drawBottomBorder = true,
     this.nullable = false,
     this.trailingIcon,
+    this.contentPadding,
     super.key,
   });
 
   final Booru? value;
   final ValueChanged<Booru?>? onChanged;
   final String title;
+  final List<Booru>? items;
   final Widget Function(Booru?, bool)? itemBuilder;
   final bool Function(Booru?)? itemFilter;
   final Widget? subtitle;
@@ -624,6 +627,7 @@ class SettingsBooruDropdown extends StatelessWidget {
   final bool drawBottomBorder;
   final bool nullable;
   final Widget? trailingIcon;
+  final EdgeInsets? contentPadding;
 
   Widget _selectedItemBuilder(Booru? item) {
     if (item == null) {
@@ -661,7 +665,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     return SettingsDropdown<Booru?>(
       value: value,
       items: [
-        ...SettingsHandler.instance.booruList.where((b) => itemFilter?.call(b) ?? true),
+        ...(items ?? SettingsHandler.instance.booruList).where((b) => itemFilter?.call(b) ?? true),
       ],
       onChanged: onChanged,
       title: title,
@@ -674,6 +678,7 @@ class SettingsBooruDropdown extends StatelessWidget {
       clearable: nullable,
       itemExtent: kMinInteractiveDimension,
       expendableByScroll: true,
+      contentPadding: contentPadding,
     );
   }
 }

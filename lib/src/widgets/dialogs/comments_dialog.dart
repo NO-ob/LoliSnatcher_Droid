@@ -6,7 +6,6 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -179,7 +178,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
                   if (index == 0) {
                     return _CommentsHeader(
                       item: widget.item,
-                      booru: widget.handler.booru,
+                      handler: widget.handler,
                     );
                   }
 
@@ -414,11 +413,11 @@ class _CommentEntry extends StatelessWidget {
 class _CommentsHeader extends StatelessWidget {
   const _CommentsHeader({
     required this.item,
-    required this.booru,
+    required this.handler,
   });
 
   final BooruItem item;
-  final Booru booru;
+  final BooruHandler handler;
 
   @override
   Widget build(BuildContext context) {
@@ -457,7 +456,7 @@ class _CommentsHeader extends StatelessWidget {
                   enabled: false,
                   child: ThumbnailBuild(
                     item: item,
-                    booru: booru,
+                    handler: handler,
                     selectable: false,
                   ),
                 ),

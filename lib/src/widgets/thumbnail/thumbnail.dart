@@ -669,7 +669,7 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 }
 
-Future<bool> tryToLoadAndUpdateItem(
+Future<void> tryToLoadAndUpdateItem(
   BooruItem item,
   CancelToken? cancelToken,
 ) async {
@@ -716,13 +716,8 @@ Future<bool> tryToLoadAndUpdateItem(
               BooruUpdateMode.urlUpdate,
             ),
           );
-          return true;
         }
-
-        return false;
       }
     }
   } catch (_) {}
-
-  return false;
 }

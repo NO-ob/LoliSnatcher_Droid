@@ -19,6 +19,7 @@ import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/data/meta_tag.dart';
@@ -1388,7 +1389,14 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 Navigator.of(context).pop();
               },
             ),
-            if (searchHandler.currentBooru.type?.isMerge != true) TagContentPreview(tag: tag.tag),
+            TagContentPreview(
+              tag: tag.tag,
+              boorus: searchHandler.currentBooru.type?.isMerge == true
+                  ? [
+                      ...(searchHandler.currentBooruHandler as MergebooruHandler).booruHandlers.map((e) => e.booru),
+                    ]
+                  : [searchHandler.currentBooru],
+            ),
             ListTile(
               title: const Text('Copy'),
               leading: const Icon(Icons.copy),
@@ -3110,7 +3118,7 @@ class _PrefixEditDialog extends StatelessWidget {
                 ),
               ),
               if (hasSecondaryBoorus)
-                SettingsDropdown(
+                SettingsBooruDropdown(
                   value: selectedBooru,
                   items: usedBoorus,
                   onChanged: (Booru? newBooru) {
@@ -3123,7 +3131,7 @@ class _PrefixEditDialog extends StatelessWidget {
                   },
                   title: 'Booru (N#)',
                   contentPadding: EdgeInsets.zero,
-                  itemBuilder: (booru) {
+                  itemBuilder: (booru, _) {
                     if (booru == null) {
                       return const Text('');
                     }

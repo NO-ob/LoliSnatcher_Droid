@@ -639,6 +639,7 @@ class VideoViewerState extends State<VideoViewer> {
       isTooBig = 2;
     }
     isStopped.value = false;
+    startedAt.value = DateTime.now().millisecondsSinceEpoch;
     await tryToLoadAndUpdateItem(
       widget.booruItem,
       loadItemCancelToken,
@@ -712,8 +713,8 @@ class VideoViewerState extends State<VideoViewer> {
               total: total,
               received: received,
               startedAt: startedAt,
-              startAction: onRestart,
-              stopAction: onStop,
+              onRestart: onRestart,
+              onStop: onStop,
             ),
           ),
           //

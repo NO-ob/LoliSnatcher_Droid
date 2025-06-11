@@ -11,16 +11,21 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -29,11 +34,10 @@ import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
-import 'package:lolisnatcher/src/widgets/gallery/item_viewer_page.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
-import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
 class _TagInfoIcon {
   _TagInfoIcon(this.icon, this.color);
@@ -43,7 +47,14 @@ class _TagInfoIcon {
 }
 
 class TagView extends StatefulWidget {
-  const TagView({super.key});
+  const TagView({
+    required this.item,
+    required this.handler,
+    super.key,
+  });
+
+  final BooruItem item;
+  final BooruHandler handler;
 
   @override
   State<TagView> createState() => _TagViewState();
@@ -59,6 +70,7 @@ class _TagViewState extends State<TagView> {
   ScrollController scrollController = ScrollController();
 
   late BooruItem item;
+  late BooruHandler handler;
   List<String> tags = [], filteredTags = [];
   Map<String, HasTabWithTagResult> tabMatchesMap = {};
   bool? sortTags;
@@ -78,12 +90,11 @@ class _TagViewState extends State<TagView> {
 
     searchFocusNode.addListener(searchFocusListener);
 
-    item = searchHandler.viewedItem.value;
+    item = widget.item;
+    handler = widget.handler;
     tags = [...item.tagsList];
     filteredTags = [...tags];
     WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
-
-    searchHandler.viewedItem.addListener(itemListener);
 
     reloadItemData(initial: true).then((_) async {
       await Future.delayed(const Duration(seconds: 3));
@@ -97,9 +108,16 @@ class _TagViewState extends State<TagView> {
     });
   }
 
-  void itemListener() {
-    item = searchHandler.viewedItem.value;
-    parseSortGroupTags();
+  @override
+  void didUpdateWidget(covariant TagView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.item != item) {
+      item = widget.item;
+      parseSortGroupTags();
+    }
+    if (widget.handler != handler) {
+      handler = widget.handler;
+    }
   }
 
   @override
@@ -110,13 +128,10 @@ class _TagViewState extends State<TagView> {
     searchController.dispose();
     searchFocusNode.removeListener(searchFocusListener);
     searchFocusNode.dispose();
-    searchHandler.viewedItem.removeListener(itemListener);
     super.dispose();
   }
 
-  bool get supportsItemUpdate =>
-      searchHandler.currentBooruHandler.hasLoadItemSupport &&
-      searchHandler.currentBooruHandler.shouldUpdateIteminTagView;
+  bool get supportsItemUpdate => handler.hasLoadItemSupport && handler.shouldUpdateIteminTagView;
 
   Future<void> reloadItemData({
     bool initial = false,
@@ -127,13 +142,20 @@ class _TagViewState extends State<TagView> {
       failedUpdate = false;
       setState(() {});
       cancelToken = CancelToken();
-      final res = await searchHandler.currentBooruHandler.loadItem(
+      final res = await handler.loadItem(
         item: item,
         cancelToken: cancelToken,
         withCapcthaCheck: !initial,
       );
       if (res.failed) {
         failedUpdate = true;
+      } else if (res.item != null) {
+        unawaited(
+          SettingsHandler.instance.dbHandler.updateBooruItem(
+            res.item!,
+            BooruUpdateMode.urlUpdate,
+          ),
+        );
       }
       loadingUpdate = false;
       setState(() {});
@@ -307,7 +329,7 @@ class _TagViewState extends State<TagView> {
   }
 
   Widget commentsButton() {
-    final bool hasSupport = searchHandler.currentBooruHandler.hasCommentsSupport;
+    final bool hasSupport = handler.hasCommentsSupport;
     final bool hasComments = item.hasComments == true;
     final IconData icon = hasComments ? CupertinoIcons.text_bubble_fill : CupertinoIcons.text_bubble;
 
@@ -325,8 +347,8 @@ class _TagViewState extends State<TagView> {
         SettingsPageOpen(
           context: context,
           page: (_) => CommentsDialog(
-            item: searchHandler.viewedItem.value,
-            handler: searchHandler.currentBooruHandler,
+            item: item,
+            handler: handler,
           ),
         ).open();
       },
@@ -335,7 +357,7 @@ class _TagViewState extends State<TagView> {
   }
 
   Widget notesButton() {
-    final bool hasSupport = searchHandler.currentBooruHandler.hasNotesSupport;
+    final bool hasSupport = handler.hasNotesSupport;
     final bool hasNotes = item.hasNotes == true;
 
     if (!hasSupport || !hasNotes) {
@@ -355,7 +377,7 @@ class _TagViewState extends State<TagView> {
             showDialog(
               context: context,
               builder: (context) {
-                return NotesDialog(searchHandler.viewedItem.value);
+                return NotesDialog(item);
               },
             );
           },
@@ -369,7 +391,7 @@ class _TagViewState extends State<TagView> {
             color: Theme.of(context).iconTheme.color,
           ),
           action: () async {
-            item.notes.value = await searchHandler.currentBooruHandler.getNotes(item.serverId!);
+            item.notes.value = await handler.getNotes(item.serverId!);
           },
           drawBottomBorder: false,
         );
@@ -515,7 +537,14 @@ class _TagViewState extends State<TagView> {
             ),
             const SizedBox(height: 10),
             //
-            if (searchHandler.currentBooru.type?.isMerge != true) TagContentPreview(tag: tag),
+            TagContentPreview(
+              tag: tag,
+              boorus: handler.booru.type?.isMerge == true
+                  ? [
+                      ...(handler as MergebooruHandler).booruHandlers.map((e) => e.booru),
+                    ]
+                  : [handler.booru],
+            ),
             //
             ListTile(
               leading: Icon(
@@ -613,6 +642,7 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.addTagToList('loved', tag);
                   searchHandler.filterCurrentFetched();
+                  handler.filterFetched();
                   parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop(true);
                 },
@@ -624,6 +654,7 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.addTagToList('hated', tag);
                   searchHandler.filterCurrentFetched();
+                  handler.filterFetched();
                   parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
@@ -1278,44 +1309,147 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
 }
 
 class TagContentPreview extends StatefulWidget {
-  const TagContentPreview({
+  TagContentPreview({
     required this.tag,
-    this.customBooru,
+    required this.boorus,
     super.key,
-  });
+  }) : assert(
+         boorus.isNotEmpty,
+         'boorus must not be empty',
+       );
 
   final String tag;
-  final Booru? customBooru;
+  final List<Booru> boorus;
 
   @override
   State<TagContentPreview> createState() => _TagContentPreviewState();
 }
 
 class _TagContentPreviewState extends State<TagContentPreview> {
-  final SearchHandler searchHandler = SearchHandler.instance;
+  late final AutoScrollController scrollController;
 
-  final ScrollController scrollController = ScrollController();
+  Booru? selectedBooru;
 
-  SearchTab? preview;
-  bool loading = false, failed = false;
+  SearchTab? tab;
+  bool loading = false;
+  bool isLastPage = false;
+  String errorString = '';
 
-  Future<void> loadPreview() async {
-    preview = SearchTab(
-      widget.customBooru ?? searchHandler.currentBooru,
-      null,
-      widget.tag,
-    );
-    loading = true;
-    failed = false;
-    setState(() {});
+  final ValueNotifier<int> viewedIndex = ValueNotifier(-1);
 
-    await preview!.booruHandler.search(widget.tag, null);
-    loading = false;
+  bool get isSingleBooru => widget.boorus.length == 1;
 
-    if (preview!.booruHandler.errorString.isNotEmpty) {
-      failed = true;
+  @override
+  void initState() {
+    super.initState();
+    scrollController = AutoScrollController();
+
+    if (isSingleBooru) {
+      selectedBooru = widget.boorus.first;
+    }
+  }
+
+  Future<void> loadPreview({
+    bool refresh = false,
+    bool retry = false,
+  }) async {
+    if (selectedBooru == null) {
+      return;
+    }
+
+    if (refresh || tab == null) {
+      tab = SearchTab(
+        selectedBooru!,
+        null,
+        widget.tag,
+      );
+      loading = false;
+      isLastPage = false;
+      errorString = '';
+      setState(() {});
+    }
+
+    if (loading) {
+      return;
+    }
+
+    if (retry) {
+      errorString = '';
+      tab!.booruHandler.errorString = '';
+
+      isLastPage = false;
+      tab!.booruHandler.locked = false;
+      tab!.booruHandler.pageNum--;
+    }
+
+    if (isLastPage || errorString.isNotEmpty) {
+      return;
+    }
+
+    if (tab!.booruHandler.locked == false) {
+      loading = true;
+      tab!.booruHandler.pageNum++;
     }
     setState(() {});
+
+    await tab!.booruHandler.search(widget.tag, null);
+
+    if (tab!.booruHandler.locked && !isLastPage) {
+      isLastPage = true;
+      setState(() {});
+    }
+
+    if (tab!.booruHandler.errorString.isNotEmpty) {
+      errorString = tab!.booruHandler.errorString;
+      setState(() {});
+    }
+
+    if (tab!.booruHandler.totalCount.value == 0) {
+      unawaited(tab!.booruHandler.searchCount(widget.tag));
+    }
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      loading = false;
+      setState(() {});
+    });
+    setState(() {});
+  }
+
+  Future<void> onTap(int index) async {
+    ViewerHandler.instance.pauseAllVideos();
+    viewedIndex.value = index;
+    await Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (_, _, _) => GalleryViewPage(
+          tab: tab!,
+          initialIndex: index,
+          canSelect: false,
+          onPageChanged: (page) async {
+            viewedIndex.value = page;
+            await scrollController.scrollToIndex(
+              page,
+              duration: const Duration(milliseconds: 10),
+              preferPosition: AutoScrollPosition.begin,
+            );
+          },
+        ),
+        opaque: false,
+        transitionDuration: const Duration(milliseconds: 300),
+        barrierColor: Colors.black26,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return const ZoomPageTransitionsBuilder().buildTransitions(
+            MaterialPageRoute(
+              builder: (_) => const SizedBox.shrink(),
+            ),
+            context,
+            animation,
+            secondaryAnimation,
+            child,
+          );
+        },
+      ),
+    );
+    viewedIndex.value = -1;
   }
 
   @override
@@ -1324,16 +1458,30 @@ class _TagContentPreviewState extends State<TagContentPreview> {
       duration: const Duration(milliseconds: 200),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
-        child: preview == null
+        child: tab == null
             ? ListTile(
                 leading: Icon(
                   Icons.search,
                   color: Theme.of(context).iconTheme.color,
                 ),
                 title: const Text('Preview'),
-                onTap: loadPreview,
+                subtitle: isSingleBooru
+                    ? null
+                    : SettingsBooruDropdown(
+                        title: 'Booru',
+                        placeholder: 'Select a booru to load',
+                        value: selectedBooru,
+                        items: widget.boorus,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        onChanged: (value) {
+                          selectedBooru = value;
+                          loadPreview(refresh: true);
+                        },
+                        drawBottomBorder: false,
+                      ),
+                onTap: isSingleBooru ? loadPreview : null,
               )
-            : ((loading || failed)
+            : ((tab!.booruHandler.filteredFetched.isEmpty && (loading || errorString.isNotEmpty))
                   ? ListTile(
                       leading: Icon(
                         loading ? Icons.search : Icons.restart_alt,
@@ -1341,8 +1489,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                       ),
                       trailing: loading ? const CircularProgressIndicator() : null,
                       title: loading ? const Text('Preview is loading...') : const Text('Failed to load preview'),
-                      subtitle: failed ? const Text('Tap to try again') : null,
-                      onTap: failed ? loadPreview : null,
+                      subtitle: errorString.isNotEmpty ? const Text('Tap to try again') : null,
+                      onTap: errorString.isNotEmpty ? () => loadPreview(refresh: true) : null,
                     )
                   : Column(
                       children: [
@@ -1351,98 +1499,171 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                             const Icon(Icons.search),
                             const SizedBox(width: 8),
                             Text(
-                              'Preview:',
+                              'Preview',
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
+                            Obx(() {
+                              final bool hasCount = tab!.booruHandler.totalCount > 0;
+
+                              return AnimatedSize(
+                                duration: const Duration(milliseconds: 200),
+                                child: hasCount
+                                    ? Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                                        child: Text(
+                                          '(${tab!.booruHandler.totalCount})',
+                                          style: Theme.of(context).textTheme.bodySmall,
+                                        ),
+                                      )
+                                    : const SizedBox.shrink(),
+                              );
+                            }),
                             const SizedBox(width: 8),
-                            BooruFavicon(preview!.booruHandler.booru),
+                            BooruFavicon(tab!.booruHandler.booru),
                             const SizedBox(width: 4),
                             Text(
-                              preview!.booruHandler.booru.name ?? '',
+                              tab!.booruHandler.booru.name ?? '',
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             const SizedBox(width: 4),
                             IconButton(
-                              onPressed: loadPreview,
+                              onPressed: isSingleBooru
+                                  ? () => loadPreview(refresh: true)
+                                  : () {
+                                      tab = null;
+                                      selectedBooru = null;
+                                      setState(() {});
+                                    },
                               icon: const Icon(Icons.refresh),
                             ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         SizedBox(
-                          height: 180,
+                          height: 200,
                           width: MediaQuery.sizeOf(context).width,
-                          child: FadingEdgeScrollView.fromScrollView(
-                            child: ListView.builder(
-                              controller: scrollController,
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: preview!.booruHandler.filteredFetched.isEmpty
-                                  ? 1
-                                  : preview!.booruHandler.filteredFetched.length,
-                              itemBuilder: (context, index) {
-                                if (preview!.booruHandler.filteredFetched.isEmpty) {
-                                  return const Center(
-                                    child: Column(
-                                      // mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Kaomoji(
-                                          type: KaomojiType.shrug,
-                                          style: TextStyle(fontSize: 24),
-                                        ),
-                                        Text(
-                                          'Nothing found',
-                                          style: TextStyle(fontSize: 16),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }
+                          child: NotificationListener<ScrollUpdateNotification>(
+                            onNotification: (notif) {
+                              final bool isNotAtStart = notif.metrics.pixels > 0;
+                              final bool isAtOrNearEdge =
+                                  notif.metrics.atEdge ||
+                                  notif.metrics.pixels >
+                                      (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2));
+                              final bool isScreenFilled =
+                                  notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0;
 
-                                return Material(
-                                  color: Colors.transparent,
-                                  child: Container(
-                                    padding: const EdgeInsets.only(right: 8),
-                                    height: 180,
-                                    width: 120,
-                                    child: InkWell(
-                                      borderRadius: BorderRadius.circular(4),
-                                      onTap: () {
-                                        ViewerHandler.instance.pauseAllVideos();
-                                        Navigator.of(context).push(
-                                          PageRouteBuilder(
-                                            pageBuilder: (_, _, _) => ItemViewerPage(
-                                              items: preview!.booruHandler.filteredFetched,
-                                              initialIndex: index,
-                                              booru: preview!.booruHandler.booru,
+                              if (!loading) {
+                                if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
+                                  loadPreview();
+                                }
+                              }
+
+                              return true;
+                            },
+                            child: Scrollbar(
+                              controller: scrollController,
+                              interactive: true,
+                              thickness: 6,
+                              thumbVisibility: true,
+                              child: FadingEdgeScrollView.fromScrollView(
+                                child: ListView.builder(
+                                  controller: scrollController,
+                                  physics: getListPhysics(),
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: tab!.booruHandler.filteredFetched.isEmpty
+                                      ? 1
+                                      : tab!.booruHandler.filteredFetched.length +
+                                            ((loading || errorString.isNotEmpty) ? 1 : 0),
+                                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                                  itemBuilder: (context, index) {
+                                    if (tab!.booruHandler.filteredFetched.isEmpty) {
+                                      return const Center(
+                                        child: Column(
+                                          // mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Kaomoji(
+                                              type: KaomojiType.shrug,
+                                              style: TextStyle(fontSize: 24),
                                             ),
-                                            opaque: false,
-                                            transitionDuration: const Duration(milliseconds: 300),
-                                            barrierColor: Colors.black26,
-                                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                              return const ZoomPageTransitionsBuilder().buildTransitions(
-                                                MaterialPageRoute(
-                                                  builder: (_) => const SizedBox.shrink(),
-                                                ),
-                                                context,
-                                                animation,
-                                                secondaryAnimation,
-                                                child,
-                                              );
-                                            },
+                                            Text(
+                                              'Nothing found',
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+
+                                    if (loading && index == tab!.booruHandler.filteredFetched.length) {
+                                      return const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 32),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    }
+
+                                    if (errorString.isNotEmpty && index == tab!.booruHandler.filteredFetched.length) {
+                                      return Center(
+                                        child: Container(
+                                          padding: const EdgeInsets.all(16),
+                                          margin: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).colorScheme.surface,
+                                            border: Border.all(color: Theme.of(context).dividerColor),
+                                            borderRadius: BorderRadius.circular(12),
                                           ),
-                                        );
-                                      },
-                                      child: ThumbnailBuild(
-                                        item: preview!.booruHandler.filteredFetched[index],
-                                        booru: preview!.booruHandler.booru,
-                                        selectable: false,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            spacing: 8,
+                                            children: [
+                                              const Icon(
+                                                Icons.error_outline,
+                                                size: 30,
+                                              ),
+                                              const Text(
+                                                'Failed to load preview page',
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  loadPreview(retry: true);
+                                                },
+                                                child: const Text('Try again'),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }
+
+                                    return Material(
+                                      color: Colors.transparent,
+                                      child: Container(
+                                        padding: const EdgeInsets.only(right: 8),
+                                        height: 180,
+                                        width: 120,
+                                        child: ValueListenableBuilder(
+                                          valueListenable: viewedIndex,
+                                          builder: (context, viewedIndex, _) {
+                                            return ThumbnailCardBuild(
+                                              index: index,
+                                              item: tab!.booruHandler.filteredFetched[index],
+                                              handler: tab!.booruHandler,
+                                              scrollController: scrollController,
+                                              isHighlighted: viewedIndex == index,
+                                              selectable: false,
+                                              onTap: onTap,
+                                            );
+                                          },
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                );
-                              },
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
                           ),
                         ),

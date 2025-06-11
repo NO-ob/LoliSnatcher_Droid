@@ -22,8 +22,7 @@ import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 class ThumbnailBuild extends StatelessWidget {
   const ThumbnailBuild({
     required this.item,
-    required this.booru,
-    this.handler,
+    required this.handler,
     this.selectedIndex,
     this.selectable = true,
     this.onSelected,
@@ -32,8 +31,7 @@ class ThumbnailBuild extends StatelessWidget {
   });
 
   final BooruItem item;
-  final Booru booru;
-  final BooruHandler? handler;
+  final BooruHandler handler;
   final int? selectedIndex;
   final bool selectable;
   final void Function()? onSelected;
@@ -50,7 +48,7 @@ class ThumbnailBuild extends StatelessWidget {
         children: [
           Thumbnail(
             item: item,
-            booru: booru,
+            booru: handler.booru,
             isStandalone: true,
             useHero: selectable,
           ),
@@ -108,7 +106,7 @@ class ThumbnailBuild extends StatelessWidget {
                       final List<Widget> widgets = [];
                       // Merge booru
                       if (handler is MergebooruHandler) {
-                        final fetchedMap = (handler! as MergebooruHandler).fetchedMap;
+                        final fetchedMap = (handler as MergebooruHandler).fetchedMap;
 
                         Booru? booru;
                         int? booruIndex;
@@ -147,7 +145,7 @@ class ThumbnailBuild extends StatelessWidget {
                       Booru? getMergeBooruEntry() {
                         if (handler is! MergebooruHandler) return null;
 
-                        final fetchedMap = (handler! as MergebooruHandler).fetchedMap;
+                        final fetchedMap = (handler as MergebooruHandler).fetchedMap;
                         for (int i = 0; i < fetchedMap.entries.length; i++) {
                           final entry = fetchedMap.entries.elementAt(i);
                           if (entry.value.items.contains(item)) {

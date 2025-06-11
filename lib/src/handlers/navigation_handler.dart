@@ -21,6 +21,8 @@ class NavigationHandler {
 
   BuildContext get navContext => navigatorKey.currentContext!;
 
+  final RouteObserver<ModalRoute> routeObserver = RouteObserver<ModalRoute>();
+
   final GlobalKey<CustomFloatingHeaderState> floatingHeaderKey = GlobalKey<CustomFloatingHeaderState>();
   final GlobalKey<WaterfallBottomBarState> bottomBarKey = GlobalKey<WaterfallBottomBarState>();
 }

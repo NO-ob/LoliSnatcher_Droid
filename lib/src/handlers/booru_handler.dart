@@ -283,7 +283,13 @@ abstract class BooruHandler {
 
   /// [SHOULD BE OVERRIDDEN]
   FutureOr<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) {
-    return BooruItem(fileURL: '', sampleURL: '', thumbnailURL: '', tagsList: [], postURL: '');
+    return BooruItem(
+      fileURL: '',
+      sampleURL: '',
+      thumbnailURL: '',
+      tagsList: const [],
+      postURL: '',
+    );
   }
 
   Future<void> afterParseResponse(List<BooruItem> newItems) async {
