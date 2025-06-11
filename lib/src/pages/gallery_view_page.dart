@@ -394,13 +394,11 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                 final bool isNear =
                                     distanceFromCurrent <=
                                     (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
-                                if (!isViewed && !isNear) {
-                                  // don't render if out of preload range
-                                  return Center(child: Container(color: Colors.black));
-                                }
 
-                                // Cut to the size of the container, prevents overlapping
-                                return child!;
+                                return AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 100),
+                                  child: (!isViewed && !isNear) ? Center(child: Container(color: Colors.black)) : child,
+                                );
                               },
                               child: ClipRect(
                                 // Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
@@ -411,7 +409,10 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                   onLongPress: () {
                                     viewerHandler.toggleToolbar(true);
                                   },
-                                  child: itemWidget,
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 100),
+                                    child: itemWidget,
+                                  ),
                                 ),
                               ),
                             );
