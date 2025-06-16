@@ -69,6 +69,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
   void initState() {
     super.initState();
 
+    // pause all active videos to avoid performance and sound overlay issues
+    viewerHandler.pauseAllVideos();
+
     controller = PreloadPageController(initialPage: widget.initialIndex);
     page.value = widget.initialIndex;
 
@@ -344,17 +347,12 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                 itemWidget = ValueListenableBuilder(
                                   valueListenable: page,
                                   builder: (_, page, _) {
-                                    return ValueListenableBuilder(
-                                      valueListenable: isActive,
-                                      builder: (_, isActive, _) {
-                                        return VideoViewer(
-                                          item,
-                                          booru: widget.tab.booruHandler.booru,
-                                          isViewed: page == index && isActive,
-                                          enableFullscreen: true,
-                                          key: item.key,
-                                        );
-                                      },
+                                    return VideoViewer(
+                                      item,
+                                      booru: widget.tab.booruHandler.booru,
+                                      isViewed: page == index,
+                                      enableFullscreen: true,
+                                      key: item.key,
                                     );
                                   },
                                 );
@@ -362,6 +360,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                 itemWidget = VideoViewerPlaceholder(
                                   item: item,
                                   booru: widget.tab.booruHandler.booru,
+                                  key: item.key,
                                 );
                               }
                             } else if (isNeedToGuess) {
@@ -375,6 +374,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                       : null;
                                   setState(() {});
                                 },
+                                key: item.key,
                               );
                             } else if (isNeedToLoadItem) {
                               itemWidget = LoadItemViewer(
@@ -384,6 +384,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                   widget.tab.booruHandler.filteredFetched[index] = newItem;
                                   setState(() {});
                                 },
+                                key: item.key,
                               );
                             } else {
                               itemWidget = GuessExtensionViewer(
@@ -396,8 +397,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                       : null;
                                   setState(() {});
                                 },
+                                key: item.key,
                               );
-                              // itemWidget = UnknownViewerPlaceholder(item: item);
+                              // itemWidget = UnknownViewerPlaceholder(item: item, key: item.key,);
                             }
 
                             final child = ValueListenableBuilder(

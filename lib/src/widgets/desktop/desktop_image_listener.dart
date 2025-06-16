@@ -71,6 +71,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
           () => VideoViewerPlaceholder(
             item: item,
             booru: searchHandler.currentBooru,
+            key: item.key,
           ),
         );
       }
@@ -84,6 +85,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
             item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
             updateState();
           },
+          key: item.key,
         ),
       );
     } else if (item.mediaType.value.isNeedToGuess && searchHandler.currentBooruHandler.hasLoadItemSupport) {
@@ -98,6 +100,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
               setState(() {});
             }
           },
+          key: item.key,
         ),
       );
     } else {
@@ -111,8 +114,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
             updateState();
           },
         ),
+        key: item.key,
       );
-      // return UnknownViewerPlaceholder(item: item);
+      // return UnknownViewerPlaceholder(item: item, key: item.key,);
     }
   }
 

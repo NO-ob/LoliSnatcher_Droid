@@ -1416,7 +1416,6 @@ class _TagContentPreviewState extends State<TagContentPreview> {
   }
 
   Future<void> onTap(int index) async {
-    ViewerHandler.instance.pauseAllVideos();
     viewedIndex.value = index;
     final viewerKey = GlobalKey(debugLabel: 'viewer-${tab!.tags.replaceAll(' ', '_')}');
     ViewerHandler.instance.addViewer(viewerKey);
