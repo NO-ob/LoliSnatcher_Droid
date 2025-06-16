@@ -42,10 +42,10 @@ List<List<String>> decodeBackupString(String input) {
 
 class SearchHandler {
   SearchHandler() {
-    _volumeStream = Platform.isAndroid ? StreamController.broadcast() : null;
+    _volumeStreamController = Platform.isAndroid ? StreamController.broadcast() : null;
     _scrollStream = StreamController.broadcast();
     _rootVolumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
-      _volumeStream?.sink.add(event);
+      _volumeStreamController?.sink.add(event);
     });
   }
   // alternative way to get instance of the controller
@@ -701,8 +701,8 @@ class SearchHandler {
   }
 
   // stream that will notify it's listeners when it receives a volume button event
-  StreamController<String>? _volumeStream;
-  Stream<String>? get volumeStream => _volumeStream?.stream;
+  StreamController<String>? _volumeStreamController;
+  Stream<String>? get volumeStream => _volumeStreamController?.stream;
 
   // listener for native volume button events
   StreamSubscription? _rootVolumeListener;
@@ -714,7 +714,7 @@ class SearchHandler {
   void dispose() {
     _scrollStream?.close();
     _rootVolumeListener?.cancel();
-    _volumeStream?.close();
+    _volumeStreamController?.close();
   }
 
   // Backup/restore tabs stuff

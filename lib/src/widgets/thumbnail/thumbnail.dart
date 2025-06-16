@@ -562,6 +562,20 @@ class _ThumbnailState extends State<Thumbnail> {
                 },
               ),
             //
+            if (widget.isStandalone && widget.item.isHated)
+              Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(iconSize * 0.1),
+                ),
+                width: iconSize,
+                height: iconSize,
+                child: const Icon(
+                  CupertinoIcons.eye_slash,
+                  color: Colors.white,
+                ),
+              ),
             if (widget.isStandalone)
               ValueListenableBuilder(
                 valueListenable: isLoaded,
@@ -623,21 +637,6 @@ class _ThumbnailState extends State<Thumbnail> {
                       },
                     );
                   },
-                ),
-              ),
-            //
-            if (widget.isStandalone && widget.item.isHated)
-              Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(iconSize * 0.1),
-                ),
-                width: iconSize,
-                height: iconSize,
-                child: const Icon(
-                  CupertinoIcons.eye_slash,
-                  color: Colors.white,
                 ),
               ),
           ],

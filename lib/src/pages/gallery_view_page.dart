@@ -33,9 +33,9 @@ class GalleryViewPage extends StatefulWidget {
   const GalleryViewPage({
     required this.tab,
     required this.initialIndex,
+    required super.key, // key required to allow disabling rendering viewer items when there are too many active viewers at the same time
     this.canSelect = true,
     this.onPageChanged,
-    super.key,
   });
 
   final SearchTab tab;
@@ -52,16 +52,18 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
   final SnatchHandler snatchHandler = SnatchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-  late PreloadPageController controller;
+  late final PreloadPageController controller;
 
   final ValueNotifier<int> page = ValueNotifier(0);
 
-  FocusNode kbFocusNode = FocusNode();
+  final FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   final GlobalKey<ScaffoldState> viewerScaffoldKey = GlobalKey<ScaffoldState>();
 
   bool isOpeningAnimation = true;
   final ValueNotifier<double> dismissProgress = ValueNotifier(1);
+
+  final ValueNotifier<bool> isActive = ValueNotifier(true);
 
   @override
   void initState() {
@@ -75,7 +77,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
 
     final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || viewerHandler.displayAppbar.value;
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
-    setVolumeListener();
+    volumeListener = SearchHandler.instance.volumeStream?.listen(volumeCallback);
 
     final item = widget.tab.booruHandler.filteredFetched[widget.initialIndex];
     viewerHandler.setCurrent(item.key);
@@ -97,24 +99,33 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
   }
 
   @override
+  void didPushNext() {
+    isActive.value = false;
+  }
+
+  @override
+  void didPush() {
+    isActive.value = true;
+  }
+
+  @override
   void didPopNext() {
+    isActive.value = true;
     final item = widget.tab.booruHandler.filteredFetched[page.value];
     viewerHandler.setCurrent(item.key);
   }
 
   @override
   void dispose() {
+    if (widget.key is GlobalKey) {
+      viewerHandler.removeViewer(widget.key! as GlobalKey);
+    }
     NavigationHandler.instance.routeObserver.unsubscribe(this);
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
     kbFocusNode.dispose();
     ServiceHandler.enableSleep();
     super.dispose();
-  }
-
-  void setVolumeListener() {
-    volumeListener?.cancel();
-    volumeListener = SearchHandler.instance.volumeStream?.listen(volumeCallback);
   }
 
   void volumeCallback(String event) {
@@ -126,7 +137,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
       dir = 1;
     }
 
-    if (kbFocusNode.hasFocus && dir != 0) {
+    if (kbFocusNode.hasFocus && isActive.value && dir != 0) {
       // disable volume scrolling when not in focus
       // lastScrolledTo = math.max(math.min(lastScrolledTo + dir, widget.handler.filteredFetched.length), 0);
       final int toPage = page.value + dir; // lastScrolledTo;
@@ -333,12 +344,17 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                 itemWidget = ValueListenableBuilder(
                                   valueListenable: page,
                                   builder: (_, page, _) {
-                                    return VideoViewer(
-                                      item,
-                                      booru: widget.tab.booruHandler.booru,
-                                      isViewed: page == index,
-                                      enableFullscreen: true,
-                                      key: item.key,
+                                    return ValueListenableBuilder(
+                                      valueListenable: isActive,
+                                      builder: (_, isActive, _) {
+                                        return VideoViewer(
+                                          item,
+                                          booru: widget.tab.booruHandler.booru,
+                                          isViewed: page == index && isActive,
+                                          enableFullscreen: true,
+                                          key: item.key,
+                                        );
+                                      },
                                     );
                                   },
                                 );
@@ -385,36 +401,47 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                             }
 
                             final child = ValueListenableBuilder(
-                              valueListenable: page,
-                              builder: (context, page, child) {
-                                final bool isViewed = index == page;
-                                final int distanceFromCurrent = (page - index).abs();
-                                // don't render more than 3 videos at once, chance to crash is too high otherwise
-                                // disabled video preload for sankaku because their videos cause crashes if loading/rendering(?) more than one at a time
-                                final bool isNear =
-                                    distanceFromCurrent <=
-                                    (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
+                              valueListenable: viewerHandler.activeViewers,
+                              builder: (_, activeViewers, _) {
+                                return ValueListenableBuilder(
+                                  valueListenable: page,
+                                  builder: (context, page, child) {
+                                    final bool isViewed = index == page;
+                                    final int distanceFromCurrent = (page - index).abs();
+                                    // don't render more than 3 videos at once, chance to crash is too high otherwise
+                                    // disabled video preload for sankaku because their videos cause crashes if loading/rendering(?) more than one at a time
+                                    final bool isNear =
+                                        distanceFromCurrent <=
+                                        (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
 
-                                return AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 100),
-                                  child: (!isViewed && !isNear) ? Center(child: Container(color: Colors.black)) : child,
+                                    final viewerIndex = widget.key is GlobalKey
+                                        ? viewerHandler.indexOfViewer(widget.key! as GlobalKey)
+                                        : -1;
+                                    final bool isViewerTooDeep = activeViewers.length > ViewerHandler.maxActiveViewers
+                                        ? (viewerIndex != -1 &&
+                                              viewerIndex < (activeViewers.length - 1 - ViewerHandler.maxActiveViewers))
+                                        : false;
+
+                                    return AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 100),
+                                      child: (isViewerTooDeep || (!isViewed && !isNear))
+                                          ? Center(child: Container(color: Colors.black))
+                                          : child,
+                                    );
+                                  },
+                                  child: ClipRect(
+                                    // Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
+                                    child: GestureDetector(
+                                      onTap: () => viewerHandler.toggleToolbar(false),
+                                      onLongPress: () => viewerHandler.toggleToolbar(true),
+                                      child: AnimatedSwitcher(
+                                        duration: const Duration(milliseconds: 100),
+                                        child: itemWidget,
+                                      ),
+                                    ),
+                                  ),
                                 );
                               },
-                              child: ClipRect(
-                                // Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
-                                child: GestureDetector(
-                                  onTap: () {
-                                    viewerHandler.toggleToolbar(false);
-                                  },
-                                  onLongPress: () {
-                                    viewerHandler.toggleToolbar(true);
-                                  },
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 100),
-                                    child: itemWidget,
-                                  ),
-                                ),
-                              ),
                             );
 
                             if (settingsHandler.disableCustomPageTransitions) {

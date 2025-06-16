@@ -231,9 +231,12 @@ class _WaterfallViewState extends State<WaterfallView> {
       viewerHandler.inViewer.value = true;
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
 
+      final viewerKey = GlobalKey(debugLabel: 'viewer-main');
+      ViewerHandler.instance.addViewer(viewerKey);
       await Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (_, _, _) => GalleryViewPage(
+            key: viewerKey,
             tab: searchHandler.currentTab,
             initialIndex: index,
             onPageChanged: onViewerPageChanged,

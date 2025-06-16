@@ -30,6 +30,26 @@ class ViewerHandler {
   // Key of the currently viewed media widget
   final Rxn<GlobalKey> currentKey = Rxn(null);
 
+  final RxList<GlobalKey> activeViewers = RxList([]);
+
+  static const int maxActiveViewers = 3;
+
+  void addViewer(GlobalKey key) {
+    if (activeViewers.contains(key)) {
+      return;
+    }
+
+    activeViewers.add(key);
+  }
+
+  void removeViewer(GlobalKey key) {
+    activeViewers.remove(key);
+  }
+
+  int indexOfViewer(GlobalKey key) {
+    return activeViewers.indexOf(key);
+  }
+
   void addViewed(Key? key) {
     if (key == null || activeKeys.contains(key)) {
       return;

@@ -255,7 +255,9 @@ class VideoViewerState extends State<VideoViewer> {
     }
 
     if (oldWidget.isViewed != widget.isViewed) {
-      videoController.value?.seekTo(Duration.zero);
+      if (!viewerHandler.isFullscreen.value) {
+        videoController.value?.seekTo(Duration.zero);
+      }
       isViewed.value = widget.isViewed;
 
       if (isViewed.value) {
@@ -266,8 +268,10 @@ class VideoViewerState extends State<VideoViewer> {
           videoController.value?.setVolume(0);
         }
       } else {
-        videoController.value?.pause();
-        resetZoom(); // reset zoom if not viewed
+        if (!viewerHandler.isFullscreen.value) {
+          videoController.value?.pause();
+        }
+        resetZoom();
       }
     }
 
@@ -443,7 +447,8 @@ class VideoViewerState extends State<VideoViewer> {
         ServiceHandler.setVolumeButtons(viewerHandler.displayAppbar.value); // same as app bar value
       }
     } else {
-      if (videoController.value?.value.isPlaying == true) {
+      // fullscreen check is to avoid pausing video when opening fullscreen (it's a separate screen and therefore marks viewer as inactive)
+      if (videoController.value?.value.isPlaying == true && !viewerHandler.isFullscreen.value) {
         videoController.value?.pause();
       }
     }

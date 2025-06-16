@@ -1418,9 +1418,12 @@ class _TagContentPreviewState extends State<TagContentPreview> {
   Future<void> onTap(int index) async {
     ViewerHandler.instance.pauseAllVideos();
     viewedIndex.value = index;
+    final viewerKey = GlobalKey(debugLabel: 'viewer-${tab!.tags.replaceAll(' ', '_')}');
+    ViewerHandler.instance.addViewer(viewerKey);
     await Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (_, _, _) => GalleryViewPage(
+          key: viewerKey,
           tab: tab!,
           initialIndex: index,
           canSelect: false,
