@@ -110,24 +110,26 @@ class Tools {
     BooruItem? item,
     bool checkForReferer = false,
   }) async {
-    final host = Uri.parse((booru?.baseURL?.isNotEmpty == true ? booru?.baseURL : item?.postURL) ?? '').host;
-    if (host.isEmpty) return {};
+    final uri = Uri.parse((booru?.baseURL?.isNotEmpty == true ? booru?.baseURL : item?.postURL) ?? '');
+    if (uri.host.isEmpty) {
+      return {};
+    }
 
     // a few boorus don't work without a browser useragent
     final Map<String, String> headers = {'User-Agent': browserUserAgent};
-    if (host.contains('danbooru.donmai.us')) {
+    if (uri.host.contains('danbooru.donmai.us')) {
       headers['User-Agent'] = appUserAgent;
     }
     if ([
       ...SankakuHandler.knownUrls,
       'sankakuapi.com',
-    ].any(host.contains)) {
+    ].any(uri.host.contains)) {
       headers['User-Agent'] = Constants.sankakuAppUserAgent;
     }
 
     if (!isTestMode) {
       try {
-        final cookiesStr = await getCookies(host);
+        final cookiesStr = await getCookies(uri.toString());
         if (cookiesStr.isNotEmpty) {
           headers['Cookie'] = cookiesStr;
         }
@@ -140,9 +142,9 @@ class Tools {
     if (checkForReferer) {
       switch (booru?.type) {
         case BooruType.World:
-          if (host.contains('rule34.xyz')) {
+          if (uri.host.contains('rule34.xyz')) {
             headers['Referer'] = 'https://rule34xyz.b-cdn.net';
-          } else if (host.contains('rule34.world')) {
+          } else if (uri.host.contains('rule34.world')) {
             headers['Referer'] = 'https://rule34storage.b-cdn.net';
           }
           break;
