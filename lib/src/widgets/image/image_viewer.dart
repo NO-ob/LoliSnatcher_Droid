@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
@@ -102,7 +103,8 @@ class ImageViewerState extends State<ImageViewer> {
       if (error is DioException) {
         killLoading([
           'Loading error: ${error.type.name}',
-          if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
+          if (error.response?.statusCode != null)
+            '${error.response?.statusCode} - ${error.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(error.response?.statusCode)}',
         ]);
       } else {
         killLoading([

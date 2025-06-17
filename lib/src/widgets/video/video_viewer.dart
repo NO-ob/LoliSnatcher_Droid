@@ -19,6 +19,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/services/dio_downloader.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
@@ -214,7 +215,8 @@ class VideoViewerState extends State<VideoViewer> {
       if (error is DioException) {
         killLoading([
           'Loading error: ${error.type.name}',
-          if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
+          if (error.response?.statusCode != null)
+            '${error.response?.statusCode} - ${error.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(error.response?.statusCode)}',
         ]);
       } else {
         killLoading([

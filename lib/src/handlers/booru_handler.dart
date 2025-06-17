@@ -189,7 +189,7 @@ abstract class BooruHandler {
       );
       if (e is DioException) {
         errorString = e.response?.statusCode != null
-            ? '${e.response?.statusCode} - ${e.response?.statusMessage}'
+            ? '${e.response?.statusCode} - ${e.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(e.response?.statusCode)}'
             : (e.message ?? e.toString());
       } else {
         errorString = e.toString();
