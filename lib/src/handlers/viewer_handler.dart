@@ -88,7 +88,6 @@ class ViewerHandler {
     resetState();
   }
 
-  final RxBool inViewer = false.obs; // is in viewerpage
   final RxBool displayAppbar = true.obs; // is viewer toolbar visible
   final RxBool isZoomed = false.obs; // is current item zoomed in
   final RxBool isLoaded = false.obs; // is current item loaded
@@ -99,7 +98,6 @@ class ViewerHandler {
   final RxBool showNotes = true.obs;
 
   void resetState() {
-    inViewer.value = false;
     displayAppbar.value = true;
     isZoomed.value = false;
     isLoaded.value = false;

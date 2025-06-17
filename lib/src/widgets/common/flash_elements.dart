@@ -7,7 +7,6 @@ import 'package:flash/flash.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -89,8 +88,6 @@ class FlashElements {
   ///
   /// [shouldLeadingPulse] - should the leading icon pulse
   ///
-  /// [allowInViewer] - should the tip open when user is in viewer
-  ///
   /// [position] - position of the tip on the screen
   ///
   /// [asDialog] - should the tip be shown as a dialog
@@ -110,7 +107,6 @@ class FlashElements {
     Duration? duration = const Duration(seconds: 4),
     bool tapToClose = true,
     bool shouldLeadingPulse = true,
-    bool allowInViewer = true,
     FlashPosition position = FlashPosition.bottom,
     bool asDialog = false,
     bool ignoreDesktopCheck = false,
@@ -119,11 +115,6 @@ class FlashElements {
   }) async {
     // do nothing if in test mode
     if (Tools.isTestMode) {
-      return;
-    }
-
-    final bool inViewer = ViewerHandler.instance.inViewer.value;
-    if (!allowInViewer && inViewer) {
       return;
     }
 

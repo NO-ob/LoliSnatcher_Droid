@@ -245,8 +245,6 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                 autofocus: false,
                 focusNode: kbFocusNode,
                 onKeyEvent: (KeyEvent event) async {
-                  // print('viewer keyboard ${viewerHandler.inViewer.value}');
-
                   // detect only key DOWN events
                   if (event.runtimeType == KeyDownEvent) {
                     if (event.physicalKey == PhysicalKeyboardKey.arrowLeft ||

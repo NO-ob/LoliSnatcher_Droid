@@ -853,7 +853,7 @@ class _TagViewState extends State<TagView> {
                 GestureDetector(
                   onLongPress: () async {
                     await ServiceHandler.vibrate();
-                    if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
+                    if (settingsHandler.appMode.value.isMobile) {
                       Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                     }
                     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -896,7 +896,7 @@ class _TagViewState extends State<TagView> {
                               IconButton(
                                 onPressed: () {
                                   ServiceHandler.vibrate();
-                                  if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
+                                  if (settingsHandler.appMode.value.isMobile) {
                                     Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                                   }
                                   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
