@@ -636,23 +636,39 @@ class VideoViewerState extends State<VideoViewer> {
     );
   }
 
-  Future<void> onRestart() async {
+  Future<void> onManualRestart() async {
     if (isTooBig == 1) {
       isTooBig = 2;
     }
     isStopped.value = false;
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
-    await tryToLoadAndUpdateItem(
+    final bool? updateRes = await tryToLoadAndUpdateItem(
       widget.booruItem,
       loadItemCancelToken,
     );
     forceCache.value = false;
     updateState();
+
+    if (updateRes != true && widget.booru.baseURL?.isNotEmpty == true) {
+      await DioNetwork.get(
+        widget.booru.baseURL ?? '',
+        headers: await Tools.getFileCustomHeaders(
+          widget.booru,
+          item: widget.booruItem,
+          checkForReferer: true,
+        ),
+        customInterceptor: (dio) => DioNetwork.captchaInterceptor(
+          dio,
+          customUserAgent: Tools.appUserAgent,
+        ),
+      );
+    }
+
     await initVideo(true);
     updateState();
   }
 
-  void onStop({List<String>? reason}) {
+  void onManualStop({List<String>? reason}) {
     killLoading(
       reason ?? ['Stopped by user'],
     );
@@ -715,8 +731,8 @@ class VideoViewerState extends State<VideoViewer> {
               total: total,
               received: received,
               startedAt: startedAt,
-              onRestart: onRestart,
-              onStop: onStop,
+              onRestart: onManualRestart,
+              onStop: onManualStop,
             ),
           ),
           //

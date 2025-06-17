@@ -1225,7 +1225,10 @@ class SearchTab {
           return item.isFavourite.value;
         }
 
-        final res = await booruHandler.loadItem(item: item);
+        final res = await booruHandler.loadItem(
+          item: item,
+          withCapcthaCheck: true,
+        );
         if (res.failed ||
             res.item == null ||
             res.item!.tagsList.isEmpty ||

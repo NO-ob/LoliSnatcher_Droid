@@ -114,7 +114,10 @@ class SnatchHandler {
           // refetch data only on smaller-ish batches, otherwise they will most likely rate limit the user
           if (items.length <= 20) {
             for (final item in items) {
-              await booruHandler.loadItem(item: item);
+              await booruHandler.loadItem(
+                item: item,
+                withCapcthaCheck: true,
+              );
               await Future.delayed(const Duration(milliseconds: 100));
             }
           }

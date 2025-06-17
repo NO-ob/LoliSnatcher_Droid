@@ -30,6 +30,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     this.onError,
     this.sendTimeout,
     this.receiveTimeout,
+    this.withCaptchaCheck = false,
   }) : assert(!withCache || cacheFolder != null, 'cacheFolder must be set when withCache is true');
 
   @override
@@ -56,6 +57,8 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
   final Duration? sendTimeout;
 
   final Duration? receiveTimeout;
+
+  final bool withCaptchaCheck;
 
   @override
   Future<CustomNetworkImage> obtainKey(ImageConfiguration configuration) {
@@ -158,10 +161,18 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         onCacheDetected?.call(cacheFile != null);
       }
 
+      final client = _httpClient;
+      if (withCaptchaCheck) {
+        DioNetwork.captchaInterceptor(
+          client,
+          customUserAgent: Tools.appUserAgent,
+        );
+      }
+
       Response? response;
       if (cacheFile == null) {
         response = withCache
-            ? await _httpClient.downloadUri(
+            ? await client.downloadUri(
                 resolved,
                 cacheFilePath,
                 options: Options(
@@ -179,7 +190,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
                 },
                 cancelToken: cancelToken,
               )
-            : await _httpClient.getUri(
+            : await client.getUri(
                 resolved,
                 options: Options(
                   headers: headers,
@@ -197,7 +208,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
                 },
                 cancelToken: cancelToken,
               );
-        _httpClient.close();
+        client.close();
 
         if (Tools.isGoodStatusCode(response.statusCode) == false) {
           throw NetworkImageLoadException(
@@ -275,6 +286,7 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
     this.onError,
     this.sendTimeout,
     this.receiveTimeout,
+    this.withCaptchaCheck = false,
   }) : assert(!withCache || cacheFolder != null, 'cacheFolder must be set when withCache is true');
 
   @override
@@ -301,6 +313,8 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
   final Duration? sendTimeout;
 
   final Duration? receiveTimeout;
+
+  final bool withCaptchaCheck;
 
   @override
   Future<CustomNetworkAvifImage> obtainKey(ImageConfiguration configuration) {
@@ -403,10 +417,18 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
         onCacheDetected?.call(cacheFile != null);
       }
 
+      final client = _httpClient;
+      if (withCaptchaCheck) {
+        DioNetwork.captchaInterceptor(
+          client,
+          customUserAgent: Tools.appUserAgent,
+        );
+      }
+
       Response? response;
       if (cacheFile == null) {
         response = withCache
-            ? await _httpClient.downloadUri(
+            ? await client.downloadUri(
                 resolved,
                 cacheFilePath,
                 options: Options(
@@ -424,7 +446,7 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
                 },
                 cancelToken: cancelToken,
               )
-            : await _httpClient.getUri(
+            : await client.getUri(
                 resolved,
                 options: Options(
                   headers: headers,
@@ -442,7 +464,7 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
                 },
                 cancelToken: cancelToken,
               );
-        _httpClient.close();
+        client.close();
 
         if (Tools.isGoodStatusCode(response.statusCode) == false) {
           throw NetworkImageLoadException(

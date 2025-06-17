@@ -414,7 +414,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
     final booruHandler = BooruHandlerFactory().getBooruHandler([record.booru], 10).booruHandler;
     if (booruHandler.hasLoadItemSupport) {
       try {
-        await booruHandler.loadItem(item: record.item);
+        await booruHandler.loadItem(
+          item: record.item,
+          withCapcthaCheck: true,
+        );
       } catch (_) {}
     }
     snatchHandler.onRetryItem(
