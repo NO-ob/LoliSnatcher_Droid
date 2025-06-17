@@ -4,9 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
 import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -162,18 +165,25 @@ class ThumbnailBuild extends StatelessWidget {
                       if (isFavsOrDls) {
                         final itemFileHost = Uri.tryParse(item.fileURL)?.host;
                         final itemPostHost = Uri.tryParse(item.postURL)?.host;
-                        final Booru? possibleBooru = settingsHandler.booruList.firstWhereOrNull((e) {
+                        final Booru? possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
                           final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
-                          return (itemFileHost != null &&
-                                  booruHost != null &&
-                                  itemFileHost.isNotEmpty == true &&
-                                  booruHost.isNotEmpty == true &&
-                                  itemFileHost.contains(booruHost)) ||
-                              (itemPostHost != null &&
-                                  booruHost != null &&
-                                  itemPostHost.isNotEmpty == true &&
-                                  booruHost.isNotEmpty == true &&
-                                  itemPostHost.contains(booruHost));
+
+                          return (itemFileHost?.isNotEmpty == true &&
+                                  booruHost?.isNotEmpty == true &&
+                                  itemFileHost!.contains(booruHost!)) ||
+                              (itemPostHost?.isNotEmpty == true &&
+                                  booruHost?.isNotEmpty == true &&
+                                  (itemPostHost!.contains(booruHost!) ||
+                                      switch (e.type) {
+                                        BooruType.Sankaku =>
+                                          SankakuHandler.knownUrls.contains(itemPostHost) ||
+                                              SankakuHandler.knownUrls.contains(booruHost) ||
+                                              booruHost.contains('sankakuapi.com'),
+                                        BooruType.IdolSankaku =>
+                                          IdolSankakuHandler.knownUrls.contains(itemPostHost) ||
+                                              IdolSankakuHandler.knownUrls.contains(booruHost),
+                                        _ => false,
+                                      }));
                         });
                         if (possibleBooru?.type?.isFavouritesOrDownloads != true) {
                           final possibleFaviconUrl =
