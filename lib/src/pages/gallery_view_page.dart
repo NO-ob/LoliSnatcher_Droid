@@ -406,21 +406,22 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                 return ValueListenableBuilder(
                                   valueListenable: page,
                                   builder: (context, page, child) {
+                                    final viewerIndex = widget.key is GlobalKey
+                                        ? viewerHandler.indexOfViewer(widget.key! as GlobalKey)
+                                        : -1;
+                                    final int viewerDepth = viewerIndex == -1
+                                        ? 0
+                                        : (activeViewers.length - 1 - viewerIndex);
+                                    final bool isViewerTooDeep = viewerDepth >= ViewerHandler.maxActiveViewers;
+
                                     final bool isViewed = index == page;
                                     final int distanceFromCurrent = (page - index).abs();
                                     // don't render more than 3 videos at once, chance to crash is too high otherwise
                                     // disabled video preload for sankaku because their videos cause crashes if loading/rendering(?) more than one at a time
                                     final bool isNear =
-                                        distanceFromCurrent <=
-                                        (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount);
-
-                                    final viewerIndex = widget.key is GlobalKey
-                                        ? viewerHandler.indexOfViewer(widget.key! as GlobalKey)
-                                        : -1;
-                                    final bool isViewerTooDeep = activeViewers.length > ViewerHandler.maxActiveViewers
-                                        ? (viewerIndex != -1 &&
-                                              viewerIndex < (activeViewers.length - 1 - ViewerHandler.maxActiveViewers))
-                                        : false;
+                                        viewerDepth < ViewerHandler.maxActiveViewers &&
+                                        (distanceFromCurrent <=
+                                            (isVideo ? (isSankaku ? 0 : min(preloadCount, 1)) : preloadCount));
 
                                     return AnimatedSwitcher(
                                       duration: const Duration(milliseconds: 100),

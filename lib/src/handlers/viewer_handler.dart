@@ -32,7 +32,7 @@ class ViewerHandler {
 
   final RxList<GlobalKey> activeViewers = RxList([]);
 
-  static const int maxActiveViewers = 3;
+  static const int maxActiveViewers = 1;
 
   void addViewer(GlobalKey key) {
     if (activeViewers.contains(key)) {
