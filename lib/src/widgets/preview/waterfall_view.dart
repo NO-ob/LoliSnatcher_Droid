@@ -159,7 +159,6 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
         dir = 1;
       }
 
-      // TODO disable when not in focus (i.e. opened settings/drawer), right now if focus is lost, this widget can't regain it
       if (dir != 0 && scrollDone == true) {
         scrollDone = false;
         final double offset = max(
