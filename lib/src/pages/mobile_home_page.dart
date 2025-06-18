@@ -203,6 +203,44 @@ class MainDrawer extends StatelessWidget {
 
     // print('build drawer');
 
+    Future<Booru?> showSelectWebviewBooruDialog(List<Booru> boorus) async {
+      return showDialog<Booru?>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Select booru for webview'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 16,
+              children: [
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width,
+                  height: 50,
+                  child: SettingsBooruDropdown(
+                    value: null,
+                    items: boorus,
+                    onChanged: (Booru? newBooru) {
+                      if (newBooru == null) return;
+
+                      WidgetsBinding.instance.addPostFrameCallback((_) async {
+                        Navigator.of(context).pop(newBooru);
+                      });
+                    },
+                    title: 'Booru',
+                    contentPadding: EdgeInsets.zero,
+                    drawBottomBorder: false,
+                  ),
+                ),
+                //
+                const CancelButton(withIcon: true),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
     return ColoredBox(
       color: Theme.of(context).colorScheme.surface,
       child: SafeArea(
@@ -257,33 +295,45 @@ class MainDrawer extends StatelessWidget {
                       page: () => const SettingsPage(),
                     ),
                     Obx(() {
+                      final List<Booru> boorus = [
+                        searchHandler.currentBooru,
+                        ...searchHandler.currentSecondaryBoorus.value ?? <Booru>[],
+                      ].where((b) => b.baseURL?.isNotEmpty == true && BooruType.saveable.contains(b.type)).toList();
+
                       if (settingsHandler.booruList.isNotEmpty &&
                           searchHandler.list.isNotEmpty &&
-                          BooruType.saveable.contains(searchHandler.currentBooru.type) &&
+                          boorus.isNotEmpty &&
                           Tools.isOnPlatformWithWebviewSupport) {
                         return SettingsButton(
                           name: 'Open webview',
                           icon: const Icon(Icons.public),
-                          action: () {
-                            final String? url = searchHandler.currentBooru.baseURL;
+                          action: () async {
+                            final Booru? selectedBooru = boorus.length == 1
+                                ? boorus.first
+                                : await showSelectWebviewBooruDialog(boorus);
+                            if (selectedBooru == null) return;
+
+                            final String? url = selectedBooru.baseURL;
                             final String userAgent = Tools.browserUserAgent;
                             if (url == null || url.isEmpty) {
                               return;
                             }
 
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => InAppWebviewView(
-                                  initialUrl: url,
-                                  userAgent: userAgent,
+                            unawaited(
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => InAppWebviewView(
+                                    initialUrl: url,
+                                    userAgent: userAgent,
+                                  ),
                                 ),
                               ),
                             );
                           },
                         );
-                      } else {
-                        return const SizedBox.shrink();
                       }
+
+                      return const SizedBox.shrink();
                     }),
                     //
                     Obx(() {
@@ -315,9 +365,9 @@ class MainDrawer extends StatelessWidget {
                             settingsHandler.showUpdate(true);
                           },
                         );
-                      } else {
-                        return const SizedBox.shrink();
                       }
+
+                      return const SizedBox.shrink();
                     }),
                     if (SettingsHandler.isDesktopPlatform)
                       SettingsButton(
