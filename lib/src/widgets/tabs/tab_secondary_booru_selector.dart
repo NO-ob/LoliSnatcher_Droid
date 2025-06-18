@@ -38,7 +38,7 @@ class TabSecondaryBooruSelector extends StatelessWidget {
           ? const EdgeInsets.fromLTRB(2, 5, 2, 2)
           : const EdgeInsets.fromLTRB(5, 8, 5, 8);
 
-      final List<Booru> value = searchHandler.currentSecondaryBoorus.value ?? [];
+      final List<Booru> value = searchHandler.currentSecondaryBoorus.value ?? <Booru>[];
 
       return Padding(
         padding: margin,
