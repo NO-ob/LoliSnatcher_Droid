@@ -23,7 +23,7 @@
 
 # Flutter/Dart/Pub related
 **/doc/api/
-.dart_tool/
+/.dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .packages
@@ -35,20 +35,23 @@
 /lib/generated/
 
 # Web related
-lib/generated_plugin_registrant.dart
+/lib/generated_plugin_registrant.dart
 
 # Windows related
-windows/flutter/generated_plugin_registrant.cc
-windows/flutter/generated_plugin_registrant.h
+/windows/flutter/generated_plugin_registrant.cc
+/windows/flutter/generated_plugin_registrant.h
 
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 /ios/
 
 # FVM files
-.fvm/
+/.fvm/
 
 # Secret variables
 /config/secrets.json
 
+# Private
+/shortcuts/
+Notes.txt
 
