@@ -694,23 +694,15 @@ Future<bool?> tryToLoadAndUpdateItem(
     final Booru? possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
       final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
 
-      return (itemFileHost?.isNotEmpty == true &&
+      return (itemPostHost?.isNotEmpty == true &&
               booruHost?.isNotEmpty == true &&
-              itemFileHost!.contains(booruHost!)) ||
-          (itemPostHost?.isNotEmpty == true &&
-              booruHost?.isNotEmpty == true &&
-              (itemPostHost!.contains(booruHost!) ||
-                  // TODO make this booru agnostic
+              (itemPostHost! == booruHost! ||
                   switch (e.type) {
-                    BooruType.Sankaku =>
-                      SankakuHandler.knownUrls.contains(itemPostHost) ||
-                          SankakuHandler.knownUrls.contains(booruHost) ||
-                          booruHost.contains('sankakuapi.com'),
-                    BooruType.IdolSankaku =>
-                      IdolSankakuHandler.knownUrls.contains(itemPostHost) ||
-                          IdolSankakuHandler.knownUrls.contains(booruHost),
+                    BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
+                    BooruType.Sankaku => SankakuHandler.knownUrls.contains(itemPostHost),
                     _ => false,
-                  }));
+                  })) ||
+          (itemFileHost?.isNotEmpty == true && booruHost?.isNotEmpty == true && itemFileHost! == booruHost!);
     });
 
     cancelToken?.cancel();

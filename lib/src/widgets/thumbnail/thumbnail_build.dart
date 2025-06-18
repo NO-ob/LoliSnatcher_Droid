@@ -69,6 +69,7 @@ class ThumbnailBuild extends StatelessWidget {
             Container(
               alignment: Alignment.topCenter,
               child: Row(
+                mainAxisSize: MainAxisSize.max,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -100,7 +101,7 @@ class ThumbnailBuild extends StatelessWidget {
                       ),
                     ),
                   //
-                  const Spacer(),
+                  const SizedBox(width: 4),
 
                   // TODO move all this away from this widget
                   // Merge/favourites/downloads booru favicon widgets
@@ -168,27 +169,42 @@ class ThumbnailBuild extends StatelessWidget {
                         final Booru? possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
                           final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
 
-                          return (itemFileHost?.isNotEmpty == true &&
+                          return (itemPostHost?.isNotEmpty == true &&
                                   booruHost?.isNotEmpty == true &&
-                                  itemFileHost!.contains(booruHost!)) ||
-                              (itemPostHost?.isNotEmpty == true &&
-                                  booruHost?.isNotEmpty == true &&
-                                  (itemPostHost!.contains(booruHost!) ||
+                                  (itemPostHost! == booruHost! ||
                                       switch (e.type) {
-                                        BooruType.Sankaku =>
-                                          SankakuHandler.knownUrls.contains(itemPostHost) ||
-                                              SankakuHandler.knownUrls.contains(booruHost) ||
-                                              booruHost.contains('sankakuapi.com'),
-                                        BooruType.IdolSankaku =>
-                                          IdolSankakuHandler.knownUrls.contains(itemPostHost) ||
-                                              IdolSankakuHandler.knownUrls.contains(booruHost),
+                                        BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
+                                        BooruType.Sankaku => SankakuHandler.knownUrls.contains(itemPostHost),
                                         _ => false,
-                                      }));
+                                      })) ||
+                              (itemFileHost?.isNotEmpty == true &&
+                                  booruHost?.isNotEmpty == true &&
+                                  itemFileHost! == booruHost!);
                         });
                         if (possibleBooru?.type?.isFavouritesOrDownloads != true) {
                           final possibleFaviconUrl =
                               possibleBooru?.faviconURL ??
                               (itemPostHost != null ? 'https://$itemPostHost/favicon.ico' : null);
+
+                          if (possibleBooru?.name != null) {
+                            widgets.add(
+                              Flexible(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 2),
+                                  child: Text(
+                                    possibleBooru?.name ?? '',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 8,
+                                      color: Colors.white,
+                                      height: 1,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
 
                           widgets.add(
                             GestureDetector(
@@ -229,8 +245,9 @@ class ThumbnailBuild extends StatelessWidget {
                             borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5)),
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            spacing: 2,
+                            spacing: 4,
                             children: widgets,
                           ),
                         );
