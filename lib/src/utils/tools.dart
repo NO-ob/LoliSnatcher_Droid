@@ -267,6 +267,72 @@ class Tools {
 
     return cookieString.trim();
   }
+
+  static Future<bool> saveCookies(String uri, List<String> cookies) async {
+    if (cookies.isEmpty) return true;
+
+    if (isOnPlatformWithWebviewSupport) {
+      try {
+        final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
+        final List<Cookie?> parsedCookies = [];
+        for (final c in cookies) {
+          try {
+            final parts = c.split(';').map((p) => p.split('='));
+
+            final name = parts.first.first.trim();
+            final value = parts.first.last.trim();
+            final domain = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'domain')?.last.trim();
+            final path = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'path')?.last.trim();
+            final expires = DateTime.tryParse(
+              parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'expires')?.last.trim() ?? '',
+            );
+            final isSecure = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'secure') != null;
+            final isHttpOnly = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'httponly') != null;
+
+            parsedCookies.add(
+              Cookie(
+                name: name,
+                value: value,
+                domain: domain,
+                path: path,
+                expiresDate: expires?.millisecondsSinceEpoch,
+                isSecure: isSecure,
+                isHttpOnly: isHttpOnly,
+              ),
+            );
+          } catch (_) {}
+        }
+
+        for (final cookie in parsedCookies) {
+          if (cookie == null) continue;
+          if (Platform.isWindows) {
+            globalWindowsCookies[WebUri(uri).host]?.add(cookie);
+          }
+          await cookieManager.setCookie(
+            url: WebUri(uri),
+            name: cookie.name,
+            value: cookie.value,
+            domain: cookie.domain,
+            path: cookie.path ?? '/',
+            expiresDate: cookie.expiresDate,
+            isSecure: cookie.isSecure,
+            isHttpOnly: cookie.isHttpOnly,
+          );
+        }
+        return true;
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'Tools',
+          'saveCookies',
+          LogTypes.exception,
+          s: s,
+        );
+      }
+    }
+
+    return false;
+  }
 }
 
 bool captchaScreenActive = false;

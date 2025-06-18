@@ -17,25 +17,26 @@ class DioNetwork {
 
   static Dio getClient({String? baseUrl}) {
     final dio = Dio();
-    // dio.httpClientAdapter = NativeAdapter();
-    dio.options.baseUrl = baseUrl ?? '';
-    // dio.options.connectTimeout = Duration(seconds: 10);
-    // dio.options.receiveTimeout = Duration(seconds: 30);
-    // dio.options.sendTimeout = Duration(seconds: 10);
 
     final settingsHandler = SettingsHandler.instance;
-
-    dio.interceptors.add(Logger.dioInterceptor!);
-    dio.interceptors.add(settingsHandler.alice.getDioInterceptor());
-
     final proxyType = ProxyType.fromName(settingsHandler.proxyType);
     if (proxyType.isDirect || (proxyType.isSystem && systemProxyAddress.isEmpty) || getProxyConfigAddress().isEmpty) {
+      // dio.httpClientAdapter = NativeAdapter();
       dio.httpClientAdapter = Http2Adapter(
         ConnectionManager(
           idleTimeout: const Duration(seconds: 30),
         ),
       );
     }
+
+    dio.options.baseUrl = baseUrl ?? '';
+    // dio.options.connectTimeout = Duration(seconds: 10);
+    // dio.options.receiveTimeout = Duration(seconds: 30);
+    // dio.options.sendTimeout = Duration(seconds: 10);
+
+    dio.interceptors.add(Logger.dioInterceptor!);
+    dio.interceptors.add(settingsHandler.alice.getDioInterceptor());
+    cookieInterceptor(dio);
 
     return dio;
   }
@@ -145,10 +146,46 @@ class DioNetwork {
     return client;
   }
 
+  static Dio cookieInterceptor(Dio client) {
+    client.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (RequestOptions options, RequestInterceptorHandler handler) async {
+          final String oldCookie = options.headers['Cookie'] as String? ?? '';
+          final String newCookie = await Tools.getCookies(options.uri.toString());
+          final headers = {
+            ...options.headers,
+            'Cookie': '$oldCookie $newCookie'.trim(),
+          };
+          options.headers = headers;
+          return handler.next(options);
+        },
+        onResponse: (Response response, ResponseInterceptorHandler handler) async {
+          final setCookies = response.headers['set-cookie'] ?? [];
+          await Tools.saveCookies(
+            response.requestOptions.uri.toString(),
+            setCookies,
+          );
+          return handler.next(response);
+        },
+        onError: (DioException error, ErrorInterceptorHandler handler) async {
+          final setCookies = error.response?.headers['set-cookie'] ?? [];
+          await Tools.saveCookies(
+            error.requestOptions.uri.toString(),
+            setCookies,
+          );
+          return handler.next(error);
+        },
+      ),
+    );
+
+    return client;
+  }
+
   static Options get defaultOptions {
     final options = Options(
       responseType: ResponseType.json,
       contentType: 'application/json',
+      followRedirects: true,
       headers: {
         'Content-Type': 'application/json',
       },
