@@ -88,7 +88,10 @@ class _ThumbnailState extends State<Thumbnail> {
     super.didUpdateWidget(oldWidget);
   }
 
-  Future<ImageProvider> getImageProvider(bool isMain) async {
+  Future<ImageProvider> getImageProvider(
+    bool isMain, {
+    bool withCaptchaCheck = false,
+  }) async {
     if (isMain) {
       mainCancelToken ??= CancelToken();
     } else {
@@ -116,6 +119,7 @@ class _ThumbnailState extends State<Thumbnail> {
                 isFromCache.value = didDetectCache;
               }
             },
+            withCaptchaCheck: withCaptchaCheck,
           )
         : CustomNetworkImage(
             url,
@@ -136,6 +140,7 @@ class _ThumbnailState extends State<Thumbnail> {
                 isFromCache.value = didDetectCache;
               }
             },
+            withCaptchaCheck: withCaptchaCheck,
           );
 
     // on desktop devicePixelRatio is not working?
@@ -232,7 +237,9 @@ class _ThumbnailState extends State<Thumbnail> {
     }
   }
 
-  void selectThumbProvider() {
+  void selectThumbProvider({
+    bool withCaptchaCheck = false,
+  }) {
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
@@ -256,15 +263,20 @@ class _ThumbnailState extends State<Thumbnail> {
     // delay loading a little to improve performance when scrolling fast, ignore delay if it's a standalone widget (i.e. not in a list)
     debounceLoading = Timer(
       Duration(milliseconds: widget.isStandalone ? 200 : 0),
-      startDownloading,
+      () => startDownloading(withCaptchaCheck: withCaptchaCheck),
     );
     return;
   }
 
-  Future<void> startDownloading() async {
+  Future<void> startDownloading({
+    bool withCaptchaCheck = false,
+  }) async {
     final bool useExtra = isThumbQuality == false && !widget.item.isHated && !settingsHandler.shitDevice;
 
-    mainProvider.value = await getImageProvider(true);
+    mainProvider.value = await getImageProvider(
+      true,
+      withCaptchaCheck: withCaptchaCheck,
+    );
     mainImageStream?.removeListener(mainImageListener!);
     mainImageStream = mainProvider.value!.resolve(ImageConfiguration.empty);
     mainImageListener = ImageStreamListener(
@@ -333,14 +345,17 @@ class _ThumbnailState extends State<Thumbnail> {
     isFailed.value = false;
     errorCode.value = null;
 
+    bool? updateRes;
     if (withItemLoad) {
-      await tryToLoadAndUpdateItem(
+      updateRes = await tryToLoadAndUpdateItem(
         widget.item,
         loadItemCancelToken,
       );
     }
 
-    selectThumbProvider();
+    selectThumbProvider(
+      withCaptchaCheck: withItemLoad && updateRes != true,
+    );
   }
 
   Future<void> cleanProviderCache() async {
@@ -562,6 +577,20 @@ class _ThumbnailState extends State<Thumbnail> {
                 },
               ),
             //
+            if (widget.isStandalone && widget.item.isHated)
+              Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(iconSize * 0.1),
+                ),
+                width: iconSize,
+                height: iconSize,
+                child: const Icon(
+                  CupertinoIcons.eye_slash,
+                  color: Colors.white,
+                ),
+              ),
             if (widget.isStandalone)
               ValueListenableBuilder(
                 valueListenable: isLoaded,
@@ -625,21 +654,6 @@ class _ThumbnailState extends State<Thumbnail> {
                   },
                 ),
               ),
-            //
-            if (widget.isStandalone && widget.item.isHated)
-              Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(iconSize * 0.1),
-                ),
-                width: iconSize,
-                height: iconSize,
-                child: const Icon(
-                  CupertinoIcons.eye_slash,
-                  color: Colors.white,
-                ),
-              ),
           ],
         );
       },
@@ -669,7 +683,8 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 }
 
-Future<void> tryToLoadAndUpdateItem(
+/// Returns true if successful, false on error and null on skip
+Future<bool?> tryToLoadAndUpdateItem(
   BooruItem item,
   CancelToken? cancelToken,
 ) async {
@@ -716,8 +731,13 @@ Future<void> tryToLoadAndUpdateItem(
               BooruUpdateMode.urlUpdate,
             ),
           );
+          return true;
+        } else {
+          return false;
         }
       }
     }
+    return null;
   } catch (_) {}
+  return null;
 }

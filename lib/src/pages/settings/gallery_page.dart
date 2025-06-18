@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -99,6 +100,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.allowRotation = allowRotation;
     settingsHandler.loadingGif = loadingGif;
     settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
+    ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
     settingsHandler.wakeLockEnabled = wakeLockEnabled;
     settingsHandler.enableHeroTransitions = enableHeroTransitions;
     settingsHandler.disableCustomPageTransitions = disableCustomPageTransitions;

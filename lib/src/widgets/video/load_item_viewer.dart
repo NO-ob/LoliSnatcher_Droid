@@ -51,7 +51,7 @@ class _LoadItemViewerState extends State<LoadItemViewer> {
         final res = await widget.handler.loadItem(
           item: widget.item,
           cancelToken: cancelToken,
-          withCapcthaCheck: false,
+          withCapcthaCheck: true,
         );
         if (!res.failed) {
           if (res.item != null) {

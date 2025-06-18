@@ -50,11 +50,14 @@ class BooruHandlerFactory {
         case BooruType.Gelbooru:
           // current gelbooru is v.0.2.5, while safe and others are 0.2.0, but since we had them under the same type from the start
           // we should keep them like that, but change sub-handler depending on the link
-          // TODO are there only these 4 sites, or possibly more?
-          const List<String> gelbooruAlikes = ['rule34.xxx', 'safebooru.org', 'realbooru.com', 'furry.booru.org'];
+          // TODO only these sites or there are more?
+          const List<String> gelbooruAlikes = ['rule34.xxx', 'safebooru.org', 'furry.booru.org'];
 
           if (booru.baseURL!.contains('gelbooru.com')) {
             booruHandler = GelbooruHandler(booru, limit);
+          } else if (booru.baseURL!.contains('realbooru.com')) {
+            // workaround to keep realbooru working with old configs
+            booruHandler = RealbooruHandler(booru, limit);
           } else if (gelbooruAlikes.any((element) => booru.baseURL!.contains(element))) {
             booruHandler = GelbooruAlikesHandler(booru, limit);
           } else {

@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
@@ -102,7 +103,8 @@ class ImageViewerState extends State<ImageViewer> {
       if (error is DioException) {
         killLoading([
           'Loading error: ${error.type.name}',
-          if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
+          if (error.response?.statusCode != null)
+            '${error.response?.statusCode} - ${error.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(error.response?.statusCode)}',
         ]);
       } else {
         killLoading([
@@ -157,7 +159,10 @@ class ImageViewerState extends State<ImageViewer> {
       ? !widget.booruItem.toggleQuality.value
       : widget.booruItem.toggleQuality.value;
 
-  Future<void> initViewer(bool ignoreTagsCheck) async {
+  Future<void> initViewer(
+    bool ignoreTagsCheck, {
+    bool withCaptchaCheck = false,
+  }) async {
     widget.booruItem.isNoScale.addListener(noScaleListener);
 
     widget.booruItem.toggleQuality.addListener(toggleQualityListener);
@@ -179,7 +184,9 @@ class ImageViewerState extends State<ImageViewer> {
     final mQuery = MediaQuery.of(NavigationHandler.instance.navContext);
     widthLimit = settingsHandler.disableImageScaling ? null : (mQuery.size.width * mQuery.devicePixelRatio * 2).round();
 
-    mainProvider.value ??= await getImageProvider();
+    mainProvider.value ??= await getImageProvider(
+      withCaptchaCheck: withCaptchaCheck,
+    );
 
     imageStream?.removeListener(imageListener!);
     imageStream = mainProvider.value!.resolve(ImageConfiguration.empty);
@@ -225,7 +232,9 @@ class ImageViewerState extends State<ImageViewer> {
         : (maxWidth * MediaQuery.devicePixelRatioOf(NavigationHandler.instance.navContext) * 2).round();
   }
 
-  Future<ImageProvider> getImageProvider() async {
+  Future<ImageProvider> getImageProvider({
+    bool withCaptchaCheck = false,
+  }) async {
     if ((settingsHandler.galleryMode == 'Sample' &&
             widget.booruItem.sampleURL.isNotEmpty &&
             widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
@@ -267,6 +276,7 @@ class ImageViewerState extends State<ImageViewer> {
             onCacheDetected: (bool didDetectCache) {
               isFromCache.value = didDetectCache;
             },
+            withCaptchaCheck: withCaptchaCheck,
           )
         : CustomNetworkImage(
             url,
@@ -283,6 +293,7 @@ class ImageViewerState extends State<ImageViewer> {
             onCacheDetected: (bool didDetectCache) {
               isFromCache.value = didDetectCache;
             },
+            withCaptchaCheck: withCaptchaCheck,
           );
 
     // scale image only if it's not an animation, scaling is allowed, not on desktop and item is not marked as noScale
@@ -401,20 +412,23 @@ class ImageViewerState extends State<ImageViewer> {
     scaleController.scaleState = PhotoViewScaleState.covering;
   }
 
-  Future<void> onRestart() async {
+  Future<void> onManualRestart() async {
     if (isTooBig == 1) {
       isTooBig = 2;
     }
     isStopped.value = false;
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
-    await tryToLoadAndUpdateItem(
+    final updateRes = await tryToLoadAndUpdateItem(
       widget.booruItem,
       loadItemCancelToken,
     );
-    await initViewer(true);
+    await initViewer(
+      true,
+      withCaptchaCheck: updateRes != true,
+    );
   }
 
-  Future<void> onStop({
+  Future<void> onManualStop({
     List<String>? reason,
   }) async {
     killLoading(
@@ -492,8 +506,8 @@ class ImageViewerState extends State<ImageViewer> {
                                   total: total,
                                   received: received,
                                   startedAt: startedAt,
-                                  onRestart: onRestart,
-                                  onStop: onStop,
+                                  onRestart: onManualRestart,
+                                  onStop: onManualStop,
                                 );
                               },
                             );

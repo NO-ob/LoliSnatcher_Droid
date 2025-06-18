@@ -30,6 +30,26 @@ class ViewerHandler {
   // Key of the currently viewed media widget
   final Rxn<GlobalKey> currentKey = Rxn(null);
 
+  final RxList<GlobalKey> activeViewers = RxList([]);
+
+  static const int maxActiveViewers = 1;
+
+  void addViewer(GlobalKey key) {
+    if (activeViewers.contains(key)) {
+      return;
+    }
+
+    activeViewers.add(key);
+  }
+
+  void removeViewer(GlobalKey key) {
+    activeViewers.remove(key);
+  }
+
+  int indexOfViewer(GlobalKey key) {
+    return activeViewers.indexOf(key);
+  }
+
   void addViewed(Key? key) {
     if (key == null || activeKeys.contains(key)) {
       return;
@@ -68,7 +88,6 @@ class ViewerHandler {
     resetState();
   }
 
-  final RxBool inViewer = false.obs; // is in viewerpage
   final RxBool displayAppbar = true.obs; // is viewer toolbar visible
   final RxBool isZoomed = false.obs; // is current item zoomed in
   final RxBool isLoaded = false.obs; // is current item loaded
@@ -79,7 +98,6 @@ class ViewerHandler {
   final RxBool showNotes = true.obs;
 
   void resetState() {
-    inViewer.value = false;
     displayAppbar.value = true;
     isZoomed.value = false;
     isLoaded.value = false;

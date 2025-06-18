@@ -1845,19 +1845,20 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                   textInputAction: TextInputAction.search,
                   enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                   showSubmitButton: (text) => !settingsHandler.showSearchbarQuickActions && text.isNotEmpty,
-                  contextMenuBuilder: (context, editableTextState) {
+                  contextMenuBuilder: (_, editableTextState) {
                     final List<ContextMenuButtonItem> buttonItems = editableTextState.contextMenuButtonItems;
 
-                    if (!suggestionTextController.text.contains(' ')) {
+                    // allow only on single tag input
+                    if (!suggestionTextController.text.trim().contains(' ')) {
                       buttonItems.insert(
                         0,
                         ContextMenuButtonItem(
                           label: 'Prefix',
                           onPressed: () {
                             ContextMenuController.removeAny();
-                            showDialog<String>(
+                            showDialog(
                               context: context,
-                              builder: (context) => _PrefixEditDialog(suggestionTextController),
+                              builder: (_) => _PrefixEditDialog(suggestionTextController),
                             );
                           },
                         ),
@@ -3097,6 +3098,7 @@ class _PrefixEditDialog extends StatelessWidget {
                   ],
                 ),
               ),
+              //
               ElevatedButton(
                 onPressed: () {
                   controller.text = isOr ? text : '~$text';
@@ -3117,38 +3119,65 @@ class _PrefixEditDialog extends StatelessWidget {
                   ],
                 ),
               ),
+              //
               if (hasSecondaryBoorus)
-                SettingsBooruDropdown(
-                  value: selectedBooru,
-                  items: usedBoorus,
-                  onChanged: (Booru? newBooru) {
-                    if (selectedBooru == newBooru) {
-                      newBooru = null;
-                    }
+                Container(
+                  width: MediaQuery.sizeOf(context).width,
+                  height: 50,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: SettingsBooruDropdown(
+                    value: selectedBooru,
+                    items: usedBoorus,
+                    onChanged: (Booru? newBooru) {
+                      if (selectedBooru == newBooru) {
+                        newBooru = null;
+                      }
 
-                    controller.text =
-                        '${newBooru == null ? '' : usedBoorus.indexOf(newBooru) + 1}${newBooru == null ? '' : '#'}${isExclude ? '-' : ''}${isOr ? '~' : ''}$text';
-                  },
-                  title: 'Booru (N#)',
-                  contentPadding: EdgeInsets.zero,
-                  itemBuilder: (booru, _) {
-                    if (booru == null) {
-                      return const Text('');
-                    }
+                      controller.text =
+                          '${newBooru == null ? '' : usedBoorus.indexOf(newBooru) + 1}${newBooru == null ? '' : '#'}${isExclude ? '-' : ''}${isOr ? '~' : ''}$text';
+                    },
+                    title: 'Booru (N#)',
+                    contentPadding: EdgeInsets.zero,
+                    itemBuilder: (booru, _) {
+                      if (booru == null) {
+                        return const Text('');
+                      }
 
-                    return Row(
-                      spacing: 6,
-                      children: [
-                        Text('${usedBoorus.indexOf(booru) + 1}#'),
-                        BooruFavicon(booru),
-                        Expanded(
-                          child: Text(booru.name ?? ''),
-                        ),
-                      ],
-                    );
-                  },
-                  drawBottomBorder: false,
+                      return Row(
+                        spacing: 6,
+                        children: [
+                          Text('${usedBoorus.indexOf(booru) + 1}#'),
+                          BooruFavicon(booru),
+                          Expanded(
+                            child: Text(booru.name ?? ''),
+                          ),
+                        ],
+                      );
+                    },
+                    selectedItemBuilder: (booru) {
+                      if (booru == null) {
+                        return const Text('');
+                      }
+
+                      return Row(
+                        spacing: 6,
+                        children: [
+                          Text('${usedBoorus.indexOf(booru) + 1}#'),
+                          BooruFavicon(booru),
+                          Expanded(
+                            child: Text(booru.name ?? ''),
+                          ),
+                        ],
+                      );
+                    },
+                    drawBottomBorder: false,
+                  ),
                 ),
+              //
+              const CancelButton(
+                text: 'Return',
+                withIcon: true,
+              ),
             ],
           );
         },

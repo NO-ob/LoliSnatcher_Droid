@@ -91,9 +91,6 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
       possibleExtensions = [...gifExtensions, ...videoExtensions, ...imageExtensions];
     } else if (widget.item.possibleMediaType.value?.isVideo == true) {
       possibleExtensions = [...videoExtensions, ...imageExtensions, ...gifExtensions];
-    } else if (widget.item.fileURL.contains('realbooru.com')) {
-      // videos are still in front because realbooru can have both image (video thumbnail) and video under same url (minus extension)
-      possibleExtensions = [...videoExtensions, ...imageExtensions, ...gifExtensions];
     } else {
       possibleExtensions = [...imageExtensions, ...gifExtensions, ...videoExtensions];
     }

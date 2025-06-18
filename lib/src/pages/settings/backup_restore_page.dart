@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
@@ -38,6 +39,30 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
   void initState() {
     super.initState();
     backupPath = settingsHandler.backupPath;
+    validateBackupPathAccess();
+  }
+
+  Future<void> validateBackupPathAccess() async {
+    if (!Platform.isAndroid || backupPath.isEmpty) {
+      return;
+    }
+
+    try {
+      final success = await ServiceHandler.testSAFPersistence(backupPath);
+      if (!success) {
+        Logger.Inst().log(
+          'Invalid backup path',
+          'BackupRestorePage',
+          'validateBackupPathAccess',
+          LogTypes.exception,
+        );
+        setState(() {
+          backupPath = '';
+          settingsHandler.backupPath = '';
+        });
+        await settingsHandler.saveSettings(restate: false);
+      }
+    } catch (_) {}
   }
 
   void showSnackbar(
@@ -151,6 +176,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 children: [
                   SettingsButton(
                     name: backupLoc.selectBackupDir,
+                    icon: const Icon(Icons.folder),
                     action: () async {
                       final String path = await ServiceHandler.getSAFDirectoryAccess();
                       if (path.isNotEmpty) {
@@ -167,6 +193,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     },
                     drawTopBorder: true,
                   ),
+                  //
                   Container(
                     margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                     width: double.infinity,
@@ -176,14 +203,28 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           : backupLoc.noBackupDirSelected,
                     ),
                   ),
-                  Container(
-                    margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                    width: double.infinity,
-                    child: Text(backupLoc.restoreInfoMsg),
-                  ),
+                  //
                   if (backupPath.isNotEmpty) ...[
                     SettingsButton(
+                      name: 'Reset backup directory',
+                      icon: const Icon(Icons.refresh_rounded),
+                      action: () async {
+                        setState(() {
+                          backupPath = '';
+                          settingsHandler.backupPath = '';
+                        });
+                      },
+                      drawTopBorder: true,
+                    ),
+                    const SettingsButton(name: '', enabled: false),
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      width: double.infinity,
+                      child: Text(backupLoc.restoreInfoMsg),
+                    ),
+                    SettingsButton(
                       name: backupLoc.backupSettings,
+                      icon: const Icon(Icons.settings),
                       action: () async {
                         inProgress = true;
                         setState(() {});
@@ -233,6 +274,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     ),
                     SettingsButton(
                       name: backupLoc.restoreSettings,
+                      icon: const Icon(null),
                       subtitle: const Text('settings.json'),
                       action: () async {
                         inProgress = true;
@@ -279,6 +321,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     const SettingsButton(name: '', enabled: false),
                     SettingsButton(
                       name: 'Backup boorus',
+                      icon: const Icon(Icons.image_search),
                       action: () async {
                         inProgress = true;
                         setState(() {});
@@ -329,6 +372,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     ),
                     SettingsButton(
                       name: backupLoc.restoreBoorus,
+                      icon: const Icon(null),
                       subtitle: const Text('boorus.json'),
                       action: () async {
                         inProgress = true;
@@ -402,6 +446,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     const SettingsButton(name: '', enabled: false),
                     SettingsButton(
                       name: backupLoc.backupDatabase,
+                      icon: const Icon(Icons.list_alt),
                       action: () async {
                         inProgress = true;
                         setState(() {});
@@ -458,12 +503,16 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     ),
                     SettingsButton(
                       name: backupLoc.restoreDatabase,
+                      icon: const Icon(null),
                       subtitle: Text('store.db (${backupLoc.restoreDatabaseInfo})'),
                       action: () async {
                         inProgress = true;
                         setState(() {});
                         try {
-                          final fileExists = await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db');
+                          final fileExists = await ServiceHandler.existsFileFromSAFDirectory(
+                            backupPath,
+                            'store.db',
+                          );
                           if (!fileExists) {
                             showSnackbar(
                               backupLoc.backupFileNotFound,
@@ -534,116 +583,120 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       },
                     ),
                     const SettingsButton(name: '', enabled: false),
-                    SettingsButton(
-                      name: backupLoc.backupTags,
-                      action: () async {
-                        inProgress = true;
-                        setState(() {});
-                        try {
-                          if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'tags.json')) {
-                            final bool res = await detectedDuplicateFile('tags.json');
-                            if (!res) {
-                              showSnackbar(
-                                backupLoc.backupCancelled,
-                                isError: true,
-                              );
-                              inProgress = false;
-                              setState(() {});
-                              return;
+                    if (settingsHandler.isDebug.value) ...[
+                      SettingsButton(
+                        name: backupLoc.backupTags,
+                        icon: const Icon(CupertinoIcons.tag),
+                        action: () async {
+                          inProgress = true;
+                          setState(() {});
+                          try {
+                            if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'tags.json')) {
+                              final bool res = await detectedDuplicateFile('tags.json');
+                              if (!res) {
+                                showSnackbar(
+                                  backupLoc.backupCancelled,
+                                  isError: true,
+                                );
+                                inProgress = false;
+                                setState(() {});
+                                return;
+                              }
                             }
+
+                            await ServiceHandler.writeImage(
+                              utf8.encode(json.encode(tagHandler.toList())),
+                              'tags',
+                              'text',
+                              'json',
+                              backupPath,
+                            );
+                            showSnackbar(
+                              backupLoc.tagsBackedUp,
+                              isError: false,
+                            );
+                          } catch (e, s) {
+                            showSnackbar(
+                              backupLoc.backupTagsError,
+                              isError: true,
+                            );
+                            Logger.Inst().log(
+                              e.toString(),
+                              'BackupRestorePage',
+                              'backupTags',
+                              LogTypes.exception,
+                              s: s,
+                            );
                           }
+                          inProgress = false;
+                          setState(() {});
+                        },
+                      ),
+                      SettingsButton(
+                        name: backupLoc.restoreTags,
+                        icon: const Icon(null),
+                        subtitle: Text('tags.json (${backupLoc.restoreTagsInfo})'),
+                        action: () async {
+                          inProgress = true;
+                          setState(() {});
+                          try {
+                            final Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(
+                              backupPath,
+                              'tags.json',
+                            );
+                            String tagJSONString = '';
+                            if (tagFileBytes != null) {
+                              tagJSONString = String.fromCharCodes(tagFileBytes);
 
-                          await ServiceHandler.writeImage(
-                            utf8.encode(json.encode(tagHandler.toList())),
-                            'tags',
-                            'text',
-                            'json',
-                            backupPath,
-                          );
-                          showSnackbar(
-                            backupLoc.tagsBackedUp,
-                            isError: false,
-                          );
-                        } catch (e, s) {
-                          showSnackbar(
-                            backupLoc.backupTagsError,
-                            isError: true,
-                          );
-                          Logger.Inst().log(
-                            e.toString(),
-                            'BackupRestorePage',
-                            'backupTags',
-                            LogTypes.exception,
-                            s: s,
-                          );
-                        }
-                        inProgress = false;
-                        setState(() {});
-                      },
-                    ),
-                    SettingsButton(
-                      name: backupLoc.restoreTags,
-                      subtitle: Text('tags.json (${backupLoc.restoreTagsInfo})'),
-                      action: () async {
-                        inProgress = true;
-                        setState(() {});
-                        try {
-                          final Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(
-                            backupPath,
-                            'tags.json',
-                          );
-                          String tagJSONString = '';
-                          if (tagFileBytes != null) {
-                            tagJSONString = String.fromCharCodes(tagFileBytes);
-
-                            if (tagJSONString.isNotEmpty) {
-                              await tagHandler.loadFromJSON(
-                                tagJSONString,
-                                onProgress: (newProgress, newTotal) {
-                                  progress = newProgress;
-                                  total = newTotal;
-                                  if (mounted) {
-                                    setState(() {});
-                                  }
-                                },
-                              );
-                              showSnackbar(
-                                backupLoc.tagsRestored,
-                                isError: false,
-                              );
+                              if (tagJSONString.isNotEmpty) {
+                                await tagHandler.loadFromJSON(
+                                  tagJSONString,
+                                  onProgress: (newProgress, newTotal) {
+                                    progress = newProgress;
+                                    total = newTotal;
+                                    if (mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                );
+                                showSnackbar(
+                                  backupLoc.tagsRestored,
+                                  isError: false,
+                                );
+                              } else {
+                                showSnackbar(
+                                  backupLoc.tagsFileNotFound,
+                                  isError: true,
+                                );
+                              }
                             } else {
                               showSnackbar(
                                 backupLoc.tagsFileNotFound,
                                 isError: true,
                               );
                             }
-                          } else {
+                          } catch (e, s) {
                             showSnackbar(
-                              backupLoc.tagsFileNotFound,
+                              backupLoc.restoreTagsError,
                               isError: true,
                             );
+                            Logger.Inst().log(
+                              e.toString(),
+                              'BackupRestorePage',
+                              'restoreTags',
+                              LogTypes.exception,
+                              s: s,
+                            );
                           }
-                        } catch (e, s) {
-                          showSnackbar(
-                            backupLoc.restoreTagsError,
-                            isError: true,
-                          );
-                          Logger.Inst().log(
-                            e.toString(),
-                            'BackupRestorePage',
-                            'restoreTags',
-                            LogTypes.exception,
-                            s: s,
-                          );
-                        }
-                        inProgress = false;
-                        progress = 0;
-                        total = 0;
-                        if (mounted) {
-                          setState(() {});
-                        }
-                      },
-                    ),
+                          inProgress = false;
+                          progress = 0;
+                          total = 0;
+                          if (mounted) {
+                            setState(() {});
+                          }
+                        },
+                      ),
+                    ],
                   ],
                 ],
               ),

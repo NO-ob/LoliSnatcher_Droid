@@ -517,7 +517,9 @@ class SettingsDropdown<T> extends StatelessWidget {
     final bool hasSubtitle = subtitle.isNotEmpty;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
+
       children: [
         Padding(
           padding: hasSubtitle ? const EdgeInsets.only(top: 8) : EdgeInsets.zero,
@@ -604,6 +606,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     required this.title,
     this.items,
     this.itemBuilder,
+    this.selectedItemBuilder,
     this.itemFilter,
     this.subtitle,
     this.placeholder,
@@ -620,6 +623,7 @@ class SettingsBooruDropdown extends StatelessWidget {
   final String title;
   final List<Booru>? items;
   final Widget Function(Booru?, bool)? itemBuilder;
+  final Widget Function(Booru?)? selectedItemBuilder;
   final bool Function(Booru?)? itemFilter;
   final Widget? subtitle;
   final String? placeholder;
@@ -632,6 +636,10 @@ class SettingsBooruDropdown extends StatelessWidget {
   Widget _selectedItemBuilder(Booru? item) {
     if (item == null) {
       return Text(placeholder ?? 'Select a booru');
+    }
+
+    if (selectedItemBuilder != null) {
+      return selectedItemBuilder!(item);
     }
 
     return TabBooruSelectorItem(booru: item);

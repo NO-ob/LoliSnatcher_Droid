@@ -30,7 +30,7 @@ class WaterfallView extends StatefulWidget {
   State<WaterfallView> createState() => _WaterfallViewState();
 }
 
-class _WaterfallViewState extends State<WaterfallView> {
+class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
@@ -45,11 +45,11 @@ class _WaterfallViewState extends State<WaterfallView> {
 
   bool get isMobile => settingsHandler.appMode.value.isMobile;
 
+  final ValueNotifier<bool> isActive = ValueNotifier(true);
+
   @override
   void initState() {
     super.initState();
-
-    viewerHandler.inViewer.value = false;
 
     // listen to current tab change to restore the scroll value
     searchHandler.index.addListener(tabIndexListener);
@@ -75,6 +75,30 @@ class _WaterfallViewState extends State<WaterfallView> {
     );
 
     isStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    NavigationHandler.instance.routeObserver.subscribe(
+      this,
+      ModalRoute.of(context)! as PageRoute,
+    );
+  }
+
+  @override
+  void didPushNext() {
+    isActive.value = false;
+  }
+
+  @override
+  void didPush() {
+    isActive.value = true;
+  }
+
+  @override
+  void didPopNext() {
+    isActive.value = true;
   }
 
   void tabIdListener() {
@@ -127,7 +151,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   Future<void> volumeCallback(String event) async {
-    if (!viewerHandler.inViewer.value) {
+    if (isActive.value) {
       int dir = 0;
       if (event == 'up') {
         dir = -1;
@@ -135,7 +159,6 @@ class _WaterfallViewState extends State<WaterfallView> {
         dir = 1;
       }
 
-      // TODO disable when not in focus (i.e. opened settings/drawer), right now if focus is lost, this widget can't regain it
       if (dir != 0 && scrollDone == true) {
         scrollDone = false;
         final double offset = max(
@@ -154,6 +177,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
   @override
   void dispose() {
+    NavigationHandler.instance.routeObserver.unsubscribe(this);
     searchHandler.index.removeListener(tabIndexListener);
     searchHandler.tabId.removeListener(tabIdListener);
     searchHandler.isLoading.removeListener(isLoadingListener);
@@ -163,9 +187,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   void jumpTo(int newIndex) {
-    if (!searchHandler.gridScrollController.hasClients ||
-        newIndex == -1 ||
-        (!viewerHandler.inViewer.value && isMobile)) {
+    if (!searchHandler.gridScrollController.hasClients || newIndex == -1 || (isActive.value && isMobile)) {
       return;
     }
 
@@ -224,16 +246,19 @@ class _WaterfallViewState extends State<WaterfallView> {
 
     if (isMobile) {
       // protection from opening multiple galleries at once
-      if (viewerHandler.inViewer.value) {
+      if (!isActive.value) {
         return;
       }
 
-      viewerHandler.inViewer.value = true;
+      isActive.value = false;
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
 
+      final viewerKey = GlobalKey(debugLabel: 'viewer-main');
+      ViewerHandler.instance.addViewer(viewerKey);
       await Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (_, _, _) => GalleryViewPage(
+            key: viewerKey,
             tab: searchHandler.currentTab,
             initialIndex: index,
             onPageChanged: onViewerPageChanged,
@@ -257,7 +282,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
       searchHandler.setViewedItem(-1);
 
-      viewerHandler.inViewer.value = false;
+      isActive.value = true;
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
 
       viewerCallback();
@@ -311,8 +336,8 @@ class _WaterfallViewState extends State<WaterfallView> {
     }
 
     final bool changedOrientation = MediaQuery.orientationOf(context) != currentOrientation;
-    if (changedOrientation && viewerHandler.inViewer.value) {
-      // try to keep the scroll position at currently viewed itemwhen screen orientation changes
+    if (changedOrientation && !isActive.value) {
+      // try to keep the scroll position at currently viewed item when screen orientation changes
       currentOrientation = MediaQuery.orientationOf(context);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         searchHandler.gridScrollController.scrollToIndex(
