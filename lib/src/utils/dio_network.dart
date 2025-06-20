@@ -20,7 +20,8 @@ class DioNetwork {
 
     final settingsHandler = SettingsHandler.instance;
     final proxyType = ProxyType.fromName(settingsHandler.proxyType);
-    if (proxyType.isDirect || (proxyType.isSystem && systemProxyAddress.isEmpty) || getProxyConfigAddress().isEmpty) {
+    if (settingsHandler.useHttp2 &&
+        (proxyType.isDirect || (proxyType.isSystem && systemProxyAddress.isEmpty) || getProxyConfigAddress().isEmpty)) {
       // dio.httpClientAdapter = NativeAdapter();
       dio.httpClientAdapter = Http2Adapter(
         ConnectionManager(
@@ -45,7 +46,7 @@ class DioNetwork {
     final usedOptions = options ?? defaultOptions;
     return usedOptions.copyWith(
       headers: {
-        ...headers ?? usedOptions.headers ?? defaultOptions.headers!,
+        ...?headers ?? usedOptions.headers ?? defaultOptions.headers,
       },
     );
   }
@@ -188,6 +189,8 @@ class DioNetwork {
       followRedirects: true,
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': Tools.browserUserAgent,
       },
     );
     return options;
