@@ -1121,7 +1121,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
                 );
               } else {
                 if (newValue) {
-                  final dropdown = LoliMultiselectDropdown(
+                  LoliMultiselectDropdown(
                     value: const <Booru>[],
                     onChanged: (List<Booru> value) {
                       // if no secondary boorus selected, disable merge mode
@@ -1133,6 +1133,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
                       height: kMinInteractiveDimension,
                       child: TabBooruSelectorItem(booru: item),
                     ),
+                    expandableByScroll: true,
                     labelText: 'Select secondary boorus:',
                     selectedItemBuilder: (List<Booru> value) => Column(
                       mainAxisSize: MainAxisSize.min,
@@ -1158,8 +1159,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
                         ),
                       ],
                     ),
-                  );
-                  dropdown.showDialog(context);
+                  ).showDialog(context);
                 } else {
                   searchHandler.mergeAction(null);
                 }

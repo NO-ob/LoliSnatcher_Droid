@@ -15,11 +15,14 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
@@ -28,6 +31,7 @@ import 'package:lolisnatcher/src/utils/timed_progress_controller.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/restartable_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/gallery/snatched_status_icon.dart';
@@ -567,7 +571,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         });
         break;
       case 'share':
-        onShareClick();
+        await onShareClick();
         break;
       case 'select':
         final bool isSelected = widget.tab.selected.contains(item);
@@ -662,13 +666,13 @@ class _HideableAppBarState extends State<HideableAppBar> {
     }
   }
 
-  void onShareClick() {
+  Future<void> onShareClick() async {
     final String shareSetting = settingsHandler.shareAction;
+    final item = widget.tab.booruHandler.filteredFetched[page.value];
+
     switch (shareSetting) {
       case 'Post URL':
-        if (widget.tab.booruHandler.filteredFetched[page.value].postURL != '') {
-          shareTextAction(widget.tab.booruHandler.filteredFetched[page.value].postURL);
-        } else {
+        if (item.postURL.isEmpty) {
           FlashElements.showSnackbar(
             context: context,
             title: const Text('No Post URL!', style: TextStyle(fontSize: 20)),
@@ -676,16 +680,46 @@ class _HideableAppBarState extends State<HideableAppBar> {
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
           );
+          return;
+        }
+
+        shareTextAction(item.postURL);
+        break;
+      case 'Post URL with tags':
+        if (item.postURL.isEmpty) {
+          FlashElements.showSnackbar(
+            context: context,
+            title: const Text('No Post URL!', style: TextStyle(fontSize: 20)),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
+          );
+          return;
+        }
+
+        final tags = await showSelectTagsDialog(context, item.tagsList);
+        if (tags.isNotEmpty) {
+          shareTextAction('${item.postURL} \n $tags');
+        } else {
+          shareTextAction(item.postURL);
         }
         break;
       case 'File URL':
-        shareTextAction(widget.tab.booruHandler.filteredFetched[page.value].fileURL);
+        shareTextAction(item.fileURL);
+        break;
+      case 'File URL with tags':
+        final tags = await showSelectTagsDialog(context, item.tagsList);
+        if (tags.isNotEmpty) {
+          shareTextAction('${item.fileURL} \n $tags');
+        } else {
+          shareTextAction(item.fileURL);
+        }
         break;
       case 'Hydrus':
-        shareHydrusAction(widget.tab.booruHandler.filteredFetched[page.value]);
+        await shareHydrusAction(item);
         break;
       case 'File':
-        shareFileAction();
+        await shareFileAction();
         break;
       case 'Ask':
       default:
@@ -960,6 +994,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   void showShareDialog({bool showTip = true}) {
+    final item = widget.tab.booruHandler.filteredFetched[page.value];
+
     // TODO change layout so the buttons set their width automatically, without padding stuff
     showDialog(
       context: context,
@@ -970,7 +1006,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
             const SizedBox(height: 15),
             Column(
               children: [
-                if (widget.tab.booruHandler.filteredFetched[page.value].postURL != '')
+                if (item.postURL.isNotEmpty) ...[
                   ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -978,12 +1014,32 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     ),
                     onTap: () {
                       Navigator.of(context).pop();
-                      shareTextAction(widget.tab.booruHandler.filteredFetched[page.value].postURL);
+                      shareTextAction(item.postURL);
                     },
                     leading: const Icon(CupertinoIcons.link),
                     title: const Text('Post URL'),
                   ),
-                const SizedBox(height: 15),
+
+                  const SizedBox(height: 15),
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                    ),
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                      final tags = await showSelectTagsDialog(context, item.tagsList);
+                      if (tags.isNotEmpty) {
+                        shareTextAction('${item.postURL} \n $tags');
+                      } else {
+                        shareTextAction(item.postURL);
+                      }
+                    },
+                    leading: const Icon(CupertinoIcons.link),
+                    title: const Text('Post URL with tags'),
+                  ),
+                  const SizedBox(height: 15),
+                ],
                 ListTile(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -991,10 +1047,28 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   ),
                   onTap: () {
                     Navigator.of(context).pop();
-                    shareTextAction(widget.tab.booruHandler.filteredFetched[page.value].fileURL);
+                    shareTextAction(item.fileURL);
                   },
                   leading: const Icon(CupertinoIcons.link),
                   title: const Text('File URL'),
+                ),
+                const SizedBox(height: 15),
+                ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                  ),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    final tags = await showSelectTagsDialog(context, item.tagsList);
+                    if (tags.isNotEmpty) {
+                      shareTextAction('${item.fileURL} \n $tags');
+                    } else {
+                      shareTextAction(item.fileURL);
+                    }
+                  },
+                  leading: const Icon(CupertinoIcons.link),
+                  title: const Text('File URL with tags'),
                 ),
                 const SizedBox(height: 15),
                 ListTile(
@@ -1017,7 +1091,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                     ),
                     onTap: () async {
-                      await shareHydrusAction(widget.tab.booruHandler.filteredFetched[page.value]);
+                      await shareHydrusAction(item);
                       Navigator.of(context).pop();
                     },
                     leading: const Icon(Icons.file_present),
@@ -1141,4 +1215,63 @@ class _HideableAppBarState extends State<HideableAppBar> {
       ),
     );
   }
+}
+
+Future<List<String>> showSelectTagsDialog(
+  BuildContext context,
+  List<String> tags,
+) async {
+  if (tags.isEmpty) return [];
+
+  final tagHandler = TagHandler.instance;
+
+  final Map<TagType, List<Tag>> tagMap = {
+    for (final type in TagType.values) type: [],
+  };
+  for (final t in tags) {
+    final tag = tagHandler.getTag(t);
+    tagMap[tag.tagType]?.add(tag);
+  }
+  final List<Tag> items = tagMap.values.expand((i) => i).toList();
+
+  final List<Tag> selectedTags = [];
+  final res = await LoliMultiselectDropdown(
+    value: selectedTags,
+    onChanged: (value) {
+      selectedTags.clear();
+      selectedTags.addAll(value);
+    },
+    expandableByScroll: false,
+    items: items,
+    itemBuilder: (item) => Container(
+      padding: const EdgeInsets.only(
+        left: 16,
+        top: 8,
+        bottom: 8,
+      ),
+      constraints: const BoxConstraints(
+        minHeight: kMinInteractiveDimension,
+      ),
+      alignment: Alignment.centerLeft,
+      child: Builder(
+        builder: (context) {
+          final color = item.getColour();
+          return Text(
+            item.fullString,
+            style: TextStyle(
+              color: color == Colors.transparent ? null : color,
+            ),
+          );
+        },
+      ),
+    ),
+    selectedItemBuilder: (items) => Text(items.join(', ')),
+    labelText: 'Select tags',
+  ).showDialog(context);
+
+  if (res) {
+    return selectedTags.map((t) => t.fullString).toList();
+  }
+
+  return [];
 }

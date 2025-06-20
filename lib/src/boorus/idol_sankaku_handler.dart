@@ -51,10 +51,6 @@ class IdolSankakuHandler extends SankakuHandler {
     'idol.sankakucomplex.com',
   ];
 
-  static List<String> knownPostUrls = [
-    'idol.sankakucomplex.com',
-  ];
-
   @override
   String get baseUrl => knownUrls.any(booru.baseURL!.contains) ? 'https://iapi.sankakucomplex.com' : booru.baseURL!;
 
