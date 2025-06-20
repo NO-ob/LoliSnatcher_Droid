@@ -88,11 +88,6 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     );
   }
 
-  static Dio get _httpClient {
-    final Dio client = DioNetwork.getClient();
-    return client;
-  }
-
   Future<bool> deleteCacheFile() async {
     final key = this;
     final Uri resolved = Uri.base.resolve(key.url);
@@ -161,7 +156,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         onCacheDetected?.call(cacheFile != null);
       }
 
-      final client = _httpClient;
+      final client = DioNetwork.getClient();
       if (withCaptchaCheck) {
         DioNetwork.captchaInterceptor(
           client,
@@ -211,6 +206,13 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         client.close();
 
         if (Tools.isGoodStatusCode(response.statusCode) == false) {
+          try {
+            final testFile = File(cacheFilePath);
+            if (await testFile.exists()) {
+              await testFile.delete();
+            }
+          } catch (_) {}
+
           throw NetworkImageLoadException(
             statusCode: response.statusCode ?? 0,
             uri: resolved,
@@ -344,11 +346,6 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
     );
   }
 
-  static Dio get _httpClient {
-    final Dio client = DioNetwork.getClient();
-    return client;
-  }
-
   Future<bool> deleteCacheFile() async {
     final key = this;
     final Uri resolved = Uri.base.resolve(key.url);
@@ -417,7 +414,7 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
         onCacheDetected?.call(cacheFile != null);
       }
 
-      final client = _httpClient;
+      final client = DioNetwork.getClient();
       if (withCaptchaCheck) {
         DioNetwork.captchaInterceptor(
           client,
@@ -467,6 +464,13 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
         client.close();
 
         if (Tools.isGoodStatusCode(response.statusCode) == false) {
+          try {
+            final testFile = File(cacheFilePath);
+            if (await testFile.exists()) {
+              await testFile.delete();
+            }
+          } catch (_) {}
+
           throw NetworkImageLoadException(
             statusCode: response.statusCode ?? 0,
             uri: resolved,
