@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -119,8 +120,9 @@ class Tools {
     final Map<String, String> headers = {'User-Agent': browserUserAgent};
     if (uri.host.contains('danbooru.donmai.us')) {
       headers['User-Agent'] = appUserAgent;
-    }
-    if ([
+    } else if (IdolSankakuHandler.knownUrls.contains(uri.host)) {
+      headers['User-Agent'] = Constants.sankakuIdolAppUserAgent;
+    } else if ([
       ...SankakuHandler.knownUrls,
       'sankakuapi.com',
     ].any(uri.host.contains)) {

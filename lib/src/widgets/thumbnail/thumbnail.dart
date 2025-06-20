@@ -699,7 +699,7 @@ Future<bool?> tryToLoadAndUpdateItem(
               (itemPostHost! == booruHost! ||
                   switch (e.type) {
                     BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
-                    BooruType.Sankaku => SankakuHandler.knownUrls.contains(itemPostHost),
+                    BooruType.Sankaku => SankakuHandler.knownPostUrls.contains(itemPostHost),
                     _ => false,
                   })) ||
           (itemFileHost?.isNotEmpty == true && booruHost?.isNotEmpty == true && itemFileHost! == booruHost!);

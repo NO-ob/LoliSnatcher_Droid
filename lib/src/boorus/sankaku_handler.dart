@@ -198,6 +198,11 @@ class SankakuHandler extends BooruHandler {
     'sankaku.app',
   ];
 
+  static List<String> knownPostUrls = [
+    'chan.sankakucomplex.com',
+    'beta.sankakucomplex.com',
+  ];
+
   String get baseUrl => knownUrls.any(booru.baseURL!.contains) ? 'https://sankakuapi.com' : booru.baseURL!;
 
   @override
