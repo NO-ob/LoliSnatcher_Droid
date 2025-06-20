@@ -461,7 +461,7 @@ class _GalleryPageState extends State<GalleryPage> {
                               '- File URL - shares direct link to the original file (may not work with some sites)',
                             ),
                             const Text(
-                              '- Post/File URL with tags - shares url and tags which you select',
+                              '- Post URL/File URL/File with tags - shares url/file and tags which you select',
                             ),
                             const Text(
                               '- File - shares the file itself, may take some time to load, progress will be shown on the Share button',

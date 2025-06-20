@@ -305,7 +305,17 @@ class SettingsHandler {
     'shareAction': {
       'type': 'stringFromList',
       'default': 'Ask',
-      'options': <String>['Ask', 'Post URL', 'File URL', 'File', 'Hydrus'],
+      // TODO replace with enum, don't forget to have these in serialization
+      'options': <String>[
+        'Ask',
+        'Post URL',
+        'Post URL with tags',
+        'File URL',
+        'File URL with tags',
+        'File',
+        'File with tags',
+        'Hydrus',
+      ],
     },
     'videoCacheMode': {
       'type': 'stringFromList',

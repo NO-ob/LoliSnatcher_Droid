@@ -699,7 +699,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
         final tags = await showSelectTagsDialog(context, item.tagsList);
         if (tags.isNotEmpty) {
-          shareTextAction('${item.postURL} \n $tags');
+          shareTextAction('${item.postURL} \n ${tags.join(', ')}');
         } else {
           shareTextAction(item.postURL);
         }
@@ -710,16 +710,24 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'File URL with tags':
         final tags = await showSelectTagsDialog(context, item.tagsList);
         if (tags.isNotEmpty) {
-          shareTextAction('${item.fileURL} \n $tags');
+          shareTextAction('${item.fileURL} \n ${tags.join(', ')}');
         } else {
           shareTextAction(item.fileURL);
         }
         break;
-      case 'Hydrus':
-        await shareHydrusAction(item);
-        break;
       case 'File':
         await shareFileAction();
+        break;
+      case 'File with tags':
+        final tags = await showSelectTagsDialog(context, item.tagsList);
+        if (tags.isNotEmpty) {
+          await shareFileAction(text: tags.join(', '));
+        } else {
+          await shareFileAction();
+        }
+        break;
+      case 'Hydrus':
+        await shareHydrusAction(item);
         break;
       case 'Ask':
       default:
@@ -801,7 +809,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     }
   }
 
-  Future<void> shareFileAction() async {
+  Future<void> shareFileAction({String? text}) async {
     final BooruItem item = widget.tab.booruHandler.filteredFetched[page.value];
 
     final bool alreadyLoading = sharedItem != null;
@@ -911,6 +919,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       await ServiceHandler.loadShareFileIntent(
         path,
         '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}',
+        text: text,
       );
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
@@ -968,6 +977,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         await ServiceHandler.loadShareFileIntent(
           path,
           '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}',
+          text: text,
         );
       } else {
         FlashElements.showSnackbar(
@@ -1030,12 +1040,22 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       Navigator.of(context).pop();
                       final tags = await showSelectTagsDialog(context, item.tagsList);
                       if (tags.isNotEmpty) {
-                        shareTextAction('${item.postURL} \n $tags');
+                        shareTextAction('${item.postURL} \n ${tags.join(', ')}');
                       } else {
                         shareTextAction(item.postURL);
                       }
                     },
-                    leading: const Icon(CupertinoIcons.link),
+                    leading: const Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Icon(CupertinoIcons.link),
+                        Positioned(
+                          bottom: -10,
+                          right: -10,
+                          child: Icon(CupertinoIcons.tag, size: 14),
+                        ),
+                      ],
+                    ),
                     title: const Text('Post URL with tags'),
                   ),
                   const SizedBox(height: 15),
@@ -1062,12 +1082,22 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     Navigator.of(context).pop();
                     final tags = await showSelectTagsDialog(context, item.tagsList);
                     if (tags.isNotEmpty) {
-                      shareTextAction('${item.fileURL} \n $tags');
+                      shareTextAction('${item.fileURL} \n ${tags.join(', ')}');
                     } else {
                       shareTextAction(item.fileURL);
                     }
                   },
-                  leading: const Icon(CupertinoIcons.link),
+                  leading: const Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Icon(CupertinoIcons.link),
+                      Positioned(
+                        bottom: -10,
+                        right: -10,
+                        child: Icon(CupertinoIcons.tag, size: 14),
+                      ),
+                    ],
+                  ),
                   title: const Text('File URL with tags'),
                 ),
                 const SizedBox(height: 15),
@@ -1082,6 +1112,34 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   },
                   leading: const Icon(Icons.file_present),
                   title: const Text('File'),
+                ),
+                const SizedBox(height: 15),
+                ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                  ),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    final tags = await showSelectTagsDialog(context, item.tagsList);
+                    if (tags.isNotEmpty) {
+                      await shareFileAction(text: tags.join(', '));
+                    } else {
+                      await shareFileAction();
+                    }
+                  },
+                  leading: const Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Icon(Icons.file_present),
+                      Positioned(
+                        bottom: -10,
+                        right: -10,
+                        child: Icon(CupertinoIcons.tag, size: 14),
+                      ),
+                    ],
+                  ),
+                  title: const Text('File with tags'),
                 ),
                 const SizedBox(height: 15),
                 if (settingsHandler.hasHydrus && widget.tab.booruHandler.booru.type?.isHydrus != true)

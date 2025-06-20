@@ -361,9 +361,20 @@ class ServiceHandler {
     }
   }
 
-  static Future<void> loadShareFileIntent(String filePath, String mimeType) async {
+  static Future<void> loadShareFileIntent(
+    String filePath,
+    String mimeType, {
+    String? text,
+  }) async {
     try {
-      await platform.invokeMethod('shareFile', {'path': filePath, 'mimeType': mimeType});
+      await platform.invokeMethod(
+        'shareFile',
+        {
+          'path': filePath,
+          'mimeType': mimeType,
+          if (text != null) 'text': text,
+        },
+      );
       return;
       // log('share closed');
     } catch (e) {

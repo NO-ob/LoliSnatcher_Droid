@@ -80,6 +80,7 @@ class MainActivity: FlutterFragmentActivity() {
                     "shareFile" -> {
                         val path = call.argument<String>("path")
                         val mimeType = call.argument<String>("mimeType")
+                        val text = call.argument<String>("text")
                         if (path != null && mimeType != null) {
                             val contentUri = FileProvider.getUriForFile(applicationContext, BuildConfig.APPLICATION_ID + ".fileprovider", File(path))
                             val shareFileIntent = Intent.createChooser(Intent().apply {
@@ -87,6 +88,9 @@ class MainActivity: FlutterFragmentActivity() {
                                 type = mimeType
                                 putExtra(Intent.EXTRA_STREAM, contentUri)
                                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                if (text != null) {
+                                    putExtra(Intent.EXTRA_TEXT, text)
+                                }
                             }, null)
 
                             val resInfoList: List<ResolveInfo> = applicationContext.packageManager.queryIntentActivities(shareFileIntent, PackageManager.MATCH_DEFAULT_ONLY)
