@@ -15,8 +15,33 @@ class ChangePageButtons extends StatelessWidget {
   final PreloadPageController? controller;
   final bool isPrev;
 
-  void changePage(int direction) {
+  Future<void> changePage(int direction) async {
     if (controller?.hasClients ?? false) {
+      if (controller!.page == null) return;
+
+      if ((controller!.page! + direction) < 0) {
+        // do a small overscroll instead of full page change
+        await controller!.animateTo(
+          0 - (controller!.position.viewportDimension / 3),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+        );
+        return;
+      }
+
+      final double maxPages =
+          controller!.position.maxScrollExtent /
+          (controller!.position.viewportDimension * controller!.viewportFraction);
+      if ((controller!.page! + direction) < 0 || (controller!.page! + direction) > maxPages) {
+        // do a small overscroll instead of full page change
+        await controller!.animateTo(
+          controller!.position.maxScrollExtent + (controller!.position.viewportDimension / 3),
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+        );
+        return;
+      }
+
       controller!.jumpToPage(((controller!.page ?? 0) + direction).round());
     }
   }
@@ -27,9 +52,7 @@ class ChangePageButtons extends StatelessWidget {
     final int direction = isPrev ? -1 : 1;
 
     return LongPressRepeater(
-      onStart: () async {
-        changePage(direction);
-      },
+      onStart: () async => changePage(direction),
       fasterAfter: 20,
       child: IconButton(
         icon: Icon(
@@ -40,9 +63,7 @@ class ChangePageButtons extends StatelessWidget {
         // what idiot designed mirrored arrow icons with 1px of difference????????
         // padding: direction == 1 ? const EdgeInsets.fromLTRB(8, 8, 8, 8) : const EdgeInsets.fromLTRB(7, 8, 8, 8),
         // padding: direction == 1 ? const EdgeInsets.fromLTRB(8, 0, 8, 0) : const EdgeInsets.fromLTRB(7, 0, 8, 0),
-        onPressed: () {
-          changePage(direction);
-        },
+        onPressed: () async => changePage(direction),
         // visualDensity: VisualDensity.comfortable,
         color: Theme.of(context).iconTheme.color?.withValues(alpha: 0.5),
       ),
