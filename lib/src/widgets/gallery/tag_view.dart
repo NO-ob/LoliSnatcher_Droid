@@ -1179,13 +1179,13 @@ class _TagText extends StatelessWidget {
           children: spans,
           style: basicStyle,
         ),
-        isExpanded: true,
+        isExpanded: false,
         style: basicStyle,
       );
     } else {
       return MarqueeText(
         text: tag.fullString,
-        isExpanded: true,
+        isExpanded: false,
         style: fullStyle,
       );
     }
