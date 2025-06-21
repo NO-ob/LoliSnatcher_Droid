@@ -568,7 +568,10 @@ class _TagViewState extends State<TagView> {
                 const SizedBox(width: 10),
                 Text(
                   tagHandler.getTag(tag).tagType.locName,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -796,171 +799,183 @@ class _TagViewState extends State<TagView> {
     if (currentTag != '') {
       final tag = tagHandler.getTag(currentTag);
 
-      return Column(
-        children: [
-          InkWell(
-            onTap: () {
-              tagDialog(
-                tag: currentTag,
-                isHated: isHated,
-                isLoved: isLoved,
-                isInSearch: isInSearch,
-              );
-            },
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    height: 50,
-                    padding: const EdgeInsets.only(left: 12),
-                    child: _TagText(
-                      key: ValueKey(currentTag),
-                      tag: tag,
-                      filterText: searchController.text,
+      return ColoredBox(
+        color: tag.getColour() == Colors.transparent
+            ? Colors.transparent
+            : Color.lerp(
+                context.isLight ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
+                tag.getColour().withValues(alpha: 0.1),
+                0.4,
+              )!,
+        child: Column(
+          children: [
+            InkWell(
+              onTap: () {
+                tagDialog(
+                  tag: currentTag,
+                  isHated: isHated,
+                  isLoved: isLoved,
+                  isInSearch: isInSearch,
+                );
+              },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 50,
+                      padding: const EdgeInsets.only(left: 12),
+                      child: _TagText(
+                        key: ValueKey(currentTag),
+                        tag: tag,
+                        filterText: searchController.text,
+                      ),
                     ),
                   ),
-                ),
-                if (tagIconAndColor.isNotEmpty) ...[
-                  ...tagIconAndColor.map(
-                    (t) => t.icon == FontAwesomeIcons.robot
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: FaIcon(
+                  if (tagIconAndColor.isNotEmpty) ...[
+                    ...tagIconAndColor.map(
+                      (t) => t.icon == FontAwesomeIcons.robot
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: FaIcon(
+                                t.icon,
+                                color: t.color,
+                                size: 18,
+                              ),
+                            )
+                          : Icon(
                               t.icon,
                               color: t.color,
-                              size: 18,
+                              size: 20,
                             ),
-                          )
-                        : Icon(
-                            t.icon,
-                            color: t.color,
-                            size: 20,
-                          ),
-                  ),
-                  const SizedBox(width: 5),
-                ],
-                IconButton(
-                  icon: Stack(
-                    children: [
-                      Icon(Icons.add, color: Theme.of(context).colorScheme.secondary),
-                      if (isInSearch)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Icon(
-                            Icons.search,
-                            size: 10,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                    ],
-                  ),
-                  onPressed: () {
-                    if (isInSearch) {
-                      FlashElements.showSnackbar(
-                        context: context,
-                        duration: const Duration(seconds: 2),
-                        title: const Text(
-                          'This tag is already in the current search query:',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        content: Text(currentTag, style: const TextStyle(fontSize: 16)),
-                        leadingIcon: Icons.warning_amber,
-                        leadingIconColor: Colors.yellow,
-                        sideColor: Colors.yellow,
-                      );
-                      return;
-                    }
-
-                    searchHandler.addTagToSearch(currentTag);
-                    FlashElements.showSnackbar(
-                      context: context,
-                      duration: const Duration(seconds: 2),
-                      title: const Text('Added to current search query:', style: TextStyle(fontSize: 20)),
-                      content: Text(currentTag, style: const TextStyle(fontSize: 16)),
-                      leadingIcon: Icons.add,
-                      sideColor: Colors.green,
-                    );
-                  },
-                ),
-                GestureDetector(
-                  onLongPress: () async {
-                    await ServiceHandler.vibrate();
-                    if (settingsHandler.appMode.value.isMobile) {
-                      Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
-                    }
-                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                      searchHandler.addTabByString(currentTag, switchToNew: true);
-                    });
-                  },
-                  child: IconButton(
+                    ),
+                    const SizedBox(width: 5),
+                  ],
+                  IconButton(
                     icon: Stack(
                       children: [
-                        Icon(Icons.fiber_new, color: Theme.of(context).colorScheme.secondary),
-                        if (hasTabWithTag.hasTag)
+                        Icon(Icons.add, color: Theme.of(context).colorScheme.secondary),
+                        if (isInSearch)
                           Positioned(
                             right: 0,
                             top: 0,
                             child: Icon(
-                              Icons.circle,
-                              size: 6,
-                              color: hasTabWithTag.isOnlyTag
-                                  ? Theme.of(context).colorScheme.onSurface
-                                  : (hasTabWithTag.isOnlyTagDifferentBooru ? Colors.yellow : Colors.blue),
+                              Icons.search,
+                              size: 10,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                       ],
                     ),
                     onPressed: () {
-                      searchHandler.addTabByString(currentTag);
+                      if (isInSearch) {
+                        FlashElements.showSnackbar(
+                          context: context,
+                          duration: const Duration(seconds: 2),
+                          title: const Text(
+                            'This tag is already in the current search query:',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          content: Text(currentTag, style: const TextStyle(fontSize: 16)),
+                          leadingIcon: Icons.warning_amber,
+                          leadingIconColor: Colors.yellow,
+                          sideColor: Colors.yellow,
+                        );
+                        return;
+                      }
 
-                      parseSortGroupTags();
-
+                      searchHandler.addTagToSearch(currentTag);
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: const Text('Added new tab:', style: TextStyle(fontSize: 20)),
+                        title: const Text('Added to current search query:', style: TextStyle(fontSize: 20)),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
-                        leadingIcon: Icons.fiber_new,
+                        leadingIcon: Icons.add,
                         sideColor: Colors.green,
-                        primaryActionBuilder: (context, controller) {
-                          return Row(
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  ServiceHandler.vibrate();
-                                  if (settingsHandler.appMode.value.isMobile) {
-                                    Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
-                                  }
-                                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                                    searchHandler.changeTabIndex(searchHandler.list.length - 1);
-                                  });
-                                  controller.dismiss();
-                                },
-                                icon: Icon(Icons.arrow_forward_rounded, color: Theme.of(context).colorScheme.onSurface),
-                              ),
-                              const SizedBox(width: 4),
-                              IconButton(
-                                onPressed: () => controller.dismiss(),
-                                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
-                              ),
-                            ],
-                          );
-                        },
                       );
                     },
                   ),
-                ),
-                const SizedBox(width: 16),
-              ],
+                  GestureDetector(
+                    onLongPress: () async {
+                      await ServiceHandler.vibrate();
+                      if (settingsHandler.appMode.value.isMobile) {
+                        Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
+                      }
+                      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                        searchHandler.addTabByString(currentTag, switchToNew: true);
+                      });
+                    },
+                    child: IconButton(
+                      icon: Stack(
+                        children: [
+                          Icon(Icons.fiber_new, color: Theme.of(context).colorScheme.secondary),
+                          if (hasTabWithTag.hasTag)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Icon(
+                                Icons.circle,
+                                size: 6,
+                                color: hasTabWithTag.isOnlyTag
+                                    ? Theme.of(context).colorScheme.onSurface
+                                    : (hasTabWithTag.isOnlyTagDifferentBooru ? Colors.yellow : Colors.blue),
+                              ),
+                            ),
+                        ],
+                      ),
+                      onPressed: () {
+                        searchHandler.addTabByString(currentTag);
+
+                        parseSortGroupTags();
+
+                        FlashElements.showSnackbar(
+                          context: context,
+                          duration: const Duration(seconds: 2),
+                          title: const Text('Added new tab:', style: TextStyle(fontSize: 20)),
+                          content: Text(currentTag, style: const TextStyle(fontSize: 16)),
+                          leadingIcon: Icons.fiber_new,
+                          sideColor: Colors.green,
+                          primaryActionBuilder: (context, controller) {
+                            return Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    ServiceHandler.vibrate();
+                                    if (settingsHandler.appMode.value.isMobile) {
+                                      Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
+                                    }
+                                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                      searchHandler.changeTabIndex(searchHandler.list.length - 1);
+                                    });
+                                    controller.dismiss();
+                                  },
+                                  icon: Icon(
+                                    Icons.arrow_forward_rounded,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                IconButton(
+                                  onPressed: () => controller.dismiss(),
+                                  icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                ],
+              ),
             ),
-          ),
-          Divider(
-            color: Colors.grey[800]!.withValues(alpha: 0.66),
-            height: 1,
-            thickness: 1,
-          ),
-        ],
+            Divider(
+              color: Colors.grey[800]!.withValues(alpha: 0.66),
+              height: 1,
+              thickness: 1,
+            ),
+          ],
+        ),
       );
     } else {
       // Render nothing if currentTag is an empty string
@@ -1146,7 +1161,6 @@ class _TagText extends StatelessWidget {
     );
     final fullStyle = basicStyle.copyWith(
       color: color,
-      backgroundColor: color?.withValues(alpha: 0.1),
     );
 
     if (filterText?.isNotEmpty == true) {
@@ -1164,9 +1178,8 @@ class _TagText extends StatelessWidget {
           spans.add(
             TextSpan(
               text: filterText,
-              style: basicStyle.copyWith(
-                color: Colors.green,
-                backgroundColor: Colors.green.withValues(alpha: 0.1),
+              style: fullStyle.copyWith(
+                backgroundColor: color?.withValues(alpha: 0.1),
                 fontWeight: FontWeight.w600,
               ),
             ),

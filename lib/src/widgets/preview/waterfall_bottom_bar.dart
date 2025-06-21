@@ -1381,6 +1381,27 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
             const SizedBox(height: 16),
             TagSuggestionText(tag: tag, isExpanded: false),
             const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  width: 6,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: tagHandler.getTag(tag.tag).getColour(),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  tagHandler.getTag(tag.tag).tagType.locName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             ListTile(
               title: const Text('Add'),
               leading: const Icon(Icons.add_rounded),
@@ -1707,10 +1728,12 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                           }
 
                           final TagSuggestion tag = suggestedTags[index];
+                          final tagColor = tagHandler.getTag(tag.tag).getColour();
 
                           return Container(
                             height: kMinInteractiveDimension + (tag.hasDescription ? 8 : 0),
                             alignment: Alignment.centerLeft,
+                            color: tagColor == Colors.transparent ? null : tagColor.withValues(alpha: 0.1),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
@@ -1974,6 +1997,7 @@ class TagSuggestionText extends StatelessWidget {
             TextSpan(
               text: isMultiword ? searchText : searchText.replaceAll('_', ' '),
               style: style?.copyWith(
+                backgroundColor: tagColor.withValues(alpha: 0.1),
                 fontWeight: FontWeight.w600,
               ),
             ),
