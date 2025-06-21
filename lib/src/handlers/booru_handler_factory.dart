@@ -155,7 +155,7 @@ class BooruHandlerFactory {
           booruHandler = FurAffinityHandler(booru, limit);
           break;*/
         default:
-          booruHandler = EmptyHandler(Booru(null, null, null, null, null), limit);
+          booruHandler = EmptyHandler(Booru.unknown(), limit);
           break;
       }
     } else {

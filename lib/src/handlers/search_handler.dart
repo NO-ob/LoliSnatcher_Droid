@@ -747,7 +747,7 @@ class SearchHandler {
           // find booru by name and create searchtab with given tags
           final Booru findBooru = settingsHandler.booruList.firstWhere(
             (booru) => booru.name == booruAndTags[0],
-            orElse: () => Booru(null, null, null, null, null),
+            orElse: Booru.unknown,
           );
           if (findBooru.name != null) {
             final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
@@ -810,7 +810,7 @@ class SearchHandler {
       list.value = restoredGlobals;
       changeTabIndex(newIndex);
     } else {
-      Booru defaultBooru = Booru(null, null, null, null, null);
+      Booru defaultBooru = Booru.unknown();
       // settingsHandler.getBooru();
       // Set the default booru and tags at the start
       if (settingsHandler.booruList.isNotEmpty) {
@@ -841,7 +841,7 @@ class SearchHandler {
         // find booru by name and create searchtab with given tags
         final Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
-          orElse: () => Booru(null, null, null, null, null),
+          orElse: Booru.unknown,
         );
         if (findBooru.name != null) {
           final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
@@ -884,7 +884,7 @@ class SearchHandler {
         // find booru by name and create searchtab with given tags
         final Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
-          orElse: () => Booru(null, null, null, null, null),
+          orElse: Booru.unknown,
         );
         if (findBooru.name != null) {
           final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
@@ -920,9 +920,9 @@ class SearchHandler {
     bool foundBrokenItems = false;
     final List<TabBackup> brokenItems = [];
     int newSelectedIndex = 0;
-    if (result != null) {
-      final List<TabBackup> tabBackups = TabBackup.fromJsonList(result);
-      for (final tabBackup in tabBackups) {
+    final List<TabBackup> tabBackups = result != null ? await compute(TabBackup.fromJsonList, result) : [];
+    for (final tabBackup in tabBackups) {
+      try {
         final newTab = parseTabFromBackup(tabBackup);
         if (newTab.selectedBooru.value.name != null) {
           restoredTabs.add(newTab);
@@ -944,6 +944,14 @@ class SearchHandler {
           final int index = tabBackups.indexWhere((tb) => tb == tabBackup);
           newSelectedIndex = index;
         }
+      } catch (e, s) {
+        Logger.Inst().log(
+          e,
+          'SearchHandler',
+          'restoreTabs',
+          LogTypes.exception,
+          s: s,
+        );
       }
     }
 
@@ -963,7 +971,11 @@ class SearchHandler {
               const Text('Some restored tabs had unknown boorus or broken characters.'),
               const Text('They were set to default or ignored.'),
               const Text('List of broken tabs:'),
-              Text(brokenItems.map((t) => '${t.booru}: ${t.tags}').join(', ')),
+              Text(
+                brokenItems
+                    .map((t) => '${tabBackups.indexOf(t)}${t.booru}: ${t.tags.isEmpty ? '[empty]' : t.tags}')
+                    .join(', '),
+              ),
             ],
           ],
         ),
@@ -975,7 +987,7 @@ class SearchHandler {
       list.value = restoredTabs;
       changeTabIndex(newSelectedIndex);
     } else {
-      Booru defaultBooru = Booru(null, null, null, null, null);
+      Booru defaultBooru = Booru.unknown();
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
@@ -1094,9 +1106,18 @@ class SearchHandler {
   SearchTab parseTabFromBackup(TabBackup backup) {
     final booruList = SettingsHandler.instance.booruList;
 
-    final Booru selectedBooru = booruList.firstWhere((b) => b.name == backup.booru);
+    final Booru selectedBooru = booruList.firstWhere(
+      (b) => b.name == backup.booru,
+      orElse: Booru.unknown,
+    );
     final List<Booru> secondaryBoorus = backup.secondaryBoorus
-        .map((b) => booruList.firstWhere((booru) => booru.name == b))
+        .map(
+          (b) => booruList.firstWhere(
+            (booru) => booru.name == b,
+            orElse: Booru.unknown,
+          ),
+        )
+        .where((b) => b.name != null)
         .toList();
 
     return SearchTab(
@@ -1119,7 +1140,7 @@ class SearchHandler {
     } catch (e) {
       print('Error restoring tabs: $e');
       // await settingsHandler.dbHandler.clearTabRestore();
-      Booru defaultBooru = Booru(null, null, null, null, null);
+      Booru defaultBooru = Booru.unknown();
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }

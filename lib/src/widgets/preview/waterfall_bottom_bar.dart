@@ -663,8 +663,8 @@ class MainSearchTagChip extends StatelessWidget {
           String formattedTag = tag;
 
           final List<Booru> usedBoorus = [
-            tab?.selectedBooru.value ?? booru ?? Booru(null, null, null, null, null),
-            ...(tab?.secondaryBoorus.value ?? <Booru>[]),
+            ?tab?.selectedBooru.value ?? booru,
+            ...?tab?.secondaryBoorus.value,
           ];
           final bool hasSecondaryBoorus = usedBoorus.length > 1;
 
@@ -2805,7 +2805,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 final item = history[index];
                 final booru = settingsHandler.booruList.value.firstWhere(
                   (b) => b.name == item.booruName && b.type == item.booruType,
-                  orElse: () => Booru(null, null, null, null, null),
+                  orElse: Booru.unknown,
                 );
 
                 const favIcon = Padding(

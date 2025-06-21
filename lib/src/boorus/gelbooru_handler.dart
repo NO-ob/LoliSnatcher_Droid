@@ -36,6 +36,9 @@ class GelbooruHandler extends BooruHandler {
     '0': TagType.none,
   };
 
+  static String get credentialsWarningText =>
+      '<p><b>You may need to add your User ID and API key. You can find them on <a href="https://gelbooru.com/index.php?page=account&s=options">Gelbooru settings page</a> under "API Access Credentials". Note: Anonymous access is NOT permitted.</b></p>';
+
   @override
   Map<String, String> getHeaders() {
     return {
