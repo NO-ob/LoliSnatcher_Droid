@@ -258,6 +258,15 @@ class _GalleryPageState extends State<GalleryPage> {
                 title: 'Hide toolbar when opening viewer',
               ),
               SettingsToggle(
+                value: settingsHandler.expandDetails,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.expandDetails = newValue;
+                  });
+                },
+                title: 'Expand details by default',
+              ),
+              SettingsToggle(
                 value: hideNotes,
                 onChanged: (newValue) {
                   setState(() {
