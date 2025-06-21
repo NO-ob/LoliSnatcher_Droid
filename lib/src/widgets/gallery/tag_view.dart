@@ -9,7 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide ContextExt;
 import 'package:intl/intl.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -26,6 +26,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -80,6 +81,8 @@ class _TagViewState extends State<TagView> {
 
   CancelToken? cancelToken;
   bool loadingUpdate = false, failedUpdate = false;
+
+  bool? detailsExpanded;
 
   Timer? sortTimer;
 
@@ -186,13 +189,13 @@ class _TagViewState extends State<TagView> {
   void sortAndGroupTagsList() {
     if (sortTags == null) {
       tags = [...item.tagsList];
+      groupTagsList();
     } else {
       tags.sort((a, b) => sortTags == true ? a.compareTo(b) : b.compareTo(a));
       filteredTags = [
         ...filterTags([...tags]),
       ];
     }
-    groupTagsList();
   }
 
   void groupTagsList() {
@@ -243,11 +246,13 @@ class _TagViewState extends State<TagView> {
   }
 
   void searchFocusListener() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (searchFocusNode.hasFocus) {
-        Scrollable.ensureVisible(
+        // doesn't scroll to a proper position in some cases
+        // probably because scroll extent changes due to elements being lazily rendered
+        await Scrollable.ensureVisible(
           searchKey.currentContext!,
-          alignment: 0.1,
+          alignment: (72 + context.viewInsets.top) / context.height,
           duration: const Duration(milliseconds: 300),
         );
       }
@@ -1017,12 +1022,18 @@ class _TagViewState extends State<TagView> {
             SliverList(
               delegate: SliverChildListDelegate(
                 [
+                  const SizedBox(height: kMinInteractiveDimension),
                   infoText('ID', itemId),
                   infoText('Post URL', item.postURL, isLink: true),
                   infoText('Posted', formattedDate, canCopy: false),
                   ExpansionTile(
                     title: const Text('Details'),
-                    initiallyExpanded: settingsHandler.expandDetails,
+                    initiallyExpanded: detailsExpanded ?? settingsHandler.expandDetails,
+                    onExpansionChanged: (expanded) {
+                      setState(() {
+                        detailsExpanded = expanded;
+                      });
+                    },
                     iconColor: Colors.white.withValues(alpha: 0.66),
                     collapsedIconColor: Colors.white.withValues(alpha: 0.66),
                     shape: const Border(),
@@ -1108,7 +1119,7 @@ class _TagViewState extends State<TagView> {
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: MediaQuery.viewInsetsOf(context).bottom,
+                height: MediaQuery.viewInsetsOf(context).bottom + kMinInteractiveDimension,
               ),
             ),
           ],

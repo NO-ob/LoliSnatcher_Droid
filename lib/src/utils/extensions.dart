@@ -7,6 +7,8 @@ extension BuildContextExtras on BuildContext {
   Size get size => MediaQuery.sizeOf(this);
   double get width => size.width;
   double get height => size.height;
+  EdgeInsets get viewInsets => MediaQuery.viewInsetsOf(this);
+  EdgeInsets get padding => MediaQuery.paddingOf(this);
   double get devicePixelRatio => MediaQuery.devicePixelRatioOf(this);
   Orientation get orientation => MediaQuery.orientationOf(this);
   bool get isLandscape => orientation.isLandscape;
