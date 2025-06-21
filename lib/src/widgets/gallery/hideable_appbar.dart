@@ -1281,6 +1281,8 @@ Future<List<String>> showSelectTagsDialog(
 ) async {
   if (tags.isEmpty) return [];
 
+  tags = tags.where((t) => t.isNotEmpty).toList();
+
   final tagHandler = TagHandler.instance;
 
   final Map<TagType, List<Tag>> tagMap = {
@@ -1318,6 +1320,7 @@ Future<List<String>> showSelectTagsDialog(
             item.fullString,
             style: TextStyle(
               color: color == Colors.transparent ? null : color,
+              backgroundColor: color == Colors.transparent ? null : color.withValues(alpha: 0.1),
             ),
           );
         },

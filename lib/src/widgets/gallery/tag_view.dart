@@ -17,6 +17,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
@@ -793,6 +794,8 @@ class _TagViewState extends State<TagView> {
     }
 
     if (currentTag != '') {
+      final tag = tagHandler.getTag(currentTag);
+
       return Column(
         children: [
           InkWell(
@@ -806,22 +809,16 @@ class _TagViewState extends State<TagView> {
             },
             child: Row(
               children: [
-                Container(
-                  width: 6,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: tagHandler.getTag(currentTag).getColour(),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
+                Expanded(
+                  child: Container(
+                    height: 50,
+                    padding: const EdgeInsets.only(left: 12),
+                    child: _TagText(
+                      key: ValueKey(currentTag),
+                      tag: tag,
+                      filterText: searchController.text,
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                _TagText(
-                  key: ValueKey(currentTag),
-                  tag: tagHandler.getTag(currentTag).fullString,
-                  filterText: searchController.text,
                 ),
                 if (tagIconAndColor.isNotEmpty) ...[
                   ...tagIconAndColor.map(
@@ -1136,33 +1133,40 @@ class _TagText extends StatelessWidget {
     super.key,
   });
 
-  final String tag;
+  final Tag tag;
   final String? filterText;
 
   @override
   Widget build(BuildContext context) {
-    final style = TextStyle(
+    Color? color = tag.getColour();
+    color = color == Colors.transparent ? null : color;
+    final basicStyle = TextStyle(
       fontSize: 14,
       fontWeight: filterText?.isNotEmpty == true ? FontWeight.w400 : FontWeight.w600,
+    );
+    final fullStyle = basicStyle.copyWith(
+      color: color,
+      backgroundColor: color?.withValues(alpha: 0.1),
     );
 
     if (filterText?.isNotEmpty == true) {
       final List<TextSpan> spans = [];
-      final List<String> split = tag.split(filterText!);
+      final List<String> split = tag.fullString.split(filterText!);
 
       for (int i = 0; i < split.length; i++) {
         spans.add(
           TextSpan(
             text: split[i],
-            style: style,
+            style: basicStyle,
           ),
         );
         if (i < split.length - 1) {
           spans.add(
             TextSpan(
               text: filterText,
-              style: style.copyWith(
+              style: basicStyle.copyWith(
                 color: Colors.green,
+                backgroundColor: Colors.green.withValues(alpha: 0.1),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1173,15 +1177,16 @@ class _TagText extends StatelessWidget {
       return MarqueeText.rich(
         textSpan: TextSpan(
           children: spans,
+          style: basicStyle,
         ),
         isExpanded: true,
-        style: style,
+        style: basicStyle,
       );
     } else {
       return MarqueeText(
-        text: tag,
+        text: tag.fullString,
         isExpanded: true,
-        style: style,
+        style: fullStyle,
       );
     }
   }
