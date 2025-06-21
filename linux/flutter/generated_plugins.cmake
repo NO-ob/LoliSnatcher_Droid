@@ -7,8 +7,10 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_avif_linux
   fvp
   gtk
+  irondash_engine_context
   media_kit_libs_linux
   media_kit_video
+  super_native_extensions
   url_launcher_linux
   volume_controller
 )

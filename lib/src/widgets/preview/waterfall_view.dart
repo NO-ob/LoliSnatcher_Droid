@@ -311,9 +311,9 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
     }
   }
 
-  void onSecondaryTap(int index) {
+  Future<void> onSecondaryTap(int index) async {
     final BooruItem item = searchHandler.currentFetched[index];
-    Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
+    await Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
     FlashElements.showSnackbar(
       duration: const Duration(seconds: 2),
       title: const Text('Copied File URL to clipboard!', style: TextStyle(fontSize: 20)),
