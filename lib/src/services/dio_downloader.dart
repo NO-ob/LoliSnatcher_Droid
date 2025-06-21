@@ -121,7 +121,7 @@ class DioDownloader {
   }
 
   Future<Map<String, dynamic>> getHeaders() async {
-    final Map<String, dynamic> resultHeaders = {...headers ?? {}};
+    final Map<String, dynamic> resultHeaders = {...?headers};
     final String cookieString = await Tools.getCookies(url);
     if (cookieString.isNotEmpty) {
       resultHeaders['Cookie'] = cookieString;

@@ -127,7 +127,7 @@ class SettingsHandler {
   double preloadSizeLimit = 0.2;
 
   int currentColumnCount(BuildContext context) {
-    return MediaQuery.orientationOf(context) == Orientation.portrait ? portraitColumns : landscapeColumns;
+    return context.isPortrait ? portraitColumns : landscapeColumns;
   }
 
   Duration cacheDuration = Duration.zero;

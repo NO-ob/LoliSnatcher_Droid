@@ -335,10 +335,10 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       });
     }
 
-    final bool changedOrientation = MediaQuery.orientationOf(context) != currentOrientation;
+    final bool changedOrientation = context.orientation != currentOrientation;
     if (changedOrientation && !isActive.value) {
       // try to keep the scroll position at currently viewed item when screen orientation changes
-      currentOrientation = MediaQuery.orientationOf(context);
+      currentOrientation = context.orientation;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         searchHandler.gridScrollController.scrollToIndex(
           searchHandler.viewedIndex.value,

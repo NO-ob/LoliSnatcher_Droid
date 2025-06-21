@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -191,6 +192,14 @@ abstract class BooruHandler {
         errorString = e.response?.statusCode != null
             ? '${e.response?.statusCode} - ${e.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(e.response?.statusCode)}'
             : (e.message ?? e.toString());
+
+        // TODO move error handling to separate function and allow per booru changes?
+        if (e.response?.statusCode == HttpStatus.unauthorized &&
+            e.requestOptions.uri.toString().contains('gelbooru.com')) {
+          // add a message to direct user to set his user ID and api key
+          errorString +=
+              '\n<p><b>You may need to add your User ID and API key. Go to <a href="/settings/booru">[Settings > Booru & Search]</a> to update the booru config. You can find your User ID and API key on <a href="https://gelbooru.com/index.php?page=account&s=options">Gelbooru settings page</a> under "API Access Credentials". Note: Anonymous access is NOT permitted.</b></p>';
+        }
       } else {
         errorString = e.toString();
       }

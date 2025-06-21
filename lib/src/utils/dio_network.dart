@@ -61,7 +61,7 @@ class DioNetwork {
     final String cleanUrl = temp.replace(queryParameters: {}).toString();
     final Map<String, dynamic> queryParams = {
       ...temp.queryParameters,
-      ...givenQueryParams ?? {},
+      ...?givenQueryParams,
     };
 
     // TODO create a separate class for this?

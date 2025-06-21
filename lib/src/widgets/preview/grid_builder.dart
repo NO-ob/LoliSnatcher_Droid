@@ -38,9 +38,7 @@ class GridBuilder extends StatelessWidget {
         ? settingsHandler.previewDisplayFallback
         : settingsHandler.previewDisplay;
 
-    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait)
-        ? settingsHandler.portraitColumns
-        : settingsHandler.landscapeColumns;
+    final int columnCount = context.isPortrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
     return ValueListenableBuilder(
       valueListenable: tab.booruHandler.filteredFetched,

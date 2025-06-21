@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 
 class ShimmerWrap extends StatelessWidget {
   const ShimmerWrap({
@@ -39,9 +40,7 @@ class ThumbnailsShimmerList extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final String displayType = settingsHandler.previewDisplay;
     final int previewCount = settingsHandler.itemLimit;
-    final int columnCount = MediaQuery.orientationOf(context) == Orientation.portrait
-        ? settingsHandler.portraitColumns
-        : settingsHandler.landscapeColumns;
+    final int columnCount = context.isPortrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
     return SliverGrid.builder(
       addAutomaticKeepAlives: false,

@@ -4,6 +4,7 @@ import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/gallery/change_page_buttons.dart';
 import 'package:lolisnatcher/src/widgets/gallery/zoom_button.dart';
 
@@ -112,8 +113,8 @@ class _GalleryButtonsState extends State<GalleryButtons> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isVerticalDirection = MediaQuery.orientationOf(context) == Orientation.portrait;
-    final double distanceFromSide = MediaQuery.sizeOf(context).width * 0.05;
+    final bool isVerticalDirection = context.isPortrait;
+    final double distanceFromSide = context.width * 0.05;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 200),

@@ -136,8 +136,8 @@ class _MobileHomeState extends State<MobileHome> {
           //When setting the vertical offset, be sure to use only top or bottom
           offset: IDOffset.only(
             bottom: 0,
-            right: orientation == Orientation.landscape ? 0 : 0.5,
-            left: orientation == Orientation.landscape ? 0 : 0.5,
+            right: orientation.isLandscape ? 0 : 0.5,
+            left: orientation.isLandscape ? 0 : 0.5,
           ),
           scale: const IDOffset.horizontal(1),
 
