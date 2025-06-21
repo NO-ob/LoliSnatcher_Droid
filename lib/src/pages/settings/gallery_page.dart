@@ -388,8 +388,13 @@ class _GalleryPageState extends State<GalleryPage> {
                                     );
                                   },
                                   key: Key('item-$name'),
+                                  minTileHeight: 64,
                                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                                   title: Text(title),
+                                  subtitle: switch (name) {
+                                    'external_player' => const Text('Only on videos'),
+                                    _ => null,
+                                  },
                                   leading: Opacity(
                                     opacity: isInfo ? 0.5 : 1,
                                     child: Checkbox(
@@ -416,13 +421,33 @@ class _GalleryPageState extends State<GalleryPage> {
                                       },
                                     ),
                                   ),
-                                  trailing: ReorderableDragStartListener(
-                                    key: Key('draghandle-#${buttonOrder[index]}'),
-                                    index: index,
-                                    child: const IconButton(
-                                      onPressed: null,
-                                      icon: Icon(Icons.drag_handle),
-                                    ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        switch (name) {
+                                          'snatch' => Icons.save,
+                                          'favourite' => Icons.favorite,
+                                          'info' => Icons.info,
+                                          'share' => Icons.share,
+                                          'select' => Icons.check_box,
+                                          'open' => Icons.public,
+                                          'autoscroll' => Icons.play_arrow,
+                                          'reloadnoscale' => Icons.refresh,
+                                          'toggle_quality' => Icons.high_quality,
+                                          'external_player' => Icons.exit_to_app,
+                                          _ => null,
+                                        },
+                                      ),
+                                      ReorderableDragStartListener(
+                                        key: Key('draghandle-#${buttonOrder[index]}'),
+                                        index: index,
+                                        child: const IconButton(
+                                          onPressed: null,
+                                          icon: Icon(Icons.drag_handle),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 );
                               },

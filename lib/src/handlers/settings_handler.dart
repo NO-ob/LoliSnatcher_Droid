@@ -134,13 +134,13 @@ class SettingsHandler {
 
   // TODO convert to enum
   static const List<String> buttonList = [
-    'autoscroll',
     'snatch',
     'favourite',
     'info',
     'share',
     'select',
     'open',
+    'autoscroll',
     'reloadnoscale',
     'toggle_quality',
     'external_player',
