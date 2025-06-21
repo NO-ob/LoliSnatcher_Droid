@@ -65,6 +65,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
 
   final ValueNotifier<bool> isActive = ValueNotifier(true);
 
+  DateTime lastEventTime = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -245,47 +247,45 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                 autofocus: false,
                 focusNode: kbFocusNode,
                 onKeyEvent: (KeyEvent event) async {
-                  // detect only key DOWN events
-                  if (event.runtimeType == KeyDownEvent) {
-                    if (event.physicalKey == PhysicalKeyboardKey.arrowLeft ||
-                        event.physicalKey == PhysicalKeyboardKey.keyH) {
-                      // prev page on Left Arrow or H
-                      if (page.value > 0) {
-                        controller.jumpToPage(page.value - 1);
-                      }
-                    } else if (event.physicalKey == PhysicalKeyboardKey.arrowRight ||
-                        event.physicalKey == PhysicalKeyboardKey.keyL) {
-                      // next page on Right Arrow or L
-                      if (page.value < widget.tab.booruHandler.filteredFetched.length - 1) {
-                        controller.jumpToPage(page.value + 1);
-                      }
-                    } else if (event.physicalKey == PhysicalKeyboardKey.keyS) {
-                      // save on S
-                      snatchHandler.queue(
-                        [widget.tab.booruHandler.filteredFetched[page.value]],
-                        widget.tab.booruHandler.booru,
-                        settingsHandler.snatchCooldown,
-                        false,
+                  if (event.physicalKey == PhysicalKeyboardKey.arrowLeft ||
+                      event.physicalKey == PhysicalKeyboardKey.keyH) {
+                    // prev page on Left Arrow or H
+                    if (page.value > 0 && DateTime.now().difference(lastEventTime).inMilliseconds > 150) {
+                      lastEventTime = DateTime.now();
+                      controller.jumpToPage(page.value - 1);
+                    }
+                  } else if (event.physicalKey == PhysicalKeyboardKey.arrowRight ||
+                      event.physicalKey == PhysicalKeyboardKey.keyL) {
+                    // next page on Right Arrow or L
+                    if (page.value < widget.tab.booruHandler.filteredFetched.length - 1 &&
+                        DateTime.now().difference(lastEventTime).inMilliseconds > 150) {
+                      lastEventTime = DateTime.now();
+                      controller.jumpToPage(page.value + 1);
+                    }
+                  } else if (event.runtimeType == KeyDownEvent && event.physicalKey == PhysicalKeyboardKey.keyS) {
+                    // save on S
+                    snatchHandler.queue(
+                      [widget.tab.booruHandler.filteredFetched[page.value]],
+                      widget.tab.booruHandler.booru,
+                      settingsHandler.snatchCooldown,
+                      false,
+                    );
+                    if (settingsHandler.favouriteOnSnatch) {
+                      await widget.tab.toggleItemFavourite(
+                        page.value,
+                        forcedValue: true,
+                        skipSnatching: true,
                       );
-                      if (settingsHandler.favouriteOnSnatch) {
-                        await widget.tab.toggleItemFavourite(
-                          page.value,
-                          forcedValue: true,
-                          skipSnatching: true,
-                        );
-                      }
-                    } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {
-                      // favorite on F
-                      if (settingsHandler.dbEnabled) {
-                        await widget.tab.toggleItemFavourite(
-                          page.value,
-                        );
-                      }
-                    } else if (event.physicalKey == PhysicalKeyboardKey.escape) {
-                      // exit on escape if in focus
-                      if (kbFocusNode.hasFocus) {
-                        Navigator.of(context).pop();
-                      }
+                    }
+                  } else if (event.runtimeType == KeyDownEvent && event.physicalKey == PhysicalKeyboardKey.keyF) {
+                    // favorite on F
+                    if (settingsHandler.dbEnabled) {
+                      await widget.tab.toggleItemFavourite(page.value);
+                    }
+                  } else if (event.runtimeType == KeyDownEvent && event.physicalKey == PhysicalKeyboardKey.escape) {
+                    // exit on escape if in focus
+                    if (kbFocusNode.hasFocus) {
+                      Navigator.of(context).pop();
                     }
                   }
                 },
