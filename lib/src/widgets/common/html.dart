@@ -28,15 +28,10 @@ class LoliHtml extends StatelessWidget {
       'p':
           htmlStyle['p']?.copyWith(margin: Margins.zero, padding: HtmlPaddings.zero) ??
           Style(margin: Margins.zero, padding: HtmlPaddings.zero),
-      'a':
-          htmlStyle['body']?.copyWith(
-            color: Colors.blue,
-            textDecoration: TextDecoration.underline,
-          ) ??
-          Style(
-            color: Colors.blue,
-            textDecoration: TextDecoration.underline,
-          ),
+      'a': Style(
+        color: Colors.blue,
+        textDecoration: TextDecoration.underline,
+      ),
     };
   }
 
