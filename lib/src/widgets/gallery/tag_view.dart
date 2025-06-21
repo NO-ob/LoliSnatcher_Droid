@@ -457,7 +457,12 @@ class _TagViewState extends State<TagView> {
     }
   }
 
-  Widget infoText(String title, String data, {bool canCopy = true}) {
+  Widget infoText(
+    String title,
+    String data, {
+    bool canCopy = true,
+    bool isLink = false,
+  }) {
     if (data.isNotEmpty) {
       return ListTile(
         onTap: canCopy
@@ -480,15 +485,41 @@ class _TagViewState extends State<TagView> {
               }
             : null,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$title: ', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
-            Expanded(child: Text(data, overflow: TextOverflow.ellipsis)),
+            Text(
+              '$title: ',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                data,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ),
           ],
         ),
+        trailing: isLink
+            ? IconButton(
+                icon: const Icon(Icons.exit_to_app),
+                onPressed: () => launchUrlString(
+                  data,
+                  mode: LaunchMode.externalApplication,
+                ),
+              )
+            : null,
       );
-    } else {
-      return const SizedBox.shrink();
     }
+
+    return const SizedBox.shrink();
   }
 
   void tagDialog({
@@ -987,7 +1018,7 @@ class _TagViewState extends State<TagView> {
               delegate: SliverChildListDelegate(
                 [
                   infoText('ID', itemId),
-                  infoText('Post URL', item.postURL),
+                  infoText('Post URL', item.postURL, isLink: true),
                   infoText('Posted', formattedDate, canCopy: false),
                   ExpansionTile(
                     title: const Text('Details'),
@@ -998,7 +1029,7 @@ class _TagViewState extends State<TagView> {
                     collapsedShape: const Border(),
                     children: [
                       if (settingsHandler.isDebug.value) infoText('Filename', fileName),
-                      infoText('URL', fileUrl),
+                      infoText('URL', fileUrl, isLink: true),
                       infoText('Extension', fileExt),
                       infoText('Resolution', fileRes),
                       infoText('Size', fileSize),
