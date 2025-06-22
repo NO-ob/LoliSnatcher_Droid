@@ -106,24 +106,11 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.disableCustomPageTransitions = disableCustomPageTransitions;
     settingsHandler.disableVibration = disableVibration;
 
-    if (int.parse(scrollSpeedController.text) < 100) {
-      scrollSpeedController.text = 100.toString();
-    }
-    if (int.parse(galleryAutoScrollController.text) < 800) {
-      galleryAutoScrollController.text = 800.toString();
-    }
-    settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
-    settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
+    settingsHandler.volumeButtonsScrollSpeed = (int.tryParse(scrollSpeedController.text) ?? 200).clamp(0, 1_000_000);
+    settingsHandler.galleryAutoScrollTime = (int.tryParse(galleryAutoScrollController.text) ?? 4000).clamp(100, 10000);
 
-    if ((int.tryParse(preloadAmountController.text) ?? 0) < 0) {
-      preloadAmountController.text = 0.toString();
-    }
-    settingsHandler.preloadCount = int.parse(preloadAmountController.text);
-
-    if ((double.tryParse(preloadSizeController.text) ?? 0) < 0) {
-      preloadSizeController.text = 0.toString();
-    }
-    settingsHandler.preloadSizeLimit = double.parse(preloadSizeController.text);
+    settingsHandler.preloadCount = (int.tryParse(preloadAmountController.text) ?? 1).clamp(0, 3);
+    settingsHandler.preloadSizeLimit = (double.tryParse(preloadSizeController.text) ?? 0).clamp(0, double.infinity);
 
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (result) {
@@ -166,8 +153,10 @@ class _GalleryPageState extends State<GalleryPage> {
                     return 'Please enter a value';
                   } else if (parse == null) {
                     return 'Please enter a valid numeric value';
-                  } else if (parse > 4) {
-                    return 'Please enter a value less than 5';
+                  } else if (parse < 0) {
+                    return 'Please enter a value equal to or greater than 0';
+                  } else if (parse > 3) {
+                    return 'Please enter a value less than 4';
                   } else {
                     return null;
                   }

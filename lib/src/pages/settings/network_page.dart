@@ -154,6 +154,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 title: 'Custom user agent',
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 resetText: () => '',
+                onChanged: (_) => setState(() {}),
                 pasteable: true,
                 drawBottomBorder: false,
                 trailingIcon: IconButton(
@@ -178,10 +179,12 @@ class _NetworkPageState extends State<NetworkPage> {
               ),
               if (userAgentController.text != Constants.defaultBrowserUserAgent)
                 SettingsButton(
-                  name: 'Tap here to use suggested browser user agent:',
+                  name:
+                      'Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):',
                   subtitle: const Text(Constants.defaultBrowserUserAgent),
                   action: () {
                     userAgentController.text = Constants.defaultBrowserUserAgent;
+                    setState(() {});
                   },
                 ),
               const SettingsButton(name: '', enabled: false),

@@ -248,13 +248,21 @@ class SettingsToggle extends StatelessWidget {
                   },
                 ),
               ),
-            trailingIcon ?? const SizedBox(width: 8),
           ],
         ),
         subtitle: subtitle,
-        trailing: Switch(
-          value: value,
-          onChanged: enabled ? onChanged : null,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: trailingIcon,
+            ),
+            Switch(
+              value: value,
+              onChanged: enabled ? onChanged : null,
+            ),
+          ],
         ),
         onTap: () => onChanged(!value),
         shape: Border(

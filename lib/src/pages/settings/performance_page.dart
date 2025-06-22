@@ -1,7 +1,11 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class PerformancePage extends StatefulWidget {
@@ -19,9 +23,11 @@ class _PerformancePageState extends State<PerformancePage> {
   bool autoPlayEnabled = true;
   bool disableVideo = false;
 
-  String galleryMode = 'Full Res';
   String previewMode = 'Sample';
+  String galleryMode = 'Full Res';
 
+  final TextEditingController columnsLandscapeController = TextEditingController();
+  final TextEditingController columnsPortraitController = TextEditingController();
   final TextEditingController preloadAmountController = TextEditingController();
   final TextEditingController preloadSizeController = TextEditingController();
 
@@ -30,8 +36,10 @@ class _PerformancePageState extends State<PerformancePage> {
     super.initState();
 
     shitDevice = settingsHandler.shitDevice;
-    galleryMode = settingsHandler.galleryMode;
     previewMode = settingsHandler.previewMode;
+    galleryMode = settingsHandler.galleryMode;
+    columnsPortraitController.text = settingsHandler.portraitColumns.toString();
+    columnsLandscapeController.text = settingsHandler.landscapeColumns.toString();
     disableImageScaling = settingsHandler.disableImageScaling;
     preloadAmountController.text = settingsHandler.preloadCount.toString();
     preloadSizeController.text = settingsHandler.preloadSizeLimit.toString();
@@ -46,10 +54,12 @@ class _PerformancePageState extends State<PerformancePage> {
     }
 
     settingsHandler.shitDevice = shitDevice;
-    settingsHandler.galleryMode = galleryMode;
     settingsHandler.previewMode = previewMode;
+    settingsHandler.galleryMode = galleryMode;
+    settingsHandler.portraitColumns = (int.tryParse(columnsPortraitController.text) ?? 3).clamp(1, 100);
+    settingsHandler.landscapeColumns = (int.tryParse(columnsLandscapeController.text) ?? 6).clamp(1, 100);
     settingsHandler.disableImageScaling = disableImageScaling;
-    settingsHandler.preloadCount = (int.tryParse(preloadAmountController.text) ?? 0).clamp(0, 4);
+    settingsHandler.preloadCount = (int.tryParse(preloadAmountController.text) ?? 0).clamp(0, 3);
     settingsHandler.preloadSizeLimit = (double.tryParse(preloadSizeController.text) ?? 0.2).clamp(0, double.maxFinite);
     settingsHandler.autoPlayEnabled = autoPlayEnabled;
     settingsHandler.disableVideo = disableVideo;
@@ -58,6 +68,58 @@ class _PerformancePageState extends State<PerformancePage> {
     if (result) {
       Navigator.of(context).pop();
     }
+  }
+
+  Future<bool> showLowPerfConfirmDialog(bool withConfirmation) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return SettingsDialog(
+              title: const Text('Low performance mode'),
+              contentItems: const [
+                Text('- Disables detailed loading progress information'),
+                Text(
+                  '- Disables resource-intensive elements (blurs, animated opacity, some animations...)',
+                ),
+                Text(
+                  '- Sets optimal settings for these options (you can change them separately later):',
+                ),
+                Text('   - Preview quality [Thumbnail]'),
+                Text('   - Image quality [Sample]'),
+                Text('   - Preview columns [2 - portrait, 4 - landscape]'),
+                Text('   - Preload amount and size [0, 0.2]'),
+                Text('   - Video autoplay [false]'),
+                Text("   - Don't scale images [false]"),
+              ],
+              actionButtons: withConfirmation
+                  ? [
+                      TextButton.icon(
+                        style: TextButton.styleFrom(foregroundColor: context.colorScheme.onSurface),
+                        onPressed: () => Navigator.of(context).pop(false),
+                        icon: const Icon(Icons.cancel_outlined),
+                        label: const Text('Cancel'),
+                      ),
+                      TextButton.icon(
+                        style: TextButton.styleFrom(foregroundColor: context.colorScheme.onSurface),
+                        onPressed: () => Navigator.of(context).pop(true),
+                        icon: const Icon(Icons.check_circle_outline),
+                        label: const Text('Confirm'),
+                      ),
+                    ]
+                  : [],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  @override
+  void dispose() {
+    columnsPortraitController.dispose();
+    columnsLandscapeController.dispose();
+    preloadAmountController.dispose();
+    preloadSizeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -75,47 +137,39 @@ class _PerformancePageState extends State<PerformancePage> {
             children: [
               SettingsToggle(
                 value: shitDevice,
-                onChanged: (newValue) {
-                  setState(() {
-                    shitDevice = newValue;
-                    if (shitDevice) {
-                      galleryMode = 'Sample';
-                      previewMode = 'Thumbnail';
-                      preloadAmountController.text = '0';
-                      preloadSizeController.text = '0.2';
-                      autoPlayEnabled = false;
-                      disableImageScaling = false;
-                    }
-                  });
+                onChanged: (newValue) async {
+                  if (await showLowPerfConfirmDialog(true)) {
+                    setState(() {
+                      shitDevice = newValue;
+                      if (shitDevice) {
+                        previewMode = 'Thumbnail';
+                        galleryMode = 'Sample';
+                        columnsPortraitController.text = '2';
+                        columnsLandscapeController.text = '4';
+                        preloadAmountController.text = '0';
+                        preloadSizeController.text = '0.2';
+                        autoPlayEnabled = false;
+                        disableImageScaling = false;
+                      }
+                    });
+                  }
                 },
                 title: 'Low performance mode',
+                subtitle: const Text('Recommended for old devices and devices with low RAM'),
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Low performance mode'),
-                          contentItems: [
-                            Text('Recommended for old devices and devices with low RAM.'),
-                            Text(''),
-                            Text('- Disables detailed loading progress information'),
-                            Text('- Disables most heavy to render elements (blurs, animated opacity...)'),
-                            Text(
-                              '- Sets optimal settings for these options (you can still change them after applying changes here):',
-                            ),
-                            Text('   - Image quality'),
-                            Text('   - Preview quality'),
-                            Text('   - Preload amount and size'),
-                            Text('   - Video autoplay'),
-                            Text("   - Don't scale images"),
-                          ],
-                        );
-                      },
-                    );
-                  },
+                  onPressed: () => showLowPerfConfirmDialog(false),
                 ),
+              ),
+              SettingsOptionsList(
+                value: previewMode,
+                items: settingsHandler.map['previewMode']!['options'],
+                onChanged: (String? newValue) {
+                  setState(() {
+                    previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
+                  });
+                },
+                title: 'Preview quality',
               ),
               SettingsOptionsList(
                 value: galleryMode,
@@ -127,15 +181,54 @@ class _PerformancePageState extends State<PerformancePage> {
                 },
                 title: 'Image quality',
               ),
-              SettingsOptionsList(
-                value: previewMode,
-                items: settingsHandler.map['previewMode']!['options'],
-                onChanged: (String? newValue) {
-                  setState(() {
-                    previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
-                  });
+              SettingsTextInput(
+                controller: columnsPortraitController,
+                title: 'Preview columns (portrait)',
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                onChanged: (String? text) {
+                  setState(() {});
                 },
-                title: 'Preview quality',
+                resetText: () => settingsHandler.map['portraitColumns']!['default']!.toString(),
+                numberButtons: true,
+                numberStep: 1,
+                numberMin: 1,
+                numberMax: double.infinity,
+                validator: (String? value) {
+                  final int? parse = int.tryParse(value ?? '');
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a value';
+                  } else if (parse == null) {
+                    return 'Please enter a valid numeric value';
+                  } else if (parse > 4 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
+                    return 'Using more than 4 columns can affect performance';
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              SettingsTextInput(
+                controller: columnsLandscapeController,
+                title: 'Preview columns (landscape)',
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                resetText: () => settingsHandler.map['landscapeColumns']!['default']!.toString(),
+                numberButtons: true,
+                numberStep: 1,
+                numberMin: 1,
+                numberMax: double.infinity,
+                validator: (String? value) {
+                  final int? parse = int.tryParse(value ?? '');
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a value';
+                  } else if (parse == null) {
+                    return 'Please enter a valid numeric value';
+                  } else if (parse > 8 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
+                    return 'Using more than 8 columns can affect performance';
+                  } else {
+                    return null;
+                  }
+                },
               ),
               SettingsTextInput(
                 controller: preloadAmountController,
@@ -153,8 +246,10 @@ class _PerformancePageState extends State<PerformancePage> {
                     return 'Please enter a value';
                   } else if (parse == null) {
                     return 'Please enter a valid numeric value';
-                  } else if (parse > 4) {
-                    return 'Please enter a value less than 5';
+                  } else if (parse < 0) {
+                    return 'Please enter a value equal to or greater than 0';
+                  } else if (parse > 3) {
+                    return 'Please enter a value less than 4';
                   } else {
                     return null;
                   }

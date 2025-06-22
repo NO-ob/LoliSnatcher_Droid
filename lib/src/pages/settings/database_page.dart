@@ -456,7 +456,7 @@ class _DatabasePageState extends State<DatabasePage> {
                             title: Text('Tag type fetching'),
                             contentItems: [
                               Text('Will search for tag types on supported boorus'),
-                              Text('This could lead to rate limiting'),
+                              Text('This can lead to rate limiting'),
                             ],
                           );
                         },
