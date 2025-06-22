@@ -1997,7 +1997,6 @@ class TagSuggestionText extends StatelessWidget {
             TextSpan(
               text: isMultiword ? searchText : searchText.replaceAll('_', ' '),
               style: style?.copyWith(
-                backgroundColor: tagColor.withValues(alpha: 0.1),
                 fontWeight: FontWeight.w600,
               ),
             ),
