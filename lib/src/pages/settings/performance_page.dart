@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class PerformancePage extends StatefulWidget {
@@ -19,7 +21,6 @@ class _PerformancePageState extends State<PerformancePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   bool shitDevice = false;
-  bool disableImageScaling = false;
   bool autoPlayEnabled = true;
   bool disableVideo = false;
 
@@ -40,7 +41,6 @@ class _PerformancePageState extends State<PerformancePage> {
     galleryMode = settingsHandler.galleryMode;
     columnsPortraitController.text = settingsHandler.portraitColumns.toString();
     columnsLandscapeController.text = settingsHandler.landscapeColumns.toString();
-    disableImageScaling = settingsHandler.disableImageScaling;
     preloadAmountController.text = settingsHandler.preloadCount.toString();
     preloadSizeController.text = settingsHandler.preloadSizeLimit.toString();
     autoPlayEnabled = settingsHandler.autoPlayEnabled;
@@ -58,7 +58,6 @@ class _PerformancePageState extends State<PerformancePage> {
     settingsHandler.galleryMode = galleryMode;
     settingsHandler.portraitColumns = (int.tryParse(columnsPortraitController.text) ?? 3).clamp(1, 100);
     settingsHandler.landscapeColumns = (int.tryParse(columnsLandscapeController.text) ?? 6).clamp(1, 100);
-    settingsHandler.disableImageScaling = disableImageScaling;
     settingsHandler.preloadCount = (int.tryParse(preloadAmountController.text) ?? 0).clamp(0, 3);
     settingsHandler.preloadSizeLimit = (double.tryParse(preloadSizeController.text) ?? 0.2).clamp(0, double.maxFinite);
     settingsHandler.autoPlayEnabled = autoPlayEnabled;
@@ -81,6 +80,7 @@ class _PerformancePageState extends State<PerformancePage> {
                 Text(
                   '- Disables resource-intensive elements (blurs, animated opacity, some animations...)',
                 ),
+                Text(''),
                 Text(
                   '- Sets optimal settings for these options (you can change them separately later):',
                 ),
@@ -138,7 +138,7 @@ class _PerformancePageState extends State<PerformancePage> {
               SettingsToggle(
                 value: shitDevice,
                 onChanged: (newValue) async {
-                  if (await showLowPerfConfirmDialog(true)) {
+                  if (!newValue || await showLowPerfConfirmDialog(true)) {
                     setState(() {
                       shitDevice = newValue;
                       if (shitDevice) {
@@ -149,7 +149,7 @@ class _PerformancePageState extends State<PerformancePage> {
                         preloadAmountController.text = '0';
                         preloadSizeController.text = '0.2';
                         autoPlayEnabled = false;
-                        disableImageScaling = false;
+                        settingsHandler.disableImageScaling = false;
                       }
                     });
                   }
@@ -278,6 +278,47 @@ class _PerformancePageState extends State<PerformancePage> {
                     return null;
                   }
                 },
+              ),
+              SettingsToggle(
+                value: settingsHandler.disableImageScaling,
+                onChanged: (newValue) async {
+                  if (newValue) {
+                    final res = await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SettingsDialog(
+                          title: Text('Warning'),
+                          contentItems: [
+                            Text(
+                              'Are you sure you want to disable image scaling?',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'This can negatively impact the performance, especially on older devices',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                          actionButtons: [
+                            CancelButton(withIcon: true),
+                            ConfirmButton(withIcon: true),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (res != true) {
+                      return;
+                    }
+                  }
+
+                  setState(() {
+                    settingsHandler.disableImageScaling = newValue;
+                  });
+                },
+                title: "Don't scale images",
+                leadingIcon: const Icon(Icons.close_fullscreen),
+                subtitle: const Text('Disables image scaling which is used to improve performance'),
               ),
               SettingsToggle(
                 value: autoPlayEnabled,
