@@ -22,6 +22,7 @@ import 'package:lolisnatcher/src/data/update_info.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -2171,8 +2172,26 @@ class SettingsHandler {
           showUpdate(withMessage || updateInfo.value!.isImportant);
         }
       } else {
-        // otherwise show latest version message
-        showLastVersionMessage(withMessage);
+        final secureStorageHandler = SecureStorageHandler.instance;
+        final viewedAtBuild = await secureStorageHandler.read(SecureStorageKey.viewedUpdateChangelogForBuild);
+        if (booruList.isEmpty) {
+          // don't bother new (no boorus) users until next update
+          await secureStorageHandler.write(
+            SecureStorageKey.viewedUpdateChangelogForBuild,
+            Constants.appBuildNumber.toString(),
+          );
+        } else if (viewedAtBuild == null ||
+            viewedAtBuild.isEmpty ||
+            viewedAtBuild != updateInfo.value!.buildNumber.toString()) {
+          await secureStorageHandler.write(
+            SecureStorageKey.viewedUpdateChangelogForBuild,
+            Constants.appBuildNumber.toString(),
+          );
+          showUpdate(true, isAfterUpdate: true);
+        } else {
+          // otherwise show latest version message
+          showLastVersionMessage(withMessage);
+        }
       }
     } catch (e) {
       if (withMessage) {
@@ -2218,8 +2237,11 @@ class SettingsHandler {
     }
   }
 
-  void showUpdate(bool withMessage) {
-    if (withMessage && updateInfo.value != null) {
+  void showUpdate(
+    bool showMessage, {
+    bool isAfterUpdate = false,
+  }) {
+    if (showMessage && updateInfo.value != null) {
       const bool isFromStore = EnvironmentConfig.isFromStore;
 
       final bool isDiffVersion = Constants.appBuildNumber < updateInfo.value!.buildNumber;
@@ -2231,7 +2253,7 @@ class SettingsHandler {
         page: (_) => Scaffold(
           appBar: AppBar(
             title: Text(
-              'Update ${isDiffVersion ? 'Available!' : 'Changelog:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
+              '${isDiffVersion ? 'Update available!' : (isAfterUpdate ? "What's new:" : 'Update changelog:')} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
             ),
           ),
           body: SafeArea(
@@ -2359,7 +2381,6 @@ class SettingsHandler {
 
     alice = Alice();
 
-    unawaited(checkUpdate(withMessage: false));
     isInit.value = true;
     return;
   }
@@ -2421,6 +2442,8 @@ class SettingsHandler {
         leadingIconColor: Colors.red,
       );
     }
+
+    unawaited(checkUpdate(withMessage: false));
 
     isPostInit.value = true;
     postInitMessage.value = '';

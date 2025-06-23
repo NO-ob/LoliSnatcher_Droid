@@ -40,6 +40,7 @@ dependencies:
       ref: a12cffc2d54e1e0350904d0f841203935d20e465 # master
   flutter_keyboard_visibility: ^6.0.0
   flutter_linkify: ^6.0.0
+  flutter_secure_storage: ^9.2.4
   flutter_socks_proxy:
     git:
       url: https://github.com/jiangtian616/socks_proxy

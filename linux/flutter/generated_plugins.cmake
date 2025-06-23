@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   flutter_avif_linux
+  flutter_secure_storage_linux
   fvp
   gtk
   irondash_engine_context

@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   flutter_avif_windows
   flutter_inappwebview_windows
+  flutter_secure_storage_windows
   fvp
   irondash_engine_context
   local_auth_windows
