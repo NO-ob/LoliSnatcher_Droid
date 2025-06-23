@@ -46,7 +46,8 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
 
   void addMessage(String message) {
     // add new message to history but limit it to X items
-    if (message.startsWith('Server active at') && messagesHistory.indexWhere((msg) => msg.startsWith('Server active at')) != -1) {
+    if (message.startsWith('Server active at') &&
+        messagesHistory.indexWhere((msg) => msg.startsWith('Server active at')) != -1) {
       return;
     }
 

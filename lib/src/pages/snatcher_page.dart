@@ -30,7 +30,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
   @override
   void initState() {
     super.initState();
-    getPerms();
+    setPermissions();
     //If the user has searched tags on the main window they will be loaded into the tags field
     snatcherTagsController.text = searchHandler.currentTab.tags;
     snatcherAmountController.text = settingsHandler.itemLimit.toString();

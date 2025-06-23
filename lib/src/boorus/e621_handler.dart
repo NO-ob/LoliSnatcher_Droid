@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 // ignore: camel_case_types
 class e621Handler extends BooruHandler {
@@ -15,13 +18,13 @@ class e621Handler extends BooruHandler {
 
   @override
   Map<String, TagType> get tagTypeMap => {
-        '7': TagType.meta,
-        '3': TagType.copyright,
-        '4': TagType.character,
-        '1': TagType.artist,
-        '5': TagType.species,
-        '0': TagType.none,
-      };
+    '7': TagType.meta,
+    '3': TagType.copyright,
+    '4': TagType.character,
+    '1': TagType.artist,
+    '5': TagType.species,
+    '0': TagType.none,
+  };
 
   @override
   List parseListFromResponse(dynamic response) {
@@ -40,7 +43,8 @@ class e621Handler extends BooruHandler {
       if (current['file']['url'] == null) {
         final String md5FirstSplit = current['file']['md5'].toString().substring(0, 2);
         final String md5SecondSplit = current['file']['md5'].toString().substring(2, 4);
-        fileURL = "https://static1.e621.net/data/$md5FirstSplit/$md5SecondSplit/${current['file']['md5']}.${current['file']['ext']}";
+        fileURL =
+            "https://static1.e621.net/data/$md5FirstSplit/$md5SecondSplit/${current['file']['md5']}.${current['file']['ext']}";
         sampleURL = fileURL.replaceFirst('data', 'data/sample').replaceFirst(current['file']['ext'], 'jpg');
         thumbURL = sampleURL.replaceFirst('data/sample', 'data/preview');
         if (current['file']['size'] <= 2694254) {
@@ -70,7 +74,10 @@ class e621Handler extends BooruHandler {
       addTagsWithType([...generalTags], TagType.none);
       addTagsWithType([...speciesTags], TagType.species);
 
-      final String? dateStr = current['created_at']?.toString().substring(0, current['created_at']!.toString().length - 6);
+      final String? dateStr = current['created_at']?.toString().substring(
+        0,
+        current['created_at']!.toString().length - 6,
+      );
 
       final BooruItem item = BooruItem(
         fileURL: fileURL,
@@ -118,15 +125,25 @@ class e621Handler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    final String loginStr = booru.userID?.isNotEmpty == true ? '&login=${booru.userID}' : '';
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-
-    return '${booru.baseURL}/posts.json?tags=$tags&limit=$limit&page=$pageNum$loginStr$apiKeyStr';
+    return '${booru.baseURL}/posts.json?tags=$tags&limit=$limit&page=$pageNum';
   }
 
   @override
   String makeTagURL(String input) {
     return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=20&search[order]=count';
+  }
+
+  @override
+  Map<String, String> getHeaders() {
+    final String? userName = booru.userID?.isNotEmpty == true ? booru.userID : null;
+    final String? apiKey = booru.apiKey?.isNotEmpty == true ? booru.apiKey : null;
+
+    return {
+      'Accept': 'text/html,application/xml,application/json',
+      'User-Agent': Tools.browserUserAgent,
+      if (userName != null && apiKey != null)
+        'Authorization': "Basic ${base64.encode(utf8.encode("$userName:$apiKey"))}",
+    };
   }
 
   @override

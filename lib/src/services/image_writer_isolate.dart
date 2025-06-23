@@ -20,7 +20,10 @@ class ImageWriterIsolate {
       final String cachePath = '$cacheRootPath$typeFolder/';
       await Directory(cachePath).create(recursive: true);
 
-      final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
+      final String fileName = sanitizeName(
+        clearName ? parseThumbUrlToName(fileURL) : fileURL,
+        fileNameExtras: fileNameExtras,
+      );
       image = File(cachePath + fileName);
       print('found image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readFileFromCache');
       await image.writeAsBytes(bytes, flush: true);
@@ -40,7 +43,10 @@ class ImageWriterIsolate {
     File? image;
     try {
       final String cachePath = '$cacheRootPath$typeFolder/';
-      final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
+      final String fileName = sanitizeName(
+        clearName ? parseThumbUrlToName(fileURL) : fileURL,
+        fileNameExtras: fileNameExtras,
+      );
       image = File(cachePath + fileName);
       // TODO is readBytes required here?
       print('found image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate /:: readFileFromCache');
@@ -63,14 +69,19 @@ class ImageWriterIsolate {
     Uint8List? imageBytes;
     try {
       final String cachePath = '$cacheRootPath$typeFolder/';
-      final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
+      final String fileName = sanitizeName(
+        clearName ? parseThumbUrlToName(fileURL) : fileURL,
+        fileNameExtras: fileNameExtras,
+      );
       final File image = File(cachePath + fileName);
 
       if (await image.exists()) {
         imageBytes = await image.readAsBytes();
         print('found image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readBytesFromCache');
       } else {
-        print('could not find image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readBytesFromCache');
+        print(
+          'could not find image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readBytesFromCache',
+        );
       }
     } catch (e) {
       print('Image Writer Isolate Exception :: read bytes cache :: $e');

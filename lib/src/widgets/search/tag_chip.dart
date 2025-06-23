@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 
 class TagChip extends StatelessWidget {
@@ -15,7 +14,6 @@ class TagChip extends StatelessWidget {
   final Widget? trailing;
   final Color? color;
 
-  final SearchHandler searchHandler = SearchHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
 
   @override
@@ -37,15 +35,6 @@ class TagChip extends StatelessWidget {
       stringContent = stringContent.split('#')[1];
       tagPins.add(TagPin(content: multiIndex, color: Colors.purple));
     }
-
-    // shorten stuff like order, sort, rating, ...
-    final Map<String, String> modifierMap = searchHandler.currentBooruHandler.tagModifierMap;
-    modifierMap.forEach((modifier, displayValue) {
-      if (stringContent.toLowerCase().startsWith(modifier)) {
-        stringContent = stringContent.toLowerCase().replaceFirst(modifier, '');
-        tagPins.add(TagPin(content: displayValue, color: Colors.purple));
-      }
-    });
 
     // color tag bg with their tag type corresponding color
     // (no type == blue here for cosmetic purposes, everywhere else they have no color)

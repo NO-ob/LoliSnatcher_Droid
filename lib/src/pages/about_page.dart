@@ -67,7 +67,9 @@ class AboutPage extends StatelessWidget {
             //
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: const Text('A big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv'),
+              child: const Text(
+                'A big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv',
+              ),
             ),
             if (!EnvironmentConfig.isFromStore)
               SettingsButton(

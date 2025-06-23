@@ -109,11 +109,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             false,
           ],
           itemBuilder: (item) => item == null ? const Text('All') : Text(item ? 'Loaded' : 'Not loaded'),
-          itemTitleBuilder: (item) => item == null
-              ? 'All'
-              : item
-                  ? 'Loaded'
-                  : 'Not loaded',
+          itemTitleBuilder: (item) => item == null ? 'All' : (item ? 'Loaded' : 'Not loaded'),
         ),
         SettingsDropdown<TagType?>(
           title: 'Tag Type',
@@ -162,11 +158,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             false,
           ],
           itemBuilder: (item) => item == null ? const Text('All') : Text(item ? 'Enabled' : 'Disabled'),
-          itemTitleBuilder: (item) => item == null
-              ? 'All'
-              : item
-                  ? 'Enabled'
-                  : 'Disabled',
+          itemTitleBuilder: (item) => item == null ? 'All' : (item ? 'Enabled' : 'Disabled'),
         ),
         SettingsToggle(
           title: 'Duplicates',

@@ -57,10 +57,19 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- Disable impeller -->
-        <!-- in 3.29 it's mostly fine, but there are still some flickering/artifacts on videos and when changing pages in viewer -->
+        <!-- Disable Impeller -->
+        <!-- in 3.32 there is a noticeable performance drop, permanent 100% gpu use (at least on xiaomi devices) -->
+        <!-- Possibly need to do a global performance pass? (always scale images (aside from main in viewer), cache widgets...) -->
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="false" />
+
+        <!-- <meta-data
+            android:name="io.flutter.embedding.android.EnablePlatformIsolates"
+            android:value="false" /> Makes every plain isolate run in its own thread -->
+
+        <!-- <meta-data
+            android:name="io.flutter.embedding.android.DisableMergedPlatformUIThread"
+            android:value="true" /> Makes service isolate run in a separate thread -->
     </application>
 </manifest>

@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/data/response_error.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class MergebooruHandler extends BooruHandler {
@@ -28,10 +29,11 @@ class MergebooruHandler extends BooruHandler {
   bool get hasSizeData => booruHandlers.every((e) => e.hasSizeData);
 
   @override
-  bool get hasTagSuggestions => booruHandlers.first.hasTagSuggestions;
+  bool get hasTagSuggestions => booruHandlers.firstWhereOrNull((e) => e.hasTagSuggestions) != null;
 
   @override
-  String? get metatagsCheatSheetLink => booruHandlers.first.metatagsCheatSheetLink;
+  String? get metatagsCheatSheetLink =>
+      booruHandlers.firstWhereOrNull((e) => e.metatagsCheatSheetLink != null)?.metatagsCheatSheetLink;
 
   @override
   List<MetaTag> availableMetaTags() {
@@ -56,8 +58,18 @@ class MergebooruHandler extends BooruHandler {
     final Map<int, ({Booru booru, List<BooruItem> items})> tmpFetchedMap = {};
     int fetchedMax = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
-      final String currentTags =
-          tags.replaceAll(RegExp('(?!' '${i + 1}' r')\d+#[A-Za-z0-9\_\-~:]*'), '').replaceAll('  ', ' ').replaceAll(RegExp(r'\d+#'), '').trim();
+      final String currentTags = tags
+          .replaceAll(
+            RegExp(
+              '(?!'
+              '${i + 1}'
+              r')\d+#[A-Za-z0-9\_\-~:]*',
+            ),
+            '',
+          )
+          .replaceAll('  ', ' ')
+          .replaceAll(RegExp(r'\d+#'), '')
+          .trim();
       Logger.Inst().log('TAGS FOR #$i are: $currentTags', 'MergeBooruHandler', 'Search', LogTypes.booruHandlerInfo);
       booruHandlers[i].pageNum = pageNum + booruHandlerPageNums[i];
       final List<BooruItem> tmpFetched = (await booruHandlers[i].search(currentTags, null)) ?? [];
@@ -81,7 +93,7 @@ class MergebooruHandler extends BooruHandler {
         final items = tmpFetchedMap[i]!.items;
 
         final booru = tmpFetchedMap[i]!.booru;
-        final bool isMd5LessBooru = [
+        final bool isBooruWithoutMd5 = [
           BooruType.Favourites,
           BooruType.Downloads,
           BooruType.BooruOnRails,
@@ -92,13 +104,13 @@ class MergebooruHandler extends BooruHandler {
         ].any((t) => t == booru.type);
 
         if (innerFetchedIndex < items.length) {
-          if (booru.type == BooruType.GelbooruV1) {
+          if (booru.type?.isGelbooruV1 == true) {
             if (items[innerFetchedIndex].md5String != null) {
               items[innerFetchedIndex].md5String = makeSha1Hash(items[innerFetchedIndex].md5String!);
             }
           }
 
-          if (isMd5LessBooru
+          if (isBooruWithoutMd5
               ? !itemInFetched(
                   fetched,
                   items[innerFetchedIndex],
@@ -209,10 +221,15 @@ class MergebooruHandler extends BooruHandler {
   void setupMerge(List<Booru> boorus) {
     booruList.addAll(boorus);
     for (final element in booruList) {
-      final List factoryResults = BooruHandlerFactory().getBooruHandler([element], null);
-      booruHandlers.add(factoryResults[0]);
-      booruHandlerPageNums.add(factoryResults[1]);
-      Logger.Inst().log('SETUP MERGE ADDING: ${element.name}', 'MergeBooruHandler', 'setupMerge', LogTypes.booruHandlerInfo);
+      final factoryResults = BooruHandlerFactory().getBooruHandler([element], null);
+      booruHandlers.add(factoryResults.booruHandler);
+      booruHandlerPageNums.add(factoryResults.startingPage);
+      Logger.Inst().log(
+        'SETUP MERGE ADDING: ${element.name}',
+        'MergeBooruHandler',
+        'setupMerge',
+        LogTypes.booruHandlerInfo,
+      );
     }
   }
 
@@ -221,15 +238,35 @@ class MergebooruHandler extends BooruHandler {
     String input, {
     CancelToken? cancelToken,
   }) async {
-    return booruHandlers.first.getTagSuggestions(input, cancelToken: cancelToken);
+    final res = booruHandlers
+        .firstWhereOrNull((e) => e.hasTagSuggestions)
+        ?.getTagSuggestions(
+          input,
+          cancelToken: cancelToken,
+        );
+    if (res == null) {
+      return const Right([]);
+    } else {
+      return res;
+    }
   }
 
   @override
   Future<void> searchCount(String input) async {
     int result = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
-      final String currentTags =
-          input.replaceAll(RegExp('(?!' '${i + 1}' r')\d+#[A-Za-z0-9\_\-~:]*'), '').replaceAll('  ', ' ').replaceAll(RegExp(r'\d+#'), '').trim();
+      final String currentTags = input
+          .replaceAll(
+            RegExp(
+              '(?!'
+              '${i + 1}'
+              r')\d+#[A-Za-z0-9\_\-~:]*',
+            ),
+            '',
+          )
+          .replaceAll('  ', ' ')
+          .replaceAll(RegExp(r'\d+#'), '')
+          .trim();
       await booruHandlers[i].searchCount(currentTags);
       result += booruHandlers[i].totalCount.value;
     }

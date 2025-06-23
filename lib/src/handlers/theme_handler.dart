@@ -18,11 +18,13 @@ class ThemeHandler {
     final platformBrigtness = MediaQuery.platformBrightnessOf(context);
     isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrigtness.isDark);
 
-    final Brightness primaryBrightness =
-        ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
+    final Brightness primaryBrightness = ThemeData.estimateBrightnessForColor(
+      (isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!,
+    );
     primaryIsDark = primaryBrightness == Brightness.dark;
-    final Brightness accentBrightness =
-        ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!);
+    final Brightness accentBrightness = ThemeData.estimateBrightnessForColor(
+      (isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!,
+    );
     accentIsDark = accentBrightness == Brightness.dark;
   }
 
@@ -44,11 +46,13 @@ class ThemeHandler {
     final platformBrigtness = MediaQuery.platformBrightnessOf(context);
     isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrigtness.isDark);
 
-    final Brightness primaryBrightness =
-        ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
+    final Brightness primaryBrightness = ThemeData.estimateBrightnessForColor(
+      (isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!,
+    );
     primaryIsDark = primaryBrightness == Brightness.dark;
-    final Brightness accentBrightness =
-        ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!);
+    final Brightness accentBrightness = ThemeData.estimateBrightnessForColor(
+      (isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!,
+    );
     accentIsDark = accentBrightness == Brightness.dark;
   }
 
@@ -161,265 +165,266 @@ class ThemeHandler {
     );
   }
 
-  TextTheme textTheme() => GoogleFonts.notoSansTextTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme);
+  TextTheme textTheme() =>
+      GoogleFonts.notoSansTextTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme);
 
   TextSelectionThemeData textSelectionTheme(ColorScheme colorScheme) => TextSelectionThemeData(
-        cursorColor: colorScheme.secondary,
-        selectionColor: Colors.blue.withValues(alpha: 0.66),
-        selectionHandleColor: colorScheme.secondary,
-      );
+    cursorColor: colorScheme.secondary,
+    selectionColor: Colors.blue.withValues(alpha: 0.66),
+    selectionHandleColor: colorScheme.secondary,
+  );
 
   ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) => ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.secondary,
-          foregroundColor: accentIsDark ? Colors.white : Colors.black,
-          iconColor: accentIsDark ? Colors.white : Colors.black,
-          disabledForegroundColor: Colors.black,
-          disabledBackgroundColor: Colors.grey,
-          disabledIconColor: Colors.black,
-          textStyle: TextStyle(
-            color: accentIsDark ? Colors.white : Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-          fixedSize: const Size(double.infinity, 44),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          splashFactory: InkSparkle.splashFactory,
-        ),
-      );
+    style: ElevatedButton.styleFrom(
+      backgroundColor: colorScheme.secondary,
+      foregroundColor: accentIsDark ? Colors.white : Colors.black,
+      iconColor: accentIsDark ? Colors.white : Colors.black,
+      disabledForegroundColor: Colors.black,
+      disabledBackgroundColor: Colors.grey,
+      disabledIconColor: Colors.black,
+      textStyle: TextStyle(
+        color: accentIsDark ? Colors.white : Colors.black,
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+      ),
+      fixedSize: const Size(double.infinity, 44),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      splashFactory: InkSparkle.splashFactory,
+    ),
+  );
 
   AppBarTheme appBarTheme(ColorScheme colorScheme) => AppBarTheme(
-        titleTextStyle: TextStyle(
-          color: primaryIsDark ? Colors.white : Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-        toolbarTextStyle: TextStyle(
-          color: primaryIsDark ? Colors.white : Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        ),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: primaryIsDark ? Colors.white : Colors.black,
-        actionsIconTheme: IconThemeData(
-          color: primaryIsDark ? Colors.white : Colors.black,
-        ),
-        iconTheme: IconThemeData(
-          color: primaryIsDark ? Colors.white : Colors.black,
-        ),
-        titleSpacing: 8,
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.25),
-          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-        ),
-      );
+    titleTextStyle: TextStyle(
+      color: primaryIsDark ? Colors.white : Colors.black,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+    ),
+    toolbarTextStyle: TextStyle(
+      color: primaryIsDark ? Colors.white : Colors.black,
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+    ),
+    backgroundColor: colorScheme.primary,
+    foregroundColor: primaryIsDark ? Colors.white : Colors.black,
+    actionsIconTheme: IconThemeData(
+      color: primaryIsDark ? Colors.white : Colors.black,
+    ),
+    iconTheme: IconThemeData(
+      color: primaryIsDark ? Colors.white : Colors.black,
+    ),
+    titleSpacing: 8,
+    systemOverlayStyle: SystemUiOverlayStyle(
+      statusBarColor: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.25),
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+    ),
+  );
 
   ButtonThemeData buttonTheme(ColorScheme colorScheme) => ButtonThemeData(
-        buttonColor: colorScheme.primary,
-        textTheme: ButtonTextTheme.primary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      );
+    buttonColor: colorScheme.primary,
+    textTheme: ButtonTextTheme.primary,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  );
 
   FloatingActionButtonThemeData floatingActionButtonTheme(ColorScheme colorScheme) => FloatingActionButtonThemeData(
-        backgroundColor: colorScheme.secondary,
-        foregroundColor: accentIsDark ? Colors.white : Colors.black,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      );
+    backgroundColor: colorScheme.secondary,
+    foregroundColor: accentIsDark ? Colors.white : Colors.black,
+    elevation: 0,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  );
 
   IconThemeData iconTheme(ColorScheme colorScheme) => IconThemeData(
-        color: colorScheme.onSurface,
-        opacity: 1,
-        size: 22,
-      );
+    color: colorScheme.onSurface,
+    opacity: 1,
+    size: 22,
+  );
 
   InputDecorationTheme inputDecorationTheme(ColorScheme colorScheme) => InputDecorationTheme(
-        fillColor: colorScheme.surfaceContainerHigh,
-        filled: true,
-        labelStyle: TextStyle(
-          color: isDark ? Colors.white : Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
-        ),
-        hintStyle: TextStyle(
-          color: isDark ? Colors.grey[300] : Colors.grey[900],
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
-        ),
-        alignLabelWithHint: false,
-        // contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.transparent, width: 0),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme.secondary, width: 2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme.error, width: 2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme.error, width: 2),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        border: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.transparent, width: 0),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-      );
+    fillColor: colorScheme.surfaceContainerHigh,
+    filled: true,
+    labelStyle: TextStyle(
+      color: isDark ? Colors.white : Colors.black,
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+    ),
+    hintStyle: TextStyle(
+      color: isDark ? Colors.grey[300] : Colors.grey[900],
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+    ),
+    alignLabelWithHint: false,
+    // contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    enabledBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: Colors.transparent, width: 0),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: colorScheme.secondary, width: 2),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    errorBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: colorScheme.error, width: 2),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    focusedErrorBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: colorScheme.error, width: 2),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    border: OutlineInputBorder(
+      borderSide: const BorderSide(color: Colors.transparent, width: 0),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    disabledBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+      borderRadius: BorderRadius.circular(8),
+    ),
+  );
 
   MaterialBannerThemeData bannerTheme() => const MaterialBannerThemeData(
-        backgroundColor: Colors.red,
-        contentTextStyle: TextStyle(color: Colors.white),
-      );
+    backgroundColor: Colors.red,
+    contentTextStyle: TextStyle(color: Colors.white),
+  );
 
-  CardTheme cardTheme(ColorScheme colorScheme) => CardTheme(
-        color: colorScheme.surface,
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      );
+  CardThemeData cardTheme(ColorScheme colorScheme) => CardThemeData(
+    color: colorScheme.surface,
+    elevation: 0,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  );
 
   PageTransitionsTheme pageTransitionsTheme() => const PageTransitionsTheme(
-        // ZoomPageTransitionsBuilder alternatives:
-        // PredictiveBackPageTransitionsBuilder - android only, requires predictive back enabled, still wip
-        // FadeForwardsPageTransitionsBuilder - latest material3 spec animation, currently conflicts with modal routes (and stuttering if there is a global restate?)
-        builders: <TargetPlatform, PageTransitionsBuilder>{
-          TargetPlatform.android: ZoomPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-          TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
-          TargetPlatform.linux: ZoomPageTransitionsBuilder(),
-          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-          TargetPlatform.windows: ZoomPageTransitionsBuilder(),
-        },
-      );
+    // ZoomPageTransitionsBuilder alternatives:
+    // PredictiveBackPageTransitionsBuilder - android only, requires predictive back enabled, still wip
+    // FadeForwardsPageTransitionsBuilder - latest material3 spec animation, currently conflicts with modal routes (and stuttering if there is a global restate?)
+    builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.android: ZoomPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
+      TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+    },
+  );
 
   ScrollbarThemeData scrollbarTheme(ColorScheme colorScheme) => ScrollbarThemeData(
-        thickness: WidgetStateProperty.resolveWith((states) {
-          if (Platform.isAndroid || Platform.isIOS) {
+    thickness: WidgetStateProperty.resolveWith((states) {
+      if (Platform.isAndroid || Platform.isIOS) {
+        return 8;
+      } else {
+        final List<WidgetState> goodStates = [WidgetState.hovered, WidgetState.focused, WidgetState.pressed];
+        for (final WidgetState state in states) {
+          if (goodStates.contains(state)) {
             return 8;
-          } else {
-            final List<WidgetState> goodStates = [WidgetState.hovered, WidgetState.focused, WidgetState.pressed];
-            for (final WidgetState state in states) {
-              if (goodStates.contains(state)) {
-                return 8;
-              }
-            }
-            return 4;
           }
-        }),
-        interactive: true,
-        thumbVisibility: WidgetStateProperty.resolveWith((states) {
-          if (Platform.isAndroid || Platform.isIOS) {
+        }
+        return 4;
+      }
+    }),
+    interactive: true,
+    thumbVisibility: WidgetStateProperty.resolveWith((states) {
+      if (Platform.isAndroid || Platform.isIOS) {
+        return true;
+      } else {
+        final List<WidgetState> goodStates = [WidgetState.hovered, WidgetState.focused, WidgetState.pressed];
+        for (final WidgetState state in states) {
+          if (goodStates.contains(state)) {
             return true;
-          } else {
-            final List<WidgetState> goodStates = [WidgetState.hovered, WidgetState.focused, WidgetState.pressed];
-            for (final WidgetState state in states) {
-              if (goodStates.contains(state)) {
-                return true;
-              }
-            }
-            return false;
           }
-        }),
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          final List<WidgetState> goodStates = [WidgetState.hovered, WidgetState.focused, WidgetState.pressed];
-          Color color = isDark ? Colors.grey[300]! : Colors.grey[900]!;
-          color = colorScheme.secondary;
-          for (final WidgetState state in states) {
-            if (goodStates.contains(state)) {
-              return color.withValues(alpha: 0.75);
-            }
-          }
-          return color.withValues(alpha: 0.5);
-        }),
-        radius: const Radius.circular(10),
-      );
+        }
+        return false;
+      }
+    }),
+    thumbColor: WidgetStateProperty.resolveWith((states) {
+      final List<WidgetState> goodStates = [WidgetState.hovered, WidgetState.focused, WidgetState.pressed];
+      Color color = isDark ? Colors.grey[300]! : Colors.grey[900]!;
+      color = colorScheme.secondary;
+      for (final WidgetState state in states) {
+        if (goodStates.contains(state)) {
+          return color.withValues(alpha: 0.75);
+        }
+      }
+      return color.withValues(alpha: 0.5);
+    }),
+    radius: const Radius.circular(10),
+  );
 
   ProgressIndicatorThemeData progressIndicatorTheme(ColorScheme colorScheme) => ProgressIndicatorThemeData(
-        color: colorScheme.secondary,
-        circularTrackColor: colorScheme.secondaryContainer.withValues(alpha: 0.33),
-        linearTrackColor: colorScheme.secondaryContainer.withValues(alpha: 0.33),
-        trackGap: 5,
-        refreshBackgroundColor: null,
-        // ignore: deprecated_member_use
-        year2023: true, // TODO change to false when they fix exception when value is null?
-      );
+    color: colorScheme.secondary,
+    circularTrackColor: colorScheme.secondaryContainer.withValues(alpha: 0.33),
+    linearTrackColor: colorScheme.secondaryContainer.withValues(alpha: 0.33),
+    trackGap: 5,
+    refreshBackgroundColor: null,
+    // ignore: deprecated_member_use
+    year2023: true, // TODO change to false when they fix exception when value is null?
+  );
 
   CheckboxThemeData checkboxTheme(ColorScheme colorScheme) => CheckboxThemeData(
-        fillColor: WidgetStateProperty.resolveWith((states) {
-          final bool isHovered = states.contains(WidgetState.hovered);
-          if (states.contains(WidgetState.selected)) {
-            final Color color = colorScheme.secondary;
-            return isHovered ? Color.lerp(color, Colors.black, 0.15)! : color;
-          } else {
-            return isHovered ? Colors.grey[600] : Colors.grey;
-          }
-        }),
-        checkColor: WidgetStateProperty.all(accentIsDark ? Colors.white : Colors.black),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      );
+    fillColor: WidgetStateProperty.resolveWith((states) {
+      final bool isHovered = states.contains(WidgetState.hovered);
+      if (states.contains(WidgetState.selected)) {
+        final Color color = colorScheme.secondary;
+        return isHovered ? Color.lerp(color, Colors.black, 0.15)! : color;
+      } else {
+        return isHovered ? Colors.grey[600] : Colors.grey;
+      }
+    }),
+    checkColor: WidgetStateProperty.all(accentIsDark ? Colors.white : Colors.black),
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  );
 
   SwitchThemeData switchTheme(ColorScheme colorScheme) => SwitchThemeData(
-        thumbColor: WidgetStateProperty.resolveWith((states) {
-          final bool isHovered = states.contains(WidgetState.hovered);
-          if (states.contains(WidgetState.selected)) {
-            final Color color = colorScheme.secondary;
-            return isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
-          } else {
-            return isHovered ? Colors.grey[600] : Colors.grey[500];
-          }
-        }),
-        trackColor: WidgetStateProperty.resolveWith((states) {
-          final bool isHovered = states.contains(WidgetState.hovered);
-          if (states.contains(WidgetState.selected)) {
-            final Color color = Color.lerp(colorScheme.secondary, Colors.white, 0.3)!;
-            return isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
-          } else {
-            return isHovered ? Colors.grey[400] : Colors.grey[300];
-          }
-        }),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      );
+    thumbColor: WidgetStateProperty.resolveWith((states) {
+      final bool isHovered = states.contains(WidgetState.hovered);
+      if (states.contains(WidgetState.selected)) {
+        final Color color = colorScheme.secondary;
+        return isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
+      } else {
+        return isHovered ? Colors.grey[600] : Colors.grey[500];
+      }
+    }),
+    trackColor: WidgetStateProperty.resolveWith((states) {
+      final bool isHovered = states.contains(WidgetState.hovered);
+      if (states.contains(WidgetState.selected)) {
+        final Color color = Color.lerp(colorScheme.secondary, Colors.white, 0.3)!;
+        return isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
+      } else {
+        return isHovered ? Colors.grey[400] : Colors.grey[300];
+      }
+    }),
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  );
 
   SliderThemeData sliderTheme(ColorScheme colorScheme) => SliderThemeData(
-        activeTrackColor: colorScheme.secondary,
-        thumbColor: colorScheme.secondary,
-        inactiveTrackColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
-      );
+    activeTrackColor: colorScheme.secondary,
+    thumbColor: colorScheme.secondary,
+    inactiveTrackColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
+  );
 
   DrawerThemeData drawerTheme(ColorScheme colorScheme) => DrawerThemeData(
-        elevation: 0,
-        backgroundColor: colorScheme.surface,
-        scrimColor: Colors.black.withValues(alpha: 0.5),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-        endShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-      );
+    elevation: 0,
+    backgroundColor: colorScheme.surface,
+    scrimColor: Colors.black.withValues(alpha: 0.5),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+    endShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+  );
 
-  TabBarTheme tabBarTheme(ColorScheme colorScheme) => TabBarTheme(
-        labelColor: colorScheme.secondary,
-        unselectedLabelColor: isDark ? Colors.grey[300]! : Colors.grey[900]!,
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
-        indicatorSize: TabBarIndicatorSize.tab,
-      );
+  TabBarThemeData tabBarTheme(ColorScheme colorScheme) => TabBarThemeData(
+    labelColor: colorScheme.secondary,
+    unselectedLabelColor: isDark ? Colors.grey[300]! : Colors.grey[900]!,
+    labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+    indicatorSize: TabBarIndicatorSize.tab,
+  );
 
   DropdownMenuThemeData dropdownMenuTheme(ColorScheme colorScheme) => DropdownMenuThemeData(
-        menuStyle: MenuStyle(
-          backgroundColor: WidgetStatePropertyAll(colorScheme.surface),
-        ),
-      );
+    menuStyle: MenuStyle(
+      backgroundColor: WidgetStatePropertyAll(colorScheme.surface),
+    ),
+  );
 
   DialogThemeData dialogTheme(ColorScheme colorScheme) => DialogThemeData(
-        backgroundColor: colorScheme.surface,
-      );
+    backgroundColor: colorScheme.surface,
+  );
 }
 
 extension BrightnessExtension on Brightness {

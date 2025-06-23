@@ -63,7 +63,9 @@ class HydrusHandler extends BooruHandler {
       try {
         final response = await DioNetwork.get(url, headers: getHeaders());
         if (response.statusCode == 200) {
-          final Map<String, dynamic> parsedResponse = response.data is String ? jsonDecode(response.data) : response.data;
+          final Map<String, dynamic> parsedResponse = response.data is String
+              ? jsonDecode(response.data)
+              : response.data;
           if (parsedResponse['file_ids'] != null) {
             _fileIDs = parsedResponse['file_ids'];
             return await getResultsPage(pageNum);
@@ -142,7 +144,8 @@ class HydrusHandler extends BooruHandler {
                 }
               }
               final BooruItem item = BooruItem(
-                fileURL: "${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
+                fileURL:
+                    "${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
                 sampleURL:
                     "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
                 thumbnailURL:
@@ -250,10 +253,20 @@ class HydrusHandler extends BooruHandler {
       );
       if (response.statusCode == 200) {
         final parsedResponse = response.data;
-        Logger.Inst().log("Key Request Successful: ${parsedResponse['access_key']}", 'HydrusHandler', 'getAccessKey', LogTypes.booruHandlerInfo);
+        Logger.Inst().log(
+          "Key Request Successful: ${parsedResponse['access_key']}",
+          'HydrusHandler',
+          'getAccessKey',
+          LogTypes.booruHandlerInfo,
+        );
         return parsedResponse['access_key'].toString();
       } else {
-        Logger.Inst().log('Key Request Failed: ${response.statusCode}', 'HydrusHandler', 'getAccessKey', LogTypes.booruHandlerInfo);
+        Logger.Inst().log(
+          'Key Request Failed: ${response.statusCode}',
+          'HydrusHandler',
+          'getAccessKey',
+          LogTypes.booruHandlerInfo,
+        );
         Logger.Inst().log(response.data, 'HydrusHandler', 'getAccessKey', LogTypes.booruHandlerInfo);
       }
     } catch (e, s) {

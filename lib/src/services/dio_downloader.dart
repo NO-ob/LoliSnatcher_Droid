@@ -121,7 +121,7 @@ class DioDownloader {
   }
 
   Future<Map<String, dynamic>> getHeaders() async {
-    final Map<String, dynamic> resultHeaders = {...headers ?? {}};
+    final Map<String, dynamic> resultHeaders = {...?headers};
     final String cookieString = await Tools.getCookies(url);
     if (cookieString.isNotEmpty) {
       resultHeaders['Cookie'] = cookieString;
@@ -189,14 +189,22 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.get(
         resolved,
-        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: await getHeaders(),
+          sendTimeout: timeoutDuration,
+          receiveTimeout: timeoutDuration,
+        ),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
       );
       currentClient!.close();
 
       if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
-        throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
+        throw DioLoadException(
+          url: response.realUri.toString(),
+          message: 'Image was redirected to a broken link, url should be: $resolved',
+        );
       }
 
       if (Tools.isGoodStatusCode(response.statusCode) == false) {
@@ -298,14 +306,22 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.get(
         resolved,
-        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: await getHeaders(),
+          sendTimeout: timeoutDuration,
+          receiveTimeout: timeoutDuration,
+        ),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
       );
       currentClient!.close();
 
       if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
-        throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
+        throw DioLoadException(
+          url: response.realUri.toString(),
+          message: 'Image was redirected to a broken link, url should be: $resolved',
+        );
       }
 
       if (Tools.isGoodStatusCode(response.statusCode) == false) {
@@ -421,7 +437,10 @@ class DioDownloader {
       currentClient!.close();
 
       if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
-        throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
+        throw DioLoadException(
+          url: response.realUri.toString(),
+          message: 'Image was redirected to a broken link, url should be: $resolved',
+        );
       }
 
       if (Tools.isGoodStatusCode(response.statusCode) == false) {
@@ -489,7 +508,10 @@ class DioDownloader {
       // print('response size: ${response.headers['content-length']}');
 
       if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
-        throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
+        throw DioLoadException(
+          url: response.realUri.toString(),
+          message: 'Image was redirected to a broken link, url should be: $resolved',
+        );
       }
 
       if (Tools.isGoodStatusCode(response.statusCode) == false) {
@@ -547,11 +569,11 @@ class IsolateCacheConfig {
   });
 
   IsolateCacheConfig.fromHost(dynamic data)
-      : cacheRootPath = data['cacheRootPath'] as String,
-        fileURL = data['fileURL'] as String,
-        bytes = data['bytes'] as List<int>? ?? [],
-        typeFolder = data['typeFolder'] as String,
-        fileNameExtras = data['fileNameExtras'] as String;
+    : cacheRootPath = data['cacheRootPath'] as String,
+      fileURL = data['fileURL'] as String,
+      bytes = data['bytes'] as List<int>? ?? [],
+      typeFolder = data['typeFolder'] as String,
+      fileNameExtras = data['fileNameExtras'] as String;
 
   final String cacheRootPath;
   final String fileURL;

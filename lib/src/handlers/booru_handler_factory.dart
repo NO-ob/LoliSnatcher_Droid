@@ -17,8 +17,9 @@ import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34hentai_handler.dart';
-import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34us_handler.dart';
+import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/realbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
@@ -32,7 +33,10 @@ class BooruHandlerFactory {
   late BooruHandler booruHandler;
   int pageNum = -1;
 
-  List getBooruHandler(List<Booru> boorus, int? customLimit) {
+  ({BooruHandler booruHandler, int startingPage}) getBooruHandler(
+    List<Booru> boorus,
+    int? customLimit,
+  ) {
     final int limit = customLimit ?? SettingsHandler.instance.itemLimit;
 
     if (boorus.length == 1) {
@@ -46,11 +50,14 @@ class BooruHandlerFactory {
         case BooruType.Gelbooru:
           // current gelbooru is v.0.2.5, while safe and others are 0.2.0, but since we had them under the same type from the start
           // we should keep them like that, but change sub-handler depending on the link
-          // TODO are there only these 4 sites, or possibly more?
-          const List<String> gelbooruAlikes = ['rule34.xxx', 'safebooru.org', 'realbooru.com', 'furry.booru.org'];
+          // TODO only these sites or there are more?
+          const List<String> gelbooruAlikes = ['rule34.xxx', 'safebooru.org', 'furry.booru.org'];
 
           if (booru.baseURL!.contains('gelbooru.com')) {
             booruHandler = GelbooruHandler(booru, limit);
+          } else if (booru.baseURL!.contains('realbooru.com')) {
+            // workaround to keep realbooru working with old configs
+            booruHandler = RealbooruHandler(booru, limit);
           } else if (gelbooruAlikes.any((element) => booru.baseURL!.contains(element))) {
             booruHandler = GelbooruAlikesHandler(booru, limit);
           } else {
@@ -113,6 +120,9 @@ class BooruHandlerFactory {
           pageNum = 0;
           booruHandler = RainbooruHandler(booru, limit);
           break;
+        case BooruType.Realbooru:
+          booruHandler = RealbooruHandler(booru, limit);
+          break;
         case BooruType.R34Hentai:
           pageNum = 0;
           booruHandler = R34HentaiHandler(booru, limit);
@@ -145,13 +155,17 @@ class BooruHandlerFactory {
           booruHandler = FurAffinityHandler(booru, limit);
           break;*/
         default:
-          booruHandler = EmptyHandler(Booru(null, null, null, null, null), limit);
+          booruHandler = EmptyHandler(Booru.unknown(), limit);
           break;
       }
     } else {
       booruHandler = MergebooruHandler(Booru('Merge', BooruType.Merge, '', '', ''), limit);
       (booruHandler as MergebooruHandler).setupMerge(boorus);
     }
-    return [booruHandler, pageNum];
+
+    return (
+      booruHandler: booruHandler,
+      startingPage: pageNum,
+    );
   }
 }

@@ -6,14 +6,10 @@ import 'package:get_it/get_it.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/constants.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 // TODO media actions, video pause/mute... global controller
 
@@ -34,7 +30,26 @@ class ViewerHandler {
   // Key of the currently viewed media widget
   final Rxn<GlobalKey> currentKey = Rxn(null);
 
-  // Add media widget key
+  final RxList<GlobalKey> activeViewers = RxList([]);
+
+  static const int maxActiveViewers = 1;
+
+  void addViewer(GlobalKey key) {
+    if (activeViewers.contains(key)) {
+      return;
+    }
+
+    activeViewers.add(key);
+  }
+
+  void removeViewer(GlobalKey key) {
+    activeViewers.remove(key);
+  }
+
+  int indexOfViewer(GlobalKey key) {
+    return activeViewers.indexOf(key);
+  }
+
   void addViewed(Key? key) {
     if (key == null || activeKeys.contains(key)) {
       return;
@@ -45,7 +60,6 @@ class ViewerHandler {
     }
   }
 
-  // Remove media widget key
   void removeViewed(Key? key) {
     if (key == null || !activeKeys.contains(key)) {
       return;
@@ -56,7 +70,6 @@ class ViewerHandler {
     }
   }
 
-  // Set the key of current viewed widget
   void setCurrent(Key? key) {
     if (key == null || currentKey.value == key) {
       return;
@@ -69,25 +82,22 @@ class ViewerHandler {
   }
 
   // Drop the key of viewed widget and reset the handler state
-  // (used when user exits the viewerpage)
+  // (used when user exits the viewer page)
   void dropCurrent() {
     currentKey.value = null;
     resetState();
   }
 
-  // Viewer state stuff
-  final RxBool inViewer = false.obs; // is in viewerpage
-  final RxBool displayAppbar = true.obs; // is gallery toolbar visible
+  final RxBool displayAppbar = true.obs; // is viewer toolbar visible
   final RxBool isZoomed = false.obs; // is current item zoomed in
   final RxBool isLoaded = false.obs; // is current item loaded
-  final Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view controller value
-  final RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoViewer)
-  final RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
+  final Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view controller value (used by notes renderer)
+  final RxBool isFullscreen = false.obs; // is viewing video in fullscreen (mobile app mode)
+  final RxBool isDesktopFullscreen = false.obs; // is viewing video in fullscreen (desktop app mode)
 
   final RxBool showNotes = true.obs;
 
   void resetState() {
-    inViewer.value = false;
     displayAppbar.value = true;
     isZoomed.value = false;
     isLoaded.value = false;
@@ -96,7 +106,6 @@ class ViewerHandler {
     viewState.value = null;
   }
 
-  // Get zoom state of new current item
   void setNewState(Key? key) {
     if (key == null || currentKey.value != key) {
       return;
@@ -105,35 +114,31 @@ class ViewerHandler {
     // addPostFrameCallback waits until widget is built to avoid calling setState in it while other setState is active
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = currentKey.value?.currentState;
-      switch (state?.widget.runtimeType) {
-        case const (ImageViewer):
+      switch (state?.widget) {
+        case ImageViewer():
           final widgetState = state! as ImageViewerState;
           isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isLoaded.value;
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
           break;
-        case const (VideoViewer):
+        case VideoViewer():
           final widgetState = state! as VideoViewerState;
           isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isVideoInited;
           isFullscreen.value = widgetState.chewieController.value?.isFullScreen ?? false;
           viewState.value = widgetState.viewController.value;
           break;
-        case const (VideoViewerPlaceholder):
-        case const (UnknownViewerPlaceholder):
-        case const (GuessExtensionViewer):
+        default:
+          isZoomed.value = false;
           isLoaded.value = true;
           isFullscreen.value = false;
           viewState.value = null;
-          break;
-        default:
           break;
       }
     });
   }
 
-  // Set zoom state, called by the current item itself
   void setZoomed(Key? key, bool isZoom) {
     if (key == null || currentKey.value != key) {
       return;
@@ -142,19 +147,98 @@ class ViewerHandler {
     isZoomed.value = isZoom;
   }
 
-  // toggle item's zoom state
   void toggleZoom() {
     isZoomed.value ? resetZoom() : doubleTapZoom();
   }
 
   void resetZoom() {
     final dynamic state = currentKey.value?.currentState;
-    state?.resetZoom?.call();
+    switch (state?.widget) {
+      case ImageViewer():
+        (state as ImageViewerState?)?.resetZoom();
+        break;
+      case VideoViewer():
+        (state as VideoViewerState?)?.resetZoom();
+        break;
+      default:
+        break;
+    }
   }
 
   void doubleTapZoom() {
     final dynamic state = currentKey.value?.currentState;
-    state?.doubleTapZoom?.call();
+    switch (state?.widget) {
+      case ImageViewer():
+        (state as ImageViewerState?)?.doubleTapZoom();
+        break;
+      case VideoViewer():
+        (state as VideoViewerState?)?.doubleTapZoom();
+        break;
+      default:
+        break;
+    }
+  }
+
+  void toggleMuteAllVideos({bool mute = true}) {
+    for (final key in activeKeys) {
+      final state = key?.currentState;
+      switch (state?.widget) {
+        case VideoViewer():
+          (state as VideoViewerState?)?.videoController.value?.setVolume(mute ? 0 : 1);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  void pauseAllVideos() {
+    for (final key in activeKeys) {
+      final state = key?.currentState;
+      switch (state?.widget) {
+        case VideoViewer():
+          (state as VideoViewerState?)?.videoController.value?.pause();
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  void hideExtraUi() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final key in activeKeys) {
+        final state = key?.currentState;
+        switch (state?.widget) {
+          case ImageViewer():
+            (state as ImageViewerState?)?.showLoading.value = false;
+            break;
+          case VideoViewer():
+            (state as VideoViewerState?)?.showControls.value = false;
+            break;
+          default:
+            break;
+        }
+      }
+    });
+  }
+
+  void showExtraUi() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (final key in activeKeys) {
+        final state = key?.currentState;
+        switch (state?.widget) {
+          case ImageViewer():
+            (state as ImageViewerState?)?.showLoading.value = true;
+            break;
+          case VideoViewer():
+            (state as VideoViewerState?)?.showControls.value = true;
+            break;
+          default:
+            break;
+        }
+      }
+    });
   }
 
   void setViewValue(Key? key, PhotoViewControllerValue value) {
@@ -184,30 +268,14 @@ class ViewerHandler {
       ServiceHandler.vibrate();
     }
 
-    final searchHandler = SearchHandler.instance;
     final settingsHandler = SettingsHandler.instance;
 
     // enable volume buttons if current page is a video AND appbar is set to visible
-    final bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isVideo;
-    final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
+    final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || newAppbarVisibility;
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
   }
 
-  // Related to videos
-  bool videoAutoMute = kDebugMode ? Constants.blurImagesDefaultDev : false; // hold volume button in VideoViewer to mute videos globally
-
-  // ViewerHandler() {
-  //   // debug: print keys list changes
-  //   activeKeys.listen((keys) {
-  //     print('Viewing: $keys');
-  //   });
-
-  //   currentKey.listen((key) {
-  //     // debug: print current key change and what widget it represents
-  //     dynamic widget = key?.currentState?.widget;
-  //     print('Current: $key');
-  //     print('Current url: ${widget?.booruItem?.fileURL}');
-  //     print('Widget type: ${widget.runtimeType}');
-  //   });
-  // }
+  bool videoAutoMute = kDebugMode
+      ? Constants.blurImagesDefaultDev
+      : false; // hold volume button in VideoViewer to mute videos globally
 }

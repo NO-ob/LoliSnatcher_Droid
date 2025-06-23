@@ -22,6 +22,7 @@ import 'package:lolisnatcher/src/data/update_info.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -64,7 +65,6 @@ class SettingsHandler {
 
   // runtime settings vars
   bool hasHydrus = false;
-  final RxList<LogTypes> enabledLogTypes = RxList.from(EnvironmentConfig.isTesting ? [...LogTypes.values] : []);
   final RxString discordURL = RxString(Constants.discordURL);
 
   // debug toggles
@@ -107,7 +107,9 @@ class SettingsHandler {
   String proxyPassword = '';
   VideoBackendMode videoBackendMode = isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.normal;
   String altVideoPlayerVO = isDesktopPlatform ? 'libmpv' : 'gpu'; // mediakit default: gpu - android, libmpv - desktop
-  String altVideoPlayerHWDEC = isDesktopPlatform ? 'auto' : 'auto-safe'; // mediakit default: auto-safe - android, auto - desktop
+  String altVideoPlayerHWDEC = isDesktopPlatform
+      ? 'auto'
+      : 'auto-safe'; // mediakit default: auto-safe - android, auto - desktop
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
@@ -126,24 +128,39 @@ class SettingsHandler {
   double preloadSizeLimit = 0.2;
 
   int currentColumnCount(BuildContext context) {
-    return MediaQuery.orientationOf(context) == Orientation.portrait ? portraitColumns : landscapeColumns;
+    return context.isPortrait ? portraitColumns : landscapeColumns;
   }
 
   Duration cacheDuration = Duration.zero;
 
-  static const List<List<String>> buttonList = [
-    ['autoscroll', 'Slideshow'],
-    ['snatch', 'Save'],
-    ['favourite', 'Favourite'],
-    ['info', 'Display Info'],
-    ['share', 'Share'],
-    ['select', 'Select'],
-    ['open', 'Open in Browser'],
-    ['reloadnoscale', 'Reload w/out scaling'],
-    ['toggle_quality', 'Toggle Quality'],
-    ['external_player', 'External player'],
+  // TODO convert to enum
+  static const List<String> buttonList = [
+    'snatch',
+    'favourite',
+    'info',
+    'share',
+    'select',
+    'open',
+    'autoscroll',
+    'reloadnoscale',
+    'toggle_quality',
+    'external_player',
   ];
-  List<List<String>> buttonOrder = [...buttonList];
+  static const Map<String, String> buttonNames = {
+    'autoscroll': 'Slideshow',
+    'snatch': 'Snatch',
+    'favourite': 'Favourite',
+    'info': 'Info',
+    'share': 'Share',
+    'select': 'Select',
+    'open': 'Open in browser',
+    'reloadnoscale': 'Reload w/out scaling',
+    'toggle_quality': 'Toggle quality',
+    'external_player': 'External player',
+  };
+  static final List<String> disableableButtonList = buttonList.where((e) => e != 'info').toList();
+  List<String> buttonOrder = [...buttonList];
+  List<String> disabledButtons = [];
 
   bool jsonWrite = false;
   bool autoPlayEnabled = true;
@@ -184,6 +201,8 @@ class SettingsHandler {
   bool useTopSearchbarInput = false;
   bool showSearchbarQuickActions = false;
   bool autofocusSearchbar = true;
+  bool useHttp2 = true;
+  bool expandDetails = false;
   final RxBool useLockscreen = false.obs;
   final RxBool blurOnLeave = false.obs;
   final RxList<Booru> booruList = RxList<Booru>([]);
@@ -260,6 +279,8 @@ class SettingsHandler {
     'useTopSearchbarInput',
     'showSearchbarQuickActions',
     'autofocusSearchbar',
+    'useHttp2',
+    'expandDetails',
     'useLockscreen',
     'blurOnLeave',
   ];
@@ -268,487 +289,510 @@ class SettingsHandler {
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
   // TODO move it in another file?
   Map<String, Map<String, dynamic>> get map => {
-        // stringFromList
-        'previewMode': {
-          'type': 'stringFromList',
-          'default': 'Sample',
-          'options': <String>['Thumbnail', 'Sample'],
-        },
-        'previewDisplay': {
-          'type': 'stringFromList',
-          'default': 'Square',
-          'options': <String>['Square', 'Rectangle', 'Staggered'],
-        },
-        'previewDisplayFallback': {
-          'type': 'stringFromList',
-          'default': 'Square',
-          'options': <String>['Square', 'Rectangle'],
-        },
-        'shareAction': {
-          'type': 'stringFromList',
-          'default': 'Ask',
-          'options': <String>['Ask', 'Post URL', 'File URL', 'File', 'Hydrus'],
-        },
-        'videoCacheMode': {
-          'type': 'stringFromList',
-          'default': 'Stream',
-          'options': <String>['Stream', 'Cache', 'Stream+Cache'],
-        },
-        'galleryMode': {
-          'type': 'stringFromList',
-          'default': 'Full Res',
-          'options': <String>['Sample', 'Full Res'],
-        },
-        'snatchMode': {
-          'type': 'stringFromList',
-          'default': 'Full Res',
-          'options': <String>['Sample', 'Full Res'],
-        },
-        'galleryScrollDirection': {
-          'type': 'stringFromList',
-          'default': 'Horizontal',
-          'options': <String>['Horizontal', 'Vertical'],
-        },
-        'galleryBarPosition': {
-          'type': 'stringFromList',
-          'default': 'Top',
-          'options': <String>['Top', 'Bottom'],
-        },
-        'zoomButtonPosition': {
-          'type': 'stringFromList',
-          'default': 'Right',
-          'options': <String>['Disabled', 'Left', 'Right'],
-        },
-        'changePageButtonsPosition': {
-          'type': 'stringFromList',
-          'default': isDesktopPlatform ? 'Right' : 'Disabled',
-          'options': <String>['Disabled', 'Left', 'Right'],
-        },
-        'scrollGridButtonsPosition': {
-          'type': 'stringFromList',
-          'default': isDesktopPlatform ? 'Right' : 'Disabled',
-          'options': <String>['Disabled', 'Left', 'Right'],
-        },
-        'videoBackendMode': {
-          'type': 'videoBackendMode',
-          'default': isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.defaultValue,
-          'options': VideoBackendMode.values,
-        },
-        'altVideoPlayerVO': {
-          'type': 'stringFromList',
-          'default': isDesktopPlatform ? 'libmpv' : 'gpu', // mediakit default: gpu - android, libmpv - desktop
-          'options': <String>[
-            'gpu',
-            'gpu-next',
-            'libmpv',
-            'mediacodec_embed',
-            'sdl',
-          ],
-        },
-        'altVideoPlayerHWDEC': {
-          'type': 'stringFromList',
-          'default': isDesktopPlatform ? 'auto' : 'auto-safe', // mediakit default: auto-safe - android, auto - desktop
-          'options': <String>[
-            'auto',
-            'auto-safe',
-            'auto-copy',
-            'mediacodec',
-            'mediacodec-copy',
-            'vulkan',
-            'vulkan-copy',
-          ],
-        },
-        'proxyType': {
-          'type': 'stringFromList',
-          'default': 'direct',
-          'options': <String>[
-            'direct',
-            'system',
-            'http',
-            'socks5',
-            'socks4',
-          ],
-        },
+    // stringFromList
+    'previewMode': {
+      'type': 'stringFromList',
+      'default': 'Sample',
+      'options': <String>['Thumbnail', 'Sample'],
+    },
+    'previewDisplay': {
+      'type': 'stringFromList',
+      'default': 'Square',
+      'options': <String>['Square', 'Rectangle', 'Staggered'],
+    },
+    'previewDisplayFallback': {
+      'type': 'stringFromList',
+      'default': 'Square',
+      'options': <String>['Square', 'Rectangle'],
+    },
+    'shareAction': {
+      'type': 'stringFromList',
+      'default': 'Ask',
+      // TODO replace with enum, don't forget to have these in serialization
+      'options': <String>[
+        'Ask',
+        'Post URL',
+        'Post URL with tags',
+        'File URL',
+        'File URL with tags',
+        'File',
+        'File with tags',
+        'Hydrus',
+      ],
+    },
+    'videoCacheMode': {
+      'type': 'stringFromList',
+      'default': 'Stream',
+      'options': <String>['Stream', 'Cache', 'Stream+Cache'],
+    },
+    'galleryMode': {
+      'type': 'stringFromList',
+      'default': 'Full Res',
+      'options': <String>['Sample', 'Full Res'],
+    },
+    'snatchMode': {
+      'type': 'stringFromList',
+      'default': 'Full Res',
+      'options': <String>['Sample', 'Full Res'],
+    },
+    'galleryScrollDirection': {
+      'type': 'stringFromList',
+      'default': 'Horizontal',
+      'options': <String>['Horizontal', 'Vertical'],
+    },
+    'galleryBarPosition': {
+      'type': 'stringFromList',
+      'default': 'Top',
+      'options': <String>['Top', 'Bottom'],
+    },
+    'zoomButtonPosition': {
+      'type': 'stringFromList',
+      'default': 'Right',
+      'options': <String>['Disabled', 'Left', 'Right'],
+    },
+    'changePageButtonsPosition': {
+      'type': 'stringFromList',
+      'default': isDesktopPlatform ? 'Right' : 'Disabled',
+      'options': <String>['Disabled', 'Left', 'Right'],
+    },
+    'scrollGridButtonsPosition': {
+      'type': 'stringFromList',
+      'default': isDesktopPlatform ? 'Right' : 'Disabled',
+      'options': <String>['Disabled', 'Left', 'Right'],
+    },
+    'videoBackendMode': {
+      'type': 'videoBackendMode',
+      'default': isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.defaultValue,
+      'options': VideoBackendMode.values,
+    },
+    'altVideoPlayerVO': {
+      'type': 'stringFromList',
+      'default': isDesktopPlatform ? 'libmpv' : 'gpu', // mediakit default: gpu - android, libmpv - desktop
+      'options': <String>[
+        'gpu',
+        'gpu-next',
+        'libmpv',
+        'mediacodec_embed',
+        'sdl',
+      ],
+    },
+    'altVideoPlayerHWDEC': {
+      'type': 'stringFromList',
+      'default': isDesktopPlatform ? 'auto' : 'auto-safe', // mediakit default: auto-safe - android, auto - desktop
+      'options': <String>[
+        'auto',
+        'auto-safe',
+        'auto-copy',
+        'mediacodec',
+        'mediacodec-copy',
+        'vulkan',
+        'vulkan-copy',
+      ],
+    },
+    'proxyType': {
+      'type': 'stringFromList',
+      'default': 'direct',
+      'options': <String>[
+        'direct',
+        'system',
+        'http',
+        'socks5',
+        'socks4',
+      ],
+    },
 
-        // string
-        'defTags': {
-          'type': 'string',
-          'default': 'rating:safe',
-        },
-        'prefBooru': {
-          'type': 'string',
-          'default': '',
-        },
-        'extPathOverride': {
-          'type': 'string',
-          'default': '',
-        },
-        'drawerMascotPathOverride': {
-          'type': 'string',
-          'default': '',
-        },
-        'backupPath': {
-          'type': 'string',
-          'default': '',
-        },
-        'lastSyncIp': {
-          'type': 'string',
-          'default': '',
-        },
-        'lastSyncPort': {
-          'type': 'string',
-          'default': '',
-        },
-        'customUserAgent': {
-          'type': 'string',
-          'default': '',
-        },
-        'proxyAddress': {
-          'type': 'string',
-          'default': '',
-        },
-        'proxyUsername': {
-          'type': 'string',
-          'default': '',
-        },
-        'proxyPassword': {
-          'type': 'string',
-          'default': '',
-        },
+    // string
+    'defTags': {
+      'type': 'string',
+      'default': 'rating:safe',
+    },
+    'prefBooru': {
+      'type': 'string',
+      'default': '',
+    },
+    'extPathOverride': {
+      'type': 'string',
+      'default': '',
+    },
+    'drawerMascotPathOverride': {
+      'type': 'string',
+      'default': '',
+    },
+    'backupPath': {
+      'type': 'string',
+      'default': '',
+    },
+    'lastSyncIp': {
+      'type': 'string',
+      'default': '',
+    },
+    'lastSyncPort': {
+      'type': 'string',
+      'default': '',
+    },
+    'customUserAgent': {
+      'type': 'string',
+      'default': '',
+    },
+    'proxyAddress': {
+      'type': 'string',
+      'default': '',
+    },
+    'proxyUsername': {
+      'type': 'string',
+      'default': '',
+    },
+    'proxyPassword': {
+      'type': 'string',
+      'default': '',
+    },
 
-        // stringList
-        'hatedTags': {
-          'type': 'stringList',
-          'default': <String>[],
-        },
-        'lovedTags': {
-          'type': 'stringList',
-          'default': <String>[],
-        },
-        'enabledLogTypes': {
-          'type': 'logTypesList',
-          'default': <LogTypes>[],
-        },
+    // stringList
+    'hatedTags': {
+      'type': 'stringList',
+      'default': <String>[],
+    },
+    'lovedTags': {
+      'type': 'stringList',
+      'default': <String>[],
+    },
 
-        // int
-        'limit': {
-          'type': 'int',
-          'default': Constants.defaultItemLimit,
-          'step': 10,
-          'upperLimit': 100,
-          'lowerLimit': 10,
-        },
-        'portraitColumns': {
-          'type': 'int',
-          'default': 2,
-          'step': 1,
-          'upperLimit': 100,
-          'lowerLimit': 1,
-        },
-        'landscapeColumns': {
-          'type': 'int',
-          'default': 4,
-          'step': 1,
-          'upperLimit': 100,
-          'lowerLimit': 1,
-        },
-        'preloadCount': {
-          'type': 'int',
-          'default': 1,
-          'step': 1,
-          'upperLimit': 3,
-          'lowerLimit': 0,
-        },
-        'snatchCooldown': {
-          'type': 'int',
-          'default': 250,
-          'step': 50,
-          'upperLimit': 10000,
-          'lowerLimit': 0,
-        },
-        'volumeButtonsScrollSpeed': {
-          'type': 'int',
-          'default': 200,
-          'step': 10,
-          'upperLimit': 1000000,
-          'lowerLimit': 0,
-        },
-        'galleryAutoScrollTime': {
-          'type': 'int',
-          'default': 4000,
-          'step': 100,
-          'upperLimit': 100000,
-          'lowerLimit': 100,
-        },
-        'cacheSize': {
-          'type': 'int',
-          'default': 3,
-          'step': 1,
-          'upperLimit': 10,
-          'lowerLimit': 0,
-        },
-        'autoLockTimeout': {
-          'type': 'int',
-          'default': 120,
-          'step': 10,
-          'upperLimit': double.infinity,
-          'lowerLimit': 0,
-        },
+    // int
+    'limit': {
+      'type': 'int',
+      'default': Constants.defaultItemLimit,
+      'step': 10,
+      'upperLimit': 100,
+      'lowerLimit': 10,
+    },
+    'portraitColumns': {
+      'type': 'int',
+      'default': 2,
+      'step': 1,
+      'upperLimit': 100,
+      'lowerLimit': 1,
+    },
+    'landscapeColumns': {
+      'type': 'int',
+      'default': 4,
+      'step': 1,
+      'upperLimit': 100,
+      'lowerLimit': 1,
+    },
+    'preloadCount': {
+      'type': 'int',
+      'default': 1,
+      'step': 1,
+      'upperLimit': 3,
+      'lowerLimit': 0,
+    },
+    'snatchCooldown': {
+      'type': 'int',
+      'default': 250,
+      'step': 50,
+      'upperLimit': 10000,
+      'lowerLimit': 0,
+    },
+    'volumeButtonsScrollSpeed': {
+      'type': 'int',
+      'default': 200,
+      'step': 10,
+      'upperLimit': 1000000,
+      'lowerLimit': 0,
+    },
+    'galleryAutoScrollTime': {
+      'type': 'int',
+      'default': 4000,
+      'step': 100,
+      'upperLimit': 100000,
+      'lowerLimit': 100,
+    },
+    'cacheSize': {
+      'type': 'int',
+      'default': 3,
+      'step': 1,
+      'upperLimit': 10,
+      'lowerLimit': 0,
+    },
+    'autoLockTimeout': {
+      'type': 'int',
+      'default': 120,
+      'step': 10,
+      'upperLimit': double.infinity,
+      'lowerLimit': 0,
+    },
 
-        // double
-        'mousewheelScrollSpeed': {
-          'type': 'double',
-          'default': 10.0,
-          'upperLimit': 20.0,
-          'lowerLimit': 0.1,
-          'step': 0.5,
-        },
-        'preloadSizeLimit': {
-          'type': 'double',
-          'default': 0.2,
-          'upperLimit': double.infinity,
-          'lowerLimit': 0.0,
-          'step': 0.1,
-        },
+    // double
+    'mousewheelScrollSpeed': {
+      'type': 'double',
+      'default': 10.0,
+      'upperLimit': 20.0,
+      'lowerLimit': 0.1,
+      'step': 0.5,
+    },
+    'preloadSizeLimit': {
+      'type': 'double',
+      'default': 0.2,
+      'upperLimit': double.infinity,
+      'lowerLimit': 0.0,
+      'step': 0.1,
+    },
 
-        // bool
-        'jsonWrite': {
-          'type': 'bool',
-          'default': false,
-        },
-        'autoPlayEnabled': {
-          'type': 'bool',
-          'default': true,
-        },
-        'loadingGif': {
-          'type': 'bool',
-          'default': false,
-        },
-        'thumbnailCache': {
-          'type': 'bool',
-          'default': true,
-        },
-        'mediaCache': {
-          'type': 'bool',
-          'default': false,
-        },
-        'autoHideImageBar': {
-          'type': 'bool',
-          'default': false,
-        },
-        'dbEnabled': {
-          'type': 'bool',
-          'default': true,
-        },
-        'indexesEnabled': {
-          'type': 'bool',
-          'default': false,
-        },
-        'searchHistoryEnabled': {
-          'type': 'bool',
-          'default': true,
-        },
-        'filterHated': {
-          'type': 'bool',
-          'default': false,
-        },
-        'filterFavourites': {
-          'type': 'bool',
-          'default': false,
-        },
-        'filterSnatched': {
-          'type': 'bool',
-          'default': false,
-        },
-        'filterAi': {
-          'type': 'bool',
-          'default': false,
-        },
-        'useVolumeButtonsForScroll': {
-          'type': 'bool',
-          'default': false,
-        },
-        'shitDevice': {
-          'type': 'bool',
-          'default': false,
-        },
-        'disableVideo': {
-          'type': 'bool',
-          'default': false,
-        },
-        'longTapFastForwardVideo': {
-          'type': 'bool',
-          'default': false,
-        },
-        'enableDrawerMascot': {
-          'type': 'bool',
-          'default': false,
-        },
-        'allowSelfSignedCerts': {
-          'type': 'bool',
-          'default': false,
-        },
-        'disableImageScaling': {
-          'type': 'bool',
-          'default': false,
-        },
-        'gifsAsThumbnails': {
-          'type': 'bool',
-          'default': false,
-        },
-        'desktopListsDrag': {
-          'type': 'bool',
-          'default': false,
-        },
-        'wakeLockEnabled': {
-          'type': 'bool',
-          'default': true,
-        },
-        'tagTypeFetchEnabled': {
-          'type': 'bool',
-          'default': true,
-        },
-        'downloadNotifications': {
-          'type': 'bool',
-          'default': true,
-        },
-        'allowRotation': {
-          'type': 'bool',
-          'default': false,
-        },
-        'enableHeroTransitions': {
-          'type': 'bool',
-          'default': true,
-        },
-        'disableCustomPageTransitions': {
-          'type': 'bool',
-          'default': false,
-        },
-        'incognitoKeyboard': {
-          'type': 'bool',
-          'default': false,
-        },
-        'hideNotes': {
-          'type': 'bool',
-          'default': false,
-        },
-        'startVideosMuted': {
-          'type': 'bool',
-          'default': false,
-        },
-        'snatchOnFavourite': {
-          'type': 'bool',
-          'default': false,
-        },
-        'favouriteOnSnatch': {
-          'type': 'bool',
-          'default': false,
-        },
-        'disableVibration': {
-          'type': 'bool',
-          'default': false,
-        },
-        'useAltVideoPlayer': {
-          'type': 'bool',
-          'default': isDesktopPlatform,
-        },
-        'altVideoPlayerHwAccel': {
-          'type': 'bool',
-          'default': true,
-        },
-        'showBottomSearchbar': {
-          'type': 'bool',
-          'default': true,
-        },
-        'useTopSearchbarInput': {
-          'type': 'bool',
-          'default': false,
-        },
-        'showSearchbarQuickActions': {
-          'type': 'bool',
-          'default': false,
-        },
-        'autofocusSearchbar': {
-          'type': 'bool',
-          'default': true,
-        },
-        'useLockscreen': {
-          'type': 'bool',
-          'default': false,
-        },
-        'blurOnLeave': {
-          'type': 'bool',
-          'default': false,
-        },
+    // bool
+    'jsonWrite': {
+      'type': 'bool',
+      'default': false,
+    },
+    'autoPlayEnabled': {
+      'type': 'bool',
+      'default': true,
+    },
+    'loadingGif': {
+      'type': 'bool',
+      'default': false,
+    },
+    'thumbnailCache': {
+      'type': 'bool',
+      'default': true,
+    },
+    'mediaCache': {
+      'type': 'bool',
+      'default': false,
+    },
+    'autoHideImageBar': {
+      'type': 'bool',
+      'default': false,
+    },
+    'dbEnabled': {
+      'type': 'bool',
+      'default': true,
+    },
+    'indexesEnabled': {
+      'type': 'bool',
+      'default': false,
+    },
+    'searchHistoryEnabled': {
+      'type': 'bool',
+      'default': true,
+    },
+    'filterHated': {
+      'type': 'bool',
+      'default': false,
+    },
+    'filterFavourites': {
+      'type': 'bool',
+      'default': false,
+    },
+    'filterSnatched': {
+      'type': 'bool',
+      'default': false,
+    },
+    'filterAi': {
+      'type': 'bool',
+      'default': false,
+    },
+    'useVolumeButtonsForScroll': {
+      'type': 'bool',
+      'default': false,
+    },
+    'shitDevice': {
+      'type': 'bool',
+      'default': false,
+    },
+    'disableVideo': {
+      'type': 'bool',
+      'default': false,
+    },
+    'longTapFastForwardVideo': {
+      'type': 'bool',
+      'default': false,
+    },
+    'enableDrawerMascot': {
+      'type': 'bool',
+      'default': false,
+    },
+    'allowSelfSignedCerts': {
+      'type': 'bool',
+      'default': false,
+    },
+    'disableImageScaling': {
+      'type': 'bool',
+      'default': false,
+    },
+    'gifsAsThumbnails': {
+      'type': 'bool',
+      'default': false,
+    },
+    'desktopListsDrag': {
+      'type': 'bool',
+      'default': false,
+    },
+    'wakeLockEnabled': {
+      'type': 'bool',
+      'default': true,
+    },
+    'tagTypeFetchEnabled': {
+      'type': 'bool',
+      'default': true,
+    },
+    'downloadNotifications': {
+      'type': 'bool',
+      'default': true,
+    },
+    'allowRotation': {
+      'type': 'bool',
+      'default': false,
+    },
+    'enableHeroTransitions': {
+      'type': 'bool',
+      'default': true,
+    },
+    'disableCustomPageTransitions': {
+      'type': 'bool',
+      'default': false,
+    },
+    'incognitoKeyboard': {
+      'type': 'bool',
+      'default': false,
+    },
+    'hideNotes': {
+      'type': 'bool',
+      'default': false,
+    },
+    'startVideosMuted': {
+      'type': 'bool',
+      'default': false,
+    },
+    'snatchOnFavourite': {
+      'type': 'bool',
+      'default': false,
+    },
+    'favouriteOnSnatch': {
+      'type': 'bool',
+      'default': false,
+    },
+    'disableVibration': {
+      'type': 'bool',
+      'default': false,
+    },
+    'useAltVideoPlayer': {
+      'type': 'bool',
+      'default': isDesktopPlatform,
+    },
+    'altVideoPlayerHwAccel': {
+      'type': 'bool',
+      'default': true,
+    },
+    'showBottomSearchbar': {
+      'type': 'bool',
+      'default': true,
+    },
+    'useTopSearchbarInput': {
+      'type': 'bool',
+      'default': false,
+    },
+    'showSearchbarQuickActions': {
+      'type': 'bool',
+      'default': false,
+    },
+    'autofocusSearchbar': {
+      'type': 'bool',
+      'default': true,
+    },
+    'useHttp2': {
+      'type': 'bool',
+      'default': true,
+    },
+    'expandDetails': {
+      'type': 'bool',
+      'default': false,
+    },
+    'useLockscreen': {
+      'type': 'bool',
+      'default': false,
+    },
+    'blurOnLeave': {
+      'type': 'bool',
+      'default': false,
+    },
 
-        // other
-        'buttonOrder': {
-          'type': 'other',
-          'default': <List<String>>[...buttonList],
-        },
-        'cacheDuration': {
-          'type': 'duration',
-          'default': Duration.zero,
-          'options': <Map<String, dynamic>>[
-            {'label': 'Never', 'value': Duration.zero},
-            {'label': '30 minutes', 'value': const Duration(minutes: 30)},
-            {'label': '1 hour', 'value': const Duration(hours: 1)},
-            {'label': '6 hours', 'value': const Duration(hours: 6)},
-            {'label': '12 hours', 'value': const Duration(hours: 12)},
-            {'label': '1 day', 'value': const Duration(days: 1)},
-            {'label': '2 days', 'value': const Duration(days: 2)},
-            {'label': '1 week', 'value': const Duration(days: 7)},
-            {'label': '1 month', 'value': const Duration(days: 30)},
-          ],
-        },
+    // other
+    'buttonOrder': {
+      'type': 'stringList',
+      'default': <String>[
+        ...buttonList,
+      ],
+    },
+    'disabledButtons': {
+      'type': 'stringList',
+      'default': <String>[],
+      'options': <String>[
+        ...disableableButtonList,
+      ],
+    },
+    'cacheDuration': {
+      'type': 'duration',
+      'default': Duration.zero,
+      'options': <Map<String, dynamic>>[
+        {'label': 'Never', 'value': Duration.zero},
+        {'label': '30 minutes', 'value': const Duration(minutes: 30)},
+        {'label': '1 hour', 'value': const Duration(hours: 1)},
+        {'label': '6 hours', 'value': const Duration(hours: 6)},
+        {'label': '12 hours', 'value': const Duration(hours: 12)},
+        {'label': '1 day', 'value': const Duration(days: 1)},
+        {'label': '2 days', 'value': const Duration(days: 2)},
+        {'label': '1 week', 'value': const Duration(days: 7)},
+        {'label': '1 month', 'value': const Duration(days: 30)},
+      ],
+    },
 
-        // theme
-        'appMode': {
-          'type': 'appMode',
-          'default': AppMode.defaultValue,
-          'options': AppMode.values,
-        },
-        'handSide': {
-          'type': 'handSide',
-          'default': HandSide.defaultValue,
-          'options': HandSide.values,
-        },
-        'theme': {
-          'type': 'theme',
-          'default': ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
-          'options': <ThemeItem>[
-            ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
-            ThemeItem(name: 'Purple', primary: Colors.deepPurple[600], accent: Colors.deepPurple[800]),
-            ThemeItem(name: 'Blue', primary: Colors.lightBlue, accent: Colors.lightBlue[600]),
-            ThemeItem(name: 'Teal', primary: Colors.teal, accent: Colors.teal[600]),
-            ThemeItem(name: 'Red', primary: Colors.red[700], accent: Colors.red[800]),
-            ThemeItem(name: 'Green', primary: Colors.green, accent: Colors.green[700]),
-            ThemeItem(name: 'Halloween', primary: const Color(0xFF0B192C), accent: const Color(0xFFEB5E28)),
-            ThemeItem(name: 'Custom', primary: null, accent: null),
-          ],
-        },
-        'themeMode': {
-          'type': 'themeMode',
-          'default': ThemeMode.dark,
-          'options': ThemeMode.values,
-        },
-        'useDynamicColor': {
-          'type': 'bool',
-          'default': false,
-        },
-        'isAmoled': {
-          'type': 'bool',
-          'default': false,
-        },
-        'customPrimaryColor': {
-          'type': 'color',
-          'default': Colors.pink[200],
-        },
-        'customAccentColor': {
-          'type': 'color',
-          'default': Colors.pink[600],
-        },
-      };
+    // theme
+    'appMode': {
+      'type': 'appMode',
+      'default': AppMode.defaultValue,
+      'options': AppMode.values,
+    },
+    'handSide': {
+      'type': 'handSide',
+      'default': HandSide.defaultValue,
+      'options': HandSide.values,
+    },
+    'theme': {
+      'type': 'theme',
+      'default': ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
+      'options': <ThemeItem>[
+        ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
+        ThemeItem(name: 'Purple', primary: Colors.deepPurple[600], accent: Colors.deepPurple[800]),
+        ThemeItem(name: 'Blue', primary: Colors.lightBlue, accent: Colors.lightBlue[600]),
+        ThemeItem(name: 'Teal', primary: Colors.teal, accent: Colors.teal[600]),
+        ThemeItem(name: 'Red', primary: Colors.red[700], accent: Colors.red[800]),
+        ThemeItem(name: 'Green', primary: Colors.green, accent: Colors.green[700]),
+        ThemeItem(name: 'Halloween', primary: const Color(0xFF0B192C), accent: const Color(0xFFEB5E28)),
+        ThemeItem(name: 'Custom', primary: null, accent: null),
+      ],
+    },
+    'themeMode': {
+      'type': 'themeMode',
+      'default': ThemeMode.dark,
+      'options': ThemeMode.values,
+    },
+    'useDynamicColor': {
+      'type': 'bool',
+      'default': false,
+    },
+    'isAmoled': {
+      'type': 'bool',
+      'default': false,
+    },
+    'customPrimaryColor': {
+      'type': 'color',
+      'default': Colors.pink[200],
+    },
+    'customAccentColor': {
+      'type': 'color',
+      'default': Colors.pink[600],
+    },
+  };
 
   dynamic validateValue(String name, dynamic value, {bool toJSON = false}) {
     final Map<String, dynamic>? settingParams = map[name];
@@ -772,7 +816,9 @@ class SettingsHandler {
     try {
       switch (settingParams['type']) {
         case 'stringFromList':
-          final String validValue = List<String>.from(settingParams['options']!).firstWhere((el) => el == value, orElse: () => '');
+          final String validValue = List<String>.from(
+            settingParams['options']!,
+          ).firstWhere((el) => el == value, orElse: () => '');
           if (validValue != '') {
             return validValue;
           } else {
@@ -844,24 +890,14 @@ class SettingsHandler {
             }
           }
 
-        case 'logTypesList':
-          if (toJSON) {
-            return (value as List<LogTypes>).map((el) => el.toString()).toList();
-          } else {
-            if (value is List) {
-              return List<String>.from(value).map(LogTypes.fromString).toList();
-            } else {
-              return settingParams['default'];
-            }
-          }
-
         case 'theme':
           if (toJSON) {
             return (value as ThemeItem).name;
           } else {
             if (value is String) {
-              final ThemeItem findTheme =
-                  List<ThemeItem>.from(settingParams['options']!).firstWhere((el) => el.name == value, orElse: () => settingParams['default']);
+              final ThemeItem findTheme = List<ThemeItem>.from(
+                settingParams['options']!,
+              ).firstWhere((el) => el.name == value, orElse: () => settingParams['default']);
               return findTheme;
             } else {
               return settingParams['default'];
@@ -873,7 +909,9 @@ class SettingsHandler {
             return (value as ThemeMode).name; // ThemeMode.dark => dark
           } else {
             if (value is String) {
-              final List<ThemeMode> findMode = ThemeMode.values.where((element) => element.toString() == 'ThemeMode.$value').toList();
+              final List<ThemeMode> findMode = ThemeMode.values
+                  .where((element) => element.toString() == 'ThemeMode.$value')
+                  .toList();
               if (findMode.isNotEmpty) {
                 // if theme mode is present
                 return findMode[0];
@@ -946,11 +984,14 @@ class SettingsHandler {
     return true;
   }
 
-  Future<bool> loadDatabase() async {
+  Future<bool> loadDatabase(ValueChanged<String> onStatusUpdate) async {
     try {
       if (!Tools.isTestMode) {
         if (dbEnabled) {
-          await dbHandler.dbConnect(path);
+          await dbHandler.dbConnect(
+            path,
+            onStatusUpdate: onStatusUpdate,
+          );
         } else {
           dbHandler = DBHandler();
         }
@@ -1041,6 +1082,8 @@ class SettingsHandler {
         return galleryScrollDirection;
       case 'buttonOrder':
         return buttonOrder;
+      case 'disabledButtons':
+        return disabledButtons;
       case 'hatedTags':
         return hatedTags;
       case 'lovedTags':
@@ -1115,12 +1158,14 @@ class SettingsHandler {
         return showSearchbarQuickActions;
       case 'autofocusSearchbar':
         return autofocusSearchbar;
+      case 'useHttp2':
+        return useHttp2;
+      case 'expandDetails':
+        return expandDetails;
       case 'useLockscreen':
         return useLockscreen;
       case 'blurOnLeave':
         return blurOnLeave;
-      case 'enabledLogTypes':
-        return enabledLogTypes;
 
       case 'prefBooru':
         return prefBooru;
@@ -1250,10 +1295,12 @@ class SettingsHandler {
         galleryScrollDirection = validatedValue;
         break;
 
-      // TODO special cases
-      // case 'buttonOrder':
-      //   buttonOrder = validatedValue;
-      //   break;
+      case 'buttonOrder':
+        buttonOrder = validatedValue;
+        break;
+      case 'disabledButtons':
+        disabledButtons = validatedValue;
+        break;
       // case 'hatedTags':
       //   hatedTags = validatedValue;
       //   break;
@@ -1383,9 +1430,6 @@ class SettingsHandler {
       case 'allowSelfSignedCerts':
         allowSelfSignedCerts = validatedValue;
         break;
-      case 'enabledLogTypes':
-        enabledLogTypes.value = validatedValue;
-        break;
       case 'wakeLockEnabled':
         wakeLockEnabled = validatedValue;
         break;
@@ -1445,6 +1489,12 @@ class SettingsHandler {
         break;
       case 'autofocusSearchbar':
         autofocusSearchbar = validatedValue;
+        break;
+      case 'useHttp2':
+        useHttp2 = validatedValue;
+        break;
+      case 'expandDetails':
+        expandDetails = validatedValue;
         break;
       case 'useLockscreen':
         useLockscreen.value = validatedValue;
@@ -1537,7 +1587,6 @@ class SettingsHandler {
       'cacheSize': validateValue('cacheSize', null, toJSON: true),
       'autoLockTimeout': validateValue('autoLockTimeout', null, toJSON: true),
       'allowSelfSignedCerts': validateValue('allowSelfSignedCerts', null, toJSON: true),
-      'enabledLogTypes': validateValue('enabledLogTypes', null, toJSON: true),
       'wakeLockEnabled': validateValue('wakeLockEnabled', null, toJSON: true),
       'tagTypeFetchEnabled': validateValue('tagTypeFetchEnabled', null, toJSON: true),
       'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
@@ -1558,11 +1607,13 @@ class SettingsHandler {
       'useTopSearchbarInput': validateValue('useTopSearchbarInput', null, toJSON: true),
       'showSearchbarQuickActions': validateValue('showSearchbarQuickActions', null, toJSON: true),
       'autofocusSearchbar': validateValue('autofocusSearchbar', null, toJSON: true),
+      'useHttp2': validateValue('useHttp2', null, toJSON: true),
+      'expandDetails': validateValue('expandDetails', null, toJSON: true),
       'useLockscreen': validateValue('useLockscreen', null, toJSON: true),
       'blurOnLeave': validateValue('blurOnLeave', null, toJSON: true),
 
-      //TODO
-      'buttonOrder': buttonOrder.map((e) => e[0]).toList(),
+      'buttonOrder': validateValue('buttonOrder', null, toJSON: true),
+      'disabledButtons': validateValue('disabledButtons', null, toJSON: true),
       'hatedTags': cleanTagsList(hatedTags),
       'lovedTags': cleanTagsList(lovedTags),
 
@@ -1623,12 +1674,12 @@ class SettingsHandler {
         // print('btnorder is a ${tempBtnOrder.runtimeType} type');
         tempBtnOrder = [];
       }
-      final List<List<String>> btnOrder = List<String>.from(tempBtnOrder)
+      final List<String> btnOrder = List<String>.from(tempBtnOrder)
           .map((bstr) {
-            final List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
+            final String button = buttonList.singleWhere((e) => e == bstr, orElse: () => '');
             return button;
           })
-          .where((el) => el[0] != 'null')
+          .where((el) => el.isNotEmpty)
           .toList();
       btnOrder.addAll(
         buttonList.where(
@@ -1638,7 +1689,35 @@ class SettingsHandler {
       buttonOrder = btnOrder;
     } catch (e, s) {
       Logger.Inst().log(
-        'Failed to parse button order $e',
+        'Failed to parse button order list $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
+    }
+
+    try {
+      final dynamic tempDisabledButtons = json['disabledButtons'];
+      if (tempDisabledButtons is List) {
+        disabledButtons = [...tempDisabledButtons];
+
+        for (final buttonName in disabledButtons) {
+          if (disableableButtonList.any((e) => e == buttonName)) {
+            // do nothing
+          } else {
+            // remove unknown and not allowed to remove buttons
+            tempDisabledButtons.remove(buttonName);
+          }
+        }
+
+        disabledButtons = [...tempDisabledButtons];
+      } else {
+        disabledButtons = [];
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse button disabled list $e',
         'SettingsHandler',
         'loadFromJSON',
         LogTypes.exception,
@@ -1700,7 +1779,16 @@ class SettingsHandler {
       );
     }
 
-    final List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
+    final List<String> leftoverKeys = json.keys
+        .where(
+          (e) => ![
+            'buttonOrder',
+            'disabledButtons',
+            'hatedTags',
+            'lovedTags',
+          ].contains(e),
+        )
+        .toList();
     for (final String key in leftoverKeys) {
       try {
         setByString(key, json[key]);
@@ -1753,9 +1841,6 @@ class SettingsHandler {
       );
     }
 
-    // Force enable logging on test builds
-    enabledLogTypes.value = EnvironmentConfig.isTesting ? [...LogTypes.values] : [...enabledLogTypes.value];
-
     // force mobile app mode, until we redo UI for desktop and start doing builds again
     appMode.value = AppMode.Mobile;
 
@@ -1763,7 +1848,7 @@ class SettingsHandler {
   }
 
   Future<bool> saveSettings({required bool restate}) async {
-    await getPerms();
+    await getStoragePermission();
     if (path == '') {
       await setConfigDir();
     }
@@ -1812,7 +1897,7 @@ class SettingsHandler {
               await booruFile.delete();
             }
 
-            if (booruFromFile.type == BooruType.Hydrus) {
+            if (booruFromFile.type?.isHydrus == true) {
               hasHydrus = true;
             }
           }
@@ -1833,7 +1918,9 @@ class SettingsHandler {
       );
     }
 
-    booruList.value = tempList.where((element) => !booruList.contains(element)).toList(); // filter due to possibility of duplicates
+    booruList.value = tempList
+        .where((element) => !booruList.contains(element))
+        .toList(); // filter due to possibility of duplicates
 
     if (tempList.isNotEmpty) {
       unawaited(sortBooruList());
@@ -1842,7 +1929,9 @@ class SettingsHandler {
   }
 
   Future<void> sortBooruList() async {
-    final List<Booru> sorted = [...booruList]; // spread the array just in case, to guarantee that we don't affect the original value
+    final List<Booru> sorted = [
+      ...booruList,
+    ]; // spread the array just in case, to guarantee that we don't affect the original value
     sorted.sort((a, b) {
       // sort alphabetically
       return a.name!.toLowerCase().compareTo(b.name!.toLowerCase());
@@ -1865,7 +1954,7 @@ class SettingsHandler {
       // print(sorted);
     }
 
-    final int favsIndex = sorted.indexWhere((el) => el.type == BooruType.Favourites);
+    final int favsIndex = sorted.indexWhere((el) => el.type?.isFavourites == true);
     if (favsIndex != -1) {
       // move favourites to the end
       final Booru tmp = sorted.elementAt(favsIndex);
@@ -1873,7 +1962,7 @@ class SettingsHandler {
       sorted.add(tmp);
     }
 
-    final int dlsIndex = sorted.indexWhere((el) => el.type == BooruType.Downloads);
+    final int dlsIndex = sorted.indexWhere((el) => el.type?.isDownloads == true);
     if (dlsIndex != -1) {
       // move downloads to the end
       final Booru tmp = sorted.elementAt(dlsIndex);
@@ -2030,14 +2119,17 @@ class SettingsHandler {
       'is_update_in_store':
           true, // is update available in store [LEGACY], after 2.2.0 hits the store - left this in update.json as true for backwards compatibility with pre-2.2
       'is_important': false, // is update important => force open dialog on start
-      'store_package': 'com.noaisu.play.loliSnatcher', // custom app package name, to allow to redirect store users to new app if it will be needed
+      'store_package':
+          'com.noaisu.play.loliSnatcher', // custom app package name, to allow to redirect store users to new app if it will be needed
       'github_url': 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
     }; // fake update json for tests
     // String fakeUpdate = '123'; // broken string
 
     try {
       const String updateFileName = EnvironmentConfig.isFromStore ? 'update_store.json' : 'update.json';
-      final response = await DioNetwork.get('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName');
+      final response = await DioNetwork.get(
+        'https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName',
+      );
       final json = jsonDecode(response.data);
       // final json = jsonDecode(jsonEncode(fakeUpdate));
 
@@ -2080,8 +2172,26 @@ class SettingsHandler {
           showUpdate(withMessage || updateInfo.value!.isImportant);
         }
       } else {
-        // otherwise show latest version message
-        showLastVersionMessage(withMessage);
+        final secureStorageHandler = SecureStorageHandler.instance;
+        final viewedAtBuild = await secureStorageHandler.read(SecureStorageKey.viewedUpdateChangelogForBuild);
+        if (booruList.isEmpty) {
+          // don't bother new (no boorus) users until next update
+          await secureStorageHandler.write(
+            SecureStorageKey.viewedUpdateChangelogForBuild,
+            Constants.appBuildNumber.toString(),
+          );
+        } else if (viewedAtBuild == null ||
+            viewedAtBuild.isEmpty ||
+            viewedAtBuild != updateInfo.value!.buildNumber.toString()) {
+          await secureStorageHandler.write(
+            SecureStorageKey.viewedUpdateChangelogForBuild,
+            Constants.appBuildNumber.toString(),
+          );
+          showUpdate(true, isAfterUpdate: true);
+        } else {
+          // otherwise show latest version message
+          showLastVersionMessage(withMessage);
+        }
       }
     } catch (e) {
       if (withMessage) {
@@ -2111,7 +2221,7 @@ class SettingsHandler {
         sideColor: Colors.green,
         leadingIcon: Icons.update,
         leadingIconColor: Colors.green,
-        actionsBuilder: (controller) {
+        actionsBuilder: (context, controller) {
           return [
             ElevatedButton.icon(
               onPressed: () {
@@ -2127,91 +2237,99 @@ class SettingsHandler {
     }
   }
 
-  void showUpdate(bool withMessage) {
-    if (withMessage && updateInfo.value != null) {
+  void showUpdate(
+    bool showMessage, {
+    bool isAfterUpdate = false,
+  }) {
+    if (showMessage && updateInfo.value != null) {
       const bool isFromStore = EnvironmentConfig.isFromStore;
 
       final bool isDiffVersion = Constants.appBuildNumber < updateInfo.value!.buildNumber;
 
-      final ctx = NavigationHandler.instance.navigatorKey.currentContext!;
+      final ctx = NavigationHandler.instance.navContext;
 
       SettingsPageOpen(
         context: ctx,
         page: (_) => Scaffold(
           appBar: AppBar(
             title: Text(
-              'Update ${isDiffVersion ? 'Available!' : 'Changelog:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
+              '${isDiffVersion ? 'Update available!' : (isAfterUpdate ? "What's new:" : 'Update changelog:')} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
             ),
           ),
-          body: Column(
-            children: [
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (isDiffVersion) ...[
-                        const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (isDiffVersion) ...[
+                          const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
+                          const Text(''),
+                        ],
+                        Text(
+                          updateInfo.value!.title,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                         const Text(''),
+                        const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text(''),
+                        Text(updateInfo.value!.changelog),
+                        // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
                       ],
-                      Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const Text(''),
-                      const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      const Text(''),
-                      Text(updateInfo.value!.changelog),
-                      // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                        },
+                        icon: const Icon(Icons.close),
+                        label: Text(isDiffVersion ? 'Later' : 'Close'),
+                      ),
+                      const SizedBox(width: 16),
+                      if (isFromStore && updateInfo.value!.isInStore)
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            // try {
+                            //   launchUrlString("market://details?id=" + updateInfo.value!.storePackage);
+                            // } on PlatformException catch(e) {
+                            //   launchUrlString("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
+                            // }
+                            launchUrlString(
+                              'https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}',
+                              mode: LaunchMode.externalApplication,
+                            );
+                            Navigator.of(ctx).pop();
+                          },
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Visit Play Store'),
+                        )
+                      else
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            launchUrlString(
+                              updateInfo.value!.githubURL,
+                              mode: LaunchMode.externalApplication,
+                            );
+                            Navigator.of(ctx).pop();
+                          },
+                          icon: const Icon(Icons.exit_to_app),
+                          label: const Text('Visit Releases'),
+                        ),
                     ],
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                      },
-                      icon: const Icon(Icons.close),
-                      label: Text(isDiffVersion ? 'Later' : 'Close'),
-                    ),
-                    const SizedBox(width: 16),
-                    if (isFromStore && updateInfo.value!.isInStore)
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          // try {
-                          //   launchUrlString("market://details?id=" + updateInfo.value!.storePackage);
-                          // } on PlatformException catch(e) {
-                          //   launchUrlString("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
-                          // }
-                          launchUrlString(
-                            'https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}',
-                            mode: LaunchMode.externalApplication,
-                          );
-                          Navigator.of(ctx).pop();
-                        },
-                        icon: const Icon(Icons.play_arrow),
-                        label: const Text('Visit Play Store'),
-                      )
-                    else
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          launchUrlString(
-                            updateInfo.value!.githubURL,
-                            mode: LaunchMode.externalApplication,
-                          );
-                          Navigator.of(ctx).pop();
-                        },
-                        icon: const Icon(Icons.exit_to_app),
-                        label: const Text('Visit Releases'),
-                      ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ).open();
@@ -2232,7 +2350,7 @@ class SettingsHandler {
     }
 
     try {
-      await getPerms();
+      await getStoragePermission();
       await loadSettings();
     } catch (e, s) {
       Logger.Inst().log(
@@ -2263,7 +2381,6 @@ class SettingsHandler {
 
     alice = Alice();
 
-    unawaited(checkUpdate(withMessage: false));
     isInit.value = true;
     return;
   }
@@ -2294,7 +2411,9 @@ class SettingsHandler {
       }
 
       postInitMessage.value = 'Loading Database...';
-      await loadDatabase();
+      await loadDatabase((newStatus) {
+        postInitMessage.value = 'Fixing data in the database...\nThis may take some time\n$newStatus';
+      });
       await indexDatabase();
       if (booruList.isEmpty) {
         postInitMessage.value = 'Loading Boorus...';
@@ -2323,6 +2442,8 @@ class SettingsHandler {
         leadingIconColor: Colors.red,
       );
     }
+
+    unawaited(checkUpdate(withMessage: false));
 
     isPostInit.value = true;
     postInitMessage.value = '';

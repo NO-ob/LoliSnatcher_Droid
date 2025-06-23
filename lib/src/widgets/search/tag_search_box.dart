@@ -8,7 +8,6 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -157,10 +156,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     const double buttonHeight = kMinInteractiveDimension;
 
     final buttonStyle = Theme.of(context).elevatedButtonTheme.style?.copyWith(
-          fixedSize: WidgetStateProperty.all<Size>(
-            const Size(buttonHeight, buttonHeight),
-          ),
-        );
+      fixedSize: WidgetStateProperty.all<Size>(
+        const Size(buttonHeight, buttonHeight),
+      ),
+    );
 
     return KeyboardActionsConfig(
       keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
@@ -183,12 +182,18 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                   ElevatedButton(
                     onPressed: () {
                       // Add '_' at current cursor position
-                      final String beforeSelection = searchHandler.searchTextController.selection.textBefore(searchHandler.searchTextController.text);
+                      final String beforeSelection = searchHandler.searchTextController.selection.textBefore(
+                        searchHandler.searchTextController.text,
+                      );
                       // final String insideSelection = searchHandler.searchTextController.selection.textInside(searchHandler.searchTextController.text);
-                      final String afterSelection = searchHandler.searchTextController.selection.textAfter(searchHandler.searchTextController.text);
+                      final String afterSelection = searchHandler.searchTextController.selection.textAfter(
+                        searchHandler.searchTextController.text,
+                      );
                       searchHandler.searchTextController.text = '${beforeSelection}_$afterSelection';
                       // set cursor to the end when tapped unfocused
-                      searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: beforeSelection.length + 1));
+                      searchHandler.searchTextController.selection = TextSelection.fromPosition(
+                        TextPosition(offset: beforeSelection.length + 1),
+                      );
                       // animateTransition();
                       createOverlay();
                     },
@@ -218,8 +223,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                       final String copied = cdata?.text ?? '';
                       if (copied.isNotEmpty) {
                         searchHandler.searchTextController.text += ' $copied ';
-                        searchHandler.searchTextController.selection =
-                            TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
+                        searchHandler.searchTextController.selection = TextSelection.fromPosition(
+                          TextPosition(offset: searchHandler.searchTextController.text.length),
+                        );
                         animateTransition();
                         createOverlay();
                       }
@@ -310,7 +316,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void tagStuff() {
     input = searchHandler.searchTextController.text;
-    if (searchHandler.currentBooru.type == BooruType.Hydrus) {
+    if (searchHandler.currentBooru.type?.isHydrus == true) {
       splitInput = input.trim().split(',');
     } else {
       splitInput = input.trim().split(' ');
@@ -340,7 +346,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     cursorPos = searchHandler.searchTextController.selection.baseOffset;
     if (cursorPos < 0) cursorPos = 0;
     int tmpStartIndex = cursorPos - 1;
-    while (tmpStartIndex > 0 && (searchHandler.currentBooru.type == BooruType.Hydrus ? input[tmpStartIndex] != ',' : input[tmpStartIndex] != ' ')) {
+    while (tmpStartIndex > 0 &&
+        (searchHandler.currentBooru.type?.isHydrus == true
+            ? input[tmpStartIndex] != ','
+            : input[tmpStartIndex] != ' ')) {
       tmpStartIndex--;
     }
 
@@ -349,7 +358,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       replaceString = lastTag;
     } else {
       int endIndex = input.indexOf(' ', cursorPos);
-      if (searchHandler.currentBooru.type == BooruType.Hydrus) {
+      if (searchHandler.currentBooru.type?.isHydrus == true) {
         if (tmpStartIndex == -1) {
           endIndex = input.length;
         } else {
@@ -373,15 +382,17 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     cancelToken = CancelToken();
     if (multiIndex != -1) {
       final MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
-      getFromBooru = (await handler.booruHandlers[multiIndex].getTagSuggestions(lastTag, cancelToken: cancelToken)).fold(
-        (e) => [],
-        (tags) => tags,
-      );
+      getFromBooru = (await handler.booruHandlers[multiIndex].getTagSuggestions(lastTag, cancelToken: cancelToken))
+          .fold(
+            (e) => [],
+            (tags) => tags,
+          );
     } else {
-      getFromBooru = (await searchHandler.currentBooruHandler.getTagSuggestions(lastTag, cancelToken: cancelToken)).fold(
-        (e) => [],
-        (tags) => tags,
-      );
+      getFromBooru = (await searchHandler.currentBooruHandler.getTagSuggestions(lastTag, cancelToken: cancelToken))
+          .fold(
+            (e) => [],
+            (tags) => tags,
+          );
     }
 
     booruResults.value = getFromBooru.map((tag) {
@@ -399,8 +410,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             return [tag, 'history'];
           }).toList()
         : [];
-    historyResults.value =
-        historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList(); // filter out duplicates
+    historyResults.value = historyResults
+        .where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1)
+        .toList(); // filter out duplicates
   }
 
   Future<void> searchDatabase() async {
@@ -456,7 +468,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           color: Theme.of(context).colorScheme.surface,
           child: Obx(() {
             final List<List<String>> items = [
-              ...historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
+              ...historyResults.where(
+                (tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1,
+              ),
               ...databaseResults.where(
                 (tag) =>
                     booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 &&
@@ -542,12 +556,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
                           // widget.searchBoxFocus.unfocus();
 
-                          final String multiIndex = replaceString.startsWith(RegExp(r'\d+#')) ? "${replaceString.split("#")[0]}#" : '';
+                          final String multiIndex = replaceString.startsWith(RegExp(r'\d+#'))
+                              ? "${replaceString.split("#")[0]}#"
+                              : '';
                           // Keep minus if its in the beggining of current (last) tag
                           final bool isExclude = RegExp('^-').hasMatch(replaceString.replaceAll(RegExp(r'\d+#'), ''));
                           final bool isOr = RegExp('^~').hasMatch(replaceString.replaceAll(RegExp(r'\d+#'), ''));
                           String newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag;
-                          if (searchHandler.currentBooru.type == BooruType.Hydrus) {
+                          if (searchHandler.currentBooru.type?.isHydrus == true) {
                             final String tagWithSpaces = newTag.replaceAll(RegExp('_'), ' ');
                             newTag = '$tagWithSpaces,';
                           } else {
@@ -557,16 +573,25 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           String newInput = '';
                           if (startIndex >= 0 && replaceString.isNotEmpty) {
                             //newInput = searchHandler.searchTextController.text.replaceRange(start, end, replacement)
-                            newInput = searchHandler.searchTextController.text.replaceFirst(replaceString, newTag, cursorPos - replaceString.length);
+                            newInput = searchHandler.searchTextController.text.replaceFirst(
+                              replaceString,
+                              newTag,
+                              cursorPos - replaceString.length,
+                            );
                           } else if (startIndex == -1) {
-                            newInput = newTag + (searchHandler.currentBooru.type == BooruType.Hydrus ? ',' : ' ') + searchHandler.searchTextController.text;
+                            newInput =
+                                newTag +
+                                (searchHandler.currentBooru.type?.isHydrus == true ? ',' : ' ') +
+                                searchHandler.searchTextController.text;
                           } else {
                             newInput = searchHandler.searchTextController.text + newTag;
                           }
 
                           searchHandler.searchTextController.text = newInput;
                           // Set the cursor to the end of the search and reset the overlay data
-                          searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
+                          searchHandler.searchTextController.selection = TextSelection.fromPosition(
+                            TextPosition(offset: newInput.length),
+                          );
                           animateTransition();
 
                           tagStuff();
@@ -638,7 +663,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             },
             decoration: InputDecoration(
               hintText: searchHandler.searchTextController.text.isEmpty ? 'Enter Tags' : '',
-              prefixIcon: isFocused //searchHandler.searchTextController.text.length > 0
+              prefixIcon:
+                  isFocused //searchHandler.searchTextController.text.length > 0
                   ? IconButton(
                       padding: const EdgeInsets.all(5),
                       onPressed: () {

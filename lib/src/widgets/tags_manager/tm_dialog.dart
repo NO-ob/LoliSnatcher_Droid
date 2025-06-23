@@ -155,7 +155,8 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
       content: Column(
         children: [
           TagsManagerListFilter(
-            title: "Filter Tags (${filterSearchController.text.isEmpty ? tags.length : '${filteredTags.length}/${tags.length}'})",
+            title:
+                "Filter Tags (${filterSearchController.text.isEmpty ? tags.length : '${filteredTags.length}/${tags.length}'})",
             controller: filterSearchController,
             onChanged: (String? input) {
               filterTags();

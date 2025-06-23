@@ -68,7 +68,9 @@ class TagsManagerListBottom extends StatelessWidget {
                     child: ListView(
                       shrinkWrap: true,
                       children: [
-                        Text('Are you sure you want to delete ${selected.length} ${Tools.pluralize('tag', selected.length)}?'),
+                        Text(
+                          'Are you sure you want to delete ${selected.length} ${Tools.pluralize('tag', selected.length)}?',
+                        ),
                         const SizedBox(height: 10),
                         ...selected.map((Tag entry) {
                           return TagsManagerListItem(tag: entry);

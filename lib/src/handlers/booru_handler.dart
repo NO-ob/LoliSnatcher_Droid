@@ -1,12 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:html/parser.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
@@ -39,12 +41,6 @@ abstract class BooruHandler {
   List failedItems = [];
 
   Map<String, TagType> get tagTypeMap => {};
-  Map<String, String> get tagModifierMap => {
-        'rating:': 'R',
-        'artist:': 'A',
-        'order:': 'O',
-        'sort:': 'S',
-      };
 
   RxList<BooruItem> fetched = RxList<BooruItem>([]);
   RxList<BooruItem> filteredFetched = RxList<BooruItem>([]);
@@ -56,6 +52,8 @@ abstract class BooruHandler {
   void filterFetched() {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
+    final List<BooruItem> itemsBeforeFilter = [...filteredFetched];
+
     final List<BooruItem> filteredItems = [];
     for (final item in fetched) {
       if (settingsHandler.filterHated && item.isHated) {
@@ -66,17 +64,19 @@ abstract class BooruHandler {
         continue;
       }
 
-      final bool filterFavourites = settingsHandler.filterFavourites && booru.type != BooruType.Favourites;
+      final bool filterFavourites = settingsHandler.filterFavourites && booru.type?.isFavourites != true;
       if (filterFavourites && item.isFavourite.value == true) {
         continue;
       }
 
-      final bool filterSnatched = settingsHandler.filterSnatched && booru.type != BooruType.Downloads;
+      final bool filterSnatched = settingsHandler.filterSnatched && booru.type?.isDownloads != true;
       if (filterSnatched && item.isSnatched.value == true) {
         continue;
       }
 
-      final bool isDuplicate = filteredItems.any((e) => e.fileURL == item.fileURL || (e.serverId != null && e.serverId == item.serverId));
+      final bool isDuplicate = filteredItems.any(
+        (e) => e.fileURL == item.fileURL || (e.serverId != null && e.serverId == item.serverId),
+      );
       if (isDuplicate) {
         continue;
       }
@@ -84,7 +84,9 @@ abstract class BooruHandler {
       filteredItems.add(item);
     }
 
-    filteredFetched.value = filteredItems;
+    if (!listEquals(itemsBeforeFilter, filteredItems)) {
+      filteredFetched.value = filteredItems;
+    }
   }
 
   String get className => runtimeType.toString();
@@ -187,7 +189,17 @@ abstract class BooruHandler {
         s: s,
       );
       if (e is DioException) {
-        errorString = e.response?.statusCode != null ? '${e.response?.statusCode} - ${e.response?.statusMessage}' : (e.message ?? e.toString());
+        errorString = e.response?.statusCode != null
+            ? '${e.response?.statusCode} - ${e.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(e.response?.statusCode)}'
+            : (e.message ?? e.toString());
+
+        // TODO move error handling to separate function and allow per booru changes?
+        if (e.response?.statusCode == HttpStatus.unauthorized &&
+            e.requestOptions.uri.toString().contains('gelbooru.com')) {
+          // add a message to direct user to set his user ID and api key
+          errorString +=
+              '\n<p><b>You may need to add your User ID and API key. Go to <a href="/settings/booru">[Settings > Booru & Search]</a> to update the booru config. You can find your User ID and API key on <a href="https://gelbooru.com/index.php?page=account&s=options">Gelbooru settings page</a> under "API Access Credentials". Note: Anonymous access is NOT permitted.</b></p>';
+        }
       } else {
         errorString = e.toString();
       }
@@ -280,7 +292,13 @@ abstract class BooruHandler {
 
   /// [SHOULD BE OVERRIDDEN]
   FutureOr<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) {
-    return BooruItem(fileURL: '', sampleURL: '', thumbnailURL: '', tagsList: [], postURL: '');
+    return BooruItem(
+      fileURL: '',
+      sampleURL: '',
+      thumbnailURL: '',
+      tagsList: const [],
+      postURL: '',
+    );
   }
 
   Future<void> afterParseResponse(List<BooruItem> newItems) async {
@@ -387,8 +405,18 @@ abstract class BooruHandler {
         return const Right([]);
       } else {
         Logger.Inst().log('error fetching url: $url', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log('status: ${response.statusCode}', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log('response: ${response.data}', className, 'getTagSuggestions', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log(
+          'status: ${response.statusCode}',
+          className,
+          'getTagSuggestions',
+          LogTypes.booruHandlerFetchFailed,
+        );
+        Logger.Inst().log(
+          'response: ${response.data}',
+          className,
+          'getTagSuggestions',
+          LogTypes.booruHandlerFetchFailed,
+        );
         return Left(
           ResponseError(
             message: 'error fetching url: $url',
@@ -731,7 +759,9 @@ abstract class BooruHandler {
       for (int i = 0; i < items[x].tagsList.length; i++) {
         final String tag = items[x].tagsList[i];
 
-        final bool alreadyStoredAndNotStale = TagHandler.instance.hasTagAndNotStale(tag); //TagHandler.instance.hasTag(tag);
+        final bool alreadyStoredAndNotStale = TagHandler.instance.hasTagAndNotStale(
+          tag,
+        ); //TagHandler.instance.hasTag(tag);
         if (!alreadyStoredAndNotStale) {
           final bool isPresent = unTyped.contains(tag);
           if (!isPresent) {
@@ -796,8 +826,9 @@ abstract class BooruHandler {
 
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     if (settingsHandler.dbHandler.db != null && diff > 0) {
-      final List<List<bool>> valuesList = await settingsHandler.dbHandler
-          .getMultipleTrackedValues(fetched.sublist(fetchedIndexes.first, fetchedIndexes.last)); //.map((e) => e.fileURL).toList()
+      final List<List<bool>> valuesList = await settingsHandler.dbHandler.getMultipleTrackedValues(
+        fetched.sublist(fetchedIndexes.first, fetchedIndexes.last),
+      ); //.map((e) => e.fileURL).toList()
 
       valuesList.asMap().forEach((index, values) {
         fetched[fetchedIndexes[index]].isSnatched.value = values[0];

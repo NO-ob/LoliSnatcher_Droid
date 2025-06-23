@@ -62,7 +62,8 @@ class ShimmieHandler extends BooruHandler {
         preURL = booru.baseURL!.split('/booru')[0];
       }
 
-      final String thumbnailUrl = preURL + current.getAttribute('preview_url')!, fileUrl = preURL + current.getAttribute('file_url')!;
+      final String thumbnailUrl = preURL + current.getAttribute('preview_url')!,
+          fileUrl = preURL + current.getAttribute('file_url')!;
 
       final String dateString = current.getAttribute('date').toString();
       final BooruItem item = BooruItem(
@@ -77,7 +78,9 @@ class ShimmieHandler extends BooruHandler {
         previewHeight: double.tryParse(current.getAttribute('preview_height') ?? ''),
         serverId: current.getAttribute('id'),
         score: current.getAttribute('score'),
-        sources: (current.getAttribute('source') != null && current.getAttribute('source') is String) ? [current.getAttribute('source')!] : null,
+        sources: (current.getAttribute('source') != null && current.getAttribute('source') is String)
+            ? [current.getAttribute('source')!]
+            : null,
         md5String: current.getAttribute('md5'),
         postDate: dateString, // 2021-06-18 04:37:31
         postDateFormat: 'yyyy-MM-dd HH:mm:ss',
@@ -154,10 +157,17 @@ class ShimmieHandler extends BooruHandler {
     return CommentItem(
       id: current.attributes['id'],
       // title: postID,
-      content: current.nodes[current.nodes.length - 1].text.toString().replaceFirst(': ', '').replaceFirst('\n\t\t\t\t', ''),
+      content: current.nodes[current.nodes.length - 1].text
+          .toString()
+          .replaceFirst(': ', '')
+          .replaceFirst('\n\t\t\t\t', ''),
       authorName: current.querySelector('.username')?.text.toString(),
       // postID: postID,
-      createDate: current.querySelector('time')?.attributes['datetime']?.split('+')[0].toString(), // 2021-12-25t10:02:28+00:00
+      createDate: current
+          .querySelector('time')
+          ?.attributes['datetime']
+          ?.split('+')[0]
+          .toString(), // 2021-12-25t10:02:28+00:00
       createDateFormat: 'iso',
     );
   }
@@ -267,16 +277,15 @@ class ShimmieHtmlHandler extends BooruHandler {
     return response.data is List
         ? (response.data as List).map((e) => TagSuggestion(tag: e)).toList()
         : response.data is Map<String, dynamic>
-            ? (response.data as Map<String, dynamic>)
-                .entries
-                .map(
-                  (e) => TagSuggestion(
-                    tag: e.key.toLowerCase(),
-                    count: e.value['count'],
-                  ),
-                )
-                .toList()
-            : [];
+        ? (response.data as Map<String, dynamic>).entries
+              .map(
+                (e) => TagSuggestion(
+                  tag: e.key.toLowerCase(),
+                  count: e.value['count'],
+                ),
+              )
+              .toList()
+        : [];
   }
 
   @override

@@ -65,7 +65,8 @@ class LocalAuthHandler {
 
     if (deviceSupportsBiometrics.value == true) {
       try {
-        final bool authenticated = forceUnlock ||
+        final bool authenticated =
+            forceUnlock ||
             await auth.authenticate(
               localizedReason: 'Please authenticate to use the app',
               options: const AuthenticationOptions(

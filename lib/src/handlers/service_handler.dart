@@ -154,10 +154,20 @@ class ServiceHandler {
     return result;
   }
 
-  static Future<String?> createFileStreamFromSAFDirectory(String fileName, String mediaType, String fileExt, String savePath) async {
+  static Future<String?> createFileStreamFromSAFDirectory(
+    String fileName,
+    String mediaType,
+    String fileExt,
+    String savePath,
+  ) async {
     String? result;
     try {
-      result = await platform.invokeMethod('createFileStream', {'fileName': fileName, 'mediaType': mediaType, 'fileExt': fileExt, 'savePath': savePath});
+      result = await platform.invokeMethod('createFileStream', {
+        'fileName': fileName,
+        'mediaType': mediaType,
+        'fileExt': fileExt,
+        'savePath': savePath,
+      });
       log('created file $fileName $result');
     } catch (e) {
       log(e);
@@ -235,7 +245,11 @@ class ServiceHandler {
   static Future<bool> copySafFileToDir(String safUri, String fileName, String targetPath) async {
     bool result = false;
     try {
-      result = await platform.invokeMethod('copySafFileToDir', {'uri': safUri, 'fileName': fileName, 'targetPath': targetPath});
+      result = await platform.invokeMethod('copySafFileToDir', {
+        'uri': safUri,
+        'fileName': fileName,
+        'targetPath': targetPath,
+      });
     } catch (e) {
       log(e);
       result = false;
@@ -278,18 +292,16 @@ class ServiceHandler {
     return result;
   }
 
-  static Future<String> testSAFPersistence() async {
+  static Future<bool> testSAFPersistence(String path) async {
     log('test saf persistence');
     String result = '';
-    const String safuri = 'content://com.android.externalstorage.documents/tree/1206-2917%3ALolisnatcher';
     try {
-      result = await platform.invokeMethod('testSAF', {'uri': safuri});
+      result = await platform.invokeMethod('testSAF', {'uri': path});
       log('got saf result $result');
     } catch (e) {
       log(e);
     }
-    // final Directory dir = Directory(result);
-    return result;
+    return result == 'ok';
   }
 
   static Future<String> getDocumentsDir() async {
@@ -306,7 +318,8 @@ class ServiceHandler {
     String result = '';
     try {
       if (Platform.isAndroid) {
-        result = "${await platform.invokeMethod("getPicturesPath")}/LoliSnatcher/"; // "${await getExtDir()}/Pictures/LoliSnatcher/";
+        result =
+            "${await platform.invokeMethod("getPicturesPath")}/LoliSnatcher/"; // "${await getExtDir()}/Pictures/LoliSnatcher/";
       } else if (Platform.isLinux) {
         result = '${await getExtDir()}/Pictures/LoliSnatcher/';
       } else if (Platform.isWindows) {
@@ -348,9 +361,20 @@ class ServiceHandler {
     }
   }
 
-  static Future<void> loadShareFileIntent(String filePath, String mimeType) async {
+  static Future<void> loadShareFileIntent(
+    String filePath,
+    String mimeType, {
+    String? text,
+  }) async {
     try {
-      await platform.invokeMethod('shareFile', {'path': filePath, 'mimeType': mimeType});
+      await platform.invokeMethod(
+        'shareFile',
+        {
+          'path': filePath,
+          'mimeType': mimeType,
+          if (text != null) 'text': text,
+        },
+      );
       return;
       // log('share closed');
     } catch (e) {
@@ -459,7 +483,6 @@ class ServiceHandler {
     return result;
   }
 
-  // ignore: avoid_void_async
   static Future<void> vibrate({
     bool flutterWay = false,
     int duration = 10,

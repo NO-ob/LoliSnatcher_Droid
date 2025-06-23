@@ -2,14 +2,21 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
@@ -19,16 +26,17 @@ import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 class Thumbnail extends StatefulWidget {
   const Thumbnail({
     required this.item,
+    required this.booru,
     this.isStandalone = false,
     this.useHero = true,
     super.key,
   });
 
   final BooruItem item;
+  final Booru booru;
 
   /// set to true when used in a list
   final bool isStandalone;
-
   final bool useHero;
 
   @override
@@ -37,18 +45,19 @@ class Thumbnail extends StatefulWidget {
 
 class _ThumbnailState extends State<Thumbnail> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final SearchHandler searchHandler = SearchHandler.instance;
 
   final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
   int restartedCount = 0;
   final ValueNotifier<bool?> isFromCache = ValueNotifier(null);
-  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true),
-      isFailed = ValueNotifier(false),
-      isLoaded = ValueNotifier(false),
-      isLoadedExtra = ValueNotifier(false),
-      failedRendering = ValueNotifier(false);
+  final ValueNotifier<bool> isFirstBuild = ValueNotifier(true);
+  final ValueNotifier<bool> isFailed = ValueNotifier(false);
+  final ValueNotifier<bool> isLoaded = ValueNotifier(false);
+  final ValueNotifier<bool> isLoadedExtra = ValueNotifier(false);
+  final ValueNotifier<bool> failedRendering = ValueNotifier(false);
   final ValueNotifier<String?> errorCode = ValueNotifier(null);
-  CancelToken? mainCancelToken, extraCancelToken;
+  CancelToken? mainCancelToken, extraCancelToken, loadItemCancelToken;
+
+  late String currentUrl;
 
   Timer? debounceLoading;
 
@@ -62,23 +71,27 @@ class _ThumbnailState extends State<Thumbnail> {
   ImageStream? mainImageStream, extraImageStream;
 
   @override
+  void initState() {
+    super.initState();
+
+    currentUrl = widget.item.thumbnailURL;
+  }
+
+  @override
   void didUpdateWidget(Thumbnail oldWidget) {
     // force redraw on tab change
     if (oldWidget.item != widget.item) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        restartLoading();
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        await restartLoading();
       });
     }
     super.didUpdateWidget(oldWidget);
   }
 
-  Future<ImageProvider> getImageProvider(bool isMain) async {
-    // if(widget.item.isHated.value) {
-    //   // pixelate hated images
-    //   // flutter 3.3 broke image pixelazation from very small width memoryimage
-    //   return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: 10);
-    // }
-
+  Future<ImageProvider> getImageProvider(
+    bool isMain, {
+    bool withCaptchaCheck = false,
+  }) async {
     if (isMain) {
       mainCancelToken ??= CancelToken();
     } else {
@@ -90,7 +103,11 @@ class _ThumbnailState extends State<Thumbnail> {
         ? CustomNetworkAvifImage(
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
-            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            headers: await Tools.getFileCustomHeaders(
+              widget.booru,
+              item: widget.item,
+              checkForReferer: true,
+            ),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
             fileNameExtras: widget.item.fileNameExtras,
@@ -102,11 +119,16 @@ class _ThumbnailState extends State<Thumbnail> {
                 isFromCache.value = didDetectCache;
               }
             },
+            withCaptchaCheck: withCaptchaCheck,
           )
         : CustomNetworkImage(
             url,
             cancelToken: isMain ? mainCancelToken : extraCancelToken,
-            headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+            headers: await Tools.getFileCustomHeaders(
+              widget.booru,
+              item: widget.item,
+              checkForReferer: true,
+            ),
             withCache: settingsHandler.thumbnailCache,
             cacheFolder: isMain ? thumbFolder : 'thumbnails',
             fileNameExtras: widget.item.fileNameExtras,
@@ -118,19 +140,25 @@ class _ThumbnailState extends State<Thumbnail> {
                 isFromCache.value = didDetectCache;
               }
             },
+            withCaptchaCheck: withCaptchaCheck,
           );
 
-    // return empty image if no size rectrictions were calculated (propably happens because widget is not mounted)
-    if (settingsHandler.disableImageScaling || (thumbWidth == null && thumbHeight == null)) {
-      return provider;
+    // on desktop devicePixelRatio is not working?
+    final bool shouldResize = (thumbWidth != null || thumbHeight != null) && !SettingsHandler.isDesktopPlatform;
+    final bool shouldPixelate = widget.item.isHated && settingsHandler.shitDevice;
+
+    if (shouldResize || shouldPixelate) {
+      return ResizeImage(
+        provider,
+        // when in low performance mode - resize hated images to 10px to simulate blur effect
+        width: shouldPixelate ? 10 : thumbWidth?.round(),
+        height: shouldPixelate ? 10 : thumbHeight?.round(),
+        policy: ResizeImagePolicy.fit,
+        allowUpscaling: false,
+      );
     }
 
-    return ResizeImage(
-      provider,
-      width: thumbWidth?.round(),
-      height: thumbWidth == null ? thumbHeight?.round() : null,
-      allowUpscaling: false,
-    );
+    return provider;
   }
 
   void calcThumbWidth(BoxConstraints constraints) {
@@ -138,41 +166,45 @@ class _ThumbnailState extends State<Thumbnail> {
       return;
     }
 
-    final double widthLimit = constraints.maxWidth * MediaQuery.devicePixelRatioOf(context) * 1;
+    final double widthLimit = constraints.maxWidth * MediaQuery.devicePixelRatioOf(context);
     double thumbRatio = 1;
     final bool hasSizeData = widget.item.fileHeight != null && widget.item.fileWidth != null;
 
-    if (widget.isStandalone) {
+    if (!widget.isStandalone) {
       thumbWidth = widthLimit;
-    } else {
-      switch (settingsHandler.previewDisplay) {
-        case 'Rectangle':
-        case 'Staggered':
-          // thumbRatio = 16 / 9;
-          if (hasSizeData) {
-            // if api gives size data
-            thumbRatio = widget.item.fileAspectRatio!;
-            if (thumbRatio < 1) {
-              // vertical image - resize to width
-              thumbWidth = widthLimit;
-            } else {
-              // horizontal image - resize to height
-              thumbHeight = widthLimit * thumbRatio;
-            }
-          } else {
-            thumbWidth = widthLimit;
-          }
-          break;
-
-        case 'Square':
-        default:
-          // otherwise resize to widthLimit
-          thumbWidth = widthLimit;
-          break;
-      }
+      return;
     }
 
-    // print('thumbWidth: $thumbWidth thumbHeight: $thumbHeight');
+    switch (settingsHandler.previewDisplay) {
+      case 'Rectangle':
+        thumbRatio = 16 / 9;
+        thumbWidth = widthLimit;
+        thumbHeight = widthLimit * thumbRatio;
+        break;
+
+      case 'Staggered':
+        if (hasSizeData) {
+          thumbRatio = widget.item.fileAspectRatio!;
+          if (thumbRatio < 1) {
+            // vertical image - resize to width
+            thumbWidth = widthLimit;
+          } else {
+            // horizontal image - resize to height
+            thumbHeight = widthLimit * thumbRatio;
+          }
+        } else {
+          thumbRatio = 16 / 9;
+          thumbWidth = widthLimit;
+          thumbHeight = widthLimit * thumbRatio;
+        }
+        break;
+
+      case 'Square':
+      default:
+        thumbWidth = widthLimit;
+        thumbHeight = widthLimit;
+        break;
+    }
   }
 
   void onBytesAdded(int receivedNew, int? totalNew) {
@@ -182,14 +214,14 @@ class _ThumbnailState extends State<Thumbnail> {
 
   void onError(Object error, {bool delayed = false}) {
     if (error is DioException && CancelToken.isCancel(error)) {
-      // print('Canceled by user: $error');
+      //
     } else {
-      if (restartedCount < 5) {
-        // attempt to reload 5 times with a 1s delay
+      if (restartedCount < (kDebugMode ? 1 : 3)) {
+        // attempt to reload 3 times with a 1s delay
         Debounce.debounce(
           tag: 'thumbnail_reload_${widget.item.hashCode}',
-          callback: () {
-            restartLoading();
+          callback: () async {
+            await restartLoading();
             restartedCount++;
           },
           duration: const Duration(seconds: 1),
@@ -202,38 +234,49 @@ class _ThumbnailState extends State<Thumbnail> {
           errorCode.value = null;
         }
       }
-      // print('Dio request cancelled: $thumbURL $error');
     }
   }
 
-  void selectThumbProvider() {
+  void selectThumbProvider({
+    bool withCaptchaCheck = false,
+  }) {
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
+    final bool isSampleGif = widget.item.sampleURL.contains('.gif');
     final bool isGifSampleNotAllowed =
-        widget.item.mediaType.value.isAnimation && ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated : true);
+        widget.item.mediaType.value.isAnimation &&
+        ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated : true);
 
-    isThumbQuality = settingsHandler.previewMode == 'Thumbnail' ||
+    isThumbQuality =
+        settingsHandler.previewMode == 'Thumbnail' ||
         (isGifSampleNotAllowed ||
             widget.item.mediaType.value.isVideo ||
             widget.item.mediaType.value.isNeedToGuess ||
             widget.item.mediaType.value.isNeedToLoadItem) ||
         (!widget.isStandalone && widget.item.fileURL == widget.item.sampleURL);
-    thumbURL = isThumbQuality == true ? widget.item.thumbnailURL : widget.item.sampleURL;
-    thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
+    thumbURL = isThumbQuality == true
+        ? widget.item.thumbnailURL
+        : (!isSampleGif || isGifSampleNotAllowed ? widget.item.sampleURL : widget.item.thumbnailURL);
+    thumbFolder = (isThumbQuality == true || thumbURL == widget.item.thumbnailURL) ? 'thumbnails' : 'samples';
 
     // delay loading a little to improve performance when scrolling fast, ignore delay if it's a standalone widget (i.e. not in a list)
     debounceLoading = Timer(
       Duration(milliseconds: widget.isStandalone ? 200 : 0),
-      startDownloading,
+      () => startDownloading(withCaptchaCheck: withCaptchaCheck),
     );
     return;
   }
 
-  Future<void> startDownloading() async {
-    final bool useExtra = isThumbQuality == false && !widget.item.isHated;
+  Future<void> startDownloading({
+    bool withCaptchaCheck = false,
+  }) async {
+    final bool useExtra = isThumbQuality == false && !widget.item.isHated && !settingsHandler.shitDevice;
 
-    mainProvider.value = await getImageProvider(true);
+    mainProvider.value = await getImageProvider(
+      true,
+      withCaptchaCheck: withCaptchaCheck,
+    );
     mainImageStream?.removeListener(mainImageListener!);
     mainImageStream = mainProvider.value!.resolve(ImageConfiguration.empty);
     mainImageListener = ImageStreamListener(
@@ -284,10 +327,10 @@ class _ThumbnailState extends State<Thumbnail> {
     }
   }
 
-  void restartLoading() {
+  Future<void> restartLoading({bool withItemLoad = false}) async {
     if (failedRendering.value) {
       failedRendering.value = false;
-      cleanProviderCache();
+      unawaited(cleanProviderCache());
     }
 
     disposables();
@@ -302,18 +345,32 @@ class _ThumbnailState extends State<Thumbnail> {
     isFailed.value = false;
     errorCode.value = null;
 
-    selectThumbProvider();
+    bool? updateRes;
+    if (withItemLoad) {
+      updateRes = await tryToLoadAndUpdateItem(
+        widget.item,
+        loadItemCancelToken,
+      );
+    }
+
+    selectThumbProvider(
+      withCaptchaCheck: withItemLoad && updateRes != true,
+    );
   }
 
   Future<void> cleanProviderCache() async {
     if (mainProvider.value != null) {
       final CustomNetworkImage usedMainProvider =
-          (mainProvider.value is ResizeImage ? (mainProvider.value! as ResizeImage).imageProvider : mainProvider.value!) as CustomNetworkImage;
+          (mainProvider.value is ResizeImage ? (mainProvider.value! as ResizeImage).imageProvider : mainProvider.value!)
+              as CustomNetworkImage;
       await usedMainProvider.deleteCacheFile();
     }
     if (extraProvider.value != null) {
       final CustomNetworkImage usedExtraProvider =
-          (extraProvider.value is ResizeImage ? (extraProvider.value! as ResizeImage).imageProvider : extraProvider.value!) as CustomNetworkImage;
+          (extraProvider.value is ResizeImage
+                  ? (extraProvider.value! as ResizeImage).imageProvider
+                  : extraProvider.value!)
+              as CustomNetworkImage;
       await usedExtraProvider.deleteCacheFile();
     }
   }
@@ -342,6 +399,11 @@ class _ThumbnailState extends State<Thumbnail> {
     }
     extraCancelToken = null;
 
+    if (!(loadItemCancelToken?.isCancelled ?? true)) {
+      loadItemCancelToken?.cancel();
+    }
+    loadItemCancelToken = null;
+
     // evict from memory cache only when in grid
     if (widget.isStandalone) {
       mainProvider.value?.evict();
@@ -356,7 +418,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget imageStack = LayoutBuilder(
+    Widget imageStack = LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           calcThumbWidth(constraints);
@@ -364,16 +426,33 @@ class _ThumbnailState extends State<Thumbnail> {
             isFirstBuild.value = false;
             selectThumbProvider();
           }
+
+          if (currentUrl != widget.item.thumbnailURL) {
+            currentUrl = widget.item.thumbnailURL;
+            restartLoading();
+          }
         });
 
         // take smallest dimension for hated icon container
-        final double iconSize = (constraints.maxHeight < constraints.maxWidth ? constraints.maxHeight : constraints.maxWidth) * 0.75;
+        final double iconSize =
+            (constraints.maxHeight < constraints.maxWidth ? constraints.maxHeight : constraints.maxWidth) * 0.75;
 
-        final bool useExtra = isThumbQuality == false && !widget.item.isHated;
+        final bool useExtra = isThumbQuality == false && !widget.item.isHated && !settingsHandler.shitDevice;
 
         return Stack(
           alignment: Alignment.center,
           children: [
+            if (widget.isStandalone)
+              ValueListenableBuilder(
+                valueListenable: isFailed,
+                builder: (context, isFailed, _) {
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    color: isFailed ? Colors.red.withValues(alpha: 0.1) : Colors.transparent,
+                  );
+                },
+              ),
+            //
             if (useExtra) // fetch small low quality thumbnail while loading a sample
               ValueListenableBuilder(
                 valueListenable: isLoadedExtra,
@@ -405,6 +484,7 @@ class _ThumbnailState extends State<Thumbnail> {
                           image: extraProvider,
                           fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                           isAntiAlias: true,
+                          filterQuality: FilterQuality.medium,
                           width: double.infinity,
                           height: double.infinity,
                           errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
@@ -426,7 +506,7 @@ class _ThumbnailState extends State<Thumbnail> {
               builder: (context, isLoaded, child) {
                 return AnimatedOpacity(
                   // fade in image
-                  opacity: (!widget.isStandalone || isLoaded) ? 1 : 0,
+                  opacity: (settingsHandler.shitDevice || !widget.isStandalone || isLoaded) ? 1 : 0,
                   duration: const Duration(milliseconds: 300),
                   child: child,
                 );
@@ -434,7 +514,7 @@ class _ThumbnailState extends State<Thumbnail> {
               child: AnimatedSwitcher(
                 duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
                 child: ImageFiltered(
-                  enabled: settingsHandler.blurImages || widget.item.isHated,
+                  enabled: settingsHandler.blurImages || (widget.item.isHated && !settingsHandler.shitDevice),
                   imageFilter: ImageFilter.blur(
                     sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
                     sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
@@ -468,34 +548,49 @@ class _ThumbnailState extends State<Thumbnail> {
               ),
             ),
             //
-            ValueListenableBuilder(
-              valueListenable: isLoaded,
-              builder: (context, isLoaded, _) {
-                return ValueListenableBuilder(
-                  valueListenable: isLoadedExtra,
-                  builder: (context, isLoadedExtra, _) {
-                    return ValueListenableBuilder(
-                      valueListenable: isFailed,
-                      builder: (context, isFailed, _) {
-                        final bool isAnyLoaded = isLoaded || isLoadedExtra;
-                        final bool showShimmer = !isAnyLoaded && !isFailed;
+            if (widget.isStandalone && !settingsHandler.shitDevice)
+              ValueListenableBuilder(
+                valueListenable: isLoaded,
+                builder: (context, isLoaded, _) {
+                  return ValueListenableBuilder(
+                    valueListenable: isLoadedExtra,
+                    builder: (context, isLoadedExtra, _) {
+                      return ValueListenableBuilder(
+                        valueListenable: isFailed,
+                        builder: (context, isFailed, _) {
+                          final bool isAnyLoaded = isLoaded || isLoadedExtra;
+                          final bool showShimmer = !isAnyLoaded && !isFailed;
 
-                        return AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 200),
-                          child: isAnyLoaded
-                              ? const SizedBox.shrink()
-                              : ShimmerCard(
-                                  isLoading: showShimmer,
-                                  child: showShimmer ? null : const SizedBox.shrink(),
-                                ),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+                          return AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: isAnyLoaded
+                                ? const SizedBox.shrink()
+                                : ShimmerCard(
+                                    isLoading: showShimmer,
+                                    child: showShimmer ? null : const SizedBox.shrink(),
+                                  ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
             //
+            if (widget.isStandalone && widget.item.isHated)
+              Container(
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(iconSize * 0.1),
+                ),
+                width: iconSize,
+                height: iconSize,
+                child: const Icon(
+                  CupertinoIcons.eye_slash,
+                  color: Colors.white,
+                ),
+              ),
             if (widget.isStandalone)
               ValueListenableBuilder(
                 valueListenable: isLoaded,
@@ -517,6 +612,8 @@ class _ThumbnailState extends State<Thumbnail> {
                             return ValueListenableBuilder(
                               valueListenable: errorCode,
                               builder: (context, errorCode, child) {
+                                final bool isFavOrDls = widget.booru.type?.isFavouritesOrDownloads == true;
+
                                 return ThumbnailLoading(
                                   item: widget.item,
                                   hasProgress: true,
@@ -526,9 +623,25 @@ class _ThumbnailState extends State<Thumbnail> {
                                   total: total,
                                   received: received,
                                   startedAt: startedAt,
-                                  restartAction: () {
+                                  retryText: isFavOrDls ? 'Tap to update or retry' : null,
+                                  retryIcon: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    spacing: 4,
+                                    children: isFavOrDls
+                                        ? const [
+                                            Icon(Icons.download),
+                                            Text('/', style: TextStyle(fontSize: 20)),
+                                            Icon(Icons.refresh),
+                                          ]
+                                        : const [
+                                            Icon(Icons.refresh),
+                                          ],
+                                  ),
+                                  restartAction: () async {
                                     restartedCount = 0;
-                                    restartLoading();
+
+                                    await restartLoading(withItemLoad: isFavOrDls);
                                   },
                                   errorCode: errorCode,
                                 );
@@ -541,31 +654,19 @@ class _ThumbnailState extends State<Thumbnail> {
                   },
                 ),
               ),
-            //
-            if (widget.item.isHated)
-              Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(iconSize * 0.1),
-                ),
-                width: iconSize,
-                height: iconSize,
-                child: const Icon(
-                  CupertinoIcons.eye_slash,
-                  color: Colors.white,
-                ),
-              ),
           ],
         );
       },
     );
 
-    // print('building thumb ${searchHandler.getItemIndex(widget.item)}');
+    imageStack = Material(
+      color: Colors.transparent,
+      child: imageStack,
+    );
 
     if (widget.isStandalone && widget.useHero) {
       return HeroMode(
-        enabled: settingsHandler.enableHeroTransitions,
+        enabled: settingsHandler.enableHeroTransitions && !settingsHandler.shitDevice,
         child: Hero(
           tag: 'imageHero${widget.item.hashCode}',
           placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
@@ -577,10 +678,58 @@ class _ThumbnailState extends State<Thumbnail> {
         ),
       );
     } else {
-      return ColoredBox(
-        color: Colors.black,
-        child: imageStack,
-      );
+      return imageStack;
     }
   }
+}
+
+/// Returns true if successful, false on error and null on skip
+Future<bool?> tryToLoadAndUpdateItem(
+  BooruItem item,
+  CancelToken? cancelToken,
+) async {
+  try {
+    final itemFileHost = Uri.tryParse(item.fileURL)?.host;
+    final itemPostHost = Uri.tryParse(item.postURL)?.host;
+    final Booru? possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
+      final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
+
+      return (itemPostHost?.isNotEmpty == true &&
+              booruHost?.isNotEmpty == true &&
+              (itemPostHost! == booruHost! ||
+                  switch (e.type) {
+                    BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
+                    BooruType.Sankaku => SankakuHandler.knownPostUrls.contains(itemPostHost),
+                    _ => false,
+                  })) ||
+          (itemFileHost?.isNotEmpty == true && booruHost?.isNotEmpty == true && itemFileHost! == booruHost!);
+    });
+
+    cancelToken?.cancel();
+    cancelToken = CancelToken();
+    if (possibleBooru != null) {
+      final handler = BooruHandlerFactory().getBooruHandler([possibleBooru], null).booruHandler;
+      if (handler.hasLoadItemSupport) {
+        final result = await handler.loadItem(
+          item: item,
+          cancelToken: cancelToken,
+          withCapcthaCheck: true,
+        );
+
+        if (!result.failed && result.item != null) {
+          unawaited(
+            SettingsHandler.instance.dbHandler.updateBooruItem(
+              result.item!,
+              BooruUpdateMode.urlUpdate,
+            ),
+          );
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+    return null;
+  } catch (_) {}
+  return null;
 }

@@ -46,7 +46,8 @@ class _BooruFaviconState extends State<BooruFavicon> {
   @override
   void didUpdateWidget(BooruFavicon oldWidget) {
     // force redraw on tab change
-    if (oldWidget.booru?.faviconURL != widget.booru?.faviconURL || oldWidget.customFaviconUrl != widget.customFaviconUrl) {
+    if (oldWidget.booru?.faviconURL != widget.booru?.faviconURL ||
+        oldWidget.customFaviconUrl != widget.customFaviconUrl) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         restartLoading();
       });
@@ -96,7 +97,9 @@ class _BooruFaviconState extends State<BooruFavicon> {
         await ((mainProvider! as ResizeImage).imageProvider as CustomNetworkImage).deleteCacheFile();
         disposables();
       }
-      if (error is DioException && error.response != null && Tools.isGoodStatusCode(error.response!.statusCode) == false) {
+      if (error is DioException &&
+          error.response != null &&
+          Tools.isGoodStatusCode(error.response!.statusCode) == false) {
         if (manualReloadTapped && (error.response!.statusCode == 403 || error.response!.statusCode == 503)) {
           await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
           unawaited(restartLoading());
@@ -127,8 +130,8 @@ class _BooruFaviconState extends State<BooruFavicon> {
     }
     disposables();
 
-    isIcon = widget.booru?.type == BooruType.Favourites ||
-        widget.booru?.type == BooruType.Downloads ||
+    isIcon =
+        widget.booru?.type?.isFavouritesOrDownloads == true ||
         (widget.booru?.type == null && widget.customFaviconUrl == null);
 
     isFailed = false;
@@ -217,7 +220,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
               fit: BoxFit.fill,
               filterQuality: FilterQuality.medium,
               isAntiAlias: true,
-              errorBuilder: (_, Object exception, ___) {
+              errorBuilder: (_, _, _) {
                 return FaviconError(
                   iconSize: size,
                   color: widget.color ?? Theme.of(context).colorScheme.onSurface,

@@ -9,19 +9,25 @@ import 'package:dio/dio.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide ContextExt;
 import 'package:intl/intl.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -30,11 +36,10 @@ import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
-import 'package:lolisnatcher/src/widgets/gallery/item_viewer_page.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
-import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
 class _TagInfoIcon {
   _TagInfoIcon(this.icon, this.color);
@@ -44,7 +49,14 @@ class _TagInfoIcon {
 }
 
 class TagView extends StatefulWidget {
-  const TagView({super.key});
+  const TagView({
+    required this.item,
+    required this.handler,
+    super.key,
+  });
+
+  final BooruItem item;
+  final BooruHandler handler;
 
   @override
   State<TagView> createState() => _TagViewState();
@@ -60,7 +72,9 @@ class _TagViewState extends State<TagView> {
   ScrollController scrollController = ScrollController();
 
   late BooruItem item;
+  late BooruHandler handler;
   List<String> tags = [], filteredTags = [];
+  Map<String, HasTabWithTagResult> tabMatchesMap = {};
   bool? sortTags;
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
@@ -69,41 +83,59 @@ class _TagViewState extends State<TagView> {
   CancelToken? cancelToken;
   bool loadingUpdate = false, failedUpdate = false;
 
+  bool? detailsExpanded;
+
+  Timer? sortTimer;
+
   @override
   void initState() {
     super.initState();
-    searchHandler.searchTextController.addListener(onMainSearchTextChanged);
+    searchHandler.searchTextController.addListener(parseSortGroupTagsWithoutCache);
 
     searchFocusNode.addListener(searchFocusListener);
 
-    item = searchHandler.viewedItem.value;
-    // copy tags to avoid changing the original array
+    item = widget.item;
+    handler = widget.handler;
     tags = [...item.tagsList];
     filteredTags = [...tags];
-    parseSortGroupTags();
+    WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
 
-    searchHandler.viewedItem.addListener(itemListener);
-
-    reloadItemData(initial: true);
+    reloadItemData(initial: true).then((_) async {
+      await Future.delayed(const Duration(seconds: 3));
+      if (mounted) {
+        parseSortGroupTagsWithoutCache();
+        sortTimer = Timer.periodic(
+          const Duration(seconds: 5),
+          (_) => parseSortGroupTagsWithoutCache(),
+        );
+      }
+    });
   }
 
-  void itemListener() {
-    item = searchHandler.viewedItem.value;
-    parseSortGroupTags();
+  @override
+  void didUpdateWidget(covariant TagView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.item != item) {
+      item = widget.item;
+      parseSortGroupTags();
+    }
+    if (widget.handler != handler) {
+      handler = widget.handler;
+    }
   }
 
   @override
   void dispose() {
     cancelToken?.cancel();
-    searchHandler.searchTextController.removeListener(onMainSearchTextChanged);
+    sortTimer?.cancel();
+    searchHandler.searchTextController.removeListener(parseSortGroupTagsWithoutCache);
     searchController.dispose();
     searchFocusNode.removeListener(searchFocusListener);
     searchFocusNode.dispose();
-    searchHandler.viewedItem.removeListener(itemListener);
     super.dispose();
   }
 
-  bool get supportsItemUpdate => searchHandler.currentBooruHandler.hasLoadItemSupport && searchHandler.currentBooruHandler.shouldUpdateIteminTagView;
+  bool get supportsItemUpdate => handler.hasLoadItemSupport && handler.shouldUpdateIteminTagView;
 
   Future<void> reloadItemData({
     bool initial = false,
@@ -114,17 +146,26 @@ class _TagViewState extends State<TagView> {
       failedUpdate = false;
       setState(() {});
       cancelToken = CancelToken();
-      final res = await searchHandler.currentBooruHandler.loadItem(
+      final res = await handler.loadItem(
         item: item,
         cancelToken: cancelToken,
         withCapcthaCheck: !initial,
       );
       if (res.failed) {
         failedUpdate = true;
+      } else if (res.item != null) {
+        unawaited(
+          SettingsHandler.instance.dbHandler.updateBooruItem(
+            res.item!,
+            BooruUpdateMode.urlUpdate,
+          ),
+        );
       }
       loadingUpdate = false;
       setState(() {});
-      parseSortGroupTags();
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => parseSortGroupTags(),
+      );
     }
   }
 
@@ -133,17 +174,17 @@ class _TagViewState extends State<TagView> {
   }
 
   List<String> filterTags(List<String> tagsToFilter) {
-    final List<String> filteredTags = [];
+    final List<String> tags = [];
     if (searchController.text.isEmpty) {
       return tagsToFilter;
     }
 
     for (int i = 0; i < tagsToFilter.length; i++) {
       if (tagsToFilter[i].toLowerCase().contains(searchController.text.toLowerCase())) {
-        filteredTags.add(tagsToFilter[i]);
+        tags.add(tagsToFilter[i]);
       }
     }
-    return filteredTags;
+    return tags;
   }
 
   void sortAndGroupTagsList() {
@@ -184,122 +225,39 @@ class _TagViewState extends State<TagView> {
     ];
   }
 
-  void parseSortGroupTags() {
-    parseTags();
-    sortAndGroupTagsList();
-    setState(() {});
+  void cacheTabMatchData() {
+    for (final tag in filteredTags) {
+      tabMatchesMap[tag] = searchHandler.hasTabWithTag(tag);
+    }
   }
 
-  void onMainSearchTextChanged() {
+  void parseSortGroupTagsWithoutCache() {
+    parseSortGroupTags(updateCache: false);
+  }
+
+  void parseSortGroupTags({
+    bool updateCache = true,
+  }) {
+    parseTags();
+    sortAndGroupTagsList();
+    if (updateCache) {
+      cacheTabMatchData();
+    }
     setState(() {});
   }
 
   void searchFocusListener() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (searchFocusNode.hasFocus) {
-        Scrollable.ensureVisible(
+        // doesn't scroll to a proper position in some cases
+        // probably because scroll extent changes due to elements being lazily rendered
+        await Scrollable.ensureVisible(
           searchKey.currentContext!,
-          alignment: 0.1,
+          alignment: (72 + context.viewInsets.top) / context.height,
           duration: const Duration(milliseconds: 300),
         );
       }
     });
-  }
-
-  Widget infoBuild() {
-    final String fileName = Tools.getFileName(item.fileURL);
-    final String fileUrl = item.fileURL;
-    final String fileRes = (item.fileWidth != null && item.fileHeight != null) ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}' : '';
-    final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
-    final String itemId = item.serverId ?? '';
-    final String rating = item.rating ?? '';
-    final String score = item.score ?? '';
-    final String md5 = item.md5String ?? '';
-    final List<String> sources = item.sources ?? [];
-    final bool tagsAvailable = tags.isNotEmpty || supportsItemUpdate;
-    String postDate = item.postDate ?? '';
-    final String postDateFormat = item.postDateFormat ?? '';
-    String formattedDate = '';
-    if (postDate.isNotEmpty && postDateFormat.isNotEmpty) {
-      try {
-        // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
-        // remove timezones from strings until they fix it
-        DateTime parsedDate;
-        if (postDateFormat == 'unix') {
-          parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
-        } else if (postDateFormat == 'iso') {
-          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
-          parsedDate = DateTime.parse(postDate).toLocal();
-        } else {
-          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
-          parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();
-        }
-        // print(postDate);
-        formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
-      } catch (e) {
-        print('Date Parse Error :: $postDate $postDateFormat :: $e');
-      }
-    }
-
-    return SliverList(
-      delegate: SliverChildListDelegate(
-        [
-          if (settingsHandler.isDebug.value) infoText('Filename', fileName),
-          infoText('URL', fileUrl),
-          infoText('Post URL', item.postURL),
-          infoText('ID', itemId),
-          infoText('Rating', rating),
-          infoText('Score', score),
-          infoText('Resolution', fileRes),
-          infoText('Size', fileSize),
-          infoText('MD5', md5),
-          infoText('Posted', formattedDate, canCopy: false),
-          commentsButton(),
-          notesButton(),
-          sourcesList(sources),
-          if (tagsAvailable) ...[
-            Divider(
-              height: 2,
-              thickness: 2,
-              color: Colors.grey[800]!.withValues(alpha: 0.66),
-            ),
-            tagsButton(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Theme(
-                data: Theme.of(context).copyWith(
-                  inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
-                        filled: false,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                ),
-                child: SettingsTextInput(
-                  key: searchKey,
-                  controller: searchController,
-                  focusNode: searchFocusNode,
-                  title: 'Search tags',
-                  onlyInput: true,
-                  clearable: true,
-                  pasteable: true,
-                  onChanged: (_) {
-                    parseSortGroupTags();
-                  },
-                  enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
-                ),
-              ),
-            ),
-          ],
-        ],
-        addAutomaticKeepAlives: false,
-      ),
-    );
   }
 
   Widget tagsButton() {
@@ -377,7 +335,7 @@ class _TagViewState extends State<TagView> {
   }
 
   Widget commentsButton() {
-    final bool hasSupport = searchHandler.currentBooruHandler.hasCommentsSupport;
+    final bool hasSupport = handler.hasCommentsSupport;
     final bool hasComments = item.hasComments == true;
     final IconData icon = hasComments ? CupertinoIcons.text_bubble_fill : CupertinoIcons.text_bubble;
 
@@ -395,8 +353,8 @@ class _TagViewState extends State<TagView> {
         SettingsPageOpen(
           context: context,
           page: (_) => CommentsDialog(
-            index: searchHandler.viewedIndex.value,
-            item: searchHandler.viewedItem.value,
+            item: item,
+            handler: handler,
           ),
         ).open();
       },
@@ -405,7 +363,7 @@ class _TagViewState extends State<TagView> {
   }
 
   Widget notesButton() {
-    final bool hasSupport = searchHandler.currentBooruHandler.hasNotesSupport;
+    final bool hasSupport = handler.hasNotesSupport;
     final bool hasNotes = item.hasNotes == true;
 
     if (!hasSupport || !hasNotes) {
@@ -425,7 +383,7 @@ class _TagViewState extends State<TagView> {
             showDialog(
               context: context,
               builder: (context) {
-                return NotesDialog(searchHandler.viewedItem.value);
+                return NotesDialog(item);
               },
             );
           },
@@ -439,7 +397,7 @@ class _TagViewState extends State<TagView> {
             color: Theme.of(context).iconTheme.color,
           ),
           action: () async {
-            item.notes.value = await searchHandler.currentBooruHandler.getNotes(item.serverId!);
+            item.notes.value = await handler.getNotes(item.serverId!);
           },
           drawBottomBorder: false,
         );
@@ -505,38 +463,69 @@ class _TagViewState extends State<TagView> {
     }
   }
 
-  Widget infoText(String title, String data, {bool canCopy = true}) {
+  Widget infoText(
+    String title,
+    String data, {
+    bool canCopy = true,
+    bool isLink = false,
+  }) {
     if (data.isNotEmpty) {
       return ListTile(
-        onTap: () {
-          if (canCopy) {
-            Clipboard.setData(ClipboardData(text: data));
-            FlashElements.showSnackbar(
-              context: context,
-              duration: const Duration(seconds: 2),
-              title: Text(
-                'Copied $title to clipboard!',
-                style: const TextStyle(fontSize: 20),
-              ),
-              content: Text(
-                data,
-                style: const TextStyle(fontSize: 16),
-              ),
-              leadingIcon: Icons.copy,
-              sideColor: Colors.green,
-            );
-          }
-        },
+        onTap: canCopy
+            ? () {
+                Clipboard.setData(ClipboardData(text: data));
+                FlashElements.showSnackbar(
+                  context: context,
+                  duration: const Duration(seconds: 2),
+                  title: Text(
+                    'Copied $title to clipboard!',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  content: Text(
+                    data,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  leadingIcon: Icons.copy,
+                  sideColor: Colors.green,
+                );
+              }
+            : null,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$title: ', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
-            Expanded(child: Text(data, overflow: TextOverflow.ellipsis)),
+            Text(
+              '$title: ',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                data,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ),
           ],
         ),
+        trailing: isLink
+            ? IconButton(
+                icon: const Icon(Icons.exit_to_app),
+                onPressed: () => launchUrlString(
+                  data,
+                  mode: LaunchMode.externalApplication,
+                ),
+              )
+            : null,
       );
-    } else {
-      return const SizedBox.shrink();
     }
+
+    return const SizedBox.shrink();
   }
 
   void tagDialog({
@@ -579,13 +568,23 @@ class _TagViewState extends State<TagView> {
                 const SizedBox(width: 10),
                 Text(
                   tagHandler.getTag(tag).tagType.locName,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
             //
-            if (searchHandler.currentBooru.type != BooruType.Merge) TagContentPreview(tag: tag),
+            TagContentPreview(
+              tag: tag,
+              boorus: handler.booru.type?.isMerge == true
+                  ? [
+                      ...(handler as MergebooruHandler).booruHandlers.map((e) => e.booru),
+                    ]
+                  : [handler.booru],
+            ),
             //
             ListTile(
               leading: Icon(
@@ -683,7 +682,8 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.addTagToList('loved', tag);
                   searchHandler.filterCurrentFetched();
-                  parseSortGroupTags();
+                  handler.filterFetched();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop(true);
                 },
               ),
@@ -694,7 +694,8 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.addTagToList('hated', tag);
                   searchHandler.filterCurrentFetched();
-                  parseSortGroupTags();
+                  handler.filterFetched();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
               ),
@@ -707,7 +708,7 @@ class _TagViewState extends State<TagView> {
                 title: const Text('Remove from Loved'),
                 onTap: () {
                   settingsHandler.removeTagFromList('loved', tag);
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
               ),
@@ -720,7 +721,7 @@ class _TagViewState extends State<TagView> {
                 title: const Text('Remove from Hated'),
                 onTap: () {
                   settingsHandler.removeTagFromList('hated', tag);
-                  parseSortGroupTags();
+                  parseSortGroupTagsWithoutCache();
                   Navigator.of(context).pop();
                 },
               ),
@@ -741,12 +742,12 @@ class _TagViewState extends State<TagView> {
                       if (newValue != null && item.tagType != newValue) {
                         item.tagType = newValue;
                         tagHandler.putTag(item, dbEnabled: settingsHandler.dbEnabled);
-                        parseSortGroupTags();
+                        parseSortGroupTagsWithoutCache();
                       }
                     },
                   ),
                 );
-                parseSortGroupTags();
+                parseSortGroupTagsWithoutCache();
               },
             ),
             //
@@ -766,19 +767,20 @@ class _TagViewState extends State<TagView> {
     );
   }
 
-  Widget tagsItemBuilder(BuildContext context, int index) {
-    final String currentTag = filteredTags[index];
-
+  Widget tagsItemBuilder(BuildContext context, String currentTag) {
     final bool isHated = tagsData.hatedTags.contains(currentTag);
     final bool isLoved = tagsData.lovedTags.contains(currentTag);
     final bool isSound = tagsData.soundTags.contains(currentTag);
     final bool isAi = tagsData.aiTags.contains(currentTag);
-    final bool isInSearch = searchHandler.searchTextController.text
+    final bool isInSearch =
+        searchHandler.searchTextController.text
             .toLowerCase()
             .split(' ')
             .indexWhere((tag) => tag == currentTag.toLowerCase() || tag == '-${currentTag.toLowerCase()}') !=
         -1;
-    final HasTabWithTagResult hasTabWithTag = searchHandler.hasTabWithTag(currentTag);
+    final HasTabWithTagResult hasTabWithTag = tabMatchesMap.containsKey(currentTag)
+        ? tabMatchesMap[currentTag]!
+        : HasTabWithTagResult.noTag;
 
     final List<_TagInfoIcon> tagIconAndColor = [];
     if (isAi) {
@@ -795,107 +797,104 @@ class _TagViewState extends State<TagView> {
     }
 
     if (currentTag != '') {
-      return Column(
-        children: [
-          InkWell(
-            onTap: () {
-              tagDialog(
-                tag: currentTag,
-                isHated: isHated,
-                isLoved: isLoved,
-                isInSearch: isInSearch,
-              );
-            },
-            child: Row(
-              children: [
-                Container(
-                  width: 6,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: tagHandler.getTag(currentTag).getColour(),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
+      final tag = tagHandler.getTag(currentTag);
+
+      return ColoredBox(
+        color: tag.getColour() == Colors.transparent
+            ? Colors.transparent
+            : Color.lerp(
+                context.isLight ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
+                tag.getColour().withValues(alpha: 0.1),
+                0.4,
+              )!,
+        child: Column(
+          children: [
+            InkWell(
+              onTap: () {
+                tagDialog(
+                  tag: currentTag,
+                  isHated: isHated,
+                  isLoved: isLoved,
+                  isInSearch: isInSearch,
+                );
+              },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 50,
+                      padding: const EdgeInsets.only(left: 12),
+                      child: _TagText(
+                        key: ValueKey(currentTag),
+                        tag: tag,
+                        filterText: searchController.text,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                _TagText(
-                  key: ValueKey(currentTag),
-                  tag: tagHandler.getTag(currentTag).fullString,
-                  filterText: searchController.text,
-                ),
-                if (tagIconAndColor.isNotEmpty) ...[
-                  ...tagIconAndColor.map(
-                    (t) => t.icon == FontAwesomeIcons.robot
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: FaIcon(
+                  if (tagIconAndColor.isNotEmpty) ...[
+                    ...tagIconAndColor.map(
+                      (t) => t.icon == FontAwesomeIcons.robot
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: FaIcon(
+                                t.icon,
+                                color: t.color,
+                                size: 18,
+                              ),
+                            )
+                          : Icon(
                               t.icon,
                               color: t.color,
-                              size: 18,
+                              size: 20,
                             ),
-                          )
-                        : Icon(
-                            t.icon,
-                            color: t.color,
-                            size: 20,
+                    ),
+                    const SizedBox(width: 5),
+                  ],
+                  IconButton(
+                    icon: Stack(
+                      children: [
+                        Icon(Icons.add, color: Theme.of(context).colorScheme.secondary),
+                        if (isInSearch)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Icon(
+                              Icons.search,
+                              size: 10,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
-                  ),
-                  const SizedBox(width: 5),
-                ],
-                IconButton(
-                  icon: Stack(
-                    children: [
-                      Icon(Icons.add, color: Theme.of(context).colorScheme.secondary),
-                      if (isInSearch)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Icon(
-                            Icons.search,
-                            size: 10,
-                            color: Theme.of(context).colorScheme.onSurface,
+                      ],
+                    ),
+                    onPressed: () {
+                      if (isInSearch) {
+                        FlashElements.showSnackbar(
+                          context: context,
+                          duration: const Duration(seconds: 2),
+                          title: const Text(
+                            'This tag is already in the current search query:',
+                            style: TextStyle(fontSize: 18),
                           ),
-                        ),
-                    ],
-                  ),
-                  onPressed: () {
-                    if (isInSearch) {
+                          content: Text(currentTag, style: const TextStyle(fontSize: 16)),
+                          leadingIcon: Icons.warning_amber,
+                          leadingIconColor: Colors.yellow,
+                          sideColor: Colors.yellow,
+                        );
+                        return;
+                      }
+
+                      searchHandler.addTagToSearch(currentTag);
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: const Text('This tag is already in the current search query:', style: TextStyle(fontSize: 18)),
+                        title: const Text('Added to current search query:', style: TextStyle(fontSize: 20)),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
-                        leadingIcon: Icons.warning_amber,
-                        leadingIconColor: Colors.yellow,
-                        sideColor: Colors.yellow,
+                        leadingIcon: Icons.add,
+                        sideColor: Colors.green,
                       );
-                      return;
-                    }
-
-                    searchHandler.addTagToSearch(currentTag);
-                    FlashElements.showSnackbar(
-                      context: context,
-                      duration: const Duration(seconds: 2),
-                      title: const Text('Added to current search query:', style: TextStyle(fontSize: 20)),
-                      content: Text(currentTag, style: const TextStyle(fontSize: 16)),
-                      leadingIcon: Icons.add,
-                      sideColor: Colors.green,
-                    );
-                  },
-                ),
-                GestureDetector(
-                  onLongPress: () async {
-                    await ServiceHandler.vibrate();
-                    if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
-                      Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
-                    }
-                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                      searchHandler.addTabByString(currentTag, switchToNew: true);
-                    });
-                  },
-                  child: IconButton(
+                    },
+                  ),
+                  IconButton(
                     icon: Stack(
                       children: [
                         Icon(Icons.fiber_new, color: Theme.of(context).colorScheme.secondary),
@@ -916,28 +915,35 @@ class _TagViewState extends State<TagView> {
                     onPressed: () {
                       searchHandler.addTabByString(currentTag);
 
+                      parseSortGroupTags();
+
                       FlashElements.showSnackbar(
                         context: context,
+                        isKeyUnique: true,
+                        key: 'added_new_tab',
                         duration: const Duration(seconds: 2),
                         title: const Text('Added new tab:', style: TextStyle(fontSize: 20)),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.fiber_new,
                         sideColor: Colors.green,
-                        primaryActionBuilder: (controller) {
+                        primaryActionBuilder: (context, controller) {
                           return Row(
                             children: [
                               IconButton(
                                 onPressed: () {
                                   ServiceHandler.vibrate();
-                                  if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
+                                  if (settingsHandler.appMode.value.isMobile) {
                                     Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                                   }
-                                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
                                     searchHandler.changeTabIndex(searchHandler.list.length - 1);
                                   });
                                   controller.dismiss();
                                 },
-                                icon: Icon(Icons.arrow_forward_rounded, color: Theme.of(context).colorScheme.onSurface),
+                                icon: Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
                               ),
                               const SizedBox(width: 4),
                               IconButton(
@@ -948,21 +954,28 @@ class _TagViewState extends State<TagView> {
                           );
                         },
                       );
-                      sortAndGroupTagsList();
-                      setState(() {});
+                    },
+                    onLongPress: () async {
+                      await ServiceHandler.vibrate();
+                      if (settingsHandler.appMode.value.isMobile) {
+                        Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
+                      }
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        searchHandler.addTabByString(currentTag, switchToNew: true);
+                      });
                     },
                   ),
-                ),
-                const SizedBox(width: 16),
-              ],
+                  const SizedBox(width: 16),
+                ],
+              ),
             ),
-          ),
-          Divider(
-            color: Colors.grey[800]!.withValues(alpha: 0.66),
-            height: 1,
-            thickness: 1,
-          ),
-        ],
+            Divider(
+              color: Colors.grey[800]!.withValues(alpha: 0.66),
+              height: 1,
+              thickness: 1,
+            ),
+          ],
+        ),
       );
     } else {
       // Render nothing if currentTag is an empty string
@@ -972,49 +985,156 @@ class _TagViewState extends State<TagView> {
 
   @override
   Widget build(BuildContext context) {
+    final String fileName = Tools.getFileName(item.fileURL);
+    final String fileExt = Tools.getFileExt(item.fileURL);
+    final String fileUrl = item.fileURL;
+    final String fileRes = (item.fileWidth != null && item.fileHeight != null)
+        ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}'
+        : '';
+    final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
+    final String itemId = item.serverId ?? '';
+    final String rating = item.rating ?? '';
+    final String score = item.score ?? '';
+    final String md5 = item.md5String ?? '';
+    final List<String> sources = item.sources ?? [];
+    final bool tagsAvailable = tags.isNotEmpty || supportsItemUpdate;
+    String postDate = item.postDate ?? '';
+    final String postDateFormat = item.postDateFormat ?? '';
+    String formattedDate = '';
+    if (postDate.isNotEmpty && postDateFormat.isNotEmpty) {
+      try {
+        // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
+        // remove timezones from strings until they fix it
+        DateTime parsedDate;
+        if (postDateFormat == 'unix') {
+          parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
+        } else if (postDateFormat == 'iso') {
+          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateTime.parse(postDate).toLocal();
+        } else {
+          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();
+        }
+        // print(postDate);
+        formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
+      } catch (e) {
+        print('Date Parse Error :: $postDate $postDateFormat :: $e');
+      }
+    }
+
     return Scrollbar(
       interactive: true,
       controller: scrollController,
       child: DesktopScrollWrap(
         controller: scrollController,
-        child: FadingEdgeScrollView.fromScrollView(
-          child: CustomScrollView(
-            controller: scrollController,
-            physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-            slivers: [
-              infoBuild(),
-              SliverToBoxAdapter(
-                child: (filteredTags.isEmpty && tags.isNotEmpty)
-                    ? const Column(
-                        children: [
-                          Kaomoji(
-                            type: KaomojiType.shrug,
-                            style: TextStyle(fontSize: 40),
+        child: CustomScrollView(
+          controller: scrollController,
+          physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  const SizedBox(height: kMinInteractiveDimension),
+                  infoText('ID', itemId),
+                  infoText('Post URL', item.postURL, isLink: true),
+                  infoText('Posted', formattedDate, canCopy: false),
+                  ExpansionTile(
+                    title: const Text('Details'),
+                    initiallyExpanded: detailsExpanded ?? settingsHandler.expandDetails,
+                    onExpansionChanged: (expanded) {
+                      setState(() {
+                        detailsExpanded = expanded;
+                      });
+                    },
+                    iconColor: Colors.white.withValues(alpha: 0.66),
+                    collapsedIconColor: Colors.white.withValues(alpha: 0.66),
+                    shape: const Border(),
+                    collapsedShape: const Border(),
+                    children: [
+                      if (settingsHandler.isDebug.value) infoText('Filename', fileName),
+                      infoText('URL', fileUrl, isLink: true),
+                      infoText('Extension', fileExt),
+                      infoText('Resolution', fileRes),
+                      infoText('Size', fileSize),
+                      infoText('MD5', md5),
+                      infoText('Rating', rating),
+                      infoText('Score', score),
+                    ],
+                  ),
+                  commentsButton(),
+                  notesButton(),
+                  sourcesList(sources),
+                  if (tagsAvailable) ...[
+                    Divider(
+                      height: 2,
+                      thickness: 2,
+                      color: Colors.grey[800]!.withValues(alpha: 0.66),
+                    ),
+                    tagsButton(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+                            filled: false,
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
-                          Text(
-                            'No tags found',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                          SizedBox(height: 60),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
+                        ),
+                        child: SettingsTextInput(
+                          key: searchKey,
+                          controller: searchController,
+                          focusNode: searchFocusNode,
+                          title: 'Search tags',
+                          onlyInput: true,
+                          clearable: true,
+                          pasteable: true,
+                          onChanged: (_) {
+                            parseSortGroupTagsWithoutCache();
+                          },
+                          enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  tagsItemBuilder,
-                  addAutomaticKeepAlives: false,
-                  // add empty items to allow a bit of overscroll for easier reachability
-                  childCount: filteredTags.length,
-                ),
+            ),
+            SliverToBoxAdapter(
+              child: (filteredTags.isEmpty && tags.isNotEmpty)
+                  ? const Column(
+                      children: [
+                        Kaomoji(
+                          type: KaomojiType.shrug,
+                          style: TextStyle(fontSize: 40),
+                        ),
+                        Text(
+                          'No tags found',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        SizedBox(height: 60),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (c, i) => tagsItemBuilder(c, filteredTags[i]),
+                childCount: filteredTags.length,
               ),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.viewInsetsOf(context).bottom,
-                ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: MediaQuery.viewInsetsOf(context).bottom + kMinInteractiveDimension,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -1028,33 +1148,38 @@ class _TagText extends StatelessWidget {
     super.key,
   });
 
-  final String tag;
+  final Tag tag;
   final String? filterText;
 
   @override
   Widget build(BuildContext context) {
-    final style = TextStyle(
+    Color? color = tag.getColour();
+    color = color == Colors.transparent ? null : color;
+    final basicStyle = TextStyle(
       fontSize: 14,
       fontWeight: filterText?.isNotEmpty == true ? FontWeight.w400 : FontWeight.w600,
+    );
+    final fullStyle = basicStyle.copyWith(
+      color: color,
     );
 
     if (filterText?.isNotEmpty == true) {
       final List<TextSpan> spans = [];
-      final List<String> split = tag.split(filterText!);
+      final List<String> split = tag.fullString.split(filterText!);
 
       for (int i = 0; i < split.length; i++) {
         spans.add(
           TextSpan(
             text: split[i],
-            style: style,
+            style: basicStyle,
           ),
         );
         if (i < split.length - 1) {
           spans.add(
             TextSpan(
               text: filterText,
-              style: style.copyWith(
-                color: Colors.green,
+              style: fullStyle.copyWith(
+                backgroundColor: color?.withValues(alpha: 0.1),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1065,15 +1190,16 @@ class _TagText extends StatelessWidget {
       return MarqueeText.rich(
         textSpan: TextSpan(
           children: spans,
+          style: basicStyle,
         ),
-        isExpanded: true,
-        style: style,
+        isExpanded: false,
+        style: basicStyle,
       );
     } else {
       return MarqueeText(
-        text: tag,
-        isExpanded: true,
-        style: style,
+        text: tag.fullString,
+        isExpanded: false,
+        style: fullStyle,
       );
     }
   }
@@ -1161,7 +1287,9 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
                 ),
               ),
             ),
-          const Text('You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:'),
+          const Text(
+            'You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:',
+          ),
           const SizedBox(height: 16),
           SelectableLinkify(
             key: ValueKey('selection-$selectionKeyIndex'),
@@ -1217,7 +1345,10 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
                   children: [
                     const Icon(Icons.select_all, size: 30),
                     const SizedBox(width: 8),
-                    if (selectedText.isNotEmpty) Expanded(child: Text(selectedText)) else const Text('[No text selected]'),
+                    if (selectedText.isNotEmpty)
+                      Expanded(child: Text(selectedText))
+                    else
+                      const Text('[No text selected]'),
                   ],
                 ),
               ),
@@ -1248,44 +1379,152 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
 }
 
 class TagContentPreview extends StatefulWidget {
-  const TagContentPreview({
+  TagContentPreview({
     required this.tag,
-    this.customBooru,
+    required this.boorus,
     super.key,
-  });
+  }) : assert(
+         boorus.isNotEmpty,
+         'boorus must not be empty',
+       );
 
   final String tag;
-  final Booru? customBooru;
+  final List<Booru> boorus;
 
   @override
   State<TagContentPreview> createState() => _TagContentPreviewState();
 }
 
 class _TagContentPreviewState extends State<TagContentPreview> {
-  final SearchHandler searchHandler = SearchHandler.instance;
+  final settingsHandler = SettingsHandler.instance;
+  final searchHandler = SearchHandler.instance;
 
-  final ScrollController scrollController = ScrollController();
+  late final AutoScrollController scrollController;
 
-  SearchTab? preview;
-  bool loading = false, failed = false;
+  Booru? selectedBooru;
 
-  Future<void> loadPreview() async {
-    preview = SearchTab(
-      widget.customBooru ?? searchHandler.currentBooru,
-      null,
-      widget.tag,
-    );
-    loading = true;
-    failed = false;
-    setState(() {});
+  SearchTab? tab;
+  bool loading = false;
+  bool isLastPage = false;
+  String errorString = '';
 
-    await preview!.booruHandler.search(widget.tag, null);
-    loading = false;
+  final ValueNotifier<int> viewedIndex = ValueNotifier(-1);
 
-    if (preview!.booruHandler.errorString.isNotEmpty) {
-      failed = true;
+  bool get isSingleBooru => widget.boorus.length == 1;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = AutoScrollController();
+
+    if (isSingleBooru) {
+      selectedBooru = widget.boorus.first;
+    }
+  }
+
+  Future<void> loadPreview({
+    bool refresh = false,
+    bool retry = false,
+  }) async {
+    if (selectedBooru == null) {
+      return;
+    }
+
+    if (refresh || tab == null) {
+      tab = SearchTab(
+        selectedBooru!,
+        null,
+        widget.tag,
+      );
+      loading = false;
+      isLastPage = false;
+      errorString = '';
+      setState(() {});
+    }
+
+    if (loading) {
+      return;
+    }
+
+    if (retry) {
+      errorString = '';
+      tab!.booruHandler.errorString = '';
+
+      isLastPage = false;
+      tab!.booruHandler.locked = false;
+      tab!.booruHandler.pageNum--;
+    }
+
+    if (isLastPage || errorString.isNotEmpty) {
+      return;
+    }
+
+    if (tab!.booruHandler.locked == false) {
+      loading = true;
+      tab!.booruHandler.pageNum++;
     }
     setState(() {});
+
+    await tab!.booruHandler.search(widget.tag, null);
+
+    if (tab!.booruHandler.locked && !isLastPage) {
+      isLastPage = true;
+      setState(() {});
+    }
+
+    if (tab!.booruHandler.errorString.isNotEmpty) {
+      errorString = tab!.booruHandler.errorString;
+      setState(() {});
+    }
+
+    if (tab!.booruHandler.totalCount.value == 0) {
+      unawaited(tab!.booruHandler.searchCount(widget.tag));
+    }
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      loading = false;
+      setState(() {});
+    });
+    setState(() {});
+  }
+
+  Future<void> onTap(int index) async {
+    viewedIndex.value = index;
+    final viewerKey = GlobalKey(debugLabel: 'viewer-${tab!.tags.replaceAll(' ', '_')}');
+    ViewerHandler.instance.addViewer(viewerKey);
+    await Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (_, _, _) => GalleryViewPage(
+          key: viewerKey,
+          tab: tab!,
+          initialIndex: index,
+          canSelect: false,
+          onPageChanged: (page) async {
+            viewedIndex.value = page;
+            await scrollController.scrollToIndex(
+              page,
+              duration: const Duration(milliseconds: 10),
+              preferPosition: AutoScrollPosition.begin,
+            );
+          },
+        ),
+        opaque: false,
+        transitionDuration: const Duration(milliseconds: 300),
+        barrierColor: Colors.black26,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return const ZoomPageTransitionsBuilder().buildTransitions(
+            MaterialPageRoute(
+              builder: (_) => const SizedBox.shrink(),
+            ),
+            context,
+            animation,
+            secondaryAnimation,
+            child,
+          );
+        },
+      ),
+    );
+    viewedIndex.value = -1;
   }
 
   @override
@@ -1294,132 +1533,272 @@ class _TagContentPreviewState extends State<TagContentPreview> {
       duration: const Duration(milliseconds: 200),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
-        child: preview == null
+        child: tab == null
             ? ListTile(
                 leading: Icon(
                   Icons.search,
                   color: Theme.of(context).iconTheme.color,
                 ),
                 title: const Text('Preview'),
-                onTap: loadPreview,
-              )
-            : ((loading || failed)
-                ? ListTile(
-                    leading: Icon(
-                      loading ? Icons.search : Icons.restart_alt,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    trailing: loading ? const CircularProgressIndicator() : null,
-                    title: loading ? const Text('Preview is loading...') : const Text('Failed to load preview'),
-                    subtitle: failed ? const Text('Tap to try again') : null,
-                    onTap: failed ? loadPreview : null,
-                  )
-                : Column(
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.search),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Preview:',
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          const SizedBox(width: 8),
-                          BooruFavicon(preview!.booruHandler.booru),
-                          const SizedBox(width: 4),
-                          Text(
-                            preview!.booruHandler.booru.name ?? '',
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          const SizedBox(width: 4),
-                          IconButton(
-                            onPressed: loadPreview,
-                            icon: const Icon(Icons.refresh),
-                          ),
-                        ],
+                subtitle: isSingleBooru
+                    ? null
+                    : SettingsBooruDropdown(
+                        title: 'Booru',
+                        placeholder: 'Select a booru to load',
+                        value: selectedBooru,
+                        items: widget.boorus,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                        onChanged: (value) {
+                          selectedBooru = value;
+                          loadPreview(refresh: true);
+                        },
+                        drawBottomBorder: false,
                       ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        height: 180,
-                        width: MediaQuery.sizeOf(context).width,
-                        child: FadingEdgeScrollView.fromScrollView(
-                          child: ListView.builder(
-                            controller: scrollController,
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: preview!.booruHandler.filteredFetched.isEmpty ? 1 : preview!.booruHandler.filteredFetched.length,
-                            itemBuilder: (context, index) {
-                              if (preview!.booruHandler.filteredFetched.isEmpty) {
-                                return const Center(
-                                  child: Column(
-                                    // mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Kaomoji(
-                                        type: KaomojiType.shrug,
-                                        style: TextStyle(fontSize: 24),
-                                      ),
-                                      Text(
-                                        'Nothing found',
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ],
-                                  ),
+                onTap: isSingleBooru ? loadPreview : null,
+              )
+            : ((tab!.booruHandler.filteredFetched.isEmpty && (loading || errorString.isNotEmpty))
+                  ? ListTile(
+                      leading: Icon(
+                        loading ? Icons.search : Icons.restart_alt,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      trailing: loading ? const CircularProgressIndicator() : null,
+                      title: loading ? const Text('Preview is loading...') : const Text('Failed to load preview'),
+                      subtitle: errorString.isNotEmpty ? const Text('Tap to try again') : null,
+                      onTap: errorString.isNotEmpty ? () => loadPreview(refresh: true) : null,
+                    )
+                  : Column(
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.search),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Preview',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            Obx(() {
+                              final bool hasCount = tab!.booruHandler.totalCount > 0;
+
+                              return AnimatedSize(
+                                duration: const Duration(milliseconds: 200),
+                                child: hasCount
+                                    ? Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                                        child: Text(
+                                          '(${tab!.booruHandler.totalCount})',
+                                          style: Theme.of(context).textTheme.bodySmall,
+                                        ),
+                                      )
+                                    : const SizedBox.shrink(),
+                              );
+                            }),
+                            const SizedBox(width: 8),
+                            BooruFavicon(tab!.booruHandler.booru),
+                            const SizedBox(width: 4),
+                            Text(
+                              tab!.booruHandler.booru.name ?? '',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            const SizedBox(width: 4),
+                            IconButton(
+                              onPressed: isSingleBooru
+                                  ? () => loadPreview(refresh: true)
+                                  : () {
+                                      tab = null;
+                                      selectedBooru = null;
+                                      setState(() {});
+                                    },
+                              icon: const Icon(Icons.refresh),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.fiber_new),
+                              onPressed: () {
+                                searchHandler.addTabByString(widget.tag);
+
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  isKeyUnique: true,
+                                  key: 'added_new_tab',
+                                  duration: const Duration(seconds: 2),
+                                  title: const Text('Added new tab:', style: TextStyle(fontSize: 20)),
+                                  content: Text(widget.tag, style: const TextStyle(fontSize: 16)),
+                                  leadingIcon: Icons.fiber_new,
+                                  sideColor: Colors.green,
+                                  primaryActionBuilder: (context, controller) {
+                                    return Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            ServiceHandler.vibrate();
+                                            if (settingsHandler.appMode.value.isMobile) {
+                                              Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
+                                            }
+                                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                                              searchHandler.changeTabIndex(searchHandler.list.length - 1);
+                                            });
+                                            controller.dismiss();
+                                          },
+                                          icon: Icon(
+                                            Icons.arrow_forward_rounded,
+                                            color: Theme.of(context).colorScheme.onSurface,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        IconButton(
+                                          onPressed: () => controller.dismiss(),
+                                          icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 );
+                              },
+                              onLongPress: () async {
+                                await ServiceHandler.vibrate();
+                                if (settingsHandler.appMode.value.isMobile) {
+                                  Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
+                                }
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  searchHandler.addTabByString(widget.tag, switchToNew: true);
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 200,
+                          width: MediaQuery.sizeOf(context).width,
+                          child: NotificationListener<ScrollUpdateNotification>(
+                            onNotification: (notif) {
+                              final bool isNotAtStart = notif.metrics.pixels > 0;
+                              final bool isAtOrNearEdge =
+                                  notif.metrics.atEdge ||
+                                  notif.metrics.pixels >
+                                      (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2));
+                              final bool isScreenFilled =
+                                  notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0;
+
+                              if (!loading) {
+                                if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
+                                  loadPreview();
+                                }
                               }
 
-                              return Container(
-                                padding: const EdgeInsets.only(right: 8),
-                                height: 180,
-                                width: 120,
-                                child: Stack(
-                                  children: [
-                                    ThumbnailBuild(
-                                      item: preview!.booruHandler.filteredFetched[index],
-                                      selectable: false,
-                                    ),
-                                    Positioned.fill(
-                                      child: Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          borderRadius: BorderRadius.circular(4),
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              PageRouteBuilder(
-                                                pageBuilder: (_, __, ___) => ItemViewerPage(
-                                                  item: preview!.booruHandler.filteredFetched[index],
-                                                  booru: preview!.booruHandler.booru,
-                                                ),
-                                                opaque: false,
-                                                transitionDuration: const Duration(milliseconds: 300),
-                                                barrierColor: Colors.black26,
-                                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                                  return const ZoomPageTransitionsBuilder().buildTransitions(
-                                                    MaterialPageRoute(
-                                                      builder: (_) => const SizedBox.shrink(),
-                                                    ),
-                                                    context,
-                                                    animation,
-                                                    secondaryAnimation,
-                                                    child,
-                                                  );
-                                                },
+                              return true;
+                            },
+                            child: Scrollbar(
+                              controller: scrollController,
+                              interactive: true,
+                              thickness: 6,
+                              thumbVisibility: true,
+                              child: FadingEdgeScrollView.fromScrollView(
+                                child: ListView.builder(
+                                  controller: scrollController,
+                                  physics: getListPhysics(),
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: tab!.booruHandler.filteredFetched.isEmpty
+                                      ? 1
+                                      : tab!.booruHandler.filteredFetched.length +
+                                            ((loading || errorString.isNotEmpty) ? 1 : 0),
+                                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                                  itemBuilder: (context, index) {
+                                    if (tab!.booruHandler.filteredFetched.isEmpty) {
+                                      return const Center(
+                                        child: Column(
+                                          // mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Kaomoji(
+                                              type: KaomojiType.shrug,
+                                              style: TextStyle(fontSize: 24),
+                                            ),
+                                            Text(
+                                              'Nothing found',
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+
+                                    if (loading && index == tab!.booruHandler.filteredFetched.length) {
+                                      return const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 32),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    }
+
+                                    if (errorString.isNotEmpty && index == tab!.booruHandler.filteredFetched.length) {
+                                      return Center(
+                                        child: Container(
+                                          padding: const EdgeInsets.all(16),
+                                          margin: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).colorScheme.surface,
+                                            border: Border.all(color: Theme.of(context).dividerColor),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            spacing: 8,
+                                            children: [
+                                              const Icon(
+                                                Icons.error_outline,
+                                                size: 30,
                                               ),
+                                              const Text(
+                                                'Failed to load preview page',
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () {
+                                                  loadPreview(retry: true);
+                                                },
+                                                child: const Text('Try again'),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }
+
+                                    return Material(
+                                      color: Colors.transparent,
+                                      child: Container(
+                                        padding: const EdgeInsets.only(right: 8),
+                                        height: 180,
+                                        width: 120,
+                                        child: ValueListenableBuilder(
+                                          valueListenable: viewedIndex,
+                                          builder: (context, viewedIndex, _) {
+                                            return ThumbnailCardBuild(
+                                              index: index,
+                                              item: tab!.booruHandler.filteredFetched[index],
+                                              handler: tab!.booruHandler,
+                                              scrollController: scrollController,
+                                              isHighlighted: viewedIndex == index,
+                                              selectable: false,
+                                              onTap: onTap,
                                             );
                                           },
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    );
+                                  },
                                 ),
-                              );
-                            },
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                  )),
+                        const SizedBox(height: 12),
+                      ],
+                    )),
       ),
     );
   }

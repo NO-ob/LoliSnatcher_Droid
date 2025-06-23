@@ -88,6 +88,18 @@ class _NetworkPageState extends State<NetworkPage> {
           child: ListView(
             children: [
               SettingsToggle(
+                value: settingsHandler.useHttp2,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.useHttp2 = newValue;
+                  });
+                },
+                title: 'Use HTTP2',
+                subtitle: const Text(
+                  'Can improve loading times, but some sites may not support it. Disable this if you encounter issues.',
+                ),
+              ),
+              SettingsToggle(
                 value: allowSelfSignedCerts,
                 onChanged: (newValue) {
                   setState(() {
@@ -142,6 +154,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 title: 'Custom user agent',
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 resetText: () => '',
+                onChanged: (_) => setState(() {}),
                 pasteable: true,
                 drawBottomBorder: false,
                 trailingIcon: IconButton(
@@ -166,10 +179,12 @@ class _NetworkPageState extends State<NetworkPage> {
               ),
               if (userAgentController.text != Constants.defaultBrowserUserAgent)
                 SettingsButton(
-                  name: 'Tap here to use suggested browser user agent:',
+                  name:
+                      'Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):',
                   subtitle: const Text(Constants.defaultBrowserUserAgent),
                   action: () {
                     userAgentController.text = Constants.defaultBrowserUserAgent;
+                    setState(() {});
                   },
                 ),
               const SettingsButton(name: '', enabled: false),
@@ -183,8 +198,9 @@ class _NetworkPageState extends State<NetworkPage> {
                 onChanged: (newValue) async {
                   selectedBooru = newValue;
                   if (newValue != null) {
-                    selectedBooruCookies =
-                        await CookieManager.instance(webViewEnvironment: webViewEnvironment).getCookies(url: WebUri(selectedBooru!.baseURL!));
+                    selectedBooruCookies = await CookieManager.instance(
+                      webViewEnvironment: webViewEnvironment,
+                    ).getCookies(url: WebUri(selectedBooru!.baseURL!));
                     if (Platform.isWindows) {
                       selectedBooruCookies.addAll(globalWindowsCookies[selectedBooru!.baseURL!] ?? []);
                     }
@@ -226,7 +242,9 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
                 action: () async {
                   if (selectedBooru != null) {
-                    await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteCookies(url: WebUri(selectedBooru!.baseURL!));
+                    await CookieManager.instance(
+                      webViewEnvironment: webViewEnvironment,
+                    ).deleteCookies(url: WebUri(selectedBooru!.baseURL!));
                     globalWindowsCookies[selectedBooru!.baseURL!]?.clear();
                     FlashElements.showSnackbar(
                       context: context,

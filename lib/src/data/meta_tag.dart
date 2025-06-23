@@ -79,7 +79,8 @@ abstract class MetaTag {
   RegExp get tagMatcher => RegExp('^($keyName)($divider)(\\S+)?');
 
   /// data: {key, value, divider}
-  String tagBuilder(String? key, String? divider, String? value) => '${keyBuilder(key)}${dividerBuilder(divider)}${valueBuilder(value)}';
+  String tagBuilder(String? key, String? divider, String? value) =>
+      '${keyBuilder(key)}${dividerBuilder(divider)}${valueBuilder(value)}';
 
   Map<String, dynamic> tagParser(String text) {
     final match = tagMatcher.firstMatch(text);
@@ -90,7 +91,9 @@ abstract class MetaTag {
 
   Future<List<TagSuggestion>> getAutoComplete(String text) async {
     if (this is MetaTagWithValues) {
-      final List<dynamic> possibleValues = (this as MetaTagWithValues).values.where((e) => (e is String && e.isNotEmpty) || e is MetaTagValue).toList();
+      final List<dynamic> possibleValues = (this as MetaTagWithValues).values
+          .where((e) => (e is String && e.isNotEmpty) || e is MetaTagValue)
+          .toList();
 
       final List<TagSuggestion> suggestedTags = [];
       for (final value in possibleValues) {
@@ -138,10 +141,10 @@ class MetaTagWithCompareModes extends MetaTag {
   final List<CompareMode> compareModes;
 
   String dividerForMode(CompareMode? mode) => switch (mode) {
-        CompareMode.less => ':<=',
-        CompareMode.greater => ':>=',
-        CompareMode.exact || null => ':',
-      };
+    CompareMode.less => ':<=',
+    CompareMode.greater => ':>=',
+    CompareMode.exact || null => ':',
+  };
 
   CompareMode compareModeFromDivider(String? divider) {
     if (divider == null) return CompareMode.exact;
@@ -183,9 +186,9 @@ class SortMetaTag extends MetaTagWithValues<MetaTagValue> {
     required super.values,
     super.isFree = false,
   }) : super(
-          name: 'Sort',
-          keyName: 'sort',
-        );
+         name: 'Sort',
+         keyName: 'sort',
+       );
 
   @override
   MetaTagType get type => MetaTagType.sort;
@@ -198,9 +201,9 @@ class OrderMetaTag extends MetaTagWithValues<MetaTagValue> {
     required super.values,
     super.isFree = false,
   }) : super(
-          name: 'Order',
-          keyName: 'order',
-        );
+         name: 'Order',
+         keyName: 'order',
+       );
 
   @override
   MetaTagType get type => MetaTagType.sort;
@@ -231,7 +234,8 @@ class DateMetaTag extends MetaTagWithCompareModes {
 
   final String dateFormat; // yyyy-MM-dd
 
-  final String? prettierDateFormat; // for cases when api uses some ugly date format, use this to format date in searchbar chip
+  final String?
+  prettierDateFormat; // for cases when api uses some ugly date format, use this to format date in searchbar chip
 
   final String valuesDivider; // .. // for between mode
 
@@ -307,10 +311,10 @@ class StringFromListMetaTag extends MetaTagWithValues<String> {
 /// Hidden from UI, only affects text styling in tag/tab widgets and tag suggestion search input
 class GenericMetaTag extends MetaTag {
   GenericMetaTag()
-      : super(
-          name: '',
-          keyName: '',
-        );
+    : super(
+        name: '',
+        keyName: '',
+      );
 
   @override
   RegExp get keyMatcher => RegExp('^(\\w+)$divider');
@@ -330,28 +334,28 @@ class GenericMetaTag extends MetaTag {
 
 class GenericRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
   GenericRatingMetaTag()
-      : super(
-          name: 'Rating',
-          keyName: 'rating',
-          values: [
-            MetaTagValue(name: 'Safe', value: 'safe'),
-            MetaTagValue(name: 'Questionable', value: 'questionable'),
-            MetaTagValue(name: 'Explicit', value: 'explicit'),
-          ],
-        );
+    : super(
+        name: 'Rating',
+        keyName: 'rating',
+        values: [
+          MetaTagValue(name: 'Safe', value: 'safe'),
+          MetaTagValue(name: 'Questionable', value: 'questionable'),
+          MetaTagValue(name: 'Explicit', value: 'explicit'),
+        ],
+      );
 }
 
 class DanbooruGelbooruRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
   DanbooruGelbooruRatingMetaTag({
     super.isFree = false,
   }) : super(
-          name: 'Rating',
-          keyName: 'rating',
-          values: [
-            MetaTagValue(name: 'General', value: 'general'),
-            MetaTagValue(name: 'Sensitive', value: 'sensitive'),
-            MetaTagValue(name: 'Questionable', value: 'questionable'),
-            MetaTagValue(name: 'Explicit', value: 'explicit'),
-          ],
-        );
+         name: 'Rating',
+         keyName: 'rating',
+         values: [
+           MetaTagValue(name: 'General', value: 'general'),
+           MetaTagValue(name: 'Sensitive', value: 'sensitive'),
+           MetaTagValue(name: 'Questionable', value: 'questionable'),
+           MetaTagValue(name: 'Explicit', value: 'explicit'),
+         ],
+       );
 }

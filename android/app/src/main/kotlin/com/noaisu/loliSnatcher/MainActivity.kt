@@ -55,548 +55,648 @@ class MainActivity: FlutterFragmentActivity() {
     @SuppressLint("WrongThread")
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SERVICES_CHANNEL).setMethodCallHandler {
-            call, result ->
-            if (call.method == "getExtPath") {
-                val path = getExtDir()
-                result.success(path)
-            } else if (call.method == "scanMedia") {
-                val path: String? = call.argument("path")
-                result.success(refreshMedia(path))
-            } else if (call.method == "shareText") {
-                val text: String? = call.argument("text")
-                val title: String? = call.argument("title")
-                val shareTextIntent = Intent.createChooser(Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, text)
-                    // putExtra(Intent.EXTRA_TITLE, title)
-                    type = "text/plain"
-                }, null)
-                startActivity(shareTextIntent)
-                result.success(true)
-            } else if (call.method == "shareFile") {
-                val path: String? = call.argument("path")
-                val contentUri = FileProvider.getUriForFile(applicationContext, BuildConfig.APPLICATION_ID + ".fileprovider", File(path))
-
-                val shareFileIntent = Intent.createChooser(Intent().apply {
-                    action = Intent.ACTION_SEND
-                    type = call.argument("mimeType")
-
-                    // putExtra(Intent.EXTRA_TITLE, "Test")
-                    // data = contentUri
-                    putExtra(Intent.EXTRA_STREAM, contentUri)
-                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                }, null)
-
-                // Grant read/write permission to chooser
-                val resInfoList: List<ResolveInfo> = applicationContext.packageManager.queryIntentActivities(shareFileIntent, PackageManager.MATCH_DEFAULT_ONLY)
-                for (resolveInfo in resInfoList) {
-                    val packageName = resolveInfo.activityInfo.packageName
-                    applicationContext.grantUriPermission(packageName, contentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                startActivity(shareFileIntent)
-                result.success(true)
-            } else if (call.method == "emptyCache") {
-                val dir: File = applicationContext.cacheDir
-                dir.deleteRecursively()
-            } else if (call.method == "getPicturesPath"){
-                result.success(Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES).absolutePath)
-            } else if (call.method == "getCachePath"){
-                result.success(applicationContext.cacheDir.absolutePath)
-            } else if (call.method == "getSdkVersion"){
-                result.success(Build.VERSION.SDK_INT)
-            } else if (call.method == "writeImage"){
-                val imageBytes = call.argument<ByteArray>("imageData")
-                val fileName = call.argument<String>("fileName")
-                val mediaType = call.argument<String>("mediaType")
-                val fileExt = call.argument<String>("fileExt")
-                val extPathOverride = call.argument<String?>("extPathOverride")
-                if (imageBytes!= null && mediaType != null && fileExt != null && fileName != null){
-                    writeImage(imageBytes,fileName,mediaType,fileExt,extPathOverride)
-                    result.success(fileName)
-                } else {
-                    result.success(null)
-                }
-
-            } else if(call.method == "setVolumeButtons") {
-                val state: Boolean? = call.argument("setActive")
-                isSinkingVolume = !state!!
-            } else if (call.method == "disableSleep"){
-                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            } else if (call.method == "enableSleep"){
-                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            } else if (call.method == "makeVidThumb"){
-                val videoURL = call.argument<String>("videoURL")
-                val retriever = MediaMetadataRetriever()
-                retriever.setDataSource(videoURL, HashMap())
-                val image = retriever.getFrameAtTime(2000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
-                val stream = ByteArrayOutputStream()
-                image?.compress(Bitmap.CompressFormat.PNG, 100, stream)
-                val byteArray = stream.toByteArray()
-                image?.recycle()
-                result.success(byteArray)
-            } else if(call.method == "getIP"){
-               result.success(getIpv4HostAddress())
-            } else if (call.method == "setExtPath"){
-                methodResult = result
-                getDirAccess()
-            }  else if (call.method == "getTempDirAccess"){
-                methodResult = result
-                getTempDirAccess()
-            } else if (call.method == "selectImage"){
-                methodResult = result
-                getImageAccess()
-            } else if (call.method == "getFileBytes"){
-                val uri: String? = call.argument("uri")
-                result.success(uri?.let { getFileBytesFromUri(it) })
-            } else if (call.method == "getFileExtension"){
-                val uri: String? = call.argument("uri")
-                result.success(uri?.let { getFileExt(it)})
-            } else if (call.method == "getFileByName"){
-                val uri: String? = call.argument("uri")
-                val fileName: String? = call.argument("fileName")
-                if (fileName != null && uri != null) {
-                    result.success(getFileByName(uri,fileName))
-                }
-            } else if (call.method == "existsFileByName"){
-                val uri: String? = call.argument("uri")
-                val fileName: String? = call.argument("fileName")
-                if (fileName != null && uri != null) {
-                    Executors.newSingleThreadExecutor().execute {
-                        val exists = existsByName(uri,fileName)
-                        result.success(exists)
-                    }
-                }
-            } else if (call.method == "deleteFileByName"){
-                val uri: String? = call.argument("uri")
-                val fileName: String? = call.argument("fileName")
-                if (fileName != null && uri != null) {
-                    result.success(removeByName(uri,fileName))
-                }
-            } else if(call.method == "createFileStream"){
-                val fileName = call.argument<String>("fileName")
-                val mediaType = call.argument<String>("mediaType")
-                val fileExt = call.argument<String>("fileExt")
-                val savePath = call.argument<String?>("savePath")
-                if (mediaType != null && fileExt != null && fileName != null && savePath != null){
-                    result.success(createSafFile(fileName,mediaType,fileExt,savePath)?.toString())
-                } else {
-                    result.success(null)
-                }
-            } else if(call.method == "writeFileStream"){
-                val uri = call.argument<String>("uri")
-                val bytes = call.argument<ByteArray>("data")
-                if (uri != null && bytes != null){
-                    result.success(writeSafFileStream(bytes,uri))
-                } else {
-                    result.success(null)
-                }
-            } else if(call.method == "closeStreamToFile"){
-                val uri = call.argument<String>("uri")
-                if (uri != null){
-                    result.success(closeSafFileStream(uri))
-                } else {
-                    result.success(null)
-                }
-            } else if(call.method == "deleteStreamToFile"){
-                val uri = call.argument<String>("uri")
-                if (uri != null){
-                    result.success(deleteSafFile(uri))
-                } else {
-                    result.success(null)
-                }
-            } else if(call.method == "existsStreamToFile"){
-                val uri = call.argument<String>("uri")
-                if (uri != null){
-                    result.success(existsSafFile(uri))
-                } else {
-                    result.success(null)
-                }
-            } else if(call.method == "copySafFileToDir"){
-                val uri = call.argument<String>("uri")
-                val fileName = call.argument<String>("fileName")
-                val targetPath = call.argument<String>("targetPath")
-                if (uri != null && fileName != null && targetPath != null){
-                    Executors.newSingleThreadExecutor().execute {
-                        val success = copySafFileToDir(uri,fileName,targetPath)
-                        result.success(success)
-                    }
-                } else {
-                    result.success(false)
-                }
-            } else if(call.method == "copyFileToSafDir") {
-                val sourcePath = call.argument<String>("sourcePath")
-                val fileName = call.argument<String>("fileName")
-                val uri = call.argument<String>("uri")
-                val mime = call.argument<String>("mime")
-                if (sourcePath != null && fileName != null && uri != null && mime != null) {
-                    Executors.newSingleThreadExecutor().execute {
-                        val success = copyFileToSafDir(sourcePath,fileName,uri,mime)
-                        result.success(success)
-                    }
-                } else {
-                    result.success(false)
-                }
-            } else if (call.method == "testSAF"){
-                val uri: String? = call.argument("uri")
-                val permissions =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                            this.contentResolver.persistedUriPermissions.takeWhile { it.isReadPermission && it.isWritePermission }
+        val servicesChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SERVICES_CHANNEL)
+        servicesChannel.setMethodCallHandler { call, result ->
+            try {
+                when (call.method) {
+                    "getExtPath" -> result.success(getExtDir())
+                    "scanMedia" -> result.success(call.argument<String>("path")?.let { refreshMedia(it) })
+                    "shareText" -> {
+                        val text = call.argument<String>("text")
+                        val title = call.argument<String>("title")
+                        if (text != null) {
+                            val shareTextIntent = Intent.createChooser(Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, text)
+                                // putExtra(Intent.EXTRA_TITLE, title)
+                                type = "text/plain"
+                            }, null)
+                            startActivity(shareTextIntent)
+                            result.success(true)
                         } else {
-                            TODO("VERSION.SDK_INT < KITKAT")
+                            result.error("INVALID_ARGUMENT", "Text argument is null", null)
                         }
-
-                if (permissions.isEmpty()) {
-                    getDirAccess()
-                } else {
-                    val cr = this.contentResolver
-                    val docFile: DocumentFile? = DocumentFile.fromTreeUri(applicationContext, Uri.parse(uri))
-                    val newFile = docFile?.createFile("text/*","testpersist")
-                    try {
-                        val output = "test writing"
-                        val stream = newFile?.uri?.let { cr.openOutputStream(it) }
-                        stream?.write(output.toByteArray())
-                        stream?.close()
-                    } catch (e: IOException){
-                        e.stackTrace
                     }
-                }
-                val parentUri =
-                        permissions
-                                .first().uri
+                    "shareFile" -> {
+                        val path = call.argument<String>("path")
+                        val mimeType = call.argument<String>("mimeType")
+                        val text = call.argument<String>("text")
+                        if (path != null && mimeType != null) {
+                            val contentUri = FileProvider.getUriForFile(applicationContext, BuildConfig.APPLICATION_ID + ".fileprovider", File(path))
+                            val shareFileIntent = Intent.createChooser(Intent().apply {
+                                action = Intent.ACTION_SEND
+                                type = mimeType
+                                putExtra(Intent.EXTRA_STREAM, contentUri)
+                                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                if (text != null) {
+                                    putExtra(Intent.EXTRA_TEXT, text)
+                                }
+                            }, null)
 
-                //result.success(permissions.last().uri.toString())
-                val tag = "loSnService"
-                Log.i(tag, contentResolver.persistedUriPermissions.toString())
-                Log.i(tag, parentUri.toString())
-                Log.i(tag, permissions.toString())
-
-
-            } else if(call.method == "openLinkDefaults"){
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    try {
-                        val intent = Intent().apply {
-                            action =
-                                android.provider.Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS
-                            addCategory(Intent.CATEGORY_DEFAULT)
-                            data = Uri.parse("package:${packageName}")
-                            addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                            val resInfoList: List<ResolveInfo> = applicationContext.packageManager.queryIntentActivities(shareFileIntent, PackageManager.MATCH_DEFAULT_ONLY)
+                            for (resolveInfo in resInfoList) {
+                                val packageName = resolveInfo.activityInfo.packageName
+                                applicationContext.grantUriPermission(packageName, contentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            }
+                            startActivity(shareFileIntent)
+                            result.success(true)
+                        } else {
+                            result.error("INVALID_ARGUMENT", "Path or mimeType is null", null)
                         }
-                        this.startActivity(intent)
-                    } catch (ignored:Throwable) {
                     }
+                    "emptyCache" -> {
+                        val dir: File = applicationContext.cacheDir
+                        if (dir.deleteRecursively()) {
+                            result.success(true)
+                        } else {
+                            result.error("CACHE_ERROR", "Failed to delete cache directory", null)
+                        }
+                    }
+                    "getPicturesPath" -> result.success(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)?.absolutePath)
+                    "getCachePath" -> result.success(applicationContext.cacheDir.absolutePath)
+                    "getSdkVersion" -> result.success(Build.VERSION.SDK_INT)
+                    "writeImage" -> {
+                        val imageBytes = call.argument<ByteArray>("imageData")
+                        val fileName = call.argument<String>("fileName")
+                        val mediaType = call.argument<String>("mediaType")
+                        val fileExt = call.argument<String>("fileExt")
+                        val extPathOverride = call.argument<String?>("extPathOverride")
+                        if (imageBytes != null && mediaType != null && fileExt != null && fileName != null) {
+                            writeImage(imageBytes, fileName, mediaType, fileExt, extPathOverride)
+                            result.success(fileName)
+                        } else {
+                            result.error("INVALID_ARGUMENT", "One or more arguments are null", null)
+                        }
+                    }
+                    "setVolumeButtons" -> {
+                        val state: Boolean? = call.argument("setActive")
+                        isSinkingVolume = !(state ?: true)
+                    }
+                    "disableSleep" -> window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    "enableSleep" -> window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    "makeVidThumb" -> {
+                        val videoURL = call.argument<String>("videoURL")
+                        if (videoURL != null) {
+                            val retriever = MediaMetadataRetriever()
+                            retriever.setDataSource(videoURL, HashMap())
+                            val image = retriever.getFrameAtTime(2000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+                            val stream = ByteArrayOutputStream()
+                            image?.compress(Bitmap.CompressFormat.PNG, 100, stream)
+                            val byteArray = stream.toByteArray()
+                            image?.recycle()
+                            result.success(byteArray)
+                        } else {
+                            result.error("INVALID_ARGUMENT", "videoURL is null", null)
+                        }
+                    }
+                    "getIP" -> result.success(getIpv4HostAddress())
+                    "setExtPath" -> {
+                        methodResult = result
+                        requestDirectoryAccess()
+                    }
+                    "getTempDirAccess" -> {
+                        methodResult = result
+                        requestTemporaryDirectoryAccess()
+                    }
+                    "selectImage" -> {
+                        methodResult = result
+                        requestImageAccess()
+                    }
+                    "getFileBytes" -> {
+                        val uri = call.argument<String>("uri")
+                        if (uri != null) {
+                            result.success(getFileBytesFromUri(uri))
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI is null", null)
+                        }
+                    }
+                    "getFileExtension" -> {
+                        val uri = call.argument<String>("uri")
+                        if (uri != null) {
+                            result.success(getFileExt(uri))
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI is null", null)
+                        }
+                    }
+                    "getFileByName" -> {
+                        val uri = call.argument<String>("uri")
+                        val fileName = call.argument<String>("fileName")
+                        if (fileName != null && uri != null) {
+                            result.success(getFileByName(uri, fileName))
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI or fileName is null", null)
+                        }
+                    }
+                    "existsFileByName" -> {
+                        val uri = call.argument<String>("uri")
+                        val fileName = call.argument<String>("fileName")
+                        if (fileName != null && uri != null) {
+                            Executors.newSingleThreadExecutor().execute {
+                                val exists = existsByName(uri, fileName)
+                                result.success(exists)
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI or fileName is null", null)
+                        }
+                    }
+                    "deleteFileByName" -> {
+                        val uri = call.argument<String>("uri")
+                        val fileName = call.argument<String>("fileName")
+                        if (fileName != null && uri != null) {
+                            result.success(removeByName(uri, fileName))
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI or fileName is null", null)
+                        }
+                    }
+                    "createFileStream" -> {
+                        val fileName = call.argument<String>("fileName")
+                        val mediaType = call.argument<String>("mediaType")
+                        val fileExt = call.argument<String>("fileExt")
+                        val savePath = call.argument<String?>("savePath")
+                        if (mediaType != null && fileExt != null && fileName != null && savePath != null) {
+                            result.success(createSafFile(fileName, mediaType, fileExt, savePath)?.toString())
+                        } else {
+                            result.error("INVALID_ARGUMENT", "One or more arguments are null", null)
+                        }
+                    }
+                    "writeFileStream" -> {
+                        val uri = call.argument<String>("uri")
+                        val bytes = call.argument<ByteArray>("data")
+                        if (uri != null && bytes != null) {
+                            result.success(writeSafFileStream(bytes, uri))
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI or data is null", null)
+                        }
+                    }
+                    "closeStreamToFile" -> {
+                        val uri = call.argument<String>("uri")
+                        if (uri != null) {
+                            result.success(closeSafFileStream(uri))
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI is null", null)
+                        }
+                    }
+                    "deleteStreamToFile" -> {
+                        val uri = call.argument<String>("uri")
+                        if (uri != null) {
+                            result.success(deleteSafFile(uri))
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI is null", null)
+                        }
+                    }
+                    "existsStreamToFile" -> {
+                        val uri = call.argument<String>("uri")
+                        if (uri != null) {
+                            result.success(existsSafFile(uri))
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI is null", null)
+                        }
+                    }
+                    "copySafFileToDir" -> {
+                        val uri = call.argument<String>("uri")
+                        val fileName = call.argument<String>("fileName")
+                        val targetPath = call.argument<String>("targetPath")
+                        if (uri != null && fileName != null && targetPath != null) {
+                            Executors.newSingleThreadExecutor().execute {
+                                val success = copySafFileToDir(uri, fileName, targetPath)
+                                result.success(success)
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENT", "One or more arguments are null", null)
+                        }
+                    }
+                    "copyFileToSafDir" -> {
+                        val sourcePath = call.argument<String>("sourcePath")
+                        val fileName = call.argument<String>("fileName")
+                        val uri = call.argument<String>("uri")
+                        val mime = call.argument<String>("mime")
+                        if (sourcePath != null && fileName != null && uri != null && mime != null) {
+                            Executors.newSingleThreadExecutor().execute {
+                                val success = copyFileToSafDir(sourcePath, fileName, uri, mime)
+                                result.success(success)
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENT", "One or more arguments are null", null)
+                        }
+                    }
+                    "testSAF" -> {
+                        val uri: String? = call.argument("uri")
+                        if (uri != null) {
+                            val permissions =
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                                        this.contentResolver.persistedUriPermissions.takeWhile { it.isReadPermission && it.isWritePermission }
+                                    } else {
+                                        emptyList()
+                                    }
+
+                            if (permissions.isEmpty()) {
+                                methodResult = result
+                                requestDirectoryAccess()
+                            } else {
+                                try {
+                                    val cr = this.contentResolver
+                                    val docFile: DocumentFile? = DocumentFile.fromTreeUri(applicationContext, Uri.parse(uri))
+                                    val newFile = docFile?.createFile("text/*", "testpersist")
+                                    if (newFile == null) {
+                                        result.error("FILE_NOT_FOUND", "File not found", null)
+                                    } else {
+                                        val output = "test writing"
+                                        val stream = cr.openOutputStream(newFile.uri)
+                                        if (stream == null) {
+                                            result.error("IO_ERROR", "IO error", null)
+                                        } else {
+                                            stream.write(output.toByteArray())
+                                            stream.close()
+                                            newFile.delete()
+                                            result.success("ok")
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity", "Error testing SAF", e)
+                                    result.error("ERROR", "Error testing SAF", null)
+                                }
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI is null", null)
+                        }
+                    }
+                    "openLinkDefaults" -> {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            try {
+                                val intent = Intent().apply {
+                                    action =
+                                        android.provider.Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS
+                                    addCategory(Intent.CATEGORY_DEFAULT)
+                                    data = Uri.parse("package:${packageName}")
+                                    addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                                    addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                                }
+                                this.startActivity(intent)
+                            } catch (ignored: Throwable) {
+                            }
+                        }
+                    }
+                    "restartApp" -> {
+                        restartApp()
+                        result.success("ok")
+                    }
+                    else -> result.notImplemented()
                 }
-            } else if(call.method == "restartApp"){
-                restartApp()
-                result.success("ok")
-            } else {
-                result.notImplemented()
+            } catch (e: Exception) {
+                result.error("ERROR", e.localizedMessage, null)
             }
         }
 
-        EventChannel(flutterEngine.dartExecutor, VOLUME_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
+        val volumeChannel = EventChannel(flutterEngine.dartExecutor, VOLUME_CHANNEL)
+        volumeChannel.setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, eventSink: EventChannel.EventSink?) {
                 volumeSink = eventSink
             }
 
             override fun onCancel(arguments: Any?) {
+                volumeSink = null
             }
         })
     }
-    //Doesn't work and idk why, it should get a uri after selecting a directory but doesn't
-    //https://developer.android.com/training/data-storage/shared/documents-files#perform-operations
-    private fun getDirAccess() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        intent.putExtra("pickerMode","directory")
-        intent.flags = Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-        startActivityForResult(intent, 1)
-            //return intent.data.toString();
-    }
 
-    private fun getTempDirAccess() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        intent.putExtra("pickerMode","directory")
-        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+    private fun requestDirectoryAccess() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+            putExtra("pickerMode", "directory")
+            flags = Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        }
+        
         startActivityForResult(intent, 1)
     }
 
-    private fun getImageAccess() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-        val mimeTypes = arrayOf("image/png", "image/jpeg","image/jpg","image/gif")
-        intent.type = "*/*"
-        intent.putExtra("pickerMode","image")
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-        intent.flags = Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+    private fun requestTemporaryDirectoryAccess() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+            putExtra("pickerMode", "directory")
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        }
+
+        startActivityForResult(intent, 1)
+    }
+
+    private fun requestImageAccess() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            type = "*/*"
+            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
+                "image/png",
+                "image/jpeg",
+                "image/jpg",
+                "image/gif"
+            ))
+            flags = Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        }
+
         startActivityForResult(intent, 1)
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
-    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?)
-    {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?) {
         super.onActivityResult(requestCode, resultCode, resultData)
 
-        if (resultCode == Activity.RESULT_OK && resultData != null) {
-            resultData.data?.also { uri ->
-               //println(uri)
+        if (resultCode == Activity.RESULT_OK && resultData?.data != null) {
+            val uri = resultData.data
+            val mode = resultData.getStringExtra("pickerMode")
+
+            if (uri != null) {
                 SAFUri = uri.toString()
-                intent.data = uri
-                println("got uri as $uri")
-                this.contentResolver.takePersistableUriPermission(intent.data!!,Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-               val mode = intent.getStringExtra("pickerMode")
-                if (mode == "image"){
+                try {
+                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     methodResult?.success(uri.toString())
-                } else {
-                    methodResult?.success(uri.toString())
+                } catch (e: SecurityException) {
+                    Log.e("MainActivity", "Failed to take persistable URI permission", e)
+                    methodResult?.error("PERMISSION_ERROR", "Failed to take persistable URI permission", null)
                 }
-
+            } else {
+                methodResult?.error("INVALID_URI", "URI is null", null)
             }
-
-            //println("got storage uri as ${resultData.data as Uri}")
+        } else {
+            methodResult?.error("RESULT_ERROR", "Invalid result or data", null)
         }
     }
 
-    private fun getFileBytesFromUri(uriString: String): ByteArray?{
-        val uri: Uri = Uri.parse(uriString)
-        if (uri != Uri.EMPTY) {
-            println()
-            val inputStream: InputStream? = contentResolver.openInputStream(uri)
-            return inputStream?.readBytes()
+    private fun getFileBytesFromUri(uriString: String): ByteArray? {
+        val uri = Uri.parse(uriString)
+        if (uri == Uri.EMPTY) {
+            return null
         }
+
+        try {
+            val stream = contentResolver.openInputStream(uri)
+            return stream?.buffered()?.use { it.readBytes() }
+        } catch (e: IOException) {
+            if (e is FileNotFoundException) {
+                Log.e("MainActivity", "File not found for URI: $uriString")
+            } else {
+                Log.e("MainActivity", "Error reading from URI: $uriString", e)
+            }
+        }
+
         return null
     }
 
     private fun getFileExt(uriString: String): String {
-        val uri: Uri = Uri.parse(uriString)
-        val fileExt: String? = if (ContentResolver.SCHEME_CONTENT == uri.scheme) {
-            val cr: ContentResolver = applicationContext.contentResolver
-            cr.getType(uri)?.split("/")?.get(1)
+        val uri = Uri.parse(uriString)
+        if (uri == Uri.EMPTY) {
+            Log.e("MainActivity", "Invalid URI: $uriString")
+            return ""
+        }
+
+        return try {
+            if (ContentResolver.SCHEME_CONTENT == uri.scheme) {
+                val cr = applicationContext.contentResolver
+                val mimeType = cr.getType(uri)
+                mimeType?.substringAfterLast('/') ?: ""
+            } else {
+                MimeTypeMap.getFileExtensionFromUrl(uri.toString()) ?: ""
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error getting file extension for URI: $uriString", e)
+            ""
+        }
+    }
+
+
+    private fun getFileByName(uriString: String, fileName: String): ByteArray? {
+        val uri = Uri.parse(uriString)
+        val documentTree = DocumentFile.fromTreeUri(applicationContext, uri) ?: return null
+        val file = documentTree.findFile(fileName) ?: return null
+        val inputStream = contentResolver.openInputStream(file.uri) ?: return null
+        return inputStream.use { it.readBytes() }
+    }
+
+    private fun existsByName(uriString: String, fileName: String): Boolean {
+        val uri = Uri.parse(uriString)
+        if (uri == Uri.EMPTY) {
+            Log.e("MainActivity", "Invalid URI: $uriString")
+            return false
+        }
+
+        val documentTree = DocumentFile.fromTreeUri(applicationContext, uri)
+        return documentTree?.findFile(fileName)?.exists() ?: false
+    }
+
+    private fun removeByName(uriString: String, fileName: String): Boolean {
+        val uri = Uri.parse(uriString)
+        if (uri == Uri.EMPTY) {
+            Log.e("MainActivity", "Invalid URI: $uriString")
+            return false
+        }
+
+        val documentTree = DocumentFile.fromTreeUri(applicationContext, uri)
+        if (documentTree == null) {
+            Log.e("MainActivity", "Document tree is null for URI: $uriString")
+            return false
+        }
+
+        val file = documentTree.findFile(fileName)
+        return if (file != null && file.exists()) {
+            file.delete()
         } else {
-            MimeTypeMap.getFileExtensionFromUrl(uri.toString())
+            Log.e("MainActivity", "File not found: $fileName")
+            false
         }
-        return fileExt ?: ""
-    }
-
-
-    private fun getFileByName(uriString: String,fileName: String): ByteArray?{
-        val uri: Uri = Uri.parse(uriString)
-        val documentTree = DocumentFile.fromTreeUri(applicationContext, uri)
-        if (documentTree != null) {
-            val file = documentTree.findFile(fileName)
-            if (file != null) {
-                val inputStream: InputStream? = contentResolver.openInputStream(file.uri)
-                return inputStream?.readBytes()
-            }
-        }
-        return null
-    }
-
-    private fun existsByName(uriString: String, fileName: String): Boolean{
-        val uri: Uri = Uri.parse(uriString)
-        val documentTree = DocumentFile.fromTreeUri(applicationContext, uri)
-        if (documentTree != null) {
-            val fileExists = documentTree.findFile(fileName) != null
-            return fileExists
-        }
-        return false
-    }
-
-    private fun removeByName(uriString: String, fileName: String): Boolean{
-        val uri: Uri = Uri.parse(uriString)
-        val documentTree = DocumentFile.fromTreeUri(applicationContext, uri)
-        if (documentTree != null) {
-            val file = documentTree.findFile(fileName)
-            if (file != null) {
-                return file.delete()
-            }
-        }
-        return false
     }
 
     private fun restartApp() {
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+            ?: return
+
+        val component = launchIntent.component
+            ?: return
+
         applicationContext.startActivity(
-            Intent.makeRestartActivityTask(
-                (applicationContext.packageManager.getLaunchIntentForPackage(
-                    applicationContext.packageName
-                ))!!.component
-            )
+            Intent.makeRestartActivityTask(component)
         )
         Runtime.getRuntime().exit(0)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) && isSinkingVolume)
-        {
-            volumeSink?.success(if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) "down" else "up")
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) && isSinkingVolume) {
+            val direction = when (keyCode) {
+                KeyEvent.KEYCODE_VOLUME_DOWN -> "down"
+                KeyEvent.KEYCODE_VOLUME_UP -> "up"
+                else -> null
+            }
+            direction?.let { volumeSink?.success(it) }
             return true
         }
-
         return super.onKeyDown(keyCode, event)
     }
 
     private fun getIpv4HostAddress(): String {
-        NetworkInterface.getNetworkInterfaces()?.toList()?.map { networkInterface ->
-            networkInterface.inetAddresses?.toList()?.find {
-                !it.isLoopbackAddress && it is Inet4Address
-            }?.let { return it.hostAddress ?: "" }
-        }
-        return ""
+        return NetworkInterface.getNetworkInterfaces()
+            ?.asSequence()
+            ?.mapNotNull { networkInterface ->
+                networkInterface.inetAddresses?.asSequence()
+                    ?.firstOrNull { !it.isLoopbackAddress && it is Inet4Address }
+                    ?.let { it.hostAddress }
+            }
+            ?.firstOrNull()
+            ?: ""
     }
 
     private fun getExtDir(): String {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
-            return Environment.getExternalStorageDirectory().absolutePath
+        return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+            Environment.getExternalStorageDirectory()?.absolutePath ?: ""
         } else {
-            return applicationContext.dataDir.absolutePath
+            applicationContext.dataDir?.absolutePath ?: ""
         }
-
     }
 
     @Throws(IOException::class)
     private fun createSafFile(fileName: String, mediaType: String, fileExt: String, savePath: String?): Uri? {
-        var thisMediaType: String = mediaType
+        val thisMediaType = if (mediaType == "animation") "image" else mediaType
 
-        if (thisMediaType == "animation"){
-            thisMediaType = "image"
-        }
-        if (!savePath.isNullOrEmpty()){
-            val doc = DocumentFile.fromTreeUri(applicationContext, Uri.parse(savePath))
-            if (doc != null) {
-                if (doc.canWrite()){
-                    val uri = doc.createFile("$thisMediaType/$fileExt","$fileName.$fileExt")?.uri
-                    uri?.let {
-                        activeFiles.put(uri, contentResolver.openOutputStream(it))
-                    }
-                    return uri
-                }
+        val doc = if (!savePath.isNullOrEmpty()) {
+            DocumentFile.fromTreeUri(applicationContext, Uri.parse(savePath))
+        } else null
+
+        if (doc != null && doc.canWrite()) {
+            val uri = doc.createFile("$thisMediaType/$fileExt", "$fileName.$fileExt")?.uri
+            uri?.let {
+                activeFiles[it] = contentResolver.openOutputStream(it)
             }
+            return uri
         }
+
         return null
     }
 
     @Throws(IOException::class)
     private fun deleteSafFile(uriString: String): Boolean {
-        val uri: Uri = Uri.parse(uriString)
-        if (uri != Uri.EMPTY) {
-            val document = DocumentFile.fromSingleUri(applicationContext, uri)
-            if (document != null && document.exists()) {
-                document.delete()
-                Objects.requireNonNull(activeFiles[uri])?.close()
-                activeFiles.remove(uri)
-                return true
-            }
+        val uri: Uri? = Uri.parse(uriString)
+        if (uri == null || uri == Uri.EMPTY) {
+            Log.e("MainActivity", "Invalid URI: $uriString")
+            return false
         }
-        return false
+
+        val document = DocumentFile.fromSingleUri(applicationContext, uri)
+        if (document == null || !document.exists()) {
+            Log.e("MainActivity", "Document does not exist for URI: $uriString")
+            return false
+        }
+
+        if (document.delete()) {
+            activeFiles[uri]?.close()
+            activeFiles.remove(uri)
+            return true
+        } else {
+            Log.e("MainActivity", "Failed to delete document for URI: $uriString")
+            return false
+        }
     }
 
-    @Throws(IOException::class)
     private fun existsSafFile(uriString: String): Boolean {
-        val uri: Uri = Uri.parse(uriString)
-        if (uri != Uri.EMPTY) {
-            val document = DocumentFile.fromSingleUri(applicationContext, uri)
-            if (document != null && document.exists()) {
-                return true
-            }
-        }
-        return false
+        val uri = Uri.parse(uriString) ?: return false
+        val document = DocumentFile.fromSingleUri(applicationContext, uri) ?: return false
+        return document.exists()
     }
 
     // write bytes to file asynchronously using SAF
     @Throws(IOException::class)
     private fun writeSafFileStream(fileBytes: ByteArray, uriString: String): Boolean {
-        val uri: Uri = Uri.parse(uriString)
-        if (uri != Uri.EMPTY) {
-            val document = DocumentFile.fromSingleUri(applicationContext, uri)
-            if (document != null && document.exists()) {
-                Objects.requireNonNull(activeFiles[uri])?.write(fileBytes)
-                return true
-            }
+        val uri = Uri.parse(uriString) ?: return false
+        val document = DocumentFile.fromSingleUri(applicationContext, uri) ?: return false
+        if (!document.exists()) {
+            Log.e("MainActivity", "Document does not exist for URI: $uriString")
+            return false
         }
-        return false
+
+        val outputStream = activeFiles[uri] ?: return false
+        try {
+            outputStream.write(fileBytes)
+            return true
+        } catch (e: IOException) {
+            Log.e("MainActivity", "Failed to write to document for URI: $uriString", e)
+            return false
+        }
     }
 
     @Throws(IOException::class)
     private fun closeSafFileStream(uriString: String): Boolean {
-        val uri: Uri = Uri.parse(uriString)
-        if (uri != Uri.EMPTY) {
-            val document = DocumentFile.fromSingleUri(applicationContext, uri)
-            if (document != null && document.exists()) {
-                Objects.requireNonNull(activeFiles[uri])?.close()
-                activeFiles.remove(uri)
-                return true
-            }
+        val uri = Uri.parse(uriString)
+        if (uri == Uri.EMPTY) {
+            Log.e("MainActivity", "Invalid URI: $uriString")
+            return false
         }
-        return false
+
+        val document = DocumentFile.fromSingleUri(applicationContext, uri)
+        if (document == null || !document.exists()) {
+            Log.e("MainActivity", "Document does not exist for URI: $uriString")
+            return false
+        }
+
+        val outputStream = activeFiles.remove(uri)
+        if (outputStream == null) {
+            Log.e("MainActivity", "No active file stream found for URI: $uriString")
+            return false
+        }
+
+        outputStream.close()
+        return true
     }
 
     @Throws(IOException::class)
     private fun copySafFileToDir(uriString: String, fileName: String, targetPath: String): Boolean {
-        val uri: Uri = Uri.parse(uriString)
-        if (uri != Uri.EMPTY) {
-            val documentTree = DocumentFile.fromTreeUri(applicationContext, uri)
-            if (documentTree != null) {
-                val file = documentTree.findFile(fileName)
-                if (file != null) {
-                    val inputStream: InputStream? = contentResolver.openInputStream(file.uri)
-                    val outputStream = FileOutputStream(File(targetPath, fileName))
-                    inputStream?.copyTo(outputStream)
-                    inputStream?.close()
-                    outputStream.close()
-                    return true
-                }
-            }
-        }
-        return false
+        val uri = Uri.parse(uriString) ?: return false
+        val documentTree = DocumentFile.fromTreeUri(applicationContext, uri) ?: return false
+        val file = documentTree.findFile(fileName) ?: return false
+        val inputStream = contentResolver.openInputStream(file.uri) ?: return false
+        val outputStream = FileOutputStream(File(targetPath, fileName))
+        inputStream.copyTo(outputStream)
+        inputStream.close()
+        outputStream.close()
+        return true
     }
 
     @Throws(IOException::class)
     private fun copyFileToSafDir(sourcePath: String, fileName: String, uriString: String, mime: String): Boolean {
         val file = File(sourcePath, fileName)
-        if (!file.exists()) return false
-        val uri: Uri = Uri.parse(uriString)
-        if (uri != Uri.EMPTY) {
-            val documentTree = DocumentFile.fromTreeUri(applicationContext, uri)
-            if (documentTree != null) {
-                // create a stream to copy file to saf dir
-                val targetFile = documentTree.createFile(mime, fileName)
-                if (targetFile == null) {
-                    return false
-                }
-                val outputStream = contentResolver.openOutputStream(targetFile.uri)
-                val inputStream = FileInputStream(file)
-                inputStream.copyTo(outputStream!!)
-                inputStream.close()
-                outputStream.close()
-                return true
-            }
+        if (!file.exists()) {
+            return false
         }
-        return false
+        val uri = Uri.parse(uriString)
+        if (uri == Uri.EMPTY) {
+            return false
+        }
+        val documentTree = DocumentFile.fromTreeUri(applicationContext, uri) ?: return false
+        val targetFile = documentTree.createFile(mime, fileName) ?: return false
+        val outputStream = contentResolver.openOutputStream(targetFile.uri) ?: return false
+        val inputStream = FileInputStream(file)
+        inputStream.copyTo(outputStream)
+        inputStream.close()
+        outputStream.close()
+        return true
     }
 
     @Throws(IOException::class)
     private fun writeImage(fileBytes: ByteArray, name: String, mediaType: String, fileExt: String, extPathOverride: String?) {
-        val fos: OutputStream?
+        var fos: OutputStream? = null
         val resolver = contentResolver
         val contentValues = ContentValues()
-        var imageUri: Uri?
+        var imageUri: Uri? = null
         var thisMediaType: String = mediaType
-        if (thisMediaType == "animation"){
+        if (thisMediaType == "animation") {
             thisMediaType = "image"
         }
-        if (!extPathOverride.isNullOrEmpty()){
+
+        if (!extPathOverride.isNullOrEmpty()) {
             val doc = DocumentFile.fromTreeUri(applicationContext, Uri.parse(extPathOverride))
-            if (doc != null) {
-                if (doc.canWrite()){
-                    doc.createFile("$thisMediaType/$fileExt","$name.$fileExt")?.uri?.let {
-                        fos = contentResolver.openOutputStream(it)
-                        fos?.write(fileBytes)
-                        Objects.requireNonNull(fos)?.close()
-                    }
+            if (doc != null && doc.canWrite()) {
+                val file = doc.createFile("$thisMediaType/$fileExt", "$name.$fileExt")
+                if (file != null) {
+                    fos = contentResolver.openOutputStream(file.uri)
                 }
             }
         } else {
-            if(thisMediaType == "image"){
+            if (thisMediaType == "image") {
                 contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.$fileExt")
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$thisMediaType/$fileExt")
                 contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LoliSnatcher/")
@@ -607,41 +707,41 @@ class MainActivity: FlutterFragmentActivity() {
                 contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/LoliSnatcher/")
                 imageUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
             }
-            if (imageUri != null){
-                fos = imageUri.let { resolver.openOutputStream(it) }
-                fos?.write(fileBytes)
-                Objects.requireNonNull(fos)?.close()
+            if (imageUri != null) {
+                fos = resolver.openOutputStream(imageUri)
+            }
+        }
+
+        if (fos != null) {
+            try {
+                fos.write(fileBytes)
+            } finally {
+                fos.close()
             }
         }
     }
 
-    private fun refreshMedia(path: String?): String {
+    private fun refreshMedia(filePath: String?): String {
         return try {
-            if (path == null) {
-                throw NullPointerException()
-            }
-
-            val file = File(path)
+            filePath ?: throw NullPointerException("filePath is null")
+            val file = File(filePath)
             if (!file.exists()) {
-                throw FileNotFoundException("File does not exist: $path")
+                throw FileNotFoundException("File does not exist: $filePath")
             }
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                applicationContext.sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)))
+                sendBroadcast(Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)))
             } else {
                 MediaScannerConnection.scanFile(
                     applicationContext,
-                    arrayOf(file.toString()),
+                    arrayOf(file.path),
                     arrayOf(file.name),
                     null,
                 )
             }
-            Log.d("Media Scanner", "Success show image $path in Gallery")
-            "Success show image $path in Gallery"
+            "Success show image $filePath in Gallery"
         } catch (e: Exception) {
-            Log.e("Media Scanner", e.toString())
             e.toString()
         }
-
     }
 }

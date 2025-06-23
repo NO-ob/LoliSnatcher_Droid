@@ -5,11 +5,15 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   flutter_avif_linux
+  flutter_secure_storage_linux
   fvp
   gtk
+  irondash_engine_context
   media_kit_libs_linux
   media_kit_video
+  super_native_extensions
   url_launcher_linux
+  volume_controller
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

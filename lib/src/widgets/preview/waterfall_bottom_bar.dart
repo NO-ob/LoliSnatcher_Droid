@@ -19,7 +19,7 @@ import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/data/meta_tag.dart';
@@ -110,7 +110,9 @@ class WaterfallBottomBarState extends State<WaterfallBottomBar> with TickerProvi
     final double edgeLimit = viewport / 3;
 
     double delta = notification.dragDetails?.delta.dy ?? 0;
-    final ScrollDirection direction = delta == 0 ? ScrollDirection.idle : (delta > 0 ? ScrollDirection.forward : ScrollDirection.reverse);
+    final ScrollDirection direction = delta == 0
+        ? ScrollDirection.idle
+        : (delta > 0 ? ScrollDirection.forward : ScrollDirection.reverse);
     delta = delta.abs();
 
     final double offsetLimit = MainSearchBar.height + MediaQuery.viewPaddingOf(context).bottom;
@@ -202,14 +204,16 @@ class WaterfallBottomBarState extends State<WaterfallBottomBar> with TickerProvi
           AnimatedBuilder(
             animation: animation,
             builder: (context, child) {
-              final double buttonPadding = showSearchBar ? ((MediaQuery.sizeOf(context).width * 0.07) + kMinInteractiveDimension) * reverseAnimValue : 0;
+              final double buttonPadding = showSearchBar
+                  ? ((MediaQuery.sizeOf(context).width * 0.07) + kMinInteractiveDimension) * reverseAnimValue
+                  : 0;
 
               return Transform.translate(
                 offset: Offset(
                   0,
                   showSearchBar ? (MainSearchBar.height + bottomPadding) * animValue : bottomPadding,
                 ),
-                child: AnimatedContainer(
+                child: AnimatedPadding(
                   duration: const Duration(milliseconds: 100),
                   padding: EdgeInsets.only(
                     left: (settingsHandler.scrollGridButtonsPosition == 'Left' ? buttonPadding : 0) + 10,
@@ -406,13 +410,15 @@ class _MainSearchBarState extends State<MainSearchBar> {
     searchHandler.searchTextController.addListener(onTextChanged);
 
     // periodically update state, mostly to force re-render of chips in case their type data gets fetched later
+    // TODO cache tags type and compare for updates instead of this?
     periodicUpdateTimer = Timer.periodic(
-      const Duration(seconds: 2),
+      const Duration(seconds: 3),
       (_) => onTextChanged(),
     );
   }
 
   void onTextChanged() {
+    // final tagsBefore = [...tags];
     parseTags();
 
     final String? prevTabId = currentTabId;
@@ -421,7 +427,10 @@ class _MainSearchBarState extends State<MainSearchBar> {
       currentTabId = searchHandler.currentTabId;
     }
 
+    // TODO re-render only if tags or their types have changed
+    // if (listEquals(tagsBefore, tags) == false) {
     setState(() {});
+    // }
   }
 
   void parseTags() {
@@ -480,7 +489,9 @@ class _MainSearchBarState extends State<MainSearchBar> {
                           controller: scrollController,
                           scrollDirection: Axis.horizontal,
                           // scrollconfig allows to control physics outside of the widget
-                          physics: tags.isEmpty ? const NeverScrollableScrollPhysics() : ScrollConfiguration.of(context).getScrollPhysics(context),
+                          physics: tags.isEmpty
+                              ? const NeverScrollableScrollPhysics()
+                              : ScrollConfiguration.of(context).getScrollPhysics(context),
                           padding: const EdgeInsets.fromLTRB(8, 6, 60, 6),
                           children: [
                             if (tags.isEmpty)
@@ -490,10 +501,10 @@ class _MainSearchBarState extends State<MainSearchBar> {
                                   child: Text(
                                     'Search',
                                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                                          fontSize: 16,
-                                          height: 1,
-                                        ),
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                      fontSize: 16,
+                                      height: 1,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -511,8 +522,12 @@ class _MainSearchBarState extends State<MainSearchBar> {
                                         tag: tags[i],
                                         tab: searchHandler.currentTab,
                                         onTap: () => widget.onChipTap(tags[i], i),
-                                        onLongTap: widget.onChipLongTap == null ? null : () => widget.onChipLongTap!(tags[i], i),
-                                        onDeleteTap: widget.onChipDeleteTap == null ? null : () => widget.onChipDeleteTap!(tags[i], i),
+                                        onLongTap: widget.onChipLongTap == null
+                                            ? null
+                                            : () => widget.onChipLongTap!(tags[i], i),
+                                        onDeleteTap: widget.onChipDeleteTap == null
+                                            ? null
+                                            : () => widget.onChipDeleteTap!(tags[i], i),
                                         canDelete: widget.selectedTagIndex != i,
                                         isSelected: widget.selectedTag == tags[i] || widget.selectedTagIndex == i,
                                       ),
@@ -648,8 +663,8 @@ class MainSearchTagChip extends StatelessWidget {
           String formattedTag = tag;
 
           final List<Booru> usedBoorus = [
-            tab?.selectedBooru.value ?? booru ?? Booru(null, null, null, null, null),
-            ...(tab?.secondaryBoorus.value ?? <Booru>[]),
+            ?tab?.selectedBooru.value ?? booru,
+            ...?tab?.secondaryBoorus.value,
           ];
           final bool hasSecondaryBoorus = usedBoorus.length > 1;
 
@@ -661,7 +676,8 @@ class MainSearchTagChip extends StatelessWidget {
           final bool isNumberMod = formattedTag.startsWith(RegExp(r'\d+#'));
           final int? booruNumber = int.tryParse(isNumberMod ? formattedTag.split('#')[0] : '');
           final bool hasBooruNumber = booruNumber != null;
-          final bool isValidNumberMod = booruNumber != null && booruNumber > 0 && hasSecondaryBoorus && booruNumber <= usedBoorus.length;
+          final bool isValidNumberMod =
+              booruNumber != null && booruNumber > 0 && hasSecondaryBoorus && booruNumber <= usedBoorus.length;
           formattedTag = formattedTag.replaceAll(RegExp(r'^\d+#'), '').trim();
 
           // do it twitce because it will be false for mergebooru
@@ -717,8 +733,8 @@ class MainSearchTagChip extends StatelessWidget {
                                   color: isExclude
                                       ? Colors.redAccent
                                       : isOr
-                                          ? Colors.purpleAccent
-                                          : Colors.white.withValues(alpha: 0.8),
+                                      ? Colors.purpleAccent
+                                      : Colors.white.withValues(alpha: 0.8),
                                   border: Border(
                                     right: BorderSide(
                                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
@@ -731,13 +747,13 @@ class MainSearchTagChip extends StatelessWidget {
                                     isExclude
                                         ? '—'
                                         : isOr
-                                            ? '~'
-                                            : '',
+                                        ? '~'
+                                        : '',
                                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                          height: 1,
-                                        ),
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -761,10 +777,10 @@ class MainSearchTagChip extends StatelessWidget {
                                         Text(
                                           booruNumber.toString(),
                                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w600,
-                                                height: 1,
-                                              ),
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w600,
+                                            height: 1,
+                                          ),
                                         ),
                                         const SizedBox(width: 4),
                                         BooruFavicon(usedBoorus[booruNumber - 1]),
@@ -788,10 +804,10 @@ class MainSearchTagChip extends StatelessWidget {
                                     child: Text(
                                       '?#',
                                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                            height: 1,
-                                          ),
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -812,32 +828,33 @@ class MainSearchTagChip extends StatelessWidget {
                                 child: Center(
                                   child: switch (metaTag?.type) {
                                     MetaTagType.sort => Icon(
-                                        Icons.sort,
-                                        color: tagColor,
-                                        size: 20,
-                                      ),
-                                    MetaTagType.date => metaTag?.keyName == 'date'
-                                        ? Icon(
-                                            Icons.calendar_month,
-                                            color: tagColor,
-                                            size: 20,
-                                          )
-                                        : Text(
-                                            metaTagParseData['key'],
-                                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                                  color: tagColor,
-                                                  fontWeight: FontWeight.w600,
-                                                  height: 1,
-                                                ),
-                                          ),
-                                    _ => Text(
-                                        metaTagParseData['key'],
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      Icons.sort,
+                                      color: tagColor,
+                                      size: 20,
+                                    ),
+                                    MetaTagType.date =>
+                                      metaTag?.keyName == 'date'
+                                          ? Icon(
+                                              Icons.calendar_month,
                                               color: tagColor,
-                                              fontWeight: FontWeight.w600,
-                                              height: 1,
+                                              size: 20,
+                                            )
+                                          : Text(
+                                              metaTagParseData['key'],
+                                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                                color: tagColor,
+                                                fontWeight: FontWeight.w600,
+                                                height: 1,
+                                              ),
                                             ),
+                                    _ => Text(
+                                      metaTagParseData['key'],
+                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                        color: tagColor,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1,
                                       ),
+                                    ),
                                   },
                                 ),
                               ),
@@ -880,7 +897,9 @@ class MainSearchTagChip extends StatelessWidget {
                                               return d;
                                             }
 
-                                            return DateFormat(metaTag.prettierDateFormat ?? metaTag.dateFormat).format(parsedDate);
+                                            return DateFormat(
+                                              metaTag.prettierDateFormat ?? metaTag.dateFormat,
+                                            ).format(parsedDate);
                                           })
                                           .toList()
                                           .join(metaTag.valuesDivider);
@@ -888,10 +907,10 @@ class MainSearchTagChip extends StatelessWidget {
                                       return Text(
                                         dates,
                                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                              height: 1,
-                                            ),
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1,
+                                        ),
                                       );
                                     },
                                   ),
@@ -904,10 +923,10 @@ class MainSearchTagChip extends StatelessWidget {
                                   child: Text(
                                     formattedTag,
                                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                          height: 1,
-                                        ),
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -999,12 +1018,16 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
 
-  final ScrollController suggestionsScrollController = ScrollController(), tagToEditScrollController = ScrollController();
+  final ScrollController suggestionsScrollController = ScrollController(),
+      tagToEditScrollController = ScrollController();
   final AutoScrollController searchBarScrollController = AutoScrollController();
 
   late final RichTextController suggestionTextController;
-  String get suggestionTextControllerRawInput =>
-      suggestionTextController.text.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').replaceAll(RegExp(r'^\d+#'), '').trim();
+  String get suggestionTextControllerRawInput => suggestionTextController.text
+      .replaceAll(RegExp('^-'), '')
+      .replaceAll(RegExp('^~'), '')
+      .replaceAll(RegExp(r'^\d+#'), '')
+      .trim();
 
   final FocusNode suggestionTextFocusNode = FocusNode();
   final ValueNotifier<bool> suggestionTextFocusNodeHasFocus = ValueNotifier(false);
@@ -1034,23 +1057,24 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
       regExpDotAll: true,
       regExpMultiLine: true,
       regExpUnicode: true,
-      targetMatches: [
-        ...tags,
-        if (tags.isEmpty) GenericMetaTag(),
-      ]
-          .map(
-            (e) => MatchTargetItem(
-              regex: e.keyDividerMatcher,
-              allowInlineMatching: true,
-              deleteOnBack: false,
-              style: TextStyle(
-                color: Colors.pink,
-                backgroundColor: Colors.pink.withValues(alpha: 0.1),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          )
-          .toList(),
+      targetMatches:
+          [
+                ...tags,
+                if (tags.isEmpty) GenericMetaTag(),
+              ]
+              .map(
+                (e) => MatchTargetItem(
+                  regex: e.keyDividerMatcher,
+                  allowInlineMatching: true,
+                  deleteOnBack: false,
+                  style: TextStyle(
+                    color: Colors.pink,
+                    backgroundColor: Colors.pink.withValues(alpha: 0.1),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              )
+              .toList(),
     );
 
     searchHandler.searchTextController.addListener(onSearchTextChanged);
@@ -1137,7 +1161,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
         bool isCancelled = false;
 
         final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
-        final MetaTag? metaTag = metaTags.firstWhereOrNull((p) => p.keyParser(suggestionTextControllerRawInput) != null);
+        final MetaTag? metaTag = metaTags.firstWhereOrNull(
+          (p) => p.keyParser(suggestionTextControllerRawInput) != null,
+        );
         if (metaTag != null) {
           if (metaTag.hasAutoComplete) {
             suggestedTags = await metaTag.getAutoComplete(suggestionTextControllerRawInput);
@@ -1184,7 +1210,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
             },
           );
         } else {
-          final databaseSearch = (await settingsHandler.dbHandler.getTags(suggestionTextControllerRawInput, 10)).map((tag) {
+          final databaseSearch = (await settingsHandler.dbHandler.getTags(suggestionTextControllerRawInput, 10)).map((
+            tag,
+          ) {
             return TagSuggestion(
               tag: tag,
               type: tagHandler.getTag(tag).tagType,
@@ -1192,16 +1220,20 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
             );
           }).toList();
 
-          final historySearch = (await settingsHandler.dbHandler.getSearchHistoryByInput(suggestionTextControllerRawInput, 10))
-              .map((tag) {
-                return TagSuggestion(
-                  tag: tag,
-                  type: tagHandler.getTag(tag).tagType,
-                  icon: const Icon(Icons.history),
-                );
-              })
-              .where((htag) => !databaseSearch.any((dbtag) => dbtag.tag.trim().toLowerCase() == htag.tag.trim().toLowerCase()))
-              .toList();
+          final historySearch =
+              (await settingsHandler.dbHandler.getSearchHistoryByInput(suggestionTextControllerRawInput, 10))
+                  .map((tag) {
+                    return TagSuggestion(
+                      tag: tag,
+                      type: tagHandler.getTag(tag).tagType,
+                      icon: const Icon(Icons.history),
+                    );
+                  })
+                  .where(
+                    (htag) =>
+                        !databaseSearch.any((dbtag) => dbtag.tag.trim().toLowerCase() == htag.tag.trim().toLowerCase()),
+                  )
+                  .toList();
 
           loading = false;
           failed = false;
@@ -1297,7 +1329,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
     String tagText = tag.tag;
 
     if (!raw) {
-      final String extrasFromInput = suggestionTextController.text.replaceAll(suggestionTextControllerRawInput, '').trim();
+      final String extrasFromInput = suggestionTextController.text
+          .replaceAll(suggestionTextControllerRawInput, '')
+          .trim();
       tagText = '$extrasFromInput$tagText';
     }
 
@@ -1347,6 +1381,27 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
             const SizedBox(height: 16),
             TagSuggestionText(tag: tag, isExpanded: false),
             const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  width: 6,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: tagHandler.getTag(tag.tag).getColour(),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  tagHandler.getTag(tag.tag).tagType.locName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             ListTile(
               title: const Text('Add'),
               leading: const Icon(Icons.add_rounded),
@@ -1355,7 +1410,14 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 Navigator.of(context).pop();
               },
             ),
-            if (searchHandler.currentBooru.type != BooruType.Merge) TagContentPreview(tag: tag.tag),
+            TagContentPreview(
+              tag: tag.tag,
+              boorus: searchHandler.currentBooru.type?.isMerge == true
+                  ? [
+                      ...(searchHandler.currentBooruHandler as MergebooruHandler).booruHandlers.map((e) => e.booru),
+                    ]
+                  : [searchHandler.currentBooru],
+            ),
             ListTile(
               title: const Text('Copy'),
               leading: const Icon(Icons.copy),
@@ -1375,7 +1437,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 Navigator.of(context).pop();
               },
             ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom),
+            SizedBox(height: MediaQuery.paddingOf(context).bottom),
           ],
         );
       },
@@ -1421,18 +1483,18 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
             child: KeyboardVisibilityBuilder(
               builder: (context, isKbVisible) {
                 final buttonStyle = Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                      fixedSize: WidgetStateProperty.all<Size>(
-                        Size(keyboardActionsHeight, keyboardActionsHeight),
-                      ),
-                      padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-                        EdgeInsets.fromLTRB(
-                          4,
-                          isKbVisible ? 4 : 0,
-                          4,
-                          4,
-                        ),
-                      ),
-                    );
+                  fixedSize: WidgetStateProperty.all<Size>(
+                    Size(keyboardActionsHeight, keyboardActionsHeight),
+                  ),
+                  padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+                    EdgeInsets.fromLTRB(
+                      4,
+                      isKbVisible ? 4 : 0,
+                      4,
+                      4,
+                    ),
+                  ),
+                );
 
                 return Container(
                   padding: const EdgeInsets.only(top: 2, bottom: 2),
@@ -1444,9 +1506,13 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                       ElevatedButton(
                         onPressed: () {
                           // Add '_' at current cursor position
-                          final String beforeSelection = suggestionTextController.selection.textBefore(suggestionTextController.text);
+                          final String beforeSelection = suggestionTextController.selection.textBefore(
+                            suggestionTextController.text,
+                          );
                           // final String insideSelection = searchHandler.searchTextController.selection.textInside(searchHandler.searchTextController.text);
-                          final String afterSelection = suggestionTextController.selection.textAfter(suggestionTextController.text);
+                          final String afterSelection = suggestionTextController.selection.textAfter(
+                            suggestionTextController.text,
+                          );
                           suggestionTextController.text = '${beforeSelection}_$afterSelection';
                           // set cursor to the end when tapped unfocused
                           suggestionTextController.selection = TextSelection(
@@ -1525,9 +1591,11 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                       const SizedBox(width: 10),
                       ValueListenableBuilder(
                         valueListenable: suggestionTextController,
-                        builder: (context, _, __) {
+                        builder: (context, _, _) {
                           return ElevatedButton(
-                            onPressed: suggestionTextControllerRawInput.isEmpty ? onSearchTap : () => onSuggestionTextSubmitted(suggestionTextController.text),
+                            onPressed: suggestionTextControllerRawInput.isEmpty
+                                ? onSearchTap
+                                : () => onSuggestionTextSubmitted(suggestionTextController.text),
                             onLongPress: suggestionTextControllerRawInput.isEmpty
                                 ? onSearchLongTap
                                 : () => onSuggestionLongTap(TagSuggestion(tag: suggestionTextControllerRawInput)),
@@ -1575,7 +1643,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 return Scrollbar(
                   controller: suggestionsScrollController,
                   interactive: true,
-                  scrollbarOrientation: settingsHandler.handSide.value.isLeft ? ScrollbarOrientation.left : ScrollbarOrientation.right,
+                  scrollbarOrientation: settingsHandler.handSide.value.isLeft
+                      ? ScrollbarOrientation.left
+                      : ScrollbarOrientation.right,
                   child: RefreshIndicator(
                     triggerMode: RefreshIndicatorTriggerMode.anywhere,
                     strokeWidth: 4,
@@ -1658,10 +1728,12 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                           }
 
                           final TagSuggestion tag = suggestedTags[index];
+                          final tagColor = tagHandler.getTag(tag.tag).getColour();
 
                           return Container(
                             height: kMinInteractiveDimension + (tag.hasDescription ? 8 : 0),
                             alignment: Alignment.centerLeft,
+                            color: tagColor == Colors.transparent ? null : tagColor.withValues(alpha: 0.1),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
@@ -1697,8 +1769,10 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                                               Text(
                                                 tag.description!,
                                                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
-                                                    ),
+                                                  color: Theme.of(
+                                                    context,
+                                                  ).colorScheme.onSurface.withValues(alpha: 0.66),
+                                                ),
                                               ),
                                           ],
                                         ),
@@ -1711,9 +1785,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                                             // TODO locale
                                             NumberFormat.compact(locale: 'en').format(tag.count),
                                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
-                                                  height: 1,
-                                                ),
+                                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
+                                              height: 1,
+                                            ),
                                           ),
                                         ),
                                     ],
@@ -1775,7 +1849,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
         isDialog: false,
         child: ValueListenableBuilder(
           valueListenable: suggestionTextFocusNodeHasFocus,
-          builder: (context, suggestionTextFocusNodeHasFocus, __) => Column(
+          builder: (context, suggestionTextFocusNodeHasFocus, _) => Column(
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -1794,6 +1868,31 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                   textInputAction: TextInputAction.search,
                   enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                   showSubmitButton: (text) => !settingsHandler.showSearchbarQuickActions && text.isNotEmpty,
+                  contextMenuBuilder: (_, editableTextState) {
+                    final List<ContextMenuButtonItem> buttonItems = editableTextState.contextMenuButtonItems;
+
+                    // allow only on single tag input
+                    if (!suggestionTextController.text.trim().contains(' ')) {
+                      buttonItems.insert(
+                        0,
+                        ContextMenuButtonItem(
+                          label: 'Prefix',
+                          onPressed: () {
+                            ContextMenuController.removeAny();
+                            showDialog(
+                              context: context,
+                              builder: (_) => _PrefixEditDialog(suggestionTextController),
+                            );
+                          },
+                        ),
+                      );
+                    }
+
+                    return AdaptiveTextSelectionToolbar.buttonItems(
+                      anchors: editableTextState.contextMenuAnchors,
+                      buttonItems: buttonItems,
+                    );
+                  },
                   submitIcon: Icons.add_rounded,
                   prefixIcon: IconButton(
                     icon: const Icon(Icons.arrow_back_rounded),
@@ -1811,7 +1910,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                       duration: const Duration(milliseconds: 200),
                       child: SizedBox(
                         width: double.infinity,
-                        height: (isKbVisible || (suggestionTextFocusNodeHasFocus && (Platform.isAndroid || Platform.isIOS)))
+                        height:
+                            (isKbVisible || (suggestionTextFocusNodeHasFocus && (Platform.isAndroid || Platform.isIOS)))
                             ? 0 // keyboardActionsHeight
                             : MediaQuery.paddingOf(context).bottom,
                         // child: ColoredBox(color: Colors.yellow.withValues(alpha: 0.2)),
@@ -1875,10 +1975,10 @@ class TagSuggestionText extends StatelessWidget {
     //
 
     final style = Theme.of(context).textTheme.bodyLarge?.copyWith(
-          color: tagColor,
-          fontWeight: FontWeight.w400,
-          height: 1,
-        );
+      color: tagColor,
+      fontWeight: FontWeight.w400,
+      height: 1,
+    );
 
     final bool isMultiword = tag.tag.split(' ').length > 1;
 
@@ -1936,10 +2036,10 @@ class AddMetatagBottomSheetResult {
   final String? value;
 
   bool get shouldAddDirectly => switch (tag.runtimeType) {
-        const (MetaTagWithCompareModes) => compareMode != null && value != null,
-        const (MetaTagWithValues) => value != null,
-        _ => false,
-      };
+    const (MetaTagWithCompareModes) => compareMode != null && value != null,
+    const (MetaTagWithValues) => value != null,
+    _ => false,
+  };
 }
 
 class AddMetatagBottomSheet extends StatelessWidget {
@@ -1988,8 +2088,8 @@ class AddMetatagBottomSheet extends StatelessWidget {
           Text(
             metaTags.length.toString(),
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -2077,8 +2177,8 @@ class AddMetatagBottomSheet extends StatelessWidget {
                                   Text(
                                     tag.keyName,
                                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
-                                        ),
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -2094,8 +2194,8 @@ class AddMetatagBottomSheet extends StatelessWidget {
                                 child: Text(
                                   'Free',
                                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
+                                    color: Theme.of(context).colorScheme.primary,
+                                  ),
                                 ),
                               ),
                             //
@@ -2106,73 +2206,76 @@ class AddMetatagBottomSheet extends StatelessWidget {
                       //
                       switch (tag.type) {
                         MetaTagType.date => Builder(
-                            builder: (context) {
-                              final metaTag = tag as DateMetaTag;
-                              return Row(
-                                spacing: 6,
-                                children: [
+                          builder: (context) {
+                            final metaTag = tag as DateMetaTag;
+                            return Row(
+                              spacing: 6,
+                              children: [
+                                IconButton.outlined(
+                                  onPressed: () async {
+                                    final res = await showSingleDatePicker(
+                                      context,
+                                      dateFormat: metaTag.dateFormat,
+                                    );
+
+                                    if (res is DateTime) {
+                                      onOptionSelect(
+                                        context,
+                                        tag,
+                                        compareMode: null,
+                                        value: DateFormat(metaTag.dateFormat).format(res),
+                                      );
+                                    }
+                                  },
+                                  icon: metaTag.supportsRange
+                                      ? const Text('Single')
+                                      : const Icon(Icons.calendar_month_rounded),
+                                ),
+                                if (metaTag.supportsRange)
                                   IconButton.outlined(
                                     onPressed: () async {
-                                      final res = await showSingleDatePicker(
+                                      final res = await showRangeDatePicker(
                                         context,
                                         dateFormat: metaTag.dateFormat,
                                       );
 
-                                      if (res is DateTime) {
+                                      if (res is List<DateTime> && res.length == 2) {
                                         onOptionSelect(
                                           context,
                                           tag,
                                           compareMode: null,
-                                          value: DateFormat(metaTag.dateFormat).format(res),
+                                          value:
+                                              DateFormat(metaTag.dateFormat).format(res[0]) +
+                                              metaTag.valuesDivider +
+                                              DateFormat(metaTag.dateFormat).format(res[1]),
                                         );
                                       }
                                     },
-                                    icon: metaTag.supportsRange ? const Text('Single') : const Icon(Icons.calendar_month_rounded),
+                                    icon: const Text('Range'),
                                   ),
-                                  if (metaTag.supportsRange)
-                                    IconButton.outlined(
-                                      onPressed: () async {
-                                        final res = await showRangeDatePicker(
-                                          context,
-                                          dateFormat: metaTag.dateFormat,
-                                        );
-
-                                        if (res is List<DateTime> && res.length == 2) {
-                                          onOptionSelect(
-                                            context,
-                                            tag,
-                                            compareMode: null,
-                                            value: DateFormat(metaTag.dateFormat).format(res[0]) +
-                                                metaTag.valuesDivider +
-                                                DateFormat(metaTag.dateFormat).format(res[1]),
-                                          );
-                                        }
-                                      },
-                                      icon: const Text('Range'),
-                                    ),
-                                  if (metaTag.supportsRange) const Icon(Icons.calendar_month_rounded),
-                                ],
-                              );
-                            },
-                          ),
+                                if (metaTag.supportsRange) const Icon(Icons.calendar_month_rounded),
+                              ],
+                            );
+                          },
+                        ),
                         MetaTagType.sort => const Icon(Icons.sort_rounded),
                         MetaTagType.comparableNumber => Row(
-                            spacing: 2,
-                            children: [
-                              for (final mode in (tag as MetaTagWithCompareModes).compareModes)
-                                IconButton.outlined(
-                                  onPressed: () => onOptionSelect(context, tag, compareMode: mode),
-                                  icon: FaIcon(
-                                    switch (mode) {
-                                      CompareMode.exact => FontAwesomeIcons.equals,
-                                      CompareMode.less => FontAwesomeIcons.lessThanEqual,
-                                      CompareMode.greater => FontAwesomeIcons.greaterThanEqual,
-                                    },
-                                    size: 18,
-                                  ),
+                          spacing: 2,
+                          children: [
+                            for (final mode in (tag as MetaTagWithCompareModes).compareModes)
+                              IconButton.outlined(
+                                onPressed: () => onOptionSelect(context, tag, compareMode: mode),
+                                icon: FaIcon(
+                                  switch (mode) {
+                                    CompareMode.exact => FontAwesomeIcons.equals,
+                                    CompareMode.less => FontAwesomeIcons.lessThanEqual,
+                                    CompareMode.greater => FontAwesomeIcons.greaterThanEqual,
+                                  },
+                                  size: 18,
                                 ),
-                            ],
-                          ),
+                              ),
+                          ],
+                        ),
                         _ => const SizedBox.shrink(),
                       },
                     ],
@@ -2498,7 +2601,9 @@ class _RangeDatePickerBottomSheetState extends State<RangeDatePickerBottomSheet>
         const SizedBox(height: 16),
         Text(
           // ignore: prefer_interpolation_to_compose_strings
-          DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(range.first) + ' - ' + DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(range.last),
+          DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(range.first) +
+              ' - ' +
+              DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(range.last),
           style: Theme.of(context).textTheme.bodyLarge,
         ),
         CalendarDatePicker2(
@@ -2723,7 +2828,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 final item = history[index];
                 final booru = settingsHandler.booruList.value.firstWhere(
                   (b) => b.name == item.booruName && b.type == item.booruType,
-                  orElse: () => Booru(null, null, null, null, null),
+                  orElse: Booru.unknown,
                 );
 
                 const favIcon = Padding(
@@ -2908,13 +3013,13 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
                     label: Text(tag.name),
                     avatar: switch (tag.type) {
                       MetaTagType.date => Icon(
-                          Icons.calendar_month_rounded,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                        Icons.calendar_month_rounded,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       MetaTagType.sort => Icon(
-                          Icons.sort_rounded,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                        Icons.sort_rounded,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       _ => null,
                     },
                     onPressed: () async {
@@ -2947,6 +3052,159 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _PrefixEditDialog extends StatelessWidget {
+  const _PrefixEditDialog(this.controller);
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final searchHandler = SearchHandler.instance;
+
+    return AlertDialog(
+      title: const Text('Prefix'),
+      content: ValueListenableBuilder(
+        valueListenable: controller,
+        builder: (context, value, child) {
+          String text = value.text;
+          bool isExclude = text.startsWith('-');
+          bool isOr = text.startsWith('~');
+          text = text.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').trim();
+
+          final bool isNumberMod = text.startsWith(RegExp(r'\d+#'));
+          final int? booruNumber = int.tryParse(isNumberMod ? text.split('#')[0] : '');
+          final bool hasBooruNumber = booruNumber != null;
+          final List<Booru> usedBoorus = [
+            searchHandler.currentTab.selectedBooru.value,
+            ...(searchHandler.currentTab.secondaryBoorus.value ?? <Booru>[]),
+          ];
+          final bool hasSecondaryBoorus = usedBoorus.length > 1;
+          final bool isValidNumberMod =
+              hasBooruNumber && booruNumber > 0 && hasSecondaryBoorus && booruNumber <= usedBoorus.length;
+          final selectedBooru = isValidNumberMod ? usedBoorus[booruNumber - 1] : null;
+          text = text.replaceAll(RegExp(r'^\d+#'), '').trim();
+
+          // do it twitce because it will be false for mergebooru
+          // (because proper tag query syntax is to place booru number in front of tag and all modifiers)
+          isExclude = isExclude || text.startsWith('-');
+          isOr = isOr || text.startsWith('~');
+          text = text.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').trim();
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 12,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  controller.text = isExclude ? text : '-$text';
+                  if (isValidNumberMod) controller.text = '$booruNumber#${controller.text}';
+                },
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Exclude (—)',
+                      ),
+                    ),
+                    IgnorePointer(
+                      ignoring: true,
+                      child: Checkbox(
+                        value: isExclude,
+                        onChanged: (_) {},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              //
+              ElevatedButton(
+                onPressed: () {
+                  controller.text = isOr ? text : '~$text';
+                  if (isValidNumberMod) controller.text = '$booruNumber#${controller.text}';
+                },
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text('Or (~)'),
+                    ),
+                    IgnorePointer(
+                      ignoring: true,
+                      child: Checkbox(
+                        value: isOr,
+                        onChanged: (_) {},
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              //
+              if (hasSecondaryBoorus)
+                Container(
+                  width: MediaQuery.sizeOf(context).width,
+                  height: 50,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: SettingsBooruDropdown(
+                    value: selectedBooru,
+                    items: usedBoorus,
+                    onChanged: (Booru? newBooru) {
+                      if (selectedBooru == newBooru) {
+                        newBooru = null;
+                      }
+
+                      controller.text =
+                          '${newBooru == null ? '' : usedBoorus.indexOf(newBooru) + 1}${newBooru == null ? '' : '#'}${isExclude ? '-' : ''}${isOr ? '~' : ''}$text';
+                    },
+                    title: 'Booru (N#)',
+                    contentPadding: EdgeInsets.zero,
+                    itemBuilder: (booru, _) {
+                      if (booru == null) {
+                        return const Text('');
+                      }
+
+                      return Row(
+                        spacing: 6,
+                        children: [
+                          Text('${usedBoorus.indexOf(booru) + 1}#'),
+                          BooruFavicon(booru),
+                          Expanded(
+                            child: Text(booru.name ?? ''),
+                          ),
+                        ],
+                      );
+                    },
+                    selectedItemBuilder: (booru) {
+                      if (booru == null) {
+                        return const Text('');
+                      }
+
+                      return Row(
+                        spacing: 6,
+                        children: [
+                          Text('${usedBoorus.indexOf(booru) + 1}#'),
+                          BooruFavicon(booru),
+                          Expanded(
+                            child: Text(booru.name ?? ''),
+                          ),
+                        ],
+                      );
+                    },
+                    drawBottomBorder: false,
+                  ),
+                ),
+              //
+              const CancelButton(
+                text: 'Return',
+                withIcon: true,
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }

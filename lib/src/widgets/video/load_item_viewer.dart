@@ -51,7 +51,7 @@ class _LoadItemViewerState extends State<LoadItemViewer> {
         final res = await widget.handler.loadItem(
           item: widget.item,
           cancelToken: cancelToken,
-          withCapcthaCheck: false,
+          withCapcthaCheck: true,
         );
         if (!res.failed) {
           if (res.item != null) {
@@ -85,7 +85,11 @@ class _LoadItemViewerState extends State<LoadItemViewer> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Thumbnail(item: widget.item),
+          Thumbnail(
+            item: widget.item,
+            booru: widget.handler.booru,
+            isStandalone: false,
+          ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
             margin: const EdgeInsets.all(16),

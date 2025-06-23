@@ -34,9 +34,11 @@ class TabSecondaryBooruSelector extends StatelessWidget {
       }
 
       final bool isDesktop = settingsHandler.appMode.value.isDesktop;
-      final EdgeInsetsGeometry margin = isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8);
+      final EdgeInsetsGeometry margin = isDesktop
+          ? const EdgeInsets.fromLTRB(2, 5, 2, 2)
+          : const EdgeInsets.fromLTRB(5, 8, 5, 8);
 
-      final List<Booru> value = searchHandler.currentSecondaryBoorus.value ?? [];
+      final List<Booru> value = searchHandler.currentSecondaryBoorus.value ?? <Booru>[];
 
       return Padding(
         padding: margin,
@@ -46,6 +48,7 @@ class TabSecondaryBooruSelector extends StatelessWidget {
             // if no secondary boorus selected, disable merge mode
             searchHandler.mergeAction(value.isNotEmpty ? value : null);
           },
+          expandableByScroll: true,
           items: settingsHandler.booruList,
           itemBuilder: (item) => Container(
             padding: const EdgeInsets.only(left: 16),

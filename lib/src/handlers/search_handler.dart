@@ -12,7 +12,6 @@ import 'package:get_it/get_it.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -43,10 +42,10 @@ List<List<String>> decodeBackupString(String input) {
 
 class SearchHandler {
   SearchHandler() {
-    _volumeStream = Platform.isAndroid ? StreamController.broadcast() : null;
+    _volumeStreamController = Platform.isAndroid ? StreamController.broadcast() : null;
     _scrollStream = StreamController.broadcast();
     _rootVolumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
-      _volumeStream?.sink.add(event);
+      _volumeStreamController?.sink.add(event);
     });
   }
   // alternative way to get instance of the controller
@@ -171,7 +170,9 @@ class SearchHandler {
       );
 
       final SettingsHandler settingsHandler = SettingsHandler.instance;
-      final String defaultText = currentBooru.defTags?.isNotEmpty == true ? currentBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = currentBooru.defTags?.isNotEmpty == true
+          ? currentBooru.defTags!
+          : settingsHandler.defTags;
       searchTextController.text = defaultText;
 
       final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
@@ -205,7 +206,9 @@ class SearchHandler {
       );
 
       final SettingsHandler settingsHandler = SettingsHandler.instance;
-      final String defaultText = currentBooru.defTags?.isNotEmpty == true ? currentBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = currentBooru.defTags?.isNotEmpty == true
+          ? currentBooru.defTags!
+          : settingsHandler.defTags;
       searchTextController.text = defaultText;
 
       final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
@@ -263,7 +266,8 @@ class SearchHandler {
   }
 
   // grid scroll controller
-  AutoScrollController gridScrollController = AutoScrollController(); // will be overwritten on the first render because there is hasClients check
+  AutoScrollController gridScrollController =
+      AutoScrollController(); // will be overwritten on the first render because there is hasClients check
   RxDouble scrollOffset = 0.0.obs;
   // stream that will notify it's listeners about scroll events of the grid controller
   StreamController<ScrollUpdateNotification>? _scrollStream;
@@ -280,7 +284,7 @@ class SearchHandler {
   final TextEditingController searchTextController = TextEditingController();
   void addTagToSearch(String tag) {
     if (tag.isNotEmpty) {
-      if (currentBooru.type == BooruType.Hydrus) {
+      if (currentBooru.type?.isHydrus == true) {
         searchTextController.text += ', $tag';
       } else {
         searchTextController.text += ' $tag';
@@ -288,7 +292,8 @@ class SearchHandler {
     }
   }
 
-  List<String> get searchTextControllerTags => searchTextController.text.trim().split(' ').where((t) => t.isNotEmpty).toList();
+  List<String> get searchTextControllerTags =>
+      searchTextController.text.trim().split(' ').where((t) => t.isNotEmpty).toList();
 
   void removeTagFromSearch(String tag) {
     if (tag.isNotEmpty) {
@@ -410,18 +415,31 @@ class SearchHandler {
   }
 
   HasTabWithTagResult hasTabWithTag(String tag) {
-    final tabsWithOnlyTag = list.where((tab) => tab.tags.toLowerCase().trim() == tag.toLowerCase().trim());
+    tag = tag.toLowerCase().trim();
+    List<SearchTab> tabsWithOnlyTag = list.where((tab) => tab.tags == tag).toList();
     if (tabsWithOnlyTag.isNotEmpty) {
-      if (tabsWithOnlyTag.any((tab) => tab.selectedBooru.value == currentBooru)) {
-        return HasTabWithTagResult.onlyTag;
-      } else {
-        return HasTabWithTagResult.onlyTagDifferentBooru;
+      tabsWithOnlyTag = tabsWithOnlyTag.where((tab) => tab.tags.toLowerCase().trim() == tag).toList();
+      if (tabsWithOnlyTag.isNotEmpty) {
+        if (tabsWithOnlyTag.any((tab) => tab.selectedBooru.value == currentBooru)) {
+          return HasTabWithTagResult.onlyTag;
+        } else {
+          return HasTabWithTagResult.onlyTagDifferentBooru;
+        }
       }
     }
 
-    final tabsContainingTag = list.where((tab) => tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim()));
+    List<SearchTab> tabsContainingTag = list
+        .where(
+          (tab) => tab.tags.contains(tag),
+        )
+        .toList();
     if (tabsContainingTag.isNotEmpty) {
-      return HasTabWithTagResult.containsTag;
+      tabsContainingTag = tabsContainingTag
+          .where((tab) => tab.tags.toLowerCase().trim().split(' ').contains(tag))
+          .toList();
+      if (tabsContainingTag.isNotEmpty) {
+        return HasTabWithTagResult.containsTag;
+      }
     }
 
     return HasTabWithTagResult.noTag;
@@ -444,8 +462,8 @@ class SearchHandler {
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   Booru get currentBooru => currentTab.selectedBooru.value;
   Rxn<List<Booru>?> get currentSecondaryBoorus => currentTab.secondaryBoorus;
-  List<BooruItem> get currentSelected => currentTab.selected;
-  List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
+  RxList<BooruItem> get currentSelected => currentTab.selected;
+  RxList<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
   void filterCurrentFetched() {
     if (list.isNotEmpty) {
       currentBooruHandler.filterFetched();
@@ -457,7 +475,7 @@ class SearchHandler {
     fileURL: '',
     sampleURL: '',
     thumbnailURL: '',
-    tagsList: [],
+    tagsList: const [],
     postURL: '',
   ).obs;
 
@@ -470,7 +488,7 @@ class SearchHandler {
             fileURL: '',
             sampleURL: '',
             thumbnailURL: '',
-            tagsList: [],
+            tagsList: const [],
             postURL: '',
           );
     viewedItem.value = newItem;
@@ -482,86 +500,6 @@ class SearchHandler {
     // print('old $oldIndex | new $newIndex index \n new item ${newItem.toString()}');
 
     return newItem;
-  }
-
-  Future<bool?> toggleItemFavourite(
-    int itemIndex, {
-    bool? forcedValue,
-    bool skipSnatching = false,
-  }) async {
-    final BooruItem item = currentFetched[itemIndex];
-    if (item.isFavourite.value != null) {
-      if (item.tagsList.isEmpty || item.mediaType.value.isNeedToLoadItem) {
-        // try to update the item before favouriting, do nothing on fail
-        if (!currentBooruHandler.hasLoadItemSupport) {
-          return item.isFavourite.value;
-        }
-
-        final res = await currentBooruHandler.loadItem(item: item);
-        if (res.failed || res.item == null || res.item!.tagsList.isEmpty || res.item!.mediaType.value.isNeedToLoadItem) {
-          return item.isFavourite.value;
-        }
-      }
-
-      if (forcedValue == null) {
-        await ServiceHandler.vibrate();
-      }
-
-      final bool newValue = forcedValue ?? (item.isFavourite.value == true ? false : true);
-      item.isFavourite.value = newValue;
-
-      final SettingsHandler settingsHandler = SettingsHandler.instance;
-      if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue && item.isSnatched.value != true) {
-        SnatchHandler.instance.queue(
-          [item],
-          currentBooru,
-          settingsHandler.snatchCooldown,
-          false,
-        );
-      }
-      await settingsHandler.dbHandler.updateBooruItem(
-        item,
-        BooruUpdateMode.local,
-      );
-
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        // update filtered items list in case user has favourites filter enabled
-        await Future.delayed(const Duration(milliseconds: 200));
-        filterCurrentFetched();
-      });
-    }
-    return item.isFavourite.value;
-  }
-
-  Future<void> updateFavForMultipleItems(
-    List<BooruItem> items, {
-    required bool newValue,
-    bool skipSnatching = false,
-  }) async {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue) {
-      SnatchHandler.instance.queue(
-        items.where((e) => e.isSnatched.value != true).toList(),
-        currentBooru,
-        settingsHandler.snatchCooldown,
-        false,
-      );
-    }
-
-    for (final BooruItem item in items) {
-      item.isFavourite.value = newValue;
-    }
-
-    await settingsHandler.dbHandler.updateMultipleBooruItems(
-      items,
-      BooruUpdateMode.local,
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // update filtered items list in case user has favourites filter enabled
-      await Future.delayed(const Duration(milliseconds: 200));
-      filterCurrentFetched();
-    });
   }
 
   // runs search on current tab
@@ -624,8 +562,9 @@ class SearchHandler {
 
     // Notify about ratings change on gelbooru and danbooru
     if (text.contains('rating:safe')) {
-      final bool isOnBooruWhereRatingsChanged = (booru.type == BooruType.Gelbooru && booru.baseURL!.contains('gelbooru.com')) ||
-          (booru.type == BooruType.Danbooru && booru.baseURL!.contains('danbooru.donmai.us'));
+      final bool isOnBooruWhereRatingsChanged =
+          (booru.type?.isGelbooru == true && booru.baseURL!.contains('gelbooru.com')) ||
+          (booru.type?.isDanbooru == true && booru.baseURL!.contains('danbooru.donmai.us'));
       if (isOnBooruWhereRatingsChanged) {
         FlashElements.showSnackbar(
           duration: null,
@@ -762,8 +701,8 @@ class SearchHandler {
   }
 
   // stream that will notify it's listeners when it receives a volume button event
-  StreamController<String>? _volumeStream;
-  Stream<String>? get volumeStream => _volumeStream?.stream;
+  StreamController<String>? _volumeStreamController;
+  Stream<String>? get volumeStream => _volumeStreamController?.stream;
 
   // listener for native volume button events
   StreamSubscription? _rootVolumeListener;
@@ -775,7 +714,7 @@ class SearchHandler {
   void dispose() {
     _scrollStream?.close();
     _rootVolumeListener?.cancel();
-    _volumeStream?.close();
+    _volumeStreamController?.close();
   }
 
   // Backup/restore tabs stuff
@@ -786,7 +725,7 @@ class SearchHandler {
 
   // bool to notify the main build that tab restoratiuon is complete
   RxBool isRestored = false.obs;
-  RxBool canBackup = true.obs;
+  RxBool canBackup = false.obs;
 
   // keeps track of the last time tabs were backupped
   DateTime lastBackupTime = DateTime.now();
@@ -808,7 +747,7 @@ class SearchHandler {
           // find booru by name and create searchtab with given tags
           final Booru findBooru = settingsHandler.booruList.firstWhere(
             (booru) => booru.name == booruAndTags[0],
-            orElse: () => Booru(null, null, null, null, null),
+            orElse: Booru.unknown,
           );
           if (findBooru.name != null) {
             final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
@@ -852,8 +791,8 @@ class SearchHandler {
               'Restored ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)} from previous session!',
             ),
             if (foundBrokenItem)
-              // notify user if there was unknown booru or invalid entry in the list
-              ...[
+            // notify user if there was unknown booru or invalid entry in the list
+            ...[
               const Text(
                 'Some restored tabs had unknown boorus or broken characters.',
               ),
@@ -871,13 +810,15 @@ class SearchHandler {
       list.value = restoredGlobals;
       changeTabIndex(newIndex);
     } else {
-      Booru defaultBooru = Booru(null, null, null, null, null);
+      Booru defaultBooru = Booru.unknown();
       // settingsHandler.getBooru();
       // Set the default booru and tags at the start
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
-      final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = defaultBooru.defTags?.isNotEmpty == true
+          ? defaultBooru.defTags!
+          : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         final SearchTab newTab = SearchTab(defaultBooru, null, defaultText);
         list.add(newTab);
@@ -900,7 +841,7 @@ class SearchHandler {
         // find booru by name and create searchtab with given tags
         final Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
-          orElse: () => Booru(null, null, null, null, null),
+          orElse: Booru.unknown,
         );
         if (findBooru.name != null) {
           final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
@@ -943,7 +884,7 @@ class SearchHandler {
         // find booru by name and create searchtab with given tags
         final Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
-          orElse: () => Booru(null, null, null, null, null),
+          orElse: Booru.unknown,
         );
         if (findBooru.name != null) {
           final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
@@ -979,9 +920,9 @@ class SearchHandler {
     bool foundBrokenItems = false;
     final List<TabBackup> brokenItems = [];
     int newSelectedIndex = 0;
-    if (result != null) {
-      final List<TabBackup> tabBackups = TabBackup.fromJsonList(result);
-      for (final tabBackup in tabBackups) {
+    final List<TabBackup> tabBackups = result != null ? await compute(TabBackup.fromJsonList, result) : [];
+    for (final tabBackup in tabBackups) {
+      try {
         final newTab = parseTabFromBackup(tabBackup);
         if (newTab.selectedBooru.value.name != null) {
           restoredTabs.add(newTab);
@@ -1003,6 +944,14 @@ class SearchHandler {
           final int index = tabBackups.indexWhere((tb) => tb == tabBackup);
           newSelectedIndex = index;
         }
+      } catch (e, s) {
+        Logger.Inst().log(
+          e,
+          'SearchHandler',
+          'restoreTabs',
+          LogTypes.exception,
+          s: s,
+        );
       }
     }
 
@@ -1022,7 +971,11 @@ class SearchHandler {
               const Text('Some restored tabs had unknown boorus or broken characters.'),
               const Text('They were set to default or ignored.'),
               const Text('List of broken tabs:'),
-              Text(brokenItems.map((t) => '${t.booru}: ${t.tags}').join(', ')),
+              Text(
+                brokenItems
+                    .map((t) => '${tabBackups.indexOf(t)}${t.booru}: ${t.tags.isEmpty ? '[empty]' : t.tags}')
+                    .join(', '),
+              ),
             ],
           ],
         ),
@@ -1034,11 +987,13 @@ class SearchHandler {
       list.value = restoredTabs;
       changeTabIndex(newSelectedIndex);
     } else {
-      Booru defaultBooru = Booru(null, null, null, null, null);
+      Booru defaultBooru = Booru.unknown();
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
-      final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = defaultBooru.defTags?.isNotEmpty == true
+          ? defaultBooru.defTags!
+          : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         list.add(
           SearchTab(defaultBooru, null, defaultText),
@@ -1061,7 +1016,8 @@ class SearchHandler {
           list.any(
             (tab) =>
                 tab.selectedBooru.value.name == newTab.selectedBooru.value.name &&
-                tab.secondaryBoorus.value?.map((t) => t.name).toList() == newTab.secondaryBoorus.value?.map((t) => t.name).toList() &&
+                tab.secondaryBoorus.value?.map((t) => t.name).toList() ==
+                    newTab.secondaryBoorus.value?.map((t) => t.name).toList() &&
                 tab.tags == newTab.tags,
           )) {
         restoredTabs.add(newTab);
@@ -1120,12 +1076,15 @@ class SearchHandler {
     final List<SearchTab> tabList = list;
     final int tabIndex = currentIndex;
     final bool onlyDefaultTab =
-        tabList.length == 1 && tabList[0].booruHandler.booru.name == settingsHandler.prefBooru && tabList[0].tags == settingsHandler.defTags;
+        tabList.length == 1 &&
+        tabList[0].booruHandler.booru.name == settingsHandler.prefBooru &&
+        tabList[0].tags == settingsHandler.defTags;
     if (!onlyDefaultTab && settingsHandler.booruList.isNotEmpty) {
       final List<String> dump = tabList.map((tab) {
         final String tags = tab.tags;
         final String booruName = tab.selectedBooru.value.name ?? 'unknown';
-        final List<String> secondaryBoorusNames = tab.secondaryBoorus.value?.map((b) => b.name ?? 'unknown').toList() ?? [];
+        final List<String> secondaryBoorusNames =
+            tab.secondaryBoorus.value?.map((b) => b.name ?? 'unknown').toList() ?? [];
         final bool selected = tab == tabList[tabIndex];
 
         return jsonEncode(
@@ -1147,8 +1106,19 @@ class SearchHandler {
   SearchTab parseTabFromBackup(TabBackup backup) {
     final booruList = SettingsHandler.instance.booruList;
 
-    final Booru selectedBooru = booruList.firstWhere((b) => b.name == backup.booru);
-    final List<Booru> secondaryBoorus = backup.secondaryBoorus.map((b) => booruList.firstWhere((booru) => booru.name == b)).toList();
+    final Booru selectedBooru = booruList.firstWhere(
+      (b) => b.name == backup.booru,
+      orElse: Booru.unknown,
+    );
+    final List<Booru> secondaryBoorus = backup.secondaryBoorus
+        .map(
+          (b) => booruList.firstWhere(
+            (booru) => booru.name == b,
+            orElse: Booru.unknown,
+          ),
+        )
+        .where((b) => b.name != null)
+        .toList();
 
     return SearchTab(
       selectedBooru,
@@ -1170,11 +1140,13 @@ class SearchHandler {
     } catch (e) {
       print('Error restoring tabs: $e');
       // await settingsHandler.dbHandler.clearTabRestore();
-      Booru defaultBooru = Booru(null, null, null, null, null);
+      Booru defaultBooru = Booru.unknown();
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
-      final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
+      final String defaultText = defaultBooru.defTags?.isNotEmpty == true
+          ? defaultBooru.defTags!
+          : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         final SearchTab newTab = SearchTab(defaultBooru, null, defaultText);
         list.clear();
@@ -1183,6 +1155,9 @@ class SearchHandler {
       }
       searchTextController.text = defaultText;
     }
+
+    // allow backup only after restoring to avoid long operations (i.e. database fixes) delaying restore and therefore causing backup to run before tabs were restored
+    canBackup.value = true;
   }
 
   void mergeTabs(String tabStr) {
@@ -1235,12 +1210,9 @@ class SearchTab {
     if (secondaryBoorus?.isNotEmpty == true) {
       tempBooruList.addAll(secondaryBoorus!);
     }
-    final List temp = BooruHandlerFactory().getBooruHandler(tempBooruList, null);
-    final BooruHandler handlerTemp = temp[0] as BooruHandler;
-    final int pageNumTemp = temp[1] as int;
-
-    booruHandler = handlerTemp;
-    booruHandler.pageNum = pageNumTemp;
+    final temp = BooruHandlerFactory().getBooruHandler(tempBooruList, null);
+    booruHandler = temp.booruHandler;
+    booruHandler.pageNum = temp.startingPage;
   }
   // unique id to use for booru controller
   final String id = uuid.v4();
@@ -1256,10 +1228,96 @@ class SearchTab {
     fileURL: '',
     sampleURL: '',
     thumbnailURL: '',
-    tagsList: [],
+    tagsList: const [],
     postURL: '',
   ).obs;
   RxList<BooruItem> selected = RxList<BooruItem>.from([]);
+
+  Future<bool?> toggleItemFavourite(
+    int itemIndex, {
+    bool? forcedValue,
+    bool skipSnatching = false,
+  }) async {
+    final BooruItem item = booruHandler.filteredFetched[itemIndex];
+    if (item.isFavourite.value != null) {
+      if (item.tagsList.isEmpty || item.mediaType.value.isNeedToLoadItem) {
+        // try to update the item before favouriting, do nothing on fail
+        if (!booruHandler.hasLoadItemSupport) {
+          return item.isFavourite.value;
+        }
+
+        final res = await booruHandler.loadItem(
+          item: item,
+          withCapcthaCheck: true,
+        );
+        if (res.failed ||
+            res.item == null ||
+            res.item!.tagsList.isEmpty ||
+            res.item!.mediaType.value.isNeedToLoadItem) {
+          return item.isFavourite.value;
+        }
+      }
+
+      if (forcedValue == null) {
+        await ServiceHandler.vibrate();
+      }
+
+      final bool newValue = forcedValue ?? (item.isFavourite.value == true ? false : true);
+      item.isFavourite.value = newValue;
+
+      final SettingsHandler settingsHandler = SettingsHandler.instance;
+      if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue && item.isSnatched.value != true) {
+        SnatchHandler.instance.queue(
+          [item],
+          booruHandler.booru,
+          settingsHandler.snatchCooldown,
+          false,
+        );
+      }
+      await settingsHandler.dbHandler.updateBooruItem(
+        item,
+        BooruUpdateMode.local,
+      );
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // update filtered items list in case user has favourites filter enabled
+        await Future.delayed(const Duration(milliseconds: 200));
+        booruHandler.filterFetched();
+      });
+    }
+    return item.isFavourite.value;
+  }
+
+  Future<void> updateFavForMultipleItems(
+    List<BooruItem> items, {
+    required bool newValue,
+    bool skipSnatching = false,
+  }) async {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    if (!skipSnatching && settingsHandler.snatchOnFavourite && newValue) {
+      SnatchHandler.instance.queue(
+        items.where((e) => e.isSnatched.value != true).toList(),
+        booruHandler.booru,
+        settingsHandler.snatchCooldown,
+        false,
+      );
+    }
+
+    for (final BooruItem item in items) {
+      item.isFavourite.value = newValue;
+    }
+
+    await settingsHandler.dbHandler.updateMultipleBooruItems(
+      items,
+      BooruUpdateMode.local,
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // update filtered items list in case user has favourites filter enabled
+      await Future.delayed(const Duration(milliseconds: 200));
+      booruHandler.filterFetched();
+    });
+  }
 
   @override
   String toString() {
@@ -1350,7 +1408,10 @@ enum HasTabWithTagResult {
   bool get isOnlyTagDifferentBooru => this == HasTabWithTagResult.onlyTagDifferentBooru;
   bool get isContainsTag => this == HasTabWithTagResult.containsTag;
   bool get isNoTag => this == HasTabWithTagResult.noTag;
-  bool get hasTag => this == HasTabWithTagResult.onlyTag || this == HasTabWithTagResult.onlyTagDifferentBooru || this == HasTabWithTagResult.containsTag;
+  bool get hasTag =>
+      this == HasTabWithTagResult.onlyTag ||
+      this == HasTabWithTagResult.onlyTagDifferentBooru ||
+      this == HasTabWithTagResult.containsTag;
 }
 
 enum TabAddMode {

@@ -11,8 +11,8 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
+import 'package:lemberfpsmonitor/lemberfpsmonitor.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:statsfl/statsfl.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -21,6 +21,7 @@ import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/notify_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
@@ -35,6 +36,7 @@ import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/root/dev_overlay.dart';
 import 'package:lolisnatcher/src/widgets/root/image_stats.dart';
 import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
@@ -62,11 +64,12 @@ void main() async {
   // load settings before first render to get theme data early
   NavigationHandler.register();
   ViewerHandler.register();
-  await SettingsHandler.register().initialize();
   SearchHandler.register();
   SnatchHandler.register();
   TagHandler.register();
   NotifyHandler.register();
+  SecureStorageHandler.register();
+  await SettingsHandler.register().initialize();
   LocalAuthHandler.register();
 
   await ServiceHandler.setSystemUiVisibility(true);
@@ -89,6 +92,7 @@ class _MainAppState extends State<MainApp> {
   final TagHandler tagHandler = TagHandler.instance;
   final NotifyHandler notifyHandler = NotifyHandler.instance;
   final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
+  OverlayScreen? overlayScreen;
 
   @override
   void initState() {
@@ -107,10 +111,43 @@ class _MainAppState extends State<MainApp> {
       settingsHandler.postInitMessage.value = 'Restoring tabs...';
       await searchHandler.restoreTabs();
     });
+
+    settingsHandler.isDebug.addListener(devOverlayListener);
+  }
+
+  void registerGlobalOverlay(BuildContext context) {
+    if (overlayScreen?.context.mounted == false) {
+      overlayScreen = null;
+    }
+    if (overlayScreen == null) {
+      overlayScreen = OverlayScreen.of(context);
+      createOverlays();
+      removeOverlays();
+    }
+  }
+
+  void createOverlays() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (settingsHandler.isDebug.value) {
+        overlayScreen?.insert(const DevOverlayContent(), 'devOverlay');
+      }
+    });
+  }
+
+  void removeOverlays() {
+    if (!settingsHandler.isDebug.value) {
+      overlayScreen?.remove('devOverlay');
+    }
+  }
+
+  void devOverlayListener() {
+    createOverlays();
+    removeOverlays();
   }
 
   @override
   void dispose() {
+    settingsHandler.isDebug.removeListener(devOverlayListener);
     NotifyHandler.unregister();
     NavigationHandler.unregister();
     ViewerHandler.unregister();
@@ -118,6 +155,7 @@ class _MainAppState extends State<MainApp> {
     SearchHandler.unregister();
     TagHandler.unregister();
     LocalAuthHandler.unregister();
+    SecureStorageHandler.unregister();
     SettingsHandler.unregister();
     super.dispose();
   }
@@ -169,12 +207,23 @@ class _MainAppState extends State<MainApp> {
                     themeMode: themeMode,
                     navigatorKey: navigationHandler.navigatorKey,
                     navigatorObservers: [
+                      navigationHandler.routeObserver,
                       TalkerRouteObserver(Logger.talker),
                     ],
                     home: const Home(),
                     builder: (_, child) => Stack(
                       children: [
-                        child ?? const SizedBox.shrink(),
+                        Overlay(
+                          initialEntries: [
+                            OverlayEntry(
+                              builder: (context) {
+                                registerGlobalOverlay(context);
+
+                                return child ?? const SizedBox.shrink();
+                              },
+                            ),
+                          ],
+                        ),
                         // Blur overlay
                         Overlay(
                           initialEntries: [
@@ -245,7 +294,7 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
       if (currentMode.refreshRate > maxFps.value) {
         maxFps.value = currentMode.refreshRate.round();
       }
-      Logger.Inst().log('Set max fps to $maxFps', 'MainApp', 'setMaxFPS', null);
+      Logger.Inst().log('Set max fps to ${maxFps.value}', 'MainApp', 'setMaxFPS', null);
     }
   }
 
@@ -262,27 +311,38 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
       builder: (context, maxFps, child) {
         return Obx(
           () {
-            return StatsFl(
-              isEnabled: settingsHandler.showFps.value,
-              width: 400,
-              height: 50,
-              maxFps: maxFps,
+            if (!settingsHandler.showFps.value) {
+              return child!;
+            }
+
+            return FPSMonitor(
+              showFPSChart: settingsHandler.showFps.value,
+              maxFPS: maxFps,
+              onFPSChanged: (_) {},
               showText: true,
               sampleTime: .2,
               totalTime: 10,
               align: Alignment.bottomLeft,
-              child: ImageStats(
-                isEnabled: settingsHandler.showImageStats.value,
-                width: 120,
-                height: 100,
-                align: Alignment.centerLeft,
-                child: child!,
-              ),
+              child: child,
             );
           },
         );
       },
-      child: widget.child,
+      child: Obx(
+        () {
+          if (!settingsHandler.showImageStats.value) {
+            return widget.child;
+          }
+
+          return ImageStats(
+            isEnabled: settingsHandler.showImageStats.value,
+            width: 120,
+            height: 100,
+            align: Alignment.centerLeft,
+            child: widget.child,
+          );
+        },
+      ),
     );
   }
 }
@@ -313,7 +373,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    backupTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    backupTimer = Timer.periodic(const Duration(seconds: kDebugMode ? 10 : 30), (timer) {
       // TODO rework so it happens on every tab change/addition, NOT on timer
       searchHandler.backupTabs();
       if (!tagHandler.tagSaveActive) {
@@ -483,7 +543,9 @@ class _AppLifecycleOverlayState extends State<AppLifecycleOverlay> with WidgetsB
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     setState(() {
-      _shouldOverlay = widget.shouldOverlay && AppLifecycleState.values.where((s) => s != AppLifecycleState.resumed).any((s) => state == s);
+      _shouldOverlay =
+          widget.shouldOverlay &&
+          AppLifecycleState.values.where((s) => s != AppLifecycleState.resumed).any((s) => state == s);
     });
   }
 
@@ -494,8 +556,8 @@ class _AppLifecycleOverlayState extends State<AppLifecycleOverlay> with WidgetsB
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.sizeOf(context).height,
+            width: MediaQuery.sizeOf(context).width,
             color: Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0.5),
             child: widget.child,
           ),

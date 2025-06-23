@@ -32,7 +32,12 @@ class _DatabasePageState extends State<DatabasePage> {
   final SearchHandler searchHandler = SearchHandler.instance;
   final ScrollController scrollController = ScrollController();
 
-  bool dbEnabled = true, indexesEnabled = true, changingIndexes = false, searchHistoryEnabled = true, isUpdating = false, tagTypeFetchEnabled = true;
+  bool dbEnabled = true,
+      indexesEnabled = true,
+      changingIndexes = false,
+      searchHistoryEnabled = true,
+      isUpdating = false,
+      tagTypeFetchEnabled = true;
   int updatingFailed = 0, updatingDone = 0;
   BooruType? sankakuType;
   CancelToken? cancelToken;
@@ -71,7 +76,10 @@ class _DatabasePageState extends State<DatabasePage> {
     if (isUpdating) {
       FlashElements.showSnackbar(
         title: const Text("Can't leave the page right now!", style: TextStyle(fontSize: 20)),
-        content: const Text('Sankaku data is being updated, wait until it ends or cancel manually at the bottom of the page', style: TextStyle(fontSize: 16)),
+        content: const Text(
+          'Sankaku data is being updated, wait until it ends or cancel manually at the bottom of the page',
+          style: TextStyle(fontSize: 16),
+        ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.yellow,
         sideColor: Colors.yellow,
@@ -105,7 +113,7 @@ class _DatabasePageState extends State<DatabasePage> {
     final List<Booru> sankakuBoorus = [];
 
     for (int i = 0; i < settingsHandler.booruList.length; i++) {
-      if (settingsHandler.booruList[i].type == BooruType.Sankaku &&
+      if (settingsHandler.booruList[i].type?.isSankaku == true &&
           [
             ...SankakuHandler.knownUrls,
             'sankakuapi.com',
@@ -171,11 +179,15 @@ class _DatabasePageState extends State<DatabasePage> {
     }
 
     for (final Booru sankakuBooru in sankakuBoorus) {
-      final SankakuHandler sankakuHandler =
-          sankakuBooru.type == BooruType.IdolSankaku ? IdolSankakuHandler(sankakuBooru, 10) : SankakuHandler(sankakuBooru, 10);
+      final SankakuHandler sankakuHandler = sankakuBooru.type?.isIdolSankaku == true
+          ? IdolSankakuHandler(sankakuBooru, 10)
+          : SankakuHandler(sankakuBooru, 10);
       updatingItems = customItems?.isNotEmpty == true
           ? customItems!
-          : await settingsHandler.dbHandler.getSankakuItems(search: sankakuSearchController.text, idol: sankakuBooru.type == BooruType.IdolSankaku);
+          : await settingsHandler.dbHandler.getSankakuItems(
+              search: sankakuSearchController.text,
+              idol: sankakuBooru.type?.isIdolSankaku == true,
+            );
 
       safeSetState(() {});
 
@@ -250,7 +262,9 @@ class _DatabasePageState extends State<DatabasePage> {
       sideColor: Colors.green,
     );
 
-    final List<String> failedIDs = await settingsHandler.dbHandler.getItemIDs(failedItems.map((e) => e.postURL).toList());
+    final List<String> failedIDs = await settingsHandler.dbHandler.getItemIDs(
+      failedItems.map((e) => e.postURL).toList(),
+    );
     await settingsHandler.dbHandler.deleteItem(failedIDs);
     setState(() {
       failedItems = [];
@@ -414,7 +428,9 @@ class _DatabasePageState extends State<DatabasePage> {
                               Text('Requires database to be enabled.'),
                               Text('Records last ${Constants.historyLimit} search queries.'),
                               Text('Tap any history entry for additional actions (Delete, Set as Favourite...)'),
-                              Text('Favourited queries are pinned to the top of the list and will not be counted towards the limit.'),
+                              Text(
+                                'Favourited queries are pinned to the top of the list and will not be counted towards the limit.',
+                              ),
                             ],
                           );
                         },
@@ -440,7 +456,7 @@ class _DatabasePageState extends State<DatabasePage> {
                             title: Text('Tag type fetching'),
                             contentItems: [
                               Text('Will search for tag types on supported boorus'),
-                              Text('This could lead to rate limiting'),
+                              Text('This can lead to rate limiting'),
                             ],
                           );
                         },
@@ -517,7 +533,10 @@ class _DatabasePageState extends State<DatabasePage> {
                                   FlashElements.showSnackbar(
                                     context: context,
                                     title: const Text('Snatched items cleared!', style: TextStyle(fontSize: 20)),
-                                    content: const Text('An app restart may be required!', style: TextStyle(fontSize: 16)),
+                                    content: const Text(
+                                      'An app restart may be required!',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                                     leadingIcon: Icons.delete_forever,
                                     leadingIconColor: Colors.red,
                                     sideColor: Colors.yellow,
@@ -565,7 +584,10 @@ class _DatabasePageState extends State<DatabasePage> {
                                   FlashElements.showSnackbar(
                                     context: context,
                                     title: const Text('Favourites cleared!', style: TextStyle(fontSize: 20)),
-                                    content: const Text('An app restart may be required!', style: TextStyle(fontSize: 16)),
+                                    content: const Text(
+                                      'An app restart may be required!',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                                     leadingIcon: Icons.delete_forever,
                                     leadingIconColor: Colors.red,
                                     sideColor: Colors.yellow,
@@ -604,7 +626,10 @@ class _DatabasePageState extends State<DatabasePage> {
                                   FlashElements.showSnackbar(
                                     context: context,
                                     title: const Text('Search history cleared!', style: TextStyle(fontSize: 20)),
-                                    content: const Text('An app restart may be required!', style: TextStyle(fontSize: 16)),
+                                    content: const Text(
+                                      'An app restart may be required!',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                                     leadingIcon: Icons.delete_forever,
                                     leadingIconColor: Colors.red,
                                     sideColor: Colors.yellow,

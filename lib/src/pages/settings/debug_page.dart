@@ -11,11 +11,13 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -124,15 +126,16 @@ class _DebugPageState extends State<DebugPage> {
                   },
                   title: 'Blur images + mute videos [DEV only]',
                 ),
-              SettingsToggle(
-                value: settingsHandler.desktopListsDrag,
-                onChanged: (newValue) {
-                  setState(() {
-                    settingsHandler.desktopListsDrag = newValue;
-                  });
-                },
-                title: 'Enable drag scroll on lists [Desktop only]',
-              ),
+              if (SettingsHandler.isDesktopPlatform)
+                SettingsToggle(
+                  value: settingsHandler.desktopListsDrag,
+                  onChanged: (newValue) {
+                    setState(() {
+                      settingsHandler.desktopListsDrag = newValue;
+                    });
+                  },
+                  title: 'Enable drag scroll on lists [Desktop only]',
+                ),
 
               SettingsButton(
                 name: 'Animation speed ($timeDilation)',
@@ -275,22 +278,35 @@ class _DebugPageState extends State<DebugPage> {
                       name: 'Vibrate',
                       action: () {
                         print('Vibrate $vDuration $vAmplitude');
-                        ServiceHandler.vibrate(flutterWay: vFlutterway, duration: vDuration.round(), amplitude: vAmplitude.round());
+                        ServiceHandler.vibrate(
+                          flutterWay: vFlutterway,
+                          duration: vDuration.round(),
+                          amplitude: vAmplitude.round(),
+                        );
                       },
                     ),
                   ],
                 ),
               ],
 
-              SettingsButton(name: 'Res: ${MediaQuery.of(context).size.width.toPrecision(4)}x${MediaQuery.of(context).size.height.toPrecision(4)}'),
-              SettingsButton(name: 'Pixel Ratio: ${MediaQuery.of(context).devicePixelRatio.toPrecision(4)}'),
+              SettingsButton(
+                name:
+                    'Res: ${MediaQuery.sizeOf(context).width.toPrecision(4)}x${MediaQuery.sizeOf(context).height.toPrecision(4)}',
+              ),
+              SettingsButton(name: 'Pixel Ratio: ${MediaQuery.devicePixelRatioOf(context).toPrecision(4)}'),
 
               const SettingsButton(name: '', enabled: false),
 
               SettingsButton(
                 name: 'Logger',
-                icon: const Icon(Icons.print),
-                page: () => const LoggerPage(),
+                action: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => LoggerViewPage(talker: Logger.talker),
+                    ),
+                  );
+                },
+                trailingIcon: const Icon(Icons.print),
               ),
 
               SettingsButton(
@@ -306,6 +322,14 @@ class _DebugPageState extends State<DebugPage> {
                   globalWindowsCookies.clear();
                 },
               ),
+
+              if (kDebugMode)
+                SettingsButton(
+                  name: 'Clear secure storage',
+                  action: () {
+                    SecureStorageHandler.instance.deleteAll();
+                  },
+                ),
 
               const SettingsButton(name: '', enabled: false),
 

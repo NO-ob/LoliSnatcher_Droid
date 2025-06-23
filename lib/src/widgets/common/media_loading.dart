@@ -20,8 +20,8 @@ class MediaLoading extends StatefulWidget {
     required this.total,
     required this.received,
     required this.startedAt,
-    required this.startAction,
-    required this.stopAction,
+    required this.onRestart,
+    required this.onStop,
     this.isTooBig = false,
     this.stopReasons = const [],
     super.key,
@@ -42,8 +42,8 @@ class MediaLoading extends StatefulWidget {
   final ValueNotifier<int> received;
   final ValueNotifier<int> startedAt;
 
-  final void Function()? startAction;
-  final void Function()? stopAction;
+  final void Function()? onRestart;
+  final void Function()? onStop;
 
   @override
   State<MediaLoading> createState() => _MediaLoadingState();
@@ -169,21 +169,99 @@ class _MediaLoadingState extends State<MediaLoading> {
       return const SizedBox.shrink();
     }
 
-    if (settingsHandler.shitDevice) {
-      if (settingsHandler.loadingGif) {
-        return const Center(
-          child: Image(image: AssetImage('assets/images/loading.gif')),
-        );
-      } else {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      }
-    }
-
     final bool hasProgressData = widget.hasProgress && (_total > 0);
     final int expectedBytes = hasProgressData ? _received : 0;
     final int totalBytes = hasProgressData ? _total : 0;
+    final double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
+
+    if (settingsHandler.shitDevice) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: widget.isStopped
+              ? [
+                  ...widget.stopReasons.map((String reason) {
+                    return LoadingText(
+                      text: reason,
+                      fontSize: 18,
+                    );
+                  }),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    icon: const Icon(
+                      Icons.play_arrow,
+                      size: 40,
+                      color: Colors.blue,
+                    ),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.black54),
+                      fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
+                    ),
+                    label: LoadingText(
+                      text: (widget.isTooBig || widget.item.isHated) ? 'Load anyway' : 'Restart loading',
+                      fontSize: 16,
+                      color: Colors.blue,
+                    ),
+                    onPressed: () {
+                      widget.onRestart?.call();
+                    },
+                  ),
+                ]
+              : [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    margin: const EdgeInsets.all(16),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          height: 48,
+                          width: 48,
+                          child: CircularProgressIndicator(
+                            value: percentDone == 0 ? null : percentDone,
+                          ),
+                        ),
+                        Text(
+                          '${(percentDone * 100).toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (percentDone < 1)
+                    ElevatedButton.icon(
+                      icon: Icon(
+                        Icons.stop,
+                        size: 40,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.black54),
+                        fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
+                      ),
+                      label: LoadingText(
+                        text: 'Stop loading',
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      onPressed: () {
+                        widget.onStop?.call();
+                      },
+                    ),
+                ],
+        ),
+      );
+    }
 
     const double speedCheckInterval = 1000 / 4;
     if (hasProgressData && (nowMils - _lastTime) > speedCheckInterval) {
@@ -194,7 +272,6 @@ class _MediaLoadingState extends State<MediaLoading> {
       _lastTime = nowMils;
     }
 
-    final double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
     final String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
     final String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
 
@@ -205,8 +282,9 @@ class _MediaLoadingState extends State<MediaLoading> {
       if (isVideo) {
         percentDoneText = (percentDone == 1) ? 'Rendering...' : '${(percentDone * 100).toStringAsFixed(2)}%';
       } else {
-        percentDoneText =
-            (percentDone == 1) ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...' : '${(percentDone * 100).toStringAsFixed(2)}%';
+        percentDoneText = (percentDone == 1)
+            ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...'
+            : '${(percentDone * 100).toStringAsFixed(2)}%';
       }
     } else {
       if (isVideo) {
@@ -223,10 +301,16 @@ class _MediaLoadingState extends State<MediaLoading> {
       expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / (nowMils - _prevTime))).round();
       // expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / speedCheckInterval)).round();
     }
-    final String expectedSpeedText = (hasProgressData && percentDone < 1) ? '${Tools.formatBytes(expectedSpeed, 1)}/s' : '';
+    final String expectedSpeedText = (hasProgressData && percentDone < 1)
+        ? '${Tools.formatBytes(expectedSpeed, 1)}/s'
+        : '';
 
-    final double expectedTime = hasProgressData ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed)) : 0;
-    final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? '~${expectedTime.toStringAsFixed(1)} s' : '';
+    final double expectedTime = hasProgressData
+        ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed))
+        : 0;
+    final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1)
+        ? '~${expectedTime.toStringAsFixed(1)} s'
+        : '';
 
     final int sinceStartSeconds = (sinceStart / 1000).floor();
     final String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds}s ago' : '';
@@ -261,12 +345,12 @@ class _MediaLoadingState extends State<MediaLoading> {
             fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
           ),
           label: LoadingText(
-            text: (widget.isTooBig || widget.item.isHated) ? 'Load Anyway' : 'Restart Loading',
+            text: (widget.isTooBig || widget.item.isHated) ? 'Load anyway' : 'Restart loading',
             fontSize: 16,
             color: Colors.blue,
           ),
           onPressed: () {
-            widget.startAction?.call();
+            widget.onRestart?.call();
           },
         ),
         if (isMovedBelow) const SizedBox(height: 60),
@@ -316,12 +400,12 @@ class _MediaLoadingState extends State<MediaLoading> {
                 fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
               ),
               label: LoadingText(
-                text: 'Stop Loading',
+                text: 'Stop loading',
                 fontSize: 18,
                 color: Theme.of(context).colorScheme.error,
               ),
               onPressed: () {
-                widget.stopAction?.call();
+                widget.onStop?.call();
               },
             ),
           if (isMovedBelow) const SizedBox(height: 60),

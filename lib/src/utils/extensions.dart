@@ -2,19 +2,44 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+extension BuildContextExtras on BuildContext {
+  MediaQueryData get mediaQuery => MediaQuery.of(this);
+  Size get size => MediaQuery.sizeOf(this);
+  double get width => size.width;
+  double get height => size.height;
+  EdgeInsets get viewInsets => MediaQuery.viewInsetsOf(this);
+  EdgeInsets get padding => MediaQuery.paddingOf(this);
+  double get devicePixelRatio => MediaQuery.devicePixelRatioOf(this);
+  Orientation get orientation => MediaQuery.orientationOf(this);
+  bool get isLandscape => orientation.isLandscape;
+  bool get isPortrait => orientation.isPortrait;
+
+  NavigatorState get navigator => Navigator.of(this);
+
+  ThemeData get theme => Theme.of(this);
+  TextTheme get textTheme => theme.textTheme;
+  ColorScheme get colorScheme => theme.colorScheme;
+  bool get isDark => theme.brightness == Brightness.dark;
+  bool get isLight => theme.brightness == Brightness.light;
+}
+
+extension OrientationExtras on Orientation {
+  bool get isLandscape => this == Orientation.landscape;
+  bool get isPortrait => this == Orientation.portrait;
+}
+
 extension UIExtras on Widget {
   Widget withBorder({
     Color? color,
     double? strokeWidth,
     BorderRadius? borderRadius,
-  }) =>
-      Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: color ?? Colors.black, width: strokeWidth ?? 1),
-          borderRadius: borderRadius,
-        ),
-        child: this,
-      );
+  }) => Container(
+    decoration: BoxDecoration(
+      border: Border.all(color: color ?? Colors.black, width: strokeWidth ?? 1),
+      borderRadius: borderRadius,
+    ),
+    child: this,
+  );
 
   Widget padded(double padding) => Padding(padding: EdgeInsets.all(padding), child: this);
 
@@ -71,7 +96,8 @@ extension DoubleExtras on double {
     return (this * mod).round().toDouble() / mod;
   }
 
-  String truncateTrailingZeroes(int? fractionDigits) => toStringAsFixed(fractionDigits ?? toString().split('.')[1].length).replaceAllMapped(
+  String truncateTrailingZeroes(int? fractionDigits) =>
+      toStringAsFixed(fractionDigits ?? toString().split('.')[1].length).replaceAllMapped(
         RegExp(r'(\.\d*?[1-9]|)\.?0+$'),
         (match) => '${match[1] == '.' ? '' : match[1]}',
       );
@@ -83,9 +109,9 @@ extension BoolExtras on bool {
 
 String formatNumber(num number) {
   final String formattedPart = number.toString().replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-        (Match match) => '${match[1]} ',
-      );
+    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+    (Match match) => '${match[1]} ',
+  );
   return formattedPart.trim();
 }
 

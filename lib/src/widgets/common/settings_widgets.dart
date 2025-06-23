@@ -81,7 +81,9 @@ class SettingsButton extends StatelessWidget {
           // draw top border when item is in the middle of other items, but they are not listtile
           top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
           // draw bottom border when item is among other listtiles, but not when it's the last one
-          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          bottom: drawBottomBorder
+              ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth)
+              : BorderSide.none,
         ),
       ),
     );
@@ -246,20 +248,30 @@ class SettingsToggle extends StatelessWidget {
                   },
                 ),
               ),
-            trailingIcon ?? const SizedBox(width: 8),
           ],
         ),
         subtitle: subtitle,
-        trailing: Switch(
-          value: value,
-          onChanged: enabled ? onChanged : null,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: trailingIcon,
+            ),
+            Switch(
+              value: value,
+              onChanged: enabled ? onChanged : null,
+            ),
+          ],
         ),
         onTap: () => onChanged(!value),
         shape: Border(
           // draw top border when item is in the middle of other items, but they are not listtile
           top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
           // draw bottom border when item is among other listtiles, but not when it's the last one
-          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          bottom: drawBottomBorder
+              ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth)
+              : BorderSide.none,
         ),
       ),
     );
@@ -343,7 +355,9 @@ class SettingsToggleTristate extends StatelessWidget {
         onTap: _onChangedToggle,
         shape: Border(
           top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          bottom: drawBottomBorder
+              ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth)
+              : BorderSide.none,
         ),
       ),
     );
@@ -447,7 +461,9 @@ class SettingsSegmentedButton<T> extends StatelessWidget {
           // draw top border when item is in the middle of other items, but they are not listtile
           top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
           // draw bottom border when item is among other listtiles, but not when it's the last one
-          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          bottom: drawBottomBorder
+              ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth)
+              : BorderSide.none,
         ),
       ),
     );
@@ -464,6 +480,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.trailingIcon,
+    this.contentPadding,
     this.itemBuilder,
     this.itemFilter,
     this.selectedItemBuilder,
@@ -484,6 +501,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget? trailingIcon;
+  final EdgeInsets? contentPadding;
   final Widget Function(T?)? itemBuilder;
   final bool Function(T?)? itemFilter;
   final Widget Function(T?)? selectedItemBuilder;
@@ -507,7 +525,9 @@ class SettingsDropdown<T> extends StatelessWidget {
     final bool hasSubtitle = subtitle.isNotEmpty;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
+
       children: [
         Padding(
           padding: hasSubtitle ? const EdgeInsets.only(top: 8) : EdgeInsets.zero,
@@ -564,7 +584,8 @@ class SettingsDropdown<T> extends StatelessWidget {
           labelText: title,
         ),
         subtitle: subtitle,
-        trailing: trailingIcon ??
+        trailing:
+            trailingIcon ??
             (onReset != null
                 ? IconButton(
                     onPressed: onReset,
@@ -572,11 +593,14 @@ class SettingsDropdown<T> extends StatelessWidget {
                   )
                 : null),
         dense: false,
+        contentPadding: contentPadding,
         shape: Border(
           // draw top border when item is in the middle of other items, but they are not listtile
           top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
           // draw bottom border when item is among other listtiles, but not when it's the last one
-          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          bottom: drawBottomBorder
+              ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth)
+              : BorderSide.none,
         ),
       ),
     );
@@ -588,7 +612,9 @@ class SettingsBooruDropdown extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.title,
+    this.items,
     this.itemBuilder,
+    this.selectedItemBuilder,
     this.itemFilter,
     this.subtitle,
     this.placeholder,
@@ -596,13 +622,16 @@ class SettingsBooruDropdown extends StatelessWidget {
     this.drawBottomBorder = true,
     this.nullable = false,
     this.trailingIcon,
+    this.contentPadding,
     super.key,
   });
 
   final Booru? value;
   final ValueChanged<Booru?>? onChanged;
   final String title;
+  final List<Booru>? items;
   final Widget Function(Booru?, bool)? itemBuilder;
+  final Widget Function(Booru?)? selectedItemBuilder;
   final bool Function(Booru?)? itemFilter;
   final Widget? subtitle;
   final String? placeholder;
@@ -610,10 +639,15 @@ class SettingsBooruDropdown extends StatelessWidget {
   final bool drawBottomBorder;
   final bool nullable;
   final Widget? trailingIcon;
+  final EdgeInsets? contentPadding;
 
   Widget _selectedItemBuilder(Booru? item) {
     if (item == null) {
       return Text(placeholder ?? 'Select a booru');
+    }
+
+    if (selectedItemBuilder != null) {
+      return selectedItemBuilder!(item);
     }
 
     return TabBooruSelectorItem(booru: item);
@@ -647,7 +681,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     return SettingsDropdown<Booru?>(
       value: value,
       items: [
-        ...SettingsHandler.instance.booruList.where((b) => itemFilter?.call(b) ?? true),
+        ...(items ?? SettingsHandler.instance.booruList).where((b) => itemFilter?.call(b) ?? true),
       ],
       onChanged: onChanged,
       title: title,
@@ -660,6 +694,7 @@ class SettingsBooruDropdown extends StatelessWidget {
       clearable: nullable,
       itemExtent: kMinInteractiveDimension,
       expendableByScroll: true,
+      contentPadding: contentPadding,
     );
   }
 }
@@ -714,7 +749,8 @@ class SettingsOptionsList<T> extends StatelessWidget {
 
     return InkWell(
       onTap: () => onChanged(value),
-      child: (isSelected ? selectedItemBuilder ?? itemBuilder : itemBuilder)?.call(value) ??
+      child:
+          (isSelected ? selectedItemBuilder ?? itemBuilder : itemBuilder)?.call(value) ??
           ListTile(
             key: Key('$index'),
             tileColor: index.isOdd ? oddItemColor : evenItemColor,
@@ -734,7 +770,8 @@ class SettingsOptionsList<T> extends StatelessWidget {
           ListTile(
             title: Text(title),
             subtitle: subtitle,
-            trailing: trailingIcon ??
+            trailing:
+                trailingIcon ??
                 (onReset != null
                     ? IconButton(
                         onPressed: onReset,
@@ -743,7 +780,9 @@ class SettingsOptionsList<T> extends StatelessWidget {
                     : null),
             dense: false,
             shape: Border(
-              top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+              top: drawTopBorder
+                  ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth)
+                  : BorderSide.none,
             ),
           ),
           ListTile(
@@ -759,7 +798,9 @@ class SettingsOptionsList<T> extends StatelessWidget {
               ],
             ),
             shape: Border(
-              bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+              bottom: drawBottomBorder
+                  ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth)
+                  : BorderSide.none,
             ),
           ),
         ],
@@ -806,6 +847,7 @@ class SettingsTextInput extends StatefulWidget {
     this.submitIcon,
     this.showSubmitButton,
     this.prefixIcon,
+    this.contextMenuBuilder,
     super.key,
   });
 
@@ -845,6 +887,7 @@ class SettingsTextInput extends StatefulWidget {
   final IconData? submitIcon;
   final bool Function(String)? showSubmitButton;
   final Widget? prefixIcon;
+  final Widget Function(BuildContext, EditableTextState)? contextMenuBuilder;
 
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
@@ -1016,7 +1059,9 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
                 _focusNode.unfocus();
               }
             },
-            onLongPress: widget.onSubmittedLongTap != null ? () => widget.onSubmittedLongTap?.call(widget.controller.text) : null,
+            onLongPress: widget.onSubmittedLongTap != null
+                ? () => widget.onSubmittedLongTap?.call(widget.controller.text)
+                : null,
           )
         else if (!isFocused)
           IconButton(
@@ -1048,6 +1093,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         autocorrect: widget.autocorrect,
         enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
         scrollPadding: const EdgeInsets.all(kToolbarHeight),
+        contextMenuBuilder: widget.contextMenuBuilder,
         decoration: InputDecoration(
           labelText: widget.title,
           hintText: widget.hintText,
@@ -1077,9 +1123,13 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         dense: false,
         shape: Border(
           // draw top border when item is in the middle of other items, but they are not listtile
-          top: widget.drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          top: widget.drawTopBorder
+              ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth)
+              : BorderSide.none,
           // draw bottom border when item is among other listtiles, but not when it's the last one
-          bottom: widget.drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          bottom: widget.drawBottomBorder
+              ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth)
+              : BorderSide.none,
         ),
       ),
     );
@@ -1120,7 +1170,8 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: title,
-      content: content ??
+      content:
+          content ??
           SingleChildScrollView(
             child: ListBody(
               children: contentItems ?? [],
@@ -1172,7 +1223,8 @@ class SettingsBottomSheet extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? Theme.of(context).colorScheme.surface,
-        borderRadius: borderRadius ?? const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        borderRadius:
+            borderRadius ?? const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -1241,7 +1293,8 @@ class SettingsBottomSheet extends StatelessWidget {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: backgroundColor ?? Theme.of(context).colorScheme.onSurface,
-                        borderRadius: borderRadius ??
+                        borderRadius:
+                            borderRadius ??
                             const BorderRadius.all(
                               Radius.circular(20),
                             ),
@@ -1287,7 +1340,8 @@ class SettingsPageDialog extends StatelessWidget {
           if ((actions?.length ?? 0) > 0)
             Row(
               // add separators between actions and after the last action
-              children: actions
+              children:
+                  actions
                       ?.map(
                         (e) => [
                           e,

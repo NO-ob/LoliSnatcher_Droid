@@ -97,7 +97,8 @@ class DesktopHome extends StatelessWidget {
                     icon: const Icon(Icons.save),
                     iconOnly: true,
                     action: () async {
-                      await getPerms();
+                      if (!await setPermissions()) return;
+
                       // call a function to save the currently viewed image when the save button is pressed
                       if (searchHandler.currentSelected.isNotEmpty) {
                         snatchHandler.queue(
@@ -107,7 +108,7 @@ class DesktopHome extends StatelessWidget {
                           false,
                         );
                         if (settingsHandler.favouriteOnSnatch) {
-                          await searchHandler.updateFavForMultipleItems(
+                          await searchHandler.currentTab.updateFavForMultipleItems(
                             searchHandler.currentSelected,
                             newValue: true,
                             skipSnatching: true,
@@ -140,7 +141,10 @@ class DesktopHome extends StatelessWidget {
                         ),
                         child: Center(
                           child: FittedBox(
-                            child: Text('${searchHandler.currentSelected.length}', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                            child: Text(
+                              '${searchHandler.currentSelected.length}',
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                            ),
                           ),
                         ),
                       ),
@@ -202,7 +206,12 @@ class DesktopTagListener extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
         ),
-        child: const TagView(),
+        child: Obx(
+          () => TagView(
+            item: searchHandler.viewedItem.value,
+            handler: searchHandler.currentBooruHandler,
+          ),
+        ),
       );
     });
   }

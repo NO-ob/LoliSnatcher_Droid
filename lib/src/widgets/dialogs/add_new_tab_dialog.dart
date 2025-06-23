@@ -43,13 +43,14 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   List<Booru> secondaryBoorus = [];
   TabAddMode addMode = TabAddMode.end; // prev, next, end
   _Querymode queryMode = _Querymode.defaultTags;
-  final TextEditingController customTagsController = TextEditingController(), customPageController = TextEditingController();
+  final TextEditingController customTagsController = TextEditingController(),
+      customPageController = TextEditingController();
   GlobalKey secondaryBoorusDropdownKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
-    secondaryBoorus = searchHandler.currentSecondaryBoorus.value ?? [];
+    secondaryBoorus = searchHandler.currentSecondaryBoorus.value ?? <Booru>[];
     customPageController.text = searchHandler.currentTab.booruHandler.pageNum.toString();
   }
 
@@ -160,44 +161,48 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                             width: borderWidth,
                           ),
                         ),
-                        title: LoliMultiselectDropdown(
-                          key: secondaryBoorusDropdownKey,
-                          value: secondaryBoorus,
-                          onChanged: (List<Booru> value) {
-                            setState(() {
-                              secondaryBoorus = value;
-                            });
-                          },
-                          items: settingsHandler.booruList,
-                          itemBuilder: (item) => Container(
-                            padding: const EdgeInsets.only(left: 16),
-                            height: kMinInteractiveDimension,
-                            child: TabBooruSelectorItem(booru: item),
-                          ),
-                          labelText: 'Secondary boorus to include',
-                          selectedItemBuilder: (List<Booru> value) => Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Wrap(
-                                spacing: 4,
-                                runSpacing: 4,
-                                children: [
-                                  for (final item in value)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(context).colorScheme.secondaryContainer,
-                                        borderRadius: BorderRadius.circular(100),
+                        title: Padding(
+                          padding: const EdgeInsets.only(top: 8, bottom: 6),
+                          child: LoliMultiselectDropdown(
+                            key: secondaryBoorusDropdownKey,
+                            value: secondaryBoorus,
+                            onChanged: (List<Booru> value) {
+                              setState(() {
+                                secondaryBoorus = value;
+                              });
+                            },
+                            expandableByScroll: true,
+                            items: settingsHandler.booruList,
+                            itemBuilder: (item) => Container(
+                              padding: const EdgeInsets.only(left: 16),
+                              height: kMinInteractiveDimension,
+                              child: TabBooruSelectorItem(booru: item),
+                            ),
+                            labelText: 'Secondary boorus to include',
+                            selectedItemBuilder: (List<Booru> value) => Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Wrap(
+                                  spacing: 4,
+                                  runSpacing: 4,
+                                  children: [
+                                    for (final item in value)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).colorScheme.secondaryContainer,
+                                          borderRadius: BorderRadius.circular(100),
+                                        ),
+                                        child: TabBooruSelectorItem(
+                                          booru: item,
+                                          compact: true,
+                                        ),
                                       ),
-                                      child: TabBooruSelectorItem(
-                                        booru: item,
-                                        compact: true,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       )
@@ -208,7 +213,8 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                             addSecondaryBoorus = v;
                             if (secondaryBoorus.isEmpty) {
                               WidgetsBinding.instance.addPostFrameCallback(
-                                (_) => (secondaryBoorusDropdownKey.currentWidget as LoliMultiselectDropdown<Booru>?)?.showDialog(context),
+                                (_) => (secondaryBoorusDropdownKey.currentWidget as LoliMultiselectDropdown<Booru>?)
+                                    ?.showDialog(context),
                               );
                             }
                           });

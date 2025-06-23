@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 
@@ -14,6 +14,9 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   bool get hasTagSuggestions => true;
+
+  @override
+  bool get hasLoadItemSupport => false;
 
   @override
   Options? fetchSearchOptions() {
@@ -38,7 +41,7 @@ class IdolSankakuHandler extends SankakuHandler {
       'Cache-Control': 'no-store, no-cache, must-revalidate',
       'Connection': 'Keep-Alive',
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      'User-Agent': 'SCChannelApp/4.2 (Android; idol)',
+      'User-Agent': Constants.sankakuIdolAppUserAgent,
       if (token.isNotEmpty) 'x-rails-token': token,
     };
   }
@@ -177,10 +180,6 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   bool get hasSignInSupport => true;
-
-  String generateSha1(String str) {
-    return sha1.convert(utf8.encode(str)).toString();
-  }
 
   String token = '';
 

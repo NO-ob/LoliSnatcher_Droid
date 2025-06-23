@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:get/get.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -7,31 +10,38 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
 class GridBuilder extends StatelessWidget {
   const GridBuilder({
+    required this.tab,
+    required this.scrollController,
+    this.highlightedIndex,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
     this.onSecondaryTap,
+    this.onSelected,
     super.key,
   });
 
-  final void Function(int, BooruItem)? onTap;
-  final void Function(int, BooruItem)? onDoubleTap;
-  final void Function(int, BooruItem)? onLongPress;
-  final void Function(int, BooruItem)? onSecondaryTap;
+  final SearchTab tab;
+  final AutoScrollController scrollController;
+  final int? highlightedIndex;
+  final void Function(int)? onTap;
+  final void Function(int)? onDoubleTap;
+  final void Function(int)? onLongPress;
+  final void Function(int)? onSecondaryTap;
+  final void Function(int)? onSelected;
 
   @override
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final SearchHandler searchHandler = SearchHandler.instance;
 
-    final String previewDisplay = (settingsHandler.previewDisplay == 'Staggered' && !searchHandler.currentBooruHandler.hasSizeData)
+    final String previewDisplay = (settingsHandler.previewDisplay == 'Staggered' && !tab.booruHandler.hasSizeData)
         ? settingsHandler.previewDisplayFallback
         : settingsHandler.previewDisplay;
 
-    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+    final int columnCount = context.isPortrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
     return ValueListenableBuilder(
-      valueListenable: searchHandler.currentTab.booruHandler.filteredFetched,
+      valueListenable: tab.booruHandler.filteredFetched,
       builder: (context, currentFetched, child) => SliverGrid.builder(
         addAutomaticKeepAlives: false,
         itemCount: currentFetched.length,
@@ -42,18 +52,30 @@ class GridBuilder extends StatelessWidget {
           crossAxisSpacing: 4,
         ),
         itemBuilder: (BuildContext context, int index) {
-          final BooruItem item = searchHandler.currentFetched[index];
+          return Obx(() {
+            final BooruItem item = currentFetched[index];
 
-          return GridTile(
-            child: ThumbnailCardBuild(
-              index: index,
-              item: item,
-              onTap: onTap,
-              onDoubleTap: onDoubleTap,
-              onLongPress: onLongPress,
-              onSecondaryTap: onSecondaryTap,
-            ),
-          );
+            final bool hasSelected = tab.selected.isNotEmpty;
+            final selectedIndex = tab.selected.indexOf(item);
+            final bool isSelected = selectedIndex != -1;
+
+            return GridTile(
+              child: ThumbnailCardBuild(
+                index: index,
+                item: item,
+                handler: tab.booruHandler,
+                scrollController: scrollController,
+                isHighlighted: index == highlightedIndex,
+                selectable: true,
+                selectedIndex: isSelected ? selectedIndex : null,
+                onSelected: hasSelected ? onSelected : null,
+                onTap: onTap,
+                onDoubleTap: onDoubleTap,
+                onLongPress: onLongPress,
+                onSecondaryTap: onSecondaryTap,
+              ),
+            );
+          });
         },
       ),
     );

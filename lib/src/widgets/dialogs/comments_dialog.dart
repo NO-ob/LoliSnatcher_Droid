@@ -8,8 +8,9 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -23,13 +24,13 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class CommentsDialog extends StatefulWidget {
   const CommentsDialog({
-    required this.index,
     required this.item,
+    required this.handler,
     super.key,
   });
 
-  final int index;
   final BooruItem item;
+  final BooruHandler handler;
 
   @override
   State<CommentsDialog> createState() => _CommentsDialogState();
@@ -37,7 +38,6 @@ class CommentsDialog extends StatefulWidget {
 
 class _CommentsDialogState extends State<CommentsDialog> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final SearchHandler searchHandler = SearchHandler.instance;
 
   List<CommentItem> comments = [];
   ScrollController scrollController = ScrollController();
@@ -51,17 +51,22 @@ class _CommentsDialogState extends State<CommentsDialog> {
   }
 
   Future<void> getComments({bool initial = false}) async {
-    page = initial ? 0 : page + 1;
+    page = page + 1;
     if (initial) {
+      page = 0;
       isCompleted = false;
       notSupported = false;
       comments.clear();
     }
+
     isLoading = true;
     if (!isCompleted) {
       if (widget.item.serverId != null) {
         setState(() {}); // set state to update the loading indicator
-        final List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, page);
+        final List<CommentItem> fetched = await widget.handler.getComments(
+          widget.item.serverId!,
+          page,
+        );
         if (fetched.isEmpty || comments.contains(fetched.first)) {
           isCompleted = true;
         }
@@ -74,19 +79,6 @@ class _CommentsDialogState extends State<CommentsDialog> {
       }
     }
 
-    // comments = [
-    //   ...comments,
-    //   ...List.generate(4000, (i) => CommentItem(
-    //     id: 'id',
-    //     title: 'title',
-    //     content: 'Comment content',
-    //     authorID: "creator_id",
-    //     authorName: "creator",
-    //     avatarUrl: null,
-    //     postID: "post_id",
-    //   ))
-    // ];
-
     isLoading = false;
     setState(() {});
   }
@@ -96,10 +88,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
       children: [
         if (isLoading)
           const Center(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(18, 50, 18, 18),
-              child: CircularProgressIndicator(),
-            ),
+            child: Padding(padding: EdgeInsets.fromLTRB(18, 50, 18, 18), child: CircularProgressIndicator()),
           )
         else if (notSupported)
           const Center(
@@ -133,7 +122,9 @@ class _CommentsDialogState extends State<CommentsDialog> {
 
   bool onScroll(ScrollUpdateNotification notif) {
     final bool isNotAtStart = notif.metrics.pixels > 0;
-    final bool isAtOrNearEdge = notif.metrics.atEdge || notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2));
+    final bool isAtOrNearEdge =
+        notif.metrics.atEdge ||
+        notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2));
     final bool isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0;
 
     if (!isLoading && !isCompleted) {
@@ -149,13 +140,26 @@ class _CommentsDialogState extends State<CommentsDialog> {
     final bool areThereErrors = (isLoading && comments.isEmpty) || notSupported || comments.isEmpty;
 
     return SettingsPageDialog(
-      title: Text('Comments ${comments.isEmpty ? '' : '(${comments.length})'}'.trim()),
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Comments'),
+          if (comments.isNotEmpty)
+            Text(
+              '${comments.length}',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+        ],
+      ),
       content: NotificationListener<ScrollUpdateNotification>(
         onNotification: onScroll,
         child: Scrollbar(
           controller: scrollController,
           interactive: true,
-          scrollbarOrientation: settingsHandler.handSide.value.isLeft ? ScrollbarOrientation.left : ScrollbarOrientation.right,
+          scrollbarOrientation: settingsHandler.handSide.value.isLeft
+              ? ScrollbarOrientation.left
+              : ScrollbarOrientation.right,
           child: RefreshIndicator(
             triggerMode: RefreshIndicatorTriggerMode.anywhere,
             strokeWidth: 4,
@@ -173,10 +177,13 @@ class _CommentsDialogState extends State<CommentsDialog> {
                 scrollDirection: Axis.vertical,
                 itemBuilder: (context, index) {
                   if (index == 0) {
-                    return _CommentsHeader(item: widget.item);
+                    return _CommentsHeader(
+                      item: widget.item,
+                      handler: widget.handler,
+                    );
                   }
 
-                  return areThereErrors
+                  return areThereErrors //
                       ? errorEntryBuild(context, index)
                       : _CommentEntry(
                           comment: comments[index - 1],
@@ -234,7 +241,6 @@ class _CommentEntry extends StatelessWidget {
         .replaceAll('said:', 'said: ')
         // .replaceAll(RegExp(r'\[\w+\]'), '[') // probably not correct to do, will trigger on everything that has [smth]
         // .replaceAll(RegExp(r'\[\/\w+\]'), ']\n')
-
         // move three dots away from everything
         .replaceAll('...', ' ... ')
         // multiple spaces to one
@@ -323,38 +329,44 @@ class _CommentEntry extends StatelessWidget {
                             : Center(child: Text(comment.authorName?.substring(0, 2) ?? '?')),
                       ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (comment.authorName?.isNotEmpty == true)
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (comment.authorName?.isNotEmpty == true)
+                            Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: SelectableText(
+                                comment.authorName!,
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           Padding(
                             padding: const EdgeInsets.all(4),
-                            child: SelectableText(comment.authorName!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        Padding(
-                          padding: const EdgeInsets.all(4),
-                          child: Row(
-                            children: [
-                              if (comment.title?.isNotEmpty == true)
-                                SelectableText(
-                                  comment.title!,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              const SizedBox(width: 5),
-                              if (comment.createDate?.isNotEmpty == true)
-                                Text(
-                                  formatDate(comment.createDate!, comment.createDateFormat!),
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                            child: Row(
+                              children: [
+                                if (comment.title?.isNotEmpty == true)
+                                  SelectableText(
+                                    comment.title!,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
-                                ),
-                              const SizedBox(width: 15),
-                              scoreText(comment.score),
-                            ],
+                                const SizedBox(width: 5),
+                                if (comment.createDate?.isNotEmpty == true)
+                                  Text(
+                                    formatDate(comment.createDate!, comment.createDateFormat!),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                    ),
+                                  ),
+                                const SizedBox(width: 15),
+                                scoreText(comment.score),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -402,9 +414,11 @@ class _CommentEntry extends StatelessWidget {
 class _CommentsHeader extends StatelessWidget {
   const _CommentsHeader({
     required this.item,
+    required this.handler,
   });
 
   final BooruItem item;
+  final BooruHandler handler;
 
   @override
   Widget build(BuildContext context) {
@@ -425,7 +439,7 @@ class _CommentsHeader extends StatelessWidget {
           height = width / maxRatio;
         }
 
-        if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+        if (context.isLandscape) {
           final double sizeDiff = height / (min(MediaQuery.sizeOf(context).height * 0.4, height));
           height /= sizeDiff;
           width /= sizeDiff;
@@ -443,6 +457,7 @@ class _CommentsHeader extends StatelessWidget {
                   enabled: false,
                   child: ThumbnailBuild(
                     item: item,
+                    handler: handler,
                     selectable: false,
                   ),
                 ),

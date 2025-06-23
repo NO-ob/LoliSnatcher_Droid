@@ -21,17 +21,17 @@ class CommentItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        content,
-        authorID,
-        authorName,
-        avatarUrl,
-        score,
-        postID,
-        createDate,
-        createDateFormat,
-      ];
+    id,
+    title,
+    content,
+    authorID,
+    authorName,
+    avatarUrl,
+    score,
+    postID,
+    createDate,
+    createDateFormat,
+  ];
 
   Map<String, dynamic> toJson() {
     return {

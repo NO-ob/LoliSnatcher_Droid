@@ -8,12 +8,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
@@ -106,25 +108,30 @@ class Tools {
   // unified http headers list generator for dio in thumb/media/video loaders
   static Future<Map<String, String>> getFileCustomHeaders(
     Booru? booru, {
+    BooruItem? item,
     bool checkForReferer = false,
   }) async {
-    if (booru == null) return {};
+    final uri = Uri.parse((booru?.baseURL?.isNotEmpty == true ? booru?.baseURL : item?.postURL) ?? '');
+    if (uri.host.isEmpty) {
+      return {};
+    }
 
     // a few boorus don't work without a browser useragent
     final Map<String, String> headers = {'User-Agent': browserUserAgent};
-    if (booru.baseURL?.contains('danbooru.donmai.us') ?? false) {
+    if (uri.host.contains('danbooru.donmai.us')) {
       headers['User-Agent'] = appUserAgent;
-    }
-    if ([
+    } else if (IdolSankakuHandler.knownUrls.contains(uri.host)) {
+      headers['User-Agent'] = Constants.sankakuIdolAppUserAgent;
+    } else if ([
       ...SankakuHandler.knownUrls,
       'sankakuapi.com',
-    ].any(booru.baseURL!.contains)) {
+    ].any(uri.host.contains)) {
       headers['User-Agent'] = Constants.sankakuAppUserAgent;
     }
 
     if (!isTestMode) {
       try {
-        final cookiesStr = await getCookies(booru.baseURL!);
+        final cookiesStr = await getCookies(uri.toString());
         if (cookiesStr.isNotEmpty) {
           headers['Cookie'] = cookiesStr;
         }
@@ -135,11 +142,11 @@ class Tools {
 
     // some boorus require referer header
     if (checkForReferer) {
-      switch (booru.type) {
+      switch (booru?.type) {
         case BooruType.World:
-          if (booru.baseURL!.contains('rule34.xyz')) {
+          if (uri.host.contains('rule34.xyz')) {
             headers['Referer'] = 'https://rule34xyz.b-cdn.net';
-          } else if (booru.baseURL!.contains('rule34.world')) {
+          } else if (uri.host.contains('rule34.world')) {
             headers['Referer'] = 'https://rule34storage.b-cdn.net';
           }
           break;
@@ -185,12 +192,15 @@ class Tools {
 
   static const String appUserAgent = 'LoliSnatcher_Droid/${Constants.appVersion}';
   static String get browserUserAgent {
-    return (isTestMode || SettingsHandler.instance.customUserAgent.isEmpty) ? appUserAgent : SettingsHandler.instance.customUserAgent;
+    return (isTestMode || SettingsHandler.instance.customUserAgent.isEmpty)
+        ? appUserAgent
+        : SettingsHandler.instance.customUserAgent;
   }
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
 
-  static bool get isOnPlatformWithWebviewSupport => Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isMacOS;
+  static bool get isOnPlatformWithWebviewSupport =>
+      Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isMacOS;
 
   static const String captchaCheckHeader = 'LSCaptchaCheck';
 
@@ -201,10 +211,21 @@ class Tools {
 
     final String host = uri.host;
 
-    if (isOnPlatformWithWebviewSupport && (response?.statusCode == 503 || response?.statusCode == 403)) {
+    final Map<String, String> knownCaptchaStrings = {
+      'booru.allthefallen.moe': 'processChallenge',
+    };
+    final String? textToFind = knownCaptchaStrings.entries.firstWhereOrNull((e) => host.contains(e.key))?.value;
+    final bool hasCaptchaContent = (textToFind == null || response?.data is! String)
+        ? false
+        : response?.data.toString().contains(textToFind) ?? false;
+
+    if (isOnPlatformWithWebviewSupport &&
+        (response?.statusCode == HttpStatus.forbidden ||
+            response?.statusCode == HttpStatus.serviceUnavailable ||
+            hasCaptchaContent)) {
       captchaScreenActive = true;
       await Navigator.push(
-        NavigationHandler.instance.navigatorKey.currentContext!,
+        NavigationHandler.instance.navContext,
         MaterialPageRoute(
           builder: (context) => InAppWebviewView(
             initialUrl: '${uri.scheme}://$host',
@@ -247,6 +268,72 @@ class Tools {
     }
 
     return cookieString.trim();
+  }
+
+  static Future<bool> saveCookies(String uri, List<String> cookies) async {
+    if (cookies.isEmpty) return true;
+
+    if (isOnPlatformWithWebviewSupport) {
+      try {
+        final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
+        final List<Cookie?> parsedCookies = [];
+        for (final c in cookies) {
+          try {
+            final parts = c.split(';').map((p) => p.split('='));
+
+            final name = parts.first.first.trim();
+            final value = parts.first.last.trim();
+            final domain = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'domain')?.last.trim();
+            final path = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'path')?.last.trim();
+            final expires = DateTime.tryParse(
+              parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'expires')?.last.trim() ?? '',
+            );
+            final isSecure = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'secure') != null;
+            final isHttpOnly = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'httponly') != null;
+
+            parsedCookies.add(
+              Cookie(
+                name: name,
+                value: value,
+                domain: domain,
+                path: path,
+                expiresDate: expires?.millisecondsSinceEpoch,
+                isSecure: isSecure,
+                isHttpOnly: isHttpOnly,
+              ),
+            );
+          } catch (_) {}
+        }
+
+        for (final cookie in parsedCookies) {
+          if (cookie == null) continue;
+          if (Platform.isWindows) {
+            globalWindowsCookies[WebUri(uri).host]?.add(cookie);
+          }
+          await cookieManager.setCookie(
+            url: WebUri(uri),
+            name: cookie.name,
+            value: cookie.value,
+            domain: cookie.domain,
+            path: cookie.path ?? '/',
+            expiresDate: cookie.expiresDate,
+            isSecure: cookie.isSecure,
+            isHttpOnly: cookie.isHttpOnly,
+          );
+        }
+        return true;
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'Tools',
+          'saveCookies',
+          LogTypes.exception,
+          s: s,
+        );
+      }
+    }
+
+    return false;
   }
 }
 

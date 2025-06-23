@@ -20,12 +20,12 @@ class SankakuHandler extends BooruHandler {
 
   @override
   Map<String, TagType> get tagTypeMap => {
-        '8': TagType.meta,
-        '3': TagType.copyright,
-        '4': TagType.character,
-        '1': TagType.artist,
-        '0': TagType.none,
-      };
+    '8': TagType.meta,
+    '3': TagType.copyright,
+    '4': TagType.character,
+    '1': TagType.artist,
+    '0': TagType.none,
+  };
 
   @override
   bool get hasSizeData => true;
@@ -57,7 +57,12 @@ class SankakuHandler extends BooruHandler {
       headers: getHeaders(),
       queryParameters: queryParams,
       options: fetchSearchOptions(),
-      customInterceptor: withCaptchaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Constants.defaultBrowserUserAgent) : null,
+      customInterceptor: withCaptchaCheck
+          ? (dio) => DioNetwork.captchaInterceptor(
+              dio,
+              customUserAgent: Constants.defaultBrowserUserAgent,
+            )
+          : null,
     );
   }
 
@@ -139,7 +144,12 @@ class SankakuHandler extends BooruHandler {
         makeApiPostURL(item.postURL.split('/').last),
         headers: getHeaders(),
         cancelToken: cancelToken,
-        customInterceptor: withCapcthaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Constants.defaultBrowserUserAgent) : null,
+        customInterceptor: withCapcthaCheck
+            ? (dio) => DioNetwork.captchaInterceptor(
+                dio,
+                customUserAgent: Constants.defaultBrowserUserAgent,
+              )
+            : null,
       );
       if (response.statusCode != 200) {
         return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
@@ -150,6 +160,7 @@ class SankakuHandler extends BooruHandler {
           item.fileURL = current['file_url'];
           item.sampleURL = current['sample_url'];
           item.thumbnailURL = current['preview_url'];
+          item.isUpdated = true;
         }
         return (item: item, failed: false, error: null);
       }
@@ -185,6 +196,11 @@ class SankakuHandler extends BooruHandler {
     'beta.sankakucomplex.com',
     'chan.sankakucomplex.com',
     'sankaku.app',
+  ];
+
+  static List<String> knownPostUrls = [
+    'chan.sankakucomplex.com',
+    'beta.sankakucomplex.com',
   ];
 
   String get baseUrl => knownUrls.any(booru.baseURL!.contains) ? 'https://sankakuapi.com' : booru.baseURL!;

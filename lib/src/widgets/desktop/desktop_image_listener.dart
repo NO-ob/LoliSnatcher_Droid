@@ -47,44 +47,76 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   //This function decides what media widget to return
   Widget getImageWidget() {
     if (item.mediaType.value.isImageOrAnimation) {
-      return ImageViewer(item, key: item.key);
+      return Obx(
+        () => ImageViewer(
+          item,
+          booru: searchHandler.currentBooru,
+          isViewed: searchHandler.viewedItem.value.fileURL == item.fileURL,
+          key: item.key,
+        ),
+      );
     } else if (item.mediaType.value.isVideo) {
       if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
-        return VideoViewer(item, enableFullscreen: true, key: item.key);
+        return Obx(
+          () => VideoViewer(
+            item,
+            booru: searchHandler.currentBooru,
+            isViewed: searchHandler.viewedItem.value.fileURL == item.fileURL,
+            enableFullscreen: true,
+            key: item.key,
+          ),
+        );
       } else {
-        return VideoViewerPlaceholder(item: item);
+        return Obx(
+          () => VideoViewerPlaceholder(
+            item: item,
+            booru: searchHandler.currentBooru,
+            key: item.key,
+          ),
+        );
       }
     } else if (item.mediaType.value.isNeedToGuess) {
-      return GuessExtensionViewer(
-        item: item,
-        onMediaTypeGuessed: (MediaType mediaType) {
-          item.mediaType.value = mediaType;
-          item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
-          updateState();
-        },
+      return Obx(
+        () => GuessExtensionViewer(
+          item: item,
+          booru: searchHandler.currentBooru,
+          onMediaTypeGuessed: (MediaType mediaType) {
+            item.mediaType.value = mediaType;
+            item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
+            updateState();
+          },
+          key: item.key,
+        ),
       );
     } else if (item.mediaType.value.isNeedToGuess && searchHandler.currentBooruHandler.hasLoadItemSupport) {
-      return LoadItemViewer(
-        item: item,
-        handler: searchHandler.currentBooruHandler,
-        onItemLoaded: (newItem) {
-          final index = searchHandler.currentFetched.indexOf(newItem);
-          if (index != -1) {
-            searchHandler.currentFetched[index] = newItem;
-            setState(() {});
-          }
-        },
+      return Obx(
+        () => LoadItemViewer(
+          item: item,
+          handler: searchHandler.currentBooruHandler,
+          onItemLoaded: (newItem) {
+            final index = searchHandler.currentFetched.indexOf(newItem);
+            if (index != -1) {
+              searchHandler.currentFetched[index] = newItem;
+              setState(() {});
+            }
+          },
+          key: item.key,
+        ),
       );
     } else {
-      return GuessExtensionViewer(
-        item: item,
-        onMediaTypeGuessed: (MediaType mediaType) {
-          item.mediaType.value = mediaType;
-          item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
-          updateState();
-        },
+      return Obx(
+        () => GuessExtensionViewer(
+          item: item,
+          booru: searchHandler.currentBooru,
+          onMediaTypeGuessed: (MediaType mediaType) {
+            item.mediaType.value = mediaType;
+            item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
+            updateState();
+          },
+        ),
+        key: item.key,
       );
-      // return UnknownViewerPlaceholder(item: item);
+      // return UnknownViewerPlaceholder(item: item, key: item.key,);
     }
   }
 
@@ -149,7 +181,12 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
     return Stack(
       children: [
         if (!viewerHandler.isDesktopFullscreen.value) itemWidget,
-        if (!viewerHandler.isDesktopFullscreen.value) const NotesRenderer(null),
+        if (!viewerHandler.isDesktopFullscreen.value)
+          NotesRenderer(
+            item: item,
+            handler: searchHandler.currentBooruHandler,
+            pageController: null,
+          ),
         Container(
           alignment: Alignment.topRight,
           child: Column(
@@ -183,7 +220,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                   },
                   child: Obx(
                     () => Icon(
-                      item.isFavourite.value == true ? Icons.favorite : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
+                      item.isFavourite.value == true
+                          ? Icons.favorite
+                          : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
                     ),
                   ),
                 ),
@@ -207,7 +246,11 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                             Obx(
                               () => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox.shrink(),
                             ),
-                            const NotesRenderer(null),
+                            NotesRenderer(
+                              item: item,
+                              handler: searchHandler.currentBooruHandler,
+                              pageController: null,
+                            ),
                             Container(
                               padding: const EdgeInsets.all(10),
                               alignment: Alignment.topRight,

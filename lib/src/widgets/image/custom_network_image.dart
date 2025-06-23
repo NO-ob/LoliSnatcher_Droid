@@ -16,7 +16,8 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/image/abstract_custom_network_image.dart' as custom_network_image;
 
 @immutable
-class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetworkImage> implements custom_network_image.CustomNetworkImage {
+class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetworkImage>
+    implements custom_network_image.CustomNetworkImage {
   const CustomNetworkImage(
     this.url, {
     this.scale = 1.0,
@@ -29,6 +30,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     this.onError,
     this.sendTimeout,
     this.receiveTimeout,
+    this.withCaptchaCheck = false,
   }) : assert(!withCache || cacheFolder != null, 'cacheFolder must be set when withCache is true');
 
   @override
@@ -56,6 +58,8 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
 
   final Duration? receiveTimeout;
 
+  final bool withCaptchaCheck;
+
   @override
   Future<CustomNetworkImage> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<CustomNetworkImage>(this);
@@ -82,11 +86,6 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         DiagnosticsProperty<custom_network_image.CustomNetworkImage>('Image key', key),
       ],
     );
-  }
-
-  static Dio get _httpClient {
-    final Dio client = DioNetwork.getClient();
-    return client;
   }
 
   Future<bool> deleteCacheFile() async {
@@ -157,10 +156,18 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         onCacheDetected?.call(cacheFile != null);
       }
 
+      final client = DioNetwork.getClient();
+      if (withCaptchaCheck) {
+        DioNetwork.captchaInterceptor(
+          client,
+          customUserAgent: Tools.appUserAgent,
+        );
+      }
+
       Response? response;
       if (cacheFile == null) {
         response = withCache
-            ? await _httpClient.downloadUri(
+            ? await client.downloadUri(
                 resolved,
                 cacheFilePath,
                 options: Options(
@@ -178,7 +185,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
                 },
                 cancelToken: cancelToken,
               )
-            : await _httpClient.getUri(
+            : await client.getUri(
                 resolved,
                 options: Options(
                   headers: headers,
@@ -196,9 +203,16 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
                 },
                 cancelToken: cancelToken,
               );
-        _httpClient.close();
+        client.close();
 
         if (Tools.isGoodStatusCode(response.statusCode) == false) {
+          try {
+            final testFile = File(cacheFilePath);
+            if (await testFile.exists()) {
+              await testFile.delete();
+            }
+          } catch (_) {}
+
           throw NetworkImageLoadException(
             statusCode: response.statusCode ?? 0,
             uri: resolved,
@@ -260,7 +274,8 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
 }
 
 @immutable
-class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNetworkImage> implements custom_network_image.CustomNetworkImage {
+class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNetworkImage>
+    implements custom_network_image.CustomNetworkImage {
   const CustomNetworkAvifImage(
     this.url, {
     this.scale = 1.0,
@@ -273,6 +288,7 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
     this.onError,
     this.sendTimeout,
     this.receiveTimeout,
+    this.withCaptchaCheck = false,
   }) : assert(!withCache || cacheFolder != null, 'cacheFolder must be set when withCache is true');
 
   @override
@@ -300,6 +316,8 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
 
   final Duration? receiveTimeout;
 
+  final bool withCaptchaCheck;
+
   @override
   Future<CustomNetworkAvifImage> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<CustomNetworkAvifImage>(this);
@@ -326,11 +344,6 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
       ],
       chunkEvents: chunkEvents.stream,
     );
-  }
-
-  static Dio get _httpClient {
-    final Dio client = DioNetwork.getClient();
-    return client;
   }
 
   Future<bool> deleteCacheFile() async {
@@ -401,10 +414,18 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
         onCacheDetected?.call(cacheFile != null);
       }
 
+      final client = DioNetwork.getClient();
+      if (withCaptchaCheck) {
+        DioNetwork.captchaInterceptor(
+          client,
+          customUserAgent: Tools.appUserAgent,
+        );
+      }
+
       Response? response;
       if (cacheFile == null) {
         response = withCache
-            ? await _httpClient.downloadUri(
+            ? await client.downloadUri(
                 resolved,
                 cacheFilePath,
                 options: Options(
@@ -422,7 +443,7 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
                 },
                 cancelToken: cancelToken,
               )
-            : await _httpClient.getUri(
+            : await client.getUri(
                 resolved,
                 options: Options(
                   headers: headers,
@@ -440,9 +461,16 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
                 },
                 cancelToken: cancelToken,
               );
-        _httpClient.close();
+        client.close();
 
         if (Tools.isGoodStatusCode(response.statusCode) == false) {
+          try {
+            final testFile = File(cacheFilePath);
+            if (await testFile.exists()) {
+              await testFile.delete();
+            }
+          } catch (_) {}
+
           throw NetworkImageLoadException(
             statusCode: response.statusCode ?? 0,
             uri: resolved,

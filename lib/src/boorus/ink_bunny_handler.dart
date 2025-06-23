@@ -41,10 +41,20 @@ class InkBunnyHandler extends BooruHandler {
       final Map<String, dynamic> parsedResponse = response.data;
       if (parsedResponse['sid'] != null) {
         sessionToken = parsedResponse['sid'].toString();
-        Logger.Inst().log('Inkbunny session token found: $sessionToken', 'InkBunnyHandler', 'getSessionToken', LogTypes.booruHandlerInfo);
+        Logger.Inst().log(
+          'Inkbunny session token found: $sessionToken',
+          'InkBunnyHandler',
+          'getSessionToken',
+          LogTypes.booruHandlerInfo,
+        );
         await setRatingOptions();
       } else {
-        Logger.Inst().log("Inkbunny couldn't get session token", 'InkBunnyHandler', 'getSessionToken', LogTypes.booruHandlerInfo);
+        Logger.Inst().log(
+          "Inkbunny couldn't get session token",
+          'InkBunnyHandler',
+          'getSessionToken',
+          LogTypes.booruHandlerInfo,
+        );
       }
     } catch (e, s) {
       Logger.Inst().log(
@@ -61,7 +71,8 @@ class InkBunnyHandler extends BooruHandler {
 
   // This sets ratings for the session so that all images are returned from the api
   Future<bool> setRatingOptions() async {
-    final String url = '${booru.baseURL}/api_userrating.php?output_mode=json&sid=$sessionToken&tag[2]=yes&tag[3]=yes&tag[4]=yes&tag[5]=yes';
+    final String url =
+        '${booru.baseURL}/api_userrating.php?output_mode=json&sid=$sessionToken&tag[2]=yes&tag[3]=yes&tag[4]=yes&tag[5]=yes';
     try {
       final response = await fetchSearch(Uri.parse(url), '');
       final Map<String, dynamic> parsedResponse = response.data;
@@ -94,14 +105,26 @@ class InkBunnyHandler extends BooruHandler {
     }
     Logger.Inst().log('Got submission ids: $ids', className, 'getSubmissionResponse', LogTypes.booruHandlerInfo);
     try {
-      final Uri uri = Uri.parse("${booru.baseURL}/api_submissions.php?output_mode=json&sid=$sessionToken&submission_ids=${ids.join(",")}");
+      final Uri uri = Uri.parse(
+        "${booru.baseURL}/api_submissions.php?output_mode=json&sid=$sessionToken&submission_ids=${ids.join(",")}",
+      );
       final response = await fetchSearch(uri, '');
-      Logger.Inst().log('Getting submission data: $uri', className, 'getSubmissionResponse', LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(
+        'Getting submission data: $uri',
+        className,
+        'getSubmissionResponse',
+        LogTypes.booruHandlerRawFetched,
+      );
       if (response.statusCode == 200) {
         Logger.Inst().log(response.data, className, 'getSubmissionResponse', LogTypes.booruHandlerRawFetched);
         return response.data;
       } else {
-        Logger.Inst().log('InkBunnyHandler failed to get submissions', className, 'getSubmissionResponse', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log(
+          'InkBunnyHandler failed to get submissions',
+          className,
+          'getSubmissionResponse',
+          LogTypes.booruHandlerFetchFailed,
+        );
       }
     } catch (e, s) {
       Logger.Inst().log(
@@ -158,7 +181,9 @@ class InkBunnyHandler extends BooruHandler {
       final files = current['files'];
 
       for (int i = 0; i < files.length; i++) {
-        String sampleURL = files[i]['file_url_screen'], thumbURL = files[i]['file_url_preview'], fileURL = files[i]['file_url_full'];
+        String sampleURL = files[i]['file_url_screen'],
+            thumbURL = files[i]['file_url_preview'],
+            fileURL = files[i]['file_url_full'];
         if (fileURL.endsWith('.mp4') && files[i].containsKey('thumbnail_url_huge')) {
           thumbURL = files[i]['thumbnail_url_huge'];
           sampleURL = thumbURL;
@@ -227,7 +252,7 @@ class InkBunnyHandler extends BooruHandler {
           }
         }
       } else {
-        tagStr += '${tagList[i]},';
+        tagStr += '${tagList[i]}${i < tagList.length - 1 ? ',' : ''}';
       }
     }
 
@@ -236,7 +261,7 @@ class InkBunnyHandler extends BooruHandler {
     //I have removed the code that was using the results id before we will see how this is without using that.
 
     //The type variable filters by file type so we only fetch those that are supported by the app
-    return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr&username=$artist&get_rid=yes&type=1,2,3,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes&orderby=$order&page=$pageNum";
+    return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr${artist.isEmpty ? '' : '&username=$artist'}&get_rid=yes&type=1,2,3,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes${order.isEmpty ? '' : '&orderby=$order'}&page=$pageNum";
   }
 
   @override
@@ -263,14 +288,24 @@ class InkBunnyHandler extends BooruHandler {
           final tagObjects = parsedResponse['results'];
           if (tagObjects.length > 0) {
             for (int i = 0; i < tagObjects.length; i++) {
-              Logger.Inst().log("tag $i = ${tagObjects[i]?["value"]}", className, 'getTagSuggestions', LogTypes.booruHandlerInfo);
+              Logger.Inst().log(
+                "tag $i = ${tagObjects[i]?["value"]}",
+                className,
+                'getTagSuggestions',
+                LogTypes.booruHandlerInfo,
+              );
               searchTags.add(TagSuggestion(tag: tagObjects[i]?['value']?.replaceAll(' ', '_') ?? ''));
             }
           }
         }
         return Right(searchTags);
       } else {
-        Logger.Inst().log('response.statusCode = ${response.statusCode}, url = $url', className, 'getTagSuggestions', LogTypes.exception);
+        Logger.Inst().log(
+          'response.statusCode = ${response.statusCode}, url = $url',
+          className,
+          'getTagSuggestions',
+          LogTypes.exception,
+        );
         return Left(
           ResponseError(
             message: 'getTagSuggestions error',

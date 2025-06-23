@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,7 +10,6 @@ import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart' hide FirstWhereOrNullExt;
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
-import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -21,12 +19,10 @@ import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
-import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/pages/snatcher_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
-import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -140,8 +136,8 @@ class _MobileHomeState extends State<MobileHome> {
           //When setting the vertical offset, be sure to use only top or bottom
           offset: IDOffset.only(
             bottom: 0,
-            right: orientation == Orientation.landscape ? 0 : 0.5,
-            left: orientation == Orientation.landscape ? 0 : 0.5,
+            right: orientation.isLandscape ? 0 : 0.5,
+            left: orientation.isLandscape ? 0 : 0.5,
           ),
           scale: const IDOffset.horizontal(1),
 
@@ -164,8 +160,16 @@ class _MobileHomeState extends State<MobileHome> {
             isDrawerOpened = isOpen;
           }, // return  true (open) or false (close)
 
-          leftChild: settingsHandler.handSide.value.isLeft ? const MainDrawer() : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
-          rightChild: settingsHandler.handSide.value.isRight ? const MainDrawer() : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
+          leftChild: RepaintBoundary(
+            child: settingsHandler.handSide.value.isLeft
+                ? const MainDrawer()
+                : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
+          ),
+          rightChild: RepaintBoundary(
+            child: settingsHandler.handSide.value.isRight
+                ? const MainDrawer()
+                : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
+          ),
 
           // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
           scaffold: Scaffold(
@@ -199,69 +203,77 @@ class MainDrawer extends StatelessWidget {
 
     // print('build drawer');
 
+    Future<Booru?> showSelectWebviewBooruDialog(List<Booru> boorus) async {
+      return showDialog<Booru?>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Select booru for webview'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 16,
+              children: [
+                SizedBox(
+                  width: MediaQuery.sizeOf(context).width,
+                  height: 50,
+                  child: SettingsBooruDropdown(
+                    value: null,
+                    items: boorus,
+                    onChanged: (Booru? newBooru) {
+                      if (newBooru == null) return;
+
+                      WidgetsBinding.instance.addPostFrameCallback((_) async {
+                        Navigator.of(context).pop(newBooru);
+                      });
+                    },
+                    title: 'Booru',
+                    contentPadding: EdgeInsets.zero,
+                    drawBottomBorder: false,
+                  ),
+                ),
+                //
+                const CancelButton(withIcon: true),
+              ],
+            ),
+          );
+        },
+      );
+    }
+
     return ColoredBox(
       color: Theme.of(context).colorScheme.surface,
       child: SafeArea(
         child: Drawer(
           child: Column(
             children: [
-              Obx(() {
-                if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
-                  return Container(
-                    height: MainSearchBar.height,
-                    margin: const EdgeInsets.fromLTRB(2, 24, 2, 12),
-                    child: const MainSearchBarWithActions('drawer'),
-                  );
-                } else {
-                  return const SizedBox.shrink();
-                }
-              }),
+              RepaintBoundary(
+                child: Obx(() {
+                  if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+                    return Container(
+                      height: MainSearchBar.height,
+                      margin: const EdgeInsets.fromLTRB(2, 24, 2, 12),
+                      child: const MainSearchBarWithActions('drawer'),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                }),
+              ),
               const TabSelector(),
               Expanded(
                 child: ListView(
-                  controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
+                  controller:
+                      ScrollController(), // needed to avoid exception when list overflows into a scrollable size
                   clipBehavior: Clip.antiAlias,
                   children: [
                     const SizedBox(height: 12),
                     const TabButtons(true, WrapAlignment.spaceEvenly),
                     const SizedBox(height: 12),
                     const MergeBooruToggleAndSelector(),
-                    //
-                    Obx(() {
-                      if (settingsHandler.isDebug.value) {
-                        return SettingsButton(
-                          name: 'Open Alice',
-                          icon: const Icon(Icons.developer_board),
-                          action: () {
-                            settingsHandler.alice.showInspector();
-                          },
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    }),
-                    //
-                    Obx(() {
-                      if ((settingsHandler.isDebug.value || EnvironmentConfig.isTesting) && settingsHandler.enabledLogTypes.isNotEmpty) {
-                        return SettingsButton(
-                          name: 'Open Logger',
-                          icon: const Icon(Icons.print),
-                          action: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => LoggerViewPage(talker: Logger.talker),
-                              ),
-                            );
-                          },
-                          drawTopBorder: true,
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    }),
                     ValueListenableBuilder(
                       valueListenable: LocalAuthHandler.instance.deviceSupportsBiometrics,
-                      builder: (_, deviceSupportsBiometrics, __) => ValueListenableBuilder(
+                      builder: (_, deviceSupportsBiometrics, _) => ValueListenableBuilder(
                         valueListenable: SettingsHandler.instance.useLockscreen,
                         builder: (_, useLockscreen, child) {
                           if (deviceSupportsBiometrics && useLockscreen) {
@@ -283,46 +295,50 @@ class MainDrawer extends StatelessWidget {
                       page: () => const SettingsPage(),
                     ),
                     Obx(() {
+                      final List<Booru> boorus = [
+                        searchHandler.currentBooru,
+                        ...searchHandler.currentSecondaryBoorus.value ?? <Booru>[],
+                      ].where((b) => b.baseURL?.isNotEmpty == true && BooruType.saveable.contains(b.type)).toList();
+
                       if (settingsHandler.booruList.isNotEmpty &&
                           searchHandler.list.isNotEmpty &&
-                          BooruType.saveable.contains(searchHandler.currentBooru.type) &&
+                          boorus.isNotEmpty &&
                           Tools.isOnPlatformWithWebviewSupport) {
                         return SettingsButton(
                           name: 'Open webview',
                           icon: const Icon(Icons.public),
-                          action: () {
-                            final String? url = searchHandler.currentBooru.baseURL;
+                          action: () async {
+                            final Booru? selectedBooru = boorus.length == 1
+                                ? boorus.first
+                                : await showSelectWebviewBooruDialog(boorus);
+                            if (selectedBooru == null) return;
+
+                            final String? url = selectedBooru.baseURL;
                             final String userAgent = Tools.browserUserAgent;
                             if (url == null || url.isEmpty) {
                               return;
                             }
 
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => InAppWebviewView(
-                                  initialUrl: url,
-                                  userAgent: userAgent,
+                            unawaited(
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => InAppWebviewView(
+                                    initialUrl: url,
+                                    userAgent: userAgent,
+                                  ),
                                 ),
                               ),
                             );
                           },
                         );
-                      } else {
-                        return const SizedBox.shrink();
                       }
+
+                      return const SizedBox.shrink();
                     }),
-                    if (kDebugMode)
-                      SettingsToggle(
-                        value: settingsHandler.blurImages,
-                        onChanged: (newValue) {
-                          settingsHandler.blurImages = newValue;
-                          searchHandler.rootRestate?.call();
-                        },
-                        title: 'Blur [DEV]',
-                      ),
                     //
                     Obx(() {
-                      if (settingsHandler.updateInfo.value != null && Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
+                      if (settingsHandler.updateInfo.value != null &&
+                          Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
                         return SettingsButton(
                           name: 'Update Available!',
                           icon: Stack(
@@ -349,9 +365,9 @@ class MainDrawer extends StatelessWidget {
                             settingsHandler.showUpdate(true);
                           },
                         );
-                      } else {
-                        return const SizedBox.shrink();
                       }
+
+                      return const SizedBox.shrink();
                     }),
                     if (SettingsHandler.isDesktopPlatform)
                       SettingsButton(
@@ -397,8 +413,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
   bool updating = false;
 
   Future<void> onStartSnatching(BuildContext context, bool isLongTap) async {
-    final bool permsRes = await getPerms();
-    if (!permsRes) {
+    if (!await setPermissions()) {
       FlashElements.showSnackbar(
         context: context,
         title: const Text('Please provide Storage permissions', style: TextStyle(fontSize: 20)),
@@ -417,7 +432,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
         isLongTap,
       );
       if (settingsHandler.favouriteOnSnatch) {
-        await searchHandler.updateFavForMultipleItems(
+        await searchHandler.currentTab.updateFavForMultipleItems(
           searchHandler.currentSelected,
           newValue: true,
           skipSnatching: true,
@@ -446,13 +461,13 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
       updating = true;
     });
 
-    if (record.booru.type == BooruType.Sankaku) {
+    final booruHandler = BooruHandlerFactory().getBooruHandler([record.booru], 10).booruHandler;
+    if (booruHandler.hasLoadItemSupport) {
       try {
-        // TODO detect when item data is outdated?
-        // TODO expand to other boorus?
-        final temp = BooruHandlerFactory().getBooruHandler([record.booru], 10);
-        final sankakuHandler = temp[0] as SankakuHandler;
-        await sankakuHandler.loadItem(item: record.item);
+        await booruHandler.loadItem(
+          item: record.item,
+          withCapcthaCheck: true,
+        );
       } catch (_) {}
     }
     snatchHandler.onRetryItem(
@@ -500,8 +515,9 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
               Expanded(
                 child: Obx(() {
                   final int queuesLength = snatchHandler.queuedList.length;
-                  final int activeLength =
-                      snatchHandler.current.value != null ? snatchHandler.current.value!.booruItems.length - snatchHandler.queueProgress.value : 0;
+                  final int activeLength = snatchHandler.current.value != null
+                      ? snatchHandler.current.value!.booruItems.length - snatchHandler.queueProgress.value
+                      : 0;
                   final int totalActiveAmount = queuesLength + activeLength;
 
                   final int existsLength = snatchHandler.existsItems.length;
@@ -536,7 +552,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                       itemExtent: 200,
                       itemBuilder: (BuildContext context, int index) {
                         if (activeLength != 0 && index < activeLength) {
-                          final item = snatchHandler.current.value!.booruItems[snatchHandler.queueProgress.value + index];
+                          final item =
+                              snatchHandler.current.value!.booruItems[snatchHandler.queueProgress.value + index];
                           return Stack(
                             children: [
                               if (index == 0)
@@ -550,7 +567,9 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
 
                                     return AnimatedProgressIndicator(
                                       value: snatchHandler.currentProgress,
-                                      valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.5),
+                                      valueColor: Theme.of(
+                                        context,
+                                      ).progressIndicatorTheme.color?.withValues(alpha: 0.5),
                                       indicatorStyle: IndicatorStyle.linear,
                                       borderRadius: 0,
                                       animationDuration: const Duration(milliseconds: 100),
@@ -569,6 +588,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           height: 150,
                                           child: ThumbnailBuild(
                                             item: item,
+                                            handler: BooruHandlerFactory().getBooruHandler(
+                                              [snatchHandler.current.value!.booru],
+                                              null,
+                                            ).booruHandler,
                                             selectable: false,
                                           ),
                                         ),
@@ -645,8 +668,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                             0,
                             max(0, queuesLength - 1),
                             (index - activeLength) / (queuesLength - 1),
-                          )!
-                              .toInt();
+                          )!.toInt();
                           final queue = snatchHandler.queuedList[queueIndex];
                           final firstItem = queue.booruItems.first;
                           final lastItem = queue.booruItems.last;
@@ -663,6 +685,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                         height: 134,
                                         child: ThumbnailBuild(
                                           item: lastItem,
+                                          handler: BooruHandlerFactory().getBooruHandler(
+                                            [queue.booru],
+                                            null,
+                                          ).booruHandler,
                                           selectable: false,
                                         ),
                                       ),
@@ -675,6 +701,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                       height: 150,
                                       child: ThumbnailBuild(
                                         item: firstItem,
+                                        handler: BooruHandlerFactory().getBooruHandler(
+                                          [queue.booru],
+                                          null,
+                                        ).booruHandler,
                                         selectable: false,
                                       ),
                                     ),
@@ -682,7 +712,9 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                 ],
                               ),
                               Text(
-                                queue.booruItems.length == 1 ? 'Item #$queueIndex' : 'Batch #$queueIndex (${queue.booruItems.length})',
+                                queue.booruItems.length == 1
+                                    ? 'Item #$queueIndex'
+                                    : 'Batch #$queueIndex (${queue.booruItems.length})',
                                 style: const TextStyle(fontSize: 16),
                               ),
                             ],
@@ -706,8 +738,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                         final record = isExists
                             ? snatchHandler.existsItems[index]
                             : isFailed
-                                ? snatchHandler.failedItems[index - existsLength]
-                                : snatchHandler.cancelledItems[index - existsLength - failedLength];
+                            ? snatchHandler.failedItems[index - existsLength]
+                            : snatchHandler.cancelledItems[index - existsLength - failedLength];
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -721,6 +753,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                     height: 150,
                                     child: ThumbnailBuild(
                                       item: record.item,
+                                      handler: BooruHandlerFactory().getBooruHandler(
+                                        [record.booru],
+                                        null,
+                                      ).booruHandler,
                                       selectable: false,
                                     ),
                                   ),
@@ -734,8 +770,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                         isExists
                                             ? 'File already exists'
                                             : isFailed
-                                                ? 'Failed to download'
-                                                : 'Cancelled by user',
+                                            ? 'Failed to download'
+                                            : 'Cancelled by user',
                                       ),
                                       RetryButton(
                                         text: isExists ? 'Save anyway' : 'Retry',
@@ -774,7 +810,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                       child: (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
                           ? ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxHeight: MediaQuery.sizeOf(context).height * (snatchHandler.queuedList.isEmpty ? 0.7 : 0.5),
+                                maxHeight:
+                                    MediaQuery.sizeOf(context).height * (snatchHandler.queuedList.isEmpty ? 0.7 : 0.5),
                               ),
                               child: Material(
                                 color: Colors.transparent,
@@ -809,9 +846,13 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                         }
                                                       }
                                                     },
-                                                    icon: snatchHandler.active.value ? const Icon(Icons.pause) : const Icon(Icons.play_arrow),
+                                                    icon: snatchHandler.active.value
+                                                        ? const Icon(Icons.pause)
+                                                        : const Icon(Icons.play_arrow),
                                                     name: snatchHandler.active.value ? 'Pause' : 'Unpause',
-                                                    subtitle: snatchHandler.active.value ? const Text('(from next item in queue)') : null,
+                                                    subtitle: snatchHandler.active.value
+                                                        ? const Text('(from next item in queue)')
+                                                        : null,
                                                   ),
                                           ),
                                         ),
@@ -819,7 +860,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           () => AnimatedSize(
                                             duration: const Duration(milliseconds: 200),
                                             alignment: Alignment.bottomCenter,
-                                            child: snatchHandler.active.value ||
+                                            child:
+                                                snatchHandler.active.value ||
                                                     (snatchHandler.existsItems.isEmpty &&
                                                         snatchHandler.failedItems.isEmpty &&
                                                         snatchHandler.cancelledItems.isEmpty)
@@ -840,7 +882,8 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           () => AnimatedSize(
                                             duration: const Duration(milliseconds: 200),
                                             alignment: Alignment.bottomCenter,
-                                            child: snatchHandler.active.value ||
+                                            child:
+                                                snatchHandler.active.value ||
                                                     (snatchHandler.existsItems.isEmpty &&
                                                         snatchHandler.failedItems.isEmpty &&
                                                         snatchHandler.cancelledItems.isEmpty)
@@ -857,12 +900,18 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                         Obx(() {
                                           final selected = searchHandler.currentSelected;
                                           if (selected.isNotEmpty) {
-                                            final int favSelectedCount = selected.where((item) => item.isFavourite.value == true).length;
-                                            final int unfavSelectedCount = selected.where((item) => item.isFavourite.value == false).length;
+                                            final int favSelectedCount = selected
+                                                .where((item) => item.isFavourite.value == true)
+                                                .length;
+                                            final int unfavSelectedCount = selected
+                                                .where((item) => item.isFavourite.value == false)
+                                                .length;
                                             final bool hasFavsSelected = favSelectedCount > 0;
                                             final bool isAllSelectedFavs = selected.length == favSelectedCount;
 
-                                            final int downloadsSelectedCount = selected.where((item) => item.isSnatched.value == true).length;
+                                            final int downloadsSelectedCount = selected
+                                                .where((item) => item.isSnatched.value == true)
+                                                .length;
                                             final bool hasDownloadsSelected = downloadsSelectedCount > 0;
 
                                             return Column(
@@ -877,10 +926,13 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                 ),
                                                 if (hasDownloadsSelected)
                                                   SettingsButton(
-                                                    name: 'Remove snatched status from selected (${downloadsSelectedCount.toFormattedString()})',
+                                                    name:
+                                                        'Remove snatched status from selected (${downloadsSelectedCount.toFormattedString()})',
                                                     icon: const Icon(Icons.file_download_off_outlined),
                                                     action: () async {
-                                                      final onlySnatched = searchHandler.currentSelected.where((e) => e.isSnatched.value == true).toList();
+                                                      final onlySnatched = searchHandler.currentSelected
+                                                          .where((e) => e.isSnatched.value == true)
+                                                          .toList();
                                                       if (onlySnatched.length > 20) {
                                                         // TODO confirm dialog
                                                       }
@@ -888,7 +940,10 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                       setState(() {});
                                                       for (final item in onlySnatched) {
                                                         item.isSnatched.value = false;
-                                                        await settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
+                                                        await settingsHandler.dbHandler.updateBooruItem(
+                                                          item,
+                                                          BooruUpdateMode.local,
+                                                        );
                                                       }
                                                       searchHandler.currentTab.selected.clear();
                                                       updating = false;
@@ -897,17 +952,22 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                   ),
                                                 if (!isAllSelectedFavs)
                                                   SettingsButton(
-                                                    name: 'Favourite selected (${unfavSelectedCount.toFormattedString()})',
+                                                    name:
+                                                        'Favourite selected (${unfavSelectedCount.toFormattedString()})',
                                                     icon: const Icon(Icons.favorite, color: Colors.red),
                                                     action: () async {
-                                                      final onlyUnfavs = searchHandler.currentSelected.where((e) => e.isFavourite.value == false).toList();
+                                                      final onlyUnfavs = searchHandler.currentSelected
+                                                          .where((e) => e.isFavourite.value == false)
+                                                          .toList();
                                                       if (onlyUnfavs.length > 20) {
                                                         // TODO confirm dialog
                                                       }
                                                       updating = true;
                                                       setState(() {});
-                                                      await searchHandler.updateFavForMultipleItems(
-                                                        searchHandler.currentFetched.where(onlyUnfavs.contains).toList(),
+                                                      await searchHandler.currentTab.updateFavForMultipleItems(
+                                                        searchHandler.currentFetched
+                                                            .where(onlyUnfavs.contains)
+                                                            .toList(),
                                                         newValue: true,
                                                       );
                                                       searchHandler.currentTab.selected.clear();
@@ -917,16 +977,19 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                   ),
                                                 if (hasFavsSelected)
                                                   SettingsButton(
-                                                    name: 'Unfavourite selected (${favSelectedCount.toFormattedString()})',
+                                                    name:
+                                                        'Unfavourite selected (${favSelectedCount.toFormattedString()})',
                                                     icon: const Icon(Icons.favorite_border),
                                                     action: () async {
-                                                      final onlyFavs = searchHandler.currentSelected.where((e) => e.isFavourite.value == true).toList();
+                                                      final onlyFavs = searchHandler.currentSelected
+                                                          .where((e) => e.isFavourite.value == true)
+                                                          .toList();
                                                       if (onlyFavs.length > 20) {
                                                         // TODO confirm dialog
                                                       }
                                                       updating = true;
                                                       setState(() {});
-                                                      await searchHandler.updateFavForMultipleItems(
+                                                      await searchHandler.currentTab.updateFavForMultipleItems(
                                                         searchHandler.currentFetched.where(onlyFavs.contains).toList(),
                                                         newValue: false,
                                                       );
@@ -946,7 +1009,9 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                             return SettingsButton(
                                               name: 'Select all',
                                               icon: const Icon(Icons.select_all),
-                                              action: () => searchHandler.currentTab.selected.addAll(searchHandler.currentFetched),
+                                              action: () => searchHandler.currentTab.selected.addAll(
+                                                searchHandler.currentFetched,
+                                              ),
                                               drawTopBorder: true,
                                             );
                                           }
@@ -960,8 +1025,9 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           name: 'Snatching History',
                                           icon: const Icon(Icons.file_download_outlined),
                                           action: () {
-                                            final Booru? downloadsBooru =
-                                                settingsHandler.booruList.firstWhereOrNull((booru) => booru.type == BooruType.Downloads);
+                                            final Booru? downloadsBooru = settingsHandler.booruList.firstWhereOrNull(
+                                              (booru) => booru.type?.isDownloads == true,
+                                            );
                                             final bool hasDownloads = downloadsBooru != null;
 
                                             if (!hasDownloads) {
@@ -1055,7 +1121,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
                 );
               } else {
                 if (newValue) {
-                  final dropdown = LoliMultiselectDropdown(
+                  LoliMultiselectDropdown(
                     value: const <Booru>[],
                     onChanged: (List<Booru> value) {
                       // if no secondary boorus selected, disable merge mode
@@ -1067,6 +1133,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
                       height: kMinInteractiveDimension,
                       child: TabBooruSelectorItem(booru: item),
                     ),
+                    expandableByScroll: true,
                     labelText: 'Select secondary boorus:',
                     selectedItemBuilder: (List<Booru> value) => Column(
                       mainAxisSize: MainAxisSize.min,
@@ -1092,8 +1159,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
                         ),
                       ],
                     ),
-                  );
-                  dropdown.showDialog(context);
+                  ).showDialog(context);
                 } else {
                   searchHandler.mergeAction(null);
                 }
@@ -1101,12 +1167,15 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
             },
           ),
           Obx(() {
-            final bool hasTabsAndTabHasSecondaryBoorus = searchHandler.list.isNotEmpty && (searchHandler.currentSecondaryBoorus.value?.isNotEmpty ?? false);
+            final bool hasTabsAndTabHasSecondaryBoorus =
+                searchHandler.list.isNotEmpty && (searchHandler.currentSecondaryBoorus.value?.isNotEmpty ?? false);
 
             return AnimatedSize(
               duration: const Duration(milliseconds: 200),
               alignment: Alignment.topCenter,
-              child: (settingsHandler.booruList.length > 1 && hasTabsAndTabHasSecondaryBoorus) ? const TabSecondaryBooruSelector() : const SizedBox.shrink(),
+              child: (settingsHandler.booruList.length > 1 && hasTabsAndTabHasSecondaryBoorus)
+                  ? const TabSecondaryBooruSelector()
+                  : const SizedBox.shrink(),
             );
           }),
         ],
