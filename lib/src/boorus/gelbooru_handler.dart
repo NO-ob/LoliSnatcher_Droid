@@ -425,6 +425,28 @@ class GelbooruHandler extends BooruHandler {
         return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
         final html = parse(response.data);
+
+        Element? source = html.getElementById('gelcomVideoPlayer');
+        if (source != null) {
+          // video
+          item.thumbnailURL = source.attributes['poster'] ?? item.thumbnailURL;
+          item.sampleURL = source.attributes['poster'] ?? item.sampleURL;
+          item.fileURL = source.attributes['src'] ?? source.children.firstOrNull?.attributes['src'] ?? item.fileURL;
+        } else {
+          // image
+          source = html.querySelector('.image-container img');
+          if (source != null) {
+            final String? src = source.attributes['src'];
+            item.fileURL = src ?? item.fileURL;
+            final isSample = src?.contains('/samples/') ?? false;
+            if (isSample) {
+              item.sampleURL = src ?? item.sampleURL;
+              item.fileURL = html.querySelector('meta[property="og:image"]')?.attributes['content'] ?? item.fileURL;
+            }
+            item.thumbnailURL = isSample ? item.sampleURL : item.thumbnailURL;
+          }
+        }
+
         final sidebar = html.getElementById('tag-list');
         final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright'));
         addTagsWithType(copyrightTags, TagType.copyright);
