@@ -201,7 +201,6 @@ class SettingsHandler {
   bool useTopSearchbarInput = false;
   bool showSearchbarQuickActions = false;
   bool autofocusSearchbar = true;
-  bool useHttp2 = true;
   bool expandDetails = false;
   final RxBool useLockscreen = false.obs;
   final RxBool blurOnLeave = false.obs;
@@ -279,7 +278,6 @@ class SettingsHandler {
     'useTopSearchbarInput',
     'showSearchbarQuickActions',
     'autofocusSearchbar',
-    'useHttp2',
     'expandDetails',
     'useLockscreen',
     'blurOnLeave',
@@ -696,10 +694,6 @@ class SettingsHandler {
       'default': false,
     },
     'autofocusSearchbar': {
-      'type': 'bool',
-      'default': true,
-    },
-    'useHttp2': {
       'type': 'bool',
       'default': true,
     },
@@ -1158,8 +1152,6 @@ class SettingsHandler {
         return showSearchbarQuickActions;
       case 'autofocusSearchbar':
         return autofocusSearchbar;
-      case 'useHttp2':
-        return useHttp2;
       case 'expandDetails':
         return expandDetails;
       case 'useLockscreen':
@@ -1490,9 +1482,6 @@ class SettingsHandler {
       case 'autofocusSearchbar':
         autofocusSearchbar = validatedValue;
         break;
-      case 'useHttp2':
-        useHttp2 = validatedValue;
-        break;
       case 'expandDetails':
         expandDetails = validatedValue;
         break;
@@ -1607,7 +1596,6 @@ class SettingsHandler {
       'useTopSearchbarInput': validateValue('useTopSearchbarInput', null, toJSON: true),
       'showSearchbarQuickActions': validateValue('showSearchbarQuickActions', null, toJSON: true),
       'autofocusSearchbar': validateValue('autofocusSearchbar', null, toJSON: true),
-      'useHttp2': validateValue('useHttp2', null, toJSON: true),
       'expandDetails': validateValue('expandDetails', null, toJSON: true),
       'useLockscreen': validateValue('useLockscreen', null, toJSON: true),
       'blurOnLeave': validateValue('blurOnLeave', null, toJSON: true),

@@ -88,18 +88,6 @@ class _NetworkPageState extends State<NetworkPage> {
           child: ListView(
             children: [
               SettingsToggle(
-                value: settingsHandler.useHttp2,
-                onChanged: (newValue) {
-                  setState(() {
-                    settingsHandler.useHttp2 = newValue;
-                  });
-                },
-                title: 'Use HTTP2',
-                subtitle: const Text(
-                  'Can improve loading times, but some sites may not support it. Disable this if you encounter issues.',
-                ),
-              ),
-              SettingsToggle(
                 value: allowSelfSignedCerts,
                 onChanged: (newValue) {
                   setState(() {

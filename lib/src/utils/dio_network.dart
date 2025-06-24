@@ -3,12 +3,9 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/pages/settings/network_page.dart';
-import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -19,16 +16,16 @@ class DioNetwork {
     final dio = Dio();
 
     final settingsHandler = SettingsHandler.instance;
-    final proxyType = ProxyType.fromName(settingsHandler.proxyType);
-    if (settingsHandler.useHttp2 &&
-        (proxyType.isDirect || (proxyType.isSystem && systemProxyAddress.isEmpty) || getProxyConfigAddress().isEmpty)) {
-      // dio.httpClientAdapter = NativeAdapter();
-      dio.httpClientAdapter = Http2Adapter(
-        ConnectionManager(
-          idleTimeout: const Duration(seconds: 30),
-        ),
-      );
-    }
+    // final proxyType = ProxyType.fromName(settingsHandler.proxyType);
+    // if (settingsHandler.useHttp2 &&
+    //     (proxyType.isDirect || (proxyType.isSystem && systemProxyAddress.isEmpty) || getProxyConfigAddress().isEmpty)) {
+    //   // dio.httpClientAdapter = NativeAdapter();
+    //   dio.httpClientAdapter = Http2Adapter(
+    //     ConnectionManager(
+    //       idleTimeout: const Duration(seconds: 30),
+    //     ),
+    //   );
+    // }
 
     dio.options.baseUrl = baseUrl ?? '';
     // dio.options.connectTimeout = Duration(seconds: 10);
