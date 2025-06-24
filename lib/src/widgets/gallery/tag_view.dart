@@ -1643,7 +1643,10 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                             IconButton(
                               icon: const Icon(Icons.fiber_new),
                               onPressed: () {
-                                searchHandler.addTabByString(widget.tag);
+                                searchHandler.addTabByString(
+                                  widget.tag,
+                                  customBooru: selectedBooru,
+                                );
 
                                 FlashElements.showSnackbar(
                                   context: context,
@@ -1689,7 +1692,11 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                   Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                                 }
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  searchHandler.addTabByString(widget.tag, switchToNew: true);
+                                  searchHandler.addTabByString(
+                                    widget.tag,
+                                    customBooru: selectedBooru,
+                                    switchToNew: true,
+                                  );
                                 });
                               },
                             ),
