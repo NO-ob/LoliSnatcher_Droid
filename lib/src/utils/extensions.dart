@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 
 extension BuildContextExtras on BuildContext {
   MediaQueryData get mediaQuery => MediaQuery.of(this);
-  Size get size => MediaQuery.sizeOf(this);
-  double get width => size.width;
-  double get height => size.height;
+  Size get mediaSize => MediaQuery.sizeOf(this);
+  double get width => mediaSize.width;
+  double get height => mediaSize.height;
   EdgeInsets get viewInsets => MediaQuery.viewInsetsOf(this);
   EdgeInsets get padding => MediaQuery.paddingOf(this);
   double get devicePixelRatio => MediaQuery.devicePixelRatioOf(this);

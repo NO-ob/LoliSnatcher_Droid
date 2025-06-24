@@ -37,7 +37,6 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
-import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
@@ -1542,17 +1541,21 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                 title: const Text('Preview'),
                 subtitle: isSingleBooru
                     ? null
-                    : SettingsBooruDropdown(
-                        title: 'Booru',
-                        placeholder: 'Select a booru to load',
-                        value: selectedBooru,
-                        items: widget.boorus,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                        onChanged: (value) {
-                          selectedBooru = value;
-                          loadPreview(refresh: true);
-                        },
-                        drawBottomBorder: false,
+                    : SizedBox(
+                        width: context.mediaSize.width,
+                        height: kMinInteractiveDimension,
+                        child: SettingsBooruDropdown(
+                          title: 'Booru',
+                          placeholder: 'Select a booru to load',
+                          value: selectedBooru,
+                          items: isSingleBooru ? settingsHandler.booruList : widget.boorus,
+                          contentPadding: EdgeInsets.zero,
+                          onChanged: (value) {
+                            selectedBooru = value;
+                            loadPreview(refresh: true);
+                          },
+                          drawBottomBorder: false,
+                        ),
                       ),
                 onTap: isSingleBooru ? loadPreview : null,
               )
@@ -1568,6 +1571,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                       onTap: errorString.isNotEmpty ? () => loadPreview(refresh: true) : null,
                     )
                   : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
@@ -1594,21 +1599,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               );
                             }),
                             const SizedBox(width: 8),
-                            BooruFavicon(tab!.booruHandler.booru),
-                            const SizedBox(width: 4),
-                            Text(
-                              tab!.booruHandler.booru.name ?? '',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            const SizedBox(width: 4),
                             IconButton(
-                              onPressed: isSingleBooru
-                                  ? () => loadPreview(refresh: true)
-                                  : () {
-                                      tab = null;
-                                      selectedBooru = null;
-                                      setState(() {});
-                                    },
+                              onPressed: () => loadPreview(refresh: true),
                               icon: const Icon(Icons.refresh),
                             ),
                             const Spacer(),
@@ -1667,9 +1659,26 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: context.mediaSize.width,
+                          height: kMinInteractiveDimension,
+                          child: SettingsBooruDropdown(
+                            title: 'Booru',
+                            placeholder: 'Select a booru to load',
+                            value: selectedBooru,
+                            items: settingsHandler.booruList,
+                            contentPadding: EdgeInsets.zero,
+                            onChanged: (value) {
+                              selectedBooru = value;
+                              loadPreview(refresh: true);
+                            },
+                            drawBottomBorder: false,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         SizedBox(
-                          height: 200,
+                          height: 180 + 10 + 16, // card + listview paddings
                           width: MediaQuery.sizeOf(context).width,
                           child: NotificationListener<ScrollUpdateNotification>(
                             onNotification: (notif) {
@@ -1704,7 +1713,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                       ? 1
                                       : tab!.booruHandler.filteredFetched.length +
                                             ((loading || errorString.isNotEmpty) ? 1 : 0),
-                                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                                   itemBuilder: (context, index) {
                                     if (tab!.booruHandler.filteredFetched.isEmpty) {
                                       return const Center(
