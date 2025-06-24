@@ -338,7 +338,7 @@ class MainDrawer extends StatelessWidget {
                     //
                     Obx(() {
                       if (settingsHandler.updateInfo.value != null &&
-                          Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
+                          Constants.updateInfo.buildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
                         return SettingsButton(
                           name: 'Update Available!',
                           icon: Stack(

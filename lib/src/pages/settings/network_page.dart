@@ -151,13 +151,13 @@ class _NetworkPageState extends State<NetworkPage> {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Custom user agent'),
+                        return SettingsDialog(
+                          title: const Text('Custom user agent'),
                           contentItems: [
-                            Text('Keep empty to use default value'),
+                            const Text('Keep empty to use default value'),
                             Text('Default: ${Tools.appUserAgent}'),
-                            Text('Will be used on requests for almost all boorus and on the webview'),
-                            Text('Value is saved after leaving this page'),
+                            const Text('Will be used on requests for almost all boorus and on the webview'),
+                            const Text('Value is saved after leaving this page'),
                           ],
                         );
                       },

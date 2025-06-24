@@ -224,7 +224,7 @@ class _VersionButtonState extends State<VersionButton> {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    const String verText = 'Version: ${Constants.appVersion} (${Constants.appBuildNumber})';
+    final String verText = 'Version: ${Constants.updateInfo.versionName} (${Constants.updateInfo.buildNumber})';
     const String buildTypeText = EnvironmentConfig.isFromStore
         ? '/ Play'
         : (EnvironmentConfig.isTesting ? '/ Test' : (kDebugMode ? '/ Debug' : ''));

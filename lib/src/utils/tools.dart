@@ -190,7 +190,7 @@ class Tools {
     return statusCode != null && statusCode >= 200 && statusCode < 300;
   }
 
-  static const String appUserAgent = 'LoliSnatcher_Droid/${Constants.appVersion}';
+  static final String appUserAgent = 'LoliSnatcher_Droid/${Constants.updateInfo.versionName}';
   static String get browserUserAgent {
     return (isTestMode || SettingsHandler.instance.customUserAgent.isEmpty)
         ? appUserAgent

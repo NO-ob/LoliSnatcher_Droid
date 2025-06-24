@@ -1626,8 +1626,8 @@ class SettingsHandler {
       'drawerMascotPathOverride': validateValue('drawerMascotPathOverride', null, toJSON: true),
       'customPrimaryColor': validateValue('customPrimaryColor', null, toJSON: true),
       'customAccentColor': validateValue('customAccentColor', null, toJSON: true),
-      'version': Constants.appVersion,
-      'build': Constants.appBuildNumber,
+      'version': Constants.updateInfo.versionName,
+      'build': Constants.updateInfo.buildNumber,
     };
 
     // print('JSON $json');
@@ -2143,7 +2143,7 @@ class SettingsHandler {
         }
       }
 
-      if (Constants.appBuildNumber < (updateInfo.value!.buildNumber)) {
+      if (Constants.updateInfo.buildNumber < (updateInfo.value!.buildNumber)) {
         // if current build number is less than update build number in json
         if (EnvironmentConfig.isFromStore) {
           // installed from store
@@ -2166,14 +2166,14 @@ class SettingsHandler {
           // don't bother new (no boorus) users until next update
           await secureStorageHandler.write(
             SecureStorageKey.viewedUpdateChangelogForBuild,
-            Constants.appBuildNumber.toString(),
+            Constants.updateInfo.buildNumber.toString(),
           );
         } else if (viewedAtBuild == null ||
             viewedAtBuild.isEmpty ||
             viewedAtBuild != updateInfo.value!.buildNumber.toString()) {
           await secureStorageHandler.write(
             SecureStorageKey.viewedUpdateChangelogForBuild,
-            Constants.appBuildNumber.toString(),
+            Constants.updateInfo.buildNumber.toString(),
           );
           showUpdate(true, isAfterUpdate: true);
         } else {
@@ -2229,10 +2229,12 @@ class SettingsHandler {
     bool showMessage, {
     bool isAfterUpdate = false,
   }) {
-    if (showMessage && updateInfo.value != null) {
+    // ignore: no_leading_underscores_for_local_identifiers
+    final _updateInfo = isAfterUpdate ? Constants.updateInfo : updateInfo.value;
+    if (showMessage && _updateInfo != null) {
       const bool isFromStore = EnvironmentConfig.isFromStore;
 
-      final bool isDiffVersion = Constants.appBuildNumber < updateInfo.value!.buildNumber;
+      final bool isDiffVersion = Constants.updateInfo.buildNumber < _updateInfo.buildNumber;
 
       final ctx = NavigationHandler.instance.navContext;
 
@@ -2241,7 +2243,7 @@ class SettingsHandler {
         page: (_) => Scaffold(
           appBar: AppBar(
             title: Text(
-              '${isDiffVersion ? 'Update available!' : (isAfterUpdate ? "What's new:" : 'Update changelog:')} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
+              '${isDiffVersion ? 'Update available!' : (isAfterUpdate ? "What's new:" : 'Update changelog:')} ${_updateInfo.versionName}+${_updateInfo.buildNumber}',
             ),
           ),
           body: SafeArea(
@@ -2255,18 +2257,19 @@ class SettingsHandler {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (isDiffVersion) ...[
-                          const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
+                          Text(
+                            'Currently Installed: ${Constants.updateInfo.versionName}+${Constants.updateInfo.buildNumber}',
+                          ),
                           const Text(''),
                         ],
                         Text(
-                          updateInfo.value!.title,
+                          _updateInfo.title,
                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         const Text(''),
                         const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         const Text(''),
-                        Text(updateInfo.value!.changelog),
-                        // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
+                        Text(_updateInfo.changelog),
                       ],
                     ),
                   ),
@@ -2284,16 +2287,16 @@ class SettingsHandler {
                         label: Text(isDiffVersion ? 'Later' : 'Close'),
                       ),
                       const SizedBox(width: 16),
-                      if (isFromStore && updateInfo.value!.isInStore)
+                      if (isFromStore && _updateInfo.isInStore)
                         ElevatedButton.icon(
                           onPressed: () {
                             // try {
-                            //   launchUrlString("market://details?id=" + updateInfo.value!.storePackage);
+                            //   launchUrlString("market://details?id=" + _updateInfo.storePackage);
                             // } on PlatformException catch(e) {
-                            //   launchUrlString("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
+                            //   launchUrlString("https://play.google.com/store/apps/details?id=" + _updateInfo.storePackage);
                             // }
                             launchUrlString(
-                              'https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}',
+                              'https://play.google.com/store/apps/details?id=${_updateInfo.storePackage}',
                               mode: LaunchMode.externalApplication,
                             );
                             Navigator.of(ctx).pop();
@@ -2305,7 +2308,7 @@ class SettingsHandler {
                         ElevatedButton.icon(
                           onPressed: () {
                             launchUrlString(
-                              updateInfo.value!.githubURL,
+                              _updateInfo.githubURL,
                               mode: LaunchMode.externalApplication,
                             );
                             Navigator.of(ctx).pop();

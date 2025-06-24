@@ -1,5 +1,5 @@
 class UpdateInfo {
-  UpdateInfo({
+  const UpdateInfo({
     required this.versionName,
     required this.buildNumber,
     required this.title,
@@ -10,12 +10,12 @@ class UpdateInfo {
     required this.githubURL,
   });
 
-  String versionName;
-  int buildNumber;
-  String title;
-  String changelog;
-  bool isInStore;
-  bool isImportant;
-  String storePackage;
-  String githubURL;
+  final String versionName;
+  final int buildNumber;
+  final String title;
+  final String changelog;
+  final bool isInStore;
+  final bool isImportant;
+  final String storePackage;
+  final String githubURL;
 }
