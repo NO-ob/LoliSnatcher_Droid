@@ -9,17 +9,21 @@ import 'package:dio/dio.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart' hide ContextExt;
+import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -72,6 +76,9 @@ class _TagViewState extends State<TagView> {
 
   late BooruItem item;
   late BooruHandler handler;
+  late bool hasLoadItemSupport;
+  late bool canLoadItemOnStart;
+  BooruHandler? possibleBooruHandler;
   List<String> tags = [], filteredTags = [];
   Map<String, HasTabWithTagResult> tabMatchesMap = {};
   bool? sortTags;
@@ -95,6 +102,9 @@ class _TagViewState extends State<TagView> {
 
     item = widget.item;
     handler = widget.handler;
+    hasLoadItemSupport = handler.hasLoadItemSupport;
+    canLoadItemOnStart = handler.shouldUpdateIteminTagView;
+    checkForPossibleBooruHandler();
     tags = [...item.tagsList];
     filteredTags = [...tags];
     WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
@@ -111,6 +121,30 @@ class _TagViewState extends State<TagView> {
     });
   }
 
+  void checkForPossibleBooruHandler() {
+    final itemFileHost = Uri.tryParse(item.fileURL)?.host;
+    final itemPostHost = Uri.tryParse(item.postURL)?.host;
+    final Booru? possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
+      final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
+
+      return (itemPostHost?.isNotEmpty == true &&
+              booruHost?.isNotEmpty == true &&
+              (itemPostHost! == booruHost! ||
+                  switch (e.type) {
+                    BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
+                    BooruType.Sankaku => SankakuHandler.knownPostUrls.contains(itemPostHost),
+                    _ => false,
+                  })) ||
+          (itemFileHost?.isNotEmpty == true && booruHost?.isNotEmpty == true && itemFileHost! == booruHost!);
+    });
+
+    if (possibleBooru?.type?.isFavouritesOrDownloads != true) {
+      possibleBooruHandler = BooruHandlerFactory().getBooruHandler([possibleBooru!], null).booruHandler;
+      hasLoadItemSupport = possibleBooruHandler!.hasLoadItemSupport;
+      canLoadItemOnStart = possibleBooruHandler!.shouldUpdateIteminTagView;
+    }
+  }
+
   @override
   void didUpdateWidget(covariant TagView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -120,6 +154,10 @@ class _TagViewState extends State<TagView> {
     }
     if (widget.handler != handler) {
       handler = widget.handler;
+      hasLoadItemSupport = handler.hasLoadItemSupport;
+      canLoadItemOnStart = handler.shouldUpdateIteminTagView;
+      checkForPossibleBooruHandler();
+      setState(() {});
     }
   }
 
@@ -134,18 +172,16 @@ class _TagViewState extends State<TagView> {
     super.dispose();
   }
 
-  bool get supportsItemUpdate => handler.hasLoadItemSupport && handler.shouldUpdateIteminTagView;
-
   Future<void> reloadItemData({
     bool initial = false,
     bool force = false,
   }) async {
-    if (supportsItemUpdate && (!item.isUpdated || force)) {
+    if (hasLoadItemSupport && (!initial || canLoadItemOnStart) && (!item.isUpdated || force)) {
       loadingUpdate = true;
       failedUpdate = false;
       setState(() {});
       cancelToken = CancelToken();
-      final res = await handler.loadItem(
+      final res = await (possibleBooruHandler ?? handler).loadItem(
         item: item,
         cancelToken: cancelToken,
         withCapcthaCheck: !initial,
@@ -268,7 +304,7 @@ class _TagViewState extends State<TagView> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (supportsItemUpdate) ...[
+            if (hasLoadItemSupport) ...[
               if (loadingUpdate)
                 IconButton(
                   onPressed: () {
@@ -996,7 +1032,7 @@ class _TagViewState extends State<TagView> {
     final String score = item.score ?? '';
     final String md5 = item.md5String ?? '';
     final List<String> sources = item.sources ?? [];
-    final bool tagsAvailable = tags.isNotEmpty || supportsItemUpdate;
+    final bool tagsAvailable = tags.isNotEmpty || hasLoadItemSupport;
     String postDate = item.postDate ?? '';
     final String postDateFormat = item.postDateFormat ?? '';
     String formattedDate = '';
