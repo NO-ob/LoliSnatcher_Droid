@@ -700,7 +700,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
         final tags = await showSelectTagsDialog(context, item.tagsList);
         if (tags.isNotEmpty) {
-          shareTextAction('${item.postURL} \n ${tags.join(', ')}');
+          shareTextAction('${item.postURL} \n ${tags.join(' ')}');
         } else {
           shareTextAction(item.postURL);
         }
@@ -711,7 +711,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'File URL with tags':
         final tags = await showSelectTagsDialog(context, item.tagsList);
         if (tags.isNotEmpty) {
-          shareTextAction('${item.fileURL} \n ${tags.join(', ')}');
+          shareTextAction('${item.fileURL} \n ${tags.join(' ')}');
         } else {
           shareTextAction(item.fileURL);
         }
@@ -722,7 +722,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'File with tags':
         final tags = await showSelectTagsDialog(context, item.tagsList);
         if (tags.isNotEmpty) {
-          await shareFileAction(text: tags.join(', '));
+          await shareFileAction(text: tags.join(' '));
         } else {
           await shareFileAction();
         }
@@ -1123,7 +1123,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       Navigator.of(context).pop();
                       final tags = await showSelectTagsDialog(context, item.tagsList);
                       if (tags.isNotEmpty) {
-                        shareTextAction('${item.postURL} \n ${tags.join(', ')}');
+                        shareTextAction('${item.postURL} \n ${tags.join(' ')}');
                       } else {
                         shareTextAction(item.postURL);
                       }
@@ -1171,7 +1171,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     Navigator.of(context).pop();
                     final tags = await showSelectTagsDialog(context, item.tagsList);
                     if (tags.isNotEmpty) {
-                      shareTextAction('${item.fileURL} \n ${tags.join(', ')}');
+                      shareTextAction('${item.fileURL} \n ${tags.join(' ')}');
                     } else {
                       shareTextAction(item.fileURL);
                     }
@@ -1218,7 +1218,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     Navigator.of(context).pop();
                     final tags = await showSelectTagsDialog(context, item.tagsList);
                     if (tags.isNotEmpty) {
-                      await shareFileAction(text: tags.join(', '));
+                      await shareFileAction(text: tags.join(' '));
                     } else {
                       await shareFileAction();
                     }
