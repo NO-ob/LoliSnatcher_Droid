@@ -373,8 +373,14 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                 children: [
                   DesktopScrollWrap(
                     controller: searchHandler.gridScrollController,
-                    child: ShimmerWrap(
-                      enabled: !SettingsHandler.instance.shitDevice,
+                    child: ValueListenableBuilder(
+                      valueListenable: isActive,
+                      builder: (context, isActive, child) {
+                        return ShimmerWrap(
+                          enabled: isActive && !SettingsHandler.instance.shitDevice,
+                          child: child ?? const SizedBox.shrink(),
+                        );
+                      },
                       child: Obx(() {
                         final bool isLoadingAndNoItems =
                             searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;

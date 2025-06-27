@@ -563,12 +563,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
                           return AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),
-                            child: isAnyLoaded
-                                ? const SizedBox.shrink()
-                                : ShimmerCard(
-                                    isLoading: showShimmer,
-                                    child: showShimmer ? null : const SizedBox.shrink(),
-                                  ),
+                            child: showShimmer ? const ShimmerCard() : const SizedBox.shrink(),
                           );
                         },
                       );
