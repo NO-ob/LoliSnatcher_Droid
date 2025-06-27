@@ -152,7 +152,7 @@ class ViewerHandler {
   }
 
   void resetZoom() {
-    final dynamic state = currentKey.value?.currentState;
+    final state = currentKey.value?.currentState;
     switch (state?.widget) {
       case ImageViewer():
         (state as ImageViewerState?)?.resetZoom();
@@ -166,7 +166,7 @@ class ViewerHandler {
   }
 
   void doubleTapZoom() {
-    final dynamic state = currentKey.value?.currentState;
+    final state = currentKey.value?.currentState;
     switch (state?.widget) {
       case ImageViewer():
         (state as ImageViewerState?)?.doubleTapZoom();

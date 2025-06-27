@@ -393,6 +393,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                         }
 
                         return CustomScrollView(
+                          key: ValueKey('CustomScrollView-${searchHandler.currentTabId}'),
                           controller: searchHandler.gridScrollController,
                           physics: isLoadingAndNoItems
                               ? const NeverScrollableScrollPhysics()
@@ -422,7 +423,6 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                       () => StaggeredBuilder(
                                         tab: searchHandler.currentTab,
                                         scrollController: searchHandler.gridScrollController,
-                                        highlightedIndex: searchHandler.viewedIndex.value,
                                         onSelected: onLongPress,
                                         onTap: onTap,
                                         onDoubleTap: onDoubleTap,
@@ -436,7 +436,6 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                     () => GridBuilder(
                                       tab: searchHandler.currentTab,
                                       scrollController: searchHandler.gridScrollController,
-                                      highlightedIndex: searchHandler.viewedIndex.value,
                                       onSelected: onLongPress,
                                       onTap: onTap,
                                       onDoubleTap: onDoubleTap,

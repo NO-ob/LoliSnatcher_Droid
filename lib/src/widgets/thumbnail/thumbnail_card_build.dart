@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -45,6 +44,8 @@ class ThumbnailCardBuild extends StatelessWidget {
   Widget build(BuildContext context) {
     final snatchHandler = SnatchHandler.instance;
 
+    final isSelected = selectable && selectedIndex != null;
+
     return AutoScrollTag(
       highlightColor: Colors.red,
       key: ValueKey(index),
@@ -53,34 +54,52 @@ class ThumbnailCardBuild extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(4),
-        child: Obx(() {
-          final bool isCurrentlyBeingSnatched =
-              snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item &&
-              snatchHandler.total.value != 0;
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ValueListenableBuilder(
+              valueListenable: snatchHandler.current,
+              builder: (_, current, child) {
+                return ValueListenableBuilder(
+                  valueListenable: snatchHandler.queueProgress,
+                  builder: (_, queueProgress, _) {
+                    return ValueListenableBuilder(
+                      valueListenable: snatchHandler.total,
+                      builder: (_, total, _) {
+                        return ValueListenableBuilder(
+                          valueListenable: snatchHandler.received,
+                          builder: (_, received, _) {
+                            final bool isCurrentlyBeingSnatched =
+                                current?.booruItems[queueProgress] == item && total != 0;
 
-          final isSelected = selectable && selectedIndex != null;
+                            final bool showBorder = isHighlighted || isSelected || isCurrentlyBeingSnatched;
+                            final Color borderColor = isCurrentlyBeingSnatched
+                                ? Colors.transparent
+                                : Theme.of(context).colorScheme.secondary;
+                            final double borderRadius = isCurrentlyBeingSnatched ? 10 : 4;
+                            final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
+                            final double borderWidth = defaultBorderWidth * (isCurrentlyBeingSnatched ? 3 : 1);
 
-          final bool showBorder = isHighlighted || isSelected || isCurrentlyBeingSnatched;
-          final Color borderColor = isCurrentlyBeingSnatched
-              ? Colors.transparent
-              : Theme.of(context).colorScheme.secondary;
-          final double borderRadius = isCurrentlyBeingSnatched ? 10 : 4;
-          final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
-          final double borderWidth = defaultBorderWidth * (isCurrentlyBeingSnatched ? 3 : 1);
-
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              Ink(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(borderRadius),
-                  border: showBorder
-                      ? Border.all(
-                          color: borderColor,
-                          width: borderWidth,
-                        )
-                      : null,
-                ),
+                            return Ink(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(borderRadius),
+                                border: showBorder
+                                    ? Border.all(
+                                        color: borderColor,
+                                        width: borderWidth,
+                                      )
+                                    : null,
+                              ),
+                              child: child,
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+              child: RepaintBoundary(
                 child: InkWell(
                   enableFeedback: true,
                   borderRadius: BorderRadius.circular(4),
@@ -99,20 +118,49 @@ class ThumbnailCardBuild extends StatelessWidget {
                   ),
                 ),
               ),
-              if (isCurrentlyBeingSnatched)
-                Positioned.fill(
-                  child: AnimatedProgressIndicator(
-                    value: snatchHandler.currentProgress,
-                    animationDuration: const Duration(milliseconds: 50),
-                    indicatorStyle: IndicatorStyle.square,
-                    valueColor: Theme.of(context).progressIndicatorTheme.color,
-                    strokeWidth: borderWidth,
-                    borderRadius: borderRadius,
-                  ),
-                ),
-            ],
-          );
-        }),
+            ),
+            Positioned.fill(
+              child: ValueListenableBuilder(
+                valueListenable: snatchHandler.current,
+                builder: (_, current, _) {
+                  return ValueListenableBuilder(
+                    valueListenable: snatchHandler.queueProgress,
+                    builder: (_, queueProgress, _) {
+                      return ValueListenableBuilder(
+                        valueListenable: snatchHandler.total,
+                        builder: (_, total, _) {
+                          return ValueListenableBuilder(
+                            valueListenable: snatchHandler.received,
+                            builder: (_, _, _) {
+                              final bool isCurrentlyBeingSnatched =
+                                  current?.booruItems[queueProgress] == item && total != 0;
+                              final double borderRadius = isCurrentlyBeingSnatched ? 10 : 4;
+                              final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
+                              final double borderWidth = defaultBorderWidth * (isCurrentlyBeingSnatched ? 3 : 1);
+
+                              if (isCurrentlyBeingSnatched) {
+                                return AnimatedProgressIndicator(
+                                  value: snatchHandler.currentProgress,
+                                  animationDuration: const Duration(milliseconds: 50),
+                                  indicatorStyle: IndicatorStyle.square,
+                                  valueColor: Theme.of(context).progressIndicatorTheme.color,
+                                  strokeWidth: borderWidth,
+                                  borderRadius: borderRadius,
+                                );
+                              }
+
+                              return const SizedBox.shrink();
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

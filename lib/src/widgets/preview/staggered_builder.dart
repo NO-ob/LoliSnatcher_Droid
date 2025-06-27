@@ -15,7 +15,6 @@ class StaggeredBuilder extends StatelessWidget {
   const StaggeredBuilder({
     required this.tab,
     required this.scrollController,
-    this.highlightedIndex,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
@@ -26,7 +25,6 @@ class StaggeredBuilder extends StatelessWidget {
 
   final SearchTab tab;
   final AutoScrollController scrollController;
-  final int? highlightedIndex;
   final void Function(int)? onTap;
   final void Function(int)? onDoubleTap;
   final void Function(int)? onLongPress;
@@ -86,7 +84,7 @@ class StaggeredBuilder extends StatelessWidget {
                     item: item,
                     handler: tab.booruHandler,
                     scrollController: scrollController,
-                    isHighlighted: index == highlightedIndex,
+                    isHighlighted: index == tab.viewedIndex.value,
                     selectable: true,
                     selectedIndex: isSelected ? selectedIndex : null,
                     onSelected: hasSelected ? onSelected : null,
