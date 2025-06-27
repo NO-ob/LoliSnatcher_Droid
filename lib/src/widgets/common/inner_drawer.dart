@@ -92,7 +92,7 @@ class InnerDrawerState extends State<InnerDrawer> with SingleTickerProviderState
   ColorTween _colorTransitionChild = ColorTween(begin: Colors.transparent, end: Colors.black54);
   ColorTween _colorTransitionScaffold = ColorTween(begin: Colors.black54, end: Colors.transparent);
 
-  double _initWidth = _kWidth;
+  double _width = _kWidth;
   double _screenWidth = _kWidth;
   Orientation _orientation = Orientation.portrait;
   final ValueNotifier<InnerDrawerDirection> _direction = ValueNotifier(InnerDrawerDirection.start);
@@ -121,12 +121,6 @@ class InnerDrawerState extends State<InnerDrawer> with SingleTickerProviderState
           ..addStatusListener(_animationStatusChanged);
 
     _animationChanged();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _updateWidth(MediaQuery.sizeOf(context).width);
   }
 
   @override
@@ -221,10 +215,6 @@ class InnerDrawerState extends State<InnerDrawer> with SingleTickerProviderState
     // _ensureHistoryEntry();
   }
 
-  double get _width {
-    return _initWidth;
-  }
-
   double get _velocity {
     return widget.velocity;
   }
@@ -232,11 +222,10 @@ class InnerDrawerState extends State<InnerDrawer> with SingleTickerProviderState
   void _updateWidth(double screenWidth) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final RenderBox? box = _drawerKey.currentContext!.findRenderObject() as RenderBox?;
-      if (box != null && box.hasSize && box.size.width > 300) {
-        setState(() {
-          _initWidth = box.size.width;
-          _screenWidth = screenWidth;
-        });
+      if (mounted && box != null && box.hasSize && box.size.width > 300) {
+        _width = box.size.width;
+        _screenWidth = screenWidth;
+        setState(() {});
       }
     });
   }
@@ -383,12 +372,13 @@ class InnerDrawerState extends State<InnerDrawer> with SingleTickerProviderState
 
   @override
   Widget build(BuildContext context) {
-    if (_initWidth == 400 ||
-        _screenWidth == 400 ||
-        MediaQuery.orientationOf(context) != _orientation ||
-        MediaQuery.sizeOf(context).width != _screenWidth) {
-      _orientation = MediaQuery.orientationOf(context);
-      _updateWidth(MediaQuery.sizeOf(context).width);
+    final size = MediaQuery.sizeOf(context);
+    final orientation = MediaQuery.orientationOf(context);
+    if (((_width == 400 || _screenWidth == 400) && size.width != 400) ||
+        orientation != _orientation ||
+        size.width != _screenWidth) {
+      _orientation = orientation;
+      _updateWidth(size.width);
     }
 
     return Container(
@@ -420,7 +410,7 @@ class InnerDrawerState extends State<InnerDrawer> with SingleTickerProviderState
                         );
                         child = SizedBox(
                           width: widget.proportionalChildArea ? _width - _widthWithOffset : _width,
-                          height: MediaQuery.sizeOf(context).height,
+                          height: size.height,
                           child: _swipeChild
                               ? GestureDetector(
                                   onHorizontalDragUpdate: _move,
@@ -555,7 +545,7 @@ class InnerDrawerState extends State<InnerDrawer> with SingleTickerProviderState
 
                                   if (widget.offset.top > 0 || widget.offset.bottom > 0) {
                                     final double translateY =
-                                        MediaQuery.sizeOf(context).height *
+                                        size.height *
                                         (widget.offset.top > 0 ? -widget.offset.top : widget.offset.bottom);
                                     container = Transform.translate(
                                       offset: Offset(0, translateY * (1 - _controller.value)),
