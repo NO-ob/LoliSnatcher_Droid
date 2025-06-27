@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -304,7 +303,7 @@ class SearchHandler {
   // search box focus node
   FocusNode searchBoxFocus = FocusNode();
 
-  final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();
+  final GlobalKey mainDrawerKey = GlobalKey();
 
   // switch to tab #index
   void changeTabIndex(

@@ -535,15 +535,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.0-beta.2"
-  flutter_inner_drawer:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: a12cffc2d54e1e0350904d0f841203935d20e465
-      resolved-ref: a12cffc2d54e1e0350904d0f841203935d20e465
-      url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"
-    source: git
-    version: "1.0.0+1"
   flutter_keyboard_visibility:
     dependency: "direct main"
     description:
@@ -1363,10 +1354,10 @@ packages:
     dependency: transitive
     description:
       name: screen_brightness_android
-      sha256: "6ba1b5812f66c64e9e4892be2d36ecd34210f4e0da8bdec6a2ea34f1aa42683e"
+      sha256: fb5fa43cb89d0c9b8534556c427db1e97e46594ac5d66ebdcf16063b773d54ed
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   screen_brightness_platform_interface:
     dependency: transitive
     description:
@@ -1528,10 +1519,10 @@ packages:
     dependency: transitive
     description:
       name: synchronized
-      sha256: "0669c70faae6270521ee4f05bffd2919892d42d1276e6c495be80174b6bc0ef6"
+      sha256: c254ade258ec8282947a0acbbc90b9575b4f19673533ee46f2f6e9b3aeefd7c0
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.1"
+    version: "3.4.0"
   talker:
     dependency: "direct main"
     description:
@@ -1838,4 +1829,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.8.1 <4.0.0"
-  flutter: ">=3.32.4"
+  flutter: ">=3.32.5"

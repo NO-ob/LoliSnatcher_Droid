@@ -45,8 +45,8 @@
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 /ios/
 
-# FVM files
-/.fvm/
+# FVM Version Cache
+.fvm/
 
 # Secret variables
 /config/secrets.json

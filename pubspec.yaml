@@ -6,7 +6,7 @@ version: 2.4.4+4200 # remember to update the values in constants.dart->updateInf
 
 environment:
   sdk: ">=3.8.1 <4.0.0"
-  flutter: ^3.32.4
+  flutter: ^3.32.5
 
 dependencies:
   flutter:
@@ -34,10 +34,6 @@ dependencies:
   flutter_html: ^3.0.0
   flutter_improved_scrolling: ^0.0.3
   flutter_inappwebview: ^6.2.0-beta.2
-  flutter_inner_drawer:
-    git:
-      url: https://github.com/NANI-SORE/flutter_inner_drawer.git
-      ref: a12cffc2d54e1e0350904d0f841203935d20e465 # master
   flutter_keyboard_visibility: ^6.0.0
   flutter_linkify: ^6.0.0
   flutter_secure_storage: ^9.2.4
