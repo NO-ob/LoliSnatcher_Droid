@@ -6,6 +6,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
 class GridBuilder extends StatelessWidget {
@@ -63,7 +64,7 @@ class GridBuilder extends StatelessWidget {
                 item: item,
                 handler: tab.booruHandler,
                 scrollController: scrollController,
-                isHighlighted: index == tab.viewedIndex.value,
+                isHighlighted: ViewerHandler.instance.currentKey.value == item.key,
                 selectable: true,
                 selectedIndex: isSelected ? selectedIndex : null,
                 onSelected: hasSelected ? onSelected : null,

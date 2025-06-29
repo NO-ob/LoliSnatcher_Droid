@@ -9,6 +9,7 @@ import 'package:waterfall_flow/waterfall_flow.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
 class StaggeredBuilder extends StatelessWidget {
@@ -84,7 +85,7 @@ class StaggeredBuilder extends StatelessWidget {
                     item: item,
                     handler: tab.booruHandler,
                     scrollController: scrollController,
-                    isHighlighted: index == tab.viewedIndex.value,
+                    isHighlighted: ViewerHandler.instance.currentKey.value == item.key,
                     selectable: true,
                     selectedIndex: isSelected ? selectedIndex : null,
                     onSelected: hasSelected ? onSelected : null,

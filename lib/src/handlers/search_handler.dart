@@ -128,9 +128,6 @@ class SearchHandler {
       tabIndex = currentIndex;
     }
 
-    // reset viewed item in any case
-    setViewedItem(-1);
-
     if (total > 1) {
       if (tabIndex == currentIndex) {
         // if current tab is the one being removed
@@ -183,8 +180,6 @@ class SearchHandler {
   void removeTabs(List<SearchTab> tabs) {
     final curTab = currentTab;
     final totalTabs = total;
-
-    setViewedItem(-1);
 
     for (final tab in tabs) {
       list.value.remove(tab);
@@ -356,12 +351,9 @@ class SearchHandler {
     // trigger search if there are items inside booruHandler
     if (isNewSearch) {
       runSearch().then((_) {
-        setViewedItem(currentTab.viewedIndex.value);
         tabId.value = list[currentIndex].id;
       });
     } else {
-      // set current viewed index and item of the tab
-      setViewedItem(currentTab.viewedIndex.value);
       tabId.value = list[currentIndex].id;
     }
 
@@ -469,38 +461,6 @@ class SearchHandler {
     }
   }
 
-  RxInt viewedIndex = (-1).obs;
-  Rx<BooruItem> viewedItem = BooruItem(
-    fileURL: '',
-    sampleURL: '',
-    thumbnailURL: '',
-    tagsList: const [],
-    postURL: '',
-  ).obs;
-
-  BooruItem setViewedItem(int i) {
-    final int newIndex = i;
-    // final int oldIndex = viewedIndex.value;
-    final BooruItem newItem = newIndex != -1
-        ? currentFetched[newIndex]
-        : BooruItem(
-            fileURL: '',
-            sampleURL: '',
-            thumbnailURL: '',
-            tagsList: const [],
-            postURL: '',
-          );
-    viewedItem.value = newItem;
-    currentTab.viewedItem.value = newItem;
-
-    viewedIndex.value = newIndex;
-    currentTab.viewedIndex.value = newIndex;
-
-    // print('old $oldIndex | new $newIndex index \n new item ${newItem.toString()}');
-
-    return newItem;
-  }
-
   // runs search on current tab
   void searchAction(String text, Booru? newBooru) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
@@ -532,8 +492,6 @@ class SearchHandler {
 
     searchReactions(text, newBooru ?? currentBooru);
 
-    // reset viewed item
-    setViewedItem(-1);
     // run search
     changeTabIndex(currentIndex, ignoreSameIndexCheck: true);
 
@@ -897,7 +855,6 @@ class SearchHandler {
       }
     }
     list.value = restoredGlobals;
-    setViewedItem(-1);
     changeTabIndex(newIndex);
 
     FlashElements.showSnackbar(
@@ -1055,7 +1012,6 @@ class SearchHandler {
       }
     }
     list.value = restoredTabs;
-    setViewedItem(-1);
     changeTabIndex(newSelectedIndex);
 
     FlashElements.showSnackbar(
@@ -1222,15 +1178,11 @@ class SearchTab {
   late final BooruHandler booruHandler;
 
   double scrollPosition = 0;
-  RxInt viewedIndex = (-1).obs;
-  Rx<BooruItem> viewedItem = BooruItem(
-    fileURL: '',
-    sampleURL: '',
-    thumbnailURL: '',
-    tagsList: const [],
-    postURL: '',
-  ).obs;
   RxList<BooruItem> selected = RxList<BooruItem>.from([]);
+
+  BooruItem? itemWithKey(Key? key) {
+    return booruHandler.filteredFetched.firstWhereOrNull((item) => item.key == key);
+  }
 
   Future<bool?> toggleItemFavourite(
     int itemIndex, {

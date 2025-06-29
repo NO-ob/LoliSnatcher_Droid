@@ -49,6 +49,7 @@ class GalleryViewPage extends StatefulWidget {
 
 class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
   final SnatchHandler snatchHandler = SnatchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
@@ -80,7 +81,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
 
     final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || viewerHandler.displayAppbar.value;
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
-    volumeListener = SearchHandler.instance.volumeStream?.listen(volumeCallback);
+    volumeListener = searchHandler.volumeStream?.listen(volumeCallback);
 
     final item = widget.tab.booruHandler.filteredFetched[widget.initialIndex];
     viewerHandler.setCurrent(item.key);
