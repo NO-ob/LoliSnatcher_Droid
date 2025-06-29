@@ -5,6 +5,7 @@ import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
+import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class OverlayScreen {
@@ -109,7 +110,7 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
     );
   }
 
-  double get totalHeight => ((btnSize + btnPadding) * (isOpen ? (kDebugMode ? 4 : 3) : 1)) + 2;
+  double get totalHeight => ((btnSize + btnPadding) * (isOpen ? (kDebugMode ? 5 : 4) : 1)) + 2;
 
   @override
   Widget build(BuildContext context) {
@@ -172,12 +173,25 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
                     ),
                     if (isOpen) ...[
                       buildButton(
+                        Icons.settings,
+                        'Settings',
+                        () {
+                          Navigator.of(NavigationHandler.instance.navContext).push(
+                            MaterialPageRoute(
+                              builder: (_) => const SettingsPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      //
+                      buildButton(
                         Icons.developer_board,
                         'Network',
                         () {
                           settingsHandler.alice.showInspector();
                         },
                       ),
+                      //
                       buildButton(
                         Icons.print,
                         'Logger',
@@ -189,6 +203,7 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
                           );
                         },
                       ),
+                      //
                       if (kDebugMode)
                         buildButton(
                           Icons.deblur,
