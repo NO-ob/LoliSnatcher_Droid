@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -72,11 +73,13 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
   Widget buildButton(
     IconData icon,
     String text,
-    VoidCallback onTap,
-  ) {
+    VoidCallback onTap, {
+    VoidCallback? onLongTap,
+  }) {
     return InkWell(
       key: ValueKey(icon),
       onTap: onTap,
+      onLongPress: onLongTap,
       child: Container(
         width: btnSize,
         height: btnSize + btnPadding,
@@ -179,6 +182,13 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
                           Navigator.of(NavigationHandler.instance.navContext).push(
                             MaterialPageRoute(
                               builder: (_) => const SettingsPage(),
+                            ),
+                          );
+                        },
+                        onLongTap: () {
+                          Navigator.of(NavigationHandler.instance.navContext).push(
+                            MaterialPageRoute(
+                              builder: (_) => const DebugPage(),
                             ),
                           );
                         },

@@ -59,7 +59,7 @@ class _DebugPageState extends State<DebugPage> {
       return;
     }
 
-    final bool result = await settingsHandler.saveSettings(restate: false);
+    final bool result = await settingsHandler.saveSettings(restate: true);
 
     if (result) {
       Navigator.of(context).pop();
