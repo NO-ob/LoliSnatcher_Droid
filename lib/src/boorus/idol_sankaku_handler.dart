@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:html/dom.dart';
+import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -8,6 +10,7 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
 class IdolSankakuHandler extends SankakuHandler {
   IdolSankakuHandler(super.booru, super.limit);
@@ -16,7 +19,7 @@ class IdolSankakuHandler extends SankakuHandler {
   bool get hasTagSuggestions => true;
 
   @override
-  bool get hasLoadItemSupport => false;
+  bool get hasLoadItemSupport => true;
 
   @override
   Options? fetchSearchOptions() {
@@ -32,6 +35,62 @@ class IdolSankakuHandler extends SankakuHandler {
   @override
   Options? fetchCommentsOptions() {
     return Options(responseType: ResponseType.plain);
+  }
+
+  @override
+  Future<({BooruItem? item, bool failed, String? error})> loadItem({
+    required BooruItem item,
+    CancelToken? cancelToken,
+    bool withCapcthaCheck = false,
+  }) async {
+    try {
+      await searchSetup();
+
+      final response = await DioNetwork.get(
+        makeApiPostURL(item.postURL.split('/').last),
+        headers: getHeaders(),
+        cancelToken: cancelToken,
+        options: Options(
+          contentType: 'text/html; charset=utf-8',
+          followRedirects: true,
+          maxRedirects: 2,
+        ),
+        customInterceptor: withCapcthaCheck
+            ? (dio) => DioNetwork.captchaInterceptor(
+          dio,
+          customUserAgent: Constants.defaultBrowserUserAgent,
+        )
+            : null,
+      );
+
+      if (response.statusCode != 200) {
+        return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
+      } else {
+
+        final Document parsedHtml = parse(response.data);
+
+        final String fileURL = parsedHtml.getElementById('highres')!.attributes['href']!.replaceFirst('//', 'https://');
+        final String sampleURL = parsedHtml.getElementById('lowres')?.attributes['href']?.replaceFirst('//', 'https://') ?? fileURL;
+        final String thumbnailURL = parsedHtml.querySelector("meta[property='og:image']")!.attributes['content'].toString().replaceFirst('//', 'https://');
+
+        Logger.Inst().log(response.data, className, 'updateFavourite', LogTypes.booruHandlerRawFetched);
+
+        if(fileURL.isNotEmpty && thumbnailURL.isNotEmpty) {
+          item.fileURL = fileURL;
+          item.sampleURL = sampleURL;
+          item.thumbnailURL = thumbnailURL;
+          item.isUpdated = true;
+        }
+
+        return (item: item, failed: false, error: null);
+      }
+    } catch (e) {
+      if (e is DioException && CancelToken.isCancel(e)) {
+        return (item: null, failed: true, error: 'Cancelled');
+      }
+
+      return (item: null, failed: true, error: e.toString());
+    }
   }
 
   @override
