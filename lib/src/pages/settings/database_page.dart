@@ -113,12 +113,12 @@ class _DatabasePageState extends State<DatabasePage> {
     final List<Booru> sankakuBoorus = [];
 
     for (int i = 0; i < settingsHandler.booruList.length; i++) {
-      if (settingsHandler.booruList[i].type?.isSankaku == true &&
+      if ((settingsHandler.booruList[i].type?.isSankaku == true || settingsHandler.booruList[i].type?.isIdolSankaku == true) &&
           [
             ...SankakuHandler.knownUrls,
+            ...IdolSankakuHandler.knownUrls,
             'sankakuapi.com',
           ].any((e) => settingsHandler.booruList[i].baseURL?.contains(e) ?? false)) {
-        // TODO add support for idol (if possible, it seems that idol uses old api which doesn't allow item refresh (parse html then?))
         sankakuBoorus.add(settingsHandler.booruList[i]);
       }
     }
