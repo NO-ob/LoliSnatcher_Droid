@@ -247,7 +247,7 @@ class IdolSankakuHandler extends SankakuHandler {
       await searchSetup();
       final response = await DioNetwork.get(
         item.postURL,
-        headers: getHeaders(),
+        // headers: getHeaders(),
         options: Options(
           contentType: 'text/html; charset=utf-8',
           followRedirects: true,
