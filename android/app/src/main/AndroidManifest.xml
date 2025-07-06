@@ -64,12 +64,14 @@
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="false" />
 
+        <!-- Makes every plain isolate run in its own thread -->
         <!-- <meta-data
             android:name="io.flutter.embedding.android.EnablePlatformIsolates"
-            android:value="false" /> Makes every plain isolate run in its own thread -->
+            android:value="false" /> -->
 
+        <!-- Makes service isolate run in a separate thread -->
         <!-- <meta-data
             android:name="io.flutter.embedding.android.DisableMergedPlatformUIThread"
-            android:value="true" /> Makes service isolate run in a separate thread -->
+             android:value="true" /> -->
     </application>
 </manifest>

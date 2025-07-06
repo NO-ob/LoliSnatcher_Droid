@@ -4,8 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:alice_lightweight/alice.dart';
+import 'package:alice_lightweight/helper/alice_save_helper.dart';
 import 'package:fvp/fvp.dart' as fvp;
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
@@ -2370,7 +2372,17 @@ class SettingsHandler {
     // print(toJSON());
     // print(jsonEncode(toJSON()));
 
-    alice = Alice();
+    alice = Alice(
+      quickShareAction: Platform.isWindows
+          ? (call) async {
+              await Clipboard.setData(
+                ClipboardData(
+                  text: await AliceSaveHelper.buildCallLog(call),
+                ),
+              );
+            }
+          : null,
+    );
 
     isInit.value = true;
     return;
