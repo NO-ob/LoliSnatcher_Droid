@@ -190,6 +190,28 @@ class Tools {
     return statusCode != null && statusCode >= 200 && statusCode < 300;
   }
 
+  static bool isGoodResponse(Response response) {
+    if (!isGoodStatusCode(response.statusCode)) {
+      return false;
+    }
+
+    final isSankaku = response.realUri.toString().contains('sankakucomplex.com');
+    final isImageOrVideo =
+        response.headers['content-type']?.any((t) => t.contains('image') || t.contains('video')) == true;
+    if (isSankaku && isImageOrVideo) {
+      final int? contentLength = int.tryParse(response.headers['content-length']?.firstOrNull ?? '');
+      if (contentLength != null) {
+        // TODO investigate better ways/possibility of this number changing
+        // Image with "Expired link - please reload site" text
+        const int expiredLinkFileSize = 14802;
+        return contentLength != expiredLinkFileSize;
+      }
+    }
+
+    // TODO add more checks
+    return true;
+  }
+
   static final String appUserAgent = 'LoliSnatcher_Droid/${Constants.updateInfo.versionName}';
   static String get browserUserAgent {
     return (isTestMode || SettingsHandler.instance.customUserAgent.isEmpty)

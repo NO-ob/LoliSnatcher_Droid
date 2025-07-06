@@ -205,7 +205,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
               );
         client.close();
 
-        if (Tools.isGoodStatusCode(response.statusCode) == false) {
+        if (!Tools.isGoodResponse(response)) {
           try {
             final testFile = File(cacheFilePath);
             if (await testFile.exists()) {
@@ -463,7 +463,7 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
               );
         client.close();
 
-        if (Tools.isGoodStatusCode(response.statusCode) == false) {
+        if (!Tools.isGoodResponse(response)) {
           try {
             final testFile = File(cacheFilePath);
             if (await testFile.exists()) {
