@@ -15,7 +15,7 @@ dependencies:
   app_links: ^6.4.0
   auto_size_text_plus: ^3.0.2
   calendar_date_picker2: ^2.0.1
-  chewie: ^1.11.3
+  chewie: ^1.12.1
   crypto: ^3.0.6
   dio: ^5.8.0+1
   dio_http2_adapter: ^2.6.0
@@ -43,7 +43,7 @@ dependencies:
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
   font_awesome_flutter: ^10.8.0
   fpdart: ^1.1.1
-  fvp: ^0.32.1
+  fvp: ^0.33.0
   get_it: ^8.0.3
   get: ^5.0.0-release-candidate-9.3.2 # ^4.7.2
   google_fonts: ^6.2.1
@@ -67,7 +67,7 @@ dependencies:
   media_kit_libs_video: ^1.0.6
   native_dio_adapter: ^1.4.0
   path_provider: ^2.1.5
-  permission_handler: ^12.0.0+1
+  permission_handler: ^12.0.1
   photo_view:
     git:
       url: https://github.com/NANI-SORE/photo_view.git
@@ -83,10 +83,10 @@ dependencies:
   sqflite_common_ffi: ^2.3.6
   sqflite: ^2.4.2
   super_clipboard: ^0.9.1
-  talker_dio_logger: ^4.9.1
-  talker_flutter: ^4.9.1
-  talker_logger: ^4.9.1
-  talker: ^4.9.1
+  talker_dio_logger: ^4.9.2
+  talker_flutter: ^4.9.2
+  talker_logger: ^4.9.2
+  talker: ^4.9.2
   url_launcher: ^6.3.1
   uuid: ^4.5.1
   vibration: ^3.1.3
