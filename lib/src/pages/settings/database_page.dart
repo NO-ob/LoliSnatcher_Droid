@@ -113,7 +113,8 @@ class _DatabasePageState extends State<DatabasePage> {
     final List<Booru> sankakuBoorus = [];
 
     for (int i = 0; i < settingsHandler.booruList.length; i++) {
-      if ((settingsHandler.booruList[i].type?.isSankaku == true || settingsHandler.booruList[i].type?.isIdolSankaku == true) &&
+      if ((settingsHandler.booruList[i].type?.isSankaku == true ||
+              settingsHandler.booruList[i].type?.isIdolSankaku == true) &&
           [
             ...SankakuHandler.knownUrls,
             ...IdolSankakuHandler.knownUrls,
@@ -655,17 +656,17 @@ class _DatabasePageState extends State<DatabasePage> {
                         ignoring: isUpdating,
                         child: Column(
                           children: [
-                            // SettingsDropdown<BooruType?>(
-                            //   value: sankakuType,
-                            //   items: getSankakuBoorus().map((e) => e.type).toList(),
-                            //   itemTitleBuilder: (BooruType? item) => item?.alias ?? '',
-                            //   onChanged: (BooruType? newValue) {
-                            //     setState(() {
-                            //       sankakuType = newValue;
-                            //     });
-                            //   },
-                            //   title: 'Sankaku type to update',
-                            // ),
+                            SettingsDropdown<BooruType?>(
+                              value: sankakuType,
+                              items: getSankakuBoorus().map((e) => e.type).toList(),
+                              itemTitleBuilder: (BooruType? item) => item?.alias ?? '',
+                              onChanged: (BooruType? newValue) {
+                                setState(() {
+                                  sankakuType = newValue;
+                                });
+                              },
+                              title: 'Sankaku type to update',
+                            ),
                             SettingsTextInput(
                               controller: sankakuSearchController,
                               title: 'Search query',
