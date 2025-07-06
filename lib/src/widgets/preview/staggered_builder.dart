@@ -85,7 +85,7 @@ class StaggeredBuilder extends StatelessWidget {
                     item: item,
                     handler: tab.booruHandler,
                     scrollController: scrollController,
-                    isHighlighted: ViewerHandler.instance.currentKey.value == item.key,
+                    isHighlighted: ViewerHandler.instance.current.value?.key == item.key,
                     selectable: true,
                     selectedIndex: isSelected ? selectedIndex : null,
                     onSelected: hasSelected ? onSelected : null,

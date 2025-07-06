@@ -209,7 +209,7 @@ class DesktopTagListener extends StatelessWidget {
         ),
         child: Obx(
           () {
-            final item = searchHandler.currentTab.itemWithKey(ViewerHandler.instance.currentKey.value);
+            final item = searchHandler.currentTab.itemWithKey(ViewerHandler.instance.current.value?.key);
 
             if (item == null) {
               return const SizedBox.shrink();

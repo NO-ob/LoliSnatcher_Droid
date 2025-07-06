@@ -568,7 +568,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         // set viewed item again in case favourites filter is enabled
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           await Future.delayed(const Duration(seconds: 1));
-          viewerHandler.setCurrent(widget.tab.booruHandler.filteredFetched[page.value].key);
+          viewerHandler.setCurrent(widget.tab.booruHandler.filteredFetched[page.value]);
         });
         break;
       case 'share':

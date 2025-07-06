@@ -209,10 +209,10 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       return;
     }
 
-    if (viewerHandler.currentKey.value == null &&
+    if (viewerHandler.current.value == null &&
         searchHandler.currentFetched.isNotEmpty &&
         searchHandler.currentFetched.length < (settingsHandler.itemLimit + 1)) {
-      viewerHandler.setCurrent(searchHandler.currentFetched.first.key);
+      viewerHandler.setCurrent(searchHandler.currentFetched.first);
     }
   }
 
@@ -231,7 +231,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   void onViewerPageChanged(int index) {
     if (isMobile) {
       jumpTo(index);
-      viewerHandler.setCurrent(searchHandler.currentFetched[index].key);
+      viewerHandler.setCurrent(searchHandler.currentFetched[index]);
     } else {
       // don't auto scroll on viewed index change on desktop
       // call jumpTo only when viewed item is possibly out of view (i.e. selected by arrow keys)
@@ -239,7 +239,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   Future<void> onTap(int index) async {
-    viewerHandler.setCurrent(searchHandler.currentFetched[index].key);
+    viewerHandler.setCurrent(searchHandler.currentFetched[index]);
 
     if (isMobile) {
       // protection from opening multiple viewers at once
@@ -340,7 +340,9 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       currentOrientation = context.orientation;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final itemIndex = searchHandler.currentFetched.indexWhere((item) => item.key == viewerHandler.currentKey.value);
+        final itemIndex = searchHandler.currentFetched.indexWhere(
+          (item) => item.key == viewerHandler.current.value?.key,
+        );
         if (itemIndex != -1) {
           searchHandler.gridScrollController.scrollToIndex(
             itemIndex,

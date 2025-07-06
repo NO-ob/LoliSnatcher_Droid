@@ -50,7 +50,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
         () => ImageViewer(
           item,
           booru: searchHandler.currentBooru,
-          isViewed: ViewerHandler.instance.currentKey.value == item.key,
+          isViewed: ViewerHandler.instance.current.value?.key == item.key,
           key: item.key,
         ),
       );
@@ -60,7 +60,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
           () => VideoViewer(
             item,
             booru: searchHandler.currentBooru,
-            isViewed: ViewerHandler.instance.currentKey.value == item.key,
+            isViewed: ViewerHandler.instance.current.value?.key == item.key,
             enableFullscreen: true,
             key: item.key,
           ),
@@ -137,7 +137,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
         return const SizedBox.shrink();
       }
 
-      final item = searchHandler.currentTab.itemWithKey(viewerHandler.currentKey.value);
+      final item = searchHandler.currentTab.itemWithKey(viewerHandler.current.value?.key);
       final Widget? itemWidget = getImageWidget(item);
       if (itemWidget == null || item == null) {
         return const SizedBox.shrink();

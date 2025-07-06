@@ -84,7 +84,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
     volumeListener = searchHandler.volumeStream?.listen(volumeCallback);
 
     final item = widget.tab.booruHandler.filteredFetched[widget.initialIndex];
-    viewerHandler.setCurrent(item.key);
+    viewerHandler.setCurrent(item);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       dismissProgress.value = 0;
@@ -116,7 +116,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
   void didPopNext() {
     isActive.value = true;
     final item = widget.tab.booruHandler.filteredFetched[page.value];
-    viewerHandler.setCurrent(item.key);
+    viewerHandler.setCurrent(item);
   }
 
   @override
@@ -475,7 +475,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
 
                             final item = widget.tab.booruHandler.filteredFetched[index];
 
-                            viewerHandler.setCurrent(item.key);
+                            viewerHandler.setCurrent(item);
 
                             final bool isVolumeAllowed =
                                 !settingsHandler.useVolumeButtonsForScroll || viewerHandler.displayAppbar.value;
