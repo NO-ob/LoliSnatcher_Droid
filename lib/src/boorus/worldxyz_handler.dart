@@ -34,6 +34,49 @@ class WorldXyzHandler extends BooruHandler {
     return (parsedResponse['items'] ?? []) as List;
   }
 
+  Map<String, dynamic> appConfig = {};
+
+  String get storageBase {
+    try {
+      final storages = appConfig['storage']?['storages'] as List;
+      return storages.firstWhereOrNull((s) => s['type'] == 1)?['parameters']?['PullZoneName'] ?? 'rule34storage';
+    } catch (_) {
+      return 'rule34storage';
+    }
+  }
+
+  @override
+  Future<bool> searchSetup() async {
+    bool success = await super.searchSetup();
+    if (!success) {
+      return success;
+    }
+
+    try {
+      final cookies = await getCookies();
+      final res = await DioNetwork.get(
+        '${booru.baseURL}/app.json',
+        headers: {
+          ...getHeaders(),
+          if (cookies?.isNotEmpty == true) 'Cookie': cookies,
+        },
+      );
+
+      appConfig = res.data;
+
+      success = true;
+    } catch (e) {
+      Logger.Inst().log(
+        e,
+        className,
+        'searchSetup',
+        LogTypes.booruHandlerInfo,
+      );
+    }
+
+    return success;
+  }
+
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final current = responseItem;
@@ -164,7 +207,7 @@ class WorldXyzHandler extends BooruHandler {
     );
     thumbnailType ??= availableFileTypes.lastWhereOrNull((t) => t.key == 11);
     if (thumbnailType?.value is List) {
-      base = thumbnailType!.value.first == 0 ? booru.baseURL! : 'https://rule34storage.b-cdn.net';
+      base = thumbnailType!.value.first == 0 ? booru.baseURL! : 'https://$storageBase.b-cdn.net';
     }
     final String thumbnailFileExt =
         fileExts[thumbnailTypes[thumbnailType?.key]] ?? (isXyz ? 'pic256.jpg' : 'thumbnail.jpg');
@@ -173,7 +216,7 @@ class WorldXyzHandler extends BooruHandler {
     MapEntry<int, dynamic>? sampleType = availableFileTypes.lastWhereOrNull((t) => sampleTypes.containsKey(t.key));
     sampleType ??= availableFileTypes.lastWhereOrNull((t) => t.key == 13);
     if (sampleType?.value is List) {
-      base = sampleType!.value.first == 0 ? booru.baseURL! : 'https://rule34storage.b-cdn.net';
+      base = sampleType!.value.first == 0 ? booru.baseURL! : 'https://$storageBase.b-cdn.net';
     }
     final String sampleFileExt = fileExts[sampleTypes[sampleType?.key]] ?? (isXyz ? 'picpreview.jpg' : 'preview.jpg');
     final String sampleUrl = isXyz ? '$base/posts/$fileGroupId/$id/$id.$sampleFileExt' : thumbnailUrl;
@@ -181,7 +224,7 @@ class WorldXyzHandler extends BooruHandler {
     MapEntry<int, dynamic>? fileType = availableFileTypes.lastWhereOrNull((t) => fileTypes.containsKey(t.key));
     fileType ??= availableFileTypes.lastWhereOrNull((t) => t.key == 10);
     if (fileType?.value is List) {
-      base = fileType!.value.first == 0 ? booru.baseURL! : 'https://rule34storage.b-cdn.net';
+      base = fileType!.value.first == 0 ? booru.baseURL! : 'https://$storageBase.b-cdn.net';
     }
     final String fileFileExt =
         fileExts[fileTypes[fileType?.key]] ?? (isVideo ? 'mov.mp4' : (isXyz ? 'pic.jpg' : 'jpg'));
