@@ -642,6 +642,7 @@ class VideoViewerState extends State<VideoViewer> {
     }
     isStopped.value = false;
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
+    updateState();
     final bool? updateRes = await tryToLoadAndUpdateItem(
       widget.booruItem,
       loadItemCancelToken,
