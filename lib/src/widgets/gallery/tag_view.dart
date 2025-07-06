@@ -41,6 +41,7 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
@@ -305,6 +306,24 @@ class _TagViewState extends State<TagView> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (hasLoadItemSupport) ...[
+              if (possibleBooruHandler != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Column(
+                    children: [
+                      BooruFavicon(
+                        possibleBooruHandler?.booru,
+                        size: 20,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        possibleBooruHandler?.booru.name ?? '',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              //
               if (loadingUpdate)
                 IconButton(
                   onPressed: () {
