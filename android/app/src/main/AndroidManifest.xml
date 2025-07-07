@@ -70,8 +70,8 @@
             android:value="false" /> -->
 
         <!-- Makes service isolate run in a separate thread -->
-        <!-- <meta-data
+        <meta-data
             android:name="io.flutter.embedding.android.DisableMergedPlatformUIThread"
-             android:value="true" /> -->
+             android:value="true" />
     </application>
 </manifest>
