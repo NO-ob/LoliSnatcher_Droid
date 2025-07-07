@@ -461,21 +461,28 @@ class ImageWriter {
         final List<File> files = (await cacheDir.list(recursive: true, followLinks: false).toList())
             .whereType<File>()
             .toList();
-        for (final File file in files) {
-          currentCacheSize += await file.length();
+
+        final List<FileStat> fileStats = await Future.wait([
+          for (final f in files) f.stat(),
+        ]);
+        final Map<String, FileStat> fileStatsMap = {
+          for (int i = 0; i < files.length; i++) files[i].path: fileStats[i],
+        };
+        for (int i = 0; i < files.length; i++) {
+          currentCacheSize += fileStats[i].size;
         }
 
         final int limitSize = settingsHandler.cacheSize * pow(1024, 3) as int;
         final int overflowSize = currentCacheSize - limitSize;
         if (overflowSize > 0) {
-          files.sort((a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
+          files.sort((a, b) => fileStatsMap[a.path]!.modified.compareTo(fileStatsMap[b.path]!.modified));
 
-          for (final File file in files) {
+          for (final file in files) {
             try {
               final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
               final bool stillOverflows = toDeleteSize < overflowSize;
               if (isNotExcludedExt && stillOverflows) {
-                final fileSize = await file.length();
+                final fileSize = fileStatsMap[file.path]?.size ?? 0;
                 if (fileSize <= fileSizeToKeep) {
                   // if file is smaller than fileSizeToKeep, we delete it
                   // otherwise leave it to be deleted by clearStaleCache after a month or manually by user
