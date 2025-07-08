@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -77,11 +78,12 @@ class _TagViewState extends State<TagView> {
 
   late BooruItem item;
   late BooruHandler handler;
-  late bool hasLoadItemSupport;
-  late bool canLoadItemOnStart;
   BooruHandler? possibleBooruHandler;
-  List<String> tags = [], filteredTags = [];
-  Map<String, HasTabWithTagResult> tabMatchesMap = {};
+  bool hasLoadItemSupport = false;
+  bool canLoadItemOnStart = false;
+  List<String> tags = [];
+  List<String> filteredTags = [];
+  final Map<String, HasTabWithTagResult> tabMatchesMap = {};
   bool? sortTags;
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
@@ -97,9 +99,6 @@ class _TagViewState extends State<TagView> {
   @override
   void initState() {
     super.initState();
-    searchHandler.searchTextController.addListener(parseSortGroupTagsWithoutCache);
-
-    searchFocusNode.addListener(searchFocusListener);
 
     item = widget.item;
     handler = widget.handler;
@@ -109,6 +108,8 @@ class _TagViewState extends State<TagView> {
     tags = [...item.tagsList];
     filteredTags = [...tags];
     WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
+    searchHandler.searchTextController.addListener(parseSortGroupTagsWithoutCache);
+    searchFocusNode.addListener(searchFocusListener);
 
     reloadItemData(initial: true).then((_) async {
       await Future.delayed(const Duration(seconds: 3));
@@ -123,6 +124,10 @@ class _TagViewState extends State<TagView> {
   }
 
   void checkForPossibleBooruHandler() {
+    if (handler.booru.type?.isFavouritesOrDownloads != true) {
+      return;
+    }
+
     final itemFileHost = Uri.tryParse(item.fileURL)?.host;
     final itemPostHost = Uri.tryParse(item.postURL)?.host;
     final Booru? possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
@@ -261,7 +266,7 @@ class _TagViewState extends State<TagView> {
     ];
   }
 
-  void cacheTabMatchData() {
+  Future<void> cacheTabMatchData() async {
     for (final tag in filteredTags) {
       tabMatchesMap[tag] = searchHandler.hasTabWithTag(tag);
     }
@@ -271,13 +276,13 @@ class _TagViewState extends State<TagView> {
     parseSortGroupTags(updateCache: false);
   }
 
-  void parseSortGroupTags({
+  Future<void> parseSortGroupTags({
     bool updateCache = true,
-  }) {
+  }) async {
     parseTags();
     sortAndGroupTagsList();
     if (updateCache) {
-      cacheTabMatchData();
+      await cacheTabMatchData();
     }
     setState(() {});
   }
@@ -310,6 +315,7 @@ class _TagViewState extends State<TagView> {
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       BooruFavicon(
                         possibleBooruHandler?.booru,
@@ -1453,7 +1459,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
   final settingsHandler = SettingsHandler.instance;
   final searchHandler = SearchHandler.instance;
 
-  late final AutoScrollController scrollController;
+  final AutoScrollController scrollController = AutoScrollController();
 
   Booru? selectedBooru;
 
@@ -1469,7 +1475,6 @@ class _TagContentPreviewState extends State<TagContentPreview> {
   @override
   void initState() {
     super.initState();
-    scrollController = AutoScrollController();
 
     if (isSingleBooru) {
       selectedBooru = widget.boorus.first;
