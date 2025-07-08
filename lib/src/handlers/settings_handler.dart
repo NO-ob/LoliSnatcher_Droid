@@ -2216,7 +2216,10 @@ class SettingsHandler {
             ElevatedButton.icon(
               onPressed: () {
                 controller.dismiss();
-                showUpdate(true);
+                showUpdate(
+                  true,
+                  isAfterUpdate: true,
+                );
               },
               icon: const Icon(Icons.list_alt_rounded),
               label: const Text('View latest changelog'),
