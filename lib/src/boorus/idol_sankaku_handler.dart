@@ -285,7 +285,8 @@ class IdolSankakuHandler extends SankakuHandler {
             ?.attributes['href']
             ?.replaceFirst(RegExp('^//'), 'https://');
         if (fileURL != null && fileURL.isNotEmpty) {
-          item.sampleURL = sampleURL ?? fileURL;
+          item.mediaType.value = MediaType.fromExtension(Tools.getFileExt(fileURL));
+          item.sampleURL = sampleURL ?? (item.mediaType.value.isVideo ? thumbnailURL : fileURL);
           item.fileURL = fileURL;
         } else {
           return (item: null, failed: true, error: 'Failed to parse html');
