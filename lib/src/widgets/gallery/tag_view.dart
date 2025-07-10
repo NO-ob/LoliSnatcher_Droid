@@ -1546,7 +1546,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
     setState(() {});
   }
 
-  Future<void> onTap(int index) async {
+  Future<void> onPreviewTap(int index) async {
     viewedIndex.value = index;
     final viewerKey = GlobalKey(debugLabel: 'viewer-${tab!.tags.replaceAll(' ', '_')}');
     ViewerHandler.instance.addViewer(viewerKey);
@@ -1583,6 +1583,26 @@ class _TagContentPreviewState extends State<TagContentPreview> {
       ),
     );
     viewedIndex.value = -1;
+  }
+
+  Future<void> onPreviewDoubleTap(int index) async {
+    await tab?.toggleItemFavourite(index);
+  }
+
+  Future<void> onPreviewSecondaryTap(int index) async {
+    if (tab == null) {
+      return;
+    }
+
+    final BooruItem item = tab!.booruHandler.filteredFetched[index];
+    await Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
+    FlashElements.showSnackbar(
+      duration: const Duration(seconds: 2),
+      title: const Text('Copied File URL to clipboard!', style: TextStyle(fontSize: 20)),
+      content: Text(Uri.encodeFull(item.fileURL), style: const TextStyle(fontSize: 16)),
+      leadingIcon: Icons.copy,
+      sideColor: Colors.green,
+    );
   }
 
   @override
@@ -1859,7 +1879,10 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                               scrollController: scrollController,
                                               isHighlighted: viewedIndex == index,
                                               selectable: false,
-                                              onTap: onTap,
+                                              onTap: onPreviewTap,
+                                              onDoubleTap: onPreviewDoubleTap,
+                                              // onLongPress: onPreviewLongPress, // TODO use select here somehow?
+                                              onSecondaryTap: onPreviewSecondaryTap,
                                             );
                                           },
                                         ),
