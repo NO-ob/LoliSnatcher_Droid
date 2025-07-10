@@ -142,6 +142,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 title: 'Custom user agent',
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 resetText: () => '',
+                onChanged: (_) => setState(() {}),
                 pasteable: true,
                 drawBottomBorder: false,
                 trailingIcon: IconButton(
@@ -150,13 +151,13 @@ class _NetworkPageState extends State<NetworkPage> {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Custom user agent'),
+                        return SettingsDialog(
+                          title: const Text('Custom user agent'),
                           contentItems: [
-                            Text('Keep empty to use default value'),
+                            const Text('Keep empty to use default value'),
                             Text('Default: ${Tools.appUserAgent}'),
-                            Text('Will be used on requests for almost all boorus and on the webview'),
-                            Text('Value is saved after leaving this page'),
+                            const Text('Will be used on requests for almost all boorus and on the webview'),
+                            const Text('Value is saved after leaving this page'),
                           ],
                         );
                       },
@@ -166,10 +167,12 @@ class _NetworkPageState extends State<NetworkPage> {
               ),
               if (userAgentController.text != Constants.defaultBrowserUserAgent)
                 SettingsButton(
-                  name: 'Tap here to use suggested browser user agent:',
+                  name:
+                      'Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):',
                   subtitle: const Text(Constants.defaultBrowserUserAgent),
                   action: () {
                     userAgentController.text = Constants.defaultBrowserUserAgent;
+                    setState(() {});
                   },
                 ),
               const SettingsButton(name: '', enabled: false),

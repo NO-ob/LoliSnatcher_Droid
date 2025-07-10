@@ -11,6 +11,9 @@ class Booru {
     this.baseURL,
     this.defTags,
   );
+
+  Booru.unknown() : this(null, null, null, null, null);
+
   Booru.withKey(
     this.name,
     this.type,

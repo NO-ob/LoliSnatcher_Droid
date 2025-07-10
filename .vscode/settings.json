@@ -1,0 +1,23 @@
+{
+  "search.exclude": {
+    "**/.fvm": true
+  },
+  "files.watcherExclude": {
+    "**/.fvm": true
+  },
+  "dart.lineLength": 120,
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.tabSize": 2,
+    "editor.rulers": [
+      120
+    ],
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "never",
+      "source.sortMembers": "never",
+      "source.fixAll": "explicit"
+    }
+  },
+  "dart.flutterSdkPath": ".fvm/versions/3.32.6"
+}

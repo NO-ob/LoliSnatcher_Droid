@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:talker/talker.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -24,6 +25,8 @@ import 'package:lolisnatcher/src/pages/settings/tags_filters_page.dart';
 import 'package:lolisnatcher/src/pages/settings/theme_page.dart';
 import 'package:lolisnatcher/src/pages/settings/user_interface_page.dart';
 import 'package:lolisnatcher/src/pages/settings/video_page.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
@@ -184,6 +187,54 @@ class SettingsPage extends StatelessWidget {
                   settingsHandler.checkUpdate(withMessage: true);
                 },
               ),
+              if (Logger.viewController != null)
+                SettingsButton(
+                  name: 'Share logs',
+                  icon: const Icon(Icons.print),
+                  trailingIcon: const Icon(Icons.exit_to_app),
+                  action: () async {
+                    await showDialog(
+                      context: context,
+                      builder: (_) => SettingsDialog(
+                        title: Text(
+                          'Logs',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Share logs to external app?',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            Text(
+                              '[WARNING]: Logs may contain sensitive information, share with caution!',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        actionButtons: [
+                          const CancelButton(withIcon: true),
+                          ElevatedButton.icon(
+                            icon: const Icon(Icons.check),
+                            label: const Text('Ok'),
+                            onPressed: () async {
+                              await Logger.viewController?.downloadLogsFile(
+                                Logger.talker.history.text(
+                                  timeFormat: Logger.talker.settings.timeFormat,
+                                ),
+                              );
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               SettingsButton(
                 name: context.loc.settings.help.title,
                 icon: const Icon(Icons.help_center_outlined),
@@ -230,7 +281,9 @@ class _VersionButtonState extends State<VersionButton> {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    final String verText = '${context.loc.settings.version}: ${Constants.appVersion} (${Constants.appBuildNumber})';
+    final String verText =
+        '${context.loc.settings.version}: ${Constants.updateInfo.versionName} (${Constants.updateInfo.buildNumber})';
+
     const String buildTypeText = EnvironmentConfig.isFromStore
         ? '/ Play'
         : (EnvironmentConfig.isTesting ? '/ Test' : (kDebugMode ? '/ Debug' : ''));

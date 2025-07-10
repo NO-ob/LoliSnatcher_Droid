@@ -2,11 +2,11 @@ name: lolisnatcher
 description: Booru Client with the ability to batch download Images.
 publish_to: none
 
-version: 2.4.3+198 # remember to update the values in constants.dart after changing them here
+version: 2.4.4+4201 # remember to update the values in constants.dart->updateInfo after changing them here
 
 environment:
   sdk: ">=3.8.1 <4.0.0"
-  flutter: ^3.32.4
+  flutter: ^3.32.6
 
 dependencies:
   flutter:
@@ -17,7 +17,7 @@ dependencies:
   app_links: ^6.4.0
   auto_size_text_plus: ^3.0.2
   calendar_date_picker2: ^2.0.1
-  chewie: ^1.11.3
+  chewie: ^1.12.1
   country_flags: ^3.3.0
   crypto: ^3.0.6
   dio: ^5.8.0+1
@@ -34,21 +34,19 @@ dependencies:
   flex_color_picker: ^3.7.1
   flutter_avif: ^3.0.0
   flutter_displaymode: ^0.6.0
+  flutter_html: ^3.0.0
   flutter_improved_scrolling: ^0.0.3
   flutter_inappwebview: ^6.2.0-beta.2
-  flutter_inner_drawer:
-    git:
-      url: https://github.com/NANI-SORE/flutter_inner_drawer.git
-      ref: a12cffc2d54e1e0350904d0f841203935d20e465 # master
   flutter_keyboard_visibility: ^6.0.0
   flutter_linkify: ^6.0.0
+  flutter_secure_storage: ^9.2.4
   flutter_socks_proxy:
     git:
       url: https://github.com/jiangtian616/socks_proxy
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
   font_awesome_flutter: ^10.8.0
   fpdart: ^1.1.1
-  fvp: ^0.32.1
+  fvp: ^0.33.0
   get_it: ^8.0.3
   get: ^5.0.0-release-candidate-9.3.2 # ^4.7.2
   google_fonts: ^6.2.1
@@ -72,7 +70,7 @@ dependencies:
   media_kit_libs_video: ^1.0.6
   native_dio_adapter: ^1.4.0
   path_provider: ^2.1.5
-  permission_handler: ^12.0.0+1
+  permission_handler: ^12.0.1
   photo_view:
     git:
       url: https://github.com/NANI-SORE/photo_view.git
@@ -89,10 +87,11 @@ dependencies:
   slang: ^4.7.2
   sqflite_common_ffi: ^2.3.6
   sqflite: ^2.4.2
-  talker_dio_logger: ^4.9.0
-  talker_flutter: ^4.9.0
-  talker_logger: ^4.9.0
-  talker: ^4.9.0
+  super_clipboard: ^0.9.1
+  talker_dio_logger: ^4.9.2
+  talker_flutter: ^4.9.2
+  talker_logger: ^4.9.2
+  talker: ^4.9.2
   url_launcher: ^6.3.1
   uuid: ^4.5.1
   vibration: ^3.1.3

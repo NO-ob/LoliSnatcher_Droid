@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
@@ -14,6 +13,7 @@ import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/theme_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
+import 'package:lolisnatcher/src/widgets/common/inner_drawer.dart';
 import 'package:lolisnatcher/src/widgets/root/active_title.dart';
 import 'package:lolisnatcher/src/widgets/root/custom_sliver_app_bar.dart';
 
@@ -37,12 +37,13 @@ class _MainAppBarState extends State<MainAppBar> {
   final SnatchHandler snatchHandler = SnatchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-  void _toggleDrawer(InnerDrawerDirection? direction) {
-    searchHandler.mainDrawerKey.currentState?.toggle(
-      // if not set, the last direction will be used
-      //InnerDrawerDirection.start OR InnerDrawerDirection.end
-      direction: direction,
-    );
+  void _toggleDrawer(InnerDrawerDirection? dir) {
+    final state = searchHandler.mainDrawerKey.currentState;
+    if (state is! InnerDrawerState) {
+      return;
+    }
+
+    state.toggle(direction: dir);
   }
 
   void _onMenuLongTap() {

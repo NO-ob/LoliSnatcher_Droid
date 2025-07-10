@@ -9,16 +9,23 @@ import 'package:dio/dio.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
+import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -26,6 +33,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -71,8 +79,12 @@ class _TagViewState extends State<TagView> {
 
   late BooruItem item;
   late BooruHandler handler;
-  List<String> tags = [], filteredTags = [];
-  Map<String, HasTabWithTagResult> tabMatchesMap = {};
+  BooruHandler? possibleBooruHandler;
+  bool hasLoadItemSupport = false;
+  bool canLoadItemOnStart = false;
+  List<String> tags = [];
+  List<String> filteredTags = [];
+  final Map<String, HasTabWithTagResult> tabMatchesMap = {};
   bool? sortTags;
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
@@ -81,20 +93,24 @@ class _TagViewState extends State<TagView> {
   CancelToken? cancelToken;
   bool loadingUpdate = false, failedUpdate = false;
 
+  bool? detailsExpanded;
+
   Timer? sortTimer;
 
   @override
   void initState() {
     super.initState();
-    searchHandler.searchTextController.addListener(parseSortGroupTagsWithoutCache);
-
-    searchFocusNode.addListener(searchFocusListener);
 
     item = widget.item;
     handler = widget.handler;
+    hasLoadItemSupport = handler.hasLoadItemSupport;
+    canLoadItemOnStart = handler.shouldUpdateIteminTagView;
+    checkForPossibleBooruHandler();
     tags = [...item.tagsList];
     filteredTags = [...tags];
     WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
+    searchHandler.searchTextController.addListener(parseSortGroupTagsWithoutCache);
+    searchFocusNode.addListener(searchFocusListener);
 
     reloadItemData(initial: true).then((_) async {
       await Future.delayed(const Duration(seconds: 3));
@@ -108,6 +124,52 @@ class _TagViewState extends State<TagView> {
     });
   }
 
+  void checkForPossibleBooruHandler() {
+    Booru? getMergeBooruEntry() {
+      if (handler is! MergebooruHandler) return null;
+
+      final fetchedMap = (handler as MergebooruHandler).fetchedMap;
+      for (int i = 0; i < fetchedMap.entries.length; i++) {
+        final entry = fetchedMap.entries.elementAt(i);
+        if (entry.value.items.contains(item)) {
+          return entry.value.booru;
+        }
+      }
+      return null;
+    }
+
+    final bool isMergeHandler = handler is MergebooruHandler;
+
+    final bool isFavsOrDlsOrMerge = handler is FavouritesHandler || handler is DownloadsHandler || isMergeHandler;
+    if (!isFavsOrDlsOrMerge) {
+      return;
+    }
+
+    final itemFileHost = Uri.tryParse(item.fileURL)?.host;
+    final itemPostHost = Uri.tryParse(item.postURL)?.host;
+    final Booru? possibleBooru = isMergeHandler
+        ? getMergeBooruEntry()
+        : SettingsHandler.instance.booruList.firstWhereOrNull((e) {
+            final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
+
+            return (itemPostHost?.isNotEmpty == true &&
+                    booruHost?.isNotEmpty == true &&
+                    (itemPostHost! == booruHost! ||
+                        switch (e.type) {
+                          BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
+                          BooruType.Sankaku => SankakuHandler.knownPostUrls.contains(itemPostHost),
+                          _ => false,
+                        })) ||
+                (itemFileHost?.isNotEmpty == true && booruHost?.isNotEmpty == true && itemFileHost! == booruHost!);
+          });
+
+    if (isMergeHandler || possibleBooru?.type?.isFavouritesOrDownloads != true) {
+      possibleBooruHandler = BooruHandlerFactory().getBooruHandler([possibleBooru!], null).booruHandler;
+      hasLoadItemSupport = possibleBooruHandler!.hasLoadItemSupport;
+      canLoadItemOnStart = possibleBooruHandler!.shouldUpdateIteminTagView;
+    }
+  }
+
   @override
   void didUpdateWidget(covariant TagView oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -117,6 +179,10 @@ class _TagViewState extends State<TagView> {
     }
     if (widget.handler != handler) {
       handler = widget.handler;
+      hasLoadItemSupport = handler.hasLoadItemSupport;
+      canLoadItemOnStart = handler.shouldUpdateIteminTagView;
+      checkForPossibleBooruHandler();
+      setState(() {});
     }
   }
 
@@ -131,18 +197,16 @@ class _TagViewState extends State<TagView> {
     super.dispose();
   }
 
-  bool get supportsItemUpdate => handler.hasLoadItemSupport && handler.shouldUpdateIteminTagView;
-
   Future<void> reloadItemData({
     bool initial = false,
     bool force = false,
   }) async {
-    if (supportsItemUpdate && (!item.isUpdated || force)) {
+    if (hasLoadItemSupport && (!initial || canLoadItemOnStart) && (!item.isUpdated || force)) {
       loadingUpdate = true;
       failedUpdate = false;
       setState(() {});
       cancelToken = CancelToken();
-      final res = await handler.loadItem(
+      final res = await (possibleBooruHandler ?? handler).loadItem(
         item: item,
         cancelToken: cancelToken,
         withCapcthaCheck: !initial,
@@ -186,13 +250,13 @@ class _TagViewState extends State<TagView> {
   void sortAndGroupTagsList() {
     if (sortTags == null) {
       tags = [...item.tagsList];
+      groupTagsList();
     } else {
       tags.sort((a, b) => sortTags == true ? a.compareTo(b) : b.compareTo(a));
       filteredTags = [
         ...filterTags([...tags]),
       ];
     }
-    groupTagsList();
   }
 
   void groupTagsList() {
@@ -221,7 +285,7 @@ class _TagViewState extends State<TagView> {
     ];
   }
 
-  void cacheTabMatchData() {
+  Future<void> cacheTabMatchData() async {
     for (final tag in filteredTags) {
       tabMatchesMap[tag] = searchHandler.hasTabWithTag(tag);
     }
@@ -231,23 +295,25 @@ class _TagViewState extends State<TagView> {
     parseSortGroupTags(updateCache: false);
   }
 
-  void parseSortGroupTags({
+  Future<void> parseSortGroupTags({
     bool updateCache = true,
-  }) {
+  }) async {
     parseTags();
     sortAndGroupTagsList();
     if (updateCache) {
-      cacheTabMatchData();
+      await cacheTabMatchData();
     }
     setState(() {});
   }
 
   void searchFocusListener() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (searchFocusNode.hasFocus) {
-        Scrollable.ensureVisible(
+        // doesn't scroll to a proper position in some cases
+        // probably because scroll extent changes due to elements being lazily rendered
+        await Scrollable.ensureVisible(
           searchKey.currentContext!,
-          alignment: 0.1,
+          alignment: (72 + context.viewInsets.top) / context.height,
           duration: const Duration(milliseconds: 300),
         );
       }
@@ -258,71 +324,100 @@ class _TagViewState extends State<TagView> {
     return SettingsButton(
       name: 'Tags',
       subtitle: Text(searchController.text.isEmpty ? '${tags.length}' : '${filteredTags.length} / ${tags.length}'),
-      trailingIcon: Container(
-        margin: const EdgeInsets.only(left: 10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (supportsItemUpdate) ...[
-              if (loadingUpdate)
-                IconButton(
-                  onPressed: () {
-                    cancelToken?.cancel();
-                  },
-                  icon: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 28,
-                        height: 28,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
+      trailingIcon: LayoutBuilder(
+        builder: (context, constraints) {
+          return Container(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth - 72),
+            margin: const EdgeInsets.only(left: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (hasLoadItemSupport) ...[
+                  if (possibleBooruHandler != null)
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            BooruFavicon(
+                              possibleBooruHandler?.booru,
+                              size: 20,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              possibleBooruHandler?.booru.name ?? '',
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
                         ),
                       ),
-                      Icon(
-                        Icons.close,
-                        color: Theme.of(context).iconTheme.color,
-                        size: 24,
+                    ),
+                  //
+                  if (loadingUpdate)
+                    IconButton(
+                      onPressed: () {
+                        cancelToken?.cancel();
+                      },
+                      icon: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 28,
+                            height: 28,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          Icon(
+                            Icons.close,
+                            color: Theme.of(context).iconTheme.color,
+                            size: 24,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )
-              else
-                IconButton(
-                  onPressed: () {
-                    reloadItemData(force: true);
-                  },
-                  icon: Icon(
-                    failedUpdate ? Icons.error_outline : Icons.refresh,
-                    color: failedUpdate ? Colors.red : Theme.of(context).iconTheme.color,
-                    size: 28,
+                    )
+                  else
+                    IconButton(
+                      onPressed: () {
+                        reloadItemData(force: true);
+                      },
+                      icon: Icon(
+                        failedUpdate ? Icons.error_outline : Icons.refresh,
+                        color: failedUpdate ? Colors.red : Theme.of(context).iconTheme.color,
+                        size: 28,
+                      ),
+                    ),
+                ],
+                //
+                Transform(
+                  alignment: Alignment.center,
+                  transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
+                  child: IconButton(
+                    icon: Icon(
+                      (sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    onPressed: () {
+                      if (sortTags == true) {
+                        sortTags = false;
+                      } else if (sortTags == false) {
+                        sortTags = null;
+                      } else {
+                        sortTags = true;
+                      }
+                      sortAndGroupTagsList();
+                      setState(() {});
+                    },
                   ),
                 ),
-            ],
-            //
-            Transform(
-              alignment: Alignment.center,
-              transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-              child: IconButton(
-                icon: Icon(
-                  (sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                onPressed: () {
-                  if (sortTags == true) {
-                    sortTags = false;
-                  } else if (sortTags == false) {
-                    sortTags = null;
-                  } else {
-                    sortTags = true;
-                  }
-                  sortAndGroupTagsList();
-                  setState(() {});
-                },
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
       drawBottomBorder: false,
     );
@@ -457,7 +552,12 @@ class _TagViewState extends State<TagView> {
     }
   }
 
-  Widget infoText(String title, String data, {bool canCopy = true}) {
+  Widget infoText(
+    String title,
+    String data, {
+    bool canCopy = true,
+    bool isLink = false,
+  }) {
     if (data.isNotEmpty) {
       return ListTile(
         onTap: canCopy
@@ -480,15 +580,41 @@ class _TagViewState extends State<TagView> {
               }
             : null,
         title: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('$title: ', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
-            Expanded(child: Text(data, overflow: TextOverflow.ellipsis)),
+            Text(
+              '$title: ',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                data,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ),
           ],
         ),
+        trailing: isLink
+            ? IconButton(
+                icon: const Icon(Icons.exit_to_app),
+                onPressed: () => launchUrlString(
+                  data,
+                  mode: LaunchMode.externalApplication,
+                ),
+              )
+            : null,
       );
-    } else {
-      return const SizedBox.shrink();
     }
+
+    return const SizedBox.shrink();
   }
 
   void tagDialog({
@@ -531,7 +657,10 @@ class _TagViewState extends State<TagView> {
                 const SizedBox(width: 10),
                 Text(
                   tagHandler.getTag(tag).tagType.locName,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -757,110 +886,104 @@ class _TagViewState extends State<TagView> {
     }
 
     if (currentTag != '') {
-      return Column(
-        children: [
-          InkWell(
-            onTap: () {
-              tagDialog(
-                tag: currentTag,
-                isHated: isHated,
-                isLoved: isLoved,
-                isInSearch: isInSearch,
-              );
-            },
-            child: Row(
-              children: [
-                Container(
-                  width: 6,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: tagHandler.getTag(currentTag).getColour(),
-                    borderRadius: const BorderRadius.only(
-                      topRight: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
+      final tag = tagHandler.getTag(currentTag);
+
+      return ColoredBox(
+        color: tag.getColour() == Colors.transparent
+            ? Colors.transparent
+            : Color.lerp(
+                context.isLight ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
+                tag.getColour().withValues(alpha: 0.1),
+                0.4,
+              )!,
+        child: Column(
+          children: [
+            InkWell(
+              onTap: () {
+                tagDialog(
+                  tag: currentTag,
+                  isHated: isHated,
+                  isLoved: isLoved,
+                  isInSearch: isInSearch,
+                );
+              },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 50,
+                      padding: const EdgeInsets.only(left: 12),
+                      child: _TagText(
+                        key: ValueKey(currentTag),
+                        tag: tag,
+                        filterText: searchController.text,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                _TagText(
-                  key: ValueKey(currentTag),
-                  tag: tagHandler.getTag(currentTag).fullString,
-                  filterText: searchController.text,
-                ),
-                if (tagIconAndColor.isNotEmpty) ...[
-                  ...tagIconAndColor.map(
-                    (t) => t.icon == FontAwesomeIcons.robot
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: FaIcon(
+                  if (tagIconAndColor.isNotEmpty) ...[
+                    ...tagIconAndColor.map(
+                      (t) => t.icon == FontAwesomeIcons.robot
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: FaIcon(
+                                t.icon,
+                                color: t.color,
+                                size: 18,
+                              ),
+                            )
+                          : Icon(
                               t.icon,
                               color: t.color,
-                              size: 18,
+                              size: 20,
                             ),
-                          )
-                        : Icon(
-                            t.icon,
-                            color: t.color,
-                            size: 20,
+                    ),
+                    const SizedBox(width: 5),
+                  ],
+                  IconButton(
+                    icon: Stack(
+                      children: [
+                        Icon(Icons.add, color: Theme.of(context).colorScheme.secondary),
+                        if (isInSearch)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Icon(
+                              Icons.search,
+                              size: 10,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
-                  ),
-                  const SizedBox(width: 5),
-                ],
-                IconButton(
-                  icon: Stack(
-                    children: [
-                      Icon(Icons.add, color: Theme.of(context).colorScheme.secondary),
-                      if (isInSearch)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Icon(
-                            Icons.search,
-                            size: 10,
-                            color: Theme.of(context).colorScheme.onSurface,
+                      ],
+                    ),
+                    onPressed: () {
+                      if (isInSearch) {
+                        FlashElements.showSnackbar(
+                          context: context,
+                          duration: const Duration(seconds: 2),
+                          title: const Text(
+                            'This tag is already in the current search query:',
+                            style: TextStyle(fontSize: 18),
                           ),
-                        ),
-                    ],
-                  ),
-                  onPressed: () {
-                    if (isInSearch) {
+                          content: Text(currentTag, style: const TextStyle(fontSize: 16)),
+                          leadingIcon: Icons.warning_amber,
+                          leadingIconColor: Colors.yellow,
+                          sideColor: Colors.yellow,
+                        );
+                        return;
+                      }
+
+                      searchHandler.addTagToSearch(currentTag);
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: const Text(
-                          'This tag is already in the current search query:',
-                          style: TextStyle(fontSize: 18),
-                        ),
+                        title: const Text('Added to current search query:', style: TextStyle(fontSize: 20)),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
-                        leadingIcon: Icons.warning_amber,
-                        leadingIconColor: Colors.yellow,
-                        sideColor: Colors.yellow,
+                        leadingIcon: Icons.add,
+                        sideColor: Colors.green,
                       );
-                      return;
-                    }
-
-                    searchHandler.addTagToSearch(currentTag);
-                    FlashElements.showSnackbar(
-                      context: context,
-                      duration: const Duration(seconds: 2),
-                      title: const Text('Added to current search query:', style: TextStyle(fontSize: 20)),
-                      content: Text(currentTag, style: const TextStyle(fontSize: 16)),
-                      leadingIcon: Icons.add,
-                      sideColor: Colors.green,
-                    );
-                  },
-                ),
-                GestureDetector(
-                  onLongPress: () async {
-                    await ServiceHandler.vibrate();
-                    if (settingsHandler.appMode.value.isMobile) {
-                      Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
-                    }
-                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                      searchHandler.addTabByString(currentTag, switchToNew: true);
-                    });
-                  },
-                  child: IconButton(
+                    },
+                  ),
+                  IconButton(
                     icon: Stack(
                       children: [
                         Icon(Icons.fiber_new, color: Theme.of(context).colorScheme.secondary),
@@ -885,6 +1008,8 @@ class _TagViewState extends State<TagView> {
 
                       FlashElements.showSnackbar(
                         context: context,
+                        isKeyUnique: true,
+                        key: 'added_new_tab',
                         duration: const Duration(seconds: 2),
                         title: const Text('Added new tab:', style: TextStyle(fontSize: 20)),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
@@ -899,12 +1024,15 @@ class _TagViewState extends State<TagView> {
                                   if (settingsHandler.appMode.value.isMobile) {
                                     Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                                   }
-                                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) {
                                     searchHandler.changeTabIndex(searchHandler.list.length - 1);
                                   });
                                   controller.dismiss();
                                 },
-                                icon: Icon(Icons.arrow_forward_rounded, color: Theme.of(context).colorScheme.onSurface),
+                                icon: Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
                               ),
                               const SizedBox(width: 4),
                               IconButton(
@@ -916,18 +1044,27 @@ class _TagViewState extends State<TagView> {
                         },
                       );
                     },
+                    onLongPress: () async {
+                      await ServiceHandler.vibrate();
+                      if (settingsHandler.appMode.value.isMobile) {
+                        Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
+                      }
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        searchHandler.addTabByString(currentTag, switchToNew: true);
+                      });
+                    },
                   ),
-                ),
-                const SizedBox(width: 16),
-              ],
+                  const SizedBox(width: 16),
+                ],
+              ),
             ),
-          ),
-          Divider(
-            color: Colors.grey[800]!.withValues(alpha: 0.66),
-            height: 1,
-            thickness: 1,
-          ),
-        ],
+            Divider(
+              color: Colors.grey[800]!.withValues(alpha: 0.66),
+              height: 1,
+              thickness: 1,
+            ),
+          ],
+        ),
       );
     } else {
       // Render nothing if currentTag is an empty string
@@ -949,7 +1086,7 @@ class _TagViewState extends State<TagView> {
     final String score = item.score ?? '';
     final String md5 = item.md5String ?? '';
     final List<String> sources = item.sources ?? [];
-    final bool tagsAvailable = tags.isNotEmpty || supportsItemUpdate;
+    final bool tagsAvailable = tags.isNotEmpty || hasLoadItemSupport;
     String postDate = item.postDate ?? '';
     final String postDateFormat = item.postDateFormat ?? '';
     String formattedDate = '';
@@ -986,17 +1123,33 @@ class _TagViewState extends State<TagView> {
             SliverList(
               delegate: SliverChildListDelegate(
                 [
-                  if (settingsHandler.isDebug.value) infoText('Filename', fileName),
-                  infoText('URL', fileUrl),
-                  infoText('Extension', fileExt),
-                  infoText('Post URL', item.postURL),
+                  const SizedBox(height: kMinInteractiveDimension),
                   infoText('ID', itemId),
-                  infoText('Rating', rating),
-                  infoText('Score', score),
-                  infoText('Resolution', fileRes),
-                  infoText('Size', fileSize),
-                  infoText('MD5', md5),
+                  infoText('Post URL', item.postURL, isLink: true),
                   infoText('Posted', formattedDate, canCopy: false),
+                  ExpansionTile(
+                    title: const Text('Details'),
+                    initiallyExpanded: detailsExpanded ?? settingsHandler.expandDetails,
+                    onExpansionChanged: (expanded) {
+                      setState(() {
+                        detailsExpanded = expanded;
+                      });
+                    },
+                    iconColor: Colors.white.withValues(alpha: 0.66),
+                    collapsedIconColor: Colors.white.withValues(alpha: 0.66),
+                    shape: const Border(),
+                    collapsedShape: const Border(),
+                    children: [
+                      if (settingsHandler.isDebug.value) infoText('Filename', fileName),
+                      infoText('URL', fileUrl, isLink: true),
+                      infoText('Extension', fileExt),
+                      infoText('Resolution', fileRes),
+                      infoText('Size', fileSize),
+                      infoText('MD5', md5),
+                      infoText('Rating', rating),
+                      infoText('Score', score),
+                    ],
+                  ),
                   commentsButton(),
                   notesButton(),
                   sourcesList(sources),
@@ -1067,7 +1220,7 @@ class _TagViewState extends State<TagView> {
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: MediaQuery.viewInsetsOf(context).bottom,
+                height: MediaQuery.viewInsetsOf(context).bottom + kMinInteractiveDimension,
               ),
             ),
           ],
@@ -1084,33 +1237,38 @@ class _TagText extends StatelessWidget {
     super.key,
   });
 
-  final String tag;
+  final Tag tag;
   final String? filterText;
 
   @override
   Widget build(BuildContext context) {
-    final style = TextStyle(
+    Color? color = tag.getColour();
+    color = color == Colors.transparent ? null : color;
+    final basicStyle = TextStyle(
       fontSize: 14,
       fontWeight: filterText?.isNotEmpty == true ? FontWeight.w400 : FontWeight.w600,
+    );
+    final fullStyle = basicStyle.copyWith(
+      color: color,
     );
 
     if (filterText?.isNotEmpty == true) {
       final List<TextSpan> spans = [];
-      final List<String> split = tag.split(filterText!);
+      final List<String> split = tag.fullString.split(filterText!);
 
       for (int i = 0; i < split.length; i++) {
         spans.add(
           TextSpan(
             text: split[i],
-            style: style,
+            style: basicStyle,
           ),
         );
         if (i < split.length - 1) {
           spans.add(
             TextSpan(
               text: filterText,
-              style: style.copyWith(
-                color: Colors.green,
+              style: fullStyle.copyWith(
+                backgroundColor: color?.withValues(alpha: 0.1),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1121,15 +1279,16 @@ class _TagText extends StatelessWidget {
       return MarqueeText.rich(
         textSpan: TextSpan(
           children: spans,
+          style: basicStyle,
         ),
-        isExpanded: true,
-        style: style,
+        isExpanded: false,
+        style: basicStyle,
       );
     } else {
       return MarqueeText(
-        text: tag,
-        isExpanded: true,
-        style: style,
+        text: tag.fullString,
+        isExpanded: false,
+        style: fullStyle,
       );
     }
   }
@@ -1326,7 +1485,10 @@ class TagContentPreview extends StatefulWidget {
 }
 
 class _TagContentPreviewState extends State<TagContentPreview> {
-  late final AutoScrollController scrollController;
+  final settingsHandler = SettingsHandler.instance;
+  final searchHandler = SearchHandler.instance;
+
+  final AutoScrollController scrollController = AutoScrollController();
 
   Booru? selectedBooru;
 
@@ -1342,7 +1504,6 @@ class _TagContentPreviewState extends State<TagContentPreview> {
   @override
   void initState() {
     super.initState();
-    scrollController = AutoScrollController();
 
     if (isSingleBooru) {
       selectedBooru = widget.boorus.first;
@@ -1415,7 +1576,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
     setState(() {});
   }
 
-  Future<void> onTap(int index) async {
+  Future<void> onPreviewTap(int index) async {
     viewedIndex.value = index;
     final viewerKey = GlobalKey(debugLabel: 'viewer-${tab!.tags.replaceAll(' ', '_')}');
     ViewerHandler.instance.addViewer(viewerKey);
@@ -1454,6 +1615,26 @@ class _TagContentPreviewState extends State<TagContentPreview> {
     viewedIndex.value = -1;
   }
 
+  Future<void> onPreviewDoubleTap(int index) async {
+    await tab?.toggleItemFavourite(index);
+  }
+
+  Future<void> onPreviewSecondaryTap(int index) async {
+    if (tab == null) {
+      return;
+    }
+
+    final BooruItem item = tab!.booruHandler.filteredFetched[index];
+    await Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
+    FlashElements.showSnackbar(
+      duration: const Duration(seconds: 2),
+      title: const Text('Copied File URL to clipboard!', style: TextStyle(fontSize: 20)),
+      content: Text(Uri.encodeFull(item.fileURL), style: const TextStyle(fontSize: 16)),
+      leadingIcon: Icons.copy,
+      sideColor: Colors.green,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
@@ -1469,17 +1650,21 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                 title: const Text('Preview'),
                 subtitle: isSingleBooru
                     ? null
-                    : SettingsBooruDropdown(
-                        title: 'Booru',
-                        placeholder: 'Select a booru to load',
-                        value: selectedBooru,
-                        items: widget.boorus,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                        onChanged: (value) {
-                          selectedBooru = value;
-                          loadPreview(refresh: true);
-                        },
-                        drawBottomBorder: false,
+                    : SizedBox(
+                        width: context.mediaSize.width,
+                        height: kMinInteractiveDimension,
+                        child: SettingsBooruDropdown(
+                          title: 'Booru',
+                          placeholder: 'Select a booru to load',
+                          value: selectedBooru,
+                          items: isSingleBooru ? settingsHandler.booruList : widget.boorus,
+                          contentPadding: EdgeInsets.zero,
+                          onChanged: (value) {
+                            selectedBooru = value;
+                            loadPreview(refresh: true);
+                          },
+                          drawBottomBorder: false,
+                        ),
                       ),
                 onTap: isSingleBooru ? loadPreview : null,
               )
@@ -1495,6 +1680,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                       onTap: errorString.isNotEmpty ? () => loadPreview(refresh: true) : null,
                     )
                   : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
@@ -1521,28 +1708,93 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               );
                             }),
                             const SizedBox(width: 8),
-                            BooruFavicon(tab!.booruHandler.booru),
-                            const SizedBox(width: 4),
-                            Text(
-                              tab!.booruHandler.booru.name ?? '',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            const SizedBox(width: 4),
                             IconButton(
-                              onPressed: isSingleBooru
-                                  ? () => loadPreview(refresh: true)
-                                  : () {
-                                      tab = null;
-                                      selectedBooru = null;
-                                      setState(() {});
-                                    },
+                              onPressed: () => loadPreview(refresh: true),
                               icon: const Icon(Icons.refresh),
+                            ),
+                            const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.fiber_new),
+                              onPressed: () {
+                                searchHandler.addTabByString(
+                                  widget.tag,
+                                  customBooru: selectedBooru,
+                                );
+
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  isKeyUnique: true,
+                                  key: 'added_new_tab',
+                                  duration: const Duration(seconds: 2),
+                                  title: const Text('Added new tab:', style: TextStyle(fontSize: 20)),
+                                  content: Text(widget.tag, style: const TextStyle(fontSize: 16)),
+                                  leadingIcon: Icons.fiber_new,
+                                  sideColor: Colors.green,
+                                  primaryActionBuilder: (context, controller) {
+                                    return Row(
+                                      children: [
+                                        IconButton(
+                                          onPressed: () {
+                                            ServiceHandler.vibrate();
+                                            if (settingsHandler.appMode.value.isMobile) {
+                                              Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
+                                            }
+                                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                                              searchHandler.changeTabIndex(searchHandler.list.length - 1);
+                                            });
+                                            controller.dismiss();
+                                          },
+                                          icon: Icon(
+                                            Icons.arrow_forward_rounded,
+                                            color: Theme.of(context).colorScheme.onSurface,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        IconButton(
+                                          onPressed: () => controller.dismiss(),
+                                          icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              onLongPress: () async {
+                                await ServiceHandler.vibrate();
+                                if (settingsHandler.appMode.value.isMobile) {
+                                  Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
+                                }
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  searchHandler.addTabByString(
+                                    widget.tag,
+                                    customBooru: selectedBooru,
+                                    switchToNew: true,
+                                  );
+                                });
+                              },
                             ),
                           ],
                         ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: context.mediaSize.width,
+                          height: kMinInteractiveDimension,
+                          child: SettingsBooruDropdown(
+                            title: 'Booru',
+                            placeholder: 'Select a booru to load',
+                            value: selectedBooru,
+                            items: settingsHandler.booruList,
+                            contentPadding: EdgeInsets.zero,
+                            onChanged: (value) {
+                              selectedBooru = value;
+                              loadPreview(refresh: true);
+                            },
+                            drawBottomBorder: false,
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         SizedBox(
-                          height: 200,
+                          height: 180 + 10 + 16, // card + listview paddings
                           width: MediaQuery.sizeOf(context).width,
                           child: NotificationListener<ScrollUpdateNotification>(
                             onNotification: (notif) {
@@ -1577,7 +1829,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                       ? 1
                                       : tab!.booruHandler.filteredFetched.length +
                                             ((loading || errorString.isNotEmpty) ? 1 : 0),
-                                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+                                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                                   itemBuilder: (context, index) {
                                     if (tab!.booruHandler.filteredFetched.isEmpty) {
                                       return const Center(
@@ -1657,7 +1909,10 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                               scrollController: scrollController,
                                               isHighlighted: viewedIndex == index,
                                               selectable: false,
-                                              onTap: onTap,
+                                              onTap: onPreviewTap,
+                                              onDoubleTap: onPreviewDoubleTap,
+                                              // onLongPress: onPreviewLongPress, // TODO use select here somehow?
+                                              onSecondaryTap: onPreviewSecondaryTap,
                                             );
                                           },
                                         ),

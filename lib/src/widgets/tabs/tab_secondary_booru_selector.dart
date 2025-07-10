@@ -48,6 +48,7 @@ class TabSecondaryBooruSelector extends StatelessWidget {
             // if no secondary boorus selected, disable merge mode
             searchHandler.mergeAction(value.isNotEmpty ? value : null);
           },
+          expandableByScroll: true,
           items: settingsHandler.booruList,
           itemBuilder: (item) => Container(
             padding: const EdgeInsets.only(left: 16),

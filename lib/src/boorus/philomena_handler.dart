@@ -13,7 +13,7 @@ class PhilomenaHandler extends BooruHandler {
     if (tags == '' || tags == ' ') {
       return '*';
     } else {
-      return super.validateTags(tags);
+      return tags;
     }
   }
 
@@ -85,10 +85,12 @@ class PhilomenaHandler extends BooruHandler {
     if (booru.baseURL!.contains('derpibooru')) {
       filter = '56027';
     }
+
+    final formattedTags = tags.replaceAll(' ', ',');
     if (booru.apiKey?.isEmpty ?? true) {
-      return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q=${tags.replaceAll(" ", ",")}&per_page=$limit&page=$pageNum";
+      return '${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q=$formattedTags&per_page=$limit&page=$pageNum';
     } else {
-      return "${booru.baseURL}/api/v1/json/search/images?key=${booru.apiKey}&q=${tags.replaceAll(" ", ",")}&per_page=$limit&page=$pageNum";
+      return '${booru.baseURL}/api/v1/json/search/images?key=${booru.apiKey}&q=$formattedTags&per_page=$limit&page=$pageNum';
     }
   }
 
@@ -97,7 +99,7 @@ class PhilomenaHandler extends BooruHandler {
     if (input.isEmpty) {
       input = '*';
     }
-    return '${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=20';
+    return '${booru.baseURL}/api/v1/json/search/tags?q=*${input.replaceAll('_', '+')}*&per_page=20';
   }
 
   @override
@@ -115,6 +117,7 @@ class PhilomenaHandler extends BooruHandler {
       ['-bwslash-', r'\'],
       ['-dot-', '.'],
       ['-plus-', '+'],
+      ['+', '_'],
     ];
 
     String tag = responseItem['slug'].toString();

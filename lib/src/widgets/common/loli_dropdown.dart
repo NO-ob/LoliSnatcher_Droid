@@ -393,6 +393,7 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
     this.labelStyle,
     this.labelBuilder,
     this.withBorder = true,
+    this.expandableByScroll = false,
     super.key,
   });
 
@@ -406,6 +407,7 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
   final TextStyle? labelStyle;
   final Widget Function()? labelBuilder;
   final bool withBorder;
+  final bool expandableByScroll;
 
   Future<bool> showDialog(BuildContext context) async {
     final dynamic res = await showModalBottomSheet(
@@ -416,27 +418,37 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
       isDismissible: true,
       useSafeArea: true,
       builder: (BuildContext context) {
-        return GestureDetector(
-          onTap: () => Navigator.of(context).pop(false),
-          child: ColoredBox(
-            color: Colors.transparent,
-            child: DraggableScrollableSheet(
-              minChildSize: 0.3,
-              initialChildSize: 0.7,
-              maxChildSize: 1,
-              shouldCloseOnMinExtent: true,
-              builder: (context, controller) {
-                return LoliMultiselectDropdownBottomSheet<T>(
-                  controller: controller,
-                  value: value,
-                  onChanged: onChanged,
-                  items: items,
-                  itemBuilder: itemBuilder,
-                  labelText: labelText,
-                );
-              },
+        if (expandableByScroll) {
+          return GestureDetector(
+            onTap: () => Navigator.of(context).pop(false),
+            child: ColoredBox(
+              color: Colors.transparent,
+              child: DraggableScrollableSheet(
+                minChildSize: 0.3,
+                initialChildSize: 0.7,
+                maxChildSize: 1,
+                shouldCloseOnMinExtent: true,
+                builder: (context, controller) {
+                  return LoliMultiselectDropdownBottomSheet<T>(
+                    controller: controller,
+                    value: value,
+                    onChanged: onChanged,
+                    items: items,
+                    itemBuilder: itemBuilder,
+                    labelText: labelText,
+                  );
+                },
+              ),
             ),
-          ),
+          );
+        }
+
+        return LoliMultiselectDropdownBottomSheet<T>(
+          value: value,
+          onChanged: onChanged,
+          items: items,
+          itemBuilder: itemBuilder,
+          labelText: labelText,
         );
       },
     );

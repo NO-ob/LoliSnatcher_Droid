@@ -171,6 +171,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                                 secondaryBoorus = value;
                               });
                             },
+                            expandableByScroll: true,
                             items: settingsHandler.booruList,
                             itemBuilder: (item) => Container(
                               padding: const EdgeInsets.only(left: 16),

@@ -37,21 +37,20 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   final SearchHandler searchHandler = SearchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-  late BooruItem item;
-
-  Timer? itemDelay;
-  bool isDelayed = false;
-
   // TODO fix key duplicate exception when entering exiting fullscreen
 
   //This function decides what media widget to return
-  Widget getImageWidget() {
+  Widget? getImageWidget(BooruItem? item) {
+    if (item == null) {
+      return null;
+    }
+
     if (item.mediaType.value.isImageOrAnimation) {
       return Obx(
         () => ImageViewer(
           item,
           booru: searchHandler.currentBooru,
-          isViewed: searchHandler.viewedItem.value.fileURL == item.fileURL,
+          isViewed: ViewerHandler.instance.current.value?.key == item.key,
           key: item.key,
         ),
       );
@@ -61,7 +60,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
           () => VideoViewer(
             item,
             booru: searchHandler.currentBooru,
-            isViewed: searchHandler.viewedItem.value.fileURL == item.fileURL,
+            isViewed: ViewerHandler.instance.current.value?.key == item.key,
             enableFullscreen: true,
             key: item.key,
           ),
@@ -97,7 +96,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
             final index = searchHandler.currentFetched.indexOf(newItem);
             if (index != -1) {
               searchHandler.currentFetched[index] = newItem;
-              setState(() {});
+              updateState();
             }
           },
           key: item.key,
@@ -120,49 +119,10 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    updateListener();
-  }
-
-  @override
-  void didUpdateWidget(DesktopImageListener oldWidget) {
-    // force redraw on tab change
-    if (oldWidget.searchTab != widget.searchTab) {
-      updateListener();
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  void updateListener() {
-    // listen to changes of selected item
-    searchHandler.viewedItem.removeListener(itemListener);
-    item = searchHandler.viewedItem.value;
-    searchHandler.viewedItem.addListener(itemListener);
-  }
-
-  void itemListener() {
-    // because all items have unique globalkey, we need to force full recreation of widget by adding a small delay between builds
-    isDelayed = true;
-    updateState();
-    item = searchHandler.viewedItem.value;
-    itemDelay = Timer(const Duration(milliseconds: 50), () {
-      isDelayed = false;
-      updateState();
-    });
-  }
-
   void updateState() {
     if (mounted) {
       setState(() {});
     }
-  }
-
-  @override
-  void dispose() {
-    searchHandler.viewedItem.removeListener(itemListener);
-    super.dispose();
   }
 
   Future<void> delayedZoomReset() async {
@@ -172,115 +132,121 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   @override
   Widget build(BuildContext context) {
-    if (searchHandler.list.isEmpty || item.fileURL == '') {
-      return const SizedBox.shrink();
-    }
+    return Obx(() {
+      if (searchHandler.list.isEmpty) {
+        return const SizedBox.shrink();
+      }
 
-    final Widget itemWidget = isDelayed ? const SizedBox.shrink() : getImageWidget();
+      final item = searchHandler.currentTab.itemWithKey(viewerHandler.current.value?.key);
+      final Widget? itemWidget = getImageWidget(item);
+      if (itemWidget == null || item == null) {
+        return const SizedBox.shrink();
+      }
 
-    return Stack(
-      children: [
-        if (!viewerHandler.isDesktopFullscreen.value) itemWidget,
-        if (!viewerHandler.isDesktopFullscreen.value)
-          NotesRenderer(
-            item: item,
-            handler: searchHandler.currentBooruHandler,
-            pageController: null,
-          ),
-        Container(
-          alignment: Alignment.topRight,
-          child: Column(
-            children: [
-              Container(
-                width: 35,
-                height: 35,
-                margin: const EdgeInsets.all(10),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    snatchHandler.queue(
-                      [item],
-                      searchHandler.currentBooru,
-                      0,
-                      false,
-                    );
-                  },
-                  child: const Icon(Icons.save),
+      return Stack(
+        children: [
+          if (!viewerHandler.isDesktopFullscreen.value) itemWidget,
+          if (!viewerHandler.isDesktopFullscreen.value)
+            NotesRenderer(
+              item: item,
+              handler: searchHandler.currentBooruHandler,
+              pageController: null,
+            ),
+          Container(
+            alignment: Alignment.topRight,
+            child: Column(
+              children: [
+                Container(
+                  width: 35,
+                  height: 35,
+                  margin: const EdgeInsets.all(10),
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      snatchHandler.queue(
+                        [item],
+                        searchHandler.currentBooru,
+                        0,
+                        false,
+                      );
+                    },
+                    child: const Icon(Icons.save),
+                  ),
                 ),
-              ),
-              Container(
-                width: 32,
-                height: 32,
-                margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                child: FloatingActionButton(
-                  onPressed: () {
-                    if (item.isFavourite.value != null) {
-                      item.isFavourite.toggle();
-                      settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
-                    }
-                  },
-                  child: Obx(
-                    () => Icon(
-                      item.isFavourite.value == true
-                          ? Icons.favorite
-                          : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
+                Container(
+                  width: 32,
+                  height: 32,
+                  margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      if (item.isFavourite.value != null) {
+                        item.isFavourite.toggle();
+                        settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
+                      }
+                    },
+                    child: Obx(
+                      () => Icon(
+                        item.isFavourite.value == true
+                            ? Icons.favorite
+                            : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(
-                width: 30,
-                height: 30,
-                child: FloatingActionButton(
-                  onPressed: () async {
-                    viewerHandler.isDesktopFullscreen.value = true;
-                    updateState();
-                    unawaited(delayedZoomReset());
+                SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: FloatingActionButton(
+                    onPressed: () async {
+                      viewerHandler.isDesktopFullscreen.value = true;
+                      updateState();
+                      unawaited(delayedZoomReset());
 
-                    await showDialog(
-                      context: context,
-                      // transitionDuration: Duration(milliseconds: 200),
-                      barrierColor: Colors.black,
-                      builder: (BuildContext context) {
-                        return Stack(
-                          children: [
-                            Obx(
-                              () => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox.shrink(),
-                            ),
-                            NotesRenderer(
-                              item: item,
-                              handler: searchHandler.currentBooruHandler,
-                              pageController: null,
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              alignment: Alignment.topRight,
-                              child: SizedBox(
-                                width: 30,
-                                height: 30,
-                                child: FloatingActionButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Icon(Icons.fullscreen_exit),
+                      await showDialog(
+                        context: context,
+                        // transitionDuration: Duration(milliseconds: 200),
+                        barrierColor: Colors.black,
+                        builder: (BuildContext context) {
+                          return Stack(
+                            children: [
+                              Obx(
+                                () => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox.shrink(),
+                              ),
+                              NotesRenderer(
+                                item: item,
+                                handler: searchHandler.currentBooruHandler,
+                                pageController: null,
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                alignment: Alignment.topRight,
+                                child: SizedBox(
+                                  width: 30,
+                                  height: 30,
+                                  child: FloatingActionButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Icon(Icons.fullscreen_exit),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                            ],
+                          );
+                        },
+                      );
 
-                    viewerHandler.isDesktopFullscreen.value = false;
-                    updateState();
-                    unawaited(delayedZoomReset());
-                  },
-                  child: const Icon(Icons.fullscreen),
+                      viewerHandler.isDesktopFullscreen.value = false;
+                      updateState();
+                      unawaited(delayedZoomReset());
+                    },
+                    child: const Icon(Icons.fullscreen),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }

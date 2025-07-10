@@ -36,6 +36,9 @@ class GelbooruHandler extends BooruHandler {
     '0': TagType.none,
   };
 
+  static String get credentialsWarningText =>
+      '<p><b>You may need to add your User ID and API key. You can find them on <a href="https://gelbooru.com/index.php?page=account&s=options">Gelbooru settings page</a> under "API Access Credentials". Note: Anonymous access is NOT permitted.</b></p>';
+
   @override
   Map<String, String> getHeaders() {
     return {
@@ -137,14 +140,23 @@ class GelbooruHandler extends BooruHandler {
     return '${booru.baseURL}/index.php?page=post&s=view&id=$id';
   }
 
+  String buildApiStr() {
+    final String apiKeyStr = booru.apiKey?.isNotEmpty == true
+        ? (booru.apiKey?.contains('api_key') == true ? booru.apiKey! : '&api_key=${booru.apiKey}')
+        : '';
+    final String userIdStr = booru.userID?.isNotEmpty == true
+        ? (apiKeyStr.contains('user_id') ? '' : '&user_id=${booru.userID}')
+        : '';
+
+    return '$apiKeyStr$userIdStr';
+  }
+
   @override
   String makeURL(String tags) {
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=rating:general%20order:score&limit=20&pid=0&json=1
     final int cappedPage = max(0, pageNum);
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-    final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
 
-    return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=$limit&pid=$cappedPage&json=1$apiKeyStr$userIdStr";
+    return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=$limit&pid=$cappedPage&json=1${buildApiStr()}";
   }
 
   // ----------------- Tag suggestions and tag handler stuff
@@ -160,9 +172,7 @@ class GelbooruHandler extends BooruHandler {
   @override
   String makeTagURL(String input) {
     // EXAMPLE https://gelbooru.com/index.php?page=dapi&s=tag&q=index&name_pattern=nagat%25&limit=20&json=1
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-    final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
-    return '${booru.baseURL}/index.php?page=autocomplete2&term=$input&type=tag_query&limit=20$apiKeyStr$userIdStr'; // limit doesnt work
+    return '${booru.baseURL}/index.php?page=autocomplete2&term=$input&type=tag_query&limit=20${buildApiStr()}'; // limit doesnt work
     // return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20&order=post_count&direction=desc&json=1$apiKeyStr$userIdStr'; // order doesnt work
   }
 
@@ -199,9 +209,7 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   String makeDirectTagURL(List<String> tags) {
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-    final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
-    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=100&json=1$apiKeyStr$userIdStr";
+    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=100&json=1${buildApiStr()}";
   }
 
   @override
@@ -265,9 +273,7 @@ class GelbooruHandler extends BooruHandler {
 
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=comment&q=index&post_id=7296350
     // ignore: dead_code
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-    final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
-    return '${booru.baseURL}/index.php?page=dapi&s=comment&q=index&post_id=$postID$apiKeyStr$userIdStr';
+    return '${booru.baseURL}/index.php?page=dapi&s=comment&q=index&post_id=$postID${buildApiStr()}';
   }
 
   @override
@@ -326,9 +332,7 @@ class GelbooruHandler extends BooruHandler {
   @override
   String makeNotesURL(String postID) {
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=note&q=index&post_id=6512262
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-    final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
-    return '${booru.baseURL}/index.php?page=dapi&s=note&q=index&post_id=$postID$apiKeyStr$userIdStr';
+    return '${booru.baseURL}/index.php?page=dapi&s=note&q=index&post_id=$postID${buildApiStr()}';
   }
 
   @override
@@ -421,6 +425,28 @@ class GelbooruHandler extends BooruHandler {
         return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
         final html = parse(response.data);
+
+        Element? source = html.getElementById('gelcomVideoPlayer');
+        if (source != null) {
+          // video
+          item.thumbnailURL = source.attributes['poster'] ?? item.thumbnailURL;
+          item.sampleURL = source.attributes['poster'] ?? item.sampleURL;
+          item.fileURL = source.attributes['src'] ?? source.children.firstOrNull?.attributes['src'] ?? item.fileURL;
+        } else {
+          // image
+          source = html.querySelector('.image-container img');
+          if (source != null) {
+            final String? src = source.attributes['src'];
+            item.fileURL = src ?? item.fileURL;
+            final isSample = src?.contains('/samples/') ?? false;
+            if (isSample) {
+              item.sampleURL = src ?? item.sampleURL;
+              item.fileURL = html.querySelector('meta[property="og:image"]')?.attributes['content'] ?? item.fileURL;
+            }
+            item.thumbnailURL = isSample ? item.sampleURL : item.thumbnailURL;
+          }
+        }
+
         final sidebar = html.getElementById('tag-list');
         final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright'));
         addTagsWithType(copyrightTags, TagType.copyright);

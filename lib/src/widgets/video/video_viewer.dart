@@ -425,19 +425,6 @@ class VideoViewerState extends State<VideoViewer> {
       });
     }
 
-    if (viewerHandler.isFullscreen.value != chewieController.value!.isFullScreen) {
-      // redisable sleep when changing fullscreen state
-      ServiceHandler.disableSleep();
-
-      // Reset systemui visibility
-      if (!chewieController.value!.isFullScreen) {
-        ServiceHandler.setSystemUiVisibility(viewerHandler.displayAppbar.value);
-      }
-
-      // save fullscreen state only when it changed
-      viewerHandler.isFullscreen.value = chewieController.value!.isFullScreen;
-    }
-
     if (isViewed.value) {
       if (chewieController.value!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
         ServiceHandler.setVolumeButtons(true); // in full screen or volumebuttons scroll setting is disabled
@@ -642,6 +629,7 @@ class VideoViewerState extends State<VideoViewer> {
     }
     isStopped.value = false;
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
+    updateState();
     final bool? updateRes = await tryToLoadAndUpdateItem(
       widget.booruItem,
       loadItemCancelToken,

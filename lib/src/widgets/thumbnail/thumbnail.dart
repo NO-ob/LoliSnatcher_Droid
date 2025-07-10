@@ -563,12 +563,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
                           return AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),
-                            child: isAnyLoaded
-                                ? const SizedBox.shrink()
-                                : ShimmerCard(
-                                    isLoading: showShimmer,
-                                    child: showShimmer ? null : const SizedBox.shrink(),
-                                  ),
+                            child: showShimmer ? const ShimmerCard() : const SizedBox.shrink(),
                           );
                         },
                       );
@@ -612,7 +607,12 @@ class _ThumbnailState extends State<Thumbnail> {
                             return ValueListenableBuilder(
                               valueListenable: errorCode,
                               builder: (context, errorCode, child) {
-                                final bool isFavOrDls = widget.booru.type?.isFavouritesOrDownloads == true;
+                                final bool isFavOrDlsOrHasLoad =
+                                    widget.booru.type?.isFavouritesOrDownloads == true ||
+                                    BooruHandlerFactory()
+                                        .getBooruHandler([widget.booru], null)
+                                        .booruHandler
+                                        .hasLoadItemSupport;
 
                                 return ThumbnailLoading(
                                   item: widget.item,
@@ -623,12 +623,12 @@ class _ThumbnailState extends State<Thumbnail> {
                                   total: total,
                                   received: received,
                                   startedAt: startedAt,
-                                  retryText: isFavOrDls ? 'Tap to update or retry' : null,
+                                  retryText: isFavOrDlsOrHasLoad ? 'Tap to update or retry' : null,
                                   retryIcon: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     spacing: 4,
-                                    children: isFavOrDls
+                                    children: isFavOrDlsOrHasLoad
                                         ? const [
                                             Icon(Icons.download),
                                             Text('/', style: TextStyle(fontSize: 20)),
@@ -641,7 +641,7 @@ class _ThumbnailState extends State<Thumbnail> {
                                   restartAction: () async {
                                     restartedCount = 0;
 
-                                    await restartLoading(withItemLoad: isFavOrDls);
+                                    await restartLoading(withItemLoad: isFavOrDlsOrHasLoad);
                                   },
                                   errorCode: errorCode,
                                 );
@@ -694,23 +694,15 @@ Future<bool?> tryToLoadAndUpdateItem(
     final Booru? possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
       final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
 
-      return (itemFileHost?.isNotEmpty == true &&
+      return (itemPostHost?.isNotEmpty == true &&
               booruHost?.isNotEmpty == true &&
-              itemFileHost!.contains(booruHost!)) ||
-          (itemPostHost?.isNotEmpty == true &&
-              booruHost?.isNotEmpty == true &&
-              (itemPostHost!.contains(booruHost!) ||
-                  // TODO make this booru agnostic
+              (itemPostHost! == booruHost! ||
                   switch (e.type) {
-                    BooruType.Sankaku =>
-                      SankakuHandler.knownUrls.contains(itemPostHost) ||
-                          SankakuHandler.knownUrls.contains(booruHost) ||
-                          booruHost.contains('sankakuapi.com'),
-                    BooruType.IdolSankaku =>
-                      IdolSankakuHandler.knownUrls.contains(itemPostHost) ||
-                          IdolSankakuHandler.knownUrls.contains(booruHost),
+                    BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
+                    BooruType.Sankaku => SankakuHandler.knownPostUrls.contains(itemPostHost),
                     _ => false,
-                  }));
+                  })) ||
+          (itemFileHost?.isNotEmpty == true && booruHost?.isNotEmpty == true && itemFileHost! == booruHost!);
     });
 
     cancelToken?.cancel();

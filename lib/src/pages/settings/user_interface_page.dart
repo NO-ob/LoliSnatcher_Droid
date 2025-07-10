@@ -75,14 +75,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.previewDisplay = previewDisplay;
     settingsHandler.previewDisplayFallback = previewDisplayFallback;
     settingsHandler.scrollGridButtonsPosition = scrollGridButtonsPosition;
-    if (int.parse(columnsLandscapeController.text) < 1) {
-      columnsLandscapeController.text = 1.toString();
-    }
-    if (int.parse(columnsPortraitController.text) < 1) {
-      columnsPortraitController.text = 1.toString();
-    }
-    settingsHandler.landscapeColumns = int.parse(columnsLandscapeController.text);
-    settingsHandler.portraitColumns = int.parse(columnsPortraitController.text);
+    settingsHandler.landscapeColumns = max(1, int.tryParse(columnsLandscapeController.text) ?? 6);
+    settingsHandler.portraitColumns = max(1, int.tryParse(columnsPortraitController.text) ?? 3);
     settingsHandler.mousewheelScrollSpeed = double.parse(mouseSpeedController.text);
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (result) {
@@ -272,7 +266,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   } else if (parse == null) {
                     return 'Please enter a valid numeric value';
                   } else if (parse > 4 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
-                    return 'Using more than 4 columns could affect performance';
+                    return 'Using more than 4 columns can affect performance';
                   } else {
                     return null;
                   }
@@ -295,7 +289,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   } else if (parse == null) {
                     return 'Please enter a valid numeric value';
                   } else if (parse > 8 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
-                    return 'Using more than 8 columns could affect performance';
+                    return 'Using more than 8 columns can affect performance';
                   } else {
                     return null;
                   }

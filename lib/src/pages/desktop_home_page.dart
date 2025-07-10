@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/pages/snatcher_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
@@ -207,10 +208,18 @@ class DesktopTagListener extends StatelessWidget {
           border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
         ),
         child: Obx(
-          () => TagView(
-            item: searchHandler.viewedItem.value,
-            handler: searchHandler.currentBooruHandler,
-          ),
+          () {
+            final item = searchHandler.currentTab.itemWithKey(ViewerHandler.instance.current.value?.key);
+
+            if (item == null) {
+              return const SizedBox.shrink();
+            }
+
+            return TagView(
+              item: item,
+              handler: searchHandler.currentBooruHandler,
+            );
+          },
         ),
       );
     });

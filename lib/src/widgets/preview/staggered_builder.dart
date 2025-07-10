@@ -9,13 +9,13 @@ import 'package:waterfall_flow/waterfall_flow.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
 class StaggeredBuilder extends StatelessWidget {
   const StaggeredBuilder({
     required this.tab,
     required this.scrollController,
-    this.highlightedIndex,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
@@ -26,7 +26,6 @@ class StaggeredBuilder extends StatelessWidget {
 
   final SearchTab tab;
   final AutoScrollController scrollController;
-  final int? highlightedIndex;
   final void Function(int)? onTap;
   final void Function(int)? onDoubleTap;
   final void Function(int)? onLongPress;
@@ -37,9 +36,7 @@ class StaggeredBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait)
-        ? settingsHandler.portraitColumns
-        : settingsHandler.landscapeColumns;
+    final int columnCount = context.isPortrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
     return ValueListenableBuilder(
       valueListenable: tab.booruHandler.filteredFetched,
@@ -88,7 +85,7 @@ class StaggeredBuilder extends StatelessWidget {
                     item: item,
                     handler: tab.booruHandler,
                     scrollController: scrollController,
-                    isHighlighted: index == highlightedIndex,
+                    isHighlighted: ViewerHandler.instance.current.value?.key == item.key,
                     selectable: true,
                     selectedIndex: isSelected ? selectedIndex : null,
                     onSelected: hasSelected ? onSelected : null,

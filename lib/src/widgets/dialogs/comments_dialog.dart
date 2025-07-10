@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -438,7 +439,7 @@ class _CommentsHeader extends StatelessWidget {
           height = width / maxRatio;
         }
 
-        if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+        if (context.isLandscape) {
           final double sizeDiff = height / (min(MediaQuery.sizeOf(context).height * 0.4, height));
           height /= sizeDiff;
           width /= sizeDiff;

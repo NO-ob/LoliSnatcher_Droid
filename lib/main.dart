@@ -22,6 +22,7 @@ import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/notify_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
@@ -68,6 +69,7 @@ void main() async {
   SnatchHandler.register();
   TagHandler.register();
   NotifyHandler.register();
+  SecureStorageHandler.register();
   await SettingsHandler.register().initialize();
   LocalAuthHandler.register();
 
@@ -154,6 +156,7 @@ class _MainAppState extends State<MainApp> {
     SearchHandler.unregister();
     TagHandler.unregister();
     LocalAuthHandler.unregister();
+    SecureStorageHandler.unregister();
     SettingsHandler.unregister();
     super.dispose();
   }
@@ -374,7 +377,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    backupTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    backupTimer = Timer.periodic(const Duration(seconds: kDebugMode ? 10 : 30), (timer) {
       // TODO rework so it happens on every tab change/addition, NOT on timer
       searchHandler.backupTabs();
       if (!tagHandler.tagSaveActive) {

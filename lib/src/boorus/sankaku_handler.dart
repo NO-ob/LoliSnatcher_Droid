@@ -12,6 +12,7 @@ import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 class SankakuHandler extends BooruHandler {
   SankakuHandler(super.booru, super.limit);
@@ -160,6 +161,7 @@ class SankakuHandler extends BooruHandler {
           item.fileURL = current['file_url'];
           item.sampleURL = current['sample_url'];
           item.thumbnailURL = current['preview_url'];
+          item.mediaType.value = MediaType.fromExtension(Tools.getFileExt(item.fileURL));
           item.isUpdated = true;
         }
         return (item: item, failed: false, error: null);
@@ -196,6 +198,11 @@ class SankakuHandler extends BooruHandler {
     'beta.sankakucomplex.com',
     'chan.sankakucomplex.com',
     'sankaku.app',
+  ];
+
+  static List<String> knownPostUrls = [
+    'chan.sankakucomplex.com',
+    'beta.sankakucomplex.com',
   ];
 
   String get baseUrl => knownUrls.any(booru.baseURL!.contains) ? 'https://sankakuapi.com' : booru.baseURL!;

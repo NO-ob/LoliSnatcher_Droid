@@ -113,12 +113,13 @@ class _DatabasePageState extends State<DatabasePage> {
     final List<Booru> sankakuBoorus = [];
 
     for (int i = 0; i < settingsHandler.booruList.length; i++) {
-      if (settingsHandler.booruList[i].type?.isSankaku == true &&
+      if ((settingsHandler.booruList[i].type?.isSankaku == true ||
+              settingsHandler.booruList[i].type?.isIdolSankaku == true) &&
           [
             ...SankakuHandler.knownUrls,
+            ...IdolSankakuHandler.knownUrls,
             'sankakuapi.com',
           ].any((e) => settingsHandler.booruList[i].baseURL?.contains(e) ?? false)) {
-        // TODO add support for idol (if possible, it seems that idol uses old api which doesn't allow item refresh (parse html then?))
         sankakuBoorus.add(settingsHandler.booruList[i]);
       }
     }
@@ -456,7 +457,7 @@ class _DatabasePageState extends State<DatabasePage> {
                             title: Text('Tag type fetching'),
                             contentItems: [
                               Text('Will search for tag types on supported boorus'),
-                              Text('This could lead to rate limiting'),
+                              Text('This can lead to rate limiting'),
                             ],
                           );
                         },
@@ -655,17 +656,17 @@ class _DatabasePageState extends State<DatabasePage> {
                         ignoring: isUpdating,
                         child: Column(
                           children: [
-                            // SettingsDropdown<BooruType?>(
-                            //   value: sankakuType,
-                            //   items: getSankakuBoorus().map((e) => e.type).toList(),
-                            //   itemTitleBuilder: (BooruType? item) => item?.alias ?? '',
-                            //   onChanged: (BooruType? newValue) {
-                            //     setState(() {
-                            //       sankakuType = newValue;
-                            //     });
-                            //   },
-                            //   title: 'Sankaku type to update',
-                            // ),
+                            SettingsDropdown<BooruType?>(
+                              value: sankakuType,
+                              items: getSankakuBoorus().map((e) => e.type).toList(),
+                              itemTitleBuilder: (BooruType? item) => item?.alias ?? '',
+                              onChanged: (BooruType? newValue) {
+                                setState(() {
+                                  sankakuType = newValue;
+                                });
+                              },
+                              title: 'Sankaku type to update',
+                            ),
                             SettingsTextInput(
                               controller: sankakuSearchController,
                               title: 'Search query',

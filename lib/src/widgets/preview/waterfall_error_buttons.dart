@@ -3,11 +3,13 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_html/flutter_html.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/common/html.dart';
 
 class WaterfallErrorButtons extends StatefulWidget {
   const WaterfallErrorButtons({
@@ -282,11 +284,11 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                             child: showSubtitle
                                 ? Align(
                                     alignment: Alignment.centerLeft,
-                                    child: Text(
+                                    child: LoliHtml(
                                       subtitle,
-                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                      ),
+                                      style: {
+                                        'p': Style(padding: HtmlPaddings(bottom: HtmlPadding(12))),
+                                      },
                                     ),
                                   )
                                 : const SizedBox.shrink(),

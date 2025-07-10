@@ -6,13 +6,13 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
 class GridBuilder extends StatelessWidget {
   const GridBuilder({
     required this.tab,
     required this.scrollController,
-    this.highlightedIndex,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
@@ -23,7 +23,6 @@ class GridBuilder extends StatelessWidget {
 
   final SearchTab tab;
   final AutoScrollController scrollController;
-  final int? highlightedIndex;
   final void Function(int)? onTap;
   final void Function(int)? onDoubleTap;
   final void Function(int)? onLongPress;
@@ -38,9 +37,7 @@ class GridBuilder extends StatelessWidget {
         ? settingsHandler.previewDisplayFallback
         : settingsHandler.previewDisplay;
 
-    final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait)
-        ? settingsHandler.portraitColumns
-        : settingsHandler.landscapeColumns;
+    final int columnCount = context.isPortrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
     return ValueListenableBuilder(
       valueListenable: tab.booruHandler.filteredFetched,
@@ -67,7 +64,7 @@ class GridBuilder extends StatelessWidget {
                 item: item,
                 handler: tab.booruHandler,
                 scrollController: scrollController,
-                isHighlighted: index == highlightedIndex,
+                isHighlighted: ViewerHandler.instance.current.value?.key == item.key,
                 selectable: true,
                 selectedIndex: isSelected ? selectedIndex : null,
                 onSelected: hasSelected ? onSelected : null,

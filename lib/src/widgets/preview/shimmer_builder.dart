@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 
 class ShimmerWrap extends StatelessWidget {
   const ShimmerWrap({
@@ -14,15 +15,14 @@ class ShimmerWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!enabled) {
-      return child;
-    }
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Shimmer(
+      enabled: true,
       linearGradient: _shimmerGradient(
-        Color.lerp(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.onSurface, 0.15)!,
-        Color.lerp(Theme.of(context).colorScheme.onSurface, Theme.of(context).colorScheme.surface, 0.75)!,
-        Color.lerp(Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.onSurface, 0.15)!,
+        Color.lerp(colorScheme.surface, colorScheme.onSurface, 0.15)!,
+        Color.lerp(colorScheme.onSurface, colorScheme.surface, 0.75)!,
+        Color.lerp(colorScheme.surface, colorScheme.onSurface, 0.15)!,
       ),
       child: child,
     );
@@ -39,9 +39,7 @@ class ThumbnailsShimmerList extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final String displayType = settingsHandler.previewDisplay;
     final int previewCount = settingsHandler.itemLimit;
-    final int columnCount = MediaQuery.orientationOf(context) == Orientation.portrait
-        ? settingsHandler.portraitColumns
-        : settingsHandler.landscapeColumns;
+    final int columnCount = context.isPortrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
     return SliverGrid.builder(
       addAutomaticKeepAlives: false,
@@ -106,6 +104,7 @@ LinearGradient _shimmerGradient(Color c1, Color c2, Color c3) => LinearGradient(
 class Shimmer extends StatefulWidget {
   const Shimmer({
     required this.linearGradient,
+    this.enabled = true,
     this.child,
     super.key,
   });
@@ -115,6 +114,7 @@ class Shimmer extends StatefulWidget {
   }
 
   final LinearGradient linearGradient;
+  final bool enabled;
   final Widget? child;
 
   @override
@@ -130,14 +130,46 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
 
-    _shimmerController = AnimationController.unbounded(vsync: this)
-      ..repeat(min: -0.5, max: 1.5, period: const Duration(milliseconds: 1000));
+    _shimmerController = AnimationController.unbounded(vsync: this);
+    if (widget.enabled) {
+      _shimmerController.repeat(
+        min: -0.5,
+        max: 1.5,
+        period: const Duration(milliseconds: 1000),
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(Shimmer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enabled != oldWidget.enabled) {
+      if (widget.enabled) {
+        play();
+      } else {
+        stop();
+      }
+    }
   }
 
   void activateChild() {
     activeChildren++;
+    play();
+  }
+
+  void play() {
     if (!_shimmerController.isAnimating) {
-      _shimmerController.repeat(min: -0.5, max: 1.5, period: const Duration(milliseconds: 1000));
+      _shimmerController.repeat(
+        min: -0.5,
+        max: 1.5,
+        period: const Duration(milliseconds: 1000),
+      );
+    }
+  }
+
+  void stop() {
+    if (activeChildren <= 0 && _shimmerController.isAnimating) {
+      _shimmerController.stop();
     }
   }
 
@@ -147,9 +179,7 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
     }
 
     activeChildren--;
-    if (activeChildren <= 0) {
-      _shimmerController.stop();
-    }
+    stop();
   }
 
   @override
@@ -245,10 +275,21 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
 
     if (isChanged) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {});
-        }
+        _shimmerUpdateIndex.value++;
       });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ShimmerLoading oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isLoading != oldWidget.isLoading) {
+      if (widget.isLoading) {
+        _shimmerState?.activateChild();
+      } else {
+        _shimmerState?.deactivateChild();
+      }
+      _shimmerUpdateIndex.value++;
     }
   }
 
@@ -260,63 +301,49 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
   }
 
   void _onShimmerChange() {
-    final prevIsLoading = widget.isLoading;
     if (widget.isLoading) {
       // update the shimmer painting.
-      if (_shimmerUpdateIndex.value == 100_000) {
+      if (_shimmerUpdateIndex.value >= 100_000) {
         _shimmerUpdateIndex.value = 0;
       } else {
         _shimmerUpdateIndex.value++;
       }
     }
-
-    if (prevIsLoading != widget.isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {});
-        }
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      child: widget.isLoading
-          ? ValueListenableBuilder<int>(
-              valueListenable: _shimmerUpdateIndex,
-              builder: (context, _, child) {
-                final RenderObject? renderObj = context.findRenderObject();
-                if (_shimmerState == null || !_shimmerState!.isSized || renderObj == null || !renderObj.attached) {
-                  // The ancestor Shimmer widget has not laid
-                  // itself out yet. Return an empty box.
-                  return widget.child;
-                }
+    return ValueListenableBuilder<int>(
+      valueListenable: _shimmerUpdateIndex,
+      builder: (context, _, child) {
+        final RenderObject? renderObj = context.findRenderObject();
+        if (_shimmerState == null || !_shimmerState!.isSized || renderObj == null || !renderObj.attached) {
+          // The ancestor Shimmer widget has not laid
+          // itself out yet. Return an empty box.
+          return child ?? const SizedBox.shrink();
+        }
 
-                return ShaderMask(
-                  blendMode: BlendMode.srcATop,
-                  shaderCallback: (bounds) {
-                    final shimmerSize = _shimmerState!.size;
-                    final gradient = _shimmerState!.gradient;
-                    final offsetWithinShimmer = _shimmerState!.getDescendantOffset(
-                      descendant: renderObj as RenderBox,
-                    );
-                    return gradient.createShader(
-                      Rect.fromLTWH(
-                        -offsetWithinShimmer.dx,
-                        -offsetWithinShimmer.dy,
-                        shimmerSize.width,
-                        shimmerSize.height,
-                      ),
-                    );
-                  },
-                  child: child,
-                );
-              },
-              child: widget.child,
-            )
-          : widget.child,
+        return ShaderMask(
+          blendMode: BlendMode.srcATop,
+          shaderCallback: (bounds) {
+            final shimmerSize = _shimmerState!.size;
+            final gradient = _shimmerState!.gradient;
+            final offsetWithinShimmer = _shimmerState!.getDescendantOffset(
+              descendant: renderObj as RenderBox,
+            );
+            return gradient.createShader(
+              Rect.fromLTWH(
+                -offsetWithinShimmer.dx,
+                -offsetWithinShimmer.dy,
+                shimmerSize.width,
+                shimmerSize.height,
+              ),
+            );
+          },
+          child: child,
+        );
+      },
+      child: widget.child,
     );
   }
 }

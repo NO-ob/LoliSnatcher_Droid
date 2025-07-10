@@ -205,19 +205,18 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   void afterSearch() {
-    if ((searchHandler.currentFetched.isNotEmpty &&
-            searchHandler.currentFetched.length < (settingsHandler.itemLimit + 1)) &&
-        !isMobile) {
-      if (searchHandler.viewedItem.value.fileURL.isEmpty) {
-        final BooruItem item = searchHandler.setViewedItem(0);
-        viewerHandler.setCurrent(item.key);
-      }
+    if (isMobile) {
+      return;
+    }
+
+    if (viewerHandler.current.value == null &&
+        searchHandler.currentFetched.isNotEmpty &&
+        searchHandler.currentFetched.length < (settingsHandler.itemLimit + 1)) {
+      viewerHandler.setCurrent(searchHandler.currentFetched.first);
     }
   }
 
   void viewerCallback() {
-    viewerHandler.dropCurrent();
-
     // do cleanup after a delay to avoid animation stutter when leaving the viewer (especially when there are thousands of items)
     Future.delayed(const Duration(milliseconds: 500), () {
       for (final item in searchHandler.currentFetched) {
@@ -232,8 +231,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   void onViewerPageChanged(int index) {
     if (isMobile) {
       jumpTo(index);
-      final viewedItem = searchHandler.setViewedItem(index);
-      viewerHandler.setCurrent(viewedItem.key);
+      viewerHandler.setCurrent(searchHandler.currentFetched[index]);
     } else {
       // don't auto scroll on viewed index change on desktop
       // call jumpTo only when viewed item is possibly out of view (i.e. selected by arrow keys)
@@ -241,11 +239,10 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   Future<void> onTap(int index) async {
-    final BooruItem viewedItem = searchHandler.setViewedItem(index);
-    viewerHandler.setCurrent(viewedItem.key);
+    viewerHandler.setCurrent(searchHandler.currentFetched[index]);
 
     if (isMobile) {
-      // protection from opening multiple galleries at once
+      // protection from opening multiple viewers at once
       if (!isActive.value) {
         return;
       }
@@ -280,9 +277,11 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
         ),
       );
 
-      searchHandler.setViewedItem(-1);
+      viewerHandler.dropCurrent();
 
       isActive.value = true;
+
+      // reset notes to default state, defined in settings
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
 
       viewerCallback();
@@ -311,9 +310,9 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
     }
   }
 
-  void onSecondaryTap(int index) {
+  Future<void> onSecondaryTap(int index) async {
     final BooruItem item = searchHandler.currentFetched[index];
-    Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
+    await Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
     FlashElements.showSnackbar(
       duration: const Duration(seconds: 2),
       title: const Text('Copied File URL to clipboard!', style: TextStyle(fontSize: 20)),
@@ -335,16 +334,22 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       });
     }
 
-    final bool changedOrientation = MediaQuery.orientationOf(context) != currentOrientation;
+    final bool changedOrientation = context.orientation != currentOrientation;
     if (changedOrientation && !isActive.value) {
       // try to keep the scroll position at currently viewed item when screen orientation changes
-      currentOrientation = MediaQuery.orientationOf(context);
+      currentOrientation = context.orientation;
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        searchHandler.gridScrollController.scrollToIndex(
-          searchHandler.viewedIndex.value,
-          duration: Duration(milliseconds: isMobile ? 10 : 100),
-          preferPosition: AutoScrollPosition.begin,
+        final itemIndex = searchHandler.currentFetched.indexWhere(
+          (item) => item.key == viewerHandler.current.value?.key,
         );
+        if (itemIndex != -1) {
+          searchHandler.gridScrollController.scrollToIndex(
+            itemIndex,
+            duration: Duration(milliseconds: isMobile ? 10 : 100),
+            preferPosition: AutoScrollPosition.begin,
+          );
+        }
       });
     }
 
@@ -373,8 +378,14 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                 children: [
                   DesktopScrollWrap(
                     controller: searchHandler.gridScrollController,
-                    child: ShimmerWrap(
-                      enabled: !SettingsHandler.instance.shitDevice,
+                    child: ValueListenableBuilder(
+                      valueListenable: isActive,
+                      builder: (context, isActive, child) {
+                        return ShimmerWrap(
+                          enabled: isActive && !SettingsHandler.instance.shitDevice,
+                          child: child ?? const SizedBox.shrink(),
+                        );
+                      },
                       child: Obx(() {
                         final bool isLoadingAndNoItems =
                             searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
@@ -387,6 +398,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                         }
 
                         return CustomScrollView(
+                          key: ValueKey('CustomScrollView-${searchHandler.currentTabId}'),
                           controller: searchHandler.gridScrollController,
                           physics: isLoadingAndNoItems
                               ? const NeverScrollableScrollPhysics()
@@ -416,7 +428,6 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                       () => StaggeredBuilder(
                                         tab: searchHandler.currentTab,
                                         scrollController: searchHandler.gridScrollController,
-                                        highlightedIndex: searchHandler.viewedIndex.value,
                                         onSelected: onLongPress,
                                         onTap: onTap,
                                         onDoubleTap: onDoubleTap,
@@ -430,7 +441,6 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                     () => GridBuilder(
                                       tab: searchHandler.currentTab,
                                       scrollController: searchHandler.gridScrollController,
-                                      highlightedIndex: searchHandler.viewedIndex.value,
                                       onSelected: onLongPress,
                                       onTap: onTap,
                                       onDoubleTap: onDoubleTap,

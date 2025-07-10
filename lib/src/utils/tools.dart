@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -119,8 +120,9 @@ class Tools {
     final Map<String, String> headers = {'User-Agent': browserUserAgent};
     if (uri.host.contains('danbooru.donmai.us')) {
       headers['User-Agent'] = appUserAgent;
-    }
-    if ([
+    } else if (IdolSankakuHandler.knownUrls.contains(uri.host)) {
+      headers['User-Agent'] = Constants.sankakuIdolAppUserAgent;
+    } else if ([
       ...SankakuHandler.knownUrls,
       'sankakuapi.com',
     ].any(uri.host.contains)) {
@@ -188,7 +190,29 @@ class Tools {
     return statusCode != null && statusCode >= 200 && statusCode < 300;
   }
 
-  static const String appUserAgent = 'LoliSnatcher_Droid/${Constants.appVersion}';
+  static bool isGoodResponse(Response response) {
+    if (!isGoodStatusCode(response.statusCode)) {
+      return false;
+    }
+
+    final isSankaku = response.realUri.toString().contains('sankakucomplex.com');
+    final isImageOrVideo =
+        response.headers['content-type']?.any((t) => t.contains('image') || t.contains('video')) == true;
+    if (isSankaku && isImageOrVideo) {
+      final int? contentLength = int.tryParse(response.headers['content-length']?.firstOrNull ?? '');
+      if (contentLength != null) {
+        // TODO investigate better ways/possibility of this number changing
+        // Image with "Expired link - please reload site" text
+        const int expiredLinkFileSize = 14802;
+        return contentLength != expiredLinkFileSize;
+      }
+    }
+
+    // TODO add more checks
+    return true;
+  }
+
+  static final String appUserAgent = 'LoliSnatcher_Droid/${Constants.updateInfo.versionName}';
   static String get browserUserAgent {
     return (isTestMode || SettingsHandler.instance.customUserAgent.isEmpty)
         ? appUserAgent
@@ -266,6 +290,72 @@ class Tools {
     }
 
     return cookieString.trim();
+  }
+
+  static Future<bool> saveCookies(String uri, List<String> cookies) async {
+    if (cookies.isEmpty) return true;
+
+    if (isOnPlatformWithWebviewSupport) {
+      try {
+        final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
+        final List<Cookie?> parsedCookies = [];
+        for (final c in cookies) {
+          try {
+            final parts = c.split(';').map((p) => p.split('='));
+
+            final name = parts.first.first.trim();
+            final value = parts.first.last.trim();
+            final domain = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'domain')?.last.trim();
+            final path = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'path')?.last.trim();
+            final expires = DateTime.tryParse(
+              parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'expires')?.last.trim() ?? '',
+            );
+            final isSecure = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'secure') != null;
+            final isHttpOnly = parts.firstWhereOrNull((p) => p.first.toLowerCase() == 'httponly') != null;
+
+            parsedCookies.add(
+              Cookie(
+                name: name,
+                value: value,
+                domain: domain,
+                path: path,
+                expiresDate: expires?.millisecondsSinceEpoch,
+                isSecure: isSecure,
+                isHttpOnly: isHttpOnly,
+              ),
+            );
+          } catch (_) {}
+        }
+
+        for (final cookie in parsedCookies) {
+          if (cookie == null) continue;
+          if (Platform.isWindows) {
+            globalWindowsCookies[WebUri(uri).host]?.add(cookie);
+          }
+          await cookieManager.setCookie(
+            url: WebUri(uri),
+            name: cookie.name,
+            value: cookie.value,
+            domain: cookie.domain,
+            path: cookie.path ?? '/',
+            expiresDate: cookie.expiresDate,
+            isSecure: cookie.isSecure,
+            isHttpOnly: cookie.isHttpOnly,
+          );
+        }
+        return true;
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'Tools',
+          'saveCookies',
+          LogTypes.exception,
+          s: s,
+        );
+      }
+    }
+
+    return false;
   }
 }
 

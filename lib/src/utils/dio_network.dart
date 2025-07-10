@@ -3,12 +3,9 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/pages/settings/network_page.dart';
-import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -17,25 +14,27 @@ class DioNetwork {
 
   static Dio getClient({String? baseUrl}) {
     final dio = Dio();
-    // dio.httpClientAdapter = NativeAdapter();
+
+    final settingsHandler = SettingsHandler.instance;
+    // final proxyType = ProxyType.fromName(settingsHandler.proxyType);
+    // if (settingsHandler.useHttp2 &&
+    //     (proxyType.isDirect || (proxyType.isSystem && systemProxyAddress.isEmpty) || getProxyConfigAddress().isEmpty)) {
+    //   // dio.httpClientAdapter = NativeAdapter();
+    //   dio.httpClientAdapter = Http2Adapter(
+    //     ConnectionManager(
+    //       idleTimeout: const Duration(seconds: 30),
+    //     ),
+    //   );
+    // }
+
     dio.options.baseUrl = baseUrl ?? '';
     // dio.options.connectTimeout = Duration(seconds: 10);
     // dio.options.receiveTimeout = Duration(seconds: 30);
     // dio.options.sendTimeout = Duration(seconds: 10);
 
-    final settingsHandler = SettingsHandler.instance;
-
     dio.interceptors.add(Logger.dioInterceptor!);
     dio.interceptors.add(settingsHandler.alice.getDioInterceptor());
-
-    final proxyType = ProxyType.fromName(settingsHandler.proxyType);
-    if (proxyType.isDirect || (proxyType.isSystem && systemProxyAddress.isEmpty) || getProxyConfigAddress().isEmpty) {
-      dio.httpClientAdapter = Http2Adapter(
-        ConnectionManager(
-          idleTimeout: const Duration(seconds: 30),
-        ),
-      );
-    }
+    cookieInterceptor(dio);
 
     return dio;
   }
@@ -44,7 +43,7 @@ class DioNetwork {
     final usedOptions = options ?? defaultOptions;
     return usedOptions.copyWith(
       headers: {
-        ...headers ?? usedOptions.headers ?? defaultOptions.headers!,
+        ...?headers ?? usedOptions.headers ?? defaultOptions.headers,
       },
     );
   }
@@ -59,7 +58,7 @@ class DioNetwork {
     final String cleanUrl = temp.replace(queryParameters: {}).toString();
     final Map<String, dynamic> queryParams = {
       ...temp.queryParameters,
-      ...givenQueryParams ?? {},
+      ...?givenQueryParams,
     };
 
     // TODO create a separate class for this?
@@ -145,12 +144,50 @@ class DioNetwork {
     return client;
   }
 
+  static Dio cookieInterceptor(Dio client) {
+    client.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (RequestOptions options, RequestInterceptorHandler handler) async {
+          final String oldCookie = options.headers['Cookie'] as String? ?? '';
+          final String newCookie = await Tools.getCookies(options.uri.toString());
+          final headers = {
+            ...options.headers,
+            'Cookie': '$oldCookie $newCookie'.trim(),
+          };
+          options.headers = headers;
+          return handler.next(options);
+        },
+        onResponse: (Response response, ResponseInterceptorHandler handler) async {
+          final setCookies = response.headers['set-cookie'] ?? [];
+          await Tools.saveCookies(
+            response.requestOptions.uri.toString(),
+            setCookies,
+          );
+          return handler.next(response);
+        },
+        onError: (DioException error, ErrorInterceptorHandler handler) async {
+          final setCookies = error.response?.headers['set-cookie'] ?? [];
+          await Tools.saveCookies(
+            error.requestOptions.uri.toString(),
+            setCookies,
+          );
+          return handler.next(error);
+        },
+      ),
+    );
+
+    return client;
+  }
+
   static Options get defaultOptions {
     final options = Options(
       responseType: ResponseType.json,
       contentType: 'application/json',
+      followRedirects: true,
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'User-Agent': Tools.browserUserAgent,
       },
     );
     return options;

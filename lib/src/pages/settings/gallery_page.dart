@@ -106,24 +106,11 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.disableCustomPageTransitions = disableCustomPageTransitions;
     settingsHandler.disableVibration = disableVibration;
 
-    if (int.parse(scrollSpeedController.text) < 100) {
-      scrollSpeedController.text = 100.toString();
-    }
-    if (int.parse(galleryAutoScrollController.text) < 800) {
-      galleryAutoScrollController.text = 800.toString();
-    }
-    settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
-    settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
+    settingsHandler.volumeButtonsScrollSpeed = (int.tryParse(scrollSpeedController.text) ?? 200).clamp(0, 1_000_000);
+    settingsHandler.galleryAutoScrollTime = (int.tryParse(galleryAutoScrollController.text) ?? 4000).clamp(100, 10000);
 
-    if ((int.tryParse(preloadAmountController.text) ?? 0) < 0) {
-      preloadAmountController.text = 0.toString();
-    }
-    settingsHandler.preloadCount = int.parse(preloadAmountController.text);
-
-    if ((double.tryParse(preloadSizeController.text) ?? 0) < 0) {
-      preloadSizeController.text = 0.toString();
-    }
-    settingsHandler.preloadSizeLimit = double.parse(preloadSizeController.text);
+    settingsHandler.preloadCount = (int.tryParse(preloadAmountController.text) ?? 1).clamp(0, 3);
+    settingsHandler.preloadSizeLimit = (double.tryParse(preloadSizeController.text) ?? 0).clamp(0, double.infinity);
 
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (result) {
@@ -166,8 +153,10 @@ class _GalleryPageState extends State<GalleryPage> {
                     return 'Please enter a value';
                   } else if (parse == null) {
                     return 'Please enter a valid numeric value';
-                  } else if (parse > 4) {
-                    return 'Please enter a value less than 5';
+                  } else if (parse < 0) {
+                    return 'Please enter a value equal to or greater than 0';
+                  } else if (parse > 3) {
+                    return 'Please enter a value less than 4';
                   } else {
                     return null;
                   }
@@ -256,6 +245,15 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: 'Hide toolbar when opening viewer',
+              ),
+              SettingsToggle(
+                value: settingsHandler.expandDetails,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.expandDetails = newValue;
+                  });
+                },
+                title: 'Expand details by default',
               ),
               SettingsToggle(
                 value: hideNotes,
@@ -379,8 +377,13 @@ class _GalleryPageState extends State<GalleryPage> {
                                     );
                                   },
                                   key: Key('item-$name'),
+                                  minTileHeight: 64,
                                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                                   title: Text(title),
+                                  subtitle: switch (name) {
+                                    'external_player' => const Text('Only on videos'),
+                                    _ => null,
+                                  },
                                   leading: Opacity(
                                     opacity: isInfo ? 0.5 : 1,
                                     child: Checkbox(
@@ -407,13 +410,33 @@ class _GalleryPageState extends State<GalleryPage> {
                                       },
                                     ),
                                   ),
-                                  trailing: ReorderableDragStartListener(
-                                    key: Key('draghandle-#${buttonOrder[index]}'),
-                                    index: index,
-                                    child: const IconButton(
-                                      onPressed: null,
-                                      icon: Icon(Icons.drag_handle),
-                                    ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        switch (name) {
+                                          'snatch' => Icons.save,
+                                          'favourite' => Icons.favorite,
+                                          'info' => Icons.info,
+                                          'share' => Icons.share,
+                                          'select' => Icons.check_box,
+                                          'open' => Icons.public,
+                                          'autoscroll' => Icons.play_arrow,
+                                          'reloadnoscale' => Icons.refresh,
+                                          'toggle_quality' => Icons.high_quality,
+                                          'external_player' => Icons.exit_to_app,
+                                          _ => null,
+                                        },
+                                      ),
+                                      ReorderableDragStartListener(
+                                        key: Key('draghandle-#${buttonOrder[index]}'),
+                                        index: index,
+                                        child: const IconButton(
+                                          onPressed: null,
+                                          icon: Icon(Icons.drag_handle),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 );
                               },
@@ -459,6 +482,9 @@ class _GalleryPageState extends State<GalleryPage> {
                             const Text('- Post URL'),
                             const Text(
                               '- File URL - shares direct link to the original file (may not work with some sites)',
+                            ),
+                            const Text(
+                              '- Post URL/File URL/File with tags - shares url/file and tags which you select',
                             ),
                             const Text(
                               '- File - shares the file itself, may take some time to load, progress will be shown on the Share button',

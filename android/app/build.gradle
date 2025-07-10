@@ -108,6 +108,14 @@ android {
     }
 }
 
+android.applicationVariants.all { variant ->
+    variant.outputs.each { output ->
+        // When building split apks, gradle adds (n * 1000) to each arch type to avoid having same build number
+        // This disables that behaviour and uses same build number for all arch variants
+        output.versionCodeOverride = variant.versionCode
+    }
+}
+
 flutter {
     source '../..'
 }

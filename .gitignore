@@ -46,8 +46,8 @@
 /ios/
 !strings*.g.dart
 
-# FVM files
-/.fvm/
+# FVM Version Cache
+.fvm/
 
 # Secret variables
 /config/secrets.json

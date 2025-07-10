@@ -2,6 +2,32 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+extension BuildContextExtras on BuildContext {
+  MediaQueryData get mediaQuery => MediaQuery.of(this);
+  Size get mediaSize => MediaQuery.sizeOf(this);
+  double get width => mediaSize.width;
+  double get height => mediaSize.height;
+  EdgeInsets get viewInsets => MediaQuery.viewInsetsOf(this);
+  EdgeInsets get padding => MediaQuery.paddingOf(this);
+  double get devicePixelRatio => MediaQuery.devicePixelRatioOf(this);
+  Orientation get orientation => MediaQuery.orientationOf(this);
+  bool get isLandscape => orientation.isLandscape;
+  bool get isPortrait => orientation.isPortrait;
+
+  NavigatorState get navigator => Navigator.of(this);
+
+  ThemeData get theme => Theme.of(this);
+  TextTheme get textTheme => theme.textTheme;
+  ColorScheme get colorScheme => theme.colorScheme;
+  bool get isDark => theme.brightness == Brightness.dark;
+  bool get isLight => theme.brightness == Brightness.light;
+}
+
+extension OrientationExtras on Orientation {
+  bool get isLandscape => this == Orientation.landscape;
+  bool get isPortrait => this == Orientation.portrait;
+}
+
 extension UIExtras on Widget {
   Widget withBorder({
     Color? color,

@@ -4,8 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:alice_lightweight/alice.dart';
+import 'package:alice_lightweight/helper/alice_save_helper.dart';
 import 'package:fvp/fvp.dart' as fvp;
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
@@ -23,6 +25,7 @@ import 'package:lolisnatcher/src/data/update_info.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -131,20 +134,20 @@ class SettingsHandler {
   double preloadSizeLimit = 0.2;
 
   int currentColumnCount(BuildContext context) {
-    return MediaQuery.orientationOf(context) == Orientation.portrait ? portraitColumns : landscapeColumns;
+    return context.isPortrait ? portraitColumns : landscapeColumns;
   }
 
   Duration cacheDuration = Duration.zero;
 
   // TODO convert to enum
   static const List<String> buttonList = [
-    'autoscroll',
     'snatch',
     'favourite',
     'info',
     'share',
     'select',
     'open',
+    'autoscroll',
     'reloadnoscale',
     'toggle_quality',
     'external_player',
@@ -204,6 +207,7 @@ class SettingsHandler {
   bool useTopSearchbarInput = false;
   bool showSearchbarQuickActions = false;
   bool autofocusSearchbar = true;
+  bool expandDetails = false;
   final RxBool useLockscreen = false.obs;
   final RxBool blurOnLeave = false.obs;
   final RxList<Booru> booruList = RxList<Booru>([]);
@@ -283,6 +287,7 @@ class SettingsHandler {
     'useTopSearchbarInput',
     'showSearchbarQuickActions',
     'autofocusSearchbar',
+    'expandDetails',
     'useLockscreen',
     'blurOnLeave',
   ];
@@ -310,7 +315,17 @@ class SettingsHandler {
     'shareAction': {
       'type': 'stringFromList',
       'default': 'Ask',
-      'options': <String>['Ask', 'Post URL', 'File URL', 'File', 'Hydrus'],
+      // TODO replace with enum, don't forget to have these in serialization
+      'options': <String>[
+        'Ask',
+        'Post URL',
+        'Post URL with tags',
+        'File URL',
+        'File URL with tags',
+        'File',
+        'File with tags',
+        'Hydrus',
+      ],
     },
     'videoCacheMode': {
       'type': 'stringFromList',
@@ -690,6 +705,10 @@ class SettingsHandler {
     'autofocusSearchbar': {
       'type': 'bool',
       'default': true,
+    },
+    'expandDetails': {
+      'type': 'bool',
+      'default': false,
     },
     'useLockscreen': {
       'type': 'bool',
@@ -1157,6 +1176,8 @@ class SettingsHandler {
         return showSearchbarQuickActions;
       case 'autofocusSearchbar':
         return autofocusSearchbar;
+      case 'expandDetails':
+        return expandDetails;
       case 'useLockscreen':
         return useLockscreen;
       case 'blurOnLeave':
@@ -1487,6 +1508,9 @@ class SettingsHandler {
       case 'autofocusSearchbar':
         autofocusSearchbar = validatedValue;
         break;
+      case 'expandDetails':
+        expandDetails = validatedValue;
+        break;
       case 'useLockscreen':
         useLockscreen.value = validatedValue;
         break;
@@ -1601,6 +1625,7 @@ class SettingsHandler {
       'useTopSearchbarInput': validateValue('useTopSearchbarInput', null, toJSON: true),
       'showSearchbarQuickActions': validateValue('showSearchbarQuickActions', null, toJSON: true),
       'autofocusSearchbar': validateValue('autofocusSearchbar', null, toJSON: true),
+      'expandDetails': validateValue('expandDetails', null, toJSON: true),
       'useLockscreen': validateValue('useLockscreen', null, toJSON: true),
       'blurOnLeave': validateValue('blurOnLeave', null, toJSON: true),
 
@@ -1631,8 +1656,8 @@ class SettingsHandler {
       'customPrimaryColor': validateValue('customPrimaryColor', null, toJSON: true),
       'customAccentColor': validateValue('customAccentColor', null, toJSON: true),
       'locale': validateValue('locale', null, toJSON: true),
-      'version': Constants.appVersion,
-      'build': Constants.appBuildNumber,
+      'version': Constants.updateInfo.versionName,
+      'build': Constants.updateInfo.buildNumber,
     };
 
     // print('JSON $json');
@@ -2101,38 +2126,27 @@ class SettingsHandler {
       return;
     }
 
-    const String changelog = '''Changelog''';
-    // ignore: unused_local_variable
-    final Map<String, dynamic> fakeUpdate = {
-      'version_name': '2.2.0',
-      'build_number': 170,
-      'title': 'Title',
-      'changelog': changelog,
-      'is_in_store': true, // is app still in store
-      'is_update_in_store':
-          true, // is update available in store [LEGACY], after 2.2.0 hits the store - left this in update.json as true for backwards compatibility with pre-2.2
-      'is_important': false, // is update important => force open dialog on start
-      'store_package':
-          'com.noaisu.play.loliSnatcher', // custom app package name, to allow to redirect store users to new app if it will be needed
-      'github_url': 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
-    }; // fake update json for tests
-    // String fakeUpdate = '123'; // broken string
+    // const String fakeUpdate = '123'; // for tests // broken string
+    // const Map<String, dynamic> = {}; // for tests // full json here
 
     try {
       const String updateFileName = EnvironmentConfig.isFromStore ? 'update_store.json' : 'update.json';
       final response = await DioNetwork.get(
         'https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName',
       );
-      final json = jsonDecode(response.data);
-      // final json = jsonDecode(jsonEncode(fakeUpdate));
+      final json = response.data is String ? jsonDecode(response.data) : (response.data is Map ? response.data : {});
+      if (json is Map && json.isEmpty) {
+        throw Exception('Update file is empty');
+      }
 
-      // use this and fakeUpdate to generate json file
-      Logger.Inst().log(
-        jsonEncode(json),
-        'SettingsHandler',
-        'checkUpdate',
-        LogTypes.settingsError,
-      );
+      try {
+        Logger.Inst().log(
+          jsonEncode(json),
+          'SettingsHandler',
+          'checkUpdate',
+          LogTypes.settingsError,
+        );
+      } catch (_) {}
 
       updateInfo.value = UpdateInfo(
         versionName: json['version_name'] ?? '0.0.0',
@@ -2153,7 +2167,7 @@ class SettingsHandler {
         }
       }
 
-      if (Constants.appBuildNumber < (updateInfo.value!.buildNumber)) {
+      if (Constants.updateInfo.buildNumber < (updateInfo.value!.buildNumber)) {
         // if current build number is less than update build number in json
         if (EnvironmentConfig.isFromStore) {
           // installed from store
@@ -2170,10 +2184,37 @@ class SettingsHandler {
           showUpdate(withMessage || updateInfo.value!.isImportant);
         }
       } else {
-        // otherwise show latest version message
-        showLastVersionMessage(withMessage);
+        final secureStorageHandler = SecureStorageHandler.instance;
+        final viewedAtBuild = int.tryParse(
+          await secureStorageHandler.read(SecureStorageKey.viewedUpdateChangelogForBuild) ?? '',
+        );
+        if (booruList.isEmpty) {
+          // don't bother new (no boorus) users until next update
+          await secureStorageHandler.write(
+            SecureStorageKey.viewedUpdateChangelogForBuild,
+            Constants.updateInfo.buildNumber.toString(),
+          );
+        } else if (viewedAtBuild == null || viewedAtBuild < Constants.updateInfo.buildNumber) {
+          await secureStorageHandler.write(
+            SecureStorageKey.viewedUpdateChangelogForBuild,
+            Constants.updateInfo.buildNumber.toString(),
+          );
+          showUpdate(true, isAfterUpdate: true);
+        } else {
+          if (withMessage) {
+            // otherwise show latest version message
+            showLastVersionMessage();
+          }
+        }
       }
-    } catch (e) {
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'SettingsHandler',
+        'checkUpdate',
+        LogTypes.settingsError,
+        s: s,
+      );
       if (withMessage) {
         FlashElements.showSnackbar(
           title: Text(
@@ -2191,37 +2232,43 @@ class SettingsHandler {
     }
   }
 
-  void showLastVersionMessage(bool withMessage) {
-    if (withMessage) {
-      FlashElements.showSnackbar(
-        title: Text(
-          loc.settings.checkForUpdates.youHaveLatestVersion,
-          style: const TextStyle(fontSize: 20),
-        ),
-        sideColor: Colors.green,
-        leadingIcon: Icons.update,
-        leadingIconColor: Colors.green,
-        actionsBuilder: (context, controller) {
-          return [
-            ElevatedButton.icon(
-              onPressed: () {
-                controller.dismiss();
-                showUpdate(true);
-              },
-              icon: const Icon(Icons.list_alt_rounded),
-              label: Text(loc.settings.checkForUpdates.viewLatestChangelog),
-            ),
-          ];
-        },
-      );
-    }
+  void showLastVersionMessage() {
+    FlashElements.showSnackbar(
+      title: Text(
+        loc.settings.checkForUpdates.youHaveLatestVersion,
+        style: const TextStyle(fontSize: 20),
+      ),
+      sideColor: Colors.green,
+      leadingIcon: Icons.update,
+      leadingIconColor: Colors.green,
+      actionsBuilder: (context, controller) {
+        return [
+          ElevatedButton.icon(
+            onPressed: () {
+              controller.dismiss();
+              showUpdate(
+                true,
+                isAfterUpdate: true,
+              );
+            },
+            icon: const Icon(Icons.list_alt_rounded),
+            label: Text(loc.settings.checkForUpdates.viewLatestChangelog),
+          ),
+        ];
+      },
+    );
   }
 
-  void showUpdate(bool withMessage) {
-    if (withMessage && updateInfo.value != null) {
+  void showUpdate(
+    bool showMessage, {
+    bool isAfterUpdate = false,
+  }) {
+    // ignore: no_leading_underscores_for_local_identifiers
+    final _updateInfo = isAfterUpdate ? Constants.updateInfo : updateInfo.value;
+    if (showMessage && _updateInfo != null) {
       const bool isFromStore = EnvironmentConfig.isFromStore;
 
-      final bool isDiffVersion = Constants.appBuildNumber < updateInfo.value!.buildNumber;
+      final bool isDiffVersion = Constants.updateInfo.buildNumber < _updateInfo.buildNumber;
 
       final ctx = NavigationHandler.instance.navContext;
 
@@ -2230,7 +2277,7 @@ class SettingsHandler {
         page: (_) => Scaffold(
           appBar: AppBar(
             title: Text(
-              '${isDiffVersion ? loc.settings.checkForUpdates.updateAvailable : '${loc.settings.checkForUpdates.updateChangelog}:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
+              '${isDiffVersion ? loc.settings.checkForUpdates.updateAvailable : '${isAfterUpdate ? "What's new" : loc.settings.checkForUpdates.updateChangelog}:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
             ),
           ),
           body: SafeArea(
@@ -2245,12 +2292,12 @@ class SettingsHandler {
                       children: [
                         if (isDiffVersion) ...[
                           Text(
-                            '${loc.settings.checkForUpdates.currentVersion}: ${Constants.appVersion}+${Constants.appBuildNumber}',
+                            '${loc.settings.checkForUpdates.currentVersion}: ${Constants.updateInfo.versionName}+${Constants.updateInfo.buildNumber}',
                           ),
                           const Text(''),
                         ],
                         Text(
-                          updateInfo.value!.title,
+                          _updateInfo.title,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -2265,8 +2312,7 @@ class SettingsHandler {
                           ),
                         ),
                         const Text(''),
-                        Text(updateInfo.value!.changelog),
-                        // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
+                        Text(_updateInfo.changelog),
                       ],
                     ),
                   ),
@@ -2284,16 +2330,16 @@ class SettingsHandler {
                         label: Text(isDiffVersion ? loc.later : loc.close),
                       ),
                       const SizedBox(width: 16),
-                      if (isFromStore && updateInfo.value!.isInStore)
+                      if (isFromStore && _updateInfo.isInStore)
                         ElevatedButton.icon(
                           onPressed: () {
                             // try {
-                            //   launchUrlString("market://details?id=" + updateInfo.value!.storePackage);
+                            //   launchUrlString("market://details?id=" + _updateInfo.storePackage);
                             // } on PlatformException catch(e) {
-                            //   launchUrlString("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
+                            //   launchUrlString("https://play.google.com/store/apps/details?id=" + _updateInfo.storePackage);
                             // }
                             launchUrlString(
-                              'https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}',
+                              'https://play.google.com/store/apps/details?id=${_updateInfo.storePackage}',
                               mode: LaunchMode.externalApplication,
                             );
                             Navigator.of(ctx).pop();
@@ -2305,7 +2351,7 @@ class SettingsHandler {
                         ElevatedButton.icon(
                           onPressed: () {
                             launchUrlString(
-                              updateInfo.value!.githubURL,
+                              _updateInfo.githubURL,
                               mode: LaunchMode.externalApplication,
                             );
                             Navigator.of(ctx).pop();
@@ -2376,9 +2422,18 @@ class SettingsHandler {
     // print(toJSON());
     // print(jsonEncode(toJSON()));
 
-    alice = Alice();
+    alice = Alice(
+      quickShareAction: Platform.isWindows
+          ? (call) async {
+              await Clipboard.setData(
+                ClipboardData(
+                  text: await AliceSaveHelper.buildCallLog(call),
+                ),
+              );
+            }
+          : null,
+    );
 
-    unawaited(checkUpdate(withMessage: false));
     isInit.value = true;
     return;
   }
@@ -2440,6 +2495,8 @@ class SettingsHandler {
         leadingIconColor: Colors.red,
       );
     }
+
+    unawaited(checkUpdate(withMessage: false));
 
     isPostInit.value = true;
     postInitMessage.value = '';

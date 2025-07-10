@@ -11,6 +11,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
@@ -58,7 +59,7 @@ class _DebugPageState extends State<DebugPage> {
       return;
     }
 
-    final bool result = await settingsHandler.saveSettings(restate: false);
+    final bool result = await settingsHandler.saveSettings(restate: true);
 
     if (result) {
       Navigator.of(context).pop();
@@ -290,7 +291,7 @@ class _DebugPageState extends State<DebugPage> {
 
               SettingsButton(
                 name:
-                    'Res: ${MediaQuery.sizeOf(context)..width.toPrecision(4)}x${MediaQuery.sizeOf(context).height.toPrecision(4)}',
+                    'Res: ${MediaQuery.sizeOf(context).width.toPrecision(4)}x${MediaQuery.sizeOf(context).height.toPrecision(4)}',
               ),
               SettingsButton(name: 'Pixel Ratio: ${MediaQuery.devicePixelRatioOf(context).toPrecision(4)}'),
 
@@ -322,70 +323,13 @@ class _DebugPageState extends State<DebugPage> {
                 },
               ),
 
-              const SettingsButton(name: '', enabled: false),
-              SettingsButton(
-                name: 'Flash normal',
-                icon: const Icon(Icons.flash_on),
-                action: () async {
-                  FlashElements.showSnackbar(
-                    title: const Text('Flash'),
-                    context: context,
-                    duration: null,
-                    key: 'flash',
-                  );
-                },
-              ),
-              SettingsButton(
-                name: 'Flash (unique)',
-                icon: const Icon(Icons.flash_on),
-                action: () async {
-                  FlashElements.showSnackbar(
-                    title: const Text('Flash Unique'),
-                    context: context,
-                    duration: null,
-                    key: 'flash-unique',
-                    isKeyUnique: true,
-                  );
-                },
-              ),
-              SettingsButton(
-                name: 'Dismiss all flashes',
-                icon: const Icon(Icons.flash_on),
-                action: () async {
-                  await FlashElements.dismissAll();
-                },
-              ),
-              SettingsButton(
-                name: 'Print flashes info',
-                icon: const Icon(Icons.flash_on),
-                action: () async {
-                  await FlashElements.dismissAll();
-                  await Future.delayed(const Duration(seconds: 1));
-                  FlashElements.cleanAllDisposedControllers();
-                  final Map<String, List<String>> flashes = FlashElements.controllersMap.map(
-                    (k, v) => MapEntry(
-                      k,
-                      v.map((e) => e is DefaultFlashController ? 'Tip' : 'Dialog').toList(),
-                    ),
-                  );
-
-                  FlashElements.showSnackbar(
-                    title: const Text('Flash print'),
-                    context: context,
-                    duration: null,
-                    tapToClose: true,
-                    content: Text(flashes.toString()),
-                    position: FlashPosition.top,
-                    key: 'flash-print',
-                    isKeyUnique: true,
-                  );
-
-                  FlashElements.showSnackbar(
-                    title: const Text('Dialog'),
-                    asDialog: true,
-                  );
-                },
-              ),
+              if (kDebugMode)
+                SettingsButton(
+                  name: 'Clear secure storage',
+                  action: () {
+                    SecureStorageHandler.instance.deleteAll();
+                  },
+                ),
 
               const SettingsButton(name: '', enabled: false),
 

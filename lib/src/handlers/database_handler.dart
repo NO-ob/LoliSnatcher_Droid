@@ -880,7 +880,7 @@ class DBHandler {
     // gelbooru moved all images from img3 server to img4
     final List<Map<String, dynamic>> items =
         await db?.rawQuery(
-          "SELECT id, fileURL, sampleURL, thumbnailURL FROM BooruItem WHERE fileURL LIKE '%img3%' OR sampleURL LIKE '%img3%' OR thumbnailURL LIKE '%img3%';",
+          "SELECT id, fileURL, sampleURL, thumbnailURL FROM BooruItem WHERE (fileURL LIKE '%img3.gelbooru.com%' OR fileURL LIKE '%video-cdn1.gelbooru.com%' OR sampleURL LIKE '%img3.gelbooru.com%' OR thumbnailURL LIKE '%img3.gelbooru.com%') AND postURL LIKE '%gelbooru.com%';",
         ) ??
         [];
 
@@ -890,7 +890,10 @@ class DBHandler {
       final chunk = items.sublist(i * chunkSize, min(items.length, (i + 1) * chunkSize));
       onStatusUpdate?.call('Gelbooru: ${i * chunkSize}/${items.length}');
       for (final Map<String, dynamic> item in chunk) {
-        final String newFileURL = item['fileURL'].toString().replaceFirst('img3', 'img4');
+        final String newFileURL = item['fileURL']
+            .toString()
+            .replaceFirst('img3', 'img4')
+            .replaceFirst('video-cdn1', 'video-cdn3');
         final String newSampleURL = item['sampleURL'].toString().replaceFirst('img3', 'img4');
         final String newThumbnailURL = item['thumbnailURL'].toString().replaceFirst('img3', 'img4');
         batch?.rawUpdate(

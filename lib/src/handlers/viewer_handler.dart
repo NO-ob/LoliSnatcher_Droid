@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 import 'package:photo_view/photo_view.dart';
 
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -28,7 +29,7 @@ class ViewerHandler {
   // Keys to get states of all currently built viewers
   final RxList<GlobalKey?> activeKeys = RxList([]);
   // Key of the currently viewed media widget
-  final Rxn<GlobalKey> currentKey = Rxn(null);
+  final Rxn<BooruItem> current = Rxn(null);
 
   final RxList<GlobalKey> activeViewers = RxList([]);
 
@@ -70,21 +71,20 @@ class ViewerHandler {
     }
   }
 
-  void setCurrent(Key? key) {
-    if (key == null || currentKey.value == key) {
+  void setCurrent(BooruItem? item) {
+    if (item == null || current.value?.key == item.key) {
       return;
     }
 
-    if (key is GlobalKey) {
-      currentKey.value = key;
-    }
-    setNewState(key);
+
+    current.value = item;
+    setNewState(item.key);
   }
 
   // Drop the key of viewed widget and reset the handler state
   // (used when user exits the viewer page)
   void dropCurrent() {
-    currentKey.value = null;
+    current.value = null;
     resetState();
   }
 
@@ -107,13 +107,13 @@ class ViewerHandler {
   }
 
   void setNewState(Key? key) {
-    if (key == null || currentKey.value != key) {
+    if (key == null || current.value?.key != key || key is! GlobalKey) {
       return;
     }
 
     // addPostFrameCallback waits until widget is built to avoid calling setState in it while other setState is active
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final state = currentKey.value?.currentState;
+      final state = key.currentState;
       switch (state?.widget) {
         case ImageViewer():
           final widgetState = state! as ImageViewerState;
@@ -140,7 +140,7 @@ class ViewerHandler {
   }
 
   void setZoomed(Key? key, bool isZoom) {
-    if (key == null || currentKey.value != key) {
+    if (key == null || current.value?.key != key) {
       return;
     }
 
@@ -152,7 +152,7 @@ class ViewerHandler {
   }
 
   void resetZoom() {
-    final dynamic state = currentKey.value?.currentState;
+    final state = (current.value?.key as GlobalKey?)?.currentState;
     switch (state?.widget) {
       case ImageViewer():
         (state as ImageViewerState?)?.resetZoom();
@@ -166,7 +166,7 @@ class ViewerHandler {
   }
 
   void doubleTapZoom() {
-    final dynamic state = currentKey.value?.currentState;
+    final state = (current.value?.key as GlobalKey?)?.currentState;
     switch (state?.widget) {
       case ImageViewer():
         (state as ImageViewerState?)?.doubleTapZoom();
@@ -242,7 +242,7 @@ class ViewerHandler {
   }
 
   void setViewValue(Key? key, PhotoViewControllerValue value) {
-    if (key == null || currentKey.value != key) {
+    if (key == null || current.value?.key != key) {
       return;
     }
 
@@ -250,7 +250,7 @@ class ViewerHandler {
   }
 
   void setLoaded(Key? key, bool value) {
-    if (key == null || currentKey.value != key || isLoaded.value == value) {
+    if (key == null || current.value?.key != key || isLoaded.value == value) {
       return;
     }
 

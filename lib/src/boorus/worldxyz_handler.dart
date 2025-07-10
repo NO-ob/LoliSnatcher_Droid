@@ -24,12 +24,57 @@ class WorldXyzHandler extends BooruHandler {
   List parseListFromResponse(dynamic response) {
     final Map<String, dynamic> parsedResponse = response.data;
     try {
+      cursor = parsedResponse['cursor'] ?? '';
+      // quick way to tell difference between old(?) (i.e.animazone34.com) and new (i.e. rule34.world) engine version
+      isXyz = parsedResponse.keys.contains('pagination');
       totalCount.value = totalCount.value > 0
           ? totalCount.value
-          : int.tryParse(parsedResponse['totalCount'] ?? '0') ?? 0;
-      cursor = parsedResponse['cursor'] ?? '';
+          : int.tryParse(parsedResponse['totalCount']?.toString() ?? '0') ?? 0;
     } catch (_) {}
     return (parsedResponse['items'] ?? []) as List;
+  }
+
+  Map<String, dynamic> appConfig = {};
+
+  String get storageBase {
+    try {
+      final storages = appConfig['storage']?['storages'] as List;
+      return storages.firstWhereOrNull((s) => s['type'] == 1)?['parameters']?['PullZoneName'] ?? 'rule34storage';
+    } catch (_) {
+      return 'rule34storage';
+    }
+  }
+
+  @override
+  Future<bool> searchSetup() async {
+    bool success = await super.searchSetup();
+    if (!success) {
+      return success;
+    }
+
+    try {
+      final cookies = await getCookies();
+      final res = await DioNetwork.get(
+        '${booru.baseURL}/app.json',
+        headers: {
+          ...getHeaders(),
+          if (cookies?.isNotEmpty == true) 'Cookie': cookies,
+        },
+      );
+
+      appConfig = res.data;
+
+      success = true;
+    } catch (e) {
+      Logger.Inst().log(
+        e,
+        className,
+        'searchSetup',
+        LogTypes.booruHandlerInfo,
+      );
+    }
+
+    return success;
   }
 
   @override
@@ -47,6 +92,7 @@ class WorldXyzHandler extends BooruHandler {
     };
 
     const Map<int, String> sampleTypes = {
+      13: 'PicPreview',
       14: 'PicSmall',
     };
 
@@ -54,7 +100,11 @@ class WorldXyzHandler extends BooruHandler {
       1: 'Raw',
       10: 'Pic',
       14: 'PicSmall',
+      30: 'PicAvif',
+      33: 'PicPreviewAvif',
+      34: 'PicSmallAvif',
       100: 'Mov',
+      111: 'Mov360',
       112: 'Mov480',
       113: 'Mov720',
       114: 'Mov1080',
@@ -70,60 +120,115 @@ class WorldXyzHandler extends BooruHandler {
       314: 'Mov1080Av1',
     };
 
-    const Map<String, String> fileExts = {
-      'Raw': 'raw',
-      'Pic': 'pic.jpg',
-      'PicThumbnail': 'pic256.jpg',
-      'PicThumbnailEx': 'pic256ex.jpg',
-      'PicPreview': 'picpreview.jpg',
-      'PicSmall': 'picsmall.jpg',
-      'PicAvif': 'picavif.avif',
-      'PicThumbnailAvif': 'pic256avif.avif',
-      'PicThumbnailExAvif': 'pic256exavif.avif',
-      'PicPreviewAvif': 'picpreviewavif.avif',
-      'PicSmallAvif': 'small.avif',
-      'Mov': 'mov.mp4',
-      'MovThumbnail': 'mov256.mp4',
-      'MovThumbnailEx': 'mov256ex.mp4',
-      'Mov360': '360.mp4',
-      'Mov480': 'mov480.mp4',
-      'Mov720': 'mov720.mp4',
-      'Mov1080': '1080.mp4',
-      'MovHevc': 'hevc.mp4',
-      'MovThumbnailHevc': 'thumbnail.hevc.mp4',
-      'MovThumbnailExHevc': 'thumbnailEx.hevc.mp4',
-      'Mov360Hevc': '360.hevc.mp4',
-      'Mov480Hevc': '480.hevc.mp4',
-      'Mov720Hevc': '720.hevc.mp4',
-      'Mov1080Hevc': '1080.hevc.mp4',
-      'MovAv1': 'av1.mp4',
-      'MovThumbnailAv1': 'thumbnail.av1.mp4',
-      'MovThumbnailExAv1': 'thumbnailEx.av1.mp4',
-      'Mov360Av1': '360.av1.mp4',
-      'Mov480Av1': '480.av1.mp4',
-      'Mov720Av1': '720.av1.mp4',
-      'Mov1080Av1': '1080.av1.mp4',
-    };
+    // old and new engine versions have different file extensions
+    final Map<String, String> fileExts = isXyz
+        ? {
+            'Raw': 'raw',
+            'Pic': 'pic.jpg',
+            'PicThumbnail': 'pic256.jpg',
+            'PicThumbnailEx': 'pic256ex.jpg',
+            'PicPreview': 'picpreview.jpg',
+            'PicSmall': 'picsmall.jpg',
+            'PicAvif': 'picavif.avif',
+            'PicThumbnailAvif': 'pic256avif.avif',
+            'PicThumbnailExAvif': 'pic256exavif.avif',
+            'PicPreviewAvif': 'picpreviewavif.avif',
+            'PicSmallAvif': 'small.avif',
+            'Mov': 'mov.mp4',
+            'MovThumbnail': 'mov256.mp4',
+            'MovThumbnailEx': 'mov256ex.mp4',
+            'Mov360': '360.mp4',
+            'Mov480': 'mov480.mp4',
+            'Mov720': 'mov720.mp4',
+            'Mov1080': '1080.mp4',
+            'MovHevc': 'hevc.mp4',
+            'MovThumbnailHevc': 'thumbnail.hevc.mp4',
+            'MovThumbnailExHevc': 'thumbnailEx.hevc.mp4',
+            'Mov360Hevc': '360.hevc.mp4',
+            'Mov480Hevc': '480.hevc.mp4',
+            'Mov720Hevc': '720.hevc.mp4',
+            'Mov1080Hevc': '1080.hevc.mp4',
+            'MovAv1': 'av1.mp4',
+            'MovThumbnailAv1': 'thumbnail.av1.mp4',
+            'MovThumbnailExAv1': 'thumbnailEx.av1.mp4',
+            'Mov360Av1': '360.av1.mp4',
+            'Mov480Av1': '480.av1.mp4',
+            'Mov720Av1': '720.av1.mp4',
+            'Mov1080Av1': '1080.av1.mp4',
+          }
+        : {
+            'Raw': 'raw',
+            'Pic': 'jpg',
+            'PicThumbnail': 'thumbnail.jpg',
+            'PicThumbnailEx': 'thumbnailex.jpg',
+            'PicPreview': 'preview.jpg',
+            'PicSmall': 'small.jpg',
+            'PicAvif': 'avif',
+            'PicThumbnailAvif': 'thumbnail.avif',
+            'PicThumbnailExAvif': 'thumbnailex.avif',
+            'PicPreviewAvif': 'preview.avif',
+            'PicSmallAvif': 'small.avif',
+            'Mov': 'mp4',
+            'MovThumbnail': 'thumbnail.mp4',
+            'MovThumbnailEx': 'thumbnailex.mp4',
+            'Mov360': '360.mp4',
+            'Mov480': '480.mp4',
+            'Mov720': '720.mp4',
+            'Mov1080': '1080.mp4',
+            'MovHevc': 'hevc.mp4',
+            'MovThumbnailHevc': 'thumbnail.hevc.mp4',
+            'MovThumbnailExHevc': 'thumbnailEx.hevc.mp4',
+            'Mov360Hevc': '360.hevc.mp4',
+            'Mov480Hevc': '480.hevc.mp4',
+            'Mov720Hevc': '720.hevc.mp4',
+            'Mov1080Hevc': '1080.hevc.mp4',
+            'MovAv1': 'av1.mp4',
+            'MovThumbnailAv1': 'thumbnail.av1.mp4',
+            'MovThumbnailExAv1': 'thumbnailEx.av1.mp4',
+            'Mov360Av1': '360.av1.mp4',
+            'Mov480Av1': '480.av1.mp4',
+            'Mov720Av1': '720.av1.mp4',
+            'Mov1080Av1': '1080.av1.mp4',
+          };
 
     final Map<String, dynamic> files = current['files'] ?? {};
-    final List<int> availableFileTypes = files.keys.map((e) => int.tryParse(e) ?? 0).toList()
-      ..sort((a, b) => a.compareTo(b));
+    final List<MapEntry<int, dynamic>> availableFileTypes =
+        files.entries.map((e) => MapEntry(int.tryParse(e.key) ?? 0, e.value)).toList()
+          ..sort((a, b) => a.key.compareTo(b.key));
 
     final String id = current['id'].toString();
     // remove last 3 numbers of the id
     final String fileGroupId = id.substring(0, id.length - 3);
 
-    final int? thumbnailType = availableFileTypes.lastWhereOrNull(thumbnailTypes.containsKey);
-    final String thumbnailFileExt = fileExts[thumbnailTypes[thumbnailType]] ?? 'pic256.jpg';
-    final String thumbnailUrl = '${booru.baseURL}/posts/$fileGroupId/$id/$id.$thumbnailFileExt';
+    String base = booru.baseURL!;
 
-    final int? sampleType = availableFileTypes.lastWhereOrNull(sampleTypes.containsKey);
-    final String sampleFileExt = fileExts[sampleTypes[sampleType]] ?? 'pic256.jpg';
-    final String sampleUrl = '${booru.baseURL}/posts/$fileGroupId/$id/$id.$sampleFileExt';
+    MapEntry<int, dynamic>? thumbnailType = availableFileTypes.lastWhereOrNull(
+      (t) => thumbnailTypes.containsKey(t.key),
+    );
+    thumbnailType ??= availableFileTypes.lastWhereOrNull((t) => t.key == 11);
+    if (thumbnailType?.value is List) {
+      base = thumbnailType!.value.first == 0 ? booru.baseURL! : 'https://$storageBase.b-cdn.net';
+    }
+    final String thumbnailFileExt =
+        fileExts[thumbnailTypes[thumbnailType?.key]] ?? (isXyz ? 'pic256.jpg' : 'thumbnail.jpg');
+    final String thumbnailUrl = '$base/posts/$fileGroupId/$id/$id.$thumbnailFileExt';
 
-    final int? fileType = availableFileTypes.lastWhereOrNull((type) => fileTypes.containsKey(type));
-    final String fileFileExt = fileExts[fileTypes[fileType]] ?? (isVideo ? 'mov.mp4' : 'pic.jpg');
-    final String fileUrl = '${booru.baseURL}/posts/$fileGroupId/$id/$id.$fileFileExt';
+    MapEntry<int, dynamic>? sampleType = availableFileTypes.lastWhereOrNull((t) => sampleTypes.containsKey(t.key));
+    sampleType ??= availableFileTypes.lastWhereOrNull((t) => t.key == 13);
+    if (sampleType?.value is List) {
+      base = sampleType!.value.first == 0 ? booru.baseURL! : 'https://$storageBase.b-cdn.net';
+    }
+    final String sampleFileExt = fileExts[sampleTypes[sampleType?.key]] ?? (isXyz ? 'picpreview.jpg' : 'preview.jpg');
+    final String sampleUrl = isXyz ? '$base/posts/$fileGroupId/$id/$id.$sampleFileExt' : thumbnailUrl;
+
+    MapEntry<int, dynamic>? fileType = availableFileTypes.lastWhereOrNull((t) => fileTypes.containsKey(t.key));
+    fileType ??= availableFileTypes.lastWhereOrNull((t) => t.key == 10);
+    if (fileType?.value is List) {
+      base = fileType!.value.first == 0 ? booru.baseURL! : 'https://$storageBase.b-cdn.net';
+    }
+    final String fileFileExt =
+        fileExts[fileTypes[fileType?.key]] ?? (isVideo ? 'mov.mp4' : (isXyz ? 'pic.jpg' : 'jpg'));
+    final String fileUrl = '$base/posts/$fileGroupId/$id/$id.$fileFileExt';
 
     final String dateString = current['created'].split('.')[0]; // split off microseconds // use posted or created?
     final BooruItem item = BooruItem(
@@ -156,6 +261,7 @@ class WorldXyzHandler extends BooruHandler {
   }
 
   String cursor = '';
+  bool isXyz = true;
 
   @override
   Future<Response<dynamic>> fetchSearch(
@@ -265,10 +371,11 @@ class WorldXyzHandler extends BooruHandler {
       } else {
         final Map<String, dynamic> current = response.data;
         final List<dynamic> tags = current['tags'] ?? [];
+        final newTags = [...item.tagsList];
         for (final rawTag in tags) {
           final tag = rawTag['value']!.replaceAll(' ', '_');
           if (item.tagsList.contains(tag)) continue;
-          item.tagsList.add(tag);
+          newTags.add(tag);
           if (rawTag['type'] != null) {
             addTagsWithType(
               [tag],
@@ -276,6 +383,7 @@ class WorldXyzHandler extends BooruHandler {
             );
           }
         }
+        item.tagsList = newTags;
         item.sources = List<String>.from(current['data']?['sources'] ?? []);
 
         item.isUpdated = true;
