@@ -10,6 +10,36 @@
                 "close": true
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Build runner",
+            "type": "shell",
+            "command": "flutter pub run build_runner build --delete-conflicting-outputs",
+            "presentation": {
+                "reveal": "always",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build runner watch",
+            "type": "shell",
+            "command": "flutter pub run build_runner watch --delete-conflicting-outputs",
+            "presentation": {
+                "reveal": "always",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Localization build",
+            "type": "shell",
+            "command": "sh ./loc_build.sh",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
         }
     ]
 }
