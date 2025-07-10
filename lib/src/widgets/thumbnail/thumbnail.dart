@@ -607,7 +607,12 @@ class _ThumbnailState extends State<Thumbnail> {
                             return ValueListenableBuilder(
                               valueListenable: errorCode,
                               builder: (context, errorCode, child) {
-                                final bool isFavOrDls = widget.booru.type?.isFavouritesOrDownloads == true;
+                                final bool isFavOrDlsOrHasLoad =
+                                    widget.booru.type?.isFavouritesOrDownloads == true ||
+                                    BooruHandlerFactory()
+                                        .getBooruHandler([widget.booru], null)
+                                        .booruHandler
+                                        .hasLoadItemSupport;
 
                                 return ThumbnailLoading(
                                   item: widget.item,
@@ -618,12 +623,12 @@ class _ThumbnailState extends State<Thumbnail> {
                                   total: total,
                                   received: received,
                                   startedAt: startedAt,
-                                  retryText: isFavOrDls ? 'Tap to update or retry' : null,
+                                  retryText: isFavOrDlsOrHasLoad ? 'Tap to update or retry' : null,
                                   retryIcon: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     spacing: 4,
-                                    children: isFavOrDls
+                                    children: isFavOrDlsOrHasLoad
                                         ? const [
                                             Icon(Icons.download),
                                             Text('/', style: TextStyle(fontSize: 20)),
@@ -636,7 +641,7 @@ class _ThumbnailState extends State<Thumbnail> {
                                   restartAction: () async {
                                     restartedCount = 0;
 
-                                    await restartLoading(withItemLoad: isFavOrDls);
+                                    await restartLoading(withItemLoad: isFavOrDlsOrHasLoad);
                                   },
                                   errorCode: errorCode,
                                 );

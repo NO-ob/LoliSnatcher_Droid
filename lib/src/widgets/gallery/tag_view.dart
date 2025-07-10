@@ -15,6 +15,8 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
+import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
 import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
@@ -123,27 +125,45 @@ class _TagViewState extends State<TagView> {
   }
 
   void checkForPossibleBooruHandler() {
-    if (handler.booru.type?.isFavouritesOrDownloads != true) {
+    Booru? getMergeBooruEntry() {
+      if (handler is! MergebooruHandler) return null;
+
+      final fetchedMap = (handler as MergebooruHandler).fetchedMap;
+      for (int i = 0; i < fetchedMap.entries.length; i++) {
+        final entry = fetchedMap.entries.elementAt(i);
+        if (entry.value.items.contains(item)) {
+          return entry.value.booru;
+        }
+      }
+      return null;
+    }
+
+    final bool isMergeHandler = handler is MergebooruHandler;
+
+    final bool isFavsOrDlsOrMerge = handler is FavouritesHandler || handler is DownloadsHandler || isMergeHandler;
+    if (!isFavsOrDlsOrMerge) {
       return;
     }
 
     final itemFileHost = Uri.tryParse(item.fileURL)?.host;
     final itemPostHost = Uri.tryParse(item.postURL)?.host;
-    final Booru? possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
-      final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
+    final Booru? possibleBooru = isMergeHandler
+        ? getMergeBooruEntry()
+        : SettingsHandler.instance.booruList.firstWhereOrNull((e) {
+            final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
 
-      return (itemPostHost?.isNotEmpty == true &&
-              booruHost?.isNotEmpty == true &&
-              (itemPostHost! == booruHost! ||
-                  switch (e.type) {
-                    BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
-                    BooruType.Sankaku => SankakuHandler.knownPostUrls.contains(itemPostHost),
-                    _ => false,
-                  })) ||
-          (itemFileHost?.isNotEmpty == true && booruHost?.isNotEmpty == true && itemFileHost! == booruHost!);
-    });
+            return (itemPostHost?.isNotEmpty == true &&
+                    booruHost?.isNotEmpty == true &&
+                    (itemPostHost! == booruHost! ||
+                        switch (e.type) {
+                          BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
+                          BooruType.Sankaku => SankakuHandler.knownPostUrls.contains(itemPostHost),
+                          _ => false,
+                        })) ||
+                (itemFileHost?.isNotEmpty == true && booruHost?.isNotEmpty == true && itemFileHost! == booruHost!);
+          });
 
-    if (possibleBooru?.type?.isFavouritesOrDownloads != true) {
+    if (isMergeHandler || possibleBooru?.type?.isFavouritesOrDownloads != true) {
       possibleBooruHandler = BooruHandlerFactory().getBooruHandler([possibleBooru!], null).booruHandler;
       hasLoadItemSupport = possibleBooruHandler!.hasLoadItemSupport;
       canLoadItemOnStart = possibleBooruHandler!.shouldUpdateIteminTagView;
