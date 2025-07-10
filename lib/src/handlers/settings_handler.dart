@@ -2098,33 +2098,27 @@ class SettingsHandler {
       return;
     }
 
-    const String changelog = '''Changelog''';
-    // ignore: unused_local_variable
-    final Map<String, dynamic> fakeUpdate = {
-      'version_name': '2.2.0',
-      'build_number': 170,
-      'title': 'Title',
-      'changelog': changelog,
-      'is_in_store': true, // is app still in store
-      'is_update_in_store':
-          true, // is update available in store [LEGACY], after 2.2.0 hits the store - left this in update.json as true for backwards compatibility with pre-2.2
-      'is_important': false, // is update important => force open dialog on start
-      'store_package':
-          'com.noaisu.play.loliSnatcher', // custom app package name, to allow to redirect store users to new app if it will be needed
-      'github_url': 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
-    }; // fake update json for tests
-    // String fakeUpdate = '123'; // broken string
+    // const String fakeUpdate = '123'; // for tests // broken string
+    // const Map<String, dynamic> = {}; // for tests // full json here
 
     try {
       const String updateFileName = EnvironmentConfig.isFromStore ? 'update_store.json' : 'update.json';
       final response = await DioNetwork.get(
         'https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName',
       );
-      final json = jsonDecode(response.data);
-      // final json = jsonDecode(jsonEncode(fakeUpdate));
+      final json = response.data is String ? jsonDecode(response.data) : (response.data is Map ? response.data : {});
+      if (json is Map && json.isEmpty) {
+        throw Exception('Update file is empty');
+      }
 
-      // use this and fakeUpdate to generate json file
-      Logger.Inst().log(jsonEncode(json), 'SettingsHandler', 'checkUpdate', LogTypes.settingsError);
+      try {
+        Logger.Inst().log(
+          jsonEncode(json),
+          'SettingsHandler',
+          'checkUpdate',
+          LogTypes.settingsError,
+        );
+      } catch (_) {}
 
       updateInfo.value = UpdateInfo(
         versionName: json['version_name'] ?? '0.0.0',
@@ -2163,27 +2157,36 @@ class SettingsHandler {
         }
       } else {
         final secureStorageHandler = SecureStorageHandler.instance;
-        final viewedAtBuild = await secureStorageHandler.read(SecureStorageKey.viewedUpdateChangelogForBuild);
+        final viewedAtBuild = int.tryParse(
+          await secureStorageHandler.read(SecureStorageKey.viewedUpdateChangelogForBuild) ?? '',
+        );
         if (booruList.isEmpty) {
           // don't bother new (no boorus) users until next update
           await secureStorageHandler.write(
             SecureStorageKey.viewedUpdateChangelogForBuild,
             Constants.updateInfo.buildNumber.toString(),
           );
-        } else if (viewedAtBuild == null ||
-            viewedAtBuild.isEmpty ||
-            viewedAtBuild != updateInfo.value!.buildNumber.toString()) {
+        } else if (viewedAtBuild == null || viewedAtBuild < Constants.updateInfo.buildNumber) {
           await secureStorageHandler.write(
             SecureStorageKey.viewedUpdateChangelogForBuild,
             Constants.updateInfo.buildNumber.toString(),
           );
           showUpdate(true, isAfterUpdate: true);
         } else {
-          // otherwise show latest version message
-          showLastVersionMessage(withMessage);
+          if (withMessage) {
+            // otherwise show latest version message
+            showLastVersionMessage();
+          }
         }
       }
-    } catch (e) {
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'SettingsHandler',
+        'checkUpdate',
+        LogTypes.settingsError,
+        s: s,
+      );
       if (withMessage) {
         FlashElements.showSnackbar(
           title: const Text(
@@ -2201,33 +2204,31 @@ class SettingsHandler {
     }
   }
 
-  void showLastVersionMessage(bool withMessage) {
-    if (withMessage) {
-      FlashElements.showSnackbar(
-        title: const Text(
-          'You already have the latest version!',
-          style: TextStyle(fontSize: 20),
-        ),
-        sideColor: Colors.green,
-        leadingIcon: Icons.update,
-        leadingIconColor: Colors.green,
-        actionsBuilder: (context, controller) {
-          return [
-            ElevatedButton.icon(
-              onPressed: () {
-                controller.dismiss();
-                showUpdate(
-                  true,
-                  isAfterUpdate: true,
-                );
-              },
-              icon: const Icon(Icons.list_alt_rounded),
-              label: const Text('View latest changelog'),
-            ),
-          ];
-        },
-      );
-    }
+  void showLastVersionMessage() {
+    FlashElements.showSnackbar(
+      title: const Text(
+        'You already have the latest version!',
+        style: TextStyle(fontSize: 20),
+      ),
+      sideColor: Colors.green,
+      leadingIcon: Icons.update,
+      leadingIconColor: Colors.green,
+      actionsBuilder: (context, controller) {
+        return [
+          ElevatedButton.icon(
+            onPressed: () {
+              controller.dismiss();
+              showUpdate(
+                true,
+                isAfterUpdate: true,
+              );
+            },
+            icon: const Icon(Icons.list_alt_rounded),
+            label: const Text('View latest changelog'),
+          ),
+        ];
+      },
+    );
   }
 
   void showUpdate(

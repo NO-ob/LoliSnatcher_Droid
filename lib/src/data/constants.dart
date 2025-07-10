@@ -27,8 +27,8 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.4.4',
-    buildNumber: 4200,
-    title: '2.4.4 Hotfix 1',
+    buildNumber: 4201,
+    title: '2.4.4 Hotfix 2',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.loliSnatcher',
@@ -37,11 +37,33 @@ class Constants {
 If you encounter any issues or have suggestions, please post them in github issues or in our discord server
 
 
+Hotfix 2 - 2.4.4+4201 (10-07-25):
+
+- Attempt to fix random freezing (need more info on this, please report on github/discord with your device info if it still happens to you after this update)
+- Added a button to quickly share app logs from settings menu
+- Added booru selector to tag preview
+- Added double tap to favourite on tag preview thumbnails
+- Favourited items can now be refreshed from the info drawer (if booru they are from support this), also added icon and name of the related booru
+- Added item refresh support for Idol Sankaku
+- Added limited item refresh support when in multibooru mode
+- Item refresh will now try to scrape updated image/video links for gelbooru
+- Fix broken links for favourited videos from Gelbooru (video-cdn1 -> video-cdn3)
+- xyz-based sites - fixed older items using wrong url scheme (404 error)
+- Philonema-based sites - fix encoding of search queries, fix tag suggestion parsing, you can use underscore as word divider now
+- Sankaku - expired image/video links sometimes returned an image with [Expired link...] text, app now tries to detect them and treats them as a failed request
+- Removed commas from formatting of [...with tags] share options
+- Fixed video controls dissapearing when exiting fullscreen paused video
+- Fixed device sleep lock not restoring correct state after exiting fullscreen video
+- Performance improvements
+- Fixed wrong changelog being shown on first start in some cases
+
+-------------------
+
 Hotfix 1 - 2.4.4+4200 (24-06-25):
 
 - Fixed build number difference with 2.4.3 which caused downgrade error during install
 - Reverted http2 setting
-- Fixed world/vault/xyz... tag data loading and fixed older images not loading, possibly fixed other variants of this engine not working correctly
+- xyz-based sites - Fixed tag data loading, fixed older images not loading, possibly fixed other variants of this engine not working correctly
 
 -------------------
 
@@ -52,7 +74,7 @@ New features:
 - Viewer toolbar options can now be individually disabled
 - Added a [Performance] settings page, it combines all existing performance-related settings in one place. Includes some improvements to low performance mode
 - Broken favourites items can now attempt to refresh their data when user manually retries loading in thumbnail grid/viewer (works only for some boorus, highly experimental)
-- Added a tag prefix editor (-, ~, 1#...) to search view, can be accessed by using "Prefix" option when selecting text in input field
+- Added a tag prefix editor (-, ~, 1#...) to search view, can be accessed by using [Prefix] option when selecting text in input field
 - All share menu options now have a separate option which allows to select tags and share them with the url/file
 
 
