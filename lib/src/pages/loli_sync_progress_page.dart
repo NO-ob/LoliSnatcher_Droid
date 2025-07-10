@@ -103,7 +103,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
       ServiceHandler.enableSleep();
       wakelocked = false;
     } else {
-      ServiceHandler.disableSleep(forceEnable: true);
+      ServiceHandler.disableSleep(force: true);
       wakelocked = true;
     }
     setState(() {});

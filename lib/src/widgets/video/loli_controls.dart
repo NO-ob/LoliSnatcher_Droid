@@ -747,6 +747,20 @@ class _LoliControlsState extends State<LoliControls> {
     setState(() {
       _hideStuff = true;
       chewieController.toggleFullScreen();
+
+      viewerHandler.isFullscreen.value = chewieController.isFullScreen;
+      if (chewieController.isFullScreen) {
+        // always disable sleep in fullscreen
+        ServiceHandler.disableSleep(force: true);
+      } else {
+        // re-enable sleep only if related setting is disabled
+        if (!SettingsHandler.instance.wakeLockEnabled) {
+          ServiceHandler.enableSleep();
+        }
+        // resotre system ui visibility state
+        ServiceHandler.setSystemUiVisibility(viewerHandler.displayAppbar.value);
+      }
+
       _showAfterExpandCollapseTimer = Timer(
         const Duration(milliseconds: 300),
         () => setState(_cancelAndRestartTimer),
