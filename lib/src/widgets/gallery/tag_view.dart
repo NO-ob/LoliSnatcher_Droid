@@ -324,90 +324,100 @@ class _TagViewState extends State<TagView> {
     return SettingsButton(
       name: 'Tags',
       subtitle: Text(searchController.text.isEmpty ? '${tags.length}' : '${filteredTags.length} / ${tags.length}'),
-      trailingIcon: Container(
-        margin: const EdgeInsets.only(left: 10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (hasLoadItemSupport) ...[
-              if (possibleBooruHandler != null)
-                Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      BooruFavicon(
-                        possibleBooruHandler?.booru,
-                        size: 20,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        possibleBooruHandler?.booru.name ?? '',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              //
-              if (loadingUpdate)
-                IconButton(
-                  onPressed: () {
-                    cancelToken?.cancel();
-                  },
-                  icon: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 28,
-                        height: 28,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
+      trailingIcon: LayoutBuilder(
+        builder: (context, constraints) {
+          return Container(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth - 72),
+            margin: const EdgeInsets.only(left: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (hasLoadItemSupport) ...[
+                  if (possibleBooruHandler != null)
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            BooruFavicon(
+                              possibleBooruHandler?.booru,
+                              size: 20,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              possibleBooruHandler?.booru.name ?? '',
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
                         ),
                       ),
-                      Icon(
-                        Icons.close,
-                        color: Theme.of(context).iconTheme.color,
-                        size: 24,
+                    ),
+                  //
+                  if (loadingUpdate)
+                    IconButton(
+                      onPressed: () {
+                        cancelToken?.cancel();
+                      },
+                      icon: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 28,
+                            height: 28,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          Icon(
+                            Icons.close,
+                            color: Theme.of(context).iconTheme.color,
+                            size: 24,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )
-              else
-                IconButton(
-                  onPressed: () {
-                    reloadItemData(force: true);
-                  },
-                  icon: Icon(
-                    failedUpdate ? Icons.error_outline : Icons.refresh,
-                    color: failedUpdate ? Colors.red : Theme.of(context).iconTheme.color,
-                    size: 28,
+                    )
+                  else
+                    IconButton(
+                      onPressed: () {
+                        reloadItemData(force: true);
+                      },
+                      icon: Icon(
+                        failedUpdate ? Icons.error_outline : Icons.refresh,
+                        color: failedUpdate ? Colors.red : Theme.of(context).iconTheme.color,
+                        size: 28,
+                      ),
+                    ),
+                ],
+                //
+                Transform(
+                  alignment: Alignment.center,
+                  transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
+                  child: IconButton(
+                    icon: Icon(
+                      (sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    onPressed: () {
+                      if (sortTags == true) {
+                        sortTags = false;
+                      } else if (sortTags == false) {
+                        sortTags = null;
+                      } else {
+                        sortTags = true;
+                      }
+                      sortAndGroupTagsList();
+                      setState(() {});
+                    },
                   ),
                 ),
-            ],
-            //
-            Transform(
-              alignment: Alignment.center,
-              transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-              child: IconButton(
-                icon: Icon(
-                  (sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                onPressed: () {
-                  if (sortTags == true) {
-                    sortTags = false;
-                  } else if (sortTags == false) {
-                    sortTags = null;
-                  } else {
-                    sortTags = true;
-                  }
-                  sortAndGroupTagsList();
-                  setState(() {});
-                },
-              ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
       drawBottomBorder: false,
     );
