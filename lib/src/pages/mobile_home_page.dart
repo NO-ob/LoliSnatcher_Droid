@@ -251,7 +251,7 @@ class MainDrawer extends StatelessWidget {
           children: [
             RepaintBoundary(
               child: Obx(() {
-                if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+                if (settingsHandler.booruList.isNotEmpty && searchHandler.tabs.isNotEmpty) {
                   return Container(
                     height: MainSearchBar.height,
                     margin: const EdgeInsets.fromLTRB(2, 24, 2, 12),
@@ -296,15 +296,16 @@ class MainDrawer extends StatelessWidget {
                     page: () => const SettingsPage(),
                   ),
                   Obx(() {
-                    final List<Booru> boorus = [
-                      searchHandler.currentBooru,
-                      ...searchHandler.currentSecondaryBoorus.value ?? <Booru>[],
-                    ].where((b) => b.baseURL?.isNotEmpty == true && BooruType.saveable.contains(b.type)).toList();
-
                     if (settingsHandler.booruList.isNotEmpty &&
-                        searchHandler.list.isNotEmpty &&
-                        boorus.isNotEmpty &&
+                        searchHandler.tabs.isNotEmpty &&
                         Tools.isOnPlatformWithWebviewSupport) {
+                      final List<Booru> boorus = [
+                        searchHandler.currentBooru,
+                        ...searchHandler.currentSecondaryBoorus.value ?? <Booru>[],
+                      ].where((b) => b.baseURL?.isNotEmpty == true && BooruType.saveable.contains(b.type)).toList();
+
+                      if (boorus.isEmpty) return const SizedBox.shrink();
+
                       return SettingsButton(
                         name: 'Open webview',
                         icon: const Icon(Icons.public),
@@ -805,7 +806,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                   () => AnimatedSize(
                     duration: const Duration(milliseconds: 200),
                     alignment: Alignment.bottomCenter,
-                    child: (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
+                    child: (settingsHandler.booruList.isNotEmpty && searchHandler.tabs.isNotEmpty)
                         ? ConstrainedBox(
                             constraints: BoxConstraints(
                               maxHeight:
@@ -1087,7 +1088,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
     final SearchHandler searchHandler = SearchHandler.instance;
 
     return Obx(() {
-      if (settingsHandler.booruList.length < 2 || searchHandler.list.isEmpty) {
+      if (settingsHandler.booruList.length < 2 || searchHandler.tabs.isEmpty) {
         return const SizedBox.shrink();
       }
 
@@ -1163,7 +1164,7 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
           ),
           Obx(() {
             final bool hasTabsAndTabHasSecondaryBoorus =
-                searchHandler.list.isNotEmpty && (searchHandler.currentSecondaryBoorus.value?.isNotEmpty ?? false);
+                searchHandler.tabs.isNotEmpty && (searchHandler.currentSecondaryBoorus.value?.isNotEmpty ?? false);
 
             return AnimatedSize(
               duration: const Duration(milliseconds: 200),

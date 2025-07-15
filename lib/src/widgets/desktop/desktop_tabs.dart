@@ -41,7 +41,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
   }
 
   Future<void> jumpToTab(int index) async {
-    scrollController.jumpTo(index * (scrollController.position.maxScrollExtent / searchHandler.list.length));
+    scrollController.jumpTo(index * (scrollController.position.maxScrollExtent / searchHandler.tabs.length));
     await Future.delayed(const Duration(milliseconds: 50));
     await scrollController.scrollToIndex(
       index,
@@ -63,7 +63,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
     final String totalCountText = (totalCount > 0) ? ' ($totalCount)' : '';
     final String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText";
 
-    final bool isSelected = searchHandler.currentIndex == searchHandler.list.indexOf(tab);
+    final bool isSelected = searchHandler.currentIndex == searchHandler.tabs.indexOf(tab);
 
     return Container(
       decoration: BoxDecoration(
@@ -99,7 +99,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
           IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
-              searchHandler.removeTabAt(tabIndex: searchHandler.list.indexOf(tab));
+              searchHandler.removeTabAt(tabIndex: searchHandler.tabs.indexOf(tab));
             },
             hoverColor: Theme.of(context).hoverColor,
             iconSize: 14,
@@ -125,9 +125,9 @@ class _DesktopTabsState extends State<DesktopTabs> {
                 child: ListView.builder(
                   controller: scrollController,
                   scrollDirection: Axis.horizontal,
-                  itemCount: searchHandler.list.length,
+                  itemCount: searchHandler.tabs.length,
                   itemBuilder: (context, index) {
-                    final SearchTab tab = searchHandler.list[index];
+                    final SearchTab tab = searchHandler.tabs[index];
 
                     return AutoScrollTag(
                       highlightColor: Colors.red,
@@ -158,10 +158,10 @@ class _DesktopTabsState extends State<DesktopTabs> {
             const SizedBox(width: 3),
             PopupMenuButton<SearchTab>(
               onSelected: (SearchTab tab) {
-                searchHandler.changeTabIndex(searchHandler.list.indexOf(tab));
+                searchHandler.changeTabIndex(searchHandler.tabs.indexOf(tab));
               },
               itemBuilder: (BuildContext context) {
-                return searchHandler.list.map((SearchTab choice) {
+                return searchHandler.tabs.map((SearchTab choice) {
                   return PopupMenuItem<SearchTab>(
                     value: choice,
                     child: buildRow(choice),

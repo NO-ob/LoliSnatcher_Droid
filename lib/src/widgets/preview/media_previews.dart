@@ -30,8 +30,8 @@ class _MediaPreviewsState extends State<MediaPreviews> {
     booruListFilled = settingsHandler.booruList.isNotEmpty;
     settingsHandler.booruList.addListener(booruListener);
 
-    tabListFilled = searchHandler.list.isNotEmpty;
-    searchHandler.list.addListener(tabListener);
+    tabListFilled = searchHandler.tabs.isNotEmpty;
+    searchHandler.tabs.addListener(tabListener);
   }
 
   void booruListener() {
@@ -45,7 +45,7 @@ class _MediaPreviewsState extends State<MediaPreviews> {
   void tabListener() {
     if (!tabListFilled) {
       setState(() {
-        tabListFilled = searchHandler.list.isNotEmpty;
+        tabListFilled = searchHandler.tabs.isNotEmpty;
       });
     }
   }
@@ -53,7 +53,7 @@ class _MediaPreviewsState extends State<MediaPreviews> {
   @override
   void dispose() {
     settingsHandler.booruList.removeListener(booruListener);
-    searchHandler.list.removeListener(tabListener);
+    searchHandler.tabs.removeListener(tabListener);
     super.dispose();
   }
 

@@ -88,7 +88,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             isCurrent: isCurrent,
           ),
           itemFilter: (booru) {
-            return SearchHandler.instance.list.where((t) => t.selectedBooru.value.name == booru?.name).isNotEmpty;
+            return SearchHandler.instance.tabs.where((t) => t.selectedBooru.value.name == booru?.name).isNotEmpty;
           },
           onChanged: (Booru? newValue) {
             booruFilter = newValue;
@@ -243,7 +243,7 @@ class _BooruDropdownItem extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final int tabCount = SearchHandler.instance.list.where((t) => t.selectedBooru.value.name == item?.name).length;
+    final int tabCount = SearchHandler.instance.tabs.where((t) => t.selectedBooru.value.name == item?.name).length;
     final String? tabCountStr = tabCount > 0 ? ' ($tabCount)' : null;
 
     return Container(
@@ -277,7 +277,7 @@ class _TagTypeDropdownItem extends StatelessWidget {
     final bool showColor = item == null ? false : !item!.isNone;
 
     if (showColor) {
-      final int tabCount = SearchHandler.instance.list.where((t) {
+      final int tabCount = SearchHandler.instance.tabs.where((t) {
         final List<String> tags = t.tags.toLowerCase().trim().split(' ');
         for (final tag in tags) {
           if (TagHandler.instance.getTag(tag).tagType == item) {

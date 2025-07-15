@@ -48,7 +48,7 @@ class SearchHandler {
     });
   }
   // alternative way to get instance of the controller
-  // i.e. "SearchHandler.to.list" instead of "Get.find<SearchHandler>().list"
+  // i.e. "SearchHandler.to.tabs" instead of "Get.find<SearchHandler>().tabs"
   static SearchHandler get instance => GetIt.instance<SearchHandler>();
 
   static SearchHandler register() {
@@ -63,8 +63,8 @@ class SearchHandler {
 
   static void unregister() => GetIt.instance.unregister<SearchHandler>();
 
-  // search globals list
-  RxList<SearchTab> list = RxList<SearchTab>([]);
+  // search tabs list
+  RxList<SearchTab> tabs = RxList<SearchTab>([]);
   // current tab index
   RxInt index = 0.obs;
   RxnString tabId = RxnString(null);
@@ -94,14 +94,14 @@ class SearchHandler {
     switch (addMode) {
       case TabAddMode.prev:
         newIndex = currentIndex;
-        list.insert(newIndex, newTab);
+        tabs.insert(newIndex, newTab);
         break;
       case TabAddMode.next:
         newIndex = currentIndex + 1;
-        list.insert(newIndex, newTab);
+        tabs.insert(newIndex, newTab);
         break;
       case TabAddMode.end:
-        list.add(newTab);
+        tabs.add(newTab);
         newIndex = total - 1;
         break;
     }
@@ -134,11 +134,11 @@ class SearchHandler {
         if (currentIndex == total - 1) {
           // if current tab is the last one, switch to previous one
           changeTabIndex(currentIndex - 1);
-          list.removeAt(currentIndex + 1);
+          tabs.removeAt(currentIndex + 1);
         } else {
           // if current tab is not the last one, switch to next one
           changeTabIndex(currentIndex + 1, switchOnly: true);
-          list.removeAt(currentIndex - 1);
+          tabs.removeAt(currentIndex - 1);
           changeTabIndex(currentIndex - 1);
         }
       } else {
@@ -147,7 +147,7 @@ class SearchHandler {
           // if tab to be removed is before current tab
           changeTabIndex(currentIndex - 1, switchOnly: true);
         }
-        list.removeAt(tabIndex);
+        tabs.removeAt(tabIndex);
         changeTabIndex(currentIndex);
       }
     } else {
@@ -172,20 +172,20 @@ class SearchHandler {
       searchTextController.text = defaultText;
 
       final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
-      list[0] = newTab;
+      tabs[0] = newTab;
       changeTabIndex(0);
     }
   }
 
-  void removeTabs(List<SearchTab> tabs) {
+  void removeTabs(List<SearchTab> tabsToRemove) {
     final curTab = currentTab;
     final totalTabs = total;
 
-    for (final tab in tabs) {
-      list.value.remove(tab);
+    for (final tab in tabsToRemove) {
+      tabs.value.remove(tab);
     }
 
-    if (totalTabs == tabs.length) {
+    if (totalTabs == tabsToRemove.length) {
       FlashElements.showSnackbar(
         title: const Text('Removed last tab', style: TextStyle(fontSize: 20)),
         content: const Column(
@@ -206,10 +206,10 @@ class SearchHandler {
       searchTextController.text = defaultText;
 
       final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
-      list.value[0] = newTab;
+      tabs.value[0] = newTab;
       changeTabIndex(0);
     } else {
-      final newIndex = list.value.indexWhere((t) => t.id == curTab.id);
+      final newIndex = tabs.value.indexWhere((t) => t.id == curTab.id);
       changeTabIndex(newIndex == -1 ? total - 1 : newIndex);
     }
   }
@@ -224,9 +224,9 @@ class SearchHandler {
     }
 
     // move tab
-    final SearchTab tab = list[fromIndex];
-    list.removeAt(fromIndex);
-    list.insert(toIndex, tab);
+    final SearchTab tab = tabs[fromIndex];
+    tabs.removeAt(fromIndex);
+    tabs.insert(toIndex, tab);
 
     // check how index changed and jump to correct tab
     if (fromIndex == currentIndex) {
@@ -248,11 +248,11 @@ class SearchHandler {
     if (index < 0 || index >= total) {
       return null;
     }
-    return list[index];
+    return tabs[index];
   }
 
   int getTabIndex(SearchTab tab) {
-    return list.indexOf(tab);
+    return tabs.indexOf(tab);
   }
 
   int getItemIndex(BooruItem item) {
@@ -311,7 +311,7 @@ class SearchHandler {
     int newIndex = i;
 
     // protection from early execution on start
-    if (list.isEmpty) {
+    if (tabs.isEmpty) {
       return;
     }
 
@@ -325,7 +325,7 @@ class SearchHandler {
     // change index only when it's different
     if (!ignoreSameIndexCheck && newIndex != currentIndex) {
       index.value = newIndex;
-      tabId.value = list[newIndex].id;
+      tabId.value = tabs[newIndex].id;
       Tools.forceClearMemoryCache(withLive: true);
     }
 
@@ -351,10 +351,10 @@ class SearchHandler {
     // trigger search if there are items inside booruHandler
     if (isNewSearch) {
       runSearch().then((_) {
-        tabId.value = list[currentIndex].id;
+        tabId.value = tabs[currentIndex].id;
       });
     } else {
-      tabId.value = list[currentIndex].id;
+      tabId.value = tabs[currentIndex].id;
     }
 
     // print('changed index from $oldIndex to $newIndex');
@@ -369,7 +369,7 @@ class SearchHandler {
     );
     newTab.booruHandler.pageNum = newPageNum;
     pageNum.value = newPageNum;
-    list[currentIndex] = newTab;
+    tabs[currentIndex] = newTab;
 
     changeTabIndex(currentIndex, ignoreSameIndexCheck: true);
   }
@@ -407,7 +407,7 @@ class SearchHandler {
 
   HasTabWithTagResult hasTabWithTag(String tag) {
     tag = tag.toLowerCase().trim();
-    List<SearchTab> tabsWithOnlyTag = list.where((tab) => tab.tags == tag).toList();
+    List<SearchTab> tabsWithOnlyTag = tabs.where((tab) => tab.tags == tag).toList();
     if (tabsWithOnlyTag.isNotEmpty) {
       tabsWithOnlyTag = tabsWithOnlyTag.where((tab) => tab.tags.toLowerCase().trim() == tag).toList();
       if (tabsWithOnlyTag.isNotEmpty) {
@@ -419,7 +419,7 @@ class SearchHandler {
       }
     }
 
-    List<SearchTab> tabsContainingTag = list
+    List<SearchTab> tabsContainingTag = tabs
         .where(
           (tab) => tab.tags.contains(tag),
         )
@@ -437,26 +437,26 @@ class SearchHandler {
   }
 
   List<SearchTab> getTabsWithTag(String tag) {
-    final List<SearchTab> tabs = [];
-    for (final SearchTab tab in list) {
+    final List<SearchTab> tabsWithTag = [];
+    for (final SearchTab tab in tabs) {
       if (tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim())) {
-        tabs.add(tab);
+        tabsWithTag.add(tab);
       }
     }
-    return tabs;
+    return tabsWithTag;
   }
 
   int get currentIndex => index.value;
   String? get currentTabId => tabId.value;
-  int get total => list.length;
-  SearchTab get currentTab => list[currentIndex];
+  int get total => tabs.length;
+  SearchTab get currentTab => tabs[currentIndex];
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   Booru get currentBooru => currentTab.selectedBooru.value;
   Rxn<List<Booru>?> get currentSecondaryBoorus => currentTab.secondaryBoorus;
   RxList<BooruItem> get currentSelected => currentTab.selected;
   RxList<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
   void filterCurrentFetched() {
-    if (list.isNotEmpty) {
+    if (tabs.isNotEmpty) {
       currentBooruHandler.filterFetched();
     }
   }
@@ -472,14 +472,14 @@ class SearchHandler {
     Tools.forceClearMemoryCache(withLive: true);
 
     // set new tab data
-    if (list.isEmpty) {
+    if (tabs.isEmpty) {
       if (settingsHandler.booruList.isNotEmpty) {
         final SearchTab newTab = SearchTab(
           settingsHandler.booruList[0],
           currentSecondaryBoorus.value,
           text,
         );
-        list.add(newTab);
+        tabs.add(newTab);
       }
     } else {
       final SearchTab newTab = SearchTab(
@@ -487,7 +487,7 @@ class SearchHandler {
         currentSecondaryBoorus.value,
         text,
       );
-      list[currentIndex] = newTab;
+      tabs[currentIndex] = newTab;
     }
 
     searchReactions(text, newBooru ?? currentBooru);
@@ -575,7 +575,7 @@ class SearchHandler {
     final List<Booru>? secondary = canAddSecondary ? secondaryBoorus : null;
 
     final SearchTab newTab = SearchTab(currentBooru, secondary, currentTab.tags);
-    list[currentIndex] = newTab;
+    tabs[currentIndex] = newTab;
 
     // run search
     changeTabIndex(currentIndex, ignoreSameIndexCheck: true);
@@ -649,7 +649,7 @@ class SearchHandler {
   }
 
   void reset() {
-    list.clear();
+    tabs.clear();
     index.value = 0;
     pageNum.value = -1;
     isLoading.value = true;
@@ -748,7 +748,7 @@ class SearchHandler {
               'Restored ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)} from previous session!',
             ),
             if (foundBrokenItem)
-            // notify user if there was unknown booru or invalid entry in the list
+            // notify user if there was unknown booru or invalid entry in the tabs
             ...[
               const Text(
                 'Some restored tabs had unknown boorus or broken characters.',
@@ -764,7 +764,7 @@ class SearchHandler {
         duration: Duration(seconds: brokenItems.isEmpty ? 4 : 10),
       );
 
-      list.value = restoredGlobals;
+      tabs.value = restoredGlobals;
       changeTabIndex(newIndex);
     } else {
       Booru defaultBooru = Booru.unknown();
@@ -778,7 +778,7 @@ class SearchHandler {
           : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         final SearchTab newTab = SearchTab(defaultBooru, null, defaultText);
-        list.add(newTab);
+        tabs.add(newTab);
         changeTabIndex(0);
       }
       searchTextController.text = defaultText;
@@ -803,7 +803,7 @@ class SearchHandler {
         if (findBooru.name != null) {
           final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
           // add only if there are not already the same tab in the list and booru is available on this device
-          if (list.indexWhere(
+          if (tabs.indexWhere(
                 (tab) => tab.selectedBooru.value.name == newTab.selectedBooru.value.name && tab.tags == newTab.tags,
               ) ==
               -1) {
@@ -812,7 +812,7 @@ class SearchHandler {
         }
       }
     }
-    list.addAll(restoredGlobals);
+    tabs.addAll(restoredGlobals);
 
     FlashElements.showSnackbar(
       title: const Text('Tabs merged'),
@@ -854,7 +854,7 @@ class SearchHandler {
         }
       }
     }
-    list.value = restoredGlobals;
+    tabs.value = restoredGlobals;
     changeTabIndex(newIndex);
 
     FlashElements.showSnackbar(
@@ -923,7 +923,7 @@ class SearchHandler {
               'Restored ${restoredTabs.length} ${Tools.pluralize('tab', restoredTabs.length)} from previous session!',
             ),
             if (foundBrokenItems) ...[
-              // notify user if there was unknown booru or invalid entry in the list
+              // notify user if there was unknown booru or invalid entry in the tabs
               const Text('Some restored tabs had unknown boorus or broken characters.'),
               const Text('They were set to default or ignored.'),
               const Text('List of broken tabs:'),
@@ -940,7 +940,7 @@ class SearchHandler {
         duration: Duration(seconds: brokenItems.isEmpty ? 4 : 10),
       );
 
-      list.value = restoredTabs;
+      tabs.value = restoredTabs;
       changeTabIndex(newSelectedIndex);
     } else {
       Booru defaultBooru = Booru.unknown();
@@ -951,7 +951,7 @@ class SearchHandler {
           ? defaultBooru.defTags!
           : settingsHandler.defTags;
       if (defaultBooru.type != null) {
-        list.add(
+        tabs.add(
           SearchTab(defaultBooru, null, defaultText),
         );
         changeTabIndex(0);
@@ -969,7 +969,7 @@ class SearchHandler {
 
       // add only if there are not already the same tab in the list and booru is available on this device
       if (newTab.selectedBooru.value.name != null &&
-          list.any(
+          tabs.any(
             (tab) =>
                 tab.selectedBooru.value.name == newTab.selectedBooru.value.name &&
                 tab.secondaryBoorus.value?.map((t) => t.name).toList() ==
@@ -980,7 +980,7 @@ class SearchHandler {
       }
     }
 
-    list.addAll(restoredTabs);
+    tabs.addAll(restoredTabs);
 
     FlashElements.showSnackbar(
       title: const Text('Tabs merged'),
@@ -1011,7 +1011,7 @@ class SearchHandler {
         }
       }
     }
-    list.value = restoredTabs;
+    tabs.value = restoredTabs;
     changeTabIndex(newSelectedIndex);
 
     FlashElements.showSnackbar(
@@ -1028,19 +1028,18 @@ class SearchHandler {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     // if there are only one tab - check that its not with default booru and tags
     // if there are more than 1 tab or check return false - start backup
-    final List<SearchTab> tabList = list;
     final int tabIndex = currentIndex;
     final bool onlyDefaultTab =
-        tabList.length == 1 &&
-        tabList[0].booruHandler.booru.name == settingsHandler.prefBooru &&
-        tabList[0].tags == settingsHandler.defTags;
+        tabs.length == 1 &&
+        tabs[0].booruHandler.booru.name == settingsHandler.prefBooru &&
+        tabs[0].tags == settingsHandler.defTags;
     if (!onlyDefaultTab && settingsHandler.booruList.isNotEmpty) {
-      final List<String> dump = tabList.map((tab) {
+      final List<String> dump = tabs.map((tab) {
         final String tags = tab.tags;
         final String booruName = tab.selectedBooru.value.name ?? 'unknown';
         final List<String> secondaryBoorusNames =
             tab.secondaryBoorus.value?.map((b) => b.name ?? 'unknown').toList() ?? [];
-        final bool selected = tab == tabList[tabIndex];
+        final bool selected = tab == tabs[tabIndex];
 
         return jsonEncode(
           TabBackup(
@@ -1104,8 +1103,8 @@ class SearchHandler {
           : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         final SearchTab newTab = SearchTab(defaultBooru, null, defaultText);
-        list.clear();
-        list.add(newTab);
+        tabs.clear();
+        tabs.add(newTab);
         changeTabIndex(0);
       }
       searchTextController.text = defaultText;

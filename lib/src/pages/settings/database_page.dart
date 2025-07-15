@@ -523,7 +523,7 @@ class _DatabasePageState extends State<DatabasePage> {
                                 if (settingsHandler.dbHandler.db != null) {
                                   settingsHandler.dbHandler.clearSnatched();
 
-                                  for (final tab in searchHandler.list) {
+                                  for (final tab in searchHandler.tabs) {
                                     for (final item in tab.booruHandler.fetched) {
                                       if (item.isSnatched.value == true) {
                                         item.isSnatched.value = false;
@@ -574,7 +574,7 @@ class _DatabasePageState extends State<DatabasePage> {
                                 if (settingsHandler.dbHandler.db != null) {
                                   settingsHandler.dbHandler.clearFavourites();
 
-                                  for (final tab in searchHandler.list) {
+                                  for (final tab in searchHandler.tabs) {
                                     for (final item in tab.booruHandler.fetched) {
                                       if (item.isFavourite.value == true) {
                                         item.isFavourite.value = false;

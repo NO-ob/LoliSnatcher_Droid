@@ -37,14 +37,14 @@ class DesktopHome extends StatelessWidget {
         toolbarHeight: 60,
         actions: [
           // Obx(() {
-          //   if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+          //   if (settingsHandler.booruList.isNotEmpty && searchHandler.tabs.isNotEmpty) {
           //     return const DesktopTabs();
           //   } else {
           //     return const SizedBox.shrink();
           //   }
           // }),
           Obx(() {
-            if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+            if (settingsHandler.booruList.isNotEmpty && searchHandler.tabs.isNotEmpty) {
               // return const SizedBox(width: 5);
               return const Expanded(
                 child: Row(
@@ -64,7 +64,7 @@ class DesktopHome extends StatelessWidget {
             }
           }),
           Obx(() {
-            if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+            if (settingsHandler.booruList.isNotEmpty && searchHandler.tabs.isNotEmpty) {
               return SettingsButton(
                 name: 'Snatcher',
                 icon: const Icon(Icons.download),
@@ -76,7 +76,7 @@ class DesktopHome extends StatelessWidget {
             }
           }),
           Obx(() {
-            if (settingsHandler.booruList.isEmpty || searchHandler.list.isEmpty) {
+            if (settingsHandler.booruList.isEmpty || searchHandler.tabs.isEmpty) {
               return const Center(child: Text('Add Boorus in Settings'));
             } else {
               return const SizedBox.shrink();
@@ -89,7 +89,7 @@ class DesktopHome extends StatelessWidget {
             page: () => const SettingsPage(),
           ),
           Obx(() {
-            if (searchHandler.list.isNotEmpty && searchHandler.currentSelected.isNotEmpty) {
+            if (searchHandler.tabs.isNotEmpty && searchHandler.currentSelected.isNotEmpty) {
               return Stack(
                 alignment: Alignment.center,
                 children: [
@@ -172,7 +172,7 @@ class DesktopHome extends StatelessWidget {
             },
           ),
           secondChild: Obx(
-            () => searchHandler.list.isEmpty
+            () => searchHandler.tabs.isEmpty
                 ? const SizedBox.shrink()
                 : DesktopImageListener(
                     searchHandler.currentTab,
@@ -198,7 +198,7 @@ class DesktopTagListener extends StatelessWidget {
     final SearchHandler searchHandler = SearchHandler.instance;
 
     return Obx(() {
-      if (searchHandler.list.isEmpty) {
+      if (searchHandler.tabs.isEmpty) {
         return const Center(child: CircularProgressIndicator());
       }
 

@@ -606,7 +606,7 @@ class _BooruEditState extends State<BooruEdit> {
         sideColor: Colors.green,
       );
 
-      if (searchHandler.list.isEmpty) {
+      if (searchHandler.tabs.isEmpty) {
         // force first tab creation after creating first booru
         searchHandler.addTabByString(
           settingsHandler.defTags,
@@ -615,14 +615,14 @@ class _BooruEditState extends State<BooruEdit> {
         unawaited(searchHandler.runSearch());
       }
 
-      if (searchHandler.list.firstWhereOrNull(
+      if (searchHandler.tabs.firstWhereOrNull(
             (tab) =>
                 tab.selectedBooru.value.type == newBooru.type && tab.selectedBooru.value.baseURL == newBooru.baseURL,
           ) !=
           null) {
         // if the booru is already selected in any tab, update the booru to a new one
         // (only if their type and baseurl are the same, otherwise main booru selector will set the value to null and user has to reselect the booru)
-        for (final tab in searchHandler.list) {
+        for (final tab in searchHandler.tabs) {
           if (tab.selectedBooru.value.type == newBooru.type && tab.selectedBooru.value.baseURL == newBooru.baseURL) {
             tab.selectedBooru.value = newBooru;
           }

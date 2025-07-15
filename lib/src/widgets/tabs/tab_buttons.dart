@@ -43,7 +43,7 @@ class TabButtons extends StatelessWidget {
     final Color iconColor = Theme.of(context).colorScheme.secondary;
 
     return Obx(() {
-      if (searchHandler.list.isEmpty) {
+      if (searchHandler.tabs.isEmpty) {
         return const SizedBox.shrink();
       }
 
