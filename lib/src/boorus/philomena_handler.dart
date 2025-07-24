@@ -86,7 +86,7 @@ class PhilomenaHandler extends BooruHandler {
       filter = '56027';
     }
 
-    final formattedTags = tags.replaceAll(' ', ',');
+    final formattedTags = tags.replaceAll(' ', ',').replaceAll('_', '+');
     if (booru.apiKey?.isEmpty ?? true) {
       return '${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q=$formattedTags&per_page=$limit&page=$pageNum';
     } else {

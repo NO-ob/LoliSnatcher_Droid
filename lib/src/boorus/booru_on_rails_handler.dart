@@ -89,7 +89,7 @@ class BooruOnRailsHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    final String tagsWithCommas = tags.replaceAll(' ', ',');
+    final String tagsWithCommas = tags.replaceAll(' ', ',').replaceAll('_', '+');
     final String limitStr = limit.toString();
     final String pageStr = pageNum.toString();
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? 'key=${booru.apiKey}&' : '';
