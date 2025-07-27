@@ -1082,6 +1082,7 @@ class SearchHandler {
   }
 
   Future<void> restoreTabs() async {
+    // TODO restoring database from the backup may have corrupted tab data when there are a lot of tabs?
     final settingsHandler = SettingsHandler.instance;
     try {
       final String? result = await settingsHandler.dbHandler.getTabRestore();
@@ -1091,8 +1092,14 @@ class SearchHandler {
         // ignore: deprecated_member_use_from_same_package
         await restoreTabsLegacy(result);
       }
-    } catch (e) {
-      print('Error restoring tabs: $e');
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Error restoring tabs: $e',
+        'SearchHandler',
+        'restoreTabs',
+        LogTypes.exception,
+        s: s,
+      );
       // await settingsHandler.dbHandler.clearTabRestore();
       Booru defaultBooru = Booru.unknown();
       if (settingsHandler.booruList.isNotEmpty) {
