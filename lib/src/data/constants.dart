@@ -27,8 +27,8 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.4.4',
-    buildNumber: 4201,
-    title: '2.4.4 Hotfix 2',
+    buildNumber: 4202,
+    title: '2.4.4 Hotfix 3',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.loliSnatcher',
@@ -36,6 +36,15 @@ class Constants {
     changelog: '''
 If you encounter any issues or have suggestions, please post them in github issues or in our discord server
 
+
+Hotfix 3 - 2.4.4+4202 (28-07-25):
+- Fixed gelboru favourited items possibly saving urls in the wrong format (extra slashes), which caused them to appear as not favourited
+- Fixed twibooru and derpibooru multi word tag searching, fixed tag formatting to replace '+' with '_'
+- Fixed videos not loading on r34us
+- Fixed video controls dissapearing when exiting fullscreen video (for real now, I hope)
+- Attempt to fix viewed item still being highlighted after leaving the viewer
+
+-------------------
 
 Hotfix 2 - 2.4.4+4201 (10-07-25):
 

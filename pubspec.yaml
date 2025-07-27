@@ -2,7 +2,7 @@ name: lolisnatcher
 description: Booru Client with the ability to batch download Images.
 publish_to: none
 
-version: 2.4.4+4201 # remember to update the values in constants.dart->updateInfo after changing them here
+version: 2.4.4+4202 # remember to update the values in constants.dart->updateInfo after changing them here
 
 environment:
   sdk: ">=3.8.1 <4.0.0"
