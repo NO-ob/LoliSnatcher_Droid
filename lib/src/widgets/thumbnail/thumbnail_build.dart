@@ -93,10 +93,20 @@ class ThumbnailBuild extends StatelessWidget {
                           color: Colors.black.withValues(alpha: 0.66),
                           borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5)),
                         ),
-                        child: const Icon(
-                          Icons.copy,
-                          color: Colors.white,
-                          size: 16,
+                        child: Builder(
+                          builder: (context) {
+                            // check for pissibly broken file urls on gelbooru
+                            final hasDoubleSlashes = item.fileURL
+                                .replaceAll('https://', '')
+                                .replaceAll('http://', '')
+                                .contains('//');
+
+                            return Icon(
+                              Icons.copy,
+                              color: hasDoubleSlashes ? Colors.red : Colors.white,
+                              size: 16,
+                            );
+                          },
                         ),
                       ),
                     ),
