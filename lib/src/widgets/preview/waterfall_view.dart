@@ -231,7 +231,6 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   void onViewerPageChanged(int index) {
     if (isMobile) {
       jumpTo(index);
-      viewerHandler.setCurrent(searchHandler.currentFetched[index]);
     } else {
       // don't auto scroll on viewed index change on desktop
       // call jumpTo only when viewed item is possibly out of view (i.e. selected by arrow keys)
