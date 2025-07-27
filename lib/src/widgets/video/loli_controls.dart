@@ -748,7 +748,7 @@ class _LoliControlsState extends State<LoliControls> {
       _hideStuff = true;
       chewieController.toggleFullScreen();
 
-      viewerHandler.isFullscreen.value = chewieController.isFullScreen;
+      viewerHandler.setFullScreenState(chewieController.isFullScreen);
       if (chewieController.isFullScreen) {
         // always disable sleep in fullscreen
         ServiceHandler.disableSleep(force: true);

@@ -117,6 +117,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
     isActive.value = true;
     final item = widget.tab.booruHandler.filteredFetched[page.value];
     viewerHandler.setCurrent(item);
+
+    // reset full screen state in case user leaves the fulscreen route through system back button/gesture
+    viewerHandler.setFullScreenState(false);
   }
 
   @override

@@ -76,7 +76,6 @@ class ViewerHandler {
       return;
     }
 
-
     current.value = item;
     setNewState(item.key);
   }
@@ -101,7 +100,7 @@ class ViewerHandler {
     displayAppbar.value = true;
     isZoomed.value = false;
     isLoaded.value = false;
-    isFullscreen.value = false;
+    setFullScreenState(false);
     isDesktopFullscreen.value = false;
     viewState.value = null;
   }
@@ -119,20 +118,20 @@ class ViewerHandler {
           final widgetState = state! as ImageViewerState;
           isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isLoaded.value;
-          isFullscreen.value = false;
+          setFullScreenState(false);
           viewState.value = widgetState.viewController.value;
           break;
         case VideoViewer():
           final widgetState = state! as VideoViewerState;
           isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isVideoInited;
-          isFullscreen.value = widgetState.chewieController.value?.isFullScreen ?? false;
+          setFullScreenState(widgetState.chewieController.value?.isFullScreen ?? false);
           viewState.value = widgetState.viewController.value;
           break;
         default:
           isZoomed.value = false;
           isLoaded.value = true;
-          isFullscreen.value = false;
+          setFullScreenState(false);
           viewState.value = null;
           break;
       }
@@ -203,6 +202,10 @@ class ViewerHandler {
           break;
       }
     }
+  }
+
+  void setFullScreenState(bool value) {
+    isFullscreen.value = value;
   }
 
   void hideExtraUi() {
