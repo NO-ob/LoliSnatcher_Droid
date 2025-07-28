@@ -38,8 +38,8 @@ If you encounter any issues or have suggestions, please post them in github issu
 
 
 Hotfix 3 - 2.4.4+4202 (28-07-25):
-- Fixed gelboru favourited items possibly saving urls in the wrong format (extra slashes), which caused them to appear as not favourited
-- Fixed twibooru and derpibooru multi word tag searching, fixed tag formatting to replace '+' with '_'
+- Fixed gelbooru favourited items possibly saving urls in the wrong format (extra slashes), which caused them to appear as not favourited
+- Fixed twibooru and derpibooru multiword tag searching, fixed tag formatting to replace + with _
 - Fixed videos not loading on r34us
 - Fixed video controls dissapearing when exiting fullscreen video (for real now, I hope)
 - Attempt to fix viewed item still being highlighted after leaving the viewer
