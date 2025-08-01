@@ -6,7 +6,7 @@ version: 2.4.4+4202 # remember to update the values in constants.dart->updateInf
 
 environment:
   sdk: ">=3.8.1 <4.0.0"
-  flutter: ^3.32.6
+  flutter: ^3.32.8
 
 dependencies:
   flutter:
@@ -19,7 +19,7 @@ dependencies:
   crypto: ^3.0.6
   dio: ^5.8.0+1
   dio_http2_adapter: ^2.6.0
-  dynamic_color: ^1.7.0
+  dynamic_color: ^1.8.1
   equatable: ^2.0.7
   external_video_player_launcher: ^0.0.3
   fading_edge_scrollview: ^4.1.1
@@ -44,9 +44,9 @@ dependencies:
   font_awesome_flutter: ^10.8.0
   fpdart: ^1.1.1
   fvp: ^0.33.1
-  get_it: ^8.0.3
+  get_it: ^8.1.0
   get: ^5.0.0-release-candidate-9.3.2 # ^4.7.2
-  google_fonts: ^6.2.1
+  google_fonts: ^6.3.0
   html: ^0.15.6
   http_proxy: # ^1.2.2
     git:
