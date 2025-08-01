@@ -18,6 +18,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/gallery/gallery_buttons.dart';
 import 'package:lolisnatcher/src/widgets/gallery/hideable_appbar.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
@@ -83,8 +84,12 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
     volumeListener = searchHandler.volumeStream?.listen(volumeCallback);
 
-    final item = widget.tab.booruHandler.filteredFetched[widget.initialIndex];
-    viewerHandler.setCurrent(item);
+    try {
+      final item = widget.tab.booruHandler.filteredFetched[widget.initialIndex];
+      viewerHandler.setCurrent(item);
+    } catch (e) {
+      viewerHandler.dropCurrent();
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       dismissProgress.value = 0;
@@ -115,8 +120,22 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
   @override
   void didPopNext() {
     isActive.value = true;
-    final item = widget.tab.booruHandler.filteredFetched[page.value];
-    viewerHandler.setCurrent(item);
+
+    try {
+      final item = widget.tab.booruHandler.filteredFetched[page.value];
+      viewerHandler.setCurrent(item);
+    } catch (_) {
+      // attempt to recover from broken out of array bounds state (i.e. when adding tag to hated removes all items from the tab)
+      if (widget.tab.booruHandler.filteredFetched.isEmpty) {
+        page.value = 0;
+        controller.jumpToPage(page.value);
+      } else if (page.value >= widget.tab.booruHandler.filteredFetched.length - 1) {
+        page.value = widget.tab.booruHandler.filteredFetched.length - 1;
+        controller.jumpToPage(page.value);
+      }
+
+      viewerHandler.dropCurrent();
+    }
 
     // reset full screen state in case user leaves the fulscreen route through system back button/gesture
     viewerHandler.setFullScreenState(false);
@@ -476,9 +495,21 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
 
                             kbFocusNode.requestFocus();
 
-                            final item = widget.tab.booruHandler.filteredFetched[index];
+                            try {
+                              final item = widget.tab.booruHandler.filteredFetched[index];
+                              viewerHandler.setCurrent(item);
+                            } catch (e) {
+                              // attempt to recover from broken out of array bounds state (i.e. when adding tag to hated removes all items from the tab)
+                              if (widget.tab.booruHandler.filteredFetched.isEmpty) {
+                                page.value = 0;
+                                controller.jumpToPage(page.value);
+                              } else if (page.value >= widget.tab.booruHandler.filteredFetched.length - 1) {
+                                page.value = widget.tab.booruHandler.filteredFetched.length - 1;
+                                controller.jumpToPage(page.value);
+                              }
 
-                            viewerHandler.setCurrent(item);
+                              viewerHandler.dropCurrent();
+                            }
 
                             final bool isVolumeAllowed =
                                 !settingsHandler.useVolumeButtonsForScroll || viewerHandler.displayAppbar.value;
@@ -498,6 +529,11 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                       child: ValueListenableBuilder(
                         valueListenable: page,
                         builder: (context, page, child) {
+                          if (widget.tab.booruHandler.filteredFetched.isEmpty ||
+                              page >= widget.tab.booruHandler.filteredFetched.length) {
+                            return const SizedBox.shrink();
+                          }
+
                           return NotesRenderer(
                             item: widget.tab.booruHandler.filteredFetched[page],
                             handler: widget.tab.booruHandler,
@@ -547,6 +583,26 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                 child: ValueListenableBuilder(
                   valueListenable: page,
                   builder: (context, page, child) {
+                    if (widget.tab.booruHandler.filteredFetched.isEmpty ||
+                        page >= widget.tab.booruHandler.filteredFetched.length) {
+                      return const Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 16,
+                          children: [
+                            Text('No item selected'),
+                            Padding(
+                              padding: EdgeInsets.all(8),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: CancelButton(text: 'Close'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
                     return TagView(
                       item: widget.tab.booruHandler.filteredFetched[page],
                       handler: widget.tab.booruHandler,
