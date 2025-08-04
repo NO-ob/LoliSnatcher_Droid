@@ -76,7 +76,7 @@ class _MainAppBarState extends State<MainAppBar> {
     return Builder(
       builder: (context) {
         return Obx(() {
-          if (searchHandler.list.isNotEmpty) {
+          if (searchHandler.tabs.isNotEmpty) {
             return Stack(
               alignment: Alignment.center,
               clipBehavior: Clip.none,

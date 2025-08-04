@@ -27,7 +27,7 @@ class TabSecondaryBooruSelector extends StatelessWidget {
       }
 
       // no tabs
-      if (searchHandler.list.isEmpty) {
+      if (searchHandler.tabs.isEmpty) {
         return const Center(
           child: CircularProgressIndicator(),
         );

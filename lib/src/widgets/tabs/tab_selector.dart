@@ -74,7 +74,7 @@ class TabSelector extends StatelessWidget {
       }
 
       // no tabs
-      if (searchHandler.list.isEmpty) {
+      if (searchHandler.tabs.isEmpty) {
         return const Center(
           child: CircularProgressIndicator(),
         );
@@ -410,7 +410,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
   }
 
   void getTabs() {
-    tabs = searchHandler.list;
+    tabs = searchHandler.tabs;
     filteredTabs = tabs;
     filterTabs();
 
@@ -525,7 +525,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
           .where((e) => e.value.length > 1)
           .expand<SearchTab>((e) => e.value)
           .toList();
-      filteredTabs = searchHandler.list.where(duplicateTabs.contains).toList();
+      filteredTabs = searchHandler.tabs.where(duplicateTabs.contains).toList();
     }
 
     if (isMultiBooruMode != null) {
@@ -574,7 +574,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             }
           }
 
-          return searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b));
+          return searchHandler.tabs.indexOf(a).compareTo(searchHandler.tabs.indexOf(b));
         },
       );
     }
@@ -744,7 +744,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
         tab: tab,
         index: index,
         isFiltered: isFilterActive || !sortingMode.isNone,
-        originalIndex: (isFilterActive || !sortingMode.isNone) ? searchHandler.list.indexOf(tab) : null,
+        originalIndex: (isFilterActive || !sortingMode.isNone) ? searchHandler.tabs.indexOf(tab) : null,
         isCurrent: isCurrent,
         filterText: filterTextController.text,
         onTap: selectMode
@@ -758,7 +758,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
               }
             : () {
                 searchHandler.changeTabIndex(
-                  searchHandler.list.indexOf(tab),
+                  searchHandler.tabs.indexOf(tab),
                 );
                 Navigator.of(context).pop();
               },
@@ -793,7 +793,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             ? null
             : () {
                 selectedTabs.remove(tab);
-                searchHandler.removeTabAt(tabIndex: searchHandler.list.indexOf(tab));
+                searchHandler.removeTabAt(tabIndex: searchHandler.tabs.indexOf(tab));
                 getTabs();
               },
       ),
@@ -802,7 +802,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
   void showOptionsDialog(int index) {
     final SearchTab tab = filteredTabs[index];
-    final int originalIndex = searchHandler.list.indexOf(tab);
+    final int originalIndex = searchHandler.tabs.indexOf(tab);
 
     final Widget optionsDialog = SettingsDialog(
       scrollable: false,
@@ -846,11 +846,11 @@ class _TabManagerPageState extends State<TabManagerPage> {
               builder: (BuildContext context) => TabMoveDialog(
                 row: TabManagerItem(
                   tab: tab,
-                  index: searchHandler.list.indexOf(tab),
+                  index: searchHandler.tabs.indexOf(tab),
                   isFiltered: false,
                   originalIndex: null,
                 ),
-                index: searchHandler.list.indexOf(tab),
+                index: searchHandler.tabs.indexOf(tab),
               ),
             );
             getTabs();
@@ -866,7 +866,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
           ),
           onTap: () {
             selectedTabs.remove(tab);
-            searchHandler.removeTabAt(tabIndex: searchHandler.list.indexOf(tab));
+            searchHandler.removeTabAt(tabIndex: searchHandler.tabs.indexOf(tab));
             getTabs();
           },
           leading: const Icon(Icons.close, color: Colors.red),
@@ -901,7 +901,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
     }
 
     // sort selected tabs in order of appearance in the list instead of order of selection
-    selectedTabs.sort((a, b) => searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b)));
+    selectedTabs.sort((a, b) => searchHandler.tabs.indexOf(a).compareTo(searchHandler.tabs.indexOf(b)));
 
     final Widget deleteDialog = SettingsDialog(
       title: Column(
@@ -930,7 +930,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
           itemBuilder: (_, index) {
             final item = selectedTabs[index];
 
-            final int itemIndex = searchHandler.list.indexOf(item);
+            final int itemIndex = searchHandler.tabs.indexOf(item);
 
             return TabManagerItem(
               tab: item,
@@ -1229,9 +1229,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
                       );
                     }
 
-                    searchHandler.list.value = [...filteredTabs];
+                    searchHandler.tabs.value = [...filteredTabs];
 
-                    final int newIndex = searchHandler.list.indexOf(currentTab);
+                    final int newIndex = searchHandler.tabs.indexOf(currentTab);
                     searchHandler.changeTabIndex(newIndex);
 
                     getTabs();

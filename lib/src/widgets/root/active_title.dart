@@ -11,9 +11,9 @@ class ActiveTitle extends StatelessWidget {
     final SearchHandler searchHandler = SearchHandler.instance;
 
     return ValueListenableBuilder(
-      valueListenable: searchHandler.list,
-      builder: (context, list, child) {
-        if (list.isEmpty) {
+      valueListenable: searchHandler.tabs,
+      builder: (context, tabs, child) {
+        if (tabs.isEmpty) {
           return const Text('LoliSnatcher');
         }
 

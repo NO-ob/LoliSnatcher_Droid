@@ -133,7 +133,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (searchHandler.list.isEmpty) {
+      if (searchHandler.tabs.isEmpty) {
         return const SizedBox.shrink();
       }
 

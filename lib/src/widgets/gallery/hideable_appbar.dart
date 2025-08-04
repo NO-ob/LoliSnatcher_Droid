@@ -164,16 +164,16 @@ class _HideableAppBarState extends State<HideableAppBar> {
   List<Widget> getActions() {
     final disabled = settingsHandler.disabledButtons;
     final List<String> filteredButtonOrder = settingsHandler.buttonOrder.where((name) {
+      if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
+        return false;
+      }
+
       if (name == 'info') {
         // Info button should always be available (if onOpenDrawer is present)
         return widget.onOpenDrawer != null;
       }
 
       if (disabled.contains(name)) {
-        return false;
-      }
-
-      if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
         return false;
       }
 

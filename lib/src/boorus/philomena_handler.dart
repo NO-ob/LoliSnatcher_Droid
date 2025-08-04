@@ -46,9 +46,7 @@ class PhilomenaHandler extends BooruHandler {
           .substring(1, current['tags'].toString().length - 1)
           .split(', ');
       for (int x = 0; x < currentTags.length; x++) {
-        if (currentTags[x].contains(' ')) {
-          currentTags[x] = currentTags[x].replaceAll(' ', '+');
-        }
+        currentTags[x] = currentTags[x].replaceAll(' ', '_');
       }
       final BooruItem item = BooruItem(
         fileURL: fileURL,
@@ -86,7 +84,7 @@ class PhilomenaHandler extends BooruHandler {
       filter = '56027';
     }
 
-    final formattedTags = tags.replaceAll(' ', ',');
+    final formattedTags = tags.replaceAll(' ', ',').replaceAll('_', '+');
     if (booru.apiKey?.isEmpty ?? true) {
       return '${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q=$formattedTags&per_page=$limit&page=$pageNum';
     } else {

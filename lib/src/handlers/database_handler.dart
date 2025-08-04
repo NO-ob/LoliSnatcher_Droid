@@ -154,9 +154,9 @@ class DBHandler {
       final result = await db?.rawInsert(
         'INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)',
         [
-          item.thumbnailURL,
-          item.sampleURL,
-          item.fileURL,
+          item.thumbnailURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+          item.sampleURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+          item.fileURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
           item.postURL,
           item.mediaType.toJson(),
           Tools.boolToInt(item.isSnatched.value == true),
@@ -175,7 +175,12 @@ class DBHandler {
     } else if (mode == BooruUpdateMode.urlUpdate) {
       await db?.rawUpdate(
         'UPDATE BooruItem SET thumbnailURL = ?,sampleURL = ?,fileURL = ? WHERE id = ?',
-        [item.thumbnailURL, item.sampleURL, item.fileURL, itemID],
+        [
+          item.thumbnailURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+          item.sampleURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+          item.fileURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+          itemID,
+        ],
       );
       resultStr = 'Updated Urls';
     } else {
@@ -198,9 +203,9 @@ class DBHandler {
         final result = await db?.rawInsert(
           'INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)',
           [
-            item.thumbnailURL,
-            item.sampleURL,
-            item.fileURL,
+            item.thumbnailURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+            item.sampleURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+            item.fileURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
             item.postURL,
             item.mediaType.toJson(),
             Tools.boolToInt(item.isSnatched.value == true),
@@ -218,7 +223,12 @@ class DBHandler {
       } else if (mode == BooruUpdateMode.urlUpdate) {
         await db?.rawUpdate(
           'UPDATE BooruItem SET thumbnailURL = ?,sampleURL = ?,fileURL = ? WHERE id = ?',
-          [item.thumbnailURL, item.sampleURL, item.fileURL, itemID],
+          [
+            item.thumbnailURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+            item.sampleURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+            item.fileURL.replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/'),
+            itemID,
+          ],
         );
       } else {
         exist++;
@@ -877,10 +887,13 @@ class DBHandler {
   }
 
   Future<void> convertGelbooruFromImg3toImg4(ValueChanged<String>? onStatusUpdate) async {
-    // gelbooru moved all images from img3 server to img4
+    // gelbooru moved all images from img3 server to img4, videos from cdn1 to cdn3, some urls saved with multiple slashes
     final List<Map<String, dynamic>> items =
         await db?.rawQuery(
-          "SELECT id, fileURL, sampleURL, thumbnailURL FROM BooruItem WHERE (fileURL LIKE '%img3.gelbooru.com%' OR fileURL LIKE '%video-cdn1.gelbooru.com%' OR sampleURL LIKE '%img3.gelbooru.com%' OR thumbnailURL LIKE '%img3.gelbooru.com%') AND postURL LIKE '%gelbooru.com%';",
+          'SELECT id, fileURL, sampleURL, thumbnailURL FROM BooruItem WHERE '
+          "(fileURL LIKE '%img3.gelbooru.com%' OR fileURL LIKE '%video-cdn1.gelbooru.com%' OR sampleURL LIKE '%img3.gelbooru.com%' OR thumbnailURL LIKE '%img3.gelbooru.com%' " // migrate to other servers
+          "OR fileURL LIKE 'https://%//%' OR sampleURL LIKE 'https://%//%' OR thumbnailURL LIKE 'https://%//%') " // fix multiple slashes (except https://)
+          "AND postURL LIKE '%gelbooru.com%';",
         ) ??
         [];
 
@@ -893,9 +906,16 @@ class DBHandler {
         final String newFileURL = item['fileURL']
             .toString()
             .replaceFirst('img3', 'img4')
-            .replaceFirst('video-cdn1', 'video-cdn3');
-        final String newSampleURL = item['sampleURL'].toString().replaceFirst('img3', 'img4');
-        final String newThumbnailURL = item['thumbnailURL'].toString().replaceFirst('img3', 'img4');
+            .replaceFirst('video-cdn1', 'video-cdn3')
+            .replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/');
+        final String newSampleURL = item['sampleURL']
+            .toString()
+            .replaceFirst('img3', 'img4')
+            .replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/');
+        final String newThumbnailURL = item['thumbnailURL']
+            .toString()
+            .replaceFirst('img3', 'img4')
+            .replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/');
         batch?.rawUpdate(
           'UPDATE BooruItem SET fileURL = ?, sampleURL = ?, thumbnailURL = ? WHERE id = ?;',
           [newFileURL, newSampleURL, newThumbnailURL, item['id']],

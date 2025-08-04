@@ -268,7 +268,7 @@ class _BooruPageState extends State<BooruPage> {
         }
 
         // TODO reset all tabs to next available booru?
-        final List<SearchTab> tabsWithBooru = searchHandler.list
+        final List<SearchTab> tabsWithBooru = searchHandler.tabs
             .where((tab) => tab.selectedBooru.value.name == selectedBooru?.name)
             .toList();
         if (tabsWithBooru.isNotEmpty) {

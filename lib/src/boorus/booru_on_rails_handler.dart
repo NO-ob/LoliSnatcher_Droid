@@ -24,7 +24,7 @@ class BooruOnRailsHandler extends BooruHandler {
     if (tags == '' || tags == ' ') {
       return '*';
     } else {
-      return super.validateTags(tags);
+      return tags;
     }
   }
 
@@ -38,9 +38,7 @@ class BooruOnRailsHandler extends BooruHandler {
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final List<String> currentTags = [];
     for (int x = 0; x < responseItem['tags'].length; x++) {
-      // if (responseItem['tags'][x].contains(" ")){ // TODO why this? with this most tags are skipped
-      currentTags.add(responseItem['tags'][x].toString().replaceAll(' ', '+'));
-      // }
+      currentTags.add(responseItem['tags'][x].toString().replaceAll(' ', '_'));
     }
     if (responseItem['representations']['full'] != null &&
         responseItem['representations']['medium'] != null &&
@@ -89,19 +87,19 @@ class BooruOnRailsHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    final String tagsWithCommas = tags.replaceAll(' ', ',');
+    final String formattedTags = tags.replaceAll(' ', ',').replaceAll('_', '+');
     final String limitStr = limit.toString();
     final String pageStr = pageNum.toString();
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? 'key=${booru.apiKey}&' : '';
 
     // EXAMPLE: https://twibooru.org/api/v3/search/posts?q=*&perpage=10&page=1
-    return '${booru.baseURL}/api/v3/search/posts?${apiKeyStr}q=$tagsWithCommas&perpage=$limitStr&page=$pageStr';
+    return '${booru.baseURL}/api/v3/search/posts?${apiKeyStr}q=$formattedTags&perpage=$limitStr&page=$pageStr';
   }
 
   @override
   String makeTagURL(String input) {
     // EXAMPLE: https://twibooru.org/api/v3/search/tags?q=*rai*
-    return '${booru.baseURL}/api/v3/search/tags?q=*$input*';
+    return '${booru.baseURL}/api/v3/search/tags?q=*${input.replaceAll('_', '+')}*';
   }
 
   @override
@@ -117,6 +115,7 @@ class BooruOnRailsHandler extends BooruHandler {
     ['-bwslash-', r'\'],
     ['-dot-', '.'],
     ['-plus-', '+'],
+    ['+', '_'],
   ];
 
   @override

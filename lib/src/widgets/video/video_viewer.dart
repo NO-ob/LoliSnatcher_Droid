@@ -594,9 +594,7 @@ class VideoViewerState extends State<VideoViewer> {
 
     return AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context, Widget? child) {
-        return child!;
-      },
+      builder: (context, child) => child!,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(
@@ -604,7 +602,15 @@ class VideoViewerState extends State<VideoViewer> {
           color: Colors.black,
           child: Stack(
             children: [
-              controllerProvider,
+              ImageFiltered(
+                enabled: settingsHandler.blurImages,
+                imageFilter: ImageFilter.blur(
+                  sigmaX: 30,
+                  sigmaY: 30,
+                  tileMode: TileMode.decal,
+                ),
+                child: controllerProvider,
+              ),
               ChewieControllerProvider(
                 controller: chewieController.value!,
                 child: TransparentPointer(

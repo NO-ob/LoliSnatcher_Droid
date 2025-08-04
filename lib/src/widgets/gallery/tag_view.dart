@@ -1025,7 +1025,7 @@ class _TagViewState extends State<TagView> {
                                     Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                                   }
                                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                                    searchHandler.changeTabIndex(searchHandler.list.length - 1);
+                                    searchHandler.changeTabIndex(searchHandler.tabs.length - 1);
                                   });
                                   controller.dismiss();
                                 },
@@ -1740,7 +1740,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                               Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                                             }
                                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                                              searchHandler.changeTabIndex(searchHandler.list.length - 1);
+                                              searchHandler.changeTabIndex(searchHandler.tabs.length - 1);
                                             });
                                             controller.dismiss();
                                           },

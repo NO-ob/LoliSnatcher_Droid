@@ -87,16 +87,22 @@ class R34USHandler extends BooruHandler {
         return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {
         final html = parse(response.data);
-        Element? div = html.querySelector('div.content_push > img');
-        div ??= html.querySelector('div.content_push > video');
-        if (div == null) {
+        final Element? imageEl = html.querySelector('div.content_push > img');
+        final Element? videoEl = html.querySelector('div.content_push > video');
+
+        // link to full res has the same html as a tag, but is the only/first(?) element inside .tag-list-left which is wrapped into <a>
+        final Element? origEl = html.querySelector('.tag-list-left > a');
+        if (imageEl == null && videoEl == null) {
           return (item: null, failed: true, error: 'Failed to parse html');
         }
 
-        item.fileURL = div.attributes['src'] ?? div.children.firstOrNull?.attributes['src'] ?? item.fileURL;
-        item.sampleURL = div.attributes['src'] ?? div.attributes['poster'] ?? item.sampleURL;
-        item.fileHeight = double.tryParse(div.attributes['height'] ?? '');
-        item.fileWidth = double.tryParse(div.attributes['width'] ?? '');
+        item.fileURL =
+            imageEl?.attributes['src'] ??
+            (videoEl != null ? origEl?.attributes['href'] ?? videoEl.children.firstOrNull?.attributes['src'] : null) ??
+            item.fileURL;
+        item.sampleURL = imageEl?.attributes['src'] ?? videoEl?.attributes['poster'] ?? item.sampleURL;
+        item.fileHeight = double.tryParse((imageEl ?? videoEl)?.attributes['height'] ?? '');
+        item.fileWidth = double.tryParse((imageEl ?? videoEl)?.attributes['width'] ?? '');
         item.fileAspectRatio = (item.fileWidth != null && item.fileHeight != null)
             ? item.fileWidth! / item.fileHeight!
             : null;

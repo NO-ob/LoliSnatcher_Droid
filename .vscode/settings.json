@@ -18,6 +18,5 @@
       "source.sortMembers": "never",
       "source.fixAll": "explicit"
     }
-  },
-  "dart.flutterSdkPath": ".fvm/versions/3.32.6"
+  }
 }
