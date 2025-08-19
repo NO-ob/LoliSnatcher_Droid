@@ -194,6 +194,9 @@ class Translations implements BaseTranslations<AppLocale, Translations> {
   /// en: 'Select all'
   String get selectAll => TranslationOverrides.string(_root.$meta, 'selectAll', {}) ?? 'Select all';
 
+  /// en: 'Reset'
+  String get reset => TranslationOverrides.string(_root.$meta, 'reset', {}) ?? 'Reset';
+
   late final TranslationsValidationErrorsEn validationErrors = TranslationsValidationErrorsEn.internal(_root);
   late final TranslationsInitEn init = TranslationsInitEn.internal(_root);
   late final TranslationsSnatcherEn snatcher = TranslationsSnatcherEn.internal(_root);
@@ -215,11 +218,11 @@ class TranslationsValidationErrorsEn {
   /// en: 'Please enter a valid value'
   String get invalid => TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? 'Please enter a valid value';
 
-  /// en: 'Please enter a value bigger than {min}'
+  /// en: 'Please enter a value bigger than ${min}'
   String tooSmall({required Object min}) =>
       TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Please enter a value bigger than ${min}';
 
-  /// en: 'Please enter a value smaller than {max}'
+  /// en: 'Please enter a value smaller than ${max}'
   String tooBig({required Object max}) =>
       TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Please enter a value smaller than ${max}';
 }
@@ -323,9 +326,11 @@ class TranslationsSettingsEn {
   late final TranslationsSettingsBackupAndRestoreEn backupAndRestore = TranslationsSettingsBackupAndRestoreEn.internal(_root);
   late final TranslationsSettingsNetworkEn network = TranslationsSettingsNetworkEn.internal(_root);
   late final TranslationsSettingsPrivacyEn privacy = TranslationsSettingsPrivacyEn.internal(_root);
+  late final TranslationsSettingsPerformanceEn performance = TranslationsSettingsPerformanceEn.internal(_root);
   late final TranslationsSettingsSyncEn sync = TranslationsSettingsSyncEn.internal(_root);
   late final TranslationsSettingsAboutEn about = TranslationsSettingsAboutEn.internal(_root);
   late final TranslationsSettingsCheckForUpdatesEn checkForUpdates = TranslationsSettingsCheckForUpdatesEn.internal(_root);
+  late final TranslationsSettingsLogsEn logs = TranslationsSettingsLogsEn.internal(_root);
   late final TranslationsSettingsHelpEn help = TranslationsSettingsHelpEn.internal(_root);
   late final TranslationsSettingsDebugEn debug = TranslationsSettingsDebugEn.internal(_root);
   late final TranslationsSettingsLoggingEn logging = TranslationsSettingsLoggingEn.internal(_root);
@@ -347,7 +352,15 @@ class TranslationsSettingsLanguageEn {
   String get title => TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Language';
 
   /// en: 'System'
-  String get systemLanguageOption => TranslationOverrides.string(_root.$meta, 'settings.language.systemLanguageOption', {}) ?? 'System';
+  String get system => TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'System';
+
+  /// en: 'Help us translate'
+  String get helpUsTranslate => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help us translate';
+
+  /// en: 'Visit <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> for details or tap on the image below to go to Weblate'
+  String get visitForDetails =>
+      TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
+      'Visit <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> for details or tap on the image below to go to Weblate';
 }
 
 // Path: settings.booru
@@ -377,12 +390,12 @@ class TranslationsSettingsBooruEn {
   /// en: 'Share Booru config'
   String get shareBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooru', {}) ?? 'Share Booru config';
 
-  /// en: 'Booru config of {booruName} will be converted to a link which then can be shared to other apps Should login/apikey data be included?'
+  /// en: 'Booru config of ${booruName} will be converted to a link which then can be shared to other apps Should login/apikey data be included?'
   String shareBooruDialogMsgMobile({required Object booruName}) =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgMobile', {'booruName': booruName}) ??
       'Booru config of ${booruName} will be converted to a link which then can be shared to other apps\n\nShould login/apikey data be included?';
 
-  /// en: 'Booru config of {booruName} will be converted to a link which will be copied to clipboard Should login/apikey data be included?'
+  /// en: 'Booru config of ${booruName} will be converted to a link which will be copied to clipboard Should login/apikey data be included?'
   String shareBooruDialogMsgDesktop({required Object booruName}) =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgDesktop', {'booruName': booruName}) ??
       'Booru config of ${booruName} will be converted to a link which will be copied to clipboard\n\nShould login/apikey data be included?';
@@ -482,6 +495,9 @@ class TranslationsSettingsBooruEditorEn {
   /// en: 'Run test first'
   String get runTestFirst => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runTestFirst', {}) ?? 'Run test first';
 
+  /// en: 'Running test...'
+  String get runningTest => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Running test...';
+
   /// en: 'This Booru config already exists'
   String get booruConfigExistsError =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigExistsError', {}) ?? 'This Booru config already exists';
@@ -550,7 +566,7 @@ class TranslationsSettingsBooruEditorEn {
   /// en: 'Booru Type'
   String get booruType => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru Type';
 
-  /// en: 'Booru Type is {booruType}'
+  /// en: 'Booru Type is ${booruType}'
   String booruTypeIs({required Object booruType}) =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruTypeIs', {'booruType': booruType}) ?? 'Booru Type is ${booruType}';
 
@@ -561,16 +577,21 @@ class TranslationsSettingsBooruEditorEn {
   String get booruFaviconPlaceholder =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFaviconPlaceholder', {}) ?? '(Autofills if blank)';
 
-  /// en: '{userIdTitle} and {apiKeyTitle} may be needed with some boorus but in most cases aren't necessary.'
+  /// en: '${userIdTitle} and ${apiKeyTitle} may be needed with some boorus but in most cases aren't necessary.'
   String booruApiCredsInfo({required Object userIdTitle, required Object apiKeyTitle}) =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruApiCredsInfo', {'userIdTitle': userIdTitle, 'apiKeyTitle': apiKeyTitle}) ??
       '${userIdTitle} and ${apiKeyTitle} may be needed with some boorus but in most cases aren\'t necessary.';
 
-  /// en: '(Can be blank)'
-  String get canBeBlankPlaceholder => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.canBeBlankPlaceholder', {}) ?? '(Can be blank)';
-
   /// en: 'Default tags'
   String get booruDefTags => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Default tags';
+
+  /// en: 'Default search for booru'
+  String get booruDefTagsPlaceholder =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTagsPlaceholder', {}) ?? 'Default search for booru';
+
+  /// en: 'Fields below may be required for some boorus'
+  String get booruDefaultInstructions =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefaultInstructions', {}) ?? 'Fields below may be required for some boorus';
 }
 
 // Path: settings.interface
@@ -595,6 +616,82 @@ class TranslationsSettingsThemeEn {
 
   /// en: 'Themes'
   String get title => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Themes';
+
+  /// en: 'Theme mode'
+  String get themeMode => TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Theme mode';
+
+  /// en: 'Black background'
+  String get blackBg => TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? 'Black background';
+
+  /// en: 'Use dynamic color'
+  String get useDynamicColor => TranslationOverrides.string(_root.$meta, 'settings.theme.useDynamicColor', {}) ?? 'Use dynamic color';
+
+  /// en: 'Android 12+ only'
+  String get android12PlusOnly => TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Android 12+ only';
+
+  /// en: 'Theme'
+  String get theme => TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'Theme';
+
+  /// en: 'Primary color'
+  String get primaryColor => TranslationOverrides.string(_root.$meta, 'settings.theme.primaryColor', {}) ?? 'Primary color';
+
+  /// en: 'Secondary color'
+  String get secondaryColor => TranslationOverrides.string(_root.$meta, 'settings.theme.secondaryColor', {}) ?? 'Secondary color';
+
+  /// en: 'Enable drawer mascot'
+  String get enableDrawerMascot => TranslationOverrides.string(_root.$meta, 'settings.theme.enableDrawerMascot', {}) ?? 'Enable drawer mascot';
+
+  /// en: 'Set custom mascot'
+  String get setCustomMascot => TranslationOverrides.string(_root.$meta, 'settings.theme.setCustomMascot', {}) ?? 'Set custom mascot';
+
+  /// en: 'Remove custom mascot'
+  String get removeCustomMascot => TranslationOverrides.string(_root.$meta, 'settings.theme.removeCustomMascot', {}) ?? 'Remove custom mascot';
+
+  /// en: 'Current mascot path'
+  String get currentMascotPath => TranslationOverrides.string(_root.$meta, 'settings.theme.currentMascotPath', {}) ?? 'Current mascot path';
+
+  /// en: 'System'
+  String get system => TranslationOverrides.string(_root.$meta, 'settings.theme.system', {}) ?? 'System';
+
+  /// en: 'Light'
+  String get light => TranslationOverrides.string(_root.$meta, 'settings.theme.light', {}) ?? 'Light';
+
+  /// en: 'Dark'
+  String get dark => TranslationOverrides.string(_root.$meta, 'settings.theme.dark', {}) ?? 'Dark';
+
+  /// en: 'Pink'
+  String get pink => TranslationOverrides.string(_root.$meta, 'settings.theme.pink', {}) ?? 'Pink';
+
+  /// en: 'Purple'
+  String get purple => TranslationOverrides.string(_root.$meta, 'settings.theme.purple', {}) ?? 'Purple';
+
+  /// en: 'Blue'
+  String get blue => TranslationOverrides.string(_root.$meta, 'settings.theme.blue', {}) ?? 'Blue';
+
+  /// en: 'Teal'
+  String get teal => TranslationOverrides.string(_root.$meta, 'settings.theme.teal', {}) ?? 'Teal';
+
+  /// en: 'Red'
+  String get red => TranslationOverrides.string(_root.$meta, 'settings.theme.red', {}) ?? 'Red';
+
+  /// en: 'Green'
+  String get green => TranslationOverrides.string(_root.$meta, 'settings.theme.green', {}) ?? 'Green';
+
+  /// en: 'Halloween'
+  String get halloween => TranslationOverrides.string(_root.$meta, 'settings.theme.halloween', {}) ?? 'Halloween';
+
+  /// en: 'Custom'
+  String get custom => TranslationOverrides.string(_root.$meta, 'settings.theme.custom', {}) ?? 'Custom';
+
+  /// en: 'Select color'
+  String get selectColor => TranslationOverrides.string(_root.$meta, 'settings.theme.selectColor', {}) ?? 'Select color';
+
+  /// en: 'Selected color'
+  String get selectedColor => TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColor', {}) ?? 'Selected color';
+
+  /// en: 'Selected color and its shades'
+  String get selectedColorAndShades =>
+      TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Selected color and its shades';
 }
 
 // Path: settings.viewer
@@ -727,7 +824,7 @@ class TranslationsSettingsBackupAndRestoreEn {
   String get duplicateFileDetectedTitle =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedTitle', {}) ?? 'Duplicate file detected!';
 
-  /// en: 'The file {fileName} already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.'
+  /// en: 'The file ${fileName} already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.'
   String duplicateFileDetectedMsg({required Object fileName}) =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedMsg', {'fileName': fileName}) ??
       'The file ${fileName} already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.';
@@ -745,7 +842,7 @@ class TranslationsSettingsBackupAndRestoreEn {
   String get failedToGetBackupPath =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.failedToGetBackupPath', {}) ?? 'Failed to get backup path!';
 
-  /// en: 'Backup path is: {backupPath}'
+  /// en: 'Backup path is: ${backupPath}'
   String backupPathMsg({required Object backupPath}) =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupPathMsg', {'backupPath': backupPath}) ??
       'Backup path is: ${backupPath}';
@@ -902,6 +999,47 @@ class TranslationsSettingsPrivacyEn {
 
   /// en: 'Privacy'
   String get title => TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? 'Privacy';
+
+  /// en: 'App lock'
+  String get appLock => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'App lock';
+
+  /// en: 'Allows to lock the app manually or if left for too long. Requires system lock with PIN or biometrics to be enabled'
+  String get appLockMsg =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.appLockMsg', {}) ??
+      'Allows to lock the app manually or if left for too long. Requires system lock with PIN or biometrics to be enabled';
+
+  /// en: 'Auto lock after'
+  String get autoLockAfter => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'Auto lock after';
+
+  /// en: 'in seconds, 0 to disable'
+  String get autoLockAfterTip => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? 'in seconds, 0 to disable';
+
+  /// en: 'Blur screen when leaving the app'
+  String get bluronLeave => TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeave', {}) ?? 'Blur screen when leaving the app';
+
+  /// en: 'May not work on some devices due to system limitations'
+  String get bluronLeaveMsg =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeaveMsg', {}) ?? 'May not work on some devices due to system limitations';
+
+  /// en: 'Incognito keyboard'
+  String get incognitoKeyboard => TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboard', {}) ?? 'Incognito keyboard';
+
+  /// en: 'Tells system keyboard to not save your typing history and disable learning based on your input. Will be applied to most of text inputs'
+  String get incognitoKeyboardMsg =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
+      'Tells system keyboard to not save your typing history and disable learning based on your input.\nWill be applied to most of text inputs';
+}
+
+// Path: settings.performance
+class TranslationsSettingsPerformanceEn {
+  TranslationsSettingsPerformanceEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Performance'
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.performance.title', {}) ?? 'Performance';
 }
 
 // Path: settings.sync
@@ -1003,6 +1141,30 @@ class TranslationsSettingsCheckForUpdatesEn {
 
   /// en: 'Visit Releases'
   String get visitReleases => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitReleases', {}) ?? 'Visit Releases';
+}
+
+// Path: settings.logs
+class TranslationsSettingsLogsEn {
+  TranslationsSettingsLogsEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Logs'
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.logs.title', {}) ?? 'Logs';
+
+  /// en: 'Share logs'
+  String get shareLogs => TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogs', {}) ?? 'Share logs';
+
+  /// en: 'Share logs to external app?'
+  String get shareLogsWarningTitle =>
+      TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogsWarningTitle', {}) ?? 'Share logs to external app?';
+
+  /// en: '[WARNING]: Logs may contain sensitive information, share with caution!'
+  String get shareLogsWarningMsg =>
+      TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogsWarningMsg', {}) ??
+      '[WARNING]: Logs may contain sensitive information, share with caution!';
 }
 
 // Path: settings.help
@@ -1183,6 +1345,8 @@ extension on Translations {
         return TranslationOverrides.string(_root.$meta, 'item', {}) ?? 'Item';
       case 'selectAll':
         return TranslationOverrides.string(_root.$meta, 'selectAll', {}) ?? 'Select all';
+      case 'reset':
+        return TranslationOverrides.string(_root.$meta, 'reset', {}) ?? 'Reset';
       case 'validationErrors.required':
         return TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? 'Please enter a value';
       case 'validationErrors.invalid':
@@ -1224,8 +1388,13 @@ extension on Translations {
         return TranslationOverrides.string(_root.$meta, 'settings.title', {}) ?? 'Settings';
       case 'settings.language.title':
         return TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Language';
-      case 'settings.language.systemLanguageOption':
-        return TranslationOverrides.string(_root.$meta, 'settings.language.systemLanguageOption', {}) ?? 'System';
+      case 'settings.language.system':
+        return TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'System';
+      case 'settings.language.helpUsTranslate':
+        return TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help us translate';
+      case 'settings.language.visitForDetails':
+        return TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
+            'Visit <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> for details or tap on the image below to go to Weblate';
       case 'settings.booru.title':
         return TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus & Search';
       case 'settings.booru.defaultTags':
@@ -1300,6 +1469,8 @@ extension on Translations {
         return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Save Booru';
       case 'settings.booruEditor.runTestFirst':
         return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runTestFirst', {}) ?? 'Run test first';
+      case 'settings.booruEditor.runningTest':
+        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Running test...';
       case 'settings.booruEditor.booruConfigExistsError':
         return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigExistsError', {}) ?? 'This Booru config already exists';
       case 'settings.booruEditor.booruSameNameExistsError':
@@ -1356,14 +1527,67 @@ extension on Translations {
               'apiKeyTitle': apiKeyTitle,
             }) ??
             '${userIdTitle} and ${apiKeyTitle} may be needed with some boorus but in most cases aren\'t necessary.';
-      case 'settings.booruEditor.canBeBlankPlaceholder':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.canBeBlankPlaceholder', {}) ?? '(Can be blank)';
       case 'settings.booruEditor.booruDefTags':
         return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Default tags';
+      case 'settings.booruEditor.booruDefTagsPlaceholder':
+        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTagsPlaceholder', {}) ?? 'Default search for booru';
+      case 'settings.booruEditor.booruDefaultInstructions':
+        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefaultInstructions', {}) ??
+            'Fields below may be required for some boorus';
       case 'settings.interface.title':
         return TranslationOverrides.string(_root.$meta, 'settings.interface.title', {}) ?? 'Interface';
       case 'settings.theme.title':
         return TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Themes';
+      case 'settings.theme.themeMode':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Theme mode';
+      case 'settings.theme.blackBg':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? 'Black background';
+      case 'settings.theme.useDynamicColor':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.useDynamicColor', {}) ?? 'Use dynamic color';
+      case 'settings.theme.android12PlusOnly':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Android 12+ only';
+      case 'settings.theme.theme':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'Theme';
+      case 'settings.theme.primaryColor':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.primaryColor', {}) ?? 'Primary color';
+      case 'settings.theme.secondaryColor':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.secondaryColor', {}) ?? 'Secondary color';
+      case 'settings.theme.enableDrawerMascot':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.enableDrawerMascot', {}) ?? 'Enable drawer mascot';
+      case 'settings.theme.setCustomMascot':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.setCustomMascot', {}) ?? 'Set custom mascot';
+      case 'settings.theme.removeCustomMascot':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.removeCustomMascot', {}) ?? 'Remove custom mascot';
+      case 'settings.theme.currentMascotPath':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.currentMascotPath', {}) ?? 'Current mascot path';
+      case 'settings.theme.system':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.system', {}) ?? 'System';
+      case 'settings.theme.light':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.light', {}) ?? 'Light';
+      case 'settings.theme.dark':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.dark', {}) ?? 'Dark';
+      case 'settings.theme.pink':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.pink', {}) ?? 'Pink';
+      case 'settings.theme.purple':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.purple', {}) ?? 'Purple';
+      case 'settings.theme.blue':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.blue', {}) ?? 'Blue';
+      case 'settings.theme.teal':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.teal', {}) ?? 'Teal';
+      case 'settings.theme.red':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.red', {}) ?? 'Red';
+      case 'settings.theme.green':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.green', {}) ?? 'Green';
+      case 'settings.theme.halloween':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.halloween', {}) ?? 'Halloween';
+      case 'settings.theme.custom':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.custom', {}) ?? 'Custom';
+      case 'settings.theme.selectColor':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.selectColor', {}) ?? 'Select color';
+      case 'settings.theme.selectedColor':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColor', {}) ?? 'Selected color';
+      case 'settings.theme.selectedColorAndShades':
+        return TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Selected color and its shades';
       case 'settings.viewer.title':
         return TranslationOverrides.string(_root.$meta, 'settings.viewer.title', {}) ?? 'Viewer';
       case 'settings.video.title':
@@ -1504,6 +1728,27 @@ extension on Translations {
         return TranslationOverrides.string(_root.$meta, 'settings.network.title', {}) ?? 'Network';
       case 'settings.privacy.title':
         return TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? 'Privacy';
+      case 'settings.privacy.appLock':
+        return TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'App lock';
+      case 'settings.privacy.appLockMsg':
+        return TranslationOverrides.string(_root.$meta, 'settings.privacy.appLockMsg', {}) ??
+            'Allows to lock the app manually or if left for too long. Requires system lock with PIN or biometrics to be enabled';
+      case 'settings.privacy.autoLockAfter':
+        return TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'Auto lock after';
+      case 'settings.privacy.autoLockAfterTip':
+        return TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? 'in seconds, 0 to disable';
+      case 'settings.privacy.bluronLeave':
+        return TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeave', {}) ?? 'Blur screen when leaving the app';
+      case 'settings.privacy.bluronLeaveMsg':
+        return TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeaveMsg', {}) ??
+            'May not work on some devices due to system limitations';
+      case 'settings.privacy.incognitoKeyboard':
+        return TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboard', {}) ?? 'Incognito keyboard';
+      case 'settings.privacy.incognitoKeyboardMsg':
+        return TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
+            'Tells system keyboard to not save your typing history and disable learning based on your input.\nWill be applied to most of text inputs';
+      case 'settings.performance.title':
+        return TranslationOverrides.string(_root.$meta, 'settings.performance.title', {}) ?? 'Performance';
       case 'settings.sync.title':
         return TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync';
       case 'settings.sync.dbError':
@@ -1551,6 +1796,15 @@ extension on Translations {
         return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitPlayStore', {}) ?? 'Visit Play Store';
       case 'settings.checkForUpdates.visitReleases':
         return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitReleases', {}) ?? 'Visit Releases';
+      case 'settings.logs.title':
+        return TranslationOverrides.string(_root.$meta, 'settings.logs.title', {}) ?? 'Logs';
+      case 'settings.logs.shareLogs':
+        return TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogs', {}) ?? 'Share logs';
+      case 'settings.logs.shareLogsWarningTitle':
+        return TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogsWarningTitle', {}) ?? 'Share logs to external app?';
+      case 'settings.logs.shareLogsWarningMsg':
+        return TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogsWarningMsg', {}) ??
+            '[WARNING]: Logs may contain sensitive information, share with caution!';
       case 'settings.help.title':
         return TranslationOverrides.string(_root.$meta, 'settings.help.title', {}) ?? 'Help';
       case 'settings.debug.title':

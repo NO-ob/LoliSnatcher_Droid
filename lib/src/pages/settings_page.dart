@@ -17,6 +17,7 @@ import 'package:lolisnatcher/src/pages/settings/database_page.dart';
 import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
 import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
 import 'package:lolisnatcher/src/pages/settings/language_page.dart';
+import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/pages/settings/network_page.dart';
 import 'package:lolisnatcher/src/pages/settings/performance_page.dart';
 import 'package:lolisnatcher/src/pages/settings/privacy_page.dart';
@@ -145,7 +146,7 @@ class SettingsPage extends StatelessWidget {
                 page: () => const PrivacyPage(),
               ),
               SettingsButton(
-                name: 'Performance',
+                name: context.loc.settings.performance.title,
                 icon: const Icon(
                   Icons.speed,
                   size: 20,
@@ -189,7 +190,7 @@ class SettingsPage extends StatelessWidget {
               ),
               if (Logger.viewController != null)
                 SettingsButton(
-                  name: 'Share logs',
+                  name: context.loc.settings.logs.title,
                   icon: const Icon(Icons.print),
                   trailingIcon: const Icon(Icons.exit_to_app),
                   action: () async {
@@ -197,7 +198,7 @@ class SettingsPage extends StatelessWidget {
                       context: context,
                       builder: (_) => SettingsDialog(
                         title: Text(
-                          'Logs',
+                          context.loc.settings.logs.title,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         content: Column(
@@ -205,11 +206,11 @@ class SettingsPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Share logs to external app?',
+                              context.loc.settings.logs.shareLogsWarningTitle,
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             Text(
-                              '[WARNING]: Logs may contain sensitive information, share with caution!',
+                              context.loc.settings.logs.shareLogsWarningMsg,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -220,7 +221,7 @@ class SettingsPage extends StatelessWidget {
                           const CancelButton(withIcon: true),
                           ElevatedButton.icon(
                             icon: const Icon(Icons.check),
-                            label: const Text('Ok'),
+                            label: Text(context.loc.ok),
                             onPressed: () async {
                               await Logger.viewController?.downloadLogsFile(
                                 Logger.talker.history.text(
@@ -231,6 +232,13 @@ class SettingsPage extends StatelessWidget {
                             },
                           ),
                         ],
+                      ),
+                    );
+                  },
+                  onLongPress: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => LoggerViewPage(talker: Logger.talker),
                       ),
                     );
                   },

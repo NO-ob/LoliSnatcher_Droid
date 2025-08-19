@@ -57,7 +57,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Privacy'),
+          title: Text(context.loc.settings.privacy.title),
         ),
         body: Center(
           child: ListView(
@@ -70,10 +70,8 @@ class _PrivacyPageState extends State<PrivacyPage> {
                       useLockscreen = newValue;
                     });
                   },
-                  title: 'App lock',
-                  subtitle: const Text(
-                    'Allows to lock the app manually or if left for too long. Requires system lock with PIN or biometrics to be enabled.',
-                  ),
+                  title: context.loc.settings.privacy.appLock,
+                  subtitle: Text(context.loc.settings.privacy.appLockMsg),
                 ),
               AnimatedSize(
                 duration: const Duration(milliseconds: 300),
@@ -81,8 +79,8 @@ class _PrivacyPageState extends State<PrivacyPage> {
                 child: useLockscreen
                     ? SettingsTextInput(
                         controller: autoLockTimeoutController,
-                        title: 'Auto lock after',
-                        subtitle: const Text('in seconds, 0 to disable'),
+                        title: context.loc.settings.privacy.autoLockAfter,
+                        subtitle: Text(context.loc.settings.privacy.autoLockAfterTip),
                         inputType: TextInputType.number,
                         resetText: () => settingsHandler.map['autoLockTimeout']!['default']!.toString(),
                         numberButtons: true,
@@ -112,8 +110,8 @@ class _PrivacyPageState extends State<PrivacyPage> {
                     blurOnLeave = newValue;
                   });
                 },
-                title: 'Blur screen when leaving the app',
-                subtitle: const Text('May not work on some devices due to system limitations'),
+                title: context.loc.settings.privacy.bluronLeave,
+                subtitle: Text(context.loc.settings.privacy.bluronLeaveMsg),
               ),
               if (Platform.isAndroid)
                 SettingsToggle(
@@ -123,10 +121,8 @@ class _PrivacyPageState extends State<PrivacyPage> {
                       incognitoKeyboard = newValue;
                     });
                   },
-                  title: 'Incognito keyboard',
-                  subtitle: const Text(
-                    "Tells system keyboard to don't save your typing history and disable learning based on your input.\nWill be applied to most of app's text inputs.",
-                  ),
+                  title: context.loc.settings.privacy.incognitoKeyboard,
+                  subtitle: Text(context.loc.settings.privacy.incognitoKeyboardMsg),
                 ),
             ],
           ),

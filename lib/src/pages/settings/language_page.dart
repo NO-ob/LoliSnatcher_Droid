@@ -43,55 +43,55 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
 
   Widget buildFlag(AppLocale? locale) {
     if (locale == null) {
-      return const Icon(
-        Icons.settings,
-      );
-    } else {
-      if (locale.localeCode == '?') {
-        return const CircularProgressIndicator();
-      }
+      return const Icon(Icons.settings);
+    }
 
-      const double width = 36, height = 24;
+    if (locale.localeCode == '?') {
+      return const CircularProgressIndicator();
+    }
 
-      Widget firstFlag = CountryFlag.fromLanguageCode(
-        locale.localeCode,
-        width: width,
-        height: height,
-        shape: const RoundedRectangle(6),
-      );
-      Widget? secondFlag;
-      switch (locale) {
-        case AppLocale.en:
-          firstFlag = CountryFlag.fromLanguageCode(
-            'en-us',
-            width: width,
-            height: height,
-            shape: const RoundedRectangle(6),
-          );
-          secondFlag = CountryFlag.fromLanguageCode(
-            locale.localeCode,
-            width: width,
-            height: height,
-            shape: const RoundedRectangle(6),
-          );
-          break;
-        default:
-          break;
-      }
+    const double width = 36, height = 24;
 
-      if (secondFlag == null) {
-        return firstFlag;
-      } else {
-        return Stack(
-          children: [
-            firstFlag,
-            ClipPath(
-              clipper: _SecondLanguageFlagClipper(),
-              child: secondFlag,
-            ),
-          ],
+    Widget firstFlag = CountryFlag.fromLanguageCode(
+      locale.localeCode,
+      width: width,
+      height: height,
+      shape: const RoundedRectangle(6),
+    );
+    Widget? secondFlag;
+    switch (locale) {
+      case AppLocale.en:
+        firstFlag = CountryFlag.fromLanguageCode(
+          'en-us',
+          width: width,
+          height: height,
+          shape: const RoundedRectangle(6),
         );
-      }
+        secondFlag = CountryFlag.fromLanguageCode(
+          locale.localeCode,
+          width: width,
+          height: height,
+          shape: const RoundedRectangle(6),
+        );
+        break;
+      case AppLocale.dev:
+        return const Icon(Icons.developer_board);
+      default:
+        break;
+    }
+
+    if (secondFlag == null) {
+      return firstFlag;
+    } else {
+      return Stack(
+        children: [
+          firstFlag,
+          ClipPath(
+            clipper: _SecondLanguageFlagClipper(),
+            child: secondFlag,
+          ),
+        ],
+      );
     }
   }
 
@@ -110,10 +110,16 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
             children: [
               SettingsDropdown(
                 value: locale,
-                items: const [
-                  null,
-                  ...AppLocale.values,
-                ],
+                items:
+                    const [
+                          null,
+                          ...AppLocale.values,
+                        ]
+                        .where(
+                          // don't show dev loc when not in debug (unless it's already selected)
+                          (e) => e?.name != 'dev' || settingsHandler.isDebug.value || locale?.name == e?.name,
+                        )
+                        .toList(),
                 onChanged: (newValue) async {
                   locale = newValue;
                   setState(() {});
@@ -127,7 +133,7 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      e?.localeName ?? context.loc.settings.language.systemLanguageOption,
+                      e?.localeName ?? context.loc.settings.language.system,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -140,7 +146,14 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
                   ],
                 ),
               ),
-              // TODO Add "Help us translate" block here with link
+              SettingsButton(name: context.loc.settings.language.helpUsTranslate),
+              SettingsButton(
+                name: context.loc.settings.language.visitForDetails,
+                useHtml: true,
+                trailingIcon: const Icon(Icons.exit_to_app),
+              ),
+              // TODO Add weblate widget
+              const Placeholder(fallbackHeight: 300),
             ],
           ),
         ),

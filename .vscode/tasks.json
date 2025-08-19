@@ -34,7 +34,27 @@
         {
             "label": "Localization build",
             "type": "shell",
-            "command": "sh ./loc_build.sh",
+            "command": "dart run ./loc_build.dart",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Localization analyze",
+            "type": "shell",
+            "command": "dart run ./loc_analyze.dart",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Localization apply",
+            "type": "shell",
+            "command": "dart run ./loc_apply.dart",
             "presentation": {
                 "reveal": "never",
                 "close": true

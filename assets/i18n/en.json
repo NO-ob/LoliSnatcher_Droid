@@ -51,11 +51,12 @@
     "visitOurDiscord": "Visit our Discord server",
     "item": "Item",
     "selectAll": "Select all",
+    "reset": "Reset",
     "validationErrors": {
         "required": "Please enter a value",
         "invalid": "Please enter a valid value",
-        "tooSmall(param=min)": "Please enter a value bigger than {min}",
-        "tooBig(param=max)": "Please enter a value smaller than {max}"
+        "tooSmall(param=min)": "Please enter a value bigger than ${min}",
+        "tooBig(param=max)": "Please enter a value smaller than ${max}"
     },
     "init": {
         "initError": "Initialization error!",
@@ -84,7 +85,9 @@
         },
         "language": {
             "title": "Language",
-            "systemLanguageOption": "System"
+            "system": "System",
+            "helpUsTranslate": "Help us translate",
+            "visitForDetails": "Visit <a href=\"https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\">github</a> for details or tap on the image below to go to Weblate"
         },
         "booru": {
             "title": "Boorus & Search",
@@ -93,8 +96,8 @@
             "itemsPerPageTip": "Some Boorus may ignore this setting",
             "addBooru": "Add Booru config",
             "shareBooru": "Share Booru config",
-            "shareBooruDialogMsgMobile(param=booruName)": "Booru config of {booruName} will be converted to a link which then can be shared to other apps\n\nShould login/apikey data be included?",
-            "shareBooruDialogMsgDesktop(param=booruName)": "Booru config of {booruName} will be converted to a link which will be copied to clipboard\n\nShould login/apikey data be included?",
+            "shareBooruDialogMsgMobile(param=booruName)": "Booru config of ${booruName} will be converted to a link which then can be shared to other apps\n\nShould login/apikey data be included?",
+            "shareBooruDialogMsgDesktop(param=booruName)": "Booru config of ${booruName} will be converted to a link which will be copied to clipboard\n\nShould login/apikey data be included?",
             "booruSharing": "Booru sharing",
             "booruSharingMsgAndroid": "How to automatically open Booru config links in the app on Android 12 and higher:\n1) Tap button below to open system app link defaults settings\n2) Tap on \"Add link\" and select all available options",
             "addedBoorus": "Added Boorus",
@@ -122,6 +125,7 @@
             "testBooruFailedMsg": "Config parameters may be incorrect, booru doesn't allow api access, request didn't return any data or there was a network error.",
             "saveBooru": "Save Booru",
             "runTestFirst": "Run test first",
+            "runningTest": "Running test...",
             "booruConfigExistsError": "This Booru config already exists",
             "booruSameNameExistsError": "Booru config with same name already exists",
             "booruSameUrlExistsError": "Booru config with same URL already exists",
@@ -140,18 +144,44 @@
             "booruUrl": "Booru URL",
             "booruUrlRequired": "Booru URL is required!",
             "booruType": "Booru Type",
-            "booruTypeIs(param=booruType)": "Booru Type is {booruType}",
+            "booruTypeIs(param=booruType)": "Booru Type is ${booruType}",
             "booruFavicon": "Favicon URL",
             "booruFaviconPlaceholder": "(Autofills if blank)",
-            "booruApiCredsInfo(param=userIdTitle, param=apiKeyTitle)": "{userIdTitle} and {apiKeyTitle} may be needed with some boorus but in most cases aren't necessary.",
-            "canBeBlankPlaceholder": "(Can be blank)",
-            "booruDefTags": "Default tags"
-        },
+            "booruApiCredsInfo(param=userIdTitle, param=apiKeyTitle)": "${userIdTitle} and ${apiKeyTitle} may be needed with some boorus but in most cases aren't necessary.",
+            "booruDefTags": "Default tags",
+            "booruDefTagsPlaceholder": "Default search for booru",
+            "booruDefaultInstructions": "Fields below may be required for some boorus"
+         },
         "interface": {
             "title": "Interface"
         },
         "theme": {
-            "title": "Themes"
+            "title": "Themes",
+            "themeMode": "Theme mode",
+            "blackBg": "Black background",
+            "useDynamicColor": "Use dynamic color",
+            "android12PlusOnly": "Android 12+ only",
+            "theme": "Theme",
+            "primaryColor": "Primary color",
+            "secondaryColor": "Secondary color",
+            "enableDrawerMascot": "Enable drawer mascot",
+            "setCustomMascot": "Set custom mascot",
+            "removeCustomMascot": "Remove custom mascot",
+            "currentMascotPath": "Current mascot path",
+            "system": "System",
+            "light": "Light",
+            "dark": "Dark",
+            "pink": "Pink",
+            "purple": "Purple",
+            "blue": "Blue",
+            "teal": "Teal",
+            "red": "Red",
+            "green": "Green",
+            "halloween": "Halloween",
+            "custom": "Custom",
+            "selectColor": "Select color",
+            "selectedColor": "Selected color",
+            "selectedColorAndShades": "Selected color and its shades"
         },
         "viewer": {
             "title": "Viewer"
@@ -188,11 +218,11 @@
         "backupAndRestore": {
             "title": "Backup & Restore",
             "duplicateFileDetectedTitle": "Duplicate file detected!",
-            "duplicateFileDetectedMsg(param=fileName)": "The file {fileName} already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.",
+            "duplicateFileDetectedMsg(param=fileName)": "The file ${fileName} already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.",
             "androidOnlyFeatureMsg": "This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app's data folder, respective to your system",
             "selectBackupDir": "Select backup directory",
             "failedToGetBackupPath": "Failed to get backup path!",
-            "backupPathMsg(param=backupPath)": "Backup path is: {backupPath}",
+            "backupPathMsg(param=backupPath)": "Backup path is: ${backupPath}",
             "noBackupDirSelected": "No backup directory selected",
             "restoreInfoMsg": "Restore will work only if the files are placed in the root of the directory.",
             "backupSettings": "Backup Settings",
@@ -232,7 +262,18 @@
             "title": "Network"
         },
         "privacy": {
-            "title": "Privacy"
+            "title": "Privacy",
+            "appLock": "App lock",
+            "appLockMsg": "Allows to lock the app manually or if left for too long. Requires system lock with PIN or biometrics to be enabled",
+            "autoLockAfter": "Auto lock after",
+            "autoLockAfterTip": "in seconds, 0 to disable",
+            "bluronLeave": "Blur screen when leaving the app",
+            "bluronLeaveMsg": "May not work on some devices due to system limitations",
+            "incognitoKeyboard": "Incognito keyboard",
+            "incognitoKeyboardMsg": "Tells system keyboard to not save your typing history and disable learning based on your input.\nWill be applied to most of text inputs"           
+        },
+        "performance": {
+            "title": "Performance"
         },
         "sync": {
             "title": "LoliSync",
@@ -261,6 +302,12 @@
             "changelog": "Changelog",
             "visitPlayStore": "Visit Play Store",
             "visitReleases": "Visit Releases"
+        },
+        "logs": {
+            "title": "Logs",
+            "shareLogs": "Share logs",
+            "shareLogsWarningTitle": "Share logs to external app?",
+            "shareLogsWarningMsg": "[WARNING]: Logs may contain sensitive information, share with caution!"
         },
         "help": {
             "title": "Help"

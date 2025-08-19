@@ -4,7 +4,7 @@ flat_map: true
 input_directory: assets/i18n
 input_file_pattern: .json
 statistics: true
-string_interpolation: braces
+string_interpolation: dart
 timestamp: false
 translate_var: loc
 translation_overrides: true

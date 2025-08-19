@@ -215,6 +215,14 @@ class _MainAppState extends State<MainApp> {
                     locale: TranslationProvider.of(context).flutterLocale,
                     supportedLocales: AppLocaleUtils.supportedLocales,
                     localizationsDelegates: GlobalMaterialLocalizations.delegates,
+                    localeResolutionCallback: (Locale? preferredLocale, Iterable<Locale> supportedLocales) {
+                      // fallback to avoid exception when using dev locale
+                      if (preferredLocale?.languageCode == 'dev') {
+                        return AppLocaleUtils.supportedLocales.firstWhere((e) => e.languageCode == 'en');
+                      }
+
+                      return preferredLocale;
+                    },
                     builder: (_, child) => Stack(
                       children: [
                         Overlay(

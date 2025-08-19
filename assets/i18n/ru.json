@@ -50,8 +50,8 @@
   "validationErrors": {
     "required": "Введи значение",
     "invalid": "Введи валидное значение",
-    "tooSmall(param=min)": "Введи значение больше {min}",
-    "tooBig(param=max)": "Введи значение меньше {max}"
+    "tooSmall(param=min)": "Введи значение больше ${min}",
+    "tooBig(param=max)": "Введи значение меньше ${max}"
   },
   "init": {
     "initError": "Ошибка инициализации!",
@@ -75,8 +75,7 @@
   "settings": {
     "title": "Настройки",
     "language": {
-      "title": "Язык",
-      "systemLanguageOption": "Системный"
+      "title": "Язык"
     },
     "booru": {
       "title": "Сайты и Поиск",
@@ -85,8 +84,8 @@
       "itemsPerPageTip": "Некоторые сайты могут игнорировать этот параметр",
       "addBooru": "Добавить конфиг сайта",
       "shareBooru": "Поделиться конфигом сайта",
-      "shareBooruDialogMsgMobile(param=booruName)": "Конфиг сайта {booruName} будет превращен в ссылку, которой затем можно поделиться в других приложениях\n\nВключить ли данные логина/ключа api?",
-      "shareBooruDialogMsgDesktop(param=booruName)": "Конфиг сайта {booruName} будет превращен в ссылку, которая будет скопирована в буфер обмена\n\nВключить ли данные логина/ключа api?",
+      "shareBooruDialogMsgMobile(param=booruName)": "Конфиг сайта ${booruName} будет превращен в ссылку, которой затем можно поделиться в других приложениях\n\nВключить ли данные логина/ключа api?",
+      "shareBooruDialogMsgDesktop(param=booruName)": "Конфиг сайта ${booruName} будет превращен в ссылку, которая будет скопирована в буфер обмена\n\nВключить ли данные логина/ключа api?",
       "booruSharing": "Поделиться конфигом сайта",
       "booruSharingMsgAndroid": "Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на \"Добавить ссылку\" и выберите все доступные опции",
       "addedBoorus": "Добавленные сайты",
@@ -132,11 +131,10 @@
       "booruUrl": "URL сайта",
       "booruUrlRequired": "URL обязательно!",
       "booruType": "Тип конфига",
-      "booruTypeIs(param=booruType)": "Сайт типа: {booruType}",
+      "booruTypeIs(param=booruType)": "Сайт типа: ${booruType}",
       "booruFavicon": "URL иконки",
       "booruFaviconPlaceholder": "(Автоматически заполняется, если оставить пустым)",
-      "booruApiCredsInfo(param=userIdTitle, param=apiKeyTitle)": "{userIdTitle} и {apiKeyTitle} могут быть обязательны для некоторых сайтов, но в большинстве случаев не нужны.",
-      "canBeBlankPlaceholder": "(Может быть пустым)",
+      "booruApiCredsInfo(param=userIdTitle, param=apiKeyTitle)": "${userIdTitle} и ${apiKeyTitle} могут быть обязательны для некоторых сайтов, но в большинстве случаев не нужны.",
       "booruDefTags": "Теги по умолчанию"
     },
     "interface": {
@@ -180,11 +178,11 @@
     "backupAndRestore": {
       "title": "Резервное копирование и восстановление",
       "duplicateFileDetectedTitle": "Дублирующийся файл!",
-      "duplicateFileDetectedMsg(param=fileName)": "Файл {fileName} уже существует. Ты хочешь его перезаписать? Усли выбрать нет, то бэкап будет отменен.",
+      "duplicateFileDetectedMsg(param=fileName)": "Файл ${fileName} уже существует. Ты хочешь его перезаписать? Усли выбрать нет, то бэкап будет отменен.",
       "androidOnlyFeatureMsg": "Эта функция доступна только на Android, на десктопных билдах можно просто копировать файлы из папки данных приложения",
       "selectBackupDir": "Выбери папку для бэкапов",
       "failedToGetBackupPath": "Не удалось получить путь к папке бэкапов!",
-      "backupPathMsg(param=backupPath)": "Папка бэкапов: {backupPath}",
+      "backupPathMsg(param=backupPath)": "Папка бэкапов: ${backupPath}",
       "noBackupDirSelected": "Нет выбранной папки бэкапов",
       "restoreInfoMsg": "Восстановление будет работать только если файлы расположены в корне папки.",
       "backupSettings": "Бэкап настроек",

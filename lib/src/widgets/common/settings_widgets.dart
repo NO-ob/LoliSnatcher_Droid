@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/html.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
@@ -28,6 +29,7 @@ class SettingsButton extends StatelessWidget {
     this.enabled = true, // disable button interaction (will also change text color to grey)
     this.iconOnly = false,
     this.dense = false,
+    this.useHtml = false,
     super.key,
   });
 
@@ -43,6 +45,7 @@ class SettingsButton extends StatelessWidget {
   final bool enabled;
   final bool iconOnly;
   final bool dense;
+  final bool useHtml;
 
   bool get interactive => action != null || page != null;
 
@@ -70,7 +73,7 @@ class SettingsButton extends StatelessWidget {
       color: Colors.transparent,
       child: ListTile(
         leading: icon,
-        title: Text(name),
+        title: useHtml ? LoliHtml(name) : Text(name),
         subtitle: subtitle,
         trailing: trailingIcon,
         enabled: enabled,

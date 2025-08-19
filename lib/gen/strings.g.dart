@@ -3,8 +3,8 @@
 /// Source: assets/i18n
 /// To regenerate, run: `dart run slang`
 ///
-/// Locales: 2
-/// Strings: 452 (226 per locale)
+/// Locales: 3
+/// Strings: 762 (254 per locale)
 
 // coverage:ignore-file
 // ignore_for_file: type=lint, unused_import
@@ -16,6 +16,7 @@ import 'package:slang/overrides.dart';
 import 'package:slang_flutter/slang_flutter.dart';
 export 'package:slang_flutter/slang_flutter.dart';
 
+import 'strings_dev.g.dart' deferred as l_dev;
 import 'strings_ru.g.dart' deferred as l_ru;
 part 'strings_en.g.dart';
 
@@ -28,7 +29,7 @@ final _buildConfig = BuildModelConfig(
   keyMapCase: null,
   paramCase: null,
   sanitization: SanitizationConfig(enabled: true, prefix: 'k', caseStyle: CaseStyle.camel),
-  stringInterpolation: StringInterpolation.braces,
+  stringInterpolation: StringInterpolation.dart,
   maps: [],
   pluralAuto: PluralAuto.cardinal,
   pluralParameter: 'n',
@@ -47,6 +48,7 @@ final _buildConfig = BuildModelConfig(
 /// - if (LocaleSettings.currentLocale == AppLocale.en) // locale check
 enum AppLocale with BaseAppLocale<AppLocale, Translations> {
   en(languageCode: 'en'),
+  dev(languageCode: 'dev'),
   ru(languageCode: 'ru');
 
   const AppLocale({
@@ -75,6 +77,13 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
           cardinalResolver: cardinalResolver,
           ordinalResolver: ordinalResolver,
         );
+      case AppLocale.dev:
+        await l_dev.loadLibrary();
+        return l_dev.TranslationsDev(
+          overrides: overrides,
+          cardinalResolver: cardinalResolver,
+          ordinalResolver: ordinalResolver,
+        );
       case AppLocale.ru:
         await l_ru.loadLibrary();
         return l_ru.TranslationsRu(
@@ -94,6 +103,12 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
     switch (this) {
       case AppLocale.en:
         return TranslationsEn(
+          overrides: overrides,
+          cardinalResolver: cardinalResolver,
+          ordinalResolver: ordinalResolver,
+        );
+      case AppLocale.dev:
+        return l_dev.TranslationsDev(
           overrides: overrides,
           cardinalResolver: cardinalResolver,
           ordinalResolver: ordinalResolver,

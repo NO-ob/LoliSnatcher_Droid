@@ -12,8 +12,11 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
-import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+
+extension ThemeModeExt on ThemeMode {
+  String locName(BuildContext context) => context.loc['settings.theme.$name'];
+}
 
 class ThemePage extends StatefulWidget {
   const ThemePage({super.key});
@@ -36,6 +39,8 @@ class _ThemePageState extends State<ThemePage> {
 
   bool needToWriteMascot = false;
   int currentSdk = 0;
+
+  TranslationsSettingsThemeEn get themeLoc => context.loc.settings.theme;
 
   @override
   void initState() {
@@ -130,15 +135,15 @@ class _ThemePageState extends State<ThemePage> {
       runSpacing: 5,
       wheelDiameter: 300,
       heading: Text(
-        'Select color',
+        themeLoc.selectColor,
         style: Theme.of(context).textTheme.titleMedium,
       ),
       subheading: Text(
-        'Selected color and its shades',
+        themeLoc.selectedColorAndShades,
         style: Theme.of(context).textTheme.titleMedium,
       ),
       wheelSubheading: Text(
-        'Selected color and its shades',
+        themeLoc.selectedColorAndShades,
         style: Theme.of(context).textTheme.titleMedium,
       ),
       showMaterialName: true,
@@ -188,7 +193,7 @@ class _ThemePageState extends State<ThemePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Themes'),
+          title: Text(themeLoc.title),
         ),
         body: Center(
           child: ListView(
@@ -200,8 +205,8 @@ class _ThemePageState extends State<ThemePage> {
                   themeMode = newValue!;
                   updateTheme();
                 },
-                title: 'Theme mode',
-                itemTitleBuilder: (item) => item?.name.capitalizeFirst ?? '?',
+                title: themeLoc.themeMode,
+                itemTitleBuilder: (item) => item?.locName(context) ?? '?',
                 itemLeadingBuilder: (ThemeMode? item) {
                   const double size = 40;
 
@@ -242,7 +247,7 @@ class _ThemePageState extends State<ThemePage> {
                     isAmoled = newValue;
                     updateTheme();
                   },
-                  title: 'Black background',
+                  title: themeLoc.blackBg,
                 ),
               if (currentSdk >= 31)
                 SettingsToggle(
@@ -251,8 +256,8 @@ class _ThemePageState extends State<ThemePage> {
                     useDynamicColor = newValue;
                     updateTheme();
                   },
-                  title: 'Use dynamic color',
-                  subtitle: Platform.isAndroid ? const Text('Android 12+ only') : null,
+                  title: themeLoc.useDynamicColor,
+                  subtitle: Platform.isAndroid ? Text(themeLoc.android12PlusOnly) : null,
                 ),
               if (!useDynamicColor)
                 SettingsDropdown(
@@ -262,7 +267,7 @@ class _ThemePageState extends State<ThemePage> {
                     theme = settingsHandler.map['theme']!['options'].where((e) => e.name == newValue).toList()[0];
                     updateTheme(withRestate: true);
                   },
-                  title: 'Theme',
+                  title: themeLoc.theme,
                   itemBuilder: (String? value) {
                     final ThemeItem theme = settingsHandler.map['theme']!['options'].firstWhere((e) => e.name == value);
                     final Color? primary = theme.name == 'Custom' ? primaryPickerColor : theme.primary;
@@ -312,7 +317,9 @@ class _ThemePageState extends State<ThemePage> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Text(value ?? ''),
+                        Text(
+                          context.loc['settings.theme.${value?.toLowerCase()}'] ?? '?',
+                        ),
                         switch (value) {
                           'Halloween' => const Padding(
                             padding: EdgeInsets.only(left: 8),
@@ -330,7 +337,7 @@ class _ThemePageState extends State<ThemePage> {
                 ),
               if (theme.name == 'Custom' && !useDynamicColor)
                 SettingsButton(
-                  name: 'Primary color',
+                  name: themeLoc.primaryColor,
                   subtitle: Text(
                     '${ColorTools.materialNameAndCode(primaryPickerColor!)} '
                     'aka ${ColorTools.nameThatColor(primaryPickerColor!)}',
@@ -364,7 +371,7 @@ class _ThemePageState extends State<ThemePage> {
                 ),
               if (theme.name == 'Custom' && !useDynamicColor)
                 SettingsButton(
-                  name: 'Secondary color',
+                  name: themeLoc.secondaryColor,
                   subtitle: Text(
                     '${ColorTools.materialNameAndCode(accentPickerColor!)} '
                     'aka ${ColorTools.nameThatColor(accentPickerColor!)}',
@@ -398,7 +405,7 @@ class _ThemePageState extends State<ThemePage> {
                 ),
               if (theme.name == 'Custom' && !useDynamicColor)
                 SettingsButton(
-                  name: 'Reset custom colors',
+                  name: context.loc.reset,
                   icon: const Icon(Icons.refresh),
                   action: () {
                     final ThemeItem theme = settingsHandler.map['theme']!['default'];
@@ -414,11 +421,13 @@ class _ThemePageState extends State<ThemePage> {
                   enableMascot = newValue;
                   updateTheme();
                 },
-                title: 'Enable drawer mascot',
+                title: themeLoc.enableDrawerMascot,
               ),
               SettingsButton(
-                name: 'Set custom mascot',
-                subtitle: mascotPathOverride.isEmpty ? null : Text('Current: $mascotPathOverride'),
+                name: themeLoc.setCustomMascot,
+                subtitle: mascotPathOverride.isEmpty
+                    ? null
+                    : Text('${themeLoc.currentMascotPath}: $mascotPathOverride'),
                 icon: const Icon(Icons.image_search_outlined),
                 action: () async {
                   mascotPathOverride = await ServiceHandler.getImageSAFUri();
@@ -428,7 +437,7 @@ class _ThemePageState extends State<ThemePage> {
               ),
               if (mascotPathOverride.isNotEmpty)
                 SettingsButton(
-                  name: 'Remove custom mascot',
+                  name: themeLoc.removeCustomMascot,
                   icon: const Icon(Icons.delete_forever),
                   action: () async {
                     final File file = File(mascotPathOverride);

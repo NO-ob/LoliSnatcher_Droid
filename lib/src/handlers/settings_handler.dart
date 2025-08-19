@@ -960,7 +960,7 @@ class SettingsHandler {
 
         case 'locale':
           if (toJSON) {
-            return (value as Rxn<AppLocale>).value?.name;
+            return (value as AppLocale?)?.name;
           } else {
             if (value is String) {
               return AppLocale.values.firstWhereOrNull((e) => e.name == value);

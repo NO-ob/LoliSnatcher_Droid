@@ -296,8 +296,6 @@ class _TranslationsSettingsLanguageRu extends TranslationsSettingsLanguageEn {
   // Translations
   @override
   String get title => TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Язык';
-  @override
-  String get systemLanguageOption => TranslationOverrides.string(_root.$meta, 'settings.language.systemLanguageOption', {}) ?? 'Системный';
 }
 
 // Path: settings.booru
@@ -465,9 +463,6 @@ class _TranslationsSettingsBooruEditorRu extends TranslationsSettingsBooruEditor
   String booruApiCredsInfo({required Object userIdTitle, required Object apiKeyTitle}) =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruApiCredsInfo', {'userIdTitle': userIdTitle, 'apiKeyTitle': apiKeyTitle}) ??
       '${userIdTitle} и ${apiKeyTitle} могут быть обязательны для некоторых сайтов, но в большинстве случаев не нужны.';
-  @override
-  String get canBeBlankPlaceholder =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.canBeBlankPlaceholder', {}) ?? '(Может быть пустым)';
   @override
   String get booruDefTags => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Теги по умолчанию';
 }
@@ -1038,8 +1033,6 @@ extension on TranslationsRu {
         return TranslationOverrides.string(_root.$meta, 'settings.title', {}) ?? 'Настройки';
       case 'settings.language.title':
         return TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Язык';
-      case 'settings.language.systemLanguageOption':
-        return TranslationOverrides.string(_root.$meta, 'settings.language.systemLanguageOption', {}) ?? 'Системный';
       case 'settings.booru.title':
         return TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Сайты и Поиск';
       case 'settings.booru.defaultTags':
@@ -1171,8 +1164,6 @@ extension on TranslationsRu {
               'apiKeyTitle': apiKeyTitle,
             }) ??
             '${userIdTitle} и ${apiKeyTitle} могут быть обязательны для некоторых сайтов, но в большинстве случаев не нужны.';
-      case 'settings.booruEditor.canBeBlankPlaceholder':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.canBeBlankPlaceholder', {}) ?? '(Может быть пустым)';
       case 'settings.booruEditor.booruDefTags':
         return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Теги по умолчанию';
       case 'settings.interface.title':

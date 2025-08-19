@@ -188,7 +188,7 @@ class _BooruEditState extends State<BooruEdit> {
               controller: booruDefTagsController,
               title: booruEditorLoc.booruDefTags,
               onChanged: (_) => setState(() {}),
-              hintText: 'Default search for booru',
+              hintText: booruEditorLoc.booruDefTagsPlaceholder,
               clearable: true,
               pasteable: true,
               enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
@@ -248,10 +248,8 @@ class _BooruEditState extends State<BooruEdit> {
 
   String getApiKeyPlaceholder() {
     switch (selectedBooruType) {
-      case BooruType.Gelbooru:
-        return '';
       default:
-        return booruEditorLoc.canBeBlankPlaceholder;
+        return '';
     }
   }
 
@@ -269,7 +267,7 @@ class _BooruEditState extends State<BooruEdit> {
         break;
     }
 
-    return "Fields below may be needed with some boorus but in most cases aren't necessary.";
+    return booruEditorLoc.booruDefaultInstructions;
   }
 
   bool shouldObscureApiKey() {
@@ -293,10 +291,8 @@ class _BooruEditState extends State<BooruEdit> {
 
   String getUserIdPlaceholder() {
     switch (selectedBooruType) {
-      case BooruType.Gelbooru:
-        return '';
       default:
-        return booruEditorLoc.canBeBlankPlaceholder;
+        return '';
     }
   }
 
@@ -507,7 +503,10 @@ class _BooruEditState extends State<BooruEdit> {
     if (booruType == null && !force) {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text('Running Booru test', style: TextStyle(fontSize: 20)),
+        title: Text(
+          booruEditorLoc.runningTest,
+          style: const TextStyle(fontSize: 20),
+        ),
         leadingIcon: Icons.refresh,
         leadingIconColor: Colors.yellow,
         sideColor: Colors.yellow,
@@ -687,7 +686,7 @@ class _BooruEditState extends State<BooruEdit> {
 
       testFetched =
           (await test.search(
-            ' ',
+            '',
             null,
             withCaptchaCheck: withCaptchaCheck,
           )) ??
