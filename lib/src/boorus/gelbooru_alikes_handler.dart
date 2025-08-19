@@ -42,6 +42,9 @@ class GelbooruAlikesHandler extends BooruHandler {
     '0': TagType.none,
   };
 
+  static String get r34xxxCredentialsWarningText =>
+      '<p><b>You may need to add your User ID and API key. You can get them on <a href="https://rule34.xxx/index.php?page=account&s=options">rule34.xxx settings page</a> under "API Access Credentials" after logging in (enter only the values, without the "&api_key="/"&user_id="). Note: Anonymous access (user_id=2) is NOT allowed. If api_key is empty, turn on "Generate new key", then press "Save", it should appear after a page reloads.</b></p>';
+
   @override
   List parseListFromResponse(dynamic response) {
     final parsedResponse = XmlDocument.parse(response.data);
