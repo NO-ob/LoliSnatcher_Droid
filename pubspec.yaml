@@ -12,12 +12,12 @@ dependencies:
   flutter:
     sdk: flutter
   alice_lightweight: ^3.10.0
-  app_links: ^6.4.0
+  app_links: ^6.4.1
   auto_size_text_plus: ^3.0.2
   calendar_date_picker2: ^2.0.1
   chewie: ^1.12.1
   crypto: ^3.0.6
-  dio: ^5.8.0+1
+  dio: ^5.9.0
   dio_http2_adapter: ^2.6.0
   dynamic_color: ^1.8.1
   equatable: ^2.0.7
@@ -41,10 +41,10 @@ dependencies:
     git:
       url: https://github.com/jiangtian616/socks_proxy
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
-  font_awesome_flutter: ^10.8.0
+  font_awesome_flutter: ^10.9.1
   fpdart: ^1.1.1
   fvp: ^0.33.1
-  get_it: ^8.1.0
+  get_it: ^8.2.0
   get: ^5.0.0-release-candidate-9.3.2 # ^4.7.2
   google_fonts: ^6.3.0
   html: ^0.15.6
@@ -79,25 +79,25 @@ dependencies:
       ref: b84b371347ab4f13374c2709becaf247aec354e4 # master - forked to change IME composing style
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
-  share_plus: ^11.0.0 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
+  share_plus: ^11.1.0 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
   sqflite_common_ffi: ^2.3.6
   sqflite: ^2.4.2
   super_clipboard: ^0.9.1
-  talker_dio_logger: ^4.9.3
-  talker_flutter: ^4.9.3
-  talker_logger: ^4.9.3
-  talker: ^4.9.3
+  talker_dio_logger: ^5.0.0
+  talker_flutter: ^5.0.0
+  talker_logger: ^5.0.0
+  talker: ^5.0.0
   url_launcher: ^6.3.2
   uuid: ^4.5.1
   vibration: ^3.1.3
   video_player: ^2.10.0
   waterfall_flow: ^3.1.1
-  xml: ^6.5.0
+  xml: ^6.6.1
 
 
 
 dependency_overrides:
-  android_intent_plus: ^5.3.0
+  android_intent_plus: ^5.3.1
   material_color_utilities: ^0.13.0 # flutter_test conflict
 
 
