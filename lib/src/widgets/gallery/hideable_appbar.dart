@@ -447,23 +447,28 @@ class _HideableAppBarState extends State<HideableAppBar> {
         }
 
         final item = widget.tab.booruHandler.filteredFetched[page.value];
-        final bool isBeingSnatched =
-            snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item &&
-            snatchHandler.total.value != 0;
-        if (!isBeingSnatched) {
-          return null;
-        } else {
+        return Obx(() {
+          final bool isBeingSnatched =
+              snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item &&
+              snatchHandler.total.value != 0;
+
+          if (!isBeingSnatched) {
+            return const SizedBox.shrink();
+          }
+
           return Padding(
             padding: const EdgeInsets.all(2),
-            child: AnimatedProgressIndicator(
-              value: snatchHandler.currentProgress,
-              animationDuration: const Duration(milliseconds: 50),
-              indicatorStyle: IndicatorStyle.circular,
-              valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.66),
-              minHeight: 4,
+            child: Obx(
+              () => AnimatedProgressIndicator(
+                value: snatchHandler.currentProgress,
+                animationDuration: const Duration(milliseconds: 50),
+                indicatorStyle: IndicatorStyle.circular,
+                valueColor: Theme.of(context).progressIndicatorTheme.color?.withValues(alpha: 0.66),
+                minHeight: 4,
+              ),
             ),
           );
-        }
+        });
       case 'autoscroll':
         if (autoScroll) {
           return RestartableProgressIndicator(
