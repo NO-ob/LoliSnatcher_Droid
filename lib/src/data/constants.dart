@@ -27,8 +27,8 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.4.4',
-    buildNumber: 4202,
-    title: '2.4.4 Hotfix 3',
+    buildNumber: 4203,
+    title: '2.4.4 Hotfix 4',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.loliSnatcher',
@@ -36,6 +36,12 @@ class Constants {
     changelog: '''
 If you encounter any issues or have suggestions, please post them in github issues or in our discord server
 
+Hotfix 4 - 2.4.4+4203 (20-08-25):
+- Added instructions when rule34xxx fails to load results (it now requires user id/api key), also fixed some requests not using the api key
+- Possible fix for huge delays when saving files in custom directory
+- Fixed current snatch progress indicator in viewer toolbar not updating
+
+-------------------
 
 Hotfix 3 - 2.4.4+4202 (28-07-25):
 - Fixed gelbooru favourited items possibly saving urls in the wrong format (extra slashes), which caused them to appear as not favourited
