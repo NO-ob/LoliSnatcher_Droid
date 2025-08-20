@@ -33,6 +33,13 @@ class GelbooruAlikesHandler extends BooruHandler {
 
   bool get isR34xxx => booru.baseURL!.contains('rule34.xxx');
 
+  // because requests to default url are protected by a captcha
+  String get baseURL => isR34xxx ? 'https://api.rule34.xxx' : booru.baseURL!;
+
+  String get apiKeyStr => booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
+
+  String get userIDStr => booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
+
   @override
   Map<String, TagType> get tagTypeMap => {
     '5': TagType.meta,
@@ -43,7 +50,9 @@ class GelbooruAlikesHandler extends BooruHandler {
   };
 
   static String get r34xxxCredentialsWarningText =>
-      '<p><b>You may need to add your User ID and API key. You can get them on <a href="https://rule34.xxx/index.php?page=account&s=options">rule34.xxx settings page</a> under "API Access Credentials" after logging in (enter only the values, without the "&api_key="/"&user_id="). Note: Anonymous access (user_id=2) is NOT allowed. If api_key is empty, turn on "Generate new key", then press "Save", it should appear after a page reloads.</b></p>';
+      '<p><b>You may need to add your User ID and API key. You can get them on <a href="https://rule34.xxx/index.php?page=account&s=options">rule34.xxx settings page</a> under "API Access Credentials" after logging in (enter only the values, without the "&api_key="/"&user_id=").</b></p> '
+      '<p><b>Note: Anonymous access (user_id=2) is NOT allowed.</b></p> '
+      '<p><b>If api_key is empty on the settings page, enable "Generate new key", then press "Save", API key should appear after a page reloads.</b></p>';
 
   @override
   List parseListFromResponse(dynamic response) {
@@ -64,12 +73,12 @@ class GelbooruAlikesHandler extends BooruHandler {
       sampleURL += getAttrOrElem(current, 'sample_url')?.toString() ?? getAttrOrElem(current, 'file_url')!.toString();
       previewURL += getAttrOrElem(current, 'preview_url')!.toString();
       if (!fileURL.contains('http')) {
-        fileURL = booru.baseURL! + fileURL;
-        sampleURL = booru.baseURL! + sampleURL;
-        previewURL = booru.baseURL! + previewURL;
+        fileURL = baseURL + fileURL;
+        sampleURL = baseURL + sampleURL;
+        previewURL = baseURL + previewURL;
       }
 
-      if (booru.baseURL!.contains('furry.booru.org')) {
+      if (baseURL.contains('furry.booru.org')) {
         previewURL = previewURL.replaceFirst('.png', '.jpg');
         if (sampleURL != fileURL && sampleURL.contains('samples')) {
           sampleURL = sampleURL.replaceFirst('.png', '.jpg');
@@ -115,23 +124,15 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String makePostURL(String id) {
     // EXAMPLE: https://safebooru.org/index.php?page=post&s=view&id=645243
-    return '${booru.baseURL}/index.php?page=post&s=view&id=$id';
+    return '$baseURL/index.php?page=post&s=view&id=$id';
   }
 
   @override
   String makeURL(String tags) {
     // EXAMPLE: https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=rating:safe+sort:score+translated&limit=50&pid=0
-    String baseUrl = booru.baseURL!;
-    if (isR34xxx) {
-      // because requests to default url are protected by a captcha
-      baseUrl = 'https://api.rule34.xxx';
-    }
-
     final int cappedPage = max(0, pageNum);
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-    final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
 
-    return "$baseUrl/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=$limit&pid=$cappedPage$apiKeyStr$userIdStr";
+    return "$baseURL/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=$limit&pid=$cappedPage$apiKeyStr$userIDStr";
   }
 
   // ----------------- Tag suggestions and tag handler stuff
@@ -139,12 +140,8 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String makeTagURL(String input) {
     // EXAMPLE: https://safebooru.org/autocomplete.php?q=naga
-    String baseUrl = booru.baseURL!;
-    if (isR34xxx) {
-      baseUrl = 'https://api.rule34.xxx';
-    }
-    return '$baseUrl/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20&order=count&direction=desc';
-    // return '$baseUrl/autocomplete.php?q=$input';
+    return '$baseURL/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=20&order=count&direction=desc$apiKeyStr$userIDStr';
+    // return '$baseURL/autocomplete.php?q=$input';
   }
 
   @override
@@ -305,12 +302,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String makeCommentsURL(String postID, int pageNum) {
     // EXAMPLE: https://safebooru.org/index.php?page=dapi&s=comment&q=index&post_id=1
-    String baseUrl = booru.baseURL!;
-    if (isR34xxx) {
-      baseUrl = 'https://api.rule34.xxx';
-    }
-
-    return '$baseUrl/index.php?page=dapi&s=comment&q=index&post_id=$postID';
+    return '$baseURL/index.php?page=dapi&s=comment&q=index&post_id=$postID$apiKeyStr$userIDStr';
   }
 
   @override
@@ -343,12 +335,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String makeNotesURL(String postID) {
     // EXAMPLE: https://safebooru.org/index.php?page=dapi&s=note&q=index&post_id=645243
-    String baseUrl = booru.baseURL!;
-    if (isR34xxx) {
-      baseUrl = 'https://api.rule34.xxx';
-    }
-
-    return '$baseUrl/index.php?page=dapi&s=note&q=index&post_id=$postID';
+    return '$baseURL/index.php?page=dapi&s=note&q=index&post_id=$postID$apiKeyStr$userIDStr';
   }
 
   @override
@@ -385,7 +372,12 @@ class GelbooruAlikesHandler extends BooruHandler {
       cookieString += headers['Cookie']!;
     }
 
-    Logger.Inst().log('${booru.baseURL}: $cookieString', className, 'getCookies', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log(
+      '$baseURL: $cookieString',
+      className,
+      'getCookies',
+      LogTypes.booruHandlerSearchURL,
+    );
 
     return cookieString.trim();
   }
