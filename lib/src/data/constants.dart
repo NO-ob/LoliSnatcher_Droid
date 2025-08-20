@@ -40,6 +40,7 @@ Hotfix 4 - 2.4.4+4203 (20-08-25):
 - Added instructions when rule34xxx fails to load results (it now requires user id/api key), also fixed some requests not using the api key
 - Possible fix for huge delays when saving files in custom directory
 - Fixed current snatch progress indicator in viewer toolbar not updating
+- Fix viewer breaking if there are no items to view (i.e. you added a tag from current search to hated)
 
 -------------------
 
