@@ -422,6 +422,22 @@ class ImageViewerState extends State<ImageViewer> {
       widget.booruItem,
       loadItemCancelToken,
     );
+
+    if (updateRes != true && widget.booru.baseURL?.isNotEmpty == true) {
+      await DioNetwork.get(
+        widget.booru.baseURL ?? '',
+        headers: await Tools.getFileCustomHeaders(
+          widget.booru,
+          item: widget.booruItem,
+          checkForReferer: true,
+        ),
+        customInterceptor: (dio) => DioNetwork.captchaInterceptor(
+          dio,
+          customUserAgent: Tools.appUserAgent,
+        ),
+      );
+    }
+
     await initViewer(
       true,
       withCaptchaCheck: updateRes != true,
