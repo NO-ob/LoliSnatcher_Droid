@@ -163,8 +163,8 @@ class _TagViewState extends State<TagView> {
                 (itemFileHost?.isNotEmpty == true && booruHost?.isNotEmpty == true && itemFileHost! == booruHost!);
           });
 
-    if (isMergeHandler || possibleBooru?.type?.isFavouritesOrDownloads != true) {
-      possibleBooruHandler = BooruHandlerFactory().getBooruHandler([possibleBooru!], null).booruHandler;
+    if (possibleBooru != null && (isMergeHandler || possibleBooru.type?.isFavouritesOrDownloads != true)) {
+      possibleBooruHandler = BooruHandlerFactory().getBooruHandler([possibleBooru], null).booruHandler;
       hasLoadItemSupport = possibleBooruHandler!.hasLoadItemSupport;
       canLoadItemOnStart = possibleBooruHandler!.shouldUpdateIteminTagView;
     }
@@ -486,6 +486,7 @@ class _TagViewState extends State<TagView> {
             color: Theme.of(context).iconTheme.color,
           ),
           action: () async {
+            if (item.serverId == null) return;
             item.notes.value = await handler.getNotes(item.serverId!);
           },
           drawBottomBorder: false,
@@ -500,9 +501,7 @@ class _TagViewState extends State<TagView> {
       return Column(
         children: [
           Divider(
-            height: 2,
-            thickness: 2,
-            color: Colors.grey[800]!.withValues(alpha: 0.66),
+            color: context.theme.dividerTheme.color?.withValues(alpha: 0.66),
           ),
           infoText(Tools.pluralize('Source', sources.length), ' ', canCopy: false),
           Column(
@@ -1059,9 +1058,7 @@ class _TagViewState extends State<TagView> {
               ),
             ),
             Divider(
-              color: Colors.grey[800]!.withValues(alpha: 0.66),
-              height: 1,
-              thickness: 1,
+              color: context.theme.dividerTheme.color?.withValues(alpha: 0.66),
             ),
           ],
         ),
@@ -1155,9 +1152,7 @@ class _TagViewState extends State<TagView> {
                   sourcesList(sources),
                   if (tagsAvailable) ...[
                     Divider(
-                      height: 2,
-                      thickness: 2,
-                      color: Colors.grey[800]!.withValues(alpha: 0.66),
+                      color: context.theme.dividerTheme.color?.withValues(alpha: 0.66),
                     ),
                     tagsButton(),
                     Padding(
@@ -1167,11 +1162,17 @@ class _TagViewState extends State<TagView> {
                           inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
                             filled: false,
                             border: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                              borderSide: BorderSide(
+                                color: context.theme.dividerTheme.color!.withValues(alpha: 0.66),
+                                width: 1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.grey[800]!.withValues(alpha: 0.66), width: 1),
+                              borderSide: BorderSide(
+                                color: context.theme.dividerTheme.color!.withValues(alpha: 0.66),
+                                width: 1,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),

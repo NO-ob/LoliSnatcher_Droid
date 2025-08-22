@@ -92,6 +92,7 @@ class ThemeHandler {
       drawerTheme: drawerTheme(lightColorScheme),
       tabBarTheme: tabBarTheme(lightColorScheme),
       dropdownMenuTheme: dropdownMenuTheme(lightColorScheme),
+      dividerTheme: dividerTheme(lightColorScheme),
     );
   }
 
@@ -128,6 +129,7 @@ class ThemeHandler {
       drawerTheme: drawerTheme(darkColorScheme),
       tabBarTheme: tabBarTheme(darkColorScheme),
       dropdownMenuTheme: dropdownMenuTheme(darkColorScheme),
+      dividerTheme: dividerTheme(darkColorScheme),
     );
   }
 
@@ -424,6 +426,14 @@ class ThemeHandler {
 
   DialogThemeData dialogTheme(ColorScheme colorScheme) => DialogThemeData(
     backgroundColor: colorScheme.surface,
+  );
+
+  DividerThemeData dividerTheme(ColorScheme colorScheme) => DividerThemeData(
+    color: Colors.grey[800],
+    thickness: 1,
+    space: 1,
+    indent: 0,
+    endIndent: 0,
   );
 }
 
