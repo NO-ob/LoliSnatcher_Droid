@@ -31,10 +31,12 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   bool get hasTagSuggestions => true;
 
-  bool get isR34xxx => booru.baseURL!.contains('rule34.xxx');
+  String get originalBaseUrl => booru.baseURL!;
+
+  bool get isR34xxx => originalBaseUrl.contains('rule34.xxx');
 
   // because requests to default url are protected by a captcha
-  String get baseURL => isR34xxx ? 'https://api.rule34.xxx' : booru.baseURL!;
+  String get baseURL => isR34xxx ? 'https://api.rule34.xxx' : originalBaseUrl;
 
   String get apiKeyStr => booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
 
@@ -124,7 +126,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String makePostURL(String id) {
     // EXAMPLE: https://safebooru.org/index.php?page=post&s=view&id=645243
-    return '$baseURL/index.php?page=post&s=view&id=$id';
+    return '$originalBaseUrl/index.php?page=post&s=view&id=$id';
   }
 
   @override
