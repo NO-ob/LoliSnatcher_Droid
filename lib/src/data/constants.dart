@@ -36,8 +36,8 @@ class Constants {
     changelog: '''
 If you encounter any issues or have suggestions, please post them in github issues or in our discord server
 
-Hotfix 5 - 2.4.4+4204 (24-08-25):
-- Fix r34xxx functions that broke after last update (post url, tag data fetching)
+Hotfix 5 - 2.4.4+4204 (25-08-25):
+- Fix r34xxx functions that broke after last update (post url, tag data fetching), fixed r34xxx items favourited before last update appearing as if they are not favourited
 - Possible fix for info drawer turning into a grey screen in some conditions when viewing items in favourites/downloads
 
 -------------------
