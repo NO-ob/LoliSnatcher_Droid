@@ -57,10 +57,8 @@ android {
         namespace 'com.noaisu.loliSnatcher'
     }
 
-    // compileSdk flutter.compileSdkVersion
-    // ndkVersion flutter.ndkVersion
-    compileSdk 35
-    ndkVersion "27.2.12479018"
+    compileSdk flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -120,6 +118,6 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0"
     implementation 'androidx.documentfile:documentfile:1.0.1'
 }
