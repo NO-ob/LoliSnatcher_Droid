@@ -141,10 +141,11 @@ class ImageWriter {
       try {
         if (Platform.isAndroid) {
           if (settingsHandler.extPathOverride.isNotEmpty && await ServiceHandler.getAndroidSDKVersion() >= 31) {
-            final bool result = await ServiceHandler.existsFileFromSAFDirectory(path, fileName);
-            if (!result) {
-              throw Exception('SAF file not found');
-            }
+            // TODO disabled for now, because it causes huge delays if user has a lot of saved files
+            // final bool result = await ServiceHandler.existsFileFromSAFDirectory(path, fileName);
+            // if (!result) {
+            //   throw Exception('SAF file not found');
+            // }
           } else {
             await ServiceHandler.callMediaScanner(image.path);
           }

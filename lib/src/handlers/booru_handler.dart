@@ -163,6 +163,14 @@ abstract class BooruHandler {
     try {
       response = await fetchSearch(uri, tags, withCaptchaCheck: withCaptchaCheck);
       if (response.statusCode == 200) {
+        if (response.requestOptions.uri.toString().contains('rule34.xxx') &&
+            response.data is String &&
+            (response.data as String).contains('Missing authentication') == true) {
+          throw Exception(
+            '<p>Missing authentication</p><p><b>You may need to add your User ID and API key. Go to <a href="/settings/booru">[Settings > Booru & Search]</a> to update the booru config. Note: Anonymous access is NOT allowed.</b></p>',
+          );
+        }
+
         // parse response data
         final List<BooruItem> newItems = await parseResponse(response);
         await afterParseResponse(newItems);
@@ -194,11 +202,15 @@ abstract class BooruHandler {
             : (e.message ?? e.toString());
 
         // TODO move error handling to separate function and allow per booru changes?
-        if (e.response?.statusCode == HttpStatus.unauthorized &&
-            e.requestOptions.uri.toString().contains('gelbooru.com')) {
-          // add a message to direct user to set his user ID and api key
-          errorString +=
-              '\n<p><b>You may need to add your User ID and API key. Go to <a href="/settings/booru">[Settings > Booru & Search]</a> to update the booru config. You can find your User ID and API key on <a href="https://gelbooru.com/index.php?page=account&s=options">Gelbooru settings page</a> under "API Access Credentials". Note: Anonymous access is NOT permitted.</b></p>';
+        if (e.response?.statusCode == HttpStatus.unauthorized) {
+          if (e.requestOptions.uri.toString().contains('gelbooru.com')) {
+            // add a message to direct user to set his user ID and api key
+            errorString +=
+                '\n<p><b>You may need to add your User ID and API key. Go to <a href="/settings/booru">[Settings > Booru & Search]</a> to update the booru config. Note: Anonymous access is NOT allowed.</b></p>';
+          } else if (e.requestOptions.uri.toString().contains('rule34.xxx')) {
+            errorString +=
+                '\n<p><b>You may need to add your User ID and API key. Go to <a href="/settings/booru">[Settings > Booru & Search]</a> to update the booru config. Note: Anonymous access is NOT allowed.</b></p>';
+          }
         }
       } else {
         errorString = e.toString();

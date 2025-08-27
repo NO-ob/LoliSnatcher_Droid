@@ -32,8 +32,8 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.4.4',
-    buildNumber: 4202,
-    title: '2.4.4 Hotfix 3',
+    buildNumber: 4204,
+    title: '2.4.4 Hotfix 5',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.loliSnatcher',
@@ -41,6 +41,19 @@ class Constants {
     changelog: '''
 If you encounter any issues or have suggestions, please post them in github issues or in our discord server
 
+Hotfix 5 - 2.4.4+4204 (25-08-25):
+- Fix r34xxx functions that broke after last update (post url, tag data fetching), fixed r34xxx items favourited before last update appearing as if they are not favourited
+- Possible fix for info drawer turning into a grey screen in some conditions when viewing items in favourites/downloads
+
+-------------------
+
+Hotfix 4 - 2.4.4+4203 (20-08-25):
+- Added instructions when rule34xxx fails to load results (it now requires user id/api key), also fixed some requests not using the api key
+- Possible fix for huge delays when saving files in custom directory
+- Fixed current snatch progress indicator in viewer toolbar not updating
+- Fix viewer breaking if there are no items to view (i.e. you added a tag from current search to hated)
+
+-------------------
 
 Hotfix 3 - 2.4.4+4202 (28-07-25):
 - Fixed gelbooru favourited items possibly saving urls in the wrong format (extra slashes), which caused them to appear as not favourited

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/gelbooru_alikes_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
@@ -257,8 +258,11 @@ class _BooruEditState extends State<BooruEdit> {
     switch (selectedBooruType) {
       case BooruType.Autodetect:
       case BooruType.Gelbooru:
+      case BooruType.GelbooruAlike:
         if (booruURLController.text.contains('gelbooru.com')) {
           return GelbooruHandler.credentialsWarningText;
+        } else if (booruURLController.text.contains('rule34.xxx')) {
+          return GelbooruAlikesHandler.r34xxxCredentialsWarningText;
         }
         break;
       case BooruType.Hydrus:
@@ -376,26 +380,16 @@ class _BooruEditState extends State<BooruEdit> {
             : booruFaviconController.text;
 
         //Call the booru test
-        Booru testBooru;
-        if (booruAPIKeyController.text == '') {
-          testBooru = Booru(
-            booruNameController.text,
-            booruType,
-            booruFaviconController.text,
-            booruURLController.text,
-            booruDefTagsController.text,
-          );
-        } else {
-          testBooru = Booru.withKey(
-            booruNameController.text,
-            booruType,
-            booruFaviconController.text,
-            booruURLController.text,
-            booruDefTagsController.text,
-            booruAPIKeyController.text,
-            booruUserIDController.text,
-          );
-        }
+        final Booru testBooru = Booru.withKey(
+          booruNameController.text,
+          booruType,
+          booruFaviconController.text,
+          booruURLController.text,
+          booruDefTagsController.text,
+          booruAPIKeyController.text.isEmpty ? null : booruAPIKeyController.text,
+          booruUserIDController.text.isEmpty ? null : booruUserIDController.text,
+        );
+
         isTesting = true;
         setState(() {});
         final testResults = await booruTest(testBooru, selectedBooruType);
@@ -516,23 +510,15 @@ class _BooruEditState extends State<BooruEdit> {
     }
 
     await getStoragePermission();
-    final Booru newBooru = (booruAPIKeyController.text == '' && booruUserIDController.text == '')
-        ? Booru(
-            booruNameController.text,
-            booruType,
-            booruFaviconController.text,
-            booruURLController.text,
-            booruDefTagsController.text,
-          )
-        : Booru.withKey(
-            booruNameController.text,
-            booruType,
-            booruFaviconController.text,
-            booruURLController.text,
-            booruDefTagsController.text,
-            booruAPIKeyController.text,
-            booruUserIDController.text,
-          );
+    final Booru newBooru = Booru.withKey(
+      booruNameController.text,
+      booruType,
+      booruFaviconController.text,
+      booruURLController.text,
+      booruDefTagsController.text,
+      booruAPIKeyController.text.isEmpty ? null : booruAPIKeyController.text,
+      booruUserIDController.text.isEmpty ? null : booruUserIDController.text,
+    );
 
     bool booruExists = false;
     String booruExistsReason = '';

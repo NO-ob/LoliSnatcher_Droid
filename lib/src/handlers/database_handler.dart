@@ -883,7 +883,18 @@ class DBHandler {
   //
 
   Future<void> fixBooruItems(ValueChanged<String>? onStatusUpdate) async {
-    await convertGelbooruFromImg3toImg4(onStatusUpdate);
+    try {
+      await convertGelbooruFromImg3toImg4(onStatusUpdate);
+      await fixR34XXXPostUrls(onStatusUpdate);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        s: s,
+        'DBHandler',
+        'fixBooruItems',
+        LogTypes.exception,
+      );
+    }
   }
 
   Future<void> convertGelbooruFromImg3toImg4(ValueChanged<String>? onStatusUpdate) async {
@@ -919,6 +930,31 @@ class DBHandler {
         batch?.rawUpdate(
           'UPDATE BooruItem SET fileURL = ?, sampleURL = ?, thumbnailURL = ? WHERE id = ?;',
           [newFileURL, newSampleURL, newThumbnailURL, item['id']],
+        );
+      }
+      await batch?.commit(noResult: true);
+    }
+  }
+
+  Future<void> fixR34XXXPostUrls(ValueChanged<String>? onStatusUpdate) async {
+    // 2.4.4+4203 introduced a bug where postURL was changed to api.rule34.xxx, this fixes those entries back to just rule34.xxx
+
+    final List<Map<String, dynamic>> items =
+        await db?.rawQuery(
+          'SELECT id, postURL FROM BooruItem WHERE postURL LIKE "%api.rule34.xxx%";',
+        ) ??
+        [];
+
+    const int chunkSize = 1000;
+    for (int i = 0; i < (items.length / chunkSize).ceil(); i++) {
+      final batch = db?.batch();
+      final chunk = items.sublist(i * chunkSize, min(items.length, (i + 1) * chunkSize));
+      onStatusUpdate?.call('R34XXX: ${i * chunkSize}/${items.length}');
+      for (final Map<String, dynamic> item in chunk) {
+        final String newPostURL = item['postURL'].toString().replaceAll('api.rule34.xxx', 'rule34.xxx');
+        batch?.rawUpdate(
+          'UPDATE BooruItem SET postURL = ? WHERE id = ?;',
+          [newPostURL, item['id']],
         );
       }
       await batch?.commit(noResult: true);
