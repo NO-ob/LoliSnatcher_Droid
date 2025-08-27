@@ -42,15 +42,27 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
   }
 
   Widget buildFlag(AppLocale? locale) {
+    const double width = 36, height = 24;
+
     if (locale == null) {
-      return const Icon(Icons.settings);
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Icon(
+          Icons.settings,
+          size: 20,
+          color: Theme.of(context).colorScheme.onSecondaryContainer,
+        ),
+      );
     }
 
     if (locale.localeCode == '?') {
       return const CircularProgressIndicator();
     }
-
-    const double width = 36, height = 24;
 
     Widget firstFlag = CountryFlag.fromLanguageCode(
       locale.localeCode,
@@ -75,7 +87,19 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
         );
         break;
       case AppLocale.dev:
-        return const Icon(Icons.developer_board);
+        return Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Icon(
+            Icons.developer_board,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSecondaryContainer,
+          ),
+        );
       default:
         break;
     }
@@ -132,16 +156,16 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: buildFlag(e),
+                    ),
                     Text(
                       e?.localeName ?? context.loc.settings.language.system,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: buildFlag(e),
                     ),
                   ],
                 ),
