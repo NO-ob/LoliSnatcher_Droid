@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 
@@ -242,7 +243,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         throw Exception('CustomNetworkImage is an empty file: $resolved');
       }
 
-      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(await _tryFixGifSpeed(bytes));
       return decode(buffer);
     } catch (e) {
       if (onError != null) {
@@ -258,12 +259,56 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     }
   }
 
+  /// Try to fix gifs without proper frame timings and therefore are played too fast due to a bug in flutter (https://github.com/flutter/flutter/issues/29130)
+  ///
+  /// Source: https://github.com/fluttercandies/extended_image_library/pull/69
+  Future<Uint8List> _tryFixGifSpeed(Uint8List image) async {
+    return compute(
+      (Uint8List image) {
+        bool handled = false;
+        if (!handled) {
+          try {
+            for (int i = 0; i < image.length - 2; i++) {
+              final Uint8List slice = image.sublist(i, i + 3);
+              if (const ListEquality<int>().equals(slice, <int>[0x21, 0xF9, 0x04])) {
+                final int delay1 = image[i + 4];
+                final int delay2 = image[i + 5];
+                final int delay = delay1 | (delay2 << 8);
+                // min 100ms
+                if (delay < 10) {
+                  image[i + 4] = 0x0A;
+                }
+              }
+            }
+            handled = true;
+          } catch (_) {
+            //
+          }
+        }
+        return image;
+      },
+      image,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is CustomNetworkImage && other.url == url && other.scale == scale;
+    return other is CustomNetworkImage &&
+        other.url == url &&
+        other.scale == scale &&
+        other.headers == headers &&
+        other.withCache == withCache &&
+        other.cacheFolder == cacheFolder &&
+        other.fileNameExtras == fileNameExtras &&
+        other.onCacheDetected == onCacheDetected &&
+        other.onError == onError &&
+        other.sendTimeout == sendTimeout &&
+        other.receiveTimeout == receiveTimeout &&
+        other.withCaptchaCheck == withCaptchaCheck &&
+        other.cancelToken == cancelToken;
   }
 
   @override
@@ -532,7 +577,19 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is CustomNetworkAvifImage && other.url == url && other.scale == scale;
+    return other is CustomNetworkAvifImage &&
+        other.url == url &&
+        other.scale == scale &&
+        other.headers == headers &&
+        other.withCache == withCache &&
+        other.cacheFolder == cacheFolder &&
+        other.fileNameExtras == fileNameExtras &&
+        other.onCacheDetected == onCacheDetected &&
+        other.onError == onError &&
+        other.sendTimeout == sendTimeout &&
+        other.receiveTimeout == receiveTimeout &&
+        other.withCaptchaCheck == withCaptchaCheck &&
+        other.cancelToken == cancelToken;
   }
 
   @override

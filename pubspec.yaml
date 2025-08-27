@@ -5,8 +5,8 @@ publish_to: none
 version: 2.4.4+4204 # remember to update the values in constants.dart->updateInfo after changing them here
 
 environment:
-  sdk: ">=3.8.1 <4.0.0"
-  flutter: ^3.32.8
+  sdk: ">=3.9.0 <4.0.0"
+  flutter: ^3.35.2
 
 dependencies:
   flutter:
@@ -16,6 +16,7 @@ dependencies:
   auto_size_text_plus: ^3.0.2
   calendar_date_picker2: ^2.0.1
   chewie: ^1.12.1
+  collection: ^1.19.1
   crypto: ^3.0.6
   dio: ^5.9.0
   dio_http2_adapter: ^2.6.0
