@@ -378,67 +378,75 @@ packages:
   flutter_avif:
     dependency: "direct main"
     description:
-      name: flutter_avif
-      sha256: "2e086140fabffb760f4be32ec2726e644074f5ecac8a4c8f52cfccc0cf6e5a9c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
+      path: flutter_avif
+      ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      resolved-ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      url: "https://github.com/realth000/flutter_avif.git"
+    source: git
+    version: "2.5.0"
   flutter_avif_android:
     dependency: transitive
     description:
-      name: flutter_avif_android
-      sha256: ecfc88ac7bda09308089e71c8d214650bb7861c6c68028d7b2827681466de332
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
+      path: flutter_avif_android
+      ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      resolved-ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      url: "https://github.com/realth000/flutter_avif.git"
+    source: git
+    version: "2.5.0"
   flutter_avif_ios:
     dependency: transitive
     description:
-      name: flutter_avif_ios
-      sha256: e528daf284a366e1838977005193d63f021c6727852d22afcea69b283ad02af2
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
+      path: flutter_avif_ios
+      ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      resolved-ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      url: "https://github.com/realth000/flutter_avif.git"
+    source: git
+    version: "2.5.0"
   flutter_avif_linux:
     dependency: transitive
     description:
-      name: flutter_avif_linux
-      sha256: a23ae19bd62daf42d717e1ff95030e80679de16ba40fdb8c753e046629d6ae15
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
+      path: flutter_avif_linux
+      ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      resolved-ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      url: "https://github.com/realth000/flutter_avif.git"
+    source: git
+    version: "2.5.0"
   flutter_avif_macos:
     dependency: transitive
     description:
-      name: flutter_avif_macos
-      sha256: "576f4991feea4fb24eb846e2fa3a5b829c2f1eae83ec312e8e99b5b09357cc84"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
+      path: flutter_avif_macos
+      ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      resolved-ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      url: "https://github.com/realth000/flutter_avif.git"
+    source: git
+    version: "2.5.0"
   flutter_avif_platform_interface:
     dependency: transitive
     description:
-      name: flutter_avif_platform_interface
-      sha256: "4a5929c24c3a3cab8c243109be938e680af03b5802a249e964d447ed89b26f49"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
+      path: flutter_avif_platform_interface
+      ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      resolved-ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      url: "https://github.com/realth000/flutter_avif.git"
+    source: git
+    version: "2.5.0"
   flutter_avif_web:
     dependency: transitive
     description:
-      name: flutter_avif_web
-      sha256: "7acc416904f52eb8623b537574d12143ce3b9095a82f68fbfb97eeea846bb998"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
+      path: flutter_avif_web
+      ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      resolved-ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      url: "https://github.com/realth000/flutter_avif.git"
+    source: git
+    version: "2.5.0"
   flutter_avif_windows:
     dependency: transitive
     description:
-      name: flutter_avif_windows
-      sha256: "08a787a5379e68844e883bfc81f2f6fb94d3d9c9a87dc6889b02cf6bab16127e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.0"
+      path: flutter_avif_windows
+      ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      resolved-ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
+      url: "https://github.com/realth000/flutter_avif.git"
+    source: git
+    version: "2.5.0"
   flutter_cache_manager:
     dependency: transitive
     description:
@@ -828,12 +836,13 @@ packages:
     source: hosted
     version: "0.20.2"
   irondash_engine_context:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: irondash_engine_context
-      sha256: "2bb0bc13dfda9f5aaef8dde06ecc5feb1379f5bb387d59716d799554f3f305d7"
-      url: "https://pub.dev"
-    source: hosted
+      path: "engine_context/dart"
+      ref: "62772db3cd0e041cc20afbd27a148969b298430e"
+      resolved-ref: "62772db3cd0e041cc20afbd27a148969b298430e"
+      url: "https://github.com/CodeDoctorDE/irondash.git"
+    source: git
     version: "0.5.5"
   irondash_message_channel:
     dependency: transitive
@@ -1013,13 +1022,14 @@ packages:
     source: hosted
     version: "1.2.0"
   media_kit_libs_android_video:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: media_kit_libs_android_video
-      sha256: adff9b571b8ead0867f9f91070f8df39562078c0eb3371d88b9029a2d547d7b7
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.7"
+      path: "libs/android/media_kit_libs_android_video"
+      ref: main
+      resolved-ref: ad84c59faa2b871926cb31516bdeec65d7676884
+      url: "https://github.com/Predidit/media-kit.git"
+    source: git
+    version: "1.3.6"
   media_kit_libs_ios_video:
     dependency: transitive
     description:

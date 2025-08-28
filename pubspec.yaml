@@ -30,7 +30,11 @@ dependencies:
       ref: 828e79014ed5fd73062d6a24db14b6c114ac175b # master - forked to add richtext
   flash: ^3.1.1
   flex_color_picker: ^3.7.1
-  flutter_avif: ^3.0.0
+  flutter_avif: #^3.0.0
+    git: # 16kb fork
+      url: https://github.com/realth000/flutter_avif.git
+      path: ./flutter_avif
+      ref: c9d98a31cef4d10d9a40b86a172d3dc5ddabe23d
   flutter_displaymode: ^0.6.0
   flutter_html: ^3.0.0
   flutter_improved_scrolling: ^0.0.3
@@ -100,6 +104,16 @@ dependencies:
 dependency_overrides:
   android_intent_plus: ^5.3.1
   material_color_utilities: ^0.13.0 # flutter_test conflict
+  media_kit_libs_android_video:
+    git: # 16kb fork
+      url: https://github.com/Predidit/media-kit.git
+      path: ./libs/android/media_kit_libs_android_video
+      ref: main
+  irondash_engine_context:
+    git: # 16kb fork
+      url: https://github.com/CodeDoctorDE/irondash.git
+      path: ./engine_context/dart
+      ref: 62772db3cd0e041cc20afbd27a148969b298430e
 
 
 
