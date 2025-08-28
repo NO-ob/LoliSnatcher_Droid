@@ -51,7 +51,7 @@ dependencies:
   fvp: ^0.33.1
   get_it: ^8.2.0
   get: ^5.0.0-release-candidate-9.3.2 # ^4.7.2
-  google_fonts: ^6.3.0
+  google_fonts: ^6.3.1
   html: ^0.15.6
   http_proxy: # ^1.2.2
     git:
@@ -87,7 +87,6 @@ dependencies:
   share_plus: ^11.1.0 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
   sqflite_common_ffi: ^2.3.6
   sqflite: ^2.4.2
-  super_clipboard: ^0.9.1
   talker_dio_logger: ^5.0.0
   talker_flutter: ^5.0.0
   talker_logger: ^5.0.0
@@ -109,11 +108,6 @@ dependency_overrides:
       url: https://github.com/Predidit/media-kit.git
       path: ./libs/android/media_kit_libs_android_video
       ref: main
-  irondash_engine_context:
-    git: # 16kb fork
-      url: https://github.com/CodeDoctorDE/irondash.git
-      path: ./engine_context/dart
-      ref: 62772db3cd0e041cc20afbd27a148969b298430e
 
 
 
