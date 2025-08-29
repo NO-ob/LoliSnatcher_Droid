@@ -40,6 +40,7 @@ Hotfix 6 - 2.4.4+4205 (29-08-25):
 - Update dependencies
 - Fix for artist: and oc: tags with underscores for booru-on-rails/philomena-based boorus, also added captcha detection for derpibooru
 - Fix text layout on the widget for page loading/failed state
+- Fix some gifs playing too fast
 
 -------------------
 
