@@ -54,6 +54,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   static String get r34xxxCredentialsWarningText =>
       '<p><b>You may need to add your User ID and API key. You can get them on <a href="https://rule34.xxx/index.php?page=account&s=options">rule34.xxx settings page</a> under "API Access Credentials" after logging in (enter only the values, without the "&api_key="/"&user_id=").</b></p> '
       '<p><b>Note: Anonymous access (user_id=2) is NOT allowed.</b></p> '
+      '<p><b>User ID must be a number, NOT your login.</b></p> '
       '<p><b>If api_key is empty on the settings page, enable "Generate new key", then press "Save", API key should appear after a page reloads.</b></p>';
 
   @override
