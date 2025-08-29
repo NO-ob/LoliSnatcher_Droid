@@ -233,13 +233,21 @@ class Tools {
 
     final String host = uri.host;
 
-    final Map<String, String> knownCaptchaStrings = {
-      'booru.allthefallen.moe': 'processChallenge',
+    final Map<String, List<String>> knownCaptchaStrings = {
+      // TODO add multiple strings for each, then try to find as much as possible and decide if it's a captcha based on the ratio of found/total
+      'booru.allthefallen.moe': [
+        'processChallenge',
+      ],
+      'derpibooru.org': [
+        'derpi-challenge',
+      ],
     };
-    final String? textToFind = knownCaptchaStrings.entries.firstWhereOrNull((e) => host.contains(e.key))?.value;
-    final bool hasCaptchaContent = (textToFind == null || response?.data is! String)
+    final List<String>? stringsToFind = knownCaptchaStrings.entries
+        .firstWhereOrNull((e) => host.contains(e.key))
+        ?.value;
+    final bool hasCaptchaContent = (stringsToFind == null || response?.data is! String)
         ? false
-        : response?.data.toString().contains(textToFind) ?? false;
+        : stringsToFind.any((t) => response?.data.toString().contains(t) ?? false);
 
     if (isOnPlatformWithWebviewSupport &&
         (response?.statusCode == HttpStatus.forbidden ||

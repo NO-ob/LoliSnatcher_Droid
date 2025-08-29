@@ -76,6 +76,19 @@ class PhilomenaHandler extends BooruHandler {
     return '${booru.baseURL}/images/$id';
   }
 
+  String formatTagsWithUnderscores(String tags) {
+    final tagsList = tags.split(' ');
+    for (int i = 0; i < tagsList.length; i++) {
+      final tag = tagsList[i];
+      if (tag.contains('artist:') || tag.contains('oc:')) {
+        continue;
+      } else {
+        tagsList[i] = tag.replaceAll('_', '+');
+      }
+    }
+    return tagsList.join(' ');
+  }
+
   @override
   String makeURL(String tags) {
     // EXAMPLE: https://derpibooru.org/api/v1/json/search/images?q=solo&per_page=20&page=1
@@ -84,7 +97,7 @@ class PhilomenaHandler extends BooruHandler {
       filter = '56027';
     }
 
-    final formattedTags = tags.replaceAll(' ', ',').replaceAll('_', '+');
+    final formattedTags = formatTagsWithUnderscores(tags).replaceAll(' ', ',');
     if (booru.apiKey?.isEmpty ?? true) {
       return '${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q=$formattedTags&per_page=$limit&page=$pageNum';
     } else {
@@ -97,7 +110,7 @@ class PhilomenaHandler extends BooruHandler {
     if (input.isEmpty) {
       input = '*';
     }
-    return '${booru.baseURL}/api/v1/json/search/tags?q=*${input.replaceAll('_', '+')}*&per_page=20';
+    return '${booru.baseURL}/api/v1/json/search/tags?q=*${formatTagsWithUnderscores(input)}*&per_page=20';
   }
 
   @override

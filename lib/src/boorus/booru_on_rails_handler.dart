@@ -85,9 +85,22 @@ class BooruOnRailsHandler extends BooruHandler {
     }
   }
 
+  String formatTagsWithUnderscores(String tags) {
+    final tagsList = tags.split(' ');
+    for (int i = 0; i < tagsList.length; i++) {
+      final tag = tagsList[i];
+      if (tag.contains('artist:') || tag.contains('oc:')) {
+        continue;
+      } else {
+        tagsList[i] = tag.replaceAll('_', '+');
+      }
+    }
+    return tagsList.join(' ');
+  }
+
   @override
   String makeURL(String tags) {
-    final String formattedTags = tags.replaceAll(' ', ',').replaceAll('_', '+');
+    final String formattedTags = formatTagsWithUnderscores(tags).replaceAll(' ', ',');
     final String limitStr = limit.toString();
     final String pageStr = pageNum.toString();
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? 'key=${booru.apiKey}&' : '';
@@ -99,7 +112,7 @@ class BooruOnRailsHandler extends BooruHandler {
   @override
   String makeTagURL(String input) {
     // EXAMPLE: https://twibooru.org/api/v3/search/tags?q=*rai*
-    return '${booru.baseURL}/api/v3/search/tags?q=*${input.replaceAll('_', '+')}*';
+    return '${booru.baseURL}/api/v3/search/tags?q=*${formatTagsWithUnderscores(input)}*';
   }
 
   @override
