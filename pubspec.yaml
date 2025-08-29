@@ -2,7 +2,7 @@ name: lolisnatcher
 description: Booru Client with the ability to batch download Images.
 publish_to: none
 
-version: 2.4.4+4204 # remember to update the values in constants.dart->updateInfo after changing them here
+version: 2.4.4+4205 # remember to update the values in constants.dart->updateInfo after changing them here
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
@@ -30,7 +30,7 @@ dependencies:
       ref: 828e79014ed5fd73062d6a24db14b6c114ac175b # master - forked to add richtext
   flash: ^3.1.1
   flex_color_picker: ^3.7.1
-  flutter_avif: #^3.0.0
+  flutter_avif: # ^3.0.0
     git: # 16kb fork
       url: https://github.com/realth000/flutter_avif.git
       path: ./flutter_avif
