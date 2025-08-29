@@ -113,6 +113,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
       Widget icon = const Icon(Icons.refresh);
       VoidCallback onTap = retrySearch;
       bool showSubtitle = true;
+      bool htmlSubtitle = false;
       if (isLastPage) {
         if (isEmpty) {
           title = 'No results';
@@ -145,6 +146,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           final String errorFormatted = '\n${searchHandler.errorString}\nTap here to retry';
           title = 'Error when loading page #$pageNum';
           subtitle = errorFormatted;
+          htmlSubtitle = true;
         } else if (isEmpty) {
           title = 'Error, no results loaded';
           subtitle = 'Tap here to retry';
@@ -284,12 +286,19 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                             child: showSubtitle
                                 ? Align(
                                     alignment: Alignment.centerLeft,
-                                    child: LoliHtml(
-                                      subtitle,
-                                      style: {
-                                        'p': Style(padding: HtmlPaddings(bottom: HtmlPadding(12))),
-                                      },
-                                    ),
+                                    child: htmlSubtitle
+                                        ? LoliHtml(
+                                            subtitle,
+                                            style: {
+                                              'p': Style(padding: HtmlPaddings(bottom: HtmlPadding(12))),
+                                            },
+                                          )
+                                        : Text(
+                                            subtitle,
+                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                            ),
+                                          ),
                                   )
                                 : const SizedBox.shrink(),
                           ),
