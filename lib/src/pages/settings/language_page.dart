@@ -64,26 +64,26 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
       return const CircularProgressIndicator();
     }
 
-    Widget firstFlag = CountryFlag.fromLanguageCode(
-      locale.localeCode,
+    const flagTheme = ImageTheme(
       width: width,
       height: height,
-      shape: const RoundedRectangle(6),
+      shape: RoundedRectangle(6),
+    );
+
+    Widget firstFlag = CountryFlag.fromLanguageCode(
+      locale.localeCode,
+      theme: flagTheme,
     );
     Widget? secondFlag;
     switch (locale) {
       case AppLocale.en:
         firstFlag = CountryFlag.fromLanguageCode(
           'en-us',
-          width: width,
-          height: height,
-          shape: const RoundedRectangle(6),
+          theme: flagTheme,
         );
         secondFlag = CountryFlag.fromLanguageCode(
           locale.localeCode,
-          width: width,
-          height: height,
-          shape: const RoundedRectangle(6),
+          theme: flagTheme,
         );
         break;
       case AppLocale.dev:

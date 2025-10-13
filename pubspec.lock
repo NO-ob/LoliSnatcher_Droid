@@ -165,10 +165,10 @@ packages:
     dependency: "direct main"
     description:
       name: country_flags
-      sha256: "78a7bf8aabd7ae1a90087f0c517471ac9ebfe07addc652692f58da0f0f833196"
+      sha256: "714f2d415e74828eb08787d552a05e94cdf2cbe0607a5656f3e70087cd7bb7e0"
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.0"
+    version: "4.1.0"
   cronet_http:
     dependency: transitive
     description:
@@ -868,10 +868,10 @@ packages:
     dependency: transitive
     description:
       name: jovial_svg
-      sha256: "6791b1435547bdc0793081a166d41a8a313ebc61e4e5136fb7a3218781fb9e50"
+      sha256: "08dd24b800d48796c9c0227acb96eb00c6cacccb1d7de58d79fc924090049868"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.27"
+    version: "1.1.28"
   js:
     dependency: transitive
     description:
@@ -1420,18 +1420,18 @@ packages:
     dependency: "direct main"
     description:
       name: slang
-      sha256: b02c531f453c328a1343818c64d730357ac140860147c9a29030fdfc82039266
+      sha256: "47182d10ce284e232f25a02eb74a421a11e7eb6a6fab9ab84fd8182bb0761130"
       url: "https://pub.dev"
     source: hosted
-    version: "4.8.1"
+    version: "4.9.0"
   slang_flutter:
     dependency: "direct main"
     description:
       name: slang_flutter
-      sha256: "7a5e55f2b1ec99e06354a5213b992d34017efacccba8ffc6066cfc5517cc0282"
+      sha256: "5ecf841d6252c05ea335920ec299bb7edbb860eb793eebb4b40f68b9d148a571"
       url: "https://pub.dev"
     source: hosted
-    version: "4.8.0"
+    version: "4.9.0"
   source_span:
     dependency: transitive
     description:
@@ -1780,10 +1780,10 @@ packages:
     dependency: transitive
     description:
       name: watcher
-      sha256: "0b7fd4a0bbc4b92641dbf20adfd7e3fd1398fe17102d94b674234563e110088a"
+      sha256: "592ab6e2892f67760543fb712ff0177f4ec76c031f02f5b4ff8d3fc5eb9fb61a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.2"
+    version: "1.1.4"
   waterfall_flow:
     dependency: "direct main"
     description:
