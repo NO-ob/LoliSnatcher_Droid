@@ -10,7 +10,6 @@ import 'package:dio/dio.dart';
 import 'package:external_video_player_launcher/external_video_player_launcher.dart';
 import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
-import 'package:super_clipboard/super_clipboard.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
@@ -928,42 +927,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
           '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}',
           text: text,
         );
-      } else if (Platform.isWindows) {
-        final clipboard = SystemClipboard.instance;
-        if (clipboard == null) {
-          return; // Clipboard API is not supported on this platform.
-        }
-        final write = DataWriterItem();
-        if (text?.isNotEmpty == true) {
-          write.add(Formats.plainText(''));
-        }
-        final extension = item.fileExt ?? '';
-        switch (extension) {
-          case 'jpg':
-          case 'jpeg':
-            write.add(Formats.jpeg(await File(path).readAsBytes()));
-            break;
-          case 'png':
-            write.add(Formats.png(await File(path).readAsBytes()));
-            break;
-          case 'gif':
-            write.add(Formats.gif(await File(path).readAsBytes()));
-            break;
-          case 'mp4':
-            write.add(Formats.mp4(await File(path).readAsBytes()));
-            break;
-          case 'webm':
-            write.add(Formats.webm(await File(path).readAsBytes()));
-            break;
-          default:
-            return;
-        }
-        await clipboard.write([write]);
-        FlashElements.showSnackbar(
-          context: context,
-          title: const Text('Copied file to clipboard!', style: TextStyle(fontSize: 20)),
-          sideColor: Colors.green,
-        );
       }
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
@@ -1023,42 +986,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
             path,
             '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}',
             text: text,
-          );
-        } else if (Platform.isWindows) {
-          final clipboard = SystemClipboard.instance;
-          if (clipboard == null) {
-            return; // Clipboard API is not supported on this platform.
-          }
-          final write = DataWriterItem();
-          if (text?.isNotEmpty == true) {
-            write.add(Formats.plainText(''));
-          }
-          final extension = item.fileExt ?? '';
-          switch (extension) {
-            case 'jpg':
-            case 'jpeg':
-              write.add(Formats.jpeg(await File(path).readAsBytes()));
-              break;
-            case 'png':
-              write.add(Formats.png(await File(path).readAsBytes()));
-              break;
-            case 'gif':
-              write.add(Formats.gif(await File(path).readAsBytes()));
-              break;
-            case 'mp4':
-              write.add(Formats.mp4(await File(path).readAsBytes()));
-              break;
-            case 'webm':
-              write.add(Formats.webm(await File(path).readAsBytes()));
-              break;
-            default:
-              return;
-          }
-          await clipboard.write([write]);
-          FlashElements.showSnackbar(
-            context: context,
-            title: const Text('Copied file to clipboard!', style: TextStyle(fontSize: 20)),
-            sideColor: Colors.green,
           );
         }
       } else {

@@ -32,14 +32,22 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.4.4',
-    buildNumber: 4204,
-    title: '2.4.4 Hotfix 5',
+    buildNumber: 5205,
+    title: '2.4.4 Hotfix 6',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.loliSnatcher',
     githubURL: 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
     changelog: '''
 If you encounter any issues or have suggestions, please post them in github issues or in our discord server
+
+Hotfix 6 - 2.4.4+5205 (29-08-25):
+- Update dependencies
+- Fix for artist: and oc: tags with underscores for booru-on-rails/philomena-based boorus, also added captcha detection for derpibooru
+- Fix text layout on the widget for page loading/failed state
+- Fix some gifs playing too fast
+
+-------------------
 
 Hotfix 5 - 2.4.4+4204 (25-08-25):
 - Fix r34xxx functions that broke after last update (post url, tag data fetching), fixed r34xxx items favourited before last update appearing as if they are not favourited

@@ -85,9 +85,23 @@ class BooruOnRailsHandler extends BooruHandler {
     }
   }
 
+  String formatTagsWithUnderscores(String tags) {
+    final tagsList = tags.split(' ');
+
+    for (int i = 0; i < tagsList.length; i++) {
+      final tag = tagsList[i];
+      if (tag.contains('"')) {
+        tagsList[i] = tag.replaceAll('"', '');
+      } else {
+        tagsList[i] = tag.replaceAll('_', '+');
+      }
+    }
+    return tagsList.join(' ');
+  }
+
   @override
   String makeURL(String tags) {
-    final String formattedTags = tags.replaceAll(' ', ',').replaceAll('_', '+');
+    final String formattedTags = formatTagsWithUnderscores(tags).replaceAll(' ', ',');
     final String limitStr = limit.toString();
     final String pageStr = pageNum.toString();
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? 'key=${booru.apiKey}&' : '';
@@ -99,7 +113,7 @@ class BooruOnRailsHandler extends BooruHandler {
   @override
   String makeTagURL(String input) {
     // EXAMPLE: https://twibooru.org/api/v3/search/tags?q=*rai*
-    return '${booru.baseURL}/api/v3/search/tags?q=*${input.replaceAll('_', '+')}*';
+    return '${booru.baseURL}/api/v3/search/tags?q=*${formatTagsWithUnderscores(input)}*';
   }
 
   @override
@@ -108,22 +122,28 @@ class BooruOnRailsHandler extends BooruHandler {
     return parsedResponse;
   }
 
-  static List<List<String>> tagStringReplacements = [
-    ['-colon-', ':'],
-    ['-dash-', '-'],
-    ['-fwslash-', '/'],
-    ['-bwslash-', r'\'],
-    ['-dot-', '.'],
-    ['-plus-', '+'],
-    ['+', '_'],
-  ];
-
   @override
   TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
+    final List tagStringReplacements = [
+      ['-colon-', ':'],
+      ['-dash-', '-'],
+      ['-fwslash-', '/'],
+      ['-bwslash-', r'\'],
+      ['-dot-', '.'],
+      ['-plus-', '+'],
+    ];
+
     String tag = responseItem['slug'].toString();
     for (int x = 0; x < tagStringReplacements.length; x++) {
       tag = tag.replaceAll(tagStringReplacements[x][0], tagStringReplacements[x][1]);
     }
+
+    if (tag.contains('_')) {
+      tag = '"$tag"';
+    }
+
+    tag = tag.replaceAll('+', '_');
+
     return TagSuggestion(tag: tag);
   }
 }

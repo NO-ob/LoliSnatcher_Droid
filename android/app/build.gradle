@@ -49,18 +49,18 @@ if (project.hasProperty('dart-defines')) {
 println("LS_IS_STORE=${dartEnvVars.LS_IS_STORE}")
 def packageName = dartEnvVars.LS_IS_STORE == "true" ? "com.noaisu.play.loliSnatcher" : "com.noaisu.loliSnatcher"
 println("packageName=${packageName}")
-// Build example
-// flutter build apk --split-per-abi --dart-define=LS_IS_STORE=true
+println("compileSdk=${flutter.compileSdkVersion}")
+println("ndkVersion=${flutter.ndkVersion}")
+println("minSdkVersion=${flutter.minSdkVersion}")
+println("targetSdkVersion=${flutter.targetSdkVersion}")
 
 android {
     if (project.android.hasProperty('namespace')) {
         namespace 'com.noaisu.loliSnatcher'
     }
 
-    // compileSdk flutter.compileSdkVersion
-    // ndkVersion flutter.ndkVersion
-    compileSdk 35
-    ndkVersion "27.2.12479018"
+    compileSdk flutter.compileSdkVersion
+    ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -120,6 +120,6 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.0"
     implementation 'androidx.documentfile:documentfile:1.0.1'
 }
