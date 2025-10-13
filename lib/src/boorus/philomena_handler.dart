@@ -80,8 +80,8 @@ class PhilomenaHandler extends BooruHandler {
     final tagsList = tags.split(' ');
     for (int i = 0; i < tagsList.length; i++) {
       final tag = tagsList[i];
-      if (tag.contains('artist:') || tag.contains('oc:')) {
-        continue;
+      if (tag.contains('"')) {
+        tagsList[i] = tag.replaceAll('"', '');
       } else {
         tagsList[i] = tag.replaceAll('_', '+');
       }
@@ -128,13 +128,19 @@ class PhilomenaHandler extends BooruHandler {
       ['-bwslash-', r'\'],
       ['-dot-', '.'],
       ['-plus-', '+'],
-      ['+', '_'],
     ];
 
     String tag = responseItem['slug'].toString();
     for (int x = 0; x < tagStringReplacements.length; x++) {
       tag = tag.replaceAll(tagStringReplacements[x][0], tagStringReplacements[x][1]);
     }
+
+    if (tag.contains('_')) {
+      tag = '"$tag"';
+    }
+
+    tag = tag.replaceAll('+', '_');
+
     return TagSuggestion(tag: tag);
   }
 }
