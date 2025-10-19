@@ -10,6 +10,7 @@ import 'package:local_auth/local_auth.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
 class LocalAuthHandler {
   LocalAuthHandler() {
@@ -69,11 +70,8 @@ class LocalAuthHandler {
             forceUnlock ||
             await auth.authenticate(
               localizedReason: 'Please authenticate to use the app',
-              options: const AuthenticationOptions(
-                stickyAuth: true,
-                useErrorDialogs: true,
-                biometricOnly: false,
-              ),
+              persistAcrossBackgrounding: true,
+              biometricOnly: false,
             );
 
         if (authenticated) {
@@ -82,8 +80,38 @@ class LocalAuthHandler {
         }
         await Future.delayed(const Duration(milliseconds: 300));
         isAuthenticated.value = authenticated;
-      } catch (e, s) {
-        // TODO handle all errors
+      } on LocalAuthException catch (e, s) {
+        Logger.Inst().log(
+          e.description ?? e.code.name,
+          'LocalAuthHandler',
+          'authenticate',
+          LogTypes.exception,
+          s: s,
+        );
+
+        switch (e.code) {
+          case LocalAuthExceptionCode.noBiometricHardware:
+            FlashElements.showSnackbar(
+              title: const Text('No biometric hardware available'),
+              leadingIcon: Icons.warning_amber,
+            );
+            break;
+          case LocalAuthExceptionCode.temporaryLockout:
+          case LocalAuthExceptionCode.biometricLockout:
+            FlashElements.showSnackbar(
+              title: const Text('Temporary lockout'),
+              leadingIcon: Icons.warning_amber,
+            );
+            break;
+          // TODO handle all errors
+          default:
+            FlashElements.showSnackbar(
+              title: Text('Something went wrong: ${e.code.name}'),
+              leadingIcon: Icons.warning_amber,
+            );
+            break;
+        }
+      } on Object catch (e, s) {
         Logger.Inst().log(
           e.toString(),
           'LocalAuthHandler',
