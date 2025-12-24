@@ -5,14 +5,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fpdart/fpdart.dart' show FpdartOnIterable;
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:uuid/uuid.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
@@ -44,6 +47,7 @@ import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
+import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 
@@ -471,9 +475,7 @@ class _TagViewState extends State<TagView> {
           onLongPress: () {
             showDialog(
               context: context,
-              builder: (context) {
-                return NotesDialog(item);
-              },
+              builder: (_) => NotesDialog(item),
             );
           },
           drawBottomBorder: false,
@@ -616,245 +618,6 @@ class _TagViewState extends State<TagView> {
     return const SizedBox.shrink();
   }
 
-  void tagDialog({
-    required String tag,
-    required bool isHated,
-    required bool isLoved,
-    required bool isInSearch,
-  }) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SettingsDialog(
-          contentPadding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-          contentItems: [
-            SizedBox(
-              height: 60,
-              width: MediaQuery.sizeOf(context).width,
-              child: ListTile(
-                title: MarqueeText(
-                  key: ValueKey(tag),
-                  text: tag,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  isExpanded: false,
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                Container(
-                  width: 6,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: tagHandler.getTag(tag).getColour(),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  tagHandler.getTag(tag).tagType.locName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            //
-            TagContentPreview(
-              tag: tag,
-              boorus: handler.booru.type?.isMerge == true
-                  ? [
-                      ...(handler as MergebooruHandler).booruHandlers.map((e) => e.booru),
-                    ]
-                  : [handler.booru],
-            ),
-            //
-            ListTile(
-              leading: Icon(
-                Icons.copy,
-                color: Theme.of(context).iconTheme.color,
-              ),
-              title: const Text('Copy'),
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: tag));
-                FlashElements.showSnackbar(
-                  context: context,
-                  duration: const Duration(seconds: 2),
-                  title: const Text(
-                    'Copied to clipboard!',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  content: Text(
-                    tag,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  leadingIcon: Icons.copy,
-                  sideColor: Colors.green,
-                );
-                Navigator.of(context).pop();
-              },
-            ),
-            //
-            if (isInSearch)
-              ListTile(
-                leading: Icon(
-                  Icons.remove,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                title: const Text('Remove from Search'),
-                onTap: () {
-                  searchHandler.removeTagFromSearch(tag);
-                  Navigator.of(context).pop();
-                },
-              )
-            else ...[
-              ListTile(
-                leading: const Icon(Icons.add, color: Colors.green),
-                title: const Text('Add to Search'),
-                onTap: () {
-                  searchHandler.addTagToSearch(tag);
-
-                  FlashElements.showSnackbar(
-                    context: context,
-                    duration: const Duration(seconds: 2),
-                    title: const Text(
-                      'Added to search bar:',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    content: Text(
-                      tag,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    leadingIcon: Icons.add,
-                    sideColor: Colors.green,
-                  );
-
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.add, color: Colors.red),
-                title: const Text('Add to Search (Exclude)'),
-                onTap: () {
-                  searchHandler.addTagToSearch('-$tag');
-
-                  FlashElements.showSnackbar(
-                    context: context,
-                    duration: const Duration(seconds: 2),
-                    title: const Text(
-                      'Added to search bar (Exclude):',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    content: Text(
-                      tag,
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    leadingIcon: Icons.add,
-                    sideColor: Colors.green,
-                  );
-
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-            //
-            if (!isHated && !isLoved)
-              ListTile(
-                leading: const Icon(Icons.star, color: Colors.yellow),
-                title: const Text('Add to Loved'),
-                onTap: () {
-                  settingsHandler.addTagToList('loved', tag);
-                  searchHandler.filterCurrentFetched();
-                  handler.filterFetched();
-                  parseSortGroupTagsWithoutCache();
-                  Navigator.of(context).pop(true);
-                },
-              ),
-            if (!isHated && !isLoved)
-              ListTile(
-                leading: const Icon(CupertinoIcons.eye_slash, color: Colors.red),
-                title: const Text('Add to Hated'),
-                onTap: () {
-                  settingsHandler.addTagToList('hated', tag);
-                  searchHandler.filterCurrentFetched();
-                  handler.filterFetched();
-                  parseSortGroupTagsWithoutCache();
-                  Navigator.of(context).pop();
-                },
-              ),
-            if (isLoved)
-              ListTile(
-                leading: Icon(
-                  Icons.star_border,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                title: const Text('Remove from Loved'),
-                onTap: () {
-                  settingsHandler.removeTagFromList('loved', tag);
-                  parseSortGroupTagsWithoutCache();
-                  Navigator.of(context).pop();
-                },
-              ),
-            if (isHated)
-              ListTile(
-                leading: Icon(
-                  CupertinoIcons.eye_slash,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                title: const Text('Remove from Hated'),
-                onTap: () {
-                  settingsHandler.removeTagFromList('hated', tag);
-                  parseSortGroupTagsWithoutCache();
-                  Navigator.of(context).pop();
-                },
-              ),
-            ListTile(
-              leading: Icon(
-                Icons.edit,
-                color: Theme.of(context).iconTheme.color,
-              ),
-              title: const Text('Edit Tag'),
-              onTap: () async {
-                Navigator.of(context).pop();
-                final item = tagHandler.getTag(tag);
-                await showDialog(
-                  context: context,
-                  builder: (context) => TagsManagerListItemDialog(
-                    tag: item,
-                    onChangedType: (TagType? newValue) {
-                      if (newValue != null && item.tagType != newValue) {
-                        item.tagType = newValue;
-                        tagHandler.putTag(item, dbEnabled: settingsHandler.dbEnabled);
-                        parseSortGroupTagsWithoutCache();
-                      }
-                    },
-                  ),
-                );
-                parseSortGroupTagsWithoutCache();
-              },
-            ),
-            //
-            ListTile(
-              leading: Icon(
-                Icons.cancel_outlined,
-                color: Theme.of(context).iconTheme.color,
-              ),
-              title: const Text('Close'),
-              onTap: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget tagsItemBuilder(BuildContext context, String currentTag) {
     final bool isHated = tagsData.hatedTags.contains(currentTag);
     final bool isLoved = tagsData.lovedTags.contains(currentTag);
@@ -899,11 +662,14 @@ class _TagViewState extends State<TagView> {
           children: [
             InkWell(
               onTap: () {
-                tagDialog(
+                showTagDialog(
+                  context: context,
                   tag: currentTag,
+                  handler: handler,
                   isHated: isHated,
                   isLoved: isLoved,
                   isInSearch: isInSearch,
+                  onUpdate: parseSortGroupTagsWithoutCache,
                 );
               },
               child: Row(
@@ -1295,6 +1061,253 @@ class _TagText extends StatelessWidget {
   }
 }
 
+Future<void> showTagDialog({
+  required BuildContext context,
+  required String tag,
+  required BooruHandler handler,
+  required bool isHated,
+  required bool isLoved,
+  required bool isInSearch,
+  required VoidCallback onUpdate,
+}) async {
+  final settingsHandler = SettingsHandler.instance;
+  final searchHandler = SearchHandler.instance;
+  final tagHandler = TagHandler.instance;
+
+  await showDialog(
+    context: context,
+    routeSettings: RouteSettings(name: 'tagDialog/$tag'),
+    builder: (BuildContext context) {
+      return SettingsDialog(
+        contentPadding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        contentItems: [
+          SizedBox(
+            height: 60,
+            width: MediaQuery.sizeOf(context).width,
+            child: ListTile(
+              title: MarqueeText(
+                key: ValueKey(tag),
+                text: tag,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+                isExpanded: false,
+              ),
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: tagHandler.getTag(tag).getColour(),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                tagHandler.getTag(tag).tagType.locName,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          //
+          TagContentPreview(
+            tag: tag,
+            boorus: handler.booru.type?.isMerge == true
+                ? [
+                    ...(handler as MergebooruHandler).booruHandlers.map((e) => e.booru),
+                  ]
+                : [handler.booru],
+          ),
+          //
+          ListTile(
+            leading: Icon(
+              Icons.copy,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            title: const Text('Copy'),
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: tag));
+              FlashElements.showSnackbar(
+                context: context,
+                duration: const Duration(seconds: 2),
+                title: const Text(
+                  'Copied to clipboard!',
+                  style: TextStyle(fontSize: 20),
+                ),
+                content: Text(
+                  tag,
+                  style: const TextStyle(fontSize: 16),
+                ),
+                leadingIcon: Icons.copy,
+                sideColor: Colors.green,
+              );
+              Navigator.of(context).pop();
+            },
+          ),
+          //
+          if (isInSearch)
+            ListTile(
+              leading: Icon(
+                Icons.remove,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              title: const Text('Remove from Search'),
+              onTap: () {
+                searchHandler.removeTagFromSearch(tag);
+                Navigator.of(context).pop();
+              },
+            )
+          else ...[
+            ListTile(
+              leading: const Icon(Icons.add, color: Colors.green),
+              title: const Text('Add to Search'),
+              onTap: () {
+                searchHandler.addTagToSearch(tag);
+
+                FlashElements.showSnackbar(
+                  context: context,
+                  duration: const Duration(seconds: 2),
+                  title: const Text(
+                    'Added to search bar:',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  content: Text(
+                    tag,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  leadingIcon: Icons.add,
+                  sideColor: Colors.green,
+                );
+
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.add, color: Colors.red),
+              title: const Text('Add to Search (Exclude)'),
+              onTap: () {
+                searchHandler.addTagToSearch('-$tag');
+
+                FlashElements.showSnackbar(
+                  context: context,
+                  duration: const Duration(seconds: 2),
+                  title: const Text(
+                    'Added to search bar (Exclude):',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  content: Text(
+                    tag,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  leadingIcon: Icons.add,
+                  sideColor: Colors.green,
+                );
+
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+          //
+          if (!isHated && !isLoved)
+            ListTile(
+              leading: const Icon(Icons.star, color: Colors.yellow),
+              title: const Text('Add to Loved'),
+              onTap: () {
+                settingsHandler.addTagToList('loved', tag);
+                searchHandler.filterCurrentFetched();
+                handler.filterFetched();
+                onUpdate();
+                Navigator.of(context).pop(true);
+              },
+            ),
+          if (!isHated && !isLoved)
+            ListTile(
+              leading: const Icon(CupertinoIcons.eye_slash, color: Colors.red),
+              title: const Text('Add to Hated'),
+              onTap: () {
+                settingsHandler.addTagToList('hated', tag);
+                searchHandler.filterCurrentFetched();
+                handler.filterFetched();
+                onUpdate();
+                Navigator.of(context).pop();
+              },
+            ),
+          if (isLoved)
+            ListTile(
+              leading: Icon(
+                Icons.star_border,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              title: const Text('Remove from Loved'),
+              onTap: () {
+                settingsHandler.removeTagFromList('loved', tag);
+                onUpdate();
+                Navigator.of(context).pop();
+              },
+            ),
+          if (isHated)
+            ListTile(
+              leading: Icon(
+                CupertinoIcons.eye_slash,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              title: const Text('Remove from Hated'),
+              onTap: () {
+                settingsHandler.removeTagFromList('hated', tag);
+                onUpdate();
+                Navigator.of(context).pop();
+              },
+            ),
+          ListTile(
+            leading: Icon(
+              Icons.edit,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            title: const Text('Edit Tag'),
+            onTap: () async {
+              Navigator.of(context).pop();
+              final item = tagHandler.getTag(tag);
+              await showDialog(
+                context: context,
+                builder: (context) => TagsManagerListItemDialog(
+                  tag: item,
+                  onChangedType: (TagType? newValue) {
+                    if (newValue != null && item.tagType != newValue) {
+                      item.tagType = newValue;
+                      tagHandler.putTag(item, dbEnabled: settingsHandler.dbEnabled);
+                      onUpdate();
+                    }
+                  },
+                ),
+              );
+              onUpdate();
+            },
+          ),
+          //
+          ListTile(
+            leading: Icon(
+              Icons.cancel_outlined,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            title: const Text('Close'),
+            onTap: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
 class SourceLinkErrorDialog extends StatefulWidget {
   const SourceLinkErrorDialog({
     required this.link,
@@ -1488,6 +1501,7 @@ class TagContentPreview extends StatefulWidget {
 class _TagContentPreviewState extends State<TagContentPreview> {
   final settingsHandler = SettingsHandler.instance;
   final searchHandler = SearchHandler.instance;
+  final viewerHandler = ViewerHandler.instance;
 
   final AutoScrollController scrollController = AutoScrollController();
 
@@ -1502,9 +1516,17 @@ class _TagContentPreviewState extends State<TagContentPreview> {
 
   bool get isSingleBooru => widget.boorus.length == 1;
 
+  final String previewId = const Uuid().v4();
+
   @override
   void initState() {
     super.initState();
+
+    viewerHandler.addTagPreview(
+      searchHandler.currentTab.id,
+      previewId,
+      widget.tag,
+    );
 
     if (isSingleBooru) {
       selectedBooru = widget.boorus.first;
@@ -1636,6 +1658,22 @@ class _TagContentPreviewState extends State<TagContentPreview> {
     );
   }
 
+  Future<void> showTagPreviewsListDialog() async {
+    await showDialog(
+      context: context,
+      builder: (_) => _TagPreviewsListDialog(searchHandler.currentTab.id),
+    );
+  }
+
+  @override
+  void dispose() {
+    viewerHandler.removeTagPreview(
+      searchHandler.currentTab.id,
+      previewId,
+    );
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedSize(
@@ -1649,6 +1687,10 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                   color: Theme.of(context).iconTheme.color,
                 ),
                 title: const Text('Preview'),
+                trailing: IconButton(
+                  icon: const Icon(Icons.list),
+                  onPressed: showTagPreviewsListDialog,
+                ),
                 subtitle: isSingleBooru
                     ? null
                     : SizedBox(
@@ -1675,7 +1717,12 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                         loading ? Icons.search : Icons.restart_alt,
                         color: Theme.of(context).iconTheme.color,
                       ),
-                      trailing: loading ? const CircularProgressIndicator() : null,
+                      trailing: loading
+                          ? const CircularProgressIndicator()
+                          : IconButton(
+                              icon: const Icon(Icons.list),
+                              onPressed: showTagPreviewsListDialog,
+                            ),
                       title: loading ? const Text('Preview is loading...') : const Text('Failed to load preview'),
                       subtitle: errorString.isNotEmpty ? const Text('Tap to try again') : null,
                       onTap: errorString.isNotEmpty ? () => loadPreview(refresh: true) : null,
@@ -1714,6 +1761,10 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               icon: const Icon(Icons.refresh),
                             ),
                             const Spacer(),
+                            IconButton(
+                              icon: const Icon(Icons.list),
+                              onPressed: showTagPreviewsListDialog,
+                            ),
                             IconButton(
                               icon: const Icon(Icons.fiber_new),
                               onPressed: () {
@@ -1928,6 +1979,228 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                         const SizedBox(height: 12),
                       ],
                     )),
+      ),
+    );
+  }
+}
+
+class _TagPreviewsListDialog extends StatelessWidget {
+  const _TagPreviewsListDialog(
+    this.tabId,
+  );
+
+  final String tabId;
+
+  @override
+  Widget build(BuildContext context) {
+    final viewerHandler = ViewerHandler.instance;
+    final searchHandler = SearchHandler.instance;
+    final settingsHandler = SettingsHandler.instance;
+
+    final list = viewerHandler.tagPreviewsHistory[tabId] ?? [];
+    final controllers = List.generate(list.length, (_) => ScrollController());
+    // scroll to end of each stack history item
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   for (final c in controllers) {
+    //     c.jumpTo(c.position.maxScrollExtent);
+    //   }
+    // });
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Material(
+          borderRadius: BorderRadius.circular(16),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              //
+              Text(
+                'Tag previews',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 12),
+              //
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: list.length,
+                  itemBuilder: (context, entryIndex) {
+                    final entry = list[list.length - entryIndex - 1];
+                    final bool isActive = entry == list.last;
+                    final bool isSecondsToLast = list.length > 1 && entry == list[list.length - 2];
+
+                    if (entry.isEmpty) return const SizedBox.shrink();
+
+                    bool matchesCurrentState = true;
+                    final currentState = viewerHandler.currentTagPreviewState(tabId).map((e) => e.value).toList();
+                    entry.forEachIndexed((i, e) {
+                      if (i >= currentState.length || currentState[i] != e.value) {
+                        matchesCurrentState = false;
+                        return;
+                      }
+                    });
+
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (isActive || isSecondsToLast)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Text(
+                              isActive ? 'Current state' : 'History',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
+                        //
+                        Material(
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                            shape: Border(
+                              top: BorderSide(
+                                color: context.theme.dividerColor,
+                                width: 0.5,
+                              ),
+                              bottom: BorderSide(
+                                color: context.theme.dividerColor,
+                                width: 0.5,
+                              ),
+                            ),
+                            trailing: (isActive || matchesCurrentState)
+                                ? null
+                                : IconButton(
+                                    icon: const Icon(Icons.history),
+                                    onPressed: () async {
+                                      Navigator.of(context).pop();
+
+                                      final state = viewerHandler.currentTagPreviewState(tabId);
+
+                                      entry.forEachIndexed((index, e) async {
+                                        final tag = e.value;
+
+                                        // skip if tag already in stack
+                                        if (state.all((e) => e.value != tag)) {
+                                          unawaited(
+                                            showTagDialog(
+                                              context: context,
+                                              tag: tag,
+                                              handler: searchHandler.currentBooruHandler,
+                                              isHated: settingsHandler.hatedTags.contains(tag),
+                                              isLoved: settingsHandler.lovedTags.contains(tag),
+                                              isInSearch:
+                                                  searchHandler.searchTextController.text
+                                                      .toLowerCase()
+                                                      .split(' ')
+                                                      .indexWhere(
+                                                        (t) => t == tag.toLowerCase() || t == '-${tag.toLowerCase()}',
+                                                      ) !=
+                                                  -1,
+                                              onUpdate: () {},
+                                            ),
+                                          );
+                                          await Future.delayed(const Duration(milliseconds: 50));
+                                        }
+                                      });
+                                    },
+                                  ),
+                            title: SizedBox(
+                              height: 40,
+                              width: double.maxFinite,
+                              child: FadingEdgeScrollView.fromScrollView(
+                                child: ListView(
+                                  controller: controllers[entryIndex],
+                                  scrollDirection: Axis.horizontal,
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  children: [
+                                    ...entry.mapWithIndex(
+                                      (e, i) {
+                                        final tag = e.value;
+                                        final bool isLast = i == entry.length - 1;
+
+                                        return Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            MainSearchTagChip(
+                                              tag: tag,
+                                              booru: searchHandler.currentBooru,
+                                              isSelected: isActive && isLast,
+                                              onTap: () {
+                                                if (isActive) {
+                                                  // close everything up to this tag
+                                                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                    Navigator.of(context).popUntil(
+                                                      (route) =>
+                                                          route.settings.name == 'tagDialog/$tag' || route.isFirst,
+                                                    );
+                                                  });
+                                                } else {
+                                                  // open dialog for this tag
+                                                  Navigator.of(context).pop();
+                                                  unawaited(
+                                                    showTagDialog(
+                                                      context: context,
+                                                      tag: tag,
+                                                      handler: searchHandler.currentBooruHandler,
+                                                      isHated: settingsHandler.hatedTags.contains(tag),
+                                                      isLoved: settingsHandler.lovedTags.contains(tag),
+                                                      isInSearch:
+                                                          searchHandler.searchTextController.text
+                                                              .toLowerCase()
+                                                              .split(' ')
+                                                              .indexWhere(
+                                                                (t) =>
+                                                                    t == tag.toLowerCase() ||
+                                                                    t == '-${tag.toLowerCase()}',
+                                                              ) !=
+                                                          -1,
+                                                      onUpdate: () {},
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                            if (!isLast)
+                                              const Padding(
+                                                padding: EdgeInsets.symmetric(horizontal: 4),
+                                                child: Icon(
+                                                  Icons.arrow_forward,
+                                                  size: 14,
+                                                ),
+                                              ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              //
+              ListTile(
+                leading: Icon(
+                  Icons.cancel_outlined,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                title: const Text('Close'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              //
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
       ),
     );
   }

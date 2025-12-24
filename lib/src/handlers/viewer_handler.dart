@@ -9,6 +9,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 
@@ -283,4 +284,57 @@ class ViewerHandler {
   bool videoAutoMute = kDebugMode
       ? Constants.blurImagesDefaultDev
       : false; // hold volume button in VideoViewer to mute videos globally
+
+  //
+  // Tag previews history
+  // Keeps track of the viewed tag previews stack for each tab
+
+  Map<String, List<MapEntry<String, String>>> tagPreviews = {};
+  Map<String, List<List<MapEntry<String, String>>>> tagPreviewsHistory = {};
+
+  void addTagPreview(
+    String tabId,
+    String previewId,
+    String tag,
+  ) {
+    if (tagPreviews[tabId] == null) {
+      tagPreviews[tabId] = [];
+    }
+    tagPreviews[tabId]?.add(MapEntry(previewId, tag));
+    updateTagPreviewHistory(tabId);
+  }
+
+  void removeTagPreview(
+    String tabId,
+    String previewId,
+  ) {
+    tagPreviews[tabId]?.removeWhere((e) => e.key == previewId);
+    updateTagPreviewHistory(tabId);
+  }
+
+  List<MapEntry<String, String>> currentTagPreviewState(
+    String tabId,
+  ) {
+    return tagPreviews[tabId] ?? [];
+  }
+
+  void updateTagPreviewHistory(
+    String tabId,
+  ) {
+    // debounce to ignore multiple page pops affecting history more than needed
+    Debounce.debounce(
+      tag: 'tag_previews_history_update',
+      duration: const Duration(milliseconds: 600),
+      callback: () {
+        if (tagPreviewsHistory[tabId] == null) {
+          tagPreviewsHistory[tabId] = [];
+        }
+        tagPreviewsHistory[tabId]?.add([...tagPreviews[tabId] ?? []]);
+
+        if ((tagPreviewsHistory[tabId]?.length ?? 0) > 100) {
+          tagPreviewsHistory[tabId]?.removeRange(0, 1);
+        }
+      },
+    );
+  }
 }
