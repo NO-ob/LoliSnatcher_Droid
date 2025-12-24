@@ -1205,7 +1205,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
               failed = false;
               failedMsg = null;
               suggestedTags = data;
-              setState(() {});
+              if (mounted) {
+                setState(() {});
+              }
 
               for (final tag in suggestedTags.where((t) => !t.type.isNone)) {
                 unawaited(tagHandler.addTagsWithType([tag.tag], tag.type));
@@ -2664,7 +2666,9 @@ class _HistoryBlockState extends State<HistoryBlock> {
     setState(() {});
     history = await settingsHandler.dbHandler.getLatestSearchHistory();
     loading = false;
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> showHistoryEntryActions(Widget row, HistoryItem entry, Booru? booru) async {
