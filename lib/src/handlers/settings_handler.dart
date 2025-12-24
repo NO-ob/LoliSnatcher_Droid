@@ -2402,7 +2402,7 @@ class SettingsHandler {
       await initProxy();
 
       if (isDesktopPlatform) {
-        MediaKitVideoPlayer.registerWith();
+        fvp.registerWith();
       } else {
         switch (videoBackendMode) {
           case VideoBackendMode.normal:
