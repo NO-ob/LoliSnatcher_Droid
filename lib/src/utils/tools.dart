@@ -258,7 +258,7 @@ class Tools {
         NavigationHandler.instance.navContext,
         MaterialPageRoute(
           builder: (context) => InAppWebviewView(
-            initialUrl: '${uri.scheme}://$host',
+            initialUrl: '${uri.scheme}://$host${uri.hasPort && uri.port != 80 ? ':${uri.port}' : ''}',
             userAgent: customUserAgent,
             title: 'Captcha check',
             subtitle:
