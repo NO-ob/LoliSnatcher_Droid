@@ -196,7 +196,9 @@ class ViewerHandler {
       final state = key?.currentState;
       switch (state?.widget) {
         case VideoViewer():
-          (state as VideoViewerState?)?.videoController.value?.pause();
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => (state as VideoViewerState?)?.videoController.value?.pause(),
+          );
           break;
         default:
           break;
