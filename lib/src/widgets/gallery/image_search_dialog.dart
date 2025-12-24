@@ -1,4 +1,3 @@
-// list popular image search engines and links where you can add image url to search
 import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher_string.dart';
@@ -56,7 +55,7 @@ Future<void> showImageSearchDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text('Reverse Image Search'),
+        title: const Text('Image search'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
