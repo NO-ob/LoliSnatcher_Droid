@@ -18,5 +18,6 @@
       "source.sortMembers": "never",
       "source.fixAll": "explicit"
     }
-  }
+  },
+  "dart.showTodos": false
 }

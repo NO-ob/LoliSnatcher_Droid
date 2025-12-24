@@ -62,16 +62,6 @@
         <!-- Possibly need to do a global performance pass? (always scale images (aside from main in viewer), cache widgets...) -->
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
-            android:value="false" />
-
-        <!-- Makes every plain isolate run in its own thread -->
-        <!-- <meta-data
-            android:name="io.flutter.embedding.android.EnablePlatformIsolates"
-            android:value="false" /> -->
-
-        <!-- Makes service isolate run in a separate thread -->
-        <meta-data
-            android:name="io.flutter.embedding.android.DisableMergedPlatformUIThread"
-             android:value="true" />
+            android:value="true" />
     </application>
 </manifest>
