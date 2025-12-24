@@ -147,6 +147,7 @@ class SettingsHandler {
     'reloadnoscale',
     'toggle_quality',
     'external_player',
+    'image_search',
   ];
   static const Map<String, String> buttonNames = {
     'autoscroll': 'Slideshow',
@@ -159,6 +160,7 @@ class SettingsHandler {
     'reloadnoscale': 'Reload w/out scaling',
     'toggle_quality': 'Toggle quality',
     'external_player': 'External player',
+    'image_search': 'Reverse image search',
   };
   static final List<String> disableableButtonList = buttonList.where((e) => e != 'info').toList();
   List<String> buttonOrder = [...buttonList];
