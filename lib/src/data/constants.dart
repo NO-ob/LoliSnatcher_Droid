@@ -15,7 +15,7 @@ class Constants {
   static const String email = 'no.aisu@protonmail.com';
 
   static const String defaultBrowserUserAgent =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36';
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36';
 
   static const String sankakuAppUserAgent = 'SCChannelApp/4.12 (RNAndroid; black)';
 
