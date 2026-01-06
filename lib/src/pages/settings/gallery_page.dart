@@ -381,7 +381,7 @@ class _GalleryPageState extends State<GalleryPage> {
                                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                                   title: Text(title),
                                   subtitle: switch (name) {
-                                    'external_player' => const Text('Only on videos'),
+                                    'external_player' => const Text('Only for videos'),
                                     _ => null,
                                   },
                                   leading: Opacity(
@@ -425,6 +425,7 @@ class _GalleryPageState extends State<GalleryPage> {
                                           'reloadnoscale' => Icons.refresh,
                                           'toggle_quality' => Icons.high_quality,
                                           'external_player' => Icons.exit_to_app,
+                                          'image_search' => Icons.image_search_rounded,
                                           _ => null,
                                         },
                                       ),

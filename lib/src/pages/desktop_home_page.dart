@@ -16,8 +16,7 @@ import 'package:lolisnatcher/src/widgets/desktop/desktop_image_listener.dart';
 import 'package:lolisnatcher/src/widgets/desktop/resizable_split_view.dart';
 import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_box.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_button.dart';
+import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
@@ -51,8 +50,7 @@ class DesktopHome extends StatelessWidget {
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     SizedBox(width: 15),
-                    TagSearchBox(),
-                    TagSearchButton(),
+                    MainSearchBarWithActions('desktop'),
                     Expanded(flex: 1, child: TabBooruSelector()),
                     Expanded(flex: 2, child: TabSelector()),
                     Expanded(flex: 2, child: TabButtons(false, WrapAlignment.start)),

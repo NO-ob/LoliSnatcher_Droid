@@ -425,26 +425,28 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                   if (isStaggered) {
                                     return Obx(
                                       () => StaggeredBuilder(
+                                        key: ValueKey('StaggeredBuilder-${searchHandler.currentTabId}'),
                                         tab: searchHandler.currentTab,
                                         scrollController: searchHandler.gridScrollController,
-                                        onSelected: onLongPress,
                                         onTap: onTap,
                                         onDoubleTap: onDoubleTap,
                                         onLongPress: onLongPress,
                                         onSecondaryTap: onSecondaryTap,
+                                        onSelected: onLongPress,
                                       ),
                                     );
                                   }
 
                                   return Obx(
                                     () => GridBuilder(
+                                      key: ValueKey('GridBuilder-${searchHandler.currentTabId}'),
                                       tab: searchHandler.currentTab,
                                       scrollController: searchHandler.gridScrollController,
-                                      onSelected: onLongPress,
                                       onTap: onTap,
                                       onDoubleTap: onDoubleTap,
                                       onLongPress: onLongPress,
                                       onSecondaryTap: onSecondaryTap,
+                                      onSelected: onLongPress,
                                     ),
                                   );
                                 },

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:xml/xml.dart';
@@ -28,8 +30,8 @@ class ShimmieHandler extends BooruHandler {
   }
 
   @override
-  List parseListFromResponse(dynamic response) {
-    final parsedResponse = XmlDocument.parse(response.data);
+  Future<List> parseListFromResponse(dynamic response) async {
+    final parsedResponse = await compute(XmlDocument.parse, response.data as String);
     try {
       parseSearchCount(parsedResponse);
     } catch (e, s) {

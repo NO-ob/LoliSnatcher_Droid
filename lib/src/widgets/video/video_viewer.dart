@@ -446,6 +446,9 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   Future<void> initPlayer() async {
+    // ignore if player is already inited (i.e. stream+cache mode)
+    if (isVideoInited) return;
+
     if (video != null) {
       // Start from cache if was already cached or only caching is allowed
       videoController.value = VideoPlayerController.file(

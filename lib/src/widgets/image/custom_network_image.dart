@@ -243,7 +243,12 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         throw Exception('CustomNetworkImage is an empty file: $resolved');
       }
 
-      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(await _tryFixGifSpeed(bytes));
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(
+        await _tryFixGifSpeed(
+          resolved.toString(),
+          bytes,
+        ),
+      );
       return decode(buffer);
     } catch (e) {
       if (onError != null) {
@@ -262,7 +267,12 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
   /// Try to fix gifs without proper frame timings and therefore are played too fast due to a bug in flutter (https://github.com/flutter/flutter/issues/29130)
   ///
   /// Source: https://github.com/fluttercandies/extended_image_library/pull/69
-  Future<Uint8List> _tryFixGifSpeed(Uint8List image) async {
+  Future<Uint8List> _tryFixGifSpeed(String url, Uint8List image) async {
+    if (!url.contains('.gif')) {
+      // avoid computation if not a gif
+      return image;
+    }
+
     return compute(
       (Uint8List image) {
         bool handled = false;

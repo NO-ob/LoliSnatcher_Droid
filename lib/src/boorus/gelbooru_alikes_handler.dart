@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
@@ -58,8 +60,8 @@ class GelbooruAlikesHandler extends BooruHandler {
       '<p><b>If api_key is empty on the settings page, enable "Generate new key", then press "Save", API key should appear after a page reloads.</b></p>';
 
   @override
-  List parseListFromResponse(dynamic response) {
-    final parsedResponse = XmlDocument.parse(response.data);
+  Future<List> parseListFromResponse(dynamic response) async {
+    final parsedResponse = await compute(XmlDocument.parse, response.data as String);
     // <post file_url="..." />
     return parsedResponse.findAllElements('post').toList();
   }
@@ -199,7 +201,7 @@ class GelbooruAlikesHandler extends BooruHandler {
       final response = await DioNetwork.get(url, headers: headers);
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        final parsedResponse = XmlDocument.parse(response.data);
+        final parsedResponse = await compute(XmlDocument.parse, response.data as String);
         final root = parsedResponse.findAllElements('posts').toList();
         if (root.length == 1) {
           result = int.parse(root[0].getAttribute('count') ?? '0');

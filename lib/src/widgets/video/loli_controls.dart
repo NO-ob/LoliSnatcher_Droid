@@ -983,13 +983,14 @@ class _LoliControlsState extends State<LoliControls> {
 
   void onHitAreaLongPressMove(LongPressMoveUpdateDetails details) {
     setState(() {
+      // swiping 1/8th of the screen from starting point will add +1 to the base speed of 2, up to a max of 4
       longTapFastForwardSpeed =
           2 +
           (double.tryParse(
-                (details.offsetFromOrigin.dx / (MediaQuery.sizeOf(context).width / 6)).toStringAsFixed(1),
+                (details.offsetFromOrigin.dx / (MediaQuery.sizeOf(context).width / 8)).toStringAsFixed(1),
               ) ??
               0);
-      // limit between 2 and 4
+      // limit between 2 and 4 (higher values are too unstable, even on high end devices)
       longTapFastForwardSpeed = longTapFastForwardSpeed.clamp(2, 4);
       // update ui value immediately, real speed change will happen in a timer below
       doubleTapped = false;

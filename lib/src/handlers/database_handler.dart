@@ -884,7 +884,11 @@ class DBHandler {
 
   Future<void> fixBooruItems(ValueChanged<String>? onStatusUpdate) async {
     try {
-      await convertGelbooruFromImg3toImg4(onStatusUpdate);
+      await convertGelbooruServers(
+        'img2',
+        'video-cdn4',
+        onStatusUpdate,
+      ); // latest change i4->2, v3->4, ~early-mid December 25
       await fixR34XXXPostUrls(onStatusUpdate);
     } catch (e, s) {
       Logger.Inst().log(
@@ -897,12 +901,28 @@ class DBHandler {
     }
   }
 
-  Future<void> convertGelbooruFromImg3toImg4(ValueChanged<String>? onStatusUpdate) async {
-    // gelbooru moved all images from img3 server to img4, videos from cdn1 to cdn3, some urls saved with multiple slashes
+  Future<void> convertGelbooruServers(
+    String newImgServer,
+    String newVidServer,
+    ValueChanged<String>? onStatusUpdate,
+  ) async {
+    final List<String> conditions = [];
+    for (final server in [
+      {'img': newImgServer},
+      {'video-cdn': newVidServer},
+    ]) {
+      for (final type in ['fileURL', 'sampleURL', 'thumbnailURL']) {
+        conditions.add(
+          '($type LIKE "%${server.keys.first}%.gelbooru.com%" AND $type NOT LIKE "%${server.values.first}.gelbooru.com%")',
+        );
+      }
+    }
+
+    // gelbooru moves images (imgN) and videos (cdnN) to new servers from time to time?
     final List<Map<String, dynamic>> items =
         await db?.rawQuery(
           'SELECT id, fileURL, sampleURL, thumbnailURL FROM BooruItem WHERE '
-          "(fileURL LIKE '%img3.gelbooru.com%' OR fileURL LIKE '%video-cdn1.gelbooru.com%' OR sampleURL LIKE '%img3.gelbooru.com%' OR thumbnailURL LIKE '%img3.gelbooru.com%' " // migrate to other servers
+          "(${conditions.join(' OR ')} " // migrate to other servers
           "OR fileURL LIKE 'https://%//%' OR sampleURL LIKE 'https://%//%' OR thumbnailURL LIKE 'https://%//%') " // fix multiple slashes (except https://)
           "AND postURL LIKE '%gelbooru.com%';",
         ) ??
@@ -916,16 +936,18 @@ class DBHandler {
       for (final Map<String, dynamic> item in chunk) {
         final String newFileURL = item['fileURL']
             .toString()
-            .replaceFirst('img3', 'img4')
-            .replaceFirst('video-cdn1', 'video-cdn3')
+            .replaceAllMapped(RegExp(r'img(\d+).gelbooru.com'), (m) => '$newImgServer.gelbooru.com')
+            .replaceAllMapped(RegExp(r'video-cdn(\d+).gelbooru.com'), (m) => '$newVidServer.gelbooru.com')
             .replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/');
         final String newSampleURL = item['sampleURL']
             .toString()
-            .replaceFirst('img3', 'img4')
+            .replaceAllMapped(RegExp(r'img(\d+).gelbooru.com'), (m) => '$newImgServer.gelbooru.com')
+            .replaceAllMapped(RegExp(r'video-cdn(\d+).gelbooru.com'), (m) => '$newVidServer.gelbooru.com')
             .replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/');
         final String newThumbnailURL = item['thumbnailURL']
             .toString()
-            .replaceFirst('img3', 'img4')
+            .replaceAllMapped(RegExp(r'img(\d+).gelbooru.com'), (m) => '$newImgServer.gelbooru.com')
+            .replaceAllMapped(RegExp(r'video-cdn(\d+).gelbooru.com'), (m) => '$newVidServer.gelbooru.com')
             .replaceFirstMapped(RegExp('(?<!https?:)//'), (m) => '/');
         batch?.rawUpdate(
           'UPDATE BooruItem SET fileURL = ?, sampleURL = ?, thumbnailURL = ? WHERE id = ?;',
