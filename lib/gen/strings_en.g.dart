@@ -9,7 +9,7 @@ part of 'strings.g.dart';
 // Path: <root>
 typedef TranslationsEn = Translations; // ignore: unused_element
 
-class Translations implements BaseTranslations<AppLocale, Translations> {
+class Translations with BaseTranslations<AppLocale, Translations> {
   /// Returns the current translations of the given [context].
   ///
   /// Usage:
@@ -1244,597 +1244,438 @@ class TranslationsSettingsWebviewEn {
   String get openWebviewTip => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'to login or obtain cookies';
 }
 
-/// Flat map(s) containing all translations.
+/// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
+///
+/// The Dart AOT compiler has issues with very large switch statements,
+/// so the map is split into smaller functions (512 entries each).
 extension on Translations {
   dynamic _flatMapFunction(String path) {
-    switch (path) {
-      case 'locale':
-        return TranslationOverrides.string(_root.$meta, 'locale', {}) ?? 'en';
-      case 'localeName':
-        return TranslationOverrides.string(_root.$meta, 'localeName', {}) ?? 'English';
-      case 'appName':
-        return TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher';
-      case 'error':
-        return TranslationOverrides.string(_root.$meta, 'error', {}) ?? 'Error';
-      case 'errorExclamation':
-        return TranslationOverrides.string(_root.$meta, 'errorExclamation', {}) ?? 'Error!';
-      case 'warning':
-        return TranslationOverrides.string(_root.$meta, 'warning', {}) ?? 'Warning';
-      case 'warningExclamation':
-        return TranslationOverrides.string(_root.$meta, 'warningExclamation', {}) ?? 'Warning!';
-      case 'info':
-        return TranslationOverrides.string(_root.$meta, 'info', {}) ?? 'Info';
-      case 'success':
-        return TranslationOverrides.string(_root.$meta, 'success', {}) ?? 'Success';
-      case 'successExclamation':
-        return TranslationOverrides.string(_root.$meta, 'successExclamation', {}) ?? 'Success!';
-      case 'cancel':
-        return TranslationOverrides.string(_root.$meta, 'cancel', {}) ?? 'Cancel';
-      case 'later':
-        return TranslationOverrides.string(_root.$meta, 'later', {}) ?? 'Later';
-      case 'close':
-        return TranslationOverrides.string(_root.$meta, 'close', {}) ?? 'Close';
-      case 'ok':
-        return TranslationOverrides.string(_root.$meta, 'ok', {}) ?? 'OK';
-      case 'yes':
-        return TranslationOverrides.string(_root.$meta, 'yes', {}) ?? 'Yes';
-      case 'no':
-        return TranslationOverrides.string(_root.$meta, 'no', {}) ?? 'No';
-      case 'pleaseWait':
-        return TranslationOverrides.string(_root.$meta, 'pleaseWait', {}) ?? 'Please wait...';
-      case 'show':
-        return TranslationOverrides.string(_root.$meta, 'show', {}) ?? 'Show';
-      case 'hide':
-        return TranslationOverrides.string(_root.$meta, 'hide', {}) ?? 'Hide';
-      case 'enable':
-        return TranslationOverrides.string(_root.$meta, 'enable', {}) ?? 'Enable';
-      case 'disable':
-        return TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Disable';
-      case 'add':
-        return TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Add';
-      case 'edit':
-        return TranslationOverrides.string(_root.$meta, 'edit', {}) ?? 'Edit';
-      case 'remove':
-        return TranslationOverrides.string(_root.$meta, 'remove', {}) ?? 'Remove';
-      case 'save':
-        return TranslationOverrides.string(_root.$meta, 'save', {}) ?? 'Save';
-      case 'delete':
-        return TranslationOverrides.string(_root.$meta, 'delete', {}) ?? 'Delete';
-      case 'copy':
-        return TranslationOverrides.string(_root.$meta, 'copy', {}) ?? 'Copy';
-      case 'copied':
-        return TranslationOverrides.string(_root.$meta, 'copied', {}) ?? 'Copied!';
-      case 'paste':
-        return TranslationOverrides.string(_root.$meta, 'paste', {}) ?? 'Paste';
-      case 'copyErrorText':
-        return TranslationOverrides.string(_root.$meta, 'copyErrorText', {}) ?? 'Copy error';
-      case 'booru':
-        return TranslationOverrides.string(_root.$meta, 'booru', {}) ?? 'Booru';
-      case 'goToSettings':
-        return TranslationOverrides.string(_root.$meta, 'goToSettings', {}) ?? 'Go to settings';
-      case 'areYouSure':
-        return TranslationOverrides.string(_root.$meta, 'areYouSure', {}) ?? 'Are you sure?';
-      case 'thisMayTakeSomeTime':
-        return TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? 'This may take some time...';
-      case 'doYouWantToExitApp':
-        return TranslationOverrides.string(_root.$meta, 'doYouWantToExitApp', {}) ?? 'Do you want to exit the app?';
-      case 'closeTheApp':
-        return TranslationOverrides.string(_root.$meta, 'closeTheApp', {}) ?? 'Close the app';
-      case 'invalidUrl':
-        return TranslationOverrides.string(_root.$meta, 'invalidUrl', {}) ?? 'Invalid URL!';
-      case 'clipboardIsEmpty':
-        return TranslationOverrides.string(_root.$meta, 'clipboardIsEmpty', {}) ?? 'Clipboard is empty!';
-      case 'apiKey':
-        return TranslationOverrides.string(_root.$meta, 'apiKey', {}) ?? 'API Key';
-      case 'userId':
-        return TranslationOverrides.string(_root.$meta, 'userId', {}) ?? 'User ID';
-      case 'login':
-        return TranslationOverrides.string(_root.$meta, 'login', {}) ?? 'Login';
-      case 'password':
-        return TranslationOverrides.string(_root.$meta, 'password', {}) ?? 'Password';
-      case 'pause':
-        return TranslationOverrides.string(_root.$meta, 'pause', {}) ?? 'Pause';
-      case 'resume':
-        return TranslationOverrides.string(_root.$meta, 'resume', {}) ?? 'Resume';
-      case 'discord':
-        return TranslationOverrides.string(_root.$meta, 'discord', {}) ?? 'Discord';
-      case 'visitOurDiscord':
-        return TranslationOverrides.string(_root.$meta, 'visitOurDiscord', {}) ?? 'Visit our Discord server';
-      case 'item':
-        return TranslationOverrides.string(_root.$meta, 'item', {}) ?? 'Item';
-      case 'selectAll':
-        return TranslationOverrides.string(_root.$meta, 'selectAll', {}) ?? 'Select all';
-      case 'reset':
-        return TranslationOverrides.string(_root.$meta, 'reset', {}) ?? 'Reset';
-      case 'validationErrors.required':
-        return TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? 'Please enter a value';
-      case 'validationErrors.invalid':
-        return TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? 'Please enter a valid value';
-      case 'validationErrors.tooSmall':
-        return ({required Object min}) =>
-            TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Please enter a value bigger than ${min}';
-      case 'validationErrors.tooBig':
-        return ({required Object max}) =>
-            TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Please enter a value smaller than ${max}';
-      case 'init.initError':
-        return TranslationOverrides.string(_root.$meta, 'init.initError', {}) ?? 'Initialization error!';
-      case 'init.postInitError':
-        return TranslationOverrides.string(_root.$meta, 'init.postInitError', {}) ?? 'Post initialization error!';
-      case 'init.settingUpProxy':
-        return TranslationOverrides.string(_root.$meta, 'init.settingUpProxy', {}) ?? 'Setting up proxy...';
-      case 'init.loadingDatabase':
-        return TranslationOverrides.string(_root.$meta, 'init.loadingDatabase', {}) ?? 'Loading Database...';
-      case 'init.loadingBoorus':
-        return TranslationOverrides.string(_root.$meta, 'init.loadingBoorus', {}) ?? 'Loading Boorus...';
-      case 'init.loadingTags':
-        return TranslationOverrides.string(_root.$meta, 'init.loadingTags', {}) ?? 'Loading Tags...';
-      case 'init.restoringTabs':
-        return TranslationOverrides.string(_root.$meta, 'init.restoringTabs', {}) ?? 'Restoring Tabs...';
-      case 'snatcher.title':
-        return TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Snatcher';
-      case 'snatcher.snatchingHistory':
-        return TranslationOverrides.string(_root.$meta, 'snatcher.snatchingHistory', {}) ?? 'Snatching history';
-      case 'multibooru.title':
-        return TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? 'Multibooru';
-      case 'multibooru.multibooruMode':
-        return TranslationOverrides.string(_root.$meta, 'multibooru.multibooruMode', {}) ?? 'Multibooru mode';
-      case 'multibooru.multibooruRequiresAtLeastTwoBoorus':
-        return TranslationOverrides.string(_root.$meta, 'multibooru.multibooruRequiresAtLeastTwoBoorus', {}) ??
-            'Multibooru mode requires at least 2 boorus to be configured';
-      case 'multibooru.selectSecondaryBoorus':
-        return TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? 'Select secondary boorus:';
-      case 'settings.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.title', {}) ?? 'Settings';
-      case 'settings.language.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Language';
-      case 'settings.language.system':
-        return TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'System';
-      case 'settings.language.helpUsTranslate':
-        return TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help us translate';
-      case 'settings.language.visitForDetails':
-        return TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-            'Visit <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> for details or tap on the image below to go to Weblate';
-      case 'settings.booru.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus & Search';
-      case 'settings.booru.defaultTags':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Default tags';
-      case 'settings.booru.itemsPerPage':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Items fetched per page';
-      case 'settings.booru.itemsPerPageTip':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPageTip', {}) ?? 'Some Boorus may ignore this setting';
-      case 'settings.booru.addBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.addBooru', {}) ?? 'Add Booru config';
-      case 'settings.booru.shareBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooru', {}) ?? 'Share Booru config';
-      case 'settings.booru.shareBooruDialogMsgMobile':
-        return ({required Object booruName}) =>
+    return switch (path) {
+      'locale' => TranslationOverrides.string(_root.$meta, 'locale', {}) ?? 'en',
+      'localeName' => TranslationOverrides.string(_root.$meta, 'localeName', {}) ?? 'English',
+      'appName' => TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher',
+      'error' => TranslationOverrides.string(_root.$meta, 'error', {}) ?? 'Error',
+      'errorExclamation' => TranslationOverrides.string(_root.$meta, 'errorExclamation', {}) ?? 'Error!',
+      'warning' => TranslationOverrides.string(_root.$meta, 'warning', {}) ?? 'Warning',
+      'warningExclamation' => TranslationOverrides.string(_root.$meta, 'warningExclamation', {}) ?? 'Warning!',
+      'info' => TranslationOverrides.string(_root.$meta, 'info', {}) ?? 'Info',
+      'success' => TranslationOverrides.string(_root.$meta, 'success', {}) ?? 'Success',
+      'successExclamation' => TranslationOverrides.string(_root.$meta, 'successExclamation', {}) ?? 'Success!',
+      'cancel' => TranslationOverrides.string(_root.$meta, 'cancel', {}) ?? 'Cancel',
+      'later' => TranslationOverrides.string(_root.$meta, 'later', {}) ?? 'Later',
+      'close' => TranslationOverrides.string(_root.$meta, 'close', {}) ?? 'Close',
+      'ok' => TranslationOverrides.string(_root.$meta, 'ok', {}) ?? 'OK',
+      'yes' => TranslationOverrides.string(_root.$meta, 'yes', {}) ?? 'Yes',
+      'no' => TranslationOverrides.string(_root.$meta, 'no', {}) ?? 'No',
+      'pleaseWait' => TranslationOverrides.string(_root.$meta, 'pleaseWait', {}) ?? 'Please wait...',
+      'show' => TranslationOverrides.string(_root.$meta, 'show', {}) ?? 'Show',
+      'hide' => TranslationOverrides.string(_root.$meta, 'hide', {}) ?? 'Hide',
+      'enable' => TranslationOverrides.string(_root.$meta, 'enable', {}) ?? 'Enable',
+      'disable' => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Disable',
+      'add' => TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Add',
+      'edit' => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? 'Edit',
+      'remove' => TranslationOverrides.string(_root.$meta, 'remove', {}) ?? 'Remove',
+      'save' => TranslationOverrides.string(_root.$meta, 'save', {}) ?? 'Save',
+      'delete' => TranslationOverrides.string(_root.$meta, 'delete', {}) ?? 'Delete',
+      'copy' => TranslationOverrides.string(_root.$meta, 'copy', {}) ?? 'Copy',
+      'copied' => TranslationOverrides.string(_root.$meta, 'copied', {}) ?? 'Copied!',
+      'paste' => TranslationOverrides.string(_root.$meta, 'paste', {}) ?? 'Paste',
+      'copyErrorText' => TranslationOverrides.string(_root.$meta, 'copyErrorText', {}) ?? 'Copy error',
+      'booru' => TranslationOverrides.string(_root.$meta, 'booru', {}) ?? 'Booru',
+      'goToSettings' => TranslationOverrides.string(_root.$meta, 'goToSettings', {}) ?? 'Go to settings',
+      'areYouSure' => TranslationOverrides.string(_root.$meta, 'areYouSure', {}) ?? 'Are you sure?',
+      'thisMayTakeSomeTime' => TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? 'This may take some time...',
+      'doYouWantToExitApp' => TranslationOverrides.string(_root.$meta, 'doYouWantToExitApp', {}) ?? 'Do you want to exit the app?',
+      'closeTheApp' => TranslationOverrides.string(_root.$meta, 'closeTheApp', {}) ?? 'Close the app',
+      'invalidUrl' => TranslationOverrides.string(_root.$meta, 'invalidUrl', {}) ?? 'Invalid URL!',
+      'clipboardIsEmpty' => TranslationOverrides.string(_root.$meta, 'clipboardIsEmpty', {}) ?? 'Clipboard is empty!',
+      'apiKey' => TranslationOverrides.string(_root.$meta, 'apiKey', {}) ?? 'API Key',
+      'userId' => TranslationOverrides.string(_root.$meta, 'userId', {}) ?? 'User ID',
+      'login' => TranslationOverrides.string(_root.$meta, 'login', {}) ?? 'Login',
+      'password' => TranslationOverrides.string(_root.$meta, 'password', {}) ?? 'Password',
+      'pause' => TranslationOverrides.string(_root.$meta, 'pause', {}) ?? 'Pause',
+      'resume' => TranslationOverrides.string(_root.$meta, 'resume', {}) ?? 'Resume',
+      'discord' => TranslationOverrides.string(_root.$meta, 'discord', {}) ?? 'Discord',
+      'visitOurDiscord' => TranslationOverrides.string(_root.$meta, 'visitOurDiscord', {}) ?? 'Visit our Discord server',
+      'item' => TranslationOverrides.string(_root.$meta, 'item', {}) ?? 'Item',
+      'selectAll' => TranslationOverrides.string(_root.$meta, 'selectAll', {}) ?? 'Select all',
+      'reset' => TranslationOverrides.string(_root.$meta, 'reset', {}) ?? 'Reset',
+      'validationErrors.required' => TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? 'Please enter a value',
+      'validationErrors.invalid' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? 'Please enter a valid value',
+      'validationErrors.tooSmall' =>
+        ({required Object min}) =>
+            TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Please enter a value bigger than ${min}',
+      'validationErrors.tooBig' =>
+        ({required Object max}) =>
+            TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Please enter a value smaller than ${max}',
+      'init.initError' => TranslationOverrides.string(_root.$meta, 'init.initError', {}) ?? 'Initialization error!',
+      'init.postInitError' => TranslationOverrides.string(_root.$meta, 'init.postInitError', {}) ?? 'Post initialization error!',
+      'init.settingUpProxy' => TranslationOverrides.string(_root.$meta, 'init.settingUpProxy', {}) ?? 'Setting up proxy...',
+      'init.loadingDatabase' => TranslationOverrides.string(_root.$meta, 'init.loadingDatabase', {}) ?? 'Loading Database...',
+      'init.loadingBoorus' => TranslationOverrides.string(_root.$meta, 'init.loadingBoorus', {}) ?? 'Loading Boorus...',
+      'init.loadingTags' => TranslationOverrides.string(_root.$meta, 'init.loadingTags', {}) ?? 'Loading Tags...',
+      'init.restoringTabs' => TranslationOverrides.string(_root.$meta, 'init.restoringTabs', {}) ?? 'Restoring Tabs...',
+      'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Snatcher',
+      'snatcher.snatchingHistory' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingHistory', {}) ?? 'Snatching history',
+      'multibooru.title' => TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? 'Multibooru',
+      'multibooru.multibooruMode' => TranslationOverrides.string(_root.$meta, 'multibooru.multibooruMode', {}) ?? 'Multibooru mode',
+      'multibooru.multibooruRequiresAtLeastTwoBoorus' =>
+        TranslationOverrides.string(_root.$meta, 'multibooru.multibooruRequiresAtLeastTwoBoorus', {}) ??
+            'Multibooru mode requires at least 2 boorus to be configured',
+      'multibooru.selectSecondaryBoorus' =>
+        TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? 'Select secondary boorus:',
+      'settings.title' => TranslationOverrides.string(_root.$meta, 'settings.title', {}) ?? 'Settings',
+      'settings.language.title' => TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Language',
+      'settings.language.system' => TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'System',
+      'settings.language.helpUsTranslate' => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help us translate',
+      'settings.language.visitForDetails' =>
+        TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
+            'Visit <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> for details or tap on the image below to go to Weblate',
+      'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus & Search',
+      'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Default tags',
+      'settings.booru.itemsPerPage' => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Items fetched per page',
+      'settings.booru.itemsPerPageTip' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPageTip', {}) ?? 'Some Boorus may ignore this setting',
+      'settings.booru.addBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.addBooru', {}) ?? 'Add Booru config',
+      'settings.booru.shareBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooru', {}) ?? 'Share Booru config',
+      'settings.booru.shareBooruDialogMsgMobile' =>
+        ({required Object booruName}) =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgMobile', {'booruName': booruName}) ??
-            'Booru config of ${booruName} will be converted to a link which then can be shared to other apps\n\nShould login/apikey data be included?';
-      case 'settings.booru.shareBooruDialogMsgDesktop':
-        return ({required Object booruName}) =>
+            'Booru config of ${booruName} will be converted to a link which then can be shared to other apps\n\nShould login/apikey data be included?',
+      'settings.booru.shareBooruDialogMsgDesktop' =>
+        ({required Object booruName}) =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgDesktop', {'booruName': booruName}) ??
-            'Booru config of ${booruName} will be converted to a link which will be copied to clipboard\n\nShould login/apikey data be included?';
-      case 'settings.booru.booruSharing':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Booru sharing';
-      case 'settings.booru.booruSharingMsgAndroid':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-            'How to automatically open Booru config links in the app on Android 12 and higher:\n1) Tap button below to open system app link defaults settings\n2) Tap on "Add link" and select all available options';
-      case 'settings.booru.addedBoorus':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Added Boorus';
-      case 'settings.booru.editBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.editBooru', {}) ?? 'Edit Booru config';
-      case 'settings.booru.importBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.importBooru', {}) ?? 'Import Booru config from clipboard';
-      case 'settings.booru.onlyLSURLsSupported':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.onlyLSURLsSupported', {}) ?? 'Only loli.snatcher URLs are supported!';
-      case 'settings.booru.deleteBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooru', {}) ?? 'Delete Booru config';
-      case 'settings.booru.deleteBooruError':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooruError', {}) ??
-            'Something went wrong during deletion of a Booru config!';
-      case 'settings.booru.booruDeleted':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.booruDeleted', {}) ?? 'Booru config deleted!';
-      case 'settings.booru.booruDropdownInfo':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.booruDropdownInfo', {}) ??
-            'The Booru selected here will be set as default after saving.\n\nThe default Booru will be first to appear in the dropdown boxes';
-      case 'settings.booru.changeDefaultBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.changeDefaultBooru', {}) ?? 'Change default Booru?';
-      case 'settings.booru.changeTo':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.changeTo', {}) ?? 'Change to: ';
-      case 'settings.booru.keepCurrentBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.keepCurrentBooru', {}) ?? 'Tap [No] to keep current: ';
-      case 'settings.booru.changeToNewBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.changeToNewBooru', {}) ?? 'Tap [Yes] to change to: ';
-      case 'settings.booru.booruConfigLinkCopied':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.booruConfigLinkCopied', {}) ?? 'Booru config link copied to clipboard!';
-      case 'settings.booru.noBooruSelected':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.noBooruSelected', {}) ?? 'No Booru selected!';
-      case 'settings.booru.cantDeleteThisBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.cantDeleteThisBooru', {}) ?? 'Can\'t delete this Booru!';
-      case 'settings.booru.removeRelatedTabsFirst':
-        return TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Remove related tabs first';
-      case 'settings.booruEditor.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Booru Editor';
-      case 'settings.booruEditor.testBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooru', {}) ?? 'Test Booru';
-      case 'settings.booruEditor.testBooruSuccessMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruSuccessMsg', {}) ?? 'Tap the Save button to save this config';
-      case 'settings.booruEditor.testBooruFailedTitle':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booru test failed';
-      case 'settings.booruEditor.testBooruFailedMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
-            'Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error.';
-      case 'settings.booruEditor.saveBooru':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Save Booru';
-      case 'settings.booruEditor.runTestFirst':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runTestFirst', {}) ?? 'Run test first';
-      case 'settings.booruEditor.runningTest':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Running test...';
-      case 'settings.booruEditor.booruConfigExistsError':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigExistsError', {}) ?? 'This Booru config already exists';
-      case 'settings.booruEditor.booruSameNameExistsError':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruSameNameExistsError', {}) ??
-            'Booru config with same name already exists';
-      case 'settings.booruEditor.booruSameUrlExistsError':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruSameUrlExistsError', {}) ??
-            'Booru config with same URL already exists';
-      case 'settings.booruEditor.thisBooruConfigWontBeAdded':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.thisBooruConfigWontBeAdded', {}) ?? 'This booru config won\'t be added';
-      case 'settings.booruEditor.booruConfigSaved':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigSaved', {}) ?? 'Booru config saved!';
-      case 'settings.booruEditor.existingTabsNeedReload':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.existingTabsNeedReload', {}) ??
-            'Existing tabs with this Booru need to be reloaded in order to apply changes!';
-      case 'settings.booruEditor.failedVerifyApiHydrus':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.failedVerifyApiHydrus', {}) ?? 'Failed to verify api access for Hydrus';
-      case 'settings.booruEditor.accessKeyRequestedTitle':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyRequestedTitle', {}) ?? 'Access key requested';
-      case 'settings.booruEditor.accessKeyRequestedMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyRequestedMsg', {}) ??
-            'Tap okay on Hydrus then apply. You can tap \'Test Booru\' afterwards';
-      case 'settings.booruEditor.accessKeyFailedTitle':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedTitle', {}) ?? 'Failed to get access key';
-      case 'settings.booruEditor.accessKeyFailedMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedMsg', {}) ??
-            'Do you have the request window open in Hydrus?';
-      case 'settings.booruEditor.hydrusInstructions':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.hydrusInstructions', {}) ??
-            'To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client api > Add > From API request';
-      case 'settings.booruEditor.getHydrusApiKey':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.getHydrusApiKey', {}) ?? 'Get Hydrus API key';
-      case 'settings.booruEditor.booruName':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Booru Name';
-      case 'settings.booruEditor.booruNameRequired':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruNameRequired', {}) ?? 'Booru Name is required!';
-      case 'settings.booruEditor.booruUrl':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrl', {}) ?? 'Booru URL';
-      case 'settings.booruEditor.booruUrlRequired':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrlRequired', {}) ?? 'Booru URL is required!';
-      case 'settings.booruEditor.booruType':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru Type';
-      case 'settings.booruEditor.booruTypeIs':
-        return ({required Object booruType}) =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruTypeIs', {'booruType': booruType}) ?? 'Booru Type is ${booruType}';
-      case 'settings.booruEditor.booruFavicon':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFavicon', {}) ?? 'Favicon URL';
-      case 'settings.booruEditor.booruFaviconPlaceholder':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFaviconPlaceholder', {}) ?? '(Autofills if blank)';
-      case 'settings.booruEditor.booruApiCredsInfo':
-        return ({required Object userIdTitle, required Object apiKeyTitle}) =>
+            'Booru config of ${booruName} will be converted to a link which will be copied to clipboard\n\nShould login/apikey data be included?',
+      'settings.booru.booruSharing' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Booru sharing',
+      'settings.booru.booruSharingMsgAndroid' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
+            'How to automatically open Booru config links in the app on Android 12 and higher:\n1) Tap button below to open system app link defaults settings\n2) Tap on "Add link" and select all available options',
+      'settings.booru.addedBoorus' => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Added Boorus',
+      'settings.booru.editBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.editBooru', {}) ?? 'Edit Booru config',
+      'settings.booru.importBooru' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.importBooru', {}) ?? 'Import Booru config from clipboard',
+      'settings.booru.onlyLSURLsSupported' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.onlyLSURLsSupported', {}) ?? 'Only loli.snatcher URLs are supported!',
+      'settings.booru.deleteBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooru', {}) ?? 'Delete Booru config',
+      'settings.booru.deleteBooruError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooruError', {}) ?? 'Something went wrong during deletion of a Booru config!',
+      'settings.booru.booruDeleted' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruDeleted', {}) ?? 'Booru config deleted!',
+      'settings.booru.booruDropdownInfo' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.booruDropdownInfo', {}) ??
+            'The Booru selected here will be set as default after saving.\n\nThe default Booru will be first to appear in the dropdown boxes',
+      'settings.booru.changeDefaultBooru' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.changeDefaultBooru', {}) ?? 'Change default Booru?',
+      'settings.booru.changeTo' => TranslationOverrides.string(_root.$meta, 'settings.booru.changeTo', {}) ?? 'Change to: ',
+      'settings.booru.keepCurrentBooru' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.keepCurrentBooru', {}) ?? 'Tap [No] to keep current: ',
+      'settings.booru.changeToNewBooru' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.changeToNewBooru', {}) ?? 'Tap [Yes] to change to: ',
+      'settings.booru.booruConfigLinkCopied' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.booruConfigLinkCopied', {}) ?? 'Booru config link copied to clipboard!',
+      'settings.booru.noBooruSelected' => TranslationOverrides.string(_root.$meta, 'settings.booru.noBooruSelected', {}) ?? 'No Booru selected!',
+      'settings.booru.cantDeleteThisBooru' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.cantDeleteThisBooru', {}) ?? 'Can\'t delete this Booru!',
+      'settings.booru.removeRelatedTabsFirst' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Remove related tabs first',
+      'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Booru Editor',
+      'settings.booruEditor.testBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooru', {}) ?? 'Test Booru',
+      'settings.booruEditor.testBooruSuccessMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruSuccessMsg', {}) ?? 'Tap the Save button to save this config',
+      'settings.booruEditor.testBooruFailedTitle' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booru test failed',
+      'settings.booruEditor.testBooruFailedMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
+            'Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error.',
+      'settings.booruEditor.saveBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Save Booru',
+      'settings.booruEditor.runTestFirst' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runTestFirst', {}) ?? 'Run test first',
+      'settings.booruEditor.runningTest' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Running test...',
+      'settings.booruEditor.booruConfigExistsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigExistsError', {}) ?? 'This Booru config already exists',
+      'settings.booruEditor.booruSameNameExistsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruSameNameExistsError', {}) ?? 'Booru config with same name already exists',
+      'settings.booruEditor.booruSameUrlExistsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruSameUrlExistsError', {}) ?? 'Booru config with same URL already exists',
+      'settings.booruEditor.thisBooruConfigWontBeAdded' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.thisBooruConfigWontBeAdded', {}) ?? 'This booru config won\'t be added',
+      'settings.booruEditor.booruConfigSaved' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigSaved', {}) ?? 'Booru config saved!',
+      'settings.booruEditor.existingTabsNeedReload' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.existingTabsNeedReload', {}) ??
+            'Existing tabs with this Booru need to be reloaded in order to apply changes!',
+      'settings.booruEditor.failedVerifyApiHydrus' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.failedVerifyApiHydrus', {}) ?? 'Failed to verify api access for Hydrus',
+      'settings.booruEditor.accessKeyRequestedTitle' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyRequestedTitle', {}) ?? 'Access key requested',
+      'settings.booruEditor.accessKeyRequestedMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyRequestedMsg', {}) ??
+            'Tap okay on Hydrus then apply. You can tap \'Test Booru\' afterwards',
+      'settings.booruEditor.accessKeyFailedTitle' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedTitle', {}) ?? 'Failed to get access key',
+      'settings.booruEditor.accessKeyFailedMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedMsg', {}) ?? 'Do you have the request window open in Hydrus?',
+      'settings.booruEditor.hydrusInstructions' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.hydrusInstructions', {}) ??
+            'To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client api > Add > From API request',
+      'settings.booruEditor.getHydrusApiKey' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.getHydrusApiKey', {}) ?? 'Get Hydrus API key',
+      'settings.booruEditor.booruName' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Booru Name',
+      'settings.booruEditor.booruNameRequired' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruNameRequired', {}) ?? 'Booru Name is required!',
+      'settings.booruEditor.booruUrl' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrl', {}) ?? 'Booru URL',
+      'settings.booruEditor.booruUrlRequired' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrlRequired', {}) ?? 'Booru URL is required!',
+      'settings.booruEditor.booruType' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru Type',
+      'settings.booruEditor.booruTypeIs' =>
+        ({required Object booruType}) =>
+            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruTypeIs', {'booruType': booruType}) ?? 'Booru Type is ${booruType}',
+      'settings.booruEditor.booruFavicon' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFavicon', {}) ?? 'Favicon URL',
+      'settings.booruEditor.booruFaviconPlaceholder' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFaviconPlaceholder', {}) ?? '(Autofills if blank)',
+      'settings.booruEditor.booruApiCredsInfo' =>
+        ({required Object userIdTitle, required Object apiKeyTitle}) =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruApiCredsInfo', {
               'userIdTitle': userIdTitle,
               'apiKeyTitle': apiKeyTitle,
             }) ??
-            '${userIdTitle} and ${apiKeyTitle} may be needed with some boorus but in most cases aren\'t necessary.';
-      case 'settings.booruEditor.booruDefTags':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Default tags';
-      case 'settings.booruEditor.booruDefTagsPlaceholder':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTagsPlaceholder', {}) ?? 'Default search for booru';
-      case 'settings.booruEditor.booruDefaultInstructions':
-        return TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefaultInstructions', {}) ??
-            'Fields below may be required for some boorus';
-      case 'settings.interface.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.interface.title', {}) ?? 'Interface';
-      case 'settings.theme.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Themes';
-      case 'settings.theme.themeMode':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Theme mode';
-      case 'settings.theme.blackBg':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? 'Black background';
-      case 'settings.theme.useDynamicColor':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.useDynamicColor', {}) ?? 'Use dynamic color';
-      case 'settings.theme.android12PlusOnly':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Android 12+ only';
-      case 'settings.theme.theme':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'Theme';
-      case 'settings.theme.primaryColor':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.primaryColor', {}) ?? 'Primary color';
-      case 'settings.theme.secondaryColor':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.secondaryColor', {}) ?? 'Secondary color';
-      case 'settings.theme.enableDrawerMascot':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.enableDrawerMascot', {}) ?? 'Enable drawer mascot';
-      case 'settings.theme.setCustomMascot':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.setCustomMascot', {}) ?? 'Set custom mascot';
-      case 'settings.theme.removeCustomMascot':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.removeCustomMascot', {}) ?? 'Remove custom mascot';
-      case 'settings.theme.currentMascotPath':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.currentMascotPath', {}) ?? 'Current mascot path';
-      case 'settings.theme.system':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.system', {}) ?? 'System';
-      case 'settings.theme.light':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.light', {}) ?? 'Light';
-      case 'settings.theme.dark':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.dark', {}) ?? 'Dark';
-      case 'settings.theme.pink':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.pink', {}) ?? 'Pink';
-      case 'settings.theme.purple':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.purple', {}) ?? 'Purple';
-      case 'settings.theme.blue':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.blue', {}) ?? 'Blue';
-      case 'settings.theme.teal':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.teal', {}) ?? 'Teal';
-      case 'settings.theme.red':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.red', {}) ?? 'Red';
-      case 'settings.theme.green':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.green', {}) ?? 'Green';
-      case 'settings.theme.halloween':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.halloween', {}) ?? 'Halloween';
-      case 'settings.theme.custom':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.custom', {}) ?? 'Custom';
-      case 'settings.theme.selectColor':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.selectColor', {}) ?? 'Select color';
-      case 'settings.theme.selectedColor':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColor', {}) ?? 'Selected color';
-      case 'settings.theme.selectedColorAndShades':
-        return TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Selected color and its shades';
-      case 'settings.viewer.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.viewer.title', {}) ?? 'Viewer';
-      case 'settings.video.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.video.title', {}) ?? 'Video';
-      case 'settings.downloads.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.title', {}) ?? 'Snatching';
-      case 'settings.downloads.fromNextItemInQueue':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.fromNextItemInQueue', {}) ?? 'From next item in queue';
-      case 'settings.downloads.pleaseProvideStoragePermission':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.pleaseProvideStoragePermission', {}) ??
-            'Please provide storage permission in order to download files';
-      case 'settings.downloads.noItemsSelected':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.noItemsSelected', {}) ?? 'No items selected';
-      case 'settings.downloads.noItemsQueued':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.noItemsQueued', {}) ?? 'No items in queue';
-      case 'settings.downloads.batch':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.batch', {}) ?? 'Batch';
-      case 'settings.downloads.snatchSelected':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.snatchSelected', {}) ?? 'Snatch selected';
-      case 'settings.downloads.removeSnatchedStatusFromSelected':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.removeSnatchedStatusFromSelected', {}) ??
-            'Remove snatched status from selected';
-      case 'settings.downloads.favouriteSelected':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.favouriteSelected', {}) ?? 'Favorite selected';
-      case 'settings.downloads.unfavouriteSelected':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.unfavouriteSelected', {}) ?? 'Unfavorite selected';
-      case 'settings.downloads.clearSelected':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.clearSelected', {}) ?? 'Clear selected';
-      case 'settings.downloads.updatingData':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloads.updatingData', {}) ?? 'Updating data...';
-      case 'settings.cache.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Caching';
-      case 'settings.downloadsAndCache':
-        return TranslationOverrides.string(_root.$meta, 'settings.downloadsAndCache', {}) ?? 'Snatching & Cache';
-      case 'settings.tagFilters.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.tagFilters.title', {}) ?? 'Tag filters';
-      case 'settings.database.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.database.title', {}) ?? 'Database';
-      case 'settings.database.indexingDatabase':
-        return TranslationOverrides.string(_root.$meta, 'settings.database.indexingDatabase', {}) ?? 'Indexing database';
-      case 'settings.database.droppingIndexes':
-        return TranslationOverrides.string(_root.$meta, 'settings.database.droppingIndexes', {}) ?? 'Dropping indexes';
-      case 'settings.backupAndRestore.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.title', {}) ?? 'Backup & Restore';
-      case 'settings.backupAndRestore.duplicateFileDetectedTitle':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedTitle', {}) ?? 'Duplicate file detected!';
-      case 'settings.backupAndRestore.duplicateFileDetectedMsg':
-        return ({required Object fileName}) =>
+            '${userIdTitle} and ${apiKeyTitle} may be needed with some boorus but in most cases aren\'t necessary.',
+      'settings.booruEditor.booruDefTags' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Default tags',
+      'settings.booruEditor.booruDefTagsPlaceholder' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTagsPlaceholder', {}) ?? 'Default search for booru',
+      'settings.booruEditor.booruDefaultInstructions' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefaultInstructions', {}) ??
+            'Fields below may be required for some boorus',
+      'settings.interface.title' => TranslationOverrides.string(_root.$meta, 'settings.interface.title', {}) ?? 'Interface',
+      'settings.theme.title' => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Themes',
+      'settings.theme.themeMode' => TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Theme mode',
+      'settings.theme.blackBg' => TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? 'Black background',
+      'settings.theme.useDynamicColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.useDynamicColor', {}) ?? 'Use dynamic color',
+      'settings.theme.android12PlusOnly' => TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Android 12+ only',
+      'settings.theme.theme' => TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'Theme',
+      'settings.theme.primaryColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.primaryColor', {}) ?? 'Primary color',
+      'settings.theme.secondaryColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.secondaryColor', {}) ?? 'Secondary color',
+      'settings.theme.enableDrawerMascot' =>
+        TranslationOverrides.string(_root.$meta, 'settings.theme.enableDrawerMascot', {}) ?? 'Enable drawer mascot',
+      'settings.theme.setCustomMascot' => TranslationOverrides.string(_root.$meta, 'settings.theme.setCustomMascot', {}) ?? 'Set custom mascot',
+      'settings.theme.removeCustomMascot' =>
+        TranslationOverrides.string(_root.$meta, 'settings.theme.removeCustomMascot', {}) ?? 'Remove custom mascot',
+      'settings.theme.currentMascotPath' => TranslationOverrides.string(_root.$meta, 'settings.theme.currentMascotPath', {}) ?? 'Current mascot path',
+      'settings.theme.system' => TranslationOverrides.string(_root.$meta, 'settings.theme.system', {}) ?? 'System',
+      'settings.theme.light' => TranslationOverrides.string(_root.$meta, 'settings.theme.light', {}) ?? 'Light',
+      'settings.theme.dark' => TranslationOverrides.string(_root.$meta, 'settings.theme.dark', {}) ?? 'Dark',
+      'settings.theme.pink' => TranslationOverrides.string(_root.$meta, 'settings.theme.pink', {}) ?? 'Pink',
+      'settings.theme.purple' => TranslationOverrides.string(_root.$meta, 'settings.theme.purple', {}) ?? 'Purple',
+      'settings.theme.blue' => TranslationOverrides.string(_root.$meta, 'settings.theme.blue', {}) ?? 'Blue',
+      'settings.theme.teal' => TranslationOverrides.string(_root.$meta, 'settings.theme.teal', {}) ?? 'Teal',
+      'settings.theme.red' => TranslationOverrides.string(_root.$meta, 'settings.theme.red', {}) ?? 'Red',
+      'settings.theme.green' => TranslationOverrides.string(_root.$meta, 'settings.theme.green', {}) ?? 'Green',
+      'settings.theme.halloween' => TranslationOverrides.string(_root.$meta, 'settings.theme.halloween', {}) ?? 'Halloween',
+      'settings.theme.custom' => TranslationOverrides.string(_root.$meta, 'settings.theme.custom', {}) ?? 'Custom',
+      'settings.theme.selectColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.selectColor', {}) ?? 'Select color',
+      'settings.theme.selectedColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColor', {}) ?? 'Selected color',
+      'settings.theme.selectedColorAndShades' =>
+        TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Selected color and its shades',
+      'settings.viewer.title' => TranslationOverrides.string(_root.$meta, 'settings.viewer.title', {}) ?? 'Viewer',
+      'settings.video.title' => TranslationOverrides.string(_root.$meta, 'settings.video.title', {}) ?? 'Video',
+      'settings.downloads.title' => TranslationOverrides.string(_root.$meta, 'settings.downloads.title', {}) ?? 'Snatching',
+      'settings.downloads.fromNextItemInQueue' =>
+        TranslationOverrides.string(_root.$meta, 'settings.downloads.fromNextItemInQueue', {}) ?? 'From next item in queue',
+      'settings.downloads.pleaseProvideStoragePermission' =>
+        TranslationOverrides.string(_root.$meta, 'settings.downloads.pleaseProvideStoragePermission', {}) ??
+            'Please provide storage permission in order to download files',
+      'settings.downloads.noItemsSelected' =>
+        TranslationOverrides.string(_root.$meta, 'settings.downloads.noItemsSelected', {}) ?? 'No items selected',
+      'settings.downloads.noItemsQueued' => TranslationOverrides.string(_root.$meta, 'settings.downloads.noItemsQueued', {}) ?? 'No items in queue',
+      'settings.downloads.batch' => TranslationOverrides.string(_root.$meta, 'settings.downloads.batch', {}) ?? 'Batch',
+      'settings.downloads.snatchSelected' => TranslationOverrides.string(_root.$meta, 'settings.downloads.snatchSelected', {}) ?? 'Snatch selected',
+      'settings.downloads.removeSnatchedStatusFromSelected' =>
+        TranslationOverrides.string(_root.$meta, 'settings.downloads.removeSnatchedStatusFromSelected', {}) ?? 'Remove snatched status from selected',
+      'settings.downloads.favouriteSelected' =>
+        TranslationOverrides.string(_root.$meta, 'settings.downloads.favouriteSelected', {}) ?? 'Favorite selected',
+      'settings.downloads.unfavouriteSelected' =>
+        TranslationOverrides.string(_root.$meta, 'settings.downloads.unfavouriteSelected', {}) ?? 'Unfavorite selected',
+      'settings.downloads.clearSelected' => TranslationOverrides.string(_root.$meta, 'settings.downloads.clearSelected', {}) ?? 'Clear selected',
+      'settings.downloads.updatingData' => TranslationOverrides.string(_root.$meta, 'settings.downloads.updatingData', {}) ?? 'Updating data...',
+      'settings.cache.title' => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Caching',
+      'settings.downloadsAndCache' => TranslationOverrides.string(_root.$meta, 'settings.downloadsAndCache', {}) ?? 'Snatching & Cache',
+      'settings.tagFilters.title' => TranslationOverrides.string(_root.$meta, 'settings.tagFilters.title', {}) ?? 'Tag filters',
+      'settings.database.title' => TranslationOverrides.string(_root.$meta, 'settings.database.title', {}) ?? 'Database',
+      'settings.database.indexingDatabase' =>
+        TranslationOverrides.string(_root.$meta, 'settings.database.indexingDatabase', {}) ?? 'Indexing database',
+      'settings.database.droppingIndexes' => TranslationOverrides.string(_root.$meta, 'settings.database.droppingIndexes', {}) ?? 'Dropping indexes',
+      'settings.backupAndRestore.title' => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.title', {}) ?? 'Backup & Restore',
+      'settings.backupAndRestore.duplicateFileDetectedTitle' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedTitle', {}) ?? 'Duplicate file detected!',
+      'settings.backupAndRestore.duplicateFileDetectedMsg' =>
+        ({required Object fileName}) =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedMsg', {'fileName': fileName}) ??
-            'The file ${fileName} already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.';
-      case 'settings.backupAndRestore.androidOnlyFeatureMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.androidOnlyFeatureMsg', {}) ??
-            'This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app\'s data folder, respective to your system';
-      case 'settings.backupAndRestore.selectBackupDir':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.selectBackupDir', {}) ?? 'Select backup directory';
-      case 'settings.backupAndRestore.failedToGetBackupPath':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.failedToGetBackupPath', {}) ?? 'Failed to get backup path!';
-      case 'settings.backupAndRestore.backupPathMsg':
-        return ({required Object backupPath}) =>
+            'The file ${fileName} already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.',
+      'settings.backupAndRestore.androidOnlyFeatureMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.androidOnlyFeatureMsg', {}) ??
+            'This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app\'s data folder, respective to your system',
+      'settings.backupAndRestore.selectBackupDir' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.selectBackupDir', {}) ?? 'Select backup directory',
+      'settings.backupAndRestore.failedToGetBackupPath' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.failedToGetBackupPath', {}) ?? 'Failed to get backup path!',
+      'settings.backupAndRestore.backupPathMsg' =>
+        ({required Object backupPath}) =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupPathMsg', {'backupPath': backupPath}) ??
-            'Backup path is: ${backupPath}';
-      case 'settings.backupAndRestore.noBackupDirSelected':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.noBackupDirSelected', {}) ?? 'No backup directory selected';
-      case 'settings.backupAndRestore.restoreInfoMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreInfoMsg', {}) ??
-            'Restore will work only if the files are placed in the root of the directory.';
-      case 'settings.backupAndRestore.backupSettings':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupSettings', {}) ?? 'Backup Settings';
-      case 'settings.backupAndRestore.restoreSettings':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreSettings', {}) ?? 'Restore Settings';
-      case 'settings.backupAndRestore.settingsBackedUp':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.settingsBackedUp', {}) ?? 'Settings backed up to settings.json';
-      case 'settings.backupAndRestore.settingsRestored':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.settingsRestored', {}) ?? 'Settings restored from backup!';
-      case 'settings.backupAndRestore.backupSettingsError':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupSettingsError', {}) ?? 'Failed to backup settings!';
-      case 'settings.backupAndRestore.restoreSettingsError':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreSettingsError', {}) ?? 'Failed to restore settings!';
-      case 'settings.backupAndRestore.backupBoorus':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorus', {}) ?? 'Backup Boorus';
-      case 'settings.backupAndRestore.restoreBoorus':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorus', {}) ?? 'Restore Boorus';
-      case 'settings.backupAndRestore.boorusBackedUp':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusBackedUp', {}) ?? 'Boorus backed up to boorus.json';
-      case 'settings.backupAndRestore.boorusRestored':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusRestored', {}) ?? 'Boorus restored from backup!';
-      case 'settings.backupAndRestore.backupBoorusError':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorusError', {}) ?? 'Failed to backup boorus!';
-      case 'settings.backupAndRestore.restoreBoorusError':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorusError', {}) ?? 'Failed to restore boorus!';
-      case 'settings.backupAndRestore.backupDatabase':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDatabase', {}) ?? 'Backup Database';
-      case 'settings.backupAndRestore.restoreDatabase':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabase', {}) ?? 'Restore Database';
-      case 'settings.backupAndRestore.restoreDatabaseInfo':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabaseInfo', {}) ??
-            'May take a while depending on the size of the database, will restart the app on success';
-      case 'settings.backupAndRestore.databaseBackedUp':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? 'Database backed up to database.json';
-      case 'settings.backupAndRestore.databaseRestored':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseRestored', {}) ??
-            'Database restored from backup! App will restart in a few seconds!';
-      case 'settings.backupAndRestore.backupDatabaseError':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDatabaseError', {}) ?? 'Failed to backup database!';
-      case 'settings.backupAndRestore.restoreDatabaseError':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabaseError', {}) ?? 'Failed to restore database!';
-      case 'settings.backupAndRestore.databaseFileNotFound':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseFileNotFound', {}) ??
-            'Database file not found or cannot be read!';
-      case 'settings.backupAndRestore.backupTags':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupTags', {}) ?? 'Backup Tags';
-      case 'settings.backupAndRestore.restoreTags':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTags', {}) ?? 'Restore Tags';
-      case 'settings.backupAndRestore.restoreTagsInfo':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTagsInfo', {}) ??
-            'May take a while if you have a lot of tags. If you did a database restore, you don\'t need to do this because it\'s already included in the database';
-      case 'settings.backupAndRestore.tagsBackedUp':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.tagsBackedUp', {}) ?? 'Tags backed up to tags.json';
-      case 'settings.backupAndRestore.tagsRestored':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.tagsRestored', {}) ?? 'Tags restored from backup!';
-      case 'settings.backupAndRestore.backupTagsError':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupTagsError', {}) ?? 'Failed to backup tags!';
-      case 'settings.backupAndRestore.restoreTagsError':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTagsError', {}) ?? 'Failed to restore tags!';
-      case 'settings.backupAndRestore.tagsFileNotFound':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.tagsFileNotFound', {}) ?? 'Tags file not found or cannot be read!';
-      case 'settings.backupAndRestore.operationTakesTooLongMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.operationTakesTooLongMsg', {}) ??
-            'Press Hide below if it takes too long, operation will continue in background';
-      case 'settings.backupAndRestore.backupFileNotFound':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupFileNotFound', {}) ??
-            'Backup file not found or cannot be read!';
-      case 'settings.backupAndRestore.backupDirNoAccess':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDirNoAccess', {}) ?? 'No access to backup directory!';
-      case 'settings.backupAndRestore.backupCancelled':
-        return TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupCancelled', {}) ?? 'Backup cancelled!';
-      case 'settings.network.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.network.title', {}) ?? 'Network';
-      case 'settings.privacy.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? 'Privacy';
-      case 'settings.privacy.appLock':
-        return TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'App lock';
-      case 'settings.privacy.appLockMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.privacy.appLockMsg', {}) ??
-            'Allows to lock the app manually or if left for too long. Requires system lock with PIN or biometrics to be enabled';
-      case 'settings.privacy.autoLockAfter':
-        return TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'Auto lock after';
-      case 'settings.privacy.autoLockAfterTip':
-        return TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? 'in seconds, 0 to disable';
-      case 'settings.privacy.bluronLeave':
-        return TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeave', {}) ?? 'Blur screen when leaving the app';
-      case 'settings.privacy.bluronLeaveMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeaveMsg', {}) ??
-            'May not work on some devices due to system limitations';
-      case 'settings.privacy.incognitoKeyboard':
-        return TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboard', {}) ?? 'Incognito keyboard';
-      case 'settings.privacy.incognitoKeyboardMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
-            'Tells system keyboard to not save your typing history and disable learning based on your input.\nWill be applied to most of text inputs';
-      case 'settings.performance.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.performance.title', {}) ?? 'Performance';
-      case 'settings.sync.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync';
-      case 'settings.sync.dbError':
-        return TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Database must be enabled to use LoliSync';
-      case 'settings.about.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.title', {}) ?? 'About';
-      case 'settings.about.appDescription':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ??
-            'LoliSnatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo.';
-      case 'settings.about.appOnGitHub':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.appOnGitHub', {}) ?? 'LoliSnatcher on Github';
-      case 'settings.about.contact':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.contact', {}) ?? 'Contact';
-      case 'settings.about.emailCopied':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.emailCopied', {}) ?? 'Email copied to clipboard!';
-      case 'settings.about.logoArtistThanks':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.logoArtistThanks', {}) ??
-            'A big thanks to Showers-U for letting us use their artwork for the app logo. Please check them out on Pixiv';
-      case 'settings.about.developers':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? 'Developers';
-      case 'settings.about.releases':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'Releases';
-      case 'settings.about.releasesMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ??
-            'Latest version and full changelogs can be found at the Github Releases page:';
-      case 'settings.about.licenses':
-        return TranslationOverrides.string(_root.$meta, 'settings.about.licenses', {}) ?? 'Licenses';
-      case 'settings.checkForUpdates.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.title', {}) ?? 'Check for updates';
-      case 'settings.checkForUpdates.updateAvailable':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateAvailable', {}) ?? 'Update available!';
-      case 'settings.checkForUpdates.updateChangelog':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateChangelog', {}) ?? 'Update changelog';
-      case 'settings.checkForUpdates.updateCheckError':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateCheckError', {}) ?? 'Update check error!';
-      case 'settings.checkForUpdates.youHaveLatestVersion':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.youHaveLatestVersion', {}) ?? 'You have the latest version!';
-      case 'settings.checkForUpdates.viewLatestChangelog':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.viewLatestChangelog', {}) ?? 'View latest changelog';
-      case 'settings.checkForUpdates.currentVersion':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.currentVersion', {}) ?? 'Current version';
-      case 'settings.checkForUpdates.changelog':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.changelog', {}) ?? 'Changelog';
-      case 'settings.checkForUpdates.visitPlayStore':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitPlayStore', {}) ?? 'Visit Play Store';
-      case 'settings.checkForUpdates.visitReleases':
-        return TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitReleases', {}) ?? 'Visit Releases';
-      case 'settings.logs.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.logs.title', {}) ?? 'Logs';
-      case 'settings.logs.shareLogs':
-        return TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogs', {}) ?? 'Share logs';
-      case 'settings.logs.shareLogsWarningTitle':
-        return TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogsWarningTitle', {}) ?? 'Share logs to external app?';
-      case 'settings.logs.shareLogsWarningMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogsWarningMsg', {}) ??
-            '[WARNING]: Logs may contain sensitive information, share with caution!';
-      case 'settings.help.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.help.title', {}) ?? 'Help';
-      case 'settings.debug.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.debug.title', {}) ?? 'Debug';
-      case 'settings.debug.enabledSnackbarMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.debug.enabledSnackbarMsg', {}) ?? 'Debug mode is enabled!';
-      case 'settings.debug.disabledSnackbarMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.debug.disabledSnackbarMsg', {}) ?? 'Debug mode is disabled!';
-      case 'settings.debug.alreadyEnabledSnackbarMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.debug.alreadyEnabledSnackbarMsg', {}) ?? 'Debug mode is already enabled!';
-      case 'settings.debug.openAlice':
-        return TranslationOverrides.string(_root.$meta, 'settings.debug.openAlice', {}) ?? 'Open network inspector';
-      case 'settings.debug.openLogger':
-        return TranslationOverrides.string(_root.$meta, 'settings.debug.openLogger', {}) ?? 'Open logger';
-      case 'settings.logging.title':
-        return TranslationOverrides.string(_root.$meta, 'settings.logging.title', {}) ?? 'Logging';
-      case 'settings.logging.enabledMsg':
-        return TranslationOverrides.string(_root.$meta, 'settings.logging.enabledMsg', {}) ?? 'Logging is enabled';
-      case 'settings.logging.enabledLogTypes':
-        return TranslationOverrides.string(_root.$meta, 'settings.logging.enabledLogTypes', {}) ?? 'Enabled log types';
-      case 'settings.logging.disableTip':
-        return TranslationOverrides.string(_root.$meta, 'settings.logging.disableTip', {}) ?? 'You can disable logging in the debug settings';
-      case 'settings.webview.openWebview':
-        return TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? 'Open webview';
-      case 'settings.webview.openWebviewTip':
-        return TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'to login or obtain cookies';
-      case 'settings.version':
-        return TranslationOverrides.string(_root.$meta, 'settings.version', {}) ?? 'Version';
-      default:
-        return null;
-    }
+            'Backup path is: ${backupPath}',
+      'settings.backupAndRestore.noBackupDirSelected' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.noBackupDirSelected', {}) ?? 'No backup directory selected',
+      'settings.backupAndRestore.restoreInfoMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreInfoMsg', {}) ??
+            'Restore will work only if the files are placed in the root of the directory.',
+      'settings.backupAndRestore.backupSettings' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupSettings', {}) ?? 'Backup Settings',
+      'settings.backupAndRestore.restoreSettings' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreSettings', {}) ?? 'Restore Settings',
+      'settings.backupAndRestore.settingsBackedUp' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.settingsBackedUp', {}) ?? 'Settings backed up to settings.json',
+      'settings.backupAndRestore.settingsRestored' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.settingsRestored', {}) ?? 'Settings restored from backup!',
+      'settings.backupAndRestore.backupSettingsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupSettingsError', {}) ?? 'Failed to backup settings!',
+      'settings.backupAndRestore.restoreSettingsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreSettingsError', {}) ?? 'Failed to restore settings!',
+      'settings.backupAndRestore.backupBoorus' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorus', {}) ?? 'Backup Boorus',
+      'settings.backupAndRestore.restoreBoorus' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorus', {}) ?? 'Restore Boorus',
+      'settings.backupAndRestore.boorusBackedUp' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusBackedUp', {}) ?? 'Boorus backed up to boorus.json',
+      'settings.backupAndRestore.boorusRestored' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusRestored', {}) ?? 'Boorus restored from backup!',
+      'settings.backupAndRestore.backupBoorusError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorusError', {}) ?? 'Failed to backup boorus!',
+      'settings.backupAndRestore.restoreBoorusError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorusError', {}) ?? 'Failed to restore boorus!',
+      'settings.backupAndRestore.backupDatabase' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDatabase', {}) ?? 'Backup Database',
+      'settings.backupAndRestore.restoreDatabase' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabase', {}) ?? 'Restore Database',
+      'settings.backupAndRestore.restoreDatabaseInfo' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabaseInfo', {}) ??
+            'May take a while depending on the size of the database, will restart the app on success',
+      'settings.backupAndRestore.databaseBackedUp' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? 'Database backed up to database.json',
+      'settings.backupAndRestore.databaseRestored' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseRestored', {}) ??
+            'Database restored from backup! App will restart in a few seconds!',
+      'settings.backupAndRestore.backupDatabaseError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDatabaseError', {}) ?? 'Failed to backup database!',
+      'settings.backupAndRestore.restoreDatabaseError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabaseError', {}) ?? 'Failed to restore database!',
+      'settings.backupAndRestore.databaseFileNotFound' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseFileNotFound', {}) ??
+            'Database file not found or cannot be read!',
+      'settings.backupAndRestore.backupTags' => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupTags', {}) ?? 'Backup Tags',
+      'settings.backupAndRestore.restoreTags' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTags', {}) ?? 'Restore Tags',
+      'settings.backupAndRestore.restoreTagsInfo' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTagsInfo', {}) ??
+            'May take a while if you have a lot of tags. If you did a database restore, you don\'t need to do this because it\'s already included in the database',
+      'settings.backupAndRestore.tagsBackedUp' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.tagsBackedUp', {}) ?? 'Tags backed up to tags.json',
+      'settings.backupAndRestore.tagsRestored' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.tagsRestored', {}) ?? 'Tags restored from backup!',
+      'settings.backupAndRestore.backupTagsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupTagsError', {}) ?? 'Failed to backup tags!',
+      'settings.backupAndRestore.restoreTagsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTagsError', {}) ?? 'Failed to restore tags!',
+      'settings.backupAndRestore.tagsFileNotFound' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.tagsFileNotFound', {}) ?? 'Tags file not found or cannot be read!',
+      'settings.backupAndRestore.operationTakesTooLongMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.operationTakesTooLongMsg', {}) ??
+            'Press Hide below if it takes too long, operation will continue in background',
+      'settings.backupAndRestore.backupFileNotFound' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupFileNotFound', {}) ?? 'Backup file not found or cannot be read!',
+      'settings.backupAndRestore.backupDirNoAccess' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDirNoAccess', {}) ?? 'No access to backup directory!',
+      'settings.backupAndRestore.backupCancelled' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupCancelled', {}) ?? 'Backup cancelled!',
+      'settings.network.title' => TranslationOverrides.string(_root.$meta, 'settings.network.title', {}) ?? 'Network',
+      'settings.privacy.title' => TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? 'Privacy',
+      'settings.privacy.appLock' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'App lock',
+      'settings.privacy.appLockMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.privacy.appLockMsg', {}) ??
+            'Allows to lock the app manually or if left for too long. Requires system lock with PIN or biometrics to be enabled',
+      'settings.privacy.autoLockAfter' => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'Auto lock after',
+      'settings.privacy.autoLockAfterTip' =>
+        TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? 'in seconds, 0 to disable',
+      'settings.privacy.bluronLeave' =>
+        TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeave', {}) ?? 'Blur screen when leaving the app',
+      'settings.privacy.bluronLeaveMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeaveMsg', {}) ?? 'May not work on some devices due to system limitations',
+      'settings.privacy.incognitoKeyboard' =>
+        TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboard', {}) ?? 'Incognito keyboard',
+      'settings.privacy.incognitoKeyboardMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
+            'Tells system keyboard to not save your typing history and disable learning based on your input.\nWill be applied to most of text inputs',
+      'settings.performance.title' => TranslationOverrides.string(_root.$meta, 'settings.performance.title', {}) ?? 'Performance',
+      'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync',
+      'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Database must be enabled to use LoliSync',
+      'settings.about.title' => TranslationOverrides.string(_root.$meta, 'settings.about.title', {}) ?? 'About',
+      'settings.about.appDescription' =>
+        TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ??
+            'LoliSnatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo.',
+      'settings.about.appOnGitHub' => TranslationOverrides.string(_root.$meta, 'settings.about.appOnGitHub', {}) ?? 'LoliSnatcher on Github',
+      'settings.about.contact' => TranslationOverrides.string(_root.$meta, 'settings.about.contact', {}) ?? 'Contact',
+      'settings.about.emailCopied' => TranslationOverrides.string(_root.$meta, 'settings.about.emailCopied', {}) ?? 'Email copied to clipboard!',
+      'settings.about.logoArtistThanks' =>
+        TranslationOverrides.string(_root.$meta, 'settings.about.logoArtistThanks', {}) ??
+            'A big thanks to Showers-U for letting us use their artwork for the app logo. Please check them out on Pixiv',
+      'settings.about.developers' => TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? 'Developers',
+      'settings.about.releases' => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'Releases',
+      'settings.about.releasesMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ??
+            'Latest version and full changelogs can be found at the Github Releases page:',
+      'settings.about.licenses' => TranslationOverrides.string(_root.$meta, 'settings.about.licenses', {}) ?? 'Licenses',
+      'settings.checkForUpdates.title' => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.title', {}) ?? 'Check for updates',
+      'settings.checkForUpdates.updateAvailable' =>
+        TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateAvailable', {}) ?? 'Update available!',
+      'settings.checkForUpdates.updateChangelog' =>
+        TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateChangelog', {}) ?? 'Update changelog',
+      'settings.checkForUpdates.updateCheckError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateCheckError', {}) ?? 'Update check error!',
+      'settings.checkForUpdates.youHaveLatestVersion' =>
+        TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.youHaveLatestVersion', {}) ?? 'You have the latest version!',
+      'settings.checkForUpdates.viewLatestChangelog' =>
+        TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.viewLatestChangelog', {}) ?? 'View latest changelog',
+      'settings.checkForUpdates.currentVersion' =>
+        TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.currentVersion', {}) ?? 'Current version',
+      'settings.checkForUpdates.changelog' => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.changelog', {}) ?? 'Changelog',
+      'settings.checkForUpdates.visitPlayStore' =>
+        TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitPlayStore', {}) ?? 'Visit Play Store',
+      'settings.checkForUpdates.visitReleases' =>
+        TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitReleases', {}) ?? 'Visit Releases',
+      'settings.logs.title' => TranslationOverrides.string(_root.$meta, 'settings.logs.title', {}) ?? 'Logs',
+      'settings.logs.shareLogs' => TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogs', {}) ?? 'Share logs',
+      'settings.logs.shareLogsWarningTitle' =>
+        TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogsWarningTitle', {}) ?? 'Share logs to external app?',
+      'settings.logs.shareLogsWarningMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogsWarningMsg', {}) ??
+            '[WARNING]: Logs may contain sensitive information, share with caution!',
+      'settings.help.title' => TranslationOverrides.string(_root.$meta, 'settings.help.title', {}) ?? 'Help',
+      'settings.debug.title' => TranslationOverrides.string(_root.$meta, 'settings.debug.title', {}) ?? 'Debug',
+      'settings.debug.enabledSnackbarMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.debug.enabledSnackbarMsg', {}) ?? 'Debug mode is enabled!',
+      'settings.debug.disabledSnackbarMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.debug.disabledSnackbarMsg', {}) ?? 'Debug mode is disabled!',
+      'settings.debug.alreadyEnabledSnackbarMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.debug.alreadyEnabledSnackbarMsg', {}) ?? 'Debug mode is already enabled!',
+      'settings.debug.openAlice' => TranslationOverrides.string(_root.$meta, 'settings.debug.openAlice', {}) ?? 'Open network inspector',
+      'settings.debug.openLogger' => TranslationOverrides.string(_root.$meta, 'settings.debug.openLogger', {}) ?? 'Open logger',
+      'settings.logging.title' => TranslationOverrides.string(_root.$meta, 'settings.logging.title', {}) ?? 'Logging',
+      'settings.logging.enabledMsg' => TranslationOverrides.string(_root.$meta, 'settings.logging.enabledMsg', {}) ?? 'Logging is enabled',
+      'settings.logging.enabledLogTypes' => TranslationOverrides.string(_root.$meta, 'settings.logging.enabledLogTypes', {}) ?? 'Enabled log types',
+      'settings.logging.disableTip' =>
+        TranslationOverrides.string(_root.$meta, 'settings.logging.disableTip', {}) ?? 'You can disable logging in the debug settings',
+      'settings.webview.openWebview' => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? 'Open webview',
+      'settings.webview.openWebviewTip' =>
+        TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'to login or obtain cookies',
+      'settings.version' => TranslationOverrides.string(_root.$meta, 'settings.version', {}) ?? 'Version',
+      _ => null,
+    };
   }
 }

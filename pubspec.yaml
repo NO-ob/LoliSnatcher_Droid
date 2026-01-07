@@ -19,7 +19,7 @@ dependencies:
   calendar_date_picker2: ^2.0.1
   chewie: ^1.13.0
   collection: ^1.19.1
-  country_flags: ^4.1.0
+  country_flags: ^4.1.1
   crypto: ^3.0.7
   dio: ^5.9.0
   dio_http2_adapter: ^2.6.0
@@ -84,8 +84,8 @@ dependencies:
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
   share_plus: ^12.0.1 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
-  slang_flutter: ^4.9.0
-  slang: ^4.9.0
+  slang_flutter: ^4.11.0
+  slang: ^4.11.1
   sqflite_common_ffi: ^2.4.0
   sqflite: ^2.4.2
   sqlite3: ^3.1.1
@@ -112,6 +112,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^2.10.4
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
 

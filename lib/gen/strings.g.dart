@@ -49,7 +49,8 @@ final _buildConfig = BuildModelConfig(
 enum AppLocale with BaseAppLocale<AppLocale, Translations> {
   en(languageCode: 'en'),
   dev(languageCode: 'dev'),
-  ru(languageCode: 'ru');
+  ru(languageCode: 'ru')
+  ;
 
   const AppLocale({
     required this.languageCode,
