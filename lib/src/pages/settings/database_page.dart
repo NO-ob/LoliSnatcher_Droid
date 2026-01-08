@@ -75,10 +75,10 @@ class _DatabasePageState extends State<DatabasePage> {
 
     if (isUpdating) {
       FlashElements.showSnackbar(
-        title: const Text("Can't leave the page right now!", style: TextStyle(fontSize: 20)),
-        content: const Text(
-          'Sankaku data is being updated, wait until it ends or cancel manually at the bottom of the page',
-          style: TextStyle(fontSize: 16),
+        title: Text(context.loc.settings.database.cantLeavePageNow, style: const TextStyle(fontSize: 20)),
+        content: Text(
+          context.loc.settings.database.sankakuDataUpdating,
+          style: const TextStyle(fontSize: 16),
         ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.yellow,
@@ -89,8 +89,8 @@ class _DatabasePageState extends State<DatabasePage> {
 
     if (changingIndexes) {
       FlashElements.showSnackbar(
-        title: const Text('Please wait!', style: TextStyle(fontSize: 20)),
-        content: const Text('Indexes are being changed', style: TextStyle(fontSize: 16)),
+        title: Text(context.loc.settings.database.pleaseWaitTitle, style: const TextStyle(fontSize: 20)),
+        content: Text(context.loc.settings.database.indexesBeingChanged, style: const TextStyle(fontSize: 16)),
         leadingIcon: Icons.info_outline,
         leadingIconColor: Colors.yellow,
         sideColor: Colors.yellow,
@@ -133,11 +133,11 @@ class _DatabasePageState extends State<DatabasePage> {
 
     FlashElements.showSnackbar(
       duration: const Duration(seconds: 6),
-      title: const Text('Sankaku Favourites Update Started!', style: TextStyle(fontSize: 20)),
-      content: const Column(
+      title: Text(context.loc.settings.database.sankakuFavouritesUpdateStarted, style: const TextStyle(fontSize: 20)),
+      content: Column(
         children: [
-          Text('New image urls will be fetched for Sankaku items in your favourites', style: TextStyle(fontSize: 16)),
-          Text("Don't leave this page until the process is complete or stopped", style: TextStyle(fontSize: 14)),
+          Text(context.loc.settings.database.sankakuNewUrlsInfo, style: const TextStyle(fontSize: 16)),
+          Text(context.loc.settings.database.sankakuDontLeavePage, style: const TextStyle(fontSize: 14)),
         ],
       ),
       leadingIcon: Icons.info_outline,
@@ -165,7 +165,7 @@ class _DatabasePageState extends State<DatabasePage> {
     final List<Booru> sankakuBoorus = getSankakuBoorus().where((e) => e.type == sankakuType).toList();
     if (sankakuBoorus.isEmpty) {
       FlashElements.showSnackbar(
-        title: const Text('No Sankaku config found!', style: TextStyle(fontSize: 20)),
+        title: Text(context.loc.settings.database.noSankakuConfigFound, style: const TextStyle(fontSize: 20)),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
@@ -226,7 +226,7 @@ class _DatabasePageState extends State<DatabasePage> {
 
     if (isUpdating) {
       FlashElements.showSnackbar(
-        title: const Text('Sankaku favourites update complete!', style: TextStyle(fontSize: 20)),
+        title: Text(context.loc.settings.database.sankakuFavouritesUpdateComplete, style: const TextStyle(fontSize: 20)),
         leadingIcon: Icons.check,
         leadingIconColor: Colors.green,
         sideColor: Colors.green,
@@ -252,10 +252,10 @@ class _DatabasePageState extends State<DatabasePage> {
   Future<bool> purgeFailedSankakuItems() async {
     FlashElements.showSnackbar(
       duration: const Duration(seconds: 6),
-      title: const Text('Failed item purge started!', style: TextStyle(fontSize: 20)),
-      content: const Column(
+      title: Text(context.loc.settings.database.failedItemsPurgeStartedTitle, style: const TextStyle(fontSize: 20)),
+      content: Column(
         children: [
-          Text('Items that failed to update will be removed from the database', style: TextStyle(fontSize: 16)),
+          Text(context.loc.settings.database.failedItemsPurgeInfo, style: const TextStyle(fontSize: 16)),
         ],
       ),
       leadingIcon: Icons.info_outline,
@@ -297,7 +297,7 @@ class _DatabasePageState extends State<DatabasePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Database'),
+          title: Text(context.loc.settings.database.title),
         ),
         body: Center(
           child: ListView(
@@ -310,18 +310,18 @@ class _DatabasePageState extends State<DatabasePage> {
                     dbEnabled = newValue;
                   });
                 },
-                title: 'Enable database',
+                title: context.loc.settings.database.enableDatabase,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return const SettingsDialog(
-                          title: Text('Database'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.database.title),
                           contentItems: [
-                            Text('The database will store favourites and also track if an item is snatched'),
-                            Text('If an item is snatched it wont be snatched again'),
+                            Text(context.loc.settings.database.databaseInfo),
+                            Text(context.loc.settings.database.databaseInfoSnatch),
                           ],
                         );
                       },
@@ -339,18 +339,18 @@ class _DatabasePageState extends State<DatabasePage> {
                           SettingsToggle(
                             value: indexesEnabled,
                             onChanged: changeIndexes,
-                            title: 'Enable indexing',
+                            title: context.loc.settings.database.enableIndexing,
                             trailingIcon: IconButton(
                               icon: const Icon(Icons.help_outline),
                               onPressed: () {
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return const SettingsDialog(
-                                      title: Text('Indexing'),
+                                    return SettingsDialog(
+                                      title: Text(context.loc.settings.database.enableIndexing),
                                       contentItems: [
                                         Text(
-                                          'Indexing helps make searching database faster, but it takes up more space on disk (possibly doubling the size of your database).\nDo not leave the page or close the app while indexing is running to avoid database corruption.',
+                                          context.loc.settings.database.indexingInfo,
                                         ),
                                       ],
                                     );
@@ -361,7 +361,7 @@ class _DatabasePageState extends State<DatabasePage> {
                           ),
                           if (settingsHandler.isDebug.value) ...[
                             SettingsButton(
-                              name: 'Create Indexes [Debug]',
+                              name: context.loc.settings.database.createIndexesDebug,
                               icon: const Icon(Icons.create_new_folder_rounded),
                               action: () async {
                                 changingIndexes = true;
@@ -372,7 +372,7 @@ class _DatabasePageState extends State<DatabasePage> {
                               },
                             ),
                             SettingsButton(
-                              name: 'Drop Indexes [Debug]',
+                              name: context.loc.settings.database.dropIndexesDebug,
                               icon: const Icon(Icons.delete_forever),
                               action: () async {
                                 changingIndexes = true;
@@ -416,21 +416,21 @@ class _DatabasePageState extends State<DatabasePage> {
                       searchHistoryEnabled = newValue;
                     });
                   },
-                  title: 'Enable search history',
+                  title: context.loc.settings.database.enableSearchHistory,
                   trailingIcon: IconButton(
                     icon: const Icon(Icons.help_outline),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return const SettingsDialog(
-                            title: Text('Search history'),
+                          return SettingsDialog(
+                            title: Text(context.loc.settings.database.enableSearchHistory),
                             contentItems: [
-                              Text('Requires database to be enabled.'),
-                              Text('Records last ${Constants.historyLimit} search queries.'),
-                              Text('Tap any history entry for additional actions (Delete, Set as Favourite...)'),
+                              Text(context.loc.settings.database.searchHistoryInfo),
+                              Text(context.loc.settings.database.searchHistoryRecords(limit: Constants.historyLimit)),
+                              Text(context.loc.settings.database.searchHistoryTapInfo),
                               Text(
-                                'Favourited queries are pinned to the top of the list and will not be counted towards the limit.',
+                                context.loc.settings.database.searchHistoryFavouritesInfo,
                               ),
                             ],
                           );
@@ -446,18 +446,18 @@ class _DatabasePageState extends State<DatabasePage> {
                       tagTypeFetchEnabled = newValue;
                     });
                   },
-                  title: 'Enable tag type fetching',
+                  title: context.loc.settings.database.enableTagTypeFetching,
                   trailingIcon: IconButton(
                     icon: const Icon(Icons.help_outline),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return const SettingsDialog(
-                            title: Text('Tag type fetching'),
+                          return SettingsDialog(
+                            title: Text(context.loc.settings.database.enableTagTypeFetching),
                             contentItems: [
-                              Text('Will search for tag types on supported boorus'),
-                              Text('This can lead to rate limiting'),
+                              Text(context.loc.settings.database.tagTypeFetchingInfo),
+                              Text(context.loc.settings.database.tagTypeFetchingWarning),
                             ],
                           );
                         },
@@ -467,16 +467,16 @@ class _DatabasePageState extends State<DatabasePage> {
                 ),
                 const SettingsButton(name: '', enabled: false),
                 SettingsButton(
-                  name: 'Delete database',
+                  name: context.loc.settings.database.deleteDatabase,
                   icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                   action: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return SettingsDialog(
-                          title: const Text('Are you sure?'),
-                          contentItems: const [
-                            Text('Delete database?'),
+                          title: Text(context.loc.areYouSure),
+                          contentItems: [
+                            Text(context.loc.settings.database.deleteDatabaseConfirm),
                           ],
                           actionButtons: [
                             const CancelButton(withIcon: true),
@@ -486,15 +486,15 @@ class _DatabasePageState extends State<DatabasePage> {
 
                                 FlashElements.showSnackbar(
                                   context: context,
-                                  title: const Text('Database deleted!', style: TextStyle(fontSize: 20)),
-                                  content: const Text('An app restart is required!', style: TextStyle(fontSize: 16)),
+                                  title: Text(context.loc.settings.database.databaseDeleted, style: const TextStyle(fontSize: 20)),
+                                  content: Text(context.loc.settings.database.appRestartRequired, style: const TextStyle(fontSize: 16)),
                                   leadingIcon: Icons.delete_forever,
                                   leadingIconColor: Colors.red,
                                   sideColor: Colors.yellow,
                                 );
                                 Navigator.of(context).pop(true);
                               },
-                              label: const Text('Delete'),
+                              label: Text(context.loc.delete),
                               icon: const Icon(Icons.delete_forever),
                             ),
                           ],
@@ -504,7 +504,7 @@ class _DatabasePageState extends State<DatabasePage> {
                   },
                 ),
                 SettingsButton(
-                  name: 'Clear snatched items',
+                  name: context.loc.settings.database.clearSnatchedItems,
                   icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   trailingIcon: const Icon(Icons.save_alt),
                   action: () {
@@ -512,9 +512,9 @@ class _DatabasePageState extends State<DatabasePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return SettingsDialog(
-                          title: const Text('Are you sure?'),
-                          contentItems: const [
-                            Text('Clear all snatched items?'),
+                          title: Text(context.loc.areYouSure),
+                          contentItems: [
+                            Text(context.loc.settings.database.clearAllSnatchedConfirm),
                           ],
                           actionButtons: [
                             const CancelButton(withIcon: true),
@@ -533,10 +533,10 @@ class _DatabasePageState extends State<DatabasePage> {
 
                                   FlashElements.showSnackbar(
                                     context: context,
-                                    title: const Text('Snatched items cleared!', style: TextStyle(fontSize: 20)),
-                                    content: const Text(
-                                      'An app restart may be required!',
-                                      style: TextStyle(fontSize: 16),
+                                    title: Text(context.loc.settings.database.snatchedItemsCleared, style: const TextStyle(fontSize: 20)),
+                                    content: Text(
+                                      context.loc.settings.database.appRestartMayBeRequired,
+                                      style: const TextStyle(fontSize: 16),
                                     ),
                                     leadingIcon: Icons.delete_forever,
                                     leadingIconColor: Colors.red,
@@ -545,7 +545,7 @@ class _DatabasePageState extends State<DatabasePage> {
                                 }
                                 Navigator.of(context).pop(true);
                               },
-                              label: const Text('Clear'),
+                              label: Text(context.loc.clear),
                               icon: const Icon(Icons.delete_forever),
                             ),
                           ],
@@ -555,7 +555,7 @@ class _DatabasePageState extends State<DatabasePage> {
                   },
                 ),
                 SettingsButton(
-                  name: 'Clear favourited items',
+                  name: context.loc.settings.database.clearFavouritedItems,
                   icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   trailingIcon: const Icon(Icons.favorite_outline),
                   action: () {
@@ -563,9 +563,9 @@ class _DatabasePageState extends State<DatabasePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return SettingsDialog(
-                          title: const Text('Are you sure?'),
-                          contentItems: const [
-                            Text('Clear all favourited items?'),
+                          title: Text(context.loc.areYouSure),
+                          contentItems: [
+                            Text(context.loc.settings.database.clearAllFavouritedConfirm),
                           ],
                           actionButtons: [
                             const CancelButton(withIcon: true),
@@ -584,10 +584,10 @@ class _DatabasePageState extends State<DatabasePage> {
 
                                   FlashElements.showSnackbar(
                                     context: context,
-                                    title: const Text('Favourites cleared!', style: TextStyle(fontSize: 20)),
-                                    content: const Text(
-                                      'An app restart may be required!',
-                                      style: TextStyle(fontSize: 16),
+                                    title: Text(context.loc.settings.database.favouritesCleared, style: const TextStyle(fontSize: 20)),
+                                    content: Text(
+                                      context.loc.settings.database.appRestartMayBeRequired,
+                                      style: const TextStyle(fontSize: 16),
                                     ),
                                     leadingIcon: Icons.delete_forever,
                                     leadingIconColor: Colors.red,
@@ -596,7 +596,7 @@ class _DatabasePageState extends State<DatabasePage> {
                                 }
                                 Navigator.of(context).pop(true);
                               },
-                              label: const Text('Clear'),
+                              label: Text(context.loc.clear),
                               icon: const Icon(Icons.delete_forever),
                             ),
                           ],
@@ -606,7 +606,7 @@ class _DatabasePageState extends State<DatabasePage> {
                   },
                 ),
                 SettingsButton(
-                  name: 'Clear search history',
+                  name: context.loc.settings.database.clearSearchHistory,
                   icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                   trailingIcon: const Icon(Icons.history),
                   action: () {
@@ -614,9 +614,9 @@ class _DatabasePageState extends State<DatabasePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return SettingsDialog(
-                          title: const Text('Are you sure?'),
-                          contentItems: const [
-                            Text('Clear search history?'),
+                          title: Text(context.loc.areYouSure),
+                          contentItems: [
+                            Text(context.loc.settings.database.clearSearchHistoryConfirm),
                           ],
                           actionButtons: [
                             const CancelButton(withIcon: true),
@@ -626,10 +626,10 @@ class _DatabasePageState extends State<DatabasePage> {
                                   settingsHandler.dbHandler.deleteFromSearchHistory(null);
                                   FlashElements.showSnackbar(
                                     context: context,
-                                    title: const Text('Search history cleared!', style: TextStyle(fontSize: 20)),
-                                    content: const Text(
-                                      'An app restart may be required!',
-                                      style: TextStyle(fontSize: 16),
+                                    title: Text(context.loc.settings.database.searchHistoryCleared, style: const TextStyle(fontSize: 20)),
+                                    content: Text(
+                                      context.loc.settings.database.appRestartMayBeRequired,
+                                      style: const TextStyle(fontSize: 16),
                                     ),
                                     leadingIcon: Icons.delete_forever,
                                     leadingIconColor: Colors.red,
@@ -638,7 +638,7 @@ class _DatabasePageState extends State<DatabasePage> {
                                 }
                                 Navigator.of(context).pop(true);
                               },
-                              label: const Text('Clear'),
+                              label: Text(context.loc.clear),
                               icon: const Icon(Icons.delete_forever),
                             ),
                           ],
@@ -649,7 +649,7 @@ class _DatabasePageState extends State<DatabasePage> {
                 ),
                 if (sankakuType != null) ...[
                   const SettingsButton(name: '', enabled: false),
-                  const SettingsButton(name: 'Sankaku favourites update'),
+                  SettingsButton(name: context.loc.settings.database.sankakuFavouritesUpdate),
                   Stack(
                     children: [
                       IgnorePointer(
@@ -665,18 +665,18 @@ class _DatabasePageState extends State<DatabasePage> {
                                   sankakuType = newValue;
                                 });
                               },
-                              title: 'Sankaku type to update',
+                              title: context.loc.settings.database.sankakuTypeToUpdate,
                             ),
                             SettingsTextInput(
                               controller: sankakuSearchController,
-                              title: 'Search query',
-                              hintText: '(optional, may make the process slower)',
+                              title: context.loc.settings.database.searchQuery,
+                              hintText: context.loc.settings.database.searchQueryOptional,
                               clearable: true,
                               pasteable: true,
                               enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                             ),
                             SettingsButton(
-                              name: 'Update Sankaku URLs',
+                              name: context.loc.settings.database.updateSankakuUrls,
                               trailingIcon: const Icon(Icons.image),
                               action: updateSankakuItems,
                             ),
@@ -708,20 +708,20 @@ class _DatabasePageState extends State<DatabasePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Updating ${updatingItems.isEmpty ? '...' : updatingItems.length} items:'),
-                          Text('Left: ${max(updatingItems.length - updatingDone - updatingFailed, 0)}'),
-                          Text('Done: $updatingDone'),
-                          Text('Failed/Skipped: $updatingFailed'),
+                          Text(context.loc.settings.database.updating(count: updatingItems.isEmpty ? 0 : updatingItems.length)),
+                          Text(context.loc.settings.database.left(count: max(updatingItems.length - updatingDone - updatingFailed, 0))),
+                          Text(context.loc.settings.database.done(count: updatingDone)),
+                          Text(context.loc.settings.database.failedSkipped(count: updatingFailed)),
                           const Text(''),
-                          const Text(
-                            "Stop and try again later if you start seeing 'Failed' number constantly growing, you could have reached rate limit and/or Sankaku blocks requests from your IP.",
+                          Text(
+                            context.loc.settings.database.sankakuRateLimitWarning,
                           ),
                         ],
                       ),
                     ),
                     SettingsButton(
-                      name: 'Press here to skip current item',
-                      subtitle: const Text('Use if item appears to be stuck'),
+                      name: context.loc.settings.database.skipCurrentItem,
+                      subtitle: Text(context.loc.settings.database.useIfStuck),
                       trailingIcon: const Icon(Icons.skip_next),
                       drawTopBorder: true,
                       action: () {
@@ -729,7 +729,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       },
                     ),
                     SettingsButton(
-                      name: 'Press here to stop',
+                      name: context.loc.settings.database.pressToStop,
                       trailingIcon: const Icon(Icons.cancel),
                       drawTopBorder: true,
                       action: () {
@@ -742,7 +742,7 @@ class _DatabasePageState extends State<DatabasePage> {
                   ],
                   if (!isUpdating && failedItems.isNotEmpty) ...[
                     SettingsButton(
-                      name: 'Purge failed items (${failedItems.length})',
+                      name: context.loc.settings.database.purgeFailedItems(count: failedItems.length),
                       trailingIcon: const Icon(Icons.delete_forever),
                       drawTopBorder: true,
                       action: () {
@@ -750,7 +750,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       },
                     ),
                     SettingsButton(
-                      name: 'Retry failed items (${failedItems.length})',
+                      name: context.loc.settings.database.retryFailedItems(count: failedItems.length),
                       trailingIcon: const Icon(Icons.refresh),
                       drawTopBorder: true,
                       action: () {

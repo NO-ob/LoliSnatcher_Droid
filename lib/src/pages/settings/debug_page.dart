@@ -217,7 +217,7 @@ class _DebugPageState extends State<DebugPage> {
                       ),
                     ),
                     SettingsButton(
-                      name: 'Amplitude',
+                      name: context.loc.settings.debug.amplitude,
                       subtitle: Row(
                         children: [
                           ElevatedButton(
@@ -272,10 +272,10 @@ class _DebugPageState extends State<DebugPage> {
                           vFlutterway = newValue;
                         });
                       },
-                      title: 'Flutterway',
+                      title: context.loc.settings.debug.flutterway,
                     ),
                     SettingsButton(
-                      name: 'Vibrate',
+                      name: context.loc.settings.debug.vibrate,
                       action: () {
                         print('Vibrate $vDuration $vAmplitude');
                         ServiceHandler.vibrate(
@@ -290,15 +290,21 @@ class _DebugPageState extends State<DebugPage> {
               ],
 
               SettingsButton(
-                name:
-                    'Res: ${MediaQuery.sizeOf(context).width.toPrecision(4)}x${MediaQuery.sizeOf(context).height.toPrecision(4)}',
+                name: context.loc.settings.debug.resolution(
+                  width: MediaQuery.sizeOf(context).width.toPrecision(4).toString(),
+                  height: MediaQuery.sizeOf(context).height.toPrecision(4).toString(),
+                ),
               ),
-              SettingsButton(name: 'Pixel Ratio: ${MediaQuery.devicePixelRatioOf(context).toPrecision(4)}'),
+              SettingsButton(
+                name: context.loc.settings.debug.pixelRatio(
+                  ratio: MediaQuery.devicePixelRatioOf(context).toPrecision(4).toString(),
+                ),
+              ),
 
               const SettingsButton(name: '', enabled: false),
 
               SettingsButton(
-                name: 'Logger',
+                name: context.loc.settings.debug.logger,
                 action: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -310,12 +316,12 @@ class _DebugPageState extends State<DebugPage> {
               ),
 
               SettingsButton(
-                name: 'Webview',
+                name: context.loc.settings.debug.webview,
                 icon: const Icon(Icons.public),
                 page: () => const InAppWebviewView(initialUrl: 'gelbooru.com'),
               ),
               SettingsButton(
-                name: 'Delete All Cookies',
+                name: context.loc.settings.debug.deleteAllCookies,
                 icon: const Icon(Icons.cookie_outlined),
                 action: () async {
                   await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteAllCookies();
@@ -325,7 +331,7 @@ class _DebugPageState extends State<DebugPage> {
 
               if (kDebugMode)
                 SettingsButton(
-                  name: 'Clear secure storage',
+                  name: context.loc.settings.debug.clearSecureStorage,
                   action: () {
                     SecureStorageHandler.instance.deleteAll();
                   },
@@ -334,7 +340,7 @@ class _DebugPageState extends State<DebugPage> {
               const SettingsButton(name: '', enabled: false),
 
               SettingsButton(
-                name: 'Get Session String',
+                name: context.loc.settings.debug.getSessionString,
                 icon: const Icon(Icons.copy),
                 action: () async {
                   final str = SearchHandler.instance.generateBackupJson() ?? '';
@@ -342,7 +348,7 @@ class _DebugPageState extends State<DebugPage> {
                   FlashElements.showSnackbar(
                     context: context,
                     duration: const Duration(seconds: 2),
-                    title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
+                    title: Text(context.loc.settings.debug.copiedToClipboard, style: const TextStyle(fontSize: 20)),
                     content: Text(
                       str,
                       style: const TextStyle(fontSize: 16),
@@ -353,7 +359,7 @@ class _DebugPageState extends State<DebugPage> {
                 },
               ),
               SettingsButton(
-                name: 'Set Session String',
+                name: context.loc.settings.debug.setSessionString,
                 icon: const Icon(Icons.restore),
                 action: () async {
                   await showDialog(
@@ -364,7 +370,7 @@ class _DebugPageState extends State<DebugPage> {
                           children: [
                             SettingsTextInput(
                               controller: sessionStrController,
-                              title: 'Session string',
+                              title: context.loc.settings.debug.sessionString,
                               onlyInput: true,
                               pasteable: true,
                             ),
@@ -380,7 +386,7 @@ class _DebugPageState extends State<DebugPage> {
                                 FlashElements.showSnackbar(
                                   context: context,
                                   duration: const Duration(seconds: 2),
-                                  title: const Text('Restored session from string!', style: TextStyle(fontSize: 20)),
+                                  title: Text(context.loc.settings.debug.restoredSessionFromString, style: const TextStyle(fontSize: 20)),
                                   content: Text(
                                     sessionStrController.text,
                                     style: const TextStyle(fontSize: 16),
@@ -390,7 +396,7 @@ class _DebugPageState extends State<DebugPage> {
                                 );
                               }
                             },
-                            child: const Text('OK'),
+                            child: Text(context.loc.ok),
                           ),
                         ],
                       );

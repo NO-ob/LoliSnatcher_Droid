@@ -53,22 +53,22 @@ Future<bool> showStorageNeedsUpdateDialog() async {
     barrierDismissible: false,
     builder: (context) {
       return AlertDialog(
-        title: const Text('No access to custom storage directory'),
+        title: Text(context.loc.permissions.noAccessToCustomStorageDirectory),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Please set storage directory again to grant the app access to it',
+            Text(
+              context.loc.permissions.pleaseSetStorageDirectoryAgain,
             ),
             if (extPath.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 16),
-                child: Text('Current path: $extPath'),
+                child: Text(context.loc.permissions.currentPath(path: extPath)),
               ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              label: const Text('Set directory'),
+              label: Text(context.loc.permissions.setDirectory),
               icon: const Icon(Icons.settings),
               onPressed: () async {
                 SettingsHandler.instance.extPathOverride = '';
@@ -80,13 +80,13 @@ Future<bool> showStorageNeedsUpdateDialog() async {
                 } else {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: const Text(
-                      'Error!',
-                      style: TextStyle(fontSize: 20),
+                    title: Text(
+                      context.loc.errorExclamation,
+                      style: const TextStyle(fontSize: 20),
                     ),
-                    content: const Text(
-                      'Currently not available for this platform',
-                      style: TextStyle(fontSize: 16),
+                    content: Text(
+                      context.loc.permissions.currentlyNotAvailableForThisPlatform,
+                      style: const TextStyle(fontSize: 16),
                     ),
                     leadingIcon: Icons.error_outline,
                     leadingIconColor: Colors.red,
@@ -98,7 +98,7 @@ Future<bool> showStorageNeedsUpdateDialog() async {
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              label: const Text('Reset directory'),
+              label: Text(context.loc.permissions.resetDirectory),
               icon: const Icon(Icons.refresh),
               style: ElevatedButtonTheme.of(context).style!.copyWith(
                 backgroundColor: const WidgetStatePropertyAll(Colors.redAccent),
@@ -110,7 +110,7 @@ Future<bool> showStorageNeedsUpdateDialog() async {
                 Navigator.of(context).pop(true);
               },
             ),
-            const Text('After reset files will be saved to default system directory'),
+            Text(context.loc.permissions.afterResetFilesWillBeSavedToDefaultDirectory),
             const SizedBox(height: 24),
             const CancelButton(
               withIcon: true,

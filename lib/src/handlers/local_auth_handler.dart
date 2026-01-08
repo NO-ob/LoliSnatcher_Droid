@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:local_auth/local_auth.dart';
 
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -69,7 +70,7 @@ class LocalAuthHandler {
         final bool authenticated =
             forceUnlock ||
             await auth.authenticate(
-              localizedReason: 'Please authenticate to use the app',
+              localizedReason: NavigationHandler.instance.navContext.loc.authentication.pleaseAuthenticateToUseTheApp,
               persistAcrossBackgrounding: true,
               biometricOnly: false,
             );
@@ -89,24 +90,25 @@ class LocalAuthHandler {
           s: s,
         );
 
+        final context = NavigationHandler.instance.navContext;
         switch (e.code) {
           case LocalAuthExceptionCode.noBiometricHardware:
             FlashElements.showSnackbar(
-              title: const Text('No biometric hardware available'),
+              title: Text(context.loc.authentication.noBiometricHardwareAvailable),
               leadingIcon: Icons.warning_amber,
             );
             break;
           case LocalAuthExceptionCode.temporaryLockout:
           case LocalAuthExceptionCode.biometricLockout:
             FlashElements.showSnackbar(
-              title: const Text('Temporary lockout'),
+              title: Text(context.loc.authentication.temporaryLockout),
               leadingIcon: Icons.warning_amber,
             );
             break;
           // TODO handle all errors
           default:
             FlashElements.showSnackbar(
-              title: Text('Something went wrong: ${e.code.name}'),
+              title: Text(context.loc.authentication.somethingWentWrong(error: e.code.name)),
               leadingIcon: Icons.warning_amber,
             );
             break;

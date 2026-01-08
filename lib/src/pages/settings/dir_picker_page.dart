@@ -46,21 +46,21 @@ class _DirPickerState extends State<DirPicker> {
         context: context,
         builder: (context) {
           return SettingsDialog(
-            title: const Text('Are you sure?'),
-            contentItems: const [
-              Text('Do you want to close the picker without choosing a directory?'),
+            title: Text(context.loc.settings.dirPicker.areYouSure),
+            contentItems: [
+              Text(context.loc.settings.dirPicker.closeWithoutChoosing),
             ],
             actionButtons: [
               ElevatedButton.icon(
                 icon: const Icon(Icons.cancel_outlined),
-                label: const Text('No'),
+                label: Text(context.loc.settings.dirPicker.no),
                 onPressed: () {
                   Navigator.of(context).pop(false);
                 },
               ),
               ElevatedButton.icon(
                 icon: const Icon(Icons.check_circle_outline_rounded),
-                label: const Text('Yes'),
+                label: Text(context.loc.settings.dirPicker.yes),
                 onPressed: () {
                   Navigator.of(context).pop(true);
                 },
@@ -99,13 +99,13 @@ class _DirPickerState extends State<DirPicker> {
 
       FlashElements.showSnackbar(
         context: context,
-        title: const Text(
-          'Error!',
-          style: TextStyle(fontSize: 20),
+        title: Text(
+          context.loc.settings.dirPicker.error,
+          style: const TextStyle(fontSize: 20),
         ),
-        content: const Text(
-          'Failed to create directory!',
-          style: TextStyle(fontSize: 16),
+        content: Text(
+          context.loc.settings.dirPicker.failedToCreateDirectory,
+          style: const TextStyle(fontSize: 16),
         ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
@@ -124,13 +124,13 @@ class _DirPickerState extends State<DirPicker> {
     } on FileSystemException {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text(
-          'Error!',
-          style: TextStyle(fontSize: 20),
+        title: Text(
+          context.loc.settings.dirPicker.error,
+          style: const TextStyle(fontSize: 20),
         ),
-        content: const Text(
-          'Directory is not writable!',
-          style: TextStyle(fontSize: 16),
+        content: Text(
+          context.loc.settings.dirPicker.directoryNotWritable,
+          style: const TextStyle(fontSize: 16),
         ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
@@ -153,7 +153,7 @@ class _DirPickerState extends State<DirPicker> {
 
   @override
   Widget build(BuildContext context) {
-    String title = 'Select a Directory';
+    String title = context.loc.settings.dirPicker.selectADirectory;
     if (path != widget.path) {
       title = path.substring(path.lastIndexOf('/') + 1);
     }
@@ -250,11 +250,11 @@ class _DirPickerState extends State<DirPicker> {
                   context: context,
                   builder: (BuildContext context) {
                     return SettingsDialog(
-                      title: const Text('New Directory'),
+                      title: Text(context.loc.settings.dirPicker.newDirectory),
                       content: SettingsTextInput(
                         controller: newDirNameController,
-                        title: 'Directory Name',
-                        hintText: 'Directory Name',
+                        title: context.loc.settings.dirPicker.directoryName,
+                        hintText: context.loc.settings.dirPicker.directoryName,
                         onlyInput: true,
                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[aA-zZ]'))],
                       ),
@@ -262,7 +262,7 @@ class _DirPickerState extends State<DirPicker> {
                         const CancelButton(withIcon: true),
                         ElevatedButton.icon(
                           icon: const Icon(Icons.add),
-                          label: const Text('Create'),
+                          label: Text(context.loc.settings.dirPicker.create),
                           onPressed: () {
                             mkdir();
                             Navigator.of(context).pop();

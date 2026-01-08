@@ -152,12 +152,12 @@ class _NetworkPageState extends State<NetworkPage> {
                       context: context,
                       builder: (context) {
                         return SettingsDialog(
-                          title: const Text('Custom user agent'),
+                          title: Text(context.loc.settings.network.customUserAgentTitle),
                           contentItems: [
-                            const Text('Keep empty to use default value'),
-                            Text('Default: ${Tools.appUserAgent}'),
-                            const Text('Will be used on requests for almost all boorus and on the webview'),
-                            const Text('Value is saved after leaving this page'),
+                            Text(context.loc.settings.network.keepEmptyForDefault),
+                            Text(context.loc.settings.network.defaultUserAgent(agent: Tools.appUserAgent)),
+                            Text(context.loc.settings.network.userAgentUsedOnRequests),
+                            Text(context.loc.settings.network.valueSavedAfterLeaving),
                           ],
                         );
                       },
@@ -167,8 +167,7 @@ class _NetworkPageState extends State<NetworkPage> {
               ),
               if (userAgentController.text != Constants.defaultBrowserUserAgent)
                 SettingsButton(
-                  name:
-                      'Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):',
+                  name: context.loc.settings.network.setBrowserUserAgent,
                   subtitle: const Text(Constants.defaultBrowserUserAgent),
                   action: () {
                     userAgentController.text = Constants.defaultBrowserUserAgent;
@@ -176,9 +175,9 @@ class _NetworkPageState extends State<NetworkPage> {
                   },
                 ),
               const SettingsButton(name: '', enabled: false),
-              const SettingsButton(
-                name: 'Cookie cleaner',
-                icon: Icon(Icons.cookie_rounded),
+              SettingsButton(
+                name: context.loc.settings.network.cookieCleaner,
+                icon: const Icon(Icons.cookie_rounded),
               ),
               SettingsBooruDropdown(
                 value: selectedBooru,
@@ -197,11 +196,11 @@ class _NetworkPageState extends State<NetworkPage> {
                   }
                   setState(() {});
                 },
-                title: 'Booru',
-                subtitle: const Text('Select a booru to clear cookies for or leave empty to clear all'),
+                title: context.loc.settings.network.booru,
+                subtitle: Text(context.loc.settings.network.selectBooruToClearCookies),
               ),
               if (selectedBooruCookies.isNotEmpty) ...[
-                SettingsButton(name: 'Cookies for ${selectedBooru?.name}:', enabled: false),
+                SettingsButton(name: context.loc.settings.network.cookiesFor(booruName: selectedBooru?.name ?? ''), enabled: false),
                 for (final Cookie cookie in selectedBooruCookies) ...[
                   SettingsButton(
                     name:
@@ -216,14 +215,16 @@ class _NetworkPageState extends State<NetworkPage> {
                       setState(() {});
                       FlashElements.showSnackbar(
                         context: context,
-                        title: Text('"${cookie.name}" cookie deleted'),
+                        title: Text(context.loc.settings.network.cookieDeleted(cookieName: cookie.name)),
                       );
                     },
                   ),
                 ],
               ],
               SettingsButton(
-                name: 'Clear cookies${selectedBooru != null ? ' for ${selectedBooru!.name}' : ''}',
+                name: selectedBooru != null
+                    ? context.loc.settings.network.clearCookiesFor(booruName: selectedBooru!.name!)
+                    : context.loc.settings.network.clearCookies,
                 icon: const Icon(
                   Icons.delete_forever,
                   color: Colors.red,
@@ -236,14 +237,14 @@ class _NetworkPageState extends State<NetworkPage> {
                     globalWindowsCookies[selectedBooru!.baseURL!]?.clear();
                     FlashElements.showSnackbar(
                       context: context,
-                      title: Text('Cookies for ${selectedBooru?.name} deleted'),
+                      title: Text(context.loc.settings.network.cookiesForBooruDeleted(booruName: selectedBooru?.name ?? '')),
                     );
                   } else {
                     await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteAllCookies();
                     globalWindowsCookies.clear();
                     FlashElements.showSnackbar(
                       context: context,
-                      title: const Text('All cookies deleted'),
+                      title: Text(context.loc.settings.network.allCookiesDeleted),
                     );
                   }
 
