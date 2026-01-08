@@ -646,9 +646,9 @@ class SettingsBooruDropdown extends StatelessWidget {
   final Widget? trailingIcon;
   final EdgeInsets? contentPadding;
 
-  Widget _selectedItemBuilder(Booru? item) {
+  Widget _selectedItemBuilder(BuildContext context, Booru? item) {
     if (item == null) {
-      return Text(placeholder ?? 'Select a booru');
+      return Text(placeholder ?? context.loc.common.selectABooru);
     }
 
     if (selectedItemBuilder != null) {
@@ -695,7 +695,7 @@ class SettingsBooruDropdown extends StatelessWidget {
       drawBottomBorder: drawBottomBorder,
       trailingIcon: trailingIcon,
       itemBuilder: (item) => _itemBuilder(context, item),
-      selectedItemBuilder: _selectedItemBuilder,
+      selectedItemBuilder: (item) => _selectedItemBuilder(context, item),
       clearable: nullable,
       itemExtent: kMinInteractiveDimension,
       expendableByScroll: true,

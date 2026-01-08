@@ -622,7 +622,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
             final item = widget.tab.booruHandler.filteredFetched[page.value];
 
             return SettingsDialog(
-              title: const Text('Snatch?'),
+              title: Text(context.loc.gallery.snatchQuestion),
               content: Column(
                 children: [
                   SelectableText(item.fileURL),
@@ -692,7 +692,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         if (item.postURL.isEmpty) {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text('No Post URL!', style: TextStyle(fontSize: 20)),
+            title: Text(context.loc.gallery.noPostUrl, style: const TextStyle(fontSize: 20)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -706,7 +706,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         if (item.postURL.isEmpty) {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text('No Post URL!', style: TextStyle(fontSize: 20)),
+            title: Text(context.loc.gallery.noPostUrl, style: const TextStyle(fontSize: 20)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -759,7 +759,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       FlashElements.showSnackbar(
         context: context,
         duration: const Duration(seconds: 2),
-        title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
+        title: Text(context.loc.gallery.copiedToClipboard, style: const TextStyle(fontSize: 20)),
         content: Text(Uri.encodeFull(text), style: const TextStyle(fontSize: 16)),
         leadingIcon: Icons.copy,
         sideColor: Colors.green,
@@ -944,8 +944,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
         context: context,
-        title: const Text('Loading File...', style: TextStyle(fontSize: 20)),
-        content: const Text('This can take some time, please wait...', style: TextStyle(fontSize: 16)),
+        title: Text(context.loc.gallery.loadingFile, style: const TextStyle(fontSize: 20)),
+        content: Text(context.loc.gallery.loadingFileMessage, style: const TextStyle(fontSize: 16)),
         overrideLeadingIconWidget: const SizedBox(
           width: 50,
           height: 50,

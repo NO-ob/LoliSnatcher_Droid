@@ -1422,8 +1422,8 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
               );
               if (!res) {
                 FlashElements.showSnackbar(
-                  title: const Text('Error'),
-                  content: const Text('Failed to open link'),
+                  title: Text(context.loc.error),
+                  content: Text(context.loc.gallery.failedToOpenLink),
                 );
               }
             },

@@ -1070,6 +1070,18 @@
             "closeDialog": "Close"
         }
     },
+    "common": {
+        "selectABooru": "Select a booru",
+        "booruItemCopiedToClipboard": "Booru item copied to clipboard"
+    },
+    "gallery": {
+        "snatchQuestion": "Snatch?",
+        "noPostUrl": "No Post URL!",
+        "copiedToClipboard": "Copied to clipboard!",
+        "loadingFile": "Loading File...",
+        "loadingFileMessage": "This can take some time, please wait...",
+        "failedToOpenLink": "Failed to open link"
+    },
     "media": {
         "loading": {
             "rendering": "Rendering...",

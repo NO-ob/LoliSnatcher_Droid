@@ -301,6 +301,8 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   late final TranslationsGalleryViewEn galleryView = TranslationsGalleryViewEn.internal(_root);
   late final TranslationsMediaPreviewsEn mediaPreviews = TranslationsMediaPreviewsEn.internal(_root);
   late final TranslationsViewerEn viewer = TranslationsViewerEn.internal(_root);
+  late final TranslationsCommonEn common = TranslationsCommonEn.internal(_root);
+  late final TranslationsGalleryEn gallery = TranslationsGalleryEn.internal(_root);
   late final TranslationsMediaEn media = TranslationsMediaEn.internal(_root);
   late final TranslationsPreviewEn preview = TranslationsPreviewEn.internal(_root);
 }
@@ -1570,6 +1572,50 @@ class TranslationsViewerEn {
   late final TranslationsViewerTutorialEn tutorial = TranslationsViewerTutorialEn.internal(_root);
   late final TranslationsViewerAppBarEn appBar = TranslationsViewerAppBarEn.internal(_root);
   late final TranslationsViewerNotesEn notes = TranslationsViewerNotesEn.internal(_root);
+}
+
+// Path: common
+class TranslationsCommonEn {
+  TranslationsCommonEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Select a booru'
+  String get selectABooru => TranslationOverrides.string(_root.$meta, 'common.selectABooru', {}) ?? 'Select a booru';
+
+  /// en: 'Booru item copied to clipboard'
+  String get booruItemCopiedToClipboard =>
+      TranslationOverrides.string(_root.$meta, 'common.booruItemCopiedToClipboard', {}) ?? 'Booru item copied to clipboard';
+}
+
+// Path: gallery
+class TranslationsGalleryEn {
+  TranslationsGalleryEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Snatch?'
+  String get snatchQuestion => TranslationOverrides.string(_root.$meta, 'gallery.snatchQuestion', {}) ?? 'Snatch?';
+
+  /// en: 'No Post URL!'
+  String get noPostUrl => TranslationOverrides.string(_root.$meta, 'gallery.noPostUrl', {}) ?? 'No Post URL!';
+
+  /// en: 'Copied to clipboard!'
+  String get copiedToClipboard => TranslationOverrides.string(_root.$meta, 'gallery.copiedToClipboard', {}) ?? 'Copied to clipboard!';
+
+  /// en: 'Loading File...'
+  String get loadingFile => TranslationOverrides.string(_root.$meta, 'gallery.loadingFile', {}) ?? 'Loading File...';
+
+  /// en: 'This can take some time, please wait...'
+  String get loadingFileMessage =>
+      TranslationOverrides.string(_root.$meta, 'gallery.loadingFileMessage', {}) ?? 'This can take some time, please wait...';
+
+  /// en: 'Failed to open link'
+  String get failedToOpenLink => TranslationOverrides.string(_root.$meta, 'gallery.failedToOpenLink', {}) ?? 'Failed to open link';
 }
 
 // Path: media
@@ -5576,6 +5622,16 @@ extension on Translations {
           'viewer.notes.note' => TranslationOverrides.string(_root.$meta, 'viewer.notes.note', {}) ?? 'Note',
           'viewer.notes.notes' => TranslationOverrides.string(_root.$meta, 'viewer.notes.notes', {}) ?? 'Notes',
           'viewer.notes.closeDialog' => TranslationOverrides.string(_root.$meta, 'viewer.notes.closeDialog', {}) ?? 'Close',
+          'common.selectABooru' => TranslationOverrides.string(_root.$meta, 'common.selectABooru', {}) ?? 'Select a booru',
+          'common.booruItemCopiedToClipboard' =>
+            TranslationOverrides.string(_root.$meta, 'common.booruItemCopiedToClipboard', {}) ?? 'Booru item copied to clipboard',
+          'gallery.snatchQuestion' => TranslationOverrides.string(_root.$meta, 'gallery.snatchQuestion', {}) ?? 'Snatch?',
+          'gallery.noPostUrl' => TranslationOverrides.string(_root.$meta, 'gallery.noPostUrl', {}) ?? 'No Post URL!',
+          'gallery.copiedToClipboard' => TranslationOverrides.string(_root.$meta, 'gallery.copiedToClipboard', {}) ?? 'Copied to clipboard!',
+          'gallery.loadingFile' => TranslationOverrides.string(_root.$meta, 'gallery.loadingFile', {}) ?? 'Loading File...',
+          'gallery.loadingFileMessage' =>
+            TranslationOverrides.string(_root.$meta, 'gallery.loadingFileMessage', {}) ?? 'This can take some time, please wait...',
+          'gallery.failedToOpenLink' => TranslationOverrides.string(_root.$meta, 'gallery.failedToOpenLink', {}) ?? 'Failed to open link',
           'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'Rendering...',
           'media.loading.loadingAndRenderingFromCache' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'Loading and rendering from cache...',

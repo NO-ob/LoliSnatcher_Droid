@@ -624,7 +624,7 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
                 setState(() {});
               },
         icon: const Icon(Icons.select_all),
-        label: const Text('Select all'),
+        label: Text(context.loc.selectAll),
       ),
       ConfirmButton(
         text: 'OK ${value.isEmpty ? '' : '(${value.length})'.trim()}',

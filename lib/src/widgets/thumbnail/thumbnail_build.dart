@@ -79,8 +79,8 @@ class ThumbnailBuild extends StatelessWidget {
                         Clipboard.setData(ClipboardData(text: item.toString()));
                         FlashElements.showSnackbar(
                           context: context,
-                          title: const Text('Copied!', style: TextStyle(fontSize: 20)),
-                          content: const Text('Booru item copied to clipboard'),
+                          title: Text(context.loc.copied, style: const TextStyle(fontSize: 20)),
+                          content: Text(context.loc.common.booruItemCopiedToClipboard),
                           sideColor: Colors.green,
                           leadingIcon: Icons.copy,
                           leadingIconColor: Colors.white,
