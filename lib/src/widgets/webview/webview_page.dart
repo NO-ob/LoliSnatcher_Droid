@@ -158,8 +158,8 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
           else
             SizedBox(
               height: MediaQuery.sizeOf(context).height * 0.8,
-              child: const Center(
-                child: Text('Not supported on this device'),
+              child: Center(
+                child: Text(context.loc.webview.notSupportedOnDevice),
               ),
             ),
           //

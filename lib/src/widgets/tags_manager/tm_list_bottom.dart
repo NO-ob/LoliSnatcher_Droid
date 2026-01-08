@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
@@ -35,7 +36,7 @@ class TagsManagerListBottom extends StatelessWidget {
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.select_all),
-                  label: const Text('Select all'),
+                  label: Text(context.loc.tagsManager.selectAll),
                   onPressed: onSelectAll,
                 ),
               ),
@@ -53,7 +54,12 @@ class TagsManagerListBottom extends StatelessWidget {
           child: Container(
             margin: const EdgeInsets.all(10),
             child: ElevatedButton.icon(
-              label: Text("Delete ${selected.length} ${Tools.pluralize('tag', selected.length)}"),
+              label: Text(
+                context.loc.tagsManager.deleteTags(
+                  count: selected.length,
+                  tagsPlural: Tools.pluralize('tag', selected.length),
+                ),
+              ),
               icon: const Icon(Icons.delete_forever),
               onPressed: () {
                 if (selected.isEmpty) {
@@ -61,7 +67,7 @@ class TagsManagerListBottom extends StatelessWidget {
                 }
 
                 final Widget deleteDialog = SettingsDialog(
-                  title: const Text('Delete Tags'),
+                  title: Text(context.loc.tagsManager.deleteTagsTitle),
                   scrollable: false,
                   content: SizedBox(
                     width: double.maxFinite,
@@ -69,7 +75,10 @@ class TagsManagerListBottom extends StatelessWidget {
                       shrinkWrap: true,
                       children: [
                         Text(
-                          'Are you sure you want to delete ${selected.length} ${Tools.pluralize('tag', selected.length)}?',
+                          context.loc.history.deleteItemsConfirm(
+                            count: selected.length,
+                            itemsPlural: Tools.pluralize('tag', selected.length),
+                          ),
                         ),
                         const SizedBox(height: 10),
                         ...selected.map((Tag entry) {
@@ -98,7 +107,7 @@ class TagsManagerListBottom extends StatelessWidget {
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.border_clear),
-            label: const Text('Clear selection'),
+            label: Text(context.loc.tagsManager.clearSelection),
             onPressed: onDeselectAll,
           ),
         ),

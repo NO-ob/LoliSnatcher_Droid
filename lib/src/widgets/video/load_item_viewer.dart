@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -77,8 +78,8 @@ class _LoadItemViewerState extends State<LoadItemViewer> {
 
   @override
   Widget build(BuildContext context) {
-    const String failedText = 'Failed to load item data';
-    const String defaultText = 'Loading item data...';
+    final String failedText = context.loc.media.video.failedToLoadItemData;
+    final String defaultText = context.loc.media.video.loadingItemData;
 
     return Material(
       color: Colors.transparent,
@@ -120,7 +121,7 @@ class _LoadItemViewerState extends State<LoadItemViewer> {
                   ElevatedButton.icon(
                     onPressed: initLoading,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    label: Text(context.loc.media.video.retry),
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
@@ -131,7 +132,7 @@ class _LoadItemViewerState extends State<LoadItemViewer> {
                       );
                     },
                     icon: const Icon(Icons.public),
-                    label: const Text('Open file in browser'),
+                    label: Text(context.loc.media.video.openFileInBrowser),
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
@@ -142,7 +143,7 @@ class _LoadItemViewerState extends State<LoadItemViewer> {
                       );
                     },
                     icon: const Icon(Icons.public),
-                    label: const Text('Open post in browser'),
+                    label: Text(context.loc.media.video.openPostInBrowser),
                   ),
                 ],
               ],

@@ -245,11 +245,50 @@
     "history": {
         "searchHistory": "Search History",
         "searchHistoryIsEmpty": "Search History is empty",
+        "searchHistoryIsDisabled": "Search History is disabled.",
+        "searchHistoryRequiresDatabase": "Search History requires enabling Database in settings.",
+        "nothingFound": "Nothing found",
         "filterSearchHistory": "Filter Search History",
-        "lastSearch(param=search)": "Last search: ${search: String}"
+        "lastSearch(param=search)": "Last search: ${search: String}",
+        "lastSearchWithDate(param=date)": "Last search: ${date: String}",
+        "unknownBooruType": "Unknown Booru type!",
+        "unknownBooru(param=name, param=type)": "Unknown booru (${name: String}-${type: String})",
+        "open": "Open",
+        "openInNewTab": "Open in new tab",
+        "removeFromFavourites": "Remove from Favourites",
+        "setAsFavourite": "Set as Favourite",
+        "copy": "Copy",
+        "copiedToClipboard": "Copied to clipboard!",
+        "delete": "Delete",
+        "deleteHistoryEntries": "Delete History Entries",
+        "deleteItemsConfirm(param=count, param=itemsPlural)": "Are you sure you want to delete ${count: int} ${itemsPlural: String}?",
+        "selectAll": "Select all",
+        "clearSelection": "Clear selection",
+        "deleteItems(param=count, param=itemsPlural)": "Delete ${count: int} ${itemsPlural: String}"
     },
     "webview": {
-        "title": "Webview"
+        "title": "Webview",
+        "notSupportedOnDevice": "Not supported on this device",
+        "navigation": {
+            "enterUrlLabel": "Enter a URL",
+            "enterCustomUrl": "Enter custom URL",
+            "navigateTo(param=url)": "Navigate to ${url: String}",
+            "listCookies": "List cookies",
+            "clearCookies": "Clear cookies",
+            "cookiesGone": "There were cookies. Now, they are gone!",
+            "getFavicon": "Get favicon",
+            "noFaviconFound": "No favicon found",
+            "host": "Host:",
+            "textAboveSelectable": "(text above is selectable)",
+            "fieldToMergeTexts": "Field to merge texts:",
+            "copyUrl": "Copy URL",
+            "copiedUrlToClipboard": "Copied URL to clipboard",
+            "cookies": "Cookies",
+            "favicon": "Favicon",
+            "history": "History",
+            "noBackHistoryItem": "No back history item",
+            "noForwardHistoryItem": "No forward history item"
+        }
     },
     "settings": {
         "title": "Settings",
@@ -815,6 +854,27 @@
         "editTagFilter": "Edit tag filter",
         "confirmDelete": "Confirm delete"
     },
+    "tagsManager": {
+        "title": "Tags",
+        "nothingFound": "Nothing found",
+        "addTag": "Add Tag",
+        "name": "Name",
+        "type": "Type",
+        "add": "Add",
+        "staleAfter(param=staleText)": "Stale after: ${staleText: String}",
+        "addedATab": "Added a tab!",
+        "addATab": "Add a tab",
+        "copiedToClipboard": "Copied to clipboard!",
+        "copy": "Copy",
+        "setStale": "Set Stale",
+        "resetStale": "Reset Stale",
+        "makeUnstaleable": "Make Unstaleable",
+        "close": "Close",
+        "selectAll": "Select all",
+        "deleteTags(param=count, param=tagsPlural)": "Delete ${count: int} ${tagsPlural: String}",
+        "deleteTagsTitle": "Delete Tags",
+        "clearSelection": "Clear selection"
+    },
     "lockscreen": {
         "tapToAuthenticate": "Tap to authenticate",
         "devUnlock": "DEV UNLOCK",
@@ -1021,6 +1081,17 @@
             "restartLoading": "Restart loading",
             "stopLoading": "Stop loading",
             "startedSecondsAgo(param=seconds)": "Started ${seconds: int}s ago"
+        },
+        "video": {
+            "videosDisabledOrNotSupported": "Videos disabled or not supported",
+            "openVideoInExternalPlayer": "Open video in external player",
+            "openVideoInBrowser": "Open video in browser",
+            "failedToLoadItemData": "Failed to load item data",
+            "loadingItemData": "Loading item data...",
+            "retry": "Retry",
+            "openFileInBrowser": "Open file in browser",
+            "openPostInBrowser": "Open post in browser",
+            "currentlyChecking": "Currently checking:"
         }
     },
     "preview": {

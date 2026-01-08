@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+
 class WebviewNavigationControls extends StatelessWidget {
   const WebviewNavigationControls({required this.controller, super.key});
 
@@ -46,7 +48,7 @@ class WebviewNavigationControls extends StatelessWidget {
                     await controller.goBack();
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('No back history item')),
+                      SnackBar(content: Text(context.loc.webview.navigation.noBackHistoryItem)),
                     );
                     return;
                   }
@@ -60,7 +62,7 @@ class WebviewNavigationControls extends StatelessWidget {
                   await controller.goForward();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('No forward history item')),
+                    SnackBar(content: Text(context.loc.webview.navigation.noForwardHistoryItem)),
                   );
                   return;
                 }
@@ -114,7 +116,7 @@ class _WebviewHistoryDialogState extends State<WebviewHistoryDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('History'),
+      title: Text(context.loc.webview.navigation.history),
       content: ListView.builder(
         itemCount: _historyItems.length,
         itemBuilder: (context, index) {

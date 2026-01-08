@@ -290,6 +290,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   late final TranslationsCommentsEn comments = TranslationsCommentsEn.internal(_root);
   late final TranslationsPageChangerEn pageChanger = TranslationsPageChangerEn.internal(_root);
   late final TranslationsTagsFiltersDialogsEn tagsFiltersDialogs = TranslationsTagsFiltersDialogsEn.internal(_root);
+  late final TranslationsTagsManagerEn tagsManager = TranslationsTagsManagerEn.internal(_root);
   late final TranslationsLockscreenEn lockscreen = TranslationsLockscreenEn.internal(_root);
   late final TranslationsLoliSyncEn loliSync = TranslationsLoliSyncEn.internal(_root);
   late final TranslationsImageSearchEn imageSearch = TranslationsImageSearchEn.internal(_root);
@@ -769,12 +770,75 @@ class TranslationsHistoryEn {
   /// en: 'Search History is empty'
   String get searchHistoryIsEmpty => TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsEmpty', {}) ?? 'Search History is empty';
 
+  /// en: 'Search History is disabled.'
+  String get searchHistoryIsDisabled =>
+      TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsDisabled', {}) ?? 'Search History is disabled.';
+
+  /// en: 'Search History requires enabling Database in settings.'
+  String get searchHistoryRequiresDatabase =>
+      TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ??
+      'Search History requires enabling Database in settings.';
+
+  /// en: 'Nothing found'
+  String get nothingFound => TranslationOverrides.string(_root.$meta, 'history.nothingFound', {}) ?? 'Nothing found';
+
   /// en: 'Filter Search History'
   String get filterSearchHistory => TranslationOverrides.string(_root.$meta, 'history.filterSearchHistory', {}) ?? 'Filter Search History';
 
   /// en: 'Last search: ${search: String}'
   String lastSearch({required String search}) =>
       TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Last search: ${search}';
+
+  /// en: 'Last search: ${date: String}'
+  String lastSearchWithDate({required String date}) =>
+      TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Last search: ${date}';
+
+  /// en: 'Unknown Booru type!'
+  String get unknownBooruType => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Unknown Booru type!';
+
+  /// en: 'Unknown booru (${name: String}-${type: String})'
+  String unknownBooru({required String name, required String type}) =>
+      TranslationOverrides.string(_root.$meta, 'history.unknownBooru', {'name': name, 'type': type}) ?? 'Unknown booru (${name}-${type})';
+
+  /// en: 'Open'
+  String get open => TranslationOverrides.string(_root.$meta, 'history.open', {}) ?? 'Open';
+
+  /// en: 'Open in new tab'
+  String get openInNewTab => TranslationOverrides.string(_root.$meta, 'history.openInNewTab', {}) ?? 'Open in new tab';
+
+  /// en: 'Remove from Favourites'
+  String get removeFromFavourites => TranslationOverrides.string(_root.$meta, 'history.removeFromFavourites', {}) ?? 'Remove from Favourites';
+
+  /// en: 'Set as Favourite'
+  String get setAsFavourite => TranslationOverrides.string(_root.$meta, 'history.setAsFavourite', {}) ?? 'Set as Favourite';
+
+  /// en: 'Copy'
+  String get copy => TranslationOverrides.string(_root.$meta, 'history.copy', {}) ?? 'Copy';
+
+  /// en: 'Copied to clipboard!'
+  String get copiedToClipboard => TranslationOverrides.string(_root.$meta, 'history.copiedToClipboard', {}) ?? 'Copied to clipboard!';
+
+  /// en: 'Delete'
+  String get delete => TranslationOverrides.string(_root.$meta, 'history.delete', {}) ?? 'Delete';
+
+  /// en: 'Delete History Entries'
+  String get deleteHistoryEntries => TranslationOverrides.string(_root.$meta, 'history.deleteHistoryEntries', {}) ?? 'Delete History Entries';
+
+  /// en: 'Are you sure you want to delete ${count: int} ${itemsPlural: String}?'
+  String deleteItemsConfirm({required int count, required String itemsPlural}) =>
+      TranslationOverrides.string(_root.$meta, 'history.deleteItemsConfirm', {'count': count, 'itemsPlural': itemsPlural}) ??
+      'Are you sure you want to delete ${count} ${itemsPlural}?';
+
+  /// en: 'Select all'
+  String get selectAll => TranslationOverrides.string(_root.$meta, 'history.selectAll', {}) ?? 'Select all';
+
+  /// en: 'Clear selection'
+  String get clearSelection => TranslationOverrides.string(_root.$meta, 'history.clearSelection', {}) ?? 'Clear selection';
+
+  /// en: 'Delete ${count: int} ${itemsPlural: String}'
+  String deleteItems({required int count, required String itemsPlural}) =>
+      TranslationOverrides.string(_root.$meta, 'history.deleteItems', {'count': count, 'itemsPlural': itemsPlural}) ??
+      'Delete ${count} ${itemsPlural}';
 }
 
 // Path: webview
@@ -787,6 +851,11 @@ class TranslationsWebviewEn {
 
   /// en: 'Webview'
   String get title => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Webview';
+
+  /// en: 'Not supported on this device'
+  String get notSupportedOnDevice => TranslationOverrides.string(_root.$meta, 'webview.notSupportedOnDevice', {}) ?? 'Not supported on this device';
+
+  late final TranslationsWebviewNavigationEn navigation = TranslationsWebviewNavigationEn.internal(_root);
 }
 
 // Path: settings
@@ -934,6 +1003,75 @@ class TranslationsTagsFiltersDialogsEn {
 
   /// en: 'Confirm delete'
   String get confirmDelete => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.confirmDelete', {}) ?? 'Confirm delete';
+}
+
+// Path: tagsManager
+class TranslationsTagsManagerEn {
+  TranslationsTagsManagerEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Tags'
+  String get title => TranslationOverrides.string(_root.$meta, 'tagsManager.title', {}) ?? 'Tags';
+
+  /// en: 'Nothing found'
+  String get nothingFound => TranslationOverrides.string(_root.$meta, 'tagsManager.nothingFound', {}) ?? 'Nothing found';
+
+  /// en: 'Add Tag'
+  String get addTag => TranslationOverrides.string(_root.$meta, 'tagsManager.addTag', {}) ?? 'Add Tag';
+
+  /// en: 'Name'
+  String get name => TranslationOverrides.string(_root.$meta, 'tagsManager.name', {}) ?? 'Name';
+
+  /// en: 'Type'
+  String get type => TranslationOverrides.string(_root.$meta, 'tagsManager.type', {}) ?? 'Type';
+
+  /// en: 'Add'
+  String get add => TranslationOverrides.string(_root.$meta, 'tagsManager.add', {}) ?? 'Add';
+
+  /// en: 'Stale after: ${staleText: String}'
+  String staleAfter({required String staleText}) =>
+      TranslationOverrides.string(_root.$meta, 'tagsManager.staleAfter', {'staleText': staleText}) ?? 'Stale after: ${staleText}';
+
+  /// en: 'Added a tab!'
+  String get addedATab => TranslationOverrides.string(_root.$meta, 'tagsManager.addedATab', {}) ?? 'Added a tab!';
+
+  /// en: 'Add a tab'
+  String get addATab => TranslationOverrides.string(_root.$meta, 'tagsManager.addATab', {}) ?? 'Add a tab';
+
+  /// en: 'Copied to clipboard!'
+  String get copiedToClipboard => TranslationOverrides.string(_root.$meta, 'tagsManager.copiedToClipboard', {}) ?? 'Copied to clipboard!';
+
+  /// en: 'Copy'
+  String get copy => TranslationOverrides.string(_root.$meta, 'tagsManager.copy', {}) ?? 'Copy';
+
+  /// en: 'Set Stale'
+  String get setStale => TranslationOverrides.string(_root.$meta, 'tagsManager.setStale', {}) ?? 'Set Stale';
+
+  /// en: 'Reset Stale'
+  String get resetStale => TranslationOverrides.string(_root.$meta, 'tagsManager.resetStale', {}) ?? 'Reset Stale';
+
+  /// en: 'Make Unstaleable'
+  String get makeUnstaleable => TranslationOverrides.string(_root.$meta, 'tagsManager.makeUnstaleable', {}) ?? 'Make Unstaleable';
+
+  /// en: 'Close'
+  String get close => TranslationOverrides.string(_root.$meta, 'tagsManager.close', {}) ?? 'Close';
+
+  /// en: 'Select all'
+  String get selectAll => TranslationOverrides.string(_root.$meta, 'tagsManager.selectAll', {}) ?? 'Select all';
+
+  /// en: 'Delete ${count: int} ${tagsPlural: String}'
+  String deleteTags({required int count, required String tagsPlural}) =>
+      TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTags', {'count': count, 'tagsPlural': tagsPlural}) ??
+      'Delete ${count} ${tagsPlural}';
+
+  /// en: 'Delete Tags'
+  String get deleteTagsTitle => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? 'Delete Tags';
+
+  /// en: 'Clear selection'
+  String get clearSelection => TranslationOverrides.string(_root.$meta, 'tagsManager.clearSelection', {}) ?? 'Clear selection';
 }
 
 // Path: lockscreen
@@ -1442,6 +1580,7 @@ class TranslationsMediaEn {
 
   // Translations
   late final TranslationsMediaLoadingEn loading = TranslationsMediaLoadingEn.internal(_root);
+  late final TranslationsMediaVideoEn video = TranslationsMediaVideoEn.internal(_root);
 }
 
 // Path: preview
@@ -1558,6 +1697,74 @@ class TranslationsTabsMoveEn {
 
   /// en: 'Preview:'
   String get preview => TranslationOverrides.string(_root.$meta, 'tabs.move.preview', {}) ?? 'Preview:';
+}
+
+// Path: webview.navigation
+class TranslationsWebviewNavigationEn {
+  TranslationsWebviewNavigationEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Enter a URL'
+  String get enterUrlLabel => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Enter a URL';
+
+  /// en: 'Enter custom URL'
+  String get enterCustomUrl => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Enter custom URL';
+
+  /// en: 'Navigate to ${url: String}'
+  String navigateTo({required String url}) =>
+      TranslationOverrides.string(_root.$meta, 'webview.navigation.navigateTo', {'url': url}) ?? 'Navigate to ${url}';
+
+  /// en: 'List cookies'
+  String get listCookies => TranslationOverrides.string(_root.$meta, 'webview.navigation.listCookies', {}) ?? 'List cookies';
+
+  /// en: 'Clear cookies'
+  String get clearCookies => TranslationOverrides.string(_root.$meta, 'webview.navigation.clearCookies', {}) ?? 'Clear cookies';
+
+  /// en: 'There were cookies. Now, they are gone!'
+  String get cookiesGone =>
+      TranslationOverrides.string(_root.$meta, 'webview.navigation.cookiesGone', {}) ?? 'There were cookies. Now, they are gone!';
+
+  /// en: 'Get favicon'
+  String get getFavicon => TranslationOverrides.string(_root.$meta, 'webview.navigation.getFavicon', {}) ?? 'Get favicon';
+
+  /// en: 'No favicon found'
+  String get noFaviconFound => TranslationOverrides.string(_root.$meta, 'webview.navigation.noFaviconFound', {}) ?? 'No favicon found';
+
+  /// en: 'Host:'
+  String get host => TranslationOverrides.string(_root.$meta, 'webview.navigation.host', {}) ?? 'Host:';
+
+  /// en: '(text above is selectable)'
+  String get textAboveSelectable =>
+      TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(text above is selectable)';
+
+  /// en: 'Field to merge texts:'
+  String get fieldToMergeTexts => TranslationOverrides.string(_root.$meta, 'webview.navigation.fieldToMergeTexts', {}) ?? 'Field to merge texts:';
+
+  /// en: 'Copy URL'
+  String get copyUrl => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'Copy URL';
+
+  /// en: 'Copied URL to clipboard'
+  String get copiedUrlToClipboard =>
+      TranslationOverrides.string(_root.$meta, 'webview.navigation.copiedUrlToClipboard', {}) ?? 'Copied URL to clipboard';
+
+  /// en: 'Cookies'
+  String get cookies => TranslationOverrides.string(_root.$meta, 'webview.navigation.cookies', {}) ?? 'Cookies';
+
+  /// en: 'Favicon'
+  String get favicon => TranslationOverrides.string(_root.$meta, 'webview.navigation.favicon', {}) ?? 'Favicon';
+
+  /// en: 'History'
+  String get history => TranslationOverrides.string(_root.$meta, 'webview.navigation.history', {}) ?? 'History';
+
+  /// en: 'No back history item'
+  String get noBackHistoryItem => TranslationOverrides.string(_root.$meta, 'webview.navigation.noBackHistoryItem', {}) ?? 'No back history item';
+
+  /// en: 'No forward history item'
+  String get noForwardHistoryItem =>
+      TranslationOverrides.string(_root.$meta, 'webview.navigation.noForwardHistoryItem', {}) ?? 'No forward history item';
 }
 
 // Path: settings.language
@@ -3702,6 +3909,44 @@ class TranslationsMediaLoadingEn {
       TranslationOverrides.string(_root.$meta, 'media.loading.startedSecondsAgo', {'seconds': seconds}) ?? 'Started ${seconds}s ago';
 }
 
+// Path: media.video
+class TranslationsMediaVideoEn {
+  TranslationsMediaVideoEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Videos disabled or not supported'
+  String get videosDisabledOrNotSupported =>
+      TranslationOverrides.string(_root.$meta, 'media.video.videosDisabledOrNotSupported', {}) ?? 'Videos disabled or not supported';
+
+  /// en: 'Open video in external player'
+  String get openVideoInExternalPlayer =>
+      TranslationOverrides.string(_root.$meta, 'media.video.openVideoInExternalPlayer', {}) ?? 'Open video in external player';
+
+  /// en: 'Open video in browser'
+  String get openVideoInBrowser => TranslationOverrides.string(_root.$meta, 'media.video.openVideoInBrowser', {}) ?? 'Open video in browser';
+
+  /// en: 'Failed to load item data'
+  String get failedToLoadItemData => TranslationOverrides.string(_root.$meta, 'media.video.failedToLoadItemData', {}) ?? 'Failed to load item data';
+
+  /// en: 'Loading item data...'
+  String get loadingItemData => TranslationOverrides.string(_root.$meta, 'media.video.loadingItemData', {}) ?? 'Loading item data...';
+
+  /// en: 'Retry'
+  String get retry => TranslationOverrides.string(_root.$meta, 'media.video.retry', {}) ?? 'Retry';
+
+  /// en: 'Open file in browser'
+  String get openFileInBrowser => TranslationOverrides.string(_root.$meta, 'media.video.openFileInBrowser', {}) ?? 'Open file in browser';
+
+  /// en: 'Open post in browser'
+  String get openPostInBrowser => TranslationOverrides.string(_root.$meta, 'media.video.openPostInBrowser', {}) ?? 'Open post in browser';
+
+  /// en: 'Currently checking:'
+  String get currentlyChecking => TranslationOverrides.string(_root.$meta, 'media.video.currentlyChecking', {}) ?? 'Currently checking:';
+}
+
 // Path: preview.error
 class TranslationsPreviewErrorEn {
   TranslationsPreviewErrorEn.internal(this._root);
@@ -4053,11 +4298,72 @@ extension on Translations {
           'dialogs.noForwardHistoryItem' => TranslationOverrides.string(_root.$meta, 'dialogs.noForwardHistoryItem', {}) ?? 'No forward history item',
           'history.searchHistory' => TranslationOverrides.string(_root.$meta, 'history.searchHistory', {}) ?? 'Search History',
           'history.searchHistoryIsEmpty' => TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsEmpty', {}) ?? 'Search History is empty',
+          'history.searchHistoryIsDisabled' =>
+            TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsDisabled', {}) ?? 'Search History is disabled.',
+          'history.searchHistoryRequiresDatabase' =>
+            TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ??
+                'Search History requires enabling Database in settings.',
+          'history.nothingFound' => TranslationOverrides.string(_root.$meta, 'history.nothingFound', {}) ?? 'Nothing found',
           'history.filterSearchHistory' => TranslationOverrides.string(_root.$meta, 'history.filterSearchHistory', {}) ?? 'Filter Search History',
           'history.lastSearch' =>
             ({required String search}) =>
                 TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Last search: ${search}',
+          'history.lastSearchWithDate' =>
+            ({required String date}) =>
+                TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Last search: ${date}',
+          'history.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Unknown Booru type!',
+          'history.unknownBooru' =>
+            ({required String name, required String type}) =>
+                TranslationOverrides.string(_root.$meta, 'history.unknownBooru', {'name': name, 'type': type}) ?? 'Unknown booru (${name}-${type})',
+          'history.open' => TranslationOverrides.string(_root.$meta, 'history.open', {}) ?? 'Open',
+          'history.openInNewTab' => TranslationOverrides.string(_root.$meta, 'history.openInNewTab', {}) ?? 'Open in new tab',
+          'history.removeFromFavourites' => TranslationOverrides.string(_root.$meta, 'history.removeFromFavourites', {}) ?? 'Remove from Favourites',
+          'history.setAsFavourite' => TranslationOverrides.string(_root.$meta, 'history.setAsFavourite', {}) ?? 'Set as Favourite',
+          'history.copy' => TranslationOverrides.string(_root.$meta, 'history.copy', {}) ?? 'Copy',
+          'history.copiedToClipboard' => TranslationOverrides.string(_root.$meta, 'history.copiedToClipboard', {}) ?? 'Copied to clipboard!',
+          'history.delete' => TranslationOverrides.string(_root.$meta, 'history.delete', {}) ?? 'Delete',
+          'history.deleteHistoryEntries' => TranslationOverrides.string(_root.$meta, 'history.deleteHistoryEntries', {}) ?? 'Delete History Entries',
+          'history.deleteItemsConfirm' =>
+            ({required int count, required String itemsPlural}) =>
+                TranslationOverrides.string(_root.$meta, 'history.deleteItemsConfirm', {'count': count, 'itemsPlural': itemsPlural}) ??
+                'Are you sure you want to delete ${count} ${itemsPlural}?',
+          'history.selectAll' => TranslationOverrides.string(_root.$meta, 'history.selectAll', {}) ?? 'Select all',
+          'history.clearSelection' => TranslationOverrides.string(_root.$meta, 'history.clearSelection', {}) ?? 'Clear selection',
+          'history.deleteItems' =>
+            ({required int count, required String itemsPlural}) =>
+                TranslationOverrides.string(_root.$meta, 'history.deleteItems', {'count': count, 'itemsPlural': itemsPlural}) ??
+                'Delete ${count} ${itemsPlural}',
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Webview',
+          'webview.notSupportedOnDevice' =>
+            TranslationOverrides.string(_root.$meta, 'webview.notSupportedOnDevice', {}) ?? 'Not supported on this device',
+          'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Enter a URL',
+          'webview.navigation.enterCustomUrl' =>
+            TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Enter custom URL',
+          'webview.navigation.navigateTo' =>
+            ({required String url}) =>
+                TranslationOverrides.string(_root.$meta, 'webview.navigation.navigateTo', {'url': url}) ?? 'Navigate to ${url}',
+          'webview.navigation.listCookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.listCookies', {}) ?? 'List cookies',
+          'webview.navigation.clearCookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.clearCookies', {}) ?? 'Clear cookies',
+          'webview.navigation.cookiesGone' =>
+            TranslationOverrides.string(_root.$meta, 'webview.navigation.cookiesGone', {}) ?? 'There were cookies. Now, they are gone!',
+          'webview.navigation.getFavicon' => TranslationOverrides.string(_root.$meta, 'webview.navigation.getFavicon', {}) ?? 'Get favicon',
+          'webview.navigation.noFaviconFound' =>
+            TranslationOverrides.string(_root.$meta, 'webview.navigation.noFaviconFound', {}) ?? 'No favicon found',
+          'webview.navigation.host' => TranslationOverrides.string(_root.$meta, 'webview.navigation.host', {}) ?? 'Host:',
+          'webview.navigation.textAboveSelectable' =>
+            TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(text above is selectable)',
+          'webview.navigation.fieldToMergeTexts' =>
+            TranslationOverrides.string(_root.$meta, 'webview.navigation.fieldToMergeTexts', {}) ?? 'Field to merge texts:',
+          'webview.navigation.copyUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'Copy URL',
+          'webview.navigation.copiedUrlToClipboard' =>
+            TranslationOverrides.string(_root.$meta, 'webview.navigation.copiedUrlToClipboard', {}) ?? 'Copied URL to clipboard',
+          'webview.navigation.cookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.cookies', {}) ?? 'Cookies',
+          'webview.navigation.favicon' => TranslationOverrides.string(_root.$meta, 'webview.navigation.favicon', {}) ?? 'Favicon',
+          'webview.navigation.history' => TranslationOverrides.string(_root.$meta, 'webview.navigation.history', {}) ?? 'History',
+          'webview.navigation.noBackHistoryItem' =>
+            TranslationOverrides.string(_root.$meta, 'webview.navigation.noBackHistoryItem', {}) ?? 'No back history item',
+          'webview.navigation.noForwardHistoryItem' =>
+            TranslationOverrides.string(_root.$meta, 'webview.navigation.noForwardHistoryItem', {}) ?? 'No forward history item',
           'settings.title' => TranslationOverrides.string(_root.$meta, 'settings.title', {}) ?? 'Settings',
           'settings.language.title' => TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Language',
           'settings.language.system' => TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'System',
@@ -4533,6 +4839,9 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusRestored', {}) ?? 'Boorus restored from backup!',
           'settings.backupAndRestore.backupBoorusError' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorusError', {}) ?? 'Failed to backup boorus!',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.backupAndRestore.restoreBoorusError' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorusError', {}) ?? 'Failed to restore boorus!',
           'settings.backupAndRestore.backupDatabase' =>
@@ -4611,9 +4920,6 @@ extension on Translations {
           'settings.performance.title' => TranslationOverrides.string(_root.$meta, 'settings.performance.title', {}) ?? 'Performance',
           'settings.performance.lowPerformanceMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceMode', {}) ?? 'Low performance mode',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.performance.lowPerformanceModeSubtitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeSubtitle', {}) ??
                 'Recommended for old devices and devices with low RAM',
@@ -5024,6 +5330,30 @@ extension on Translations {
           'tagsFiltersDialogs.newFilter' => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.newFilter', {}) ?? 'New filter',
           'tagsFiltersDialogs.editTagFilter' => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.editTagFilter', {}) ?? 'Edit tag filter',
           'tagsFiltersDialogs.confirmDelete' => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.confirmDelete', {}) ?? 'Confirm delete',
+          'tagsManager.title' => TranslationOverrides.string(_root.$meta, 'tagsManager.title', {}) ?? 'Tags',
+          'tagsManager.nothingFound' => TranslationOverrides.string(_root.$meta, 'tagsManager.nothingFound', {}) ?? 'Nothing found',
+          'tagsManager.addTag' => TranslationOverrides.string(_root.$meta, 'tagsManager.addTag', {}) ?? 'Add Tag',
+          'tagsManager.name' => TranslationOverrides.string(_root.$meta, 'tagsManager.name', {}) ?? 'Name',
+          'tagsManager.type' => TranslationOverrides.string(_root.$meta, 'tagsManager.type', {}) ?? 'Type',
+          'tagsManager.add' => TranslationOverrides.string(_root.$meta, 'tagsManager.add', {}) ?? 'Add',
+          'tagsManager.staleAfter' =>
+            ({required String staleText}) =>
+                TranslationOverrides.string(_root.$meta, 'tagsManager.staleAfter', {'staleText': staleText}) ?? 'Stale after: ${staleText}',
+          'tagsManager.addedATab' => TranslationOverrides.string(_root.$meta, 'tagsManager.addedATab', {}) ?? 'Added a tab!',
+          'tagsManager.addATab' => TranslationOverrides.string(_root.$meta, 'tagsManager.addATab', {}) ?? 'Add a tab',
+          'tagsManager.copiedToClipboard' => TranslationOverrides.string(_root.$meta, 'tagsManager.copiedToClipboard', {}) ?? 'Copied to clipboard!',
+          'tagsManager.copy' => TranslationOverrides.string(_root.$meta, 'tagsManager.copy', {}) ?? 'Copy',
+          'tagsManager.setStale' => TranslationOverrides.string(_root.$meta, 'tagsManager.setStale', {}) ?? 'Set Stale',
+          'tagsManager.resetStale' => TranslationOverrides.string(_root.$meta, 'tagsManager.resetStale', {}) ?? 'Reset Stale',
+          'tagsManager.makeUnstaleable' => TranslationOverrides.string(_root.$meta, 'tagsManager.makeUnstaleable', {}) ?? 'Make Unstaleable',
+          'tagsManager.close' => TranslationOverrides.string(_root.$meta, 'tagsManager.close', {}) ?? 'Close',
+          'tagsManager.selectAll' => TranslationOverrides.string(_root.$meta, 'tagsManager.selectAll', {}) ?? 'Select all',
+          'tagsManager.deleteTags' =>
+            ({required int count, required String tagsPlural}) =>
+                TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTags', {'count': count, 'tagsPlural': tagsPlural}) ??
+                'Delete ${count} ${tagsPlural}',
+          'tagsManager.deleteTagsTitle' => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? 'Delete Tags',
+          'tagsManager.clearSelection' => TranslationOverrides.string(_root.$meta, 'tagsManager.clearSelection', {}) ?? 'Clear selection',
           'lockscreen.tapToAuthenticate' => TranslationOverrides.string(_root.$meta, 'lockscreen.tapToAuthenticate', {}) ?? 'Tap to authenticate',
           'lockscreen.devUnlock' => TranslationOverrides.string(_root.$meta, 'lockscreen.devUnlock', {}) ?? 'DEV UNLOCK',
           'lockscreen.testingMessage' =>
@@ -5259,6 +5589,19 @@ extension on Translations {
           'media.loading.startedSecondsAgo' =>
             ({required int seconds}) =>
                 TranslationOverrides.string(_root.$meta, 'media.loading.startedSecondsAgo', {'seconds': seconds}) ?? 'Started ${seconds}s ago',
+          'media.video.videosDisabledOrNotSupported' =>
+            TranslationOverrides.string(_root.$meta, 'media.video.videosDisabledOrNotSupported', {}) ?? 'Videos disabled or not supported',
+          'media.video.openVideoInExternalPlayer' =>
+            TranslationOverrides.string(_root.$meta, 'media.video.openVideoInExternalPlayer', {}) ?? 'Open video in external player',
+          'media.video.openVideoInBrowser' =>
+            TranslationOverrides.string(_root.$meta, 'media.video.openVideoInBrowser', {}) ?? 'Open video in browser',
+          'media.video.failedToLoadItemData' =>
+            TranslationOverrides.string(_root.$meta, 'media.video.failedToLoadItemData', {}) ?? 'Failed to load item data',
+          'media.video.loadingItemData' => TranslationOverrides.string(_root.$meta, 'media.video.loadingItemData', {}) ?? 'Loading item data...',
+          'media.video.retry' => TranslationOverrides.string(_root.$meta, 'media.video.retry', {}) ?? 'Retry',
+          'media.video.openFileInBrowser' => TranslationOverrides.string(_root.$meta, 'media.video.openFileInBrowser', {}) ?? 'Open file in browser',
+          'media.video.openPostInBrowser' => TranslationOverrides.string(_root.$meta, 'media.video.openPostInBrowser', {}) ?? 'Open post in browser',
+          'media.video.currentlyChecking' => TranslationOverrides.string(_root.$meta, 'media.video.currentlyChecking', {}) ?? 'Currently checking:',
           'preview.searchForTags' => TranslationOverrides.string(_root.$meta, 'preview.searchForTags', {}) ?? 'Search for tags',
           'preview.booruNumber' =>
             ({required int number}) => TranslationOverrides.string(_root.$meta, 'preview.booruNumber', {'number': number}) ?? 'Booru (${number}#)',

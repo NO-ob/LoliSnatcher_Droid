@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 enum _NavigationMenuOptions {
   goToInitial,
@@ -54,7 +55,7 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
           content: TextField(
             controller: _urlController,
             decoration: InputDecoration(
-              labelText: 'Enter a URL',
+              labelText: context.loc.webview.navigation.enterUrlLabel,
               border: const OutlineInputBorder(),
               suffixIcon: GestureDetector(
                 onTap: _urlController.clear,
@@ -70,11 +71,11 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
           ),
           actions: [
             ElevatedButton(
-              child: const Text('Cancel'),
+              child: Text(context.loc.cancel),
               onPressed: () => Navigator.pop(context, null),
             ),
             ElevatedButton(
-              child: const Text('Go'),
+              child: Text(context.loc.go),
               onPressed: () => Navigator.pop(context, _urlController.text),
             ),
           ],
@@ -100,7 +101,7 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Cookies'),
+          title: Text(context.loc.webview.navigation.cookies),
           content: SingleChildScrollView(
             child: ListBody(
               children: cookies.map((Cookie cookie) {
@@ -127,11 +128,10 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
       url: WebUri.uri(url),
       webViewController: controller,
     );
-    const String message = 'There were cookies. Now, they are gone!';
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(message),
+      SnackBar(
+        content: Text(context.loc.webview.navigation.cookiesGone),
       ),
     );
   }
@@ -158,21 +158,21 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Favicon'),
+          title: Text(context.loc.webview.navigation.favicon),
           content: SingleChildScrollView(
             child: ListBody(
               children: [
                 SelectableText(
-                  favicon ?? 'No favicon found',
+                  favicon ?? context.loc.webview.navigation.noFaviconFound,
                   style: const TextStyle(fontSize: 16),
                 ),
-                const Text('Host:'),
+                Text(context.loc.webview.navigation.host),
                 SelectableText(
                   '${uri?.scheme}://${uri?.host}',
                 ),
-                const Text('(text above is selectable)'),
+                Text(context.loc.webview.navigation.textAboveSelectable),
                 const Text(''),
-                const Text('Field to merge texts:'),
+                Text(context.loc.webview.navigation.fieldToMergeTexts),
                 const TextField(),
               ],
             ),
@@ -190,8 +190,8 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
     if (url != null) {
       await Clipboard.setData(ClipboardData(text: url));
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Copied URL to clipboard'),
+        SnackBar(
+          content: Text(context.loc.webview.navigation.copiedUrlToClipboard),
         ),
       );
     }
@@ -228,27 +228,27 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
           itemBuilder: (context) => [
             PopupMenuItem<_NavigationMenuOptions>(
               value: _NavigationMenuOptions.goToInitial,
-              child: Text('Navigate to ${widget.initialUrl}'),
+              child: Text(context.loc.webview.navigation.navigateTo(url: widget.initialUrl)),
             ),
-            const PopupMenuItem<_NavigationMenuOptions>(
+            PopupMenuItem<_NavigationMenuOptions>(
               value: _NavigationMenuOptions.enterCustomUrl,
-              child: Text('Enter custom URL'),
+              child: Text(context.loc.webview.navigation.enterCustomUrl),
             ),
-            const PopupMenuItem<_NavigationMenuOptions>(
+            PopupMenuItem<_NavigationMenuOptions>(
               value: _NavigationMenuOptions.listCookies,
-              child: Text('List cookies'),
+              child: Text(context.loc.webview.navigation.listCookies),
             ),
-            const PopupMenuItem<_NavigationMenuOptions>(
+            PopupMenuItem<_NavigationMenuOptions>(
               value: _NavigationMenuOptions.clearCookies,
-              child: Text('Clear cookies'),
+              child: Text(context.loc.webview.navigation.clearCookies),
             ),
-            const PopupMenuItem<_NavigationMenuOptions>(
+            PopupMenuItem<_NavigationMenuOptions>(
               value: _NavigationMenuOptions.getFavicon,
-              child: Text('Get favicon'),
+              child: Text(context.loc.webview.navigation.getFavicon),
             ),
-            const PopupMenuItem<_NavigationMenuOptions>(
+            PopupMenuItem<_NavigationMenuOptions>(
               value: _NavigationMenuOptions.copyUrl,
-              child: Text('Copy URL'),
+              child: Text(context.loc.webview.navigation.copyUrl),
             ),
           ],
         );

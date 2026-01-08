@@ -26,11 +26,11 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
   @override
   Widget build(BuildContext context) {
     return SettingsDialog(
-      title: const Text('Add Tag'),
+      title: Text(context.loc.tagsManager.addTag),
       contentItems: [
         SettingsTextInput(
           controller: _controller,
-          title: 'Name',
+          title: context.loc.tagsManager.name,
           drawBottomBorder: false,
           pasteable: true,
           enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
@@ -43,7 +43,7 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
               _type = newValue!;
             });
           },
-          title: 'Type',
+          title: context.loc.tagsManager.type,
           drawBottomBorder: false,
         ),
       ],
@@ -54,7 +54,7 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
           returnData: null,
         ),
         ElevatedButton.icon(
-          label: const Text('Add'),
+          label: Text(context.loc.tagsManager.add),
           icon: const Icon(Icons.add),
           onPressed: () {
             final String tagName = _controller.text.trim();

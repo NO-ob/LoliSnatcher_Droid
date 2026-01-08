@@ -144,7 +144,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
   @override
   Widget build(BuildContext context) {
     return SettingsPageDialog(
-      title: const Text('Tags'),
+      title: Text(context.loc.tagsManager.title),
       fab: Padding(
         padding: const EdgeInsets.only(bottom: 40),
         child: FloatingActionButton(
@@ -167,7 +167,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
             Center(
               child: Column(
                 children: [
-                  if (filteredTags.isEmpty) const Text('Nothing found'),
+                  if (filteredTags.isEmpty) Text(context.loc.tagsManager.nothingFound),
                 ],
               ),
             ),

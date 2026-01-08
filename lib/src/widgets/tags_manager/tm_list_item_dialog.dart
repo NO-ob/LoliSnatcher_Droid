@@ -5,6 +5,7 @@ import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
@@ -58,7 +59,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
         //
         if (widget.debug) ...[
           const SizedBox(height: 10),
-          Text('Stale after: $staleText'),
+          Text(context.loc.tagsManager.staleAfter(staleText: staleText)),
         ],
         //
         const SizedBox(height: 10),
@@ -70,7 +71,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
               widget.onChangedType(newValue);
             });
           },
-          title: 'Type',
+          title: context.loc.tagsManager.type,
           drawBottomBorder: false,
           itemBuilder: (item) => Row(
             children: [
@@ -103,7 +104,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
               FlashElements.showSnackbar(
                 context: context,
                 duration: const Duration(seconds: 2),
-                title: const Text('Added a tab!', style: TextStyle(fontSize: 20)),
+                title: Text(context.loc.tagsManager.addedATab, style: const TextStyle(fontSize: 20)),
                 content: Text(widget.tag.fullString, style: const TextStyle(fontSize: 16)),
                 leadingIcon: Icons.copy,
                 sideColor: Colors.green,
@@ -112,7 +113,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             },
             leading: const Icon(Icons.add_circle_outline),
             trailing: BooruFavicon(SearchHandler.instance.currentBooruHandler.booru),
-            title: const Text('Add a tab'),
+            title: Text(context.loc.tagsManager.addATab),
           ),
         ],
         //
@@ -127,7 +128,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             FlashElements.showSnackbar(
               context: context,
               duration: const Duration(seconds: 2),
-              title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
+              title: Text(context.loc.tagsManager.copiedToClipboard, style: const TextStyle(fontSize: 20)),
               content: Text(widget.tag.fullString, style: const TextStyle(fontSize: 16)),
               leadingIcon: Icons.copy,
               sideColor: Colors.green,
@@ -135,7 +136,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             Navigator.of(context).pop(true);
           },
           leading: const Icon(Icons.copy),
-          title: const Text('Copy'),
+          title: Text(context.loc.tagsManager.copy),
         ),
         //
         // don't need this since we shouldn't delete tags from sqlite
@@ -159,7 +160,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             ),
             onTap: () => callbackWithSetState(widget.onSetStale!),
             leading: const Icon(Icons.timer_off),
-            title: const Text('Set Stale'),
+            title: Text(context.loc.tagsManager.setStale),
           ),
         ],
         //
@@ -172,7 +173,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             ),
             onTap: () => callbackWithSetState(widget.onResetStale!),
             leading: const Icon(Icons.restore),
-            title: const Text('Reset Stale'),
+            title: Text(context.loc.tagsManager.resetStale),
           ),
         ],
         //
@@ -185,7 +186,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             ),
             onTap: () => callbackWithSetState(widget.onSetUnstaleable!),
             leading: const Icon(Icons.lock_clock),
-            title: const Text('Make Unstaleable'),
+            title: Text(context.loc.tagsManager.makeUnstaleable),
           ),
         ],
         const SizedBox(height: 10),
@@ -196,7 +197,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           ),
           onTap: () => Navigator.of(context).pop(),
           leading: const Icon(Icons.cancel_outlined),
-          title: const Text('Close'),
+          title: Text(context.loc.tagsManager.close),
         ),
       ],
     );

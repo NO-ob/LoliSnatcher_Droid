@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -168,7 +169,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
                   ElevatedButton.icon(
                     onPressed: startGuessing,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
+                    label: Text(context.loc.media.video.retry),
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
@@ -179,7 +180,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
                       );
                     },
                     icon: const Icon(Icons.public),
-                    label: const Text('Open file in browser'),
+                    label: Text(context.loc.media.video.openFileInBrowser),
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
@@ -190,13 +191,13 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
                       );
                     },
                     icon: const Icon(Icons.public),
-                    label: const Text('Open post in browser'),
+                    label: Text(context.loc.media.video.openPostInBrowser),
                   ),
                 ] else ...[
-                  const Text(
-                    'Currently checking:',
+                  Text(
+                    context.loc.media.video.currentlyChecking,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20),
+                    style: const TextStyle(fontSize: 20),
                   ),
                   Text(
                     currentExtension,
