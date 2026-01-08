@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 // TODO change to bottom sheet
 // TODO add more engines? ability to add custom ones?
@@ -55,7 +56,7 @@ Future<void> showImageSearchDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: const Text('Image search'),
+        title: Text(context.loc.imageSearch.title),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

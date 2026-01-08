@@ -44,7 +44,12 @@ class TagsFiltersList extends StatelessWidget {
         children: [
           SettingsTextInput(
             controller: tagSearchController,
-            title: 'Search filters (${isSearchActive ? '$filteredCount/$originalCount' : '$originalCount'})',
+            title: isSearchActive
+                ? context.loc.settings.tagsFilters.searchFiltersFilteredCount(
+                    filtered: filteredCount,
+                    total: originalCount,
+                  )
+                : context.loc.settings.tagsFilters.searchFiltersCount(count: originalCount),
             floatingLabelBehavior: FloatingLabelBehavior.always,
             clearable: true,
             pasteable: true,
@@ -54,7 +59,9 @@ class TagsFiltersList extends StatelessWidget {
           //
           if (filteredTagsList.isEmpty)
             SettingsButton(
-              name: 'No filters ${isSearchActive ? 'found' : 'added'}',
+              name: isSearchActive
+                  ? context.loc.settings.tagsFilters.noFiltersFound
+                  : context.loc.settings.tagsFilters.noFiltersAdded,
               action: () {
                 if (!isSearchActive) {
                   openAddDialog();

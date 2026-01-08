@@ -116,22 +116,23 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
       bool htmlSubtitle = false;
       if (isLastPage) {
         if (isEmpty) {
-          title = 'No results';
-          subtitle = 'Try changing your search query or tap here to retry';
+          title = context.loc.preview.error.noResults;
+          subtitle = context.loc.preview.error.noResultsSubtitle;
         } else {
-          title = 'You reached the end';
-          subtitle = 'Loaded $pageNum pages\nTap here to reload last page';
+          title = context.loc.preview.error.reachedEnd;
+          subtitle = context.loc.preview.error.reachedEndSubtitle(pageNum: pageNum);
         }
       } else {
         if (isLoading) {
           final int nowMils = DateTime.now().millisecondsSinceEpoch;
           final int sinceStart = _startedAt == 0 ? 0 : Duration(milliseconds: nowMils - _startedAt).inSeconds;
           final bool isTakingTooLong = sinceStart > 5;
+          final String secondsPlural = Tools.pluralize('second', sinceStart);
           final String sinceStartText = sinceStart > 0
-              ? 'Started $sinceStart ${Tools.pluralize('second', sinceStart)} ago${isTakingTooLong ? '\nTap here to retry if search is taking too long or seems stuck' : ''}'
+              ? '${context.loc.preview.error.startedAgo(seconds: sinceStart, secondsPlural: secondsPlural)}${isTakingTooLong ? '\n${context.loc.preview.error.tapToRetryIfStuck}' : ''}'
               : '';
 
-          title = 'Loading page #$pageNum...';
+          title = context.loc.preview.error.loadingPage(pageNum: pageNum);
           subtitle = sinceStartText;
           showSubtitle = sinceStartText.isNotEmpty;
           icon = const RepaintBoundary(
@@ -143,13 +144,13 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           );
           onTap = restartTimerRetrySearch;
         } else if (hasError) {
-          final String errorFormatted = '\n${searchHandler.errorString}\nTap here to retry';
-          title = 'Error when loading page #$pageNum';
+          final String errorFormatted = '\n${searchHandler.errorString}\n${context.loc.preview.error.errorWithMessage}';
+          title = context.loc.preview.error.errorLoadingPage(pageNum: pageNum);
           subtitle = errorFormatted;
           htmlSubtitle = true;
         } else if (isEmpty) {
-          title = 'Error, no results loaded';
-          subtitle = 'Tap here to retry';
+          title = context.loc.preview.error.errorNoResultsLoaded;
+          subtitle = context.loc.preview.error.tapToRetry;
         } else {
           // return const SizedBox.shrink();
 

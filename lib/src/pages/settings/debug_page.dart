@@ -74,7 +74,7 @@ class _DebugPageState extends State<DebugPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Debug'),
+          title: Text(context.loc.settings.debug.title),
         ),
         body: Center(
           child: ListView(
@@ -86,7 +86,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showPerf.value = newValue;
                   });
                 },
-                title: 'Show Performance graph',
+                title: context.loc.settings.debug.showPerformanceGraph,
               ),
               SettingsToggle(
                 value: settingsHandler.showFps.value,
@@ -95,7 +95,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showFps.value = newValue;
                   });
                 },
-                title: 'Show FPS graph',
+                title: context.loc.settings.debug.showFPSGraph,
               ),
               SettingsToggle(
                 value: settingsHandler.showImageStats.value,
@@ -104,7 +104,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showImageStats.value = newValue;
                   });
                 },
-                title: 'Show Image Stats',
+                title: context.loc.settings.debug.showImageStats,
               ),
               SettingsToggle(
                 value: settingsHandler.showVideoStats.value,
@@ -113,7 +113,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showVideoStats.value = newValue;
                   });
                 },
-                title: 'Show Video Stats',
+                title: context.loc.settings.debug.showVideoStats,
               ),
               if (kDebugMode)
                 SettingsToggle(
@@ -124,7 +124,7 @@ class _DebugPageState extends State<DebugPage> {
                       ViewerHandler.instance.videoAutoMute = newValue;
                     });
                   },
-                  title: 'Blur images + mute videos [DEV only]',
+                  title: context.loc.settings.debug.blurImagesAndMuteVideosDevOnly,
                 ),
               if (SettingsHandler.isDesktopPlatform)
                 SettingsToggle(
@@ -134,11 +134,11 @@ class _DebugPageState extends State<DebugPage> {
                       settingsHandler.desktopListsDrag = newValue;
                     });
                   },
-                  title: 'Enable drag scroll on lists [Desktop only]',
+                  title: context.loc.settings.debug.enableDragScrollOnListsDesktopOnly,
                 ),
 
               SettingsButton(
-                name: 'Animation speed ($timeDilation)',
+                name: context.loc.settings.debug.animationSpeed(speed: timeDilation),
                 icon: const Icon(Icons.timelapse),
                 action: () {
                   const List<double> speeds = [0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20];
@@ -153,7 +153,7 @@ class _DebugPageState extends State<DebugPage> {
               ),
 
               SettingsButton(
-                name: 'Tags Manager',
+                name: context.loc.settings.debug.tagsManager,
                 icon: const Icon(CupertinoIcons.tag),
                 action: () {
                   showTagsManager(context);
@@ -161,14 +161,14 @@ class _DebugPageState extends State<DebugPage> {
               ),
 
               if (kDebugMode && (Platform.isAndroid || Platform.isIOS)) ...[
-                const SettingsButton(name: 'Vibration', enabled: false),
+                SettingsButton(name: context.loc.settings.debug.vibration, enabled: false),
                 Column(
                   children: [
-                    const SettingsButton(
-                      name: 'Vibration tests',
+                    SettingsButton(
+                      name: context.loc.settings.debug.vibrationTests,
                     ),
                     SettingsButton(
-                      name: 'Duration',
+                      name: context.loc.settings.debug.duration,
                       subtitle: Row(
                         children: [
                           ElevatedButton(

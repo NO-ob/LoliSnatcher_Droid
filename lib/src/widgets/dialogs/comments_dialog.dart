@@ -91,28 +91,28 @@ class _CommentsDialogState extends State<CommentsDialog> {
             child: Padding(padding: EdgeInsets.fromLTRB(18, 50, 18, 18), child: CircularProgressIndicator()),
           )
         else if (notSupported)
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(18, 50, 18, 18),
-              child: Text("This Booru doesn't have comments or there is no API for them"),
+              padding: const EdgeInsets.fromLTRB(18, 50, 18, 18),
+              child: Text(context.loc.comments.noBooruAPIForComments),
             ),
           )
         else if (comments.isEmpty)
-          const Center(
+          Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(height: 50),
-                Kaomoji(
+                const SizedBox(height: 50),
+                const Kaomoji(
                   type: KaomojiType.shrug,
                   style: TextStyle(fontSize: 40),
                 ),
                 Text(
-                  'No comments',
-                  style: TextStyle(fontSize: 20),
+                  context.loc.comments.noComments,
+                  style: const TextStyle(fontSize: 20),
                 ),
-                SizedBox(height: 50),
+                const SizedBox(height: 50),
               ],
             ),
           ),
@@ -144,7 +144,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Comments'),
+          Text(context.loc.comments.title),
           if (comments.isNotEmpty)
             Text(
               '${comments.length}',
@@ -391,8 +391,8 @@ class _CommentEntry extends StatelessWidget {
                       );
                       if (!res) {
                         FlashElements.showSnackbar(
-                          title: const Text('Error'),
-                          content: const Text('Failed to open link'),
+                          title: Text(context.loc.error),
+                          content: Text(context.loc.comments.failedToOpenLink),
                         );
                       }
                     },

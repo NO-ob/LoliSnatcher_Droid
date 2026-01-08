@@ -16,7 +16,7 @@ class _InitHomePageState extends State<InitHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LoliSnatcher'),
+        title: Text(context.loc.appName),
         leading: const Icon(null),
       ),
       body: Center(

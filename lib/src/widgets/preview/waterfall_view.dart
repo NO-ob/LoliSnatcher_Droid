@@ -309,12 +309,12 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
     }
   }
 
-  Future<void> onSecondaryTap(int index) async {
+  Future<void> onSecondaryTap(int index, BuildContext context) async {
     final BooruItem item = searchHandler.currentFetched[index];
     await Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
     FlashElements.showSnackbar(
       duration: const Duration(seconds: 2),
-      title: const Text('Copied File URL to clipboard!', style: TextStyle(fontSize: 20)),
+      title: Text(context.loc.mediaPreviews.copiedFileURL, style: const TextStyle(fontSize: 20)),
       content: Text(Uri.encodeFull(item.fileURL), style: const TextStyle(fontSize: 16)),
       leadingIcon: Icons.copy,
       sideColor: Colors.green,
@@ -431,7 +431,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                         onTap: onTap,
                                         onDoubleTap: onDoubleTap,
                                         onLongPress: onLongPress,
-                                        onSecondaryTap: onSecondaryTap,
+                                        onSecondaryTap: (i) => onSecondaryTap(i, context),
                                         onSelected: onLongPress,
                                       ),
                                     );
@@ -445,7 +445,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                       onTap: onTap,
                                       onDoubleTap: onDoubleTap,
                                       onLongPress: onLongPress,
-                                      onSecondaryTap: onSecondaryTap,
+                                      onSecondaryTap: (i) => onSecondaryTap(i, context),
                                       onSelected: onLongPress,
                                     ),
                                   );

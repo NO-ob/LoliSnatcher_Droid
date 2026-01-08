@@ -90,12 +90,15 @@ class _PrivacyPageState extends State<PrivacyPage> {
                         validator: (String? value) {
                           final double? parse = double.tryParse(value ?? '');
                           if (value == null || value.isEmpty) {
-                            return 'Please enter a value';
+                            return context.loc.validationErrors.required;
                           } else if (parse == null) {
-                            return 'Please enter a valid numeric value';
+                            return context.loc.validationErrors.invalidNumericValue;
                           } else if (parse < settingsHandler.map['autoLockTimeout']!['lowerLimit']! ||
                               parse > settingsHandler.map['autoLockTimeout']!['upperLimit']!) {
-                            return 'Please enter a value between ${settingsHandler.map['autoLockTimeout']!['lowerLimit']!} and ${settingsHandler.map['autoLockTimeout']!['upperLimit']!}';
+                            return context.loc.validationErrors.rangeError(
+                              min: settingsHandler.map['autoLockTimeout']!['lowerLimit']!,
+                              max: settingsHandler.map['autoLockTimeout']!['upperLimit']!,
+                            );
                           } else {
                             return null;
                           }

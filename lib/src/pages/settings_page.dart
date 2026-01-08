@@ -118,7 +118,7 @@ class SettingsPage extends StatelessWidget {
                 page: () => const SaveCachePage(),
               ),
               SettingsButton(
-                name: context.loc.settings.tagFilters.title,
+                name: context.loc.settings.tagsFilters.title,
                 icon: const Icon(CupertinoIcons.tag),
                 page: () => const TagsFiltersPage(),
               ),

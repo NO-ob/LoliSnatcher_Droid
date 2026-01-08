@@ -67,17 +67,17 @@ class _MediaPreviewsState extends State<MediaPreviews> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  const SettingsButton(
-                    name: 'No Booru Configs Found',
-                    icon: Icon(null),
+                  SettingsButton(
+                    name: context.loc.mediaPreviews.noBooruConfigsFound,
+                    icon: const Icon(null),
                   ),
                   SettingsButton(
-                    name: 'Add new Booru',
+                    name: context.loc.mediaPreviews.addNewBooru,
                     icon: const Icon(Icons.settings),
                     page: () => BooruEdit(Booru('New', null, '', '', '')),
                   ),
                   SettingsButton(
-                    name: 'Help',
+                    name: context.loc.mediaPreviews.help,
                     icon: const Icon(Icons.help_center_outlined),
                     action: () {
                       launchUrlString(
@@ -88,7 +88,7 @@ class _MediaPreviewsState extends State<MediaPreviews> {
                     trailingIcon: const Icon(Icons.exit_to_app),
                   ),
                   SettingsButton(
-                    name: 'Settings',
+                    name: context.loc.mediaPreviews.settings,
                     icon: const Icon(Icons.settings),
                     page: () => const SettingsPage(),
                   ),
@@ -113,7 +113,7 @@ class _MediaPreviewsState extends State<MediaPreviews> {
 
                               return child!;
                             },
-                            child: const Text('Restoring previous session...'),
+                            child: Text(context.loc.mediaPreviews.restoringPreviousSession),
                           ),
                         ],
                       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/clear_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -69,16 +70,16 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
   @override
   Widget build(BuildContext context) {
     return SettingsBottomSheet(
-      title: const Text(
-        'Tab Filters',
-        style: TextStyle(fontSize: 20),
+      title: Text(
+        context.loc.tabs.filters.title,
+        style: const TextStyle(fontSize: 20),
       ),
       titlePadding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       contentPadding: EdgeInsets.zero,
       buttonPadding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
       contentItems: [
         SettingsBooruDropdown(
-          title: 'Booru',
+          title: context.loc.booru,
           value: booruFilter,
           drawBottomBorder: false,
           nullable: true,
@@ -96,7 +97,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
           },
         ),
         SettingsDropdown<bool?>(
-          title: 'Loaded',
+          title: context.loc.tabs.filters.loaded,
           value: loadedFilter,
           drawBottomBorder: false,
           onChanged: (bool? newValue) {
@@ -108,11 +109,11 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             true,
             false,
           ],
-          itemBuilder: (item) => item == null ? const Text('All') : Text(item ? 'Loaded' : 'Not loaded'),
-          itemTitleBuilder: (item) => item == null ? 'All' : (item ? 'Loaded' : 'Not loaded'),
+          itemBuilder: (item) => item == null ? Text(context.loc.tabs.filters.all) : Text(item ? context.loc.tabs.filters.loaded : context.loc.tabs.filters.notLoaded),
+          itemTitleBuilder: (item) => item == null ? context.loc.tabs.filters.all : (item ? context.loc.tabs.filters.loaded : context.loc.tabs.filters.notLoaded),
         ),
         SettingsDropdown<TagType?>(
-          title: 'Tag Type',
+          title: context.loc.tabs.filters.tagType,
           value: tagTypeFilter,
           drawBottomBorder: false,
           onChanged: (TagType? newValue) {
@@ -125,10 +126,10 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
               showDialog(
                 context: context,
                 builder: (context) {
-                  return const SettingsDialog(
-                    title: Text('Tag Type Filter'),
+                  return SettingsDialog(
+                    title: Text(context.loc.tabs.filters.tagType),
                     contentItems: [
-                      Text('Filter tabs which contain at least one tag of selected type'),
+                      Text(context.loc.tabs.filters.tagTypeFilterHelp),
                     ],
                   );
                 },
@@ -145,7 +146,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
           ),
         ),
         SettingsDropdown<bool?>(
-          title: 'Multibooru',
+          title: context.loc.tabs.filters.multibooru,
           value: isMultiBooruMode,
           drawBottomBorder: false,
           onChanged: (bool? newValue) {
@@ -157,12 +158,12 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             true,
             false,
           ],
-          itemBuilder: (item) => item == null ? const Text('All') : Text(item ? 'Enabled' : 'Disabled'),
-          itemTitleBuilder: (item) => item == null ? 'All' : (item ? 'Enabled' : 'Disabled'),
+          itemBuilder: (item) => item == null ? Text(context.loc.tabs.filters.all) : Text(item ? context.loc.tabs.filters.enabled : context.loc.tabs.filters.disabled),
+          itemTitleBuilder: (item) => item == null ? context.loc.tabs.filters.all : (item ? context.loc.tabs.filters.enabled : context.loc.tabs.filters.disabled),
         ),
         SettingsToggle(
-          title: 'Duplicates',
-          subtitle: duplicateFilter ? const Text('Will also enable sorting') : null,
+          title: context.loc.tabs.filters.duplicates,
+          subtitle: duplicateFilter ? Text(context.loc.tabs.filters.willAlsoEnableSorting) : null,
           value: duplicateFilter,
           onChanged: (bool newValue) {
             duplicateFilter = newValue;
@@ -182,7 +183,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
                     ),
                     Expanded(
                       child: SettingsToggle(
-                        title: 'Check for duplicates on same Booru',
+                        title: context.loc.tabs.filters.checkDuplicatesOnSameBooru,
                         value: duplicateBooruFilter,
                         onChanged: (bool newValue) {
                           duplicateBooruFilter = newValue;
@@ -196,7 +197,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
               : const SizedBox.shrink(),
         ),
         SettingsToggle(
-          title: 'Empty search query',
+          title: context.loc.tabs.filters.emptySearchQuery,
           value: emptyFilter,
           onChanged: (bool newValue) {
             emptyFilter = newValue;
@@ -209,7 +210,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
         const ClearButton(withIcon: true),
         const SizedBox(width: 10),
         ElevatedButton.icon(
-          label: const Text('Apply'),
+          label: Text(context.loc.tabs.filters.apply),
           icon: const Icon(Icons.check),
           onPressed: () {
             widget.loadedFilterChanged(loadedFilter);
@@ -272,7 +273,7 @@ class _TagTypeDropdownItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String title = item == null ? 'Any' : item!.locName;
+    String title = item == null ? context.loc.tabs.filters.any : item!.locName;
 
     final bool showColor = item == null ? false : !item!.isNone;
 

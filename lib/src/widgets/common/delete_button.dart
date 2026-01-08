@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/gen/strings.g.dart';
+
 class DeleteButton extends StatelessWidget {
   const DeleteButton({
-    this.text = 'Delete',
+    this.text,
     this.action,
     this.returnData,
     this.withIcon = false,
@@ -10,7 +12,7 @@ class DeleteButton extends StatelessWidget {
     super.key,
   });
 
-  final String text;
+  final String? text;
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
@@ -37,7 +39,7 @@ class DeleteButton extends StatelessWidget {
           }
         },
         icon: Icon(withIcon ? (customIcon ?? Icons.delete_forever) : null),
-        label: Text(text),
+        label: Text(text ?? context.loc.delete),
       );
     }
 
@@ -55,7 +57,7 @@ class DeleteButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(text),
+      child: Text(text ?? context.loc.delete),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/loli_sync_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class LoliSyncProgressPage extends StatefulWidget {
@@ -114,23 +115,23 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
       context: context,
       builder: (context) {
         return SettingsDialog(
-          title: const Text('Are you sure?'),
+          title: Text(context.loc.loliSync.areYouSure),
           contentItems: [
             Text(
-              widget.type == 'sender' ? 'Do you want to stop syncing?' : 'Do you want to stop the server?',
+              widget.type == 'sender' ? context.loc.loliSync.stopSyncingQuestion : context.loc.loliSync.stopServerQuestion,
             ),
           ],
           actionButtons: [
             ElevatedButton.icon(
               icon: const Icon(Icons.cancel),
-              label: const Text('No'),
+              label: Text(context.loc.no),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
             ),
             ElevatedButton.icon(
               icon: const Icon(Icons.exit_to_app),
-              label: const Text('Yes'),
+              label: Text(context.loc.yes),
               onPressed: () {
                 if (widget.type == 'sender') {
                   loliSync.killSync();
@@ -171,7 +172,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('LoliSync'),
+          title: Text(context.loc.loliSync.title),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -187,17 +188,17 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
             builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
               String status = '';
               if (snapshot.hasError) {
-                status = 'Error ${snapshot.error}';
+                status = '${context.loc.error} ${snapshot.error}';
               } else {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
-                    status = 'No connection';
+                    status = context.loc.loliSync.noConnection;
                     break;
                   case ConnectionState.waiting:
                     if (widget.type == 'sender') {
-                      status = 'Waiting for connection...';
+                      status = context.loc.loliSync.waitingForConnection;
                     } else {
-                      status = 'Starting server...';
+                      status = context.loc.loliSync.startingServer;
                     }
                     break;
                   case ConnectionState.active:
@@ -216,7 +217,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
                     const SizedBox(height: 10),
                     if (Platform.isAndroid || Platform.isIOS)
                       SettingsToggle(
-                        title: 'Keep the screen awake',
+                        title: context.loc.loliSync.keepScreenAwake,
                         value: wakelocked,
                         onChanged: (bool newValue) {
                           toggleWakelock();

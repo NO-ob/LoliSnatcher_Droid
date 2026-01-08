@@ -326,7 +326,7 @@ class _TagViewState extends State<TagView> {
 
   Widget tagsButton() {
     return SettingsButton(
-      name: 'Tags',
+      name: context.loc.tagView.tags,
       subtitle: Text(searchController.text.isEmpty ? '${tags.length}' : '${filteredTags.length} / ${tags.length}'),
       trailingIcon: LayoutBuilder(
         builder: (context, constraints) {
@@ -437,7 +437,7 @@ class _TagViewState extends State<TagView> {
     }
 
     return SettingsButton(
-      name: 'Comments',
+      name: context.loc.tagView.comments,
       icon: Icon(
         icon,
         color: Theme.of(context).iconTheme.color,
@@ -466,7 +466,9 @@ class _TagViewState extends State<TagView> {
     return Obx(() {
       if (item.notes.isNotEmpty) {
         return SettingsButton(
-          name: '${viewerHandler.showNotes.value ? 'Hide' : 'Show'} Notes (${item.notes.length})',
+          name: viewerHandler.showNotes.value
+              ? context.loc.tagView.hideNotes(count: item.notes.length)
+              : context.loc.tagView.showNotes(count: item.notes.length),
           icon: Icon(
             Icons.note_add,
             color: Theme.of(context).iconTheme.color,
@@ -482,7 +484,7 @@ class _TagViewState extends State<TagView> {
         );
       } else {
         return SettingsButton(
-          name: 'Load notes',
+          name: context.loc.tagView.loadNotes,
           icon: Icon(
             Icons.note_add,
             color: Theme.of(context).iconTheme.color,
@@ -725,9 +727,9 @@ class _TagViewState extends State<TagView> {
                         FlashElements.showSnackbar(
                           context: context,
                           duration: const Duration(seconds: 2),
-                          title: const Text(
-                            'This tag is already in the current search query:',
-                            style: TextStyle(fontSize: 18),
+                          title: Text(
+                            context.loc.tagView.thisTagAlreadyInSearch,
+                            style: const TextStyle(fontSize: 18),
                           ),
                           content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                           leadingIcon: Icons.warning_amber,
@@ -741,7 +743,7 @@ class _TagViewState extends State<TagView> {
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: const Text('Added to current search query:', style: TextStyle(fontSize: 20)),
+                        title: Text(context.loc.tagView.addedToCurrentSearch, style: const TextStyle(fontSize: 20)),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.add,
                         sideColor: Colors.green,
@@ -776,7 +778,7 @@ class _TagViewState extends State<TagView> {
                         isKeyUnique: true,
                         key: 'added_new_tab',
                         duration: const Duration(seconds: 2),
-                        title: const Text('Added new tab:', style: TextStyle(fontSize: 20)),
+                        title: Text(context.loc.tagView.addedNewTab, style: const TextStyle(fontSize: 20)),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.fiber_new,
                         sideColor: Colors.green,
@@ -887,11 +889,11 @@ class _TagViewState extends State<TagView> {
               delegate: SliverChildListDelegate(
                 [
                   const SizedBox(height: kMinInteractiveDimension),
-                  infoText('ID', itemId),
-                  infoText('Post URL', item.postURL, isLink: true),
-                  infoText('Posted', formattedDate, canCopy: false),
+                  infoText(context.loc.tagView.id, itemId),
+                  infoText(context.loc.tagView.postURL, item.postURL, isLink: true),
+                  infoText(context.loc.tagView.posted, formattedDate, canCopy: false),
                   ExpansionTile(
-                    title: const Text('Details'),
+                    title: Text(context.loc.tagView.details),
                     initiallyExpanded: detailsExpanded ?? settingsHandler.expandDetails,
                     onExpansionChanged: (expanded) {
                       setState(() {
@@ -903,14 +905,14 @@ class _TagViewState extends State<TagView> {
                     shape: const Border(),
                     collapsedShape: const Border(),
                     children: [
-                      if (settingsHandler.isDebug.value) infoText('Filename', fileName),
-                      infoText('URL', fileUrl, isLink: true),
-                      infoText('Extension', fileExt),
-                      infoText('Resolution', fileRes),
-                      infoText('Size', fileSize),
-                      infoText('MD5', md5),
-                      infoText('Rating', rating),
-                      infoText('Score', score),
+                      if (settingsHandler.isDebug.value) infoText(context.loc.tagView.filename, fileName),
+                      infoText(context.loc.tagView.url, fileUrl, isLink: true),
+                      infoText(context.loc.tagView.extension, fileExt),
+                      infoText(context.loc.tagView.resolution, fileRes),
+                      infoText(context.loc.tagView.size, fileSize),
+                      infoText(context.loc.tagView.md5, md5),
+                      infoText(context.loc.tagView.rating, rating),
+                      infoText(context.loc.tagView.score, score),
                     ],
                   ),
                   commentsButton(),
@@ -947,7 +949,7 @@ class _TagViewState extends State<TagView> {
                           key: searchKey,
                           controller: searchController,
                           focusNode: searchFocusNode,
-                          title: 'Search tags',
+                          title: context.loc.tagView.searchTags,
                           onlyInput: true,
                           clearable: true,
                           pasteable: true,
@@ -964,17 +966,17 @@ class _TagViewState extends State<TagView> {
             ),
             SliverToBoxAdapter(
               child: (filteredTags.isEmpty && tags.isNotEmpty)
-                  ? const Column(
+                  ? Column(
                       children: [
-                        Kaomoji(
+                        const Kaomoji(
                           type: KaomojiType.shrug,
                           style: TextStyle(fontSize: 40),
                         ),
                         Text(
-                          'No tags found',
-                          style: TextStyle(fontSize: 20),
+                          context.loc.tagView.noTagsFound,
+                          style: const TextStyle(fontSize: 20),
                         ),
-                        SizedBox(height: 60),
+                        const SizedBox(height: 60),
                       ],
                     )
                   : const SizedBox.shrink(),
@@ -1132,15 +1134,15 @@ Future<void> showTagDialog({
               Icons.copy,
               color: Theme.of(context).iconTheme.color,
             ),
-            title: const Text('Copy'),
+            title: Text(context.loc.tagView.copy),
             onTap: () {
               Clipboard.setData(ClipboardData(text: tag));
               FlashElements.showSnackbar(
                 context: context,
                 duration: const Duration(seconds: 2),
-                title: const Text(
-                  'Copied to clipboard!',
-                  style: TextStyle(fontSize: 20),
+                title: Text(
+                  context.loc.tagView.copiedToClipboard,
+                  style: const TextStyle(fontSize: 20),
                 ),
                 content: Text(
                   tag,
@@ -1159,7 +1161,7 @@ Future<void> showTagDialog({
                 Icons.remove,
                 color: Theme.of(context).iconTheme.color,
               ),
-              title: const Text('Remove from Search'),
+              title: Text(context.loc.tagView.removeFromSearch),
               onTap: () {
                 searchHandler.removeTagFromSearch(tag);
                 Navigator.of(context).pop();
@@ -1168,16 +1170,16 @@ Future<void> showTagDialog({
           else ...[
             ListTile(
               leading: const Icon(Icons.add, color: Colors.green),
-              title: const Text('Add to Search'),
+              title: Text(context.loc.tagView.addToSearch),
               onTap: () {
                 searchHandler.addTagToSearch(tag);
 
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
-                  title: const Text(
-                    'Added to search bar:',
-                    style: TextStyle(fontSize: 20),
+                  title: Text(
+                    context.loc.tagView.addedToSearchBar,
+                    style: const TextStyle(fontSize: 20),
                   ),
                   content: Text(
                     tag,
@@ -1192,16 +1194,16 @@ Future<void> showTagDialog({
             ),
             ListTile(
               leading: const Icon(Icons.add, color: Colors.red),
-              title: const Text('Add to Search (Exclude)'),
+              title: Text(context.loc.tagView.addToSearchExclude),
               onTap: () {
                 searchHandler.addTagToSearch('-$tag');
 
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
-                  title: const Text(
-                    'Added to search bar (Exclude):',
-                    style: TextStyle(fontSize: 20),
+                  title: Text(
+                    context.loc.tagView.addedToSearchBarExclude,
+                    style: const TextStyle(fontSize: 20),
                   ),
                   content: Text(
                     tag,
@@ -1219,7 +1221,7 @@ Future<void> showTagDialog({
           if (!isHated && !isLoved)
             ListTile(
               leading: const Icon(Icons.star, color: Colors.yellow),
-              title: const Text('Add to Loved'),
+              title: Text(context.loc.tagView.addToLoved),
               onTap: () {
                 settingsHandler.addTagToList('loved', tag);
                 searchHandler.filterCurrentFetched();
@@ -1231,7 +1233,7 @@ Future<void> showTagDialog({
           if (!isHated && !isLoved)
             ListTile(
               leading: const Icon(CupertinoIcons.eye_slash, color: Colors.red),
-              title: const Text('Add to Hated'),
+              title: Text(context.loc.tagView.addToHated),
               onTap: () {
                 settingsHandler.addTagToList('hated', tag);
                 searchHandler.filterCurrentFetched();
@@ -1246,7 +1248,7 @@ Future<void> showTagDialog({
                 Icons.star_border,
                 color: Theme.of(context).iconTheme.color,
               ),
-              title: const Text('Remove from Loved'),
+              title: Text(context.loc.tagView.removeFromLoved),
               onTap: () {
                 settingsHandler.removeTagFromList('loved', tag);
                 onUpdate();
@@ -1259,7 +1261,7 @@ Future<void> showTagDialog({
                 CupertinoIcons.eye_slash,
                 color: Theme.of(context).iconTheme.color,
               ),
-              title: const Text('Remove from Hated'),
+              title: Text(context.loc.tagView.removeFromHated),
               onTap: () {
                 settingsHandler.removeTagFromList('hated', tag);
                 onUpdate();
@@ -1271,7 +1273,7 @@ Future<void> showTagDialog({
               Icons.edit,
               color: Theme.of(context).iconTheme.color,
             ),
-            title: const Text('Edit Tag'),
+            title: Text(context.loc.tagView.editTag),
             onTap: () async {
               Navigator.of(context).pop();
               final item = tagHandler.getTag(tag);
@@ -1297,7 +1299,7 @@ Future<void> showTagDialog({
               Icons.cancel_outlined,
               color: Theme.of(context).iconTheme.color,
             ),
-            title: const Text('Close'),
+            title: Text(context.loc.tagView.close),
             onTap: () {
               Navigator.of(context).pop();
             },
@@ -1337,7 +1339,9 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
       context: context,
       duration: const Duration(seconds: 2),
       title: Text(
-        'Copied ${hasSelected ? 'selected text' : 'source'} to clipboard!',
+        context.loc.tagView.copiedSelected(
+          type: hasSelected ? context.loc.tagView.selectedText : context.loc.tagView.source,
+        ),
         style: const TextStyle(fontSize: 20),
       ),
       content: Text(link, style: const TextStyle(fontSize: 16)),
@@ -1361,9 +1365,9 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
       FlashElements.showSnackbar(
         context: context,
         duration: const Duration(seconds: 2),
-        title: const Text(
-          'Failed to open link!',
-          style: TextStyle(fontSize: 20),
+        title: Text(
+          context.loc.tagView.failedToOpenLink,
+          style: const TextStyle(fontSize: 20),
         ),
         content: Text(link, style: const TextStyle(fontSize: 16)),
       );
@@ -1373,25 +1377,25 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Source'),
+      title: Text(context.loc.tagView.sourceDialogTitle),
       scrollable: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (widget.fromError)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 24),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 24),
               child: Text(
-                "The text in source field can't be opened as a link, either because it's not a link or there are multiple URLs in a single string.",
-                style: TextStyle(
+                context.loc.tagView.sourceDialogText1,
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
-          const Text(
-            'You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:',
+          Text(
+            context.loc.tagView.sourceDialogText2,
           ),
           const SizedBox(height: 16),
           SelectableLinkify(
@@ -1451,7 +1455,7 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
                     if (selectedText.isNotEmpty)
                       Expanded(child: Text(selectedText))
                     else
-                      const Text('[No text selected]'),
+                      Text(context.loc.tagView.noTextSelected),
                   ],
                 ),
               ),
@@ -1464,16 +1468,20 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
       actions: [
         ElevatedButton.icon(
           onPressed: copy,
-          label: Text('Copy ${hasSelected ? 'selected' : 'all'}'.trim()),
+          label: Text(
+            context.loc.tagView.copySelected(
+              type: hasSelected ? context.loc.tagView.selected : context.loc.tagView.all,
+            ),
+          ),
           icon: const Icon(Icons.copy),
         ),
         ElevatedButton.icon(
           onPressed: open,
-          label: Text('Open ${hasSelected ? 'selected' : ''}'.trim()),
+          label: Text(context.loc.tagView.openSelected(type: hasSelected ? context.loc.tagView.selected : '')),
           icon: const Icon(Icons.open_in_new),
         ),
-        const CancelButton(
-          text: 'Return',
+        CancelButton(
+          text: context.loc.tagView.returnButton,
           withIcon: true,
         ),
       ],
@@ -1651,7 +1659,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
     await Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
     FlashElements.showSnackbar(
       duration: const Duration(seconds: 2),
-      title: const Text('Copied File URL to clipboard!', style: TextStyle(fontSize: 20)),
+      title: Text(context.loc.tagView.copiedFileURL, style: const TextStyle(fontSize: 20)),
       content: Text(Uri.encodeFull(item.fileURL), style: const TextStyle(fontSize: 16)),
       leadingIcon: Icons.copy,
       sideColor: Colors.green,
@@ -1686,7 +1694,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                   Icons.search,
                   color: Theme.of(context).iconTheme.color,
                 ),
-                title: const Text('Preview'),
+                title: Text(context.loc.tagView.preview),
                 trailing: IconButton(
                   icon: const Icon(Icons.list),
                   onPressed: showTagPreviewsListDialog,
@@ -1697,8 +1705,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                         width: context.mediaSize.width,
                         height: kMinInteractiveDimension,
                         child: SettingsBooruDropdown(
-                          title: 'Booru',
-                          placeholder: 'Select a booru to load',
+                          title: context.loc.tagView.booru,
+                          placeholder: context.loc.tagView.selectBooruToLoad,
                           value: selectedBooru,
                           items: isSingleBooru ? settingsHandler.booruList : widget.boorus,
                           contentPadding: EdgeInsets.zero,
@@ -1723,8 +1731,10 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               icon: const Icon(Icons.list),
                               onPressed: showTagPreviewsListDialog,
                             ),
-                      title: loading ? const Text('Preview is loading...') : const Text('Failed to load preview'),
-                      subtitle: errorString.isNotEmpty ? const Text('Tap to try again') : null,
+                      title: loading
+                          ? Text(context.loc.tagView.previewIsLoading)
+                          : Text(context.loc.tagView.failedToLoadPreview),
+                      subtitle: errorString.isNotEmpty ? Text(context.loc.tagView.tapToTryAgain) : null,
                       onTap: errorString.isNotEmpty ? () => loadPreview(refresh: true) : null,
                     )
                   : Column(
@@ -1736,7 +1746,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                             const Icon(Icons.search),
                             const SizedBox(width: 8),
                             Text(
-                              'Preview',
+                              context.loc.tagView.preview,
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             Obx(() {
@@ -1778,7 +1788,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                   isKeyUnique: true,
                                   key: 'added_new_tab',
                                   duration: const Duration(seconds: 2),
-                                  title: const Text('Added new tab:', style: TextStyle(fontSize: 20)),
+                                  title: Text(context.loc.tagView.addedNewTab, style: const TextStyle(fontSize: 20)),
                                   content: Text(widget.tag, style: const TextStyle(fontSize: 16)),
                                   leadingIcon: Icons.fiber_new,
                                   sideColor: Colors.green,
@@ -1832,8 +1842,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                           width: context.mediaSize.width,
                           height: kMinInteractiveDimension,
                           child: SettingsBooruDropdown(
-                            title: 'Booru',
-                            placeholder: 'Select a booru to load',
+                            title: context.loc.tagView.booru,
+                            placeholder: context.loc.tagView.selectBooruToLoad,
                             value: selectedBooru,
                             items: settingsHandler.booruList,
                             contentPadding: EdgeInsets.zero,
@@ -1884,18 +1894,18 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
                                   itemBuilder: (context, index) {
                                     if (tab!.booruHandler.filteredFetched.isEmpty) {
-                                      return const Center(
+                                      return Center(
                                         child: Column(
                                           // mainAxisSize: MainAxisSize.max,
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            Kaomoji(
+                                            const Kaomoji(
                                               type: KaomojiType.shrug,
                                               style: TextStyle(fontSize: 24),
                                             ),
                                             Text(
-                                              'Nothing found',
-                                              style: TextStyle(fontSize: 16),
+                                              context.loc.tagView.nothingFound,
+                                              style: const TextStyle(fontSize: 16),
                                             ),
                                           ],
                                         ),
@@ -1929,15 +1939,15 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                                 Icons.error_outline,
                                                 size: 30,
                                               ),
-                                              const Text(
-                                                'Failed to load preview page',
-                                                style: TextStyle(fontSize: 16),
+                                              Text(
+                                                context.loc.tagView.failedToLoadPreviewPage,
+                                                style: const TextStyle(fontSize: 16),
                                               ),
                                               ElevatedButton(
                                                 onPressed: () {
                                                   loadPreview(retry: true);
                                                 },
-                                                child: const Text('Try again'),
+                                                child: Text(context.loc.tagView.tryAgain),
                                               ),
                                             ],
                                           ),
@@ -2018,7 +2028,7 @@ class _TagPreviewsListDialog extends StatelessWidget {
               const SizedBox(height: 12),
               //
               Text(
-                'Tag previews',
+                context.loc.tagView.tagPreviews,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 12),
@@ -2051,7 +2061,7 @@ class _TagPreviewsListDialog extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Text(
-                              isActive ? 'Current state' : 'History',
+                              isActive ? context.loc.tagView.currentState : context.loc.tagView.history,
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),
@@ -2191,7 +2201,7 @@ class _TagPreviewsListDialog extends StatelessWidget {
                   Icons.cancel_outlined,
                   color: Theme.of(context).iconTheme.color,
                 ),
-                title: const Text('Close'),
+                title: Text(context.loc.tagView.close),
                 onTap: () {
                   Navigator.of(context).pop();
                 },

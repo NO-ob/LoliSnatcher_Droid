@@ -82,7 +82,7 @@ class _NetworkPageState extends State<NetworkPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Network'),
+          title: Text(context.loc.settings.network.title),
         ),
         body: Center(
           child: ListView(
@@ -94,7 +94,7 @@ class _NetworkPageState extends State<NetworkPage> {
                     allowSelfSignedCerts = newValue;
                   });
                 },
-                title: 'Enable self signed SSL certificates',
+                title: context.loc.settings.network.enableSelfSignedSSLCertificates,
               ),
               const SettingsButton(name: '', enabled: false),
               SettingsDropdown<ProxyType>(
@@ -105,14 +105,14 @@ class _NetworkPageState extends State<NetworkPage> {
                     proxyType = newValue ?? ProxyType.direct;
                   });
                 },
-                title: 'Proxy',
-                subtitle: const Text('Does not apply to streaming video mode, use caching video mode instead'),
+                title: context.loc.settings.network.proxy,
+                subtitle: Text(context.loc.settings.network.proxySubtitle),
                 itemBuilder: (item) => Text(item?.name.capitalizeFirst ?? ''),
               ),
               if (!proxyType.isDirect && !proxyType.isSystem) ...[
                 SettingsTextInput(
                   controller: proxyAddressController,
-                  title: 'Address',
+                  title: context.loc.address,
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   resetText: () => '',
                   pasteable: true,
@@ -120,7 +120,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
                 SettingsTextInput(
                   controller: proxyUsernameController,
-                  title: 'Username',
+                  title: context.loc.username,
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   resetText: () => '',
                   pasteable: true,
@@ -128,7 +128,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
                 SettingsTextInput(
                   controller: proxyPasswordController,
-                  title: 'Password',
+                  title: context.loc.password,
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   resetText: () => '',
                   pasteable: true,
@@ -139,7 +139,7 @@ class _NetworkPageState extends State<NetworkPage> {
               const SettingsButton(name: '', enabled: false),
               SettingsTextInput(
                 controller: userAgentController,
-                title: 'Custom user agent',
+                title: context.loc.settings.network.customUserAgent,
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 resetText: () => '',
                 onChanged: (_) => setState(() {}),

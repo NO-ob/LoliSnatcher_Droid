@@ -74,22 +74,22 @@ class _PerformancePageState extends State<PerformancePage> {
           context: context,
           builder: (context) {
             return SettingsDialog(
-              title: const Text('Low performance mode'),
-              contentItems: const [
-                Text('- Disables detailed loading progress information'),
+              title: Text(context.loc.settings.performance.lowPerformanceModeDialogTitle),
+              contentItems: [
+                Text(context.loc.settings.performance.lowPerformanceModeDialogDisablesDetailed),
                 Text(
-                  '- Disables resource-intensive elements (blurs, animated opacity, some animations...)',
+                  context.loc.settings.performance.lowPerformanceModeDialogDisablesResourceIntensive,
                 ),
-                Text(''),
+                const Text(''),
                 Text(
-                  '- Sets optimal settings for these options (you can change them separately later):',
+                  context.loc.settings.performance.lowPerformanceModeDialogSetsOptimal,
                 ),
-                Text('   - Preview quality [Thumbnail]'),
-                Text('   - Image quality [Sample]'),
-                Text('   - Preview columns [2 - portrait, 4 - landscape]'),
-                Text('   - Preload amount and size [0, 0.2]'),
-                Text('   - Video autoplay [false]'),
-                Text("   - Don't scale images [false]"),
+                Text(context.loc.settings.performance.lowPerformanceModeDialogPreviewQuality),
+                Text(context.loc.settings.performance.lowPerformanceModeDialogImageQuality),
+                Text(context.loc.settings.performance.lowPerformanceModeDialogPreviewColumns),
+                Text(context.loc.settings.performance.lowPerformanceModeDialogPreloadAmount),
+                Text(context.loc.settings.performance.lowPerformanceModeDialogVideoAutoplay),
+                Text(context.loc.settings.performance.lowPerformanceModeDialogDontScaleImages),
               ],
               actionButtons: withConfirmation
                   ? [
@@ -97,13 +97,13 @@ class _PerformancePageState extends State<PerformancePage> {
                         style: TextButton.styleFrom(foregroundColor: context.colorScheme.onSurface),
                         onPressed: () => Navigator.of(context).pop(false),
                         icon: const Icon(Icons.cancel_outlined),
-                        label: const Text('Cancel'),
+                        label: Text(context.loc.cancel),
                       ),
                       TextButton.icon(
                         style: TextButton.styleFrom(foregroundColor: context.colorScheme.onSurface),
                         onPressed: () => Navigator.of(context).pop(true),
                         icon: const Icon(Icons.check_circle_outline),
-                        label: const Text('Confirm'),
+                        label: Text(context.loc['confirm']),
                       ),
                     ]
                   : [],
@@ -130,7 +130,7 @@ class _PerformancePageState extends State<PerformancePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Performance'),
+          title: Text(context.loc.settings.performance.title),
         ),
         body: Center(
           child: ListView(
@@ -154,8 +154,8 @@ class _PerformancePageState extends State<PerformancePage> {
                     });
                   }
                 },
-                title: 'Low performance mode',
-                subtitle: const Text('Recommended for old devices and devices with low RAM'),
+                title: context.loc.settings.performance.lowPerformanceMode,
+                subtitle: Text(context.loc.settings.performance.lowPerformanceModeSubtitle),
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () => showLowPerfConfirmDialog(false),
@@ -169,7 +169,7 @@ class _PerformancePageState extends State<PerformancePage> {
                     previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
                   });
                 },
-                title: 'Preview quality',
+                title: context.loc.settings.performance.previewQuality,
               ),
               SettingsOptionsList(
                 value: galleryMode,
@@ -179,11 +179,11 @@ class _PerformancePageState extends State<PerformancePage> {
                     galleryMode = newValue ?? settingsHandler.map['galleryMode']!['default'];
                   });
                 },
-                title: 'Image quality',
+                title: context.loc.settings.performance.imageQuality,
               ),
               SettingsTextInput(
                 controller: columnsPortraitController,
-                title: 'Preview columns (portrait)',
+                title: context.loc.settings.performance.previewColumnsPortrait,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 onChanged: (String? text) {
@@ -197,11 +197,11 @@ class _PerformancePageState extends State<PerformancePage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse > 4 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
-                    return 'Using more than 4 columns can affect performance';
+                    return context.loc.validationErrors.moreThan4ColumnsWarning;
                   } else {
                     return null;
                   }
@@ -209,7 +209,7 @@ class _PerformancePageState extends State<PerformancePage> {
               ),
               SettingsTextInput(
                 controller: columnsLandscapeController,
-                title: 'Preview columns (landscape)',
+                title: context.loc.settings.performance.previewColumnsLandscape,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['landscapeColumns']!['default']!.toString(),
@@ -220,11 +220,11 @@ class _PerformancePageState extends State<PerformancePage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse > 8 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
-                    return 'Using more than 8 columns can affect performance';
+                    return context.loc.validationErrors.moreThan8ColumnsWarning;
                   } else {
                     return null;
                   }
@@ -232,7 +232,7 @@ class _PerformancePageState extends State<PerformancePage> {
               ),
               SettingsTextInput(
                 controller: preloadAmountController,
-                title: 'Preload amount',
+                title: context.loc.settings.performance.preloadAmount,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['preloadCount']!['default']!.toString(),
@@ -243,13 +243,13 @@ class _PerformancePageState extends State<PerformancePage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse < 0) {
-                    return 'Please enter a value equal to or greater than 0';
+                    return context.loc.validationErrors.greaterThanOrEqualZero;
                   } else if (parse > 3) {
-                    return 'Please enter a value less than 4';
+                    return context.loc.validationErrors.lessThan4;
                   } else {
                     return null;
                   }
@@ -257,8 +257,8 @@ class _PerformancePageState extends State<PerformancePage> {
               ),
               SettingsTextInput(
                 controller: preloadSizeController,
-                title: 'Preload size limit',
-                subtitle: const Text('in GB, 0 for no limit'),
+                title: context.loc.settings.performance.preloadSizeLimit,
+                subtitle: Text(context.loc.settings.performance.preloadSizeLimitSubtitle),
                 inputType: TextInputType.number,
                 resetText: () => settingsHandler.map['preloadSizeLimit']!['default']!.toString(),
                 numberButtons: true,
@@ -268,12 +268,15 @@ class _PerformancePageState extends State<PerformancePage> {
                 validator: (String? value) {
                   final double? parse = double.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse < settingsHandler.map['preloadSizeLimit']!['lowerLimit']! ||
                       parse > settingsHandler.map['preloadSizeLimit']!['upperLimit']!) {
-                    return 'Please enter a value between ${settingsHandler.map['preloadSizeLimit']!['lowerLimit']!} and ${settingsHandler.map['preloadSizeLimit']!['upperLimit']!}';
+                    return context.loc.validationErrors.rangeError(
+                      min: settingsHandler.map['preloadSizeLimit']!['lowerLimit']!,
+                      max: settingsHandler.map['preloadSizeLimit']!['upperLimit']!,
+                    );
                   } else {
                     return null;
                   }
@@ -286,20 +289,20 @@ class _PerformancePageState extends State<PerformancePage> {
                     final res = await showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return const SettingsDialog(
-                          title: Text('Warning'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.performance.dontScaleImagesWarningTitle),
                           contentItems: [
                             Text(
-                              'Are you sure you want to disable image scaling?',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              context.loc.settings.performance.dontScaleImagesWarningMsg,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
-                              'This can negatively impact the performance, especially on older devices',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              context.loc.settings.performance.dontScaleImagesWarningPerformance,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],
-                          actionButtons: [
+                          actionButtons: const [
                             CancelButton(withIcon: true),
                             ConfirmButton(withIcon: true),
                           ],
@@ -316,9 +319,9 @@ class _PerformancePageState extends State<PerformancePage> {
                     settingsHandler.disableImageScaling = newValue;
                   });
                 },
-                title: "Don't scale images",
+                title: context.loc.settings.performance.dontScaleImages,
                 leadingIcon: const Icon(Icons.close_fullscreen),
-                subtitle: const Text('Disables image scaling which is used to improve performance'),
+                subtitle: Text(context.loc.settings.performance.dontScaleImagesSubtitle),
               ),
               SettingsToggle(
                 value: autoPlayEnabled,
@@ -327,7 +330,7 @@ class _PerformancePageState extends State<PerformancePage> {
                     autoPlayEnabled = newValue;
                   });
                 },
-                title: 'Autoplay videos',
+                title: context.loc.settings.performance.autoplayVideos,
               ),
               SettingsToggle(
                 value: disableVideo,
@@ -336,18 +339,18 @@ class _PerformancePageState extends State<PerformancePage> {
                     disableVideo = newValue;
                   });
                 },
-                title: 'Disable videos',
+                title: context.loc.settings.performance.disableVideos,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Disable videos'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.performance.disableVideos),
                           contentItems: [
                             Text(
-                              'Useful on low end devices that crash when trying to load videos. Gives options to view video in external player or browser instead.',
+                              context.loc.settings.performance.disableVideosHelp,
                             ),
                           ],
                         );

@@ -1376,14 +1376,14 @@ enum TabAddMode {
   next,
   end;
 
-  String get locName {
+  String locName(BuildContext context) {
     switch (this) {
       case prev:
-        return 'Prev tab';
+        return context.loc.tabs.addModePrevTab;
       case next:
-        return 'Next tab';
+        return context.loc.tabs.addModeNextTab;
       case end:
-        return 'List end';
+        return context.loc.tabs.addModeListEnd;
     }
   }
 }

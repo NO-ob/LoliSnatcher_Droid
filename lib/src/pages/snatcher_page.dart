@@ -50,7 +50,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Snatcher'),
+        title: Text(context.loc.snatcher.title),
       ),
       resizeToAvoidBottomInset: true,
       body: Center(
@@ -58,8 +58,8 @@ class _SnatcherPageState extends State<SnatcherPage> {
           children: [
             SettingsTextInput(
               controller: snatcherTagsController,
-              title: 'Tags',
-              hintText: 'Enter Tags',
+              title: context.loc.tags,
+              hintText: context.loc.snatcher.enterTags,
               inputType: TextInputType.text,
               clearable: true,
               pasteable: true,
@@ -67,8 +67,8 @@ class _SnatcherPageState extends State<SnatcherPage> {
             ),
             SettingsTextInput(
               controller: snatcherAmountController,
-              title: 'Amount',
-              hintText: 'Amount of Files to Snatch',
+              title: context.loc.snatcher.amount,
+              hintText: context.loc.snatcher.amountOfFilesToSnatch,
               inputType: TextInputType.number,
               inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
               resetText: () => 10.toString(),
@@ -79,8 +79,8 @@ class _SnatcherPageState extends State<SnatcherPage> {
             ),
             SettingsTextInput(
               controller: snatcherSleepController,
-              title: 'Delay (in ms)',
-              hintText: 'Delay between each download',
+              title: context.loc.snatcher.delayInMs,
+              hintText: context.loc.snatcher.delayBetweenEachDownload,
               inputType: TextInputType.number,
               inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
               resetText: () => settingsHandler.snatchCooldown.toString(),
@@ -96,11 +96,11 @@ class _SnatcherPageState extends State<SnatcherPage> {
                   selectedBooru = newValue!;
                 });
               },
-              title: 'Booru',
+              title: context.loc.booru,
             ),
             const SettingsButton(name: '', enabled: false),
             SettingsButton(
-              name: 'Snatch Files',
+              name: context.loc.snatcher.snatchFiles,
               icon: const Icon(Icons.download),
               action: () {
                 if (snatcherSleepController.text.isEmpty) {

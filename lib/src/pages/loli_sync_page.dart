@@ -56,7 +56,6 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   String tabsMode = 'Merge';
   String tagsMode = 'PreferTypeIfNone';
   List<String> tabsModesList = ['Merge', 'Replace'];
-  // TODO: Will change all these string to enum at some point, also for booru type
   List<String> tagsModesList = ['Overwrite', 'PreferTypeIfNone'];
   int? favCount, snatchedCount;
 
@@ -129,11 +128,11 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     if (ipController.text.isEmpty || portController.text.isEmpty) {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text('Error!', style: TextStyle(fontSize: 20)),
-        content: const Column(
+        title: Text(context.loc.settings.sync.errorTitle, style: const TextStyle(fontSize: 20)),
+        content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Please enter IP address and port.'),
+            Text(context.loc.settings.sync.pleaseEnterIPAndPort),
           ],
         ),
         sideColor: Colors.red,
@@ -170,9 +169,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const SettingsButton(
-          name: 'Select what you want to do',
-          icon: Icon(Icons.help_center_outlined),
+        SettingsButton(
+          name: context.loc.settings.sync.selectWhatYouWantToDo,
+          icon: const Icon(Icons.help_center_outlined),
           enabled: false,
         ),
         const SettingsButton(
@@ -180,7 +179,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           enabled: false,
         ),
         SettingsButton(
-          name: 'SEND data TO another device',
+          name: context.loc.settings.sync.sendDataToDevice,
           icon: const Icon(Icons.send_to_mobile),
           action: () {
             syncSide = SyncSide.sender;
@@ -188,7 +187,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           },
         ),
         SettingsButton(
-          name: 'RECEIVE data FROM another device',
+          name: context.loc.settings.sync.receiveDataFromDevice,
           icon: const Icon(Icons.dns_outlined),
           action: () {
             syncSide = SyncSide.receiver;
@@ -204,14 +203,14 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
       children: [
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: const Text(
-            'Start the server on another device it will show an ip and port, fill those in and then hit start sync to send data from this device to the other',
+          child: Text(
+            context.loc.settings.sync.senderInstructions,
           ),
         ),
         SettingsTextInput(
           controller: ipController,
-          title: 'IP Address',
-          hintText: 'Host IP Address (i.e. 192.168.1.1)',
+          title: context.loc.settings.sync.ipAddress,
+          hintText: context.loc.settings.sync.ipAddressPlaceholder,
           inputType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
           clearable: true,
@@ -219,8 +218,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         ),
         SettingsTextInput(
           controller: portController,
-          title: 'Port',
-          hintText: 'Host Port (i.e. 7777)',
+          title: context.loc.settings.sync.port,
+          hintText: context.loc.settings.sync.portPlaceholder,
           inputType: TextInputType.number,
           inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
           clearable: true,
@@ -237,8 +236,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               favouritesv2 = newValue;
             });
           },
-          title: 'Send favourites',
-          subtitle: Text('Favorites: ${favCount ?? '...'}'),
+          title: context.loc.settings.sync.sendFavourites,
+          subtitle: Text(context.loc.settings.sync.favouritesCount(count: favCount?.toString() ?? '...')),
           drawBottomBorder: !favouritesv2,
         ),
         if (favToggleCount > 2)
@@ -249,8 +248,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 favourites = newValue;
               });
             },
-            title: 'Send favourites (Legacy)',
-            subtitle: Text('Favorites: ${favCount ?? '...'}'),
+            title: context.loc.settings.sync.sendFavouritesLegacy,
+            subtitle: Text(context.loc.settings.sync.favouritesCount(count: favCount?.toString() ?? '...')),
             drawBottomBorder: !favourites,
           ),
         AnimatedSwitcher(
@@ -258,7 +257,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           child: (favouritesv2 || favourites)
               ? SettingsTextInput(
                   controller: favouritesSkipController,
-                  title: 'Sync favs from #...',
+                  title: context.loc.settings.sync.syncFavsFrom,
                   inputType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                   clearable: true,
@@ -273,18 +272,18 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return const SettingsDialog(
-                            title: Text('Sync favs from #...'),
+                          return SettingsDialog(
+                            title: Text(context.loc.settings.sync.syncFavsFrom),
                             contentItems: [
                               Text(
-                                'Allows to set from where the sync should start from, useful if you already synced all your favs before and want to sync only the newest items',
+                                context.loc.settings.sync.syncFavsFromHelpText1,
                               ),
-                              Text('If you want to sync from the beginning leave this field blank'),
-                              Text(''),
+                              Text(context.loc.settings.sync.syncFavsFromHelpText2),
+                              const Text(''),
                               Text(
-                                'Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X',
+                                context.loc.settings.sync.syncFavsFromHelpText3,
                               ),
-                              Text('Order of favs: From oldest (0) to newest (X)'),
+                              Text(context.loc.settings.sync.syncFavsFromHelpText4),
                             ],
                           );
                         },
@@ -301,8 +300,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               snatched = newValue;
             });
           },
-          title: 'Send snatched history',
-          subtitle: Text('Snatched: ${snatchedCount ?? '...'}'),
+          title: context.loc.settings.sync.sendSnatchedHistory,
+          subtitle: Text(context.loc.settings.sync.snatchedCount(count: snatchedCount?.toString() ?? '...')),
           drawBottomBorder: !snatched,
         ),
         AnimatedSwitcher(
@@ -310,7 +309,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           child: snatched
               ? SettingsTextInput(
                   controller: snatchedSkipController,
-                  title: 'Sync snatched from #...',
+                  title: context.loc.settings.sync.syncSnatchedFrom,
                   inputType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                   clearable: true,
@@ -325,18 +324,18 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return const SettingsDialog(
-                            title: Text('Sync snatched from #...'),
+                          return SettingsDialog(
+                            title: Text(context.loc.settings.sync.syncSnatchedFrom),
                             contentItems: [
                               Text(
-                                'Allows to set from where the sync should start from, useful if you already synced all your snatched history before and want to sync only the newest items',
+                                context.loc.settings.sync.syncSnatchedFromHelpText1,
                               ),
-                              Text('If you want to sync from the beginning leave this field blank'),
-                              Text(''),
+                              Text(context.loc.settings.sync.syncSnatchedFromHelpText2),
+                              const Text(''),
                               Text(
-                                'Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X',
+                                context.loc.settings.sync.syncSnatchedFromHelpText3,
                               ),
-                              Text('Order of favs: From oldest (0) to newest (X)'),
+                              Text(context.loc.settings.sync.syncSnatchedFromHelpText4),
                             ],
                           );
                         },
@@ -353,7 +352,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               settings = newValue;
             });
           },
-          title: 'Send settings',
+          title: context.loc.settings.sync.sendSettings,
         ),
         SettingsToggle(
           value: booru,
@@ -362,8 +361,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               booru = newValue;
             });
           },
-          title: 'Send booru configs',
-          subtitle: Text('Configs: ${settingsHandler.booruList.length}'),
+          title: context.loc.settings.sync.sendBooruConfigs,
+          subtitle: Text(context.loc.settings.sync.configsCount(count: settingsHandler.booruList.length.toString())),
         ),
         SettingsToggle(
           value: tabs,
@@ -372,8 +371,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               tabs = newValue;
             });
           },
-          title: 'Send tabs',
-          subtitle: Text('Tabs: ${searchHandler.total}'),
+          title: context.loc.settings.sync.sendTabs,
+          subtitle: Text(context.loc.settings.sync.tabsCount(count: searchHandler.total.toString())),
           drawBottomBorder: !tabs,
         ),
         AnimatedSwitcher(
@@ -387,22 +386,22 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                       tabsMode = newValue!;
                     });
                   },
-                  title: 'Tabs sync mode',
+                  title: context.loc.settings.sync.tabsSyncMode,
                   trailingIcon: IconButton(
                     icon: const Icon(Icons.help_outline),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return const SettingsDialog(
-                            title: Text('Tabs sync mode'),
+                          return SettingsDialog(
+                            title: Text(context.loc.settings.sync.tabsSyncMode),
                             contentItems: [
                               Text(
-                                'Merge: Merge the tabs from this device on the other device, tabs with unknown boorus and already existing tabs will be ignored',
+                                context.loc.settings.sync.tabsSyncModeMerge,
                               ),
-                              Text(''),
+                              const Text(''),
                               Text(
-                                'Replace: Completely replace the tabs on the other device with the tabs from this device',
+                                context.loc.settings.sync.tabsSyncModeReplace,
                               ),
                             ],
                           );
@@ -420,8 +419,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               tags = newValue;
             });
           },
-          title: 'Send tags',
-          subtitle: Text('Tags: ${tagHandler.tagMap.entries.length}'),
+          title: context.loc.settings.sync.sendTags,
+          subtitle: Text(context.loc.settings.sync.tagsCount(count: tagHandler.tagMap.entries.length.toString())),
           drawBottomBorder: !tags,
         ),
         AnimatedSwitcher(
@@ -435,22 +434,22 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                       tagsMode = newValue!;
                     });
                   },
-                  title: 'Tags sync mode',
+                  title: context.loc.settings.sync.tagsSyncMode,
                   trailingIcon: IconButton(
                     icon: const Icon(Icons.help_outline),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return const SettingsDialog(
-                            title: Text('Tags sync mode'),
+                          return SettingsDialog(
+                            title: Text(context.loc.settings.sync.tagsSyncMode),
                             contentItems: [
                               Text(
-                                "PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn't on this device it will be skipped",
+                                context.loc.settings.sync.tagsSyncModePreferTypeIfNone,
                               ),
-                              Text(''),
+                              const Text(''),
                               Text(
-                                'Overwrite: All tags will be added, if a tag and tag type exists on the other device it will be overwritten',
+                                context.loc.settings.sync.tagsSyncModeOverwrite,
                               ),
                             ],
                           );
@@ -463,7 +462,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         ),
         const SettingsButton(name: '', enabled: false),
         SettingsButton(
-          name: 'Test connection',
+          name: context.loc.settings.sync.testConnection,
           icon: const Icon(Icons.wifi_tethering),
           action: sendTestRequest,
           trailingIcon: IconButton(
@@ -472,11 +471,11 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               showDialog(
                 context: context,
                 builder: (context) {
-                  return const SettingsDialog(
-                    title: Text('Test connection'),
+                  return SettingsDialog(
+                    title: Text(context.loc.settings.sync.testConnection),
                     contentItems: [
-                      Text('This will send a test request to the other device.'),
-                      Text('There will be a notification stating if the request was successful or not.'),
+                      Text(context.loc.settings.sync.testConnectionHelpText1),
+                      Text(context.loc.settings.sync.testConnectionHelpText2),
                     ],
                   );
                 },
@@ -485,7 +484,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           ),
         ),
         SettingsButton(
-          name: 'Start sync',
+          name: context.loc.settings.sync.startSync,
           icon: const Icon(Icons.send_to_mobile),
           action: () async {
             final bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
@@ -516,13 +515,13 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             } else {
               String errorString = '???';
               if (!isAddressEntered) {
-                errorString = 'The Port and IP fields cannot be empty!';
+                errorString = context.loc.settings.sync.portAndIPCannotBeEmpty;
               } else if (!isAnySyncSelected) {
-                errorString = "You haven't selected anything to sync!";
+                errorString = context.loc.settings.sync.nothingSelectedToSync;
               }
               FlashElements.showSnackbar(
                 context: context,
-                title: const Text('Error!', style: TextStyle(fontSize: 20)),
+                title: Text(context.loc.settings.sync.errorTitle, style: const TextStyle(fontSize: 20)),
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -548,18 +547,18 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Stats of this device:'),
-              Text("Favourites: ${favCount?.toFormattedString() ?? '...'}"),
-              Text('Snatched: ${snatchedCount?.toFormattedString() ?? '...'}'),
-              Text('Boorus: ${settingsHandler.booruList.length.toFormattedString()}'),
-              Text('Tabs: ${searchHandler.total.toFormattedString()}'),
+              Text(context.loc.settings.sync.statsOfThisDevice),
+              Text(context.loc.settings.sync.favouritesCount(count: favCount?.toFormattedString() ?? '...')),
+              Text(context.loc.settings.sync.snatchedCount(count: snatchedCount?.toFormattedString() ?? '...')),
+              Text(context.loc.settings.sync.configsCount(count: settingsHandler.booruList.length.toFormattedString())),
+              Text(context.loc.settings.sync.tabsCount(count: searchHandler.total.toFormattedString())),
             ],
           ),
         ),
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: const Text(
-            'Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed',
+          child: Text(
+            context.loc.settings.sync.receiverInstructions,
           ),
         ),
         SettingsOptionsList(
@@ -576,16 +575,16 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             }
             updateState();
           },
-          title: 'Available network interfaces',
+          title: context.loc.settings.sync.availableNetworkInterfaces,
         ),
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: Text('Selected interface IP: ${selectedAddress ?? 'none'}'),
+          child: Text(context.loc.settings.sync.selectedInterfaceIP(ip: selectedAddress ?? 'none')),
         ),
         SettingsTextInput(
           controller: startPortController,
-          title: 'Server port',
-          hintText: "(will default to '8080' if empty)",
+          title: context.loc.settings.sync.serverPort,
+          hintText: context.loc.settings.sync.serverPortPlaceholder,
           inputType: TextInputType.number,
           inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
           clearable: true,
@@ -593,7 +592,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           floatingLabelBehavior: FloatingLabelBehavior.always,
         ),
         SettingsButton(
-          name: 'Start receiver server',
+          name: context.loc.settings.sync.startReceiverServer,
           icon: const Icon(Icons.dns_outlined),
           action: () async {
             await SettingsPageOpen(
@@ -632,7 +631,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('LoliSync'),
+          title: Text(context.loc.settings.sync.title),
         ),
         body: Center(child: conditionalBuild()),
       ),

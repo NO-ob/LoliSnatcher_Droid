@@ -113,8 +113,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
         if (newState == true) {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text("Can't start Slideshow", style: TextStyle(fontSize: 20)),
-            content: const Text('Reached the Last loaded Item', style: TextStyle(fontSize: 16)),
+            title: Text(context.loc.viewer.appBar.cantStartSlideshow, style: const TextStyle(fontSize: 20)),
+            content: Text(context.loc.viewer.appBar.reachedLastLoadedItem, style: const TextStyle(fontSize: 16)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -508,23 +508,23 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
     switch (name) {
       case 'autoscroll':
-        label = "${autoScroll ? 'Pause' : 'Start'} $defaultLabel";
+        label = '${autoScroll ? context.loc.viewer.appBar.pause : context.loc.viewer.appBar.start} $defaultLabel';
         break;
       case 'favourite':
-        label = item.isFavourite.value == true ? 'Unfavourite' : defaultLabel;
+        label = item.isFavourite.value == true ? context.loc.viewer.appBar.unfavourite : defaultLabel;
         break;
       case 'select':
         final bool isSelected = widget.tab.selected.contains(item);
-        label = isSelected ? 'Deselect' : defaultLabel;
+        label = isSelected ? context.loc.viewer.appBar.deselect : defaultLabel;
         break;
       case 'reloadnoscale':
-        label = item.isNoScale.value ? 'Reload with scaling' : defaultLabel;
+        label = item.isNoScale.value ? context.loc.viewer.appBar.reloadWithScaling : defaultLabel;
         break;
       case 'toggle_quality':
         final bool isHq = settingsHandler.galleryMode == 'Full Res'
             ? !item.toggleQuality.value
             : item.toggleQuality.value;
-        label = isHq ? 'Load Sample Quality' : 'Load High Quality';
+        label = isHq ? context.loc.viewer.appBar.loadSampleQuality : context.loc.viewer.appBar.loadHighQuality;
         break;
       default:
         // use default text
@@ -640,8 +640,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       },
                       leading: item.isSnatched.value == true ? const Icon(Icons.clear) : const Icon(Icons.check),
                       title: item.isSnatched.value == true
-                          ? const Text('Drop snatched status')
-                          : const Text('Set snatched status'),
+                          ? Text(context.loc.viewer.appBar.dropSnatchedStatus)
+                          : Text(context.loc.viewer.appBar.setSnatchedStatus),
                     ),
                   //
                   const SizedBox(height: 16),
@@ -669,7 +669,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       Navigator.of(context).pop();
                     },
                     leading: const Icon(Icons.file_download_outlined),
-                    title: Text('Snatch ${item.isSnatched.value == true ? '(forced)' : ''}'.trim()),
+                    title: Text(
+                      '${context.loc.viewer.appBar.snatch} ${item.isSnatched.value == true ? context.loc.viewer.appBar.forced : ''}'
+                          .trim(),
+                    ),
                   ),
                 ],
               ),
@@ -777,28 +780,28 @@ class _HideableAppBarState extends State<HideableAppBar> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Hydrus Share'),
+            title: Text(context.loc.viewer.appBar.hydrusShare),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Which URL you want to share to Hydrus?'),
+                Text(context.loc.viewer.appBar.whichUrlToShareToHydrus),
                 const SizedBox(height: 12),
                 ListTile(
-                  title: const Text('Post URL'),
+                  title: Text(context.loc.viewer.appBar.postURL),
                   leading: const Icon(Icons.arrow_forward),
                   onTap: () {
                     Navigator.of(context).pop('post');
                   },
                 ),
                 ListTile(
-                  title: const Text('File URL'),
+                  title: Text(context.loc.viewer.appBar.fileURL),
                   leading: const Icon(Icons.arrow_forward),
                   onTap: () {
                     Navigator.of(context).pop('file');
                   },
                 ),
                 ListTile(
-                  title: const Text('Cancel'),
+                  title: Text(context.loc.cancel),
                   leading: const Icon(Icons.cancel_outlined),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -818,7 +821,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     } else {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text('Hydrus is not configured!', style: TextStyle(fontSize: 20)),
+        title: Text(context.loc.viewer.appBar.hydrusNotConfigured, style: const TextStyle(fontSize: 20)),
       );
     }
   }
@@ -837,15 +840,15 @@ class _HideableAppBarState extends State<HideableAppBar> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Share File'),
+            title: Text(context.loc.viewer.appBar.shareFile),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (alreadyLoadingSame)
-                  const Text('Already downloading this file for sharing, do you want to abort?')
+                  Text(context.loc.viewer.appBar.alreadyDownloadingThisFile)
                 else
-                  const Text(
-                    'Already downloading file for sharing, do you want to abort current file and share a new file?',
+                  Text(
+                    context.loc.viewer.appBar.alreadyDownloadingFile,
                   ),
                 const SizedBox(height: 10),
                 Row(
@@ -853,7 +856,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   children: [
                     Column(
                       children: [
-                        if (!alreadyLoadingSame) const Text('Current:'),
+                        if (!alreadyLoadingSame) Text(context.loc.viewer.appBar.current),
                         SizedBox(
                           width: thumbWidth,
                           height: thumbHeight,
@@ -875,7 +878,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       const SizedBox(width: 8),
                       Column(
                         children: [
-                          const Text('New:'),
+                          Text(context.loc.viewer.appBar.kNew),
                           SizedBox(
                             width: thumbWidth,
                             height: thumbHeight,
@@ -898,13 +901,13 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   onPressed: () {
                     Navigator.of(context).pop('new');
                   },
-                  child: const Text('Share new'),
+                  child: Text(context.loc.viewer.appBar.shareNew),
                 ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop('abort');
                 },
-                child: const Text('Abort'),
+                child: Text(context.loc.viewer.appBar.abort),
               ),
             ],
           );
@@ -1000,10 +1003,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
       } else {
         FlashElements.showSnackbar(
           context: context,
-          title: const Text('Error!', style: TextStyle(fontSize: 20)),
-          content: const Text(
-            'Something went wrong when saving the File before Sharing',
-            style: TextStyle(fontSize: 16),
+          title: Text(context.loc.viewer.appBar.error, style: const TextStyle(fontSize: 20)),
+          content: Text(
+            context.loc.viewer.appBar.savingFileError,
+            style: const TextStyle(fontSize: 16),
           ),
           leadingIcon: Icons.warning_amber,
           leadingIconColor: Colors.red,
@@ -1029,7 +1032,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       context: context,
       builder: (context) {
         return SettingsDialog(
-          title: const Text('What you want to Share?'),
+          title: Text(context.loc.viewer.appBar.whatToShare),
           contentItems: [
             const SizedBox(height: 15),
             Column(
@@ -1048,7 +1051,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       shareTextAction(item.postURL);
                     },
                     leading: const Icon(CupertinoIcons.link),
-                    title: const Text('Post URL'),
+                    title: Text(context.loc.viewer.appBar.postURL),
                   ),
 
                   const SizedBox(height: 15),
@@ -1080,7 +1083,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                         ),
                       ],
                     ),
-                    title: const Text('Post URL with tags'),
+                    title: Text(context.loc.viewer.appBar.postURLWithTags),
                   ),
                   const SizedBox(height: 15),
                 ],
@@ -1097,7 +1100,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     shareTextAction(item.fileURL);
                   },
                   leading: const Icon(CupertinoIcons.link),
-                  title: const Text('File URL'),
+                  title: Text(context.loc.viewer.appBar.fileURL),
                 ),
                 const SizedBox(height: 15),
                 ListTile(
@@ -1128,7 +1131,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       ),
                     ],
                   ),
-                  title: const Text('File URL with tags'),
+                  title: Text(context.loc.viewer.appBar.fileURLWithTags),
                 ),
                 const SizedBox(height: 15),
                 ListTile(
@@ -1144,7 +1147,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     shareFileAction();
                   },
                   leading: const Icon(Icons.file_present),
-                  title: const Text('File'),
+                  title: Text(context.loc.viewer.appBar.file),
                 ),
                 const SizedBox(height: 15),
                 ListTile(
@@ -1175,7 +1178,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       ),
                     ],
                   ),
-                  title: const Text('File with tags'),
+                  title: Text(context.loc.viewer.appBar.fileWithTags),
                 ),
                 const SizedBox(height: 15),
                 if (settingsHandler.hasHydrus && widget.tab.booruHandler.booru.type?.isHydrus != true)
@@ -1192,7 +1195,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       Navigator.of(context).pop();
                     },
                     leading: const Icon(Icons.file_present),
-                    title: const Text('Hydrus'),
+                    title: Text(context.loc.viewer.appBar.hydrus),
                   ),
               ],
             ),
@@ -1366,7 +1369,7 @@ Future<List<String>> showSelectTagsDialog(
       ),
     ),
     selectedItemBuilder: (items) => Text(items.join(', ')),
-    labelText: 'Select tags',
+    labelText: context.loc.viewer.appBar.selectTags,
   ).showDialog(context);
 
   if (res) {

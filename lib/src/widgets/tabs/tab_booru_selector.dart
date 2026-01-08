@@ -22,8 +22,8 @@ class TabBooruSelector extends StatelessWidget {
     return Obx(() {
       // no boorus
       if (settingsHandler.booruList.isEmpty) {
-        return const Center(
-          child: Text('Add Boorus in Settings'),
+        return Center(
+          child: Text(context.loc.tabs.addBoorusInSettings),
         );
       }
 
@@ -78,12 +78,12 @@ class TabBooruSelector extends StatelessWidget {
           },
           selectedItemBuilder: (value) {
             if (value == null) {
-              return const Text('Select a Booru');
+              return Text(context.loc.tabs.selectABooru);
             }
 
             return TabBooruSelectorItem(booru: value);
           },
-          labelText: 'Booru',
+          labelText: context.loc.booru,
         ),
       );
     });

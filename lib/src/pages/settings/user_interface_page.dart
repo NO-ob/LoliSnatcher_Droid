@@ -92,7 +92,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Interface'),
+          title: Text(context.loc.settings.interface.title),
         ),
         body: Center(
           child: ListView(
@@ -111,14 +111,14 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                           await showDialog<bool>(
                             context: context,
                             builder: (BuildContext context) {
-                              return const SettingsDialog(
-                                title: Text('App UI mode'),
+                              return SettingsDialog(
+                                title: Text(context.loc.settings.interface.appUIModeWarningTitle),
                                 contentItems: [
                                   Text(
-                                    'Are you sure you want to use Desktop mode? It may cause problems on Mobile devices and is considered DEPRECATED.',
+                                    context.loc.settings.interface.appUIModeWarning,
                                   ),
                                 ],
-                                actionButtons: [
+                                actionButtons: const [
                                   CancelButton(),
                                   ConfirmButton(),
                                 ],
@@ -138,7 +138,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       appMode = newValue!;
                     });
                   },
-                  title: 'App UI mode',
+                  title: context.loc.settings.interface.appUIMode,
                   itemLeadingBuilder: (item) {
                     return switch (item) {
                       AppMode.Mobile => const Icon(Icons.phone_android_sharp),
@@ -152,20 +152,20 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return const SettingsDialog(
-                            title: Text('App UI mode'),
+                          return SettingsDialog(
+                            title: Text(context.loc.settings.interface.appUIModeWarningTitle),
                             contentItems: [
-                              Text('- Mobile - Normal Mobile UI'),
-                              Text('- Desktop - Ahoviewer Style UI [DEPRECATED, NEEDS REWORK]'),
-                              SizedBox(height: 10),
+                              Text(context.loc.settings.interface.appUIModeHelpMobile),
+                              Text(context.loc.settings.interface.appUIModeHelpDesktop),
+                              const SizedBox(height: 10),
                               Text(
-                                '[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.',
+                                context.loc.settings.interface.appUIModeHelpWarning,
                               ),
                               Text(
-                                'If you are on android versions below 11 you can remove the appMode line from /LoliSnatcher/config/settings.json',
+                                context.loc.settings.interface.appUIModeHelpAndroid10,
                               ),
                               Text(
-                                'If you are on android 11 or higher you will have to wipe app data via system settings',
+                                context.loc.settings.interface.appUIModeHelpAndroid11,
                               ),
                             ],
                           );
@@ -182,17 +182,17 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     handSide = newValue!;
                   });
                 },
-                title: 'Hand side',
+                title: context.loc.settings.interface.handSide,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.back_hand_outlined),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return const SettingsDialog(
-                          title: Text('Hand side'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.interface.handSide),
                           contentItems: [
-                            Text('Changes position of some UI elements according to selected side'),
+                            Text(context.loc.settings.interface.handSideHelp),
                           ],
                         );
                       },
@@ -207,7 +207,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     showBottomSearchbar = newValue;
                   });
                 },
-                title: 'Show search bar in preview grid',
+                title: context.loc.settings.interface.showSearchBarInPreviewGrid,
               ),
               SettingsToggle(
                 value: useTopSearchbarInput,
@@ -216,7 +216,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     useTopSearchbarInput = newValue;
                   });
                 },
-                title: 'Move input to top in search view',
+                title: context.loc.settings.interface.moveInputToTopInSearchView,
               ),
               SettingsToggle(
                 value: showSearchbarQuickActions,
@@ -225,7 +225,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     showSearchbarQuickActions = newValue;
                   });
                 },
-                title: 'Search view quick actions panel',
+                title: context.loc.settings.interface.searchViewQuickActionsPanel,
               ),
               SettingsToggle(
                 value: autofocusSearchbar,
@@ -234,7 +234,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     autofocusSearchbar = newValue;
                   });
                 },
-                title: 'Search view input autofocus',
+                title: context.loc.settings.interface.searchViewInputAutofocus,
               ),
               SettingsToggle(
                 value: disableVibration,
@@ -243,12 +243,12 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     disableVibration = newValue;
                   });
                 },
-                title: 'Disable vibration',
-                subtitle: const Text('May still happen on some actions even when disabled'),
+                title: context.loc.settings.interface.disableVibration,
+                subtitle: Text(context.loc.settings.interface.disableVibrationSubtitle),
               ),
               SettingsTextInput(
                 controller: columnsPortraitController,
-                title: 'Preview columns (portrait)',
+                title: context.loc.settings.interface.previewColumnsPortrait,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 onChanged: (String? text) {
@@ -262,11 +262,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse > 4 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
-                    return 'Using more than 4 columns can affect performance';
+                    return context.loc.validationErrors.moreThan4ColumnsWarning;
                   } else {
                     return null;
                   }
@@ -274,7 +274,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               ),
               SettingsTextInput(
                 controller: columnsLandscapeController,
-                title: 'Preview columns (landscape)',
+                title: context.loc.settings.interface.previewColumnsLandscape,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['landscapeColumns']!['default']!.toString(),
@@ -285,11 +285,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse > 8 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
-                    return 'Using more than 8 columns can affect performance';
+                    return context.loc.validationErrors.moreThan8ColumnsWarning;
                   } else {
                     return null;
                   }
@@ -303,24 +303,24 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
                   });
                 },
-                title: 'Preview quality',
+                title: context.loc.settings.interface.previewQuality,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return const SettingsDialog(
-                          title: Text('Preview quality'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.interface.previewQuality),
                           contentItems: [
-                            Text('This setting changes the resolution of images in the preview grid'),
+                            Text(context.loc.settings.interface.previewQualityHelp),
                             Text(
-                              ' - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads',
+                              context.loc.settings.interface.previewQualityHelpSample,
                             ),
-                            Text(' - Thumbnail - Low resolution'),
-                            Text(' '),
+                            Text(context.loc.settings.interface.previewQualityHelpThumbnail),
+                            const Text(' '),
                             Text(
-                              '[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid',
+                              context.loc.settings.interface.previewQualityHelpNote,
                             ),
                           ],
                         );
@@ -353,7 +353,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     previewDisplay = newValue ?? settingsHandler.map['previewDisplay']!['default'];
                   });
                 },
-                title: 'Preview display',
+                title: context.loc.settings.interface.previewDisplay,
               ),
               AnimatedSize(
                 duration: const Duration(milliseconds: 300),
@@ -382,8 +382,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                                 newValue ?? settingsHandler.map['previewDisplayFallback']!['default'];
                           });
                         },
-                        title: 'Preview display fallback',
-                        subtitle: const Text('This will be used when Staggered option is not possible'),
+                        title: context.loc.settings.interface.previewDisplayFallback,
+                        subtitle: Text(context.loc.settings.interface.previewDisplayFallbackHelp),
                       )
                     : const SizedBox(width: double.infinity),
               ),
@@ -394,20 +394,20 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     final res = await showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        return const SettingsDialog(
-                          title: Text('Warning'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.interface.dontScaleImagesWarningTitle),
                           contentItems: [
                             Text(
-                              'Are you sure you want to disable image scaling?',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              context.loc.settings.interface.dontScaleImagesWarning,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Text(
-                              'This can negatively impact the performance, especially on older devices',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              context.loc.settings.interface.dontScaleImagesWarningMsg,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ],
-                          actionButtons: [
+                          actionButtons: const [
                             CancelButton(withIcon: true),
                             ConfirmButton(withIcon: true),
                           ],
@@ -424,9 +424,9 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     settingsHandler.disableImageScaling = newValue;
                   });
                 },
-                title: "Don't scale images",
+                title: context.loc.settings.interface.dontScaleImages,
                 leadingIcon: const Icon(Icons.close_fullscreen),
-                subtitle: const Text('Disables image scaling which is used to improve performance'),
+                subtitle: Text(context.loc.settings.interface.dontScaleImagesSubtitle),
               ),
               Stack(
                 children: [
@@ -437,9 +437,9 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                         settingsHandler.gifsAsThumbnails = newValue;
                       });
                     },
-                    title: 'GIF thumbnails',
+                    title: context.loc.settings.interface.gifThumbnails,
                     leadingIcon: const Icon(Icons.gif),
-                    subtitle: const Text('Requires "Don\'t scale images"'),
+                    subtitle: Text(context.loc.settings.interface.gifThumbnailsRequires),
                   ),
                   if (!settingsHandler.disableImageScaling)
                     Positioned.fill(
@@ -458,13 +458,13 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                         newValue ?? settingsHandler.map['scrollGridButtonsPosition']!['default'];
                   });
                 },
-                title: 'Scroll previews buttons position',
+                title: context.loc.settings.interface.scrollPreviewsButtonsPosition,
               ),
               if (SettingsHandler.isDesktopPlatform)
                 SettingsTextInput(
                   controller: mouseSpeedController,
-                  title: 'Mouse Wheel Scroll Modifer',
-                  hintText: 'Scroll modifier',
+                  title: context.loc.settings.interface.mouseWheelScrollModifier,
+                  hintText: context.loc.settings.interface.scrollModifier,
                   inputType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                   resetText: () => settingsHandler.map['mousewheelScrollSpeed']!['default']!.toString(),
@@ -475,11 +475,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   validator: (String? value) {
                     final double? parse = double.tryParse(value ?? '');
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a value';
+                      return context.loc.validationErrors.required;
                     } else if (parse == null) {
-                      return 'Please enter a valid numeric value';
+                      return context.loc.validationErrors.invalidNumericValue;
                     } else if (parse > 20.0) {
-                      return 'Please enter a value between 0.1 and 20.0';
+                      return context.loc.validationErrors.rangeError(min: 0.1, max: 20);
                     } else {
                       return null;
                     }

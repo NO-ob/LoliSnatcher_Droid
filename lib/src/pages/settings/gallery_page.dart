@@ -132,14 +132,14 @@ class _GalleryPageState extends State<GalleryPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Viewer'),
+          title: Text(context.loc.settings.viewer.title),
         ),
         body: Center(
           child: ListView(
             children: [
               SettingsTextInput(
                 controller: preloadAmountController,
-                title: 'Preload amount',
+                title: context.loc.settings.viewer.preloadAmount,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['preloadCount']!['default']!.toString(),
@@ -150,13 +150,13 @@ class _GalleryPageState extends State<GalleryPage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse < 0) {
-                    return 'Please enter a value equal to or greater than 0';
+                    return context.loc.validationErrors.greaterThanOrEqualZero;
                   } else if (parse > 3) {
-                    return 'Please enter a value less than 4';
+                    return context.loc.validationErrors.lessThan4;
                   } else {
                     return null;
                   }
@@ -164,7 +164,7 @@ class _GalleryPageState extends State<GalleryPage> {
               ),
               SettingsTextInput(
                 controller: preloadSizeController,
-                title: 'Preload size limit',
+                title: context.loc.settings.viewer.preloadSizeLimit,
                 subtitle: const Text('in GB, 0 for no limit'),
                 inputType: TextInputType.number,
                 resetText: () => settingsHandler.map['preloadSizeLimit']!['default']!.toString(),
@@ -175,12 +175,15 @@ class _GalleryPageState extends State<GalleryPage> {
                 validator: (String? value) {
                   final double? parse = double.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse < settingsHandler.map['preloadSizeLimit']!['lowerLimit']! ||
                       parse > settingsHandler.map['preloadSizeLimit']!['upperLimit']!) {
-                    return 'Please enter a value between ${settingsHandler.map['preloadSizeLimit']!['lowerLimit']!} and ${settingsHandler.map['preloadSizeLimit']!['upperLimit']!}';
+                    return context.loc.validationErrors.rangeError(
+                      min: settingsHandler.map['preloadSizeLimit']!['lowerLimit']!,
+                      max: settingsHandler.map['preloadSizeLimit']!['upperLimit']!,
+                    );
                   } else {
                     return null;
                   }
@@ -194,7 +197,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     galleryMode = newValue ?? settingsHandler.map['galleryMode']!['default'];
                   });
                 },
-                title: 'Image quality',
+                title: context.loc.settings.viewer.imageQuality,
               ),
               SettingsOptionsList(
                 value: galleryScrollDirection,
@@ -204,7 +207,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     galleryScrollDirection = newValue ?? settingsHandler.map['galleryScrollDirection']!['default'];
                   });
                 },
-                title: 'Viewer scroll direction',
+                title: context.loc.settings.viewer.viewerScrollDirection,
               ),
               SettingsOptionsList(
                 value: galleryBarPosition,
@@ -214,7 +217,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     galleryBarPosition = newValue ?? settingsHandler.map['galleryBarPosition']!['default'];
                   });
                 },
-                title: 'Viewer toolbar position',
+                title: context.loc.settings.viewer.viewerToolbarPosition,
               ),
               SettingsOptionsList(
                 value: zoomButtonPosition,
@@ -224,7 +227,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     zoomButtonPosition = newValue ?? settingsHandler.map['zoomButtonPosition']!['default'];
                   });
                 },
-                title: 'Zoom button position',
+                title: context.loc.settings.viewer.zoomButtonPosition,
               ),
               SettingsOptionsList(
                 value: changePageButtonsPosition,
@@ -235,7 +238,7 @@ class _GalleryPageState extends State<GalleryPage> {
                         newValue ?? settingsHandler.map['changePageButtonsPosition']!['default'];
                   });
                 },
-                title: 'Change page buttons position',
+                title: context.loc.settings.viewer.changePageButtonsPosition,
               ),
               SettingsToggle(
                 value: autoHideImageBar,
@@ -244,7 +247,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     autoHideImageBar = newValue;
                   });
                 },
-                title: 'Hide toolbar when opening viewer',
+                title: context.loc.settings.viewer.hideToolbarWhenOpeningViewer,
               ),
               SettingsToggle(
                 value: settingsHandler.expandDetails,
@@ -253,7 +256,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     settingsHandler.expandDetails = newValue;
                   });
                 },
-                title: 'Expand details by default',
+                title: context.loc.settings.viewer.expandDetailsByDefault,
               ),
               SettingsToggle(
                 value: hideNotes,
@@ -262,7 +265,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     hideNotes = newValue;
                   });
                 },
-                title: 'Hide translation notes by default',
+                title: context.loc.settings.viewer.hideTranslationNotesByDefault,
               ),
               SettingsToggle(
                 value: allowRotation,
@@ -271,8 +274,8 @@ class _GalleryPageState extends State<GalleryPage> {
                     allowRotation = newValue;
                   });
                 },
-                title: 'Enable rotation',
-                subtitle: const Text('Double tap to reset (only works on images)'),
+                title: context.loc.settings.viewer.enableRotation,
+                subtitle: Text(context.loc.settings.viewer.enableRotationSubtitle),
               ),
 
               Material(
@@ -280,7 +283,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 child: ExpansionTile(
                   title: Row(
                     children: [
-                      const Expanded(child: Text('Toolbar buttons order')),
+                      Expanded(child: Text(context.loc.settings.viewer.toolbarButtonsOrder)),
                       IconButton(
                         icon: Icon(
                           Icons.refresh,
@@ -304,12 +307,12 @@ class _GalleryPageState extends State<GalleryPage> {
                           showDialog(
                             context: context,
                             builder: (context) {
-                              return const SettingsDialog(
-                                title: Text('Buttons order'),
+                              return SettingsDialog(
+                                title: Text(context.loc.settings.viewer.buttonsOrder),
                                 contentItems: [
-                                  Text('Long press to change item order.'),
-                                  Text('At least 4 buttons from this list will be always visible on Toolbar.'),
-                                  Text('Other buttons will go into overflow (three dots) menu.'),
+                                  Text(context.loc.settings.viewer.longPressToChangeItemOrder),
+                                  Text(context.loc.settings.viewer.atLeast4ButtonsVisibleOnToolbar),
+                                  Text(context.loc.settings.viewer.otherButtonsWillGoIntoOverflow),
                                 ],
                               );
                             },
@@ -365,9 +368,9 @@ class _GalleryPageState extends State<GalleryPage> {
 
                                     FlashElements.showSnackbar(
                                       context: context,
-                                      title: const Text(
-                                        'Long press to move items',
-                                        style: TextStyle(fontSize: 20),
+                                      title: Text(
+                                        context.loc.settings.viewer.longPressToMoveItems,
+                                        style: const TextStyle(fontSize: 20),
                                       ),
                                       key: 'toolbar-button-order',
                                       isKeyUnique: true,
@@ -381,7 +384,7 @@ class _GalleryPageState extends State<GalleryPage> {
                                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                                   title: Text(title),
                                   subtitle: switch (name) {
-                                    'external_player' => const Text('Only for videos'),
+                                    'external_player' => Text(context.loc.settings.viewer.onlyForVideos),
                                     _ => null,
                                   },
                                   leading: Opacity(
@@ -392,9 +395,9 @@ class _GalleryPageState extends State<GalleryPage> {
                                       onChanged: (_) {
                                         if (isInfo) {
                                           FlashElements.showSnackbar(
-                                            title: const Text(
-                                              'This button cannot be disabled',
-                                              style: TextStyle(fontSize: 20),
+                                            title: Text(
+                                              context.loc.settings.viewer.thisButtonCannotBeDisabled,
+                                              style: const TextStyle(fontSize: 20),
                                             ),
                                           );
                                           return;
@@ -469,7 +472,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
                   });
                 },
-                title: 'Default share action',
+                title: context.loc.settings.viewer.defaultShareAction,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -477,26 +480,18 @@ class _GalleryPageState extends State<GalleryPage> {
                       context: context,
                       builder: (context) {
                         return SettingsDialog(
-                          title: const Text('Share actions'),
+                          title: Text(context.loc.settings.viewer.shareActions),
                           contentItems: [
-                            const Text('- Ask - always ask what to share'),
-                            const Text('- Post URL'),
-                            const Text(
-                              '- File URL - shares direct link to the original file (may not work with some sites)',
-                            ),
-                            const Text(
-                              '- Post URL/File URL/File with tags - shares url/file and tags which you select',
-                            ),
-                            const Text(
-                              '- File - shares the file itself, may take some time to load, progress will be shown on the Share button',
-                            ),
-                            if (hasHydrus) const Text('- Hydrus - sends the post url to Hydrus for import'),
+                            Text(context.loc.settings.viewer.shareActionsAsk),
+                            Text(context.loc.settings.viewer.shareActionsPostURL),
+                            Text(context.loc.settings.viewer.shareActionsFileURL),
+                            Text(context.loc.settings.viewer.shareActionsPostURLFileURLFileWithTags),
+                            Text(context.loc.settings.viewer.shareActionsFile),
+                            if (hasHydrus) Text(context.loc.settings.viewer.shareActionsHydrus),
                             const Text(''),
-                            const Text(
-                              '[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network.',
-                            ),
+                            Text(context.loc.settings.viewer.shareActionsNoteIfFileSavedInCache),
                             const Text(''),
-                            const Text('[Tip]: You can open Share actions menu by long pressing Share button.'),
+                            Text(context.loc.settings.viewer.shareActionsTip),
                           ],
                         );
                       },
@@ -511,24 +506,24 @@ class _GalleryPageState extends State<GalleryPage> {
                     useVolumeButtonsForScroll = newValue;
                   });
                 },
-                title: 'Use volume buttons for scrolling',
+                title: context.loc.settings.viewer.useVolumeButtonsForScrolling,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Volume buttons scrolling'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.viewer.volumeButtonsScrolling),
                           contentItems: [
-                            Text('Allows to scroll through previews grid and viewer items using volume buttons'),
-                            Text(''),
-                            Text(' - Volume Down - next item'),
-                            Text(' - Volume Up - previous item'),
-                            Text(''),
-                            Text('In viewer:'),
-                            Text(' - Toolbar visible - controls volume'),
-                            Text(' - Toolbar hidden - controls scrolling'),
+                            Text(context.loc.settings.viewer.volumeButtonsScrollingHelp),
+                            const Text(''),
+                            Text(context.loc.settings.viewer.volumeButtonsVolumeDown),
+                            Text(context.loc.settings.viewer.volumeButtonsVolumeUp),
+                            const Text(''),
+                            Text(context.loc.settings.viewer.volumeButtonsInViewer),
+                            Text(context.loc.settings.viewer.volumeButtonsToolbarVisible),
+                            Text(context.loc.settings.viewer.volumeButtonsToolbarHidden),
                           ],
                         );
                       },
@@ -538,7 +533,7 @@ class _GalleryPageState extends State<GalleryPage> {
               ),
               SettingsTextInput(
                 controller: scrollSpeedController,
-                title: 'Volume buttons scroll speed',
+                title: context.loc.settings.viewer.volumeButtonsScrollSpeed,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['volumeButtonsScrollSpeed']!['default']!.toString(),
@@ -549,11 +544,11 @@ class _GalleryPageState extends State<GalleryPage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse < 100) {
-                    return 'Please enter a value bigger than 100';
+                    return context.loc.validationErrors.biggerThan100;
                   } else {
                     return null;
                   }
@@ -562,7 +557,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
               SettingsTextInput(
                 controller: galleryAutoScrollController,
-                title: 'Slideshow duration (in ms)',
+                title: context.loc.settings.viewer.slideshowDurationInMs,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['galleryAutoScrollTime']!['default']!.toString(),
@@ -573,9 +568,9 @@ class _GalleryPageState extends State<GalleryPage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else {
                     return null;
                   }
@@ -586,10 +581,10 @@ class _GalleryPageState extends State<GalleryPage> {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Slideshow'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.viewer.slideshow),
                           contentItems: [
-                            Text('[WIP] Videos and gifs must be scrolled manually for now.'),
+                            Text(context.loc.settings.viewer.slideshowWIPNote),
                           ],
                         );
                       },
@@ -604,7 +599,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     wakeLockEnabled = newValue;
                   });
                 },
-                title: 'Prevent device from sleeping',
+                title: context.loc.settings.viewer.preventDeviceFromSleeping,
               ),
               SettingsToggle(
                 value: enableHeroTransitions,
@@ -613,7 +608,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     enableHeroTransitions = newValue;
                   });
                 },
-                title: 'Viewer open/close animation',
+                title: context.loc.settings.viewer.viewerOpenCloseAnimation,
               ),
               SettingsToggle(
                 value: disableCustomPageTransitions,
@@ -622,9 +617,11 @@ class _GalleryPageState extends State<GalleryPage> {
                     disableCustomPageTransitions = newValue;
                   });
                 },
-                title: 'Viewer page change animation',
+                title: context.loc.settings.viewer.viewerPageChangeAnimation,
                 subtitle: Text(
-                  disableCustomPageTransitions ? 'Using default animation' : 'Using custom animation',
+                  disableCustomPageTransitions
+                      ? context.loc.settings.viewer.usingDefaultAnimation
+                      : context.loc.settings.viewer.usingCustomAnimation,
                 ),
               ),
 
@@ -636,7 +633,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     loadingGif = newValue;
                   });
                 },
-                title: 'Kanna loading Gif',
+                title: context.loc.settings.viewer.kannaLoadingGif,
               ),
             ],
           ),

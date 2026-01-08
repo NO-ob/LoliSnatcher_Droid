@@ -20,16 +20,17 @@ class AddNewTabDialog extends StatefulWidget {
 enum _Querymode {
   defaultTags,
   currentInput,
-  custom;
+  custom
+  ;
 
-  String get locName {
+  String locName(BuildContext context) {
     switch (this) {
       case defaultTags:
-        return 'Default';
+        return context.loc.tabs.queryModeDefault;
       case currentInput:
-        return 'Current';
+        return context.loc.tabs.queryModeCurrent;
       case custom:
-        return 'Custom';
+        return context.loc.tabs.queryModeCustom;
     }
   }
 }
@@ -92,9 +93,9 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   @override
   Widget build(BuildContext context) {
     return SettingsBottomSheet(
-      title: const Text(
-        'Add new tab',
-        style: TextStyle(fontSize: 20),
+      title: Text(
+        context.loc.tabs.addNewTab,
+        style: const TextStyle(fontSize: 20),
       ),
       contentItems: [
         Column(
@@ -105,8 +106,8 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
             const SizedBox(height: 10),
             SettingsBooruDropdown(
               value: booru,
-              title: 'Booru',
-              placeholder: 'Select a booru or leave empty',
+              title: context.loc.booru,
+              placeholder: context.loc.tabs.selectABooruOrLeaveEmpty,
               nullable: true,
               onChanged: (value) {
                 setState(() {
@@ -117,28 +118,28 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
             SettingsSegmentedButton(
               value: addMode,
               values: TabAddMode.values,
-              itemTitleBuilder: (v) => v.locName,
+              itemTitleBuilder: (v) => v.locName(context),
               onChanged: (v) {
                 setState(() {
                   addMode = v;
                 });
               },
-              title: 'Add position:',
+              title: context.loc.tabs.addPosition,
             ),
             SettingsSegmentedButton(
               value: queryMode,
               values: _Querymode.values,
-              itemTitleBuilder: (v) => v.locName,
+              itemTitleBuilder: (v) => v.locName(context),
               onChanged: (v) {
                 setState(() {
                   queryMode = v;
                 });
               },
-              title: 'Used query:',
+              title: context.loc.tabs.usedQuery,
               subtitle: queryMode == _Querymode.custom
                   ? SettingsTextInput(
                       controller: customTagsController,
-                      title: 'Custom query',
+                      title: context.loc.tabs.customQuery,
                       onlyInput: true,
                       inputType: TextInputType.text,
                       clearable: true,
@@ -146,7 +147,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                       enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                     )
                   : Text(
-                      usedQuery.isEmpty ? '[empty]' : usedQuery,
+                      usedQuery.isEmpty ? context.loc.tabs.empty : usedQuery,
                     ),
             ),
             Material(
@@ -178,7 +179,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                               height: kMinInteractiveDimension,
                               child: TabBooruSelectorItem(booru: item),
                             ),
-                            labelText: 'Secondary boorus to include',
+                            labelText: context.loc.multibooru.labelSecondaryBoorusToInclude,
                             selectedItemBuilder: (List<Booru> value) => Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,8 +220,10 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                             }
                           });
                         },
-                        title: secondaryBoorus.isEmpty ? 'Add secondary boorus' : 'Keep secondary boorus',
-                        subtitle: const Text('aka Multibooru mode'),
+                        title: secondaryBoorus.isEmpty
+                            ? context.loc.tabs.addSecondaryBoorus
+                            : context.loc.tabs.keepSecondaryBoorus,
+                        subtitle: Text(context.loc.multibooru.akaMultibooruMode),
                       ),
               ),
             ),
@@ -237,8 +240,8 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                           ),
                         ),
                         title: SettingsTextInput(
-                          title: 'Page #',
-                          hintText: 'Page #',
+                          title: context.loc.pageNumber,
+                          hintText: context.loc.pageNumber,
                           onlyInput: true,
                           controller: customPageController,
                           autofocus: true,
@@ -249,9 +252,9 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                           numberMax: double.infinity,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter a number';
+                              return context.loc.tabs.pleaseEnterANumber;
                             } else if (int.tryParse(value) == null) {
-                              return 'Please enter a valid number';
+                              return context.loc.tabs.pleaseEnterAValidNumber;
                             }
                             return null;
                           },
@@ -264,7 +267,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                             useCustomPage = v;
                           });
                         },
-                        title: 'Start from custom page number',
+                        title: context.loc.tabs.startFromCustomPageNumber,
                       ),
               ),
             ),
@@ -275,7 +278,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                   switchToNew = v;
                 });
               },
-              title: 'Switch to new tab',
+              title: context.loc.tabs.switchToNewTab,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -289,7 +292,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                   ),
                   ElevatedButton.icon(
                     onPressed: addNewTab,
-                    label: const Text('Add'),
+                    label: Text(context.loc.tabs.add),
                     icon: const Icon(Icons.add_circle_outline),
                   ),
                 ],

@@ -128,8 +128,8 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   void duplicateMessage(String tag, String type) {
     FlashElements.showSnackbar(
       context: context,
-      title: const Text('Duplicate tag!', style: TextStyle(fontSize: 20)),
-      content: Text("'$tag' is already in $type list", style: const TextStyle(fontSize: 16)),
+      title: Text(context.loc.settings.tagsFilters.duplicateTag, style: const TextStyle(fontSize: 20)),
+      content: Text(context.loc.settings.tagsFilters.alreadyInList(tag: tag, type: type), style: const TextStyle(fontSize: 16)),
       leadingIcon: Icons.warning_amber,
       leadingIconColor: Colors.yellow,
       sideColor: Colors.yellow,
@@ -167,7 +167,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Filters'),
+          title: Text(context.loc.settings.tagsFilters.title),
           bottom: TabBar(
             controller: tabController,
             indicatorColor: Theme.of(context).colorScheme.secondary,
@@ -179,22 +179,22 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
             labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             unselectedLabelStyle: const TextStyle(fontSize: 16),
             tabs: [
-              const Tab(
-                text: 'Hated',
-                icon: Icon(
+              Tab(
+                text: context.loc.settings.tagsFilters.hated,
+                icon: const Icon(
                   CupertinoIcons.eye_slash,
                   color: Colors.red,
                 ),
               ),
-              const Tab(
-                text: 'Loved',
-                icon: Icon(
+              Tab(
+                text: context.loc.settings.tagsFilters.loved,
+                icon: const Icon(
                   Icons.star,
                   color: Colors.yellow,
                 ),
               ),
               Tab(
-                text: 'Settings',
+                text: context.loc.settings.title,
                 icon: Icon(
                   Icons.settings,
                   color: Theme.of(context).colorScheme.onSurface,

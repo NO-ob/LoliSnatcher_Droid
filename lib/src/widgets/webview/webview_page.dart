@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_navigation_controls.dart';
@@ -109,7 +110,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title ?? 'Webview'),
+        title: Text(widget.title ?? context.loc.webview.title),
         actions: [
           WebviewNavigationControls(controller: controller),
           WebviewNavigationMenu(initialUrl: widget.initialUrl, controller: controller),

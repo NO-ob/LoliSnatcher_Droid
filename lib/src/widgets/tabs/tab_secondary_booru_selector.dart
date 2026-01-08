@@ -21,8 +21,8 @@ class TabSecondaryBooruSelector extends StatelessWidget {
     return Obx(() {
       // no boorus
       if (settingsHandler.booruList.isEmpty) {
-        return const Center(
-          child: Text('Add Boorus in Settings'),
+        return Center(
+          child: Text(context.loc.tabs.addBoorusInSettings),
         );
       }
 
@@ -55,7 +55,7 @@ class TabSecondaryBooruSelector extends StatelessWidget {
             height: kMinInteractiveDimension,
             child: TabBooruSelectorItem(booru: item),
           ),
-          labelText: 'Secondary boorus',
+          labelText: context.loc.tabs.secondaryBoorus,
           selectedItemBuilder: (List<Booru> value) => Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

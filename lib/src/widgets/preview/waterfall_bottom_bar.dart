@@ -1408,7 +1408,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
             ),
             const SizedBox(height: 16),
             ListTile(
-              title: const Text('Add'),
+              title: Text(context.loc.add),
               leading: const Icon(Icons.add_rounded),
               onTap: () async {
                 onSuggestionTap(tag);
@@ -1424,7 +1424,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                   : [searchHandler.currentBooru],
             ),
             ListTile(
-              title: const Text('Copy'),
+              title: Text(context.loc.copy),
               leading: const Icon(Icons.copy),
               onTap: () async {
                 final tagText = tag.tag;
@@ -1432,8 +1432,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 await Clipboard.setData(ClipboardData(text: tagText));
                 FlashElements.showSnackbar(
                   context: context,
-                  title: const Text('Copied!', style: TextStyle(fontSize: 20)),
-                  content: Text('Copied "$tagText" to clipboard'),
+                  title: Text(context.loc.copied, style: const TextStyle(fontSize: 20)),
+                  content: Text(context.loc.searchBar.copiedTagToClipboard(tag: tagText)),
                   sideColor: Colors.green,
                   leadingIcon: Icons.check,
                   leadingIconColor: Colors.green,
@@ -1690,7 +1690,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                                           const SizedBox(width: 8),
                                           Expanded(
                                             child: Text(
-                                              'Failed to load suggestions, tap to retry${failedMsg?.isNotEmpty == true ? '\n\n[$failedMsg]' : ''}',
+                                              context.loc.searchBar.failedToLoadSuggestions(
+                                                msg: failedMsg?.isNotEmpty == true ? '\n\n[$failedMsg]' : '',
+                                              ),
                                               style: context.theme.textTheme.bodyLarge,
                                             ),
                                           ),
@@ -1722,8 +1724,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                                     ),
                                     Text(
                                       searchHandler.currentBooruHandler.hasTagSuggestions
-                                          ? 'No suggestions found'
-                                          : 'Tag suggestions are not available for this booru',
+                                          ? context.loc.searchBar.noSuggestionsFound
+                                          : context.loc.searchBar.tagSuggestionsNotAvailable,
                                       style: context.theme.textTheme.bodyLarge,
                                     ),
                                   ],
@@ -1861,8 +1863,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 child: SettingsTextInput(
                   controller: suggestionTextController,
                   focusNode: suggestionTextFocusNode,
-                  title: 'Search for tags',
-                  hintText: 'Search for tags',
+                  title: context.loc.searchBar.searchForTags,
+                  hintText: context.loc.searchBar.searchForTags,
                   clearable: true,
                   onSubmitted: onSuggestionTextSubmitted,
                   onSubmittedLongTap: (_) => onSuggestionLongTap(
@@ -1881,7 +1883,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                       buttonItems.insert(
                         0,
                         ContextMenuButtonItem(
-                          label: 'Prefix',
+                          label: context.loc.searchBar.prefix,
                           onPressed: () {
                             ContextMenuController.removeAny();
                             showDialog(
@@ -2086,7 +2088,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            'Metatags',
+            context.loc.searchBar.metatags,
             style: context.theme.textTheme.titleLarge,
           ),
           const SizedBox(width: 12),
@@ -2119,14 +2121,14 @@ class AddMetatagBottomSheet extends StatelessWidget {
                     const Icon(Icons.info_outline_rounded),
                     const SizedBox(width: 8),
                     Text(
-                      'Free metatags',
+                      context.loc.searchBar.freeMetatags,
                       style: context.theme.textTheme.bodyMedium,
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Free metatags do not count against the tag search limits',
+                Text(
+                  context.loc.searchBar.freeMetatagsDescription,
                 ),
               ],
             ),
@@ -2197,7 +2199,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  'Free',
+                                  context.loc.searchBar.free,
                                   style: context.theme.textTheme.bodySmall?.copyWith(
                                     color: context.theme.colorScheme.primary,
                                   ),
@@ -2233,7 +2235,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
                                     }
                                   },
                                   icon: metaTag.supportsRange
-                                      ? const Text('Single')
+                                      ? Text(context.loc.searchBar.single)
                                       : const Icon(Icons.calendar_month_rounded),
                                 ),
                                 if (metaTag.supportsRange)
@@ -2256,7 +2258,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
                                         );
                                       }
                                     },
-                                    icon: const Text('Range'),
+                                    icon: Text(context.loc.searchBar.range),
                                   ),
                                 if (metaTag.supportsRange) const Icon(Icons.calendar_month_rounded),
                               ],
@@ -2340,7 +2342,7 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Popular',
+                        context.loc.searchBar.popular,
                         style: context.theme.textTheme.bodyLarge,
                       ),
                       const SizedBox(width: 8),
@@ -2352,8 +2354,8 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
                             child: SettingsBooruDropdown(
                               value: null,
                               onChanged: (booru) {},
-                              title: 'Booru',
-                              placeholder: 'Select',
+                              title: context.loc.booru,
+                              placeholder: context.loc.select,
                               drawBottomBorder: false,
                             ),
                           ),
@@ -2413,7 +2415,7 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'Favourties',
+                          context.loc.searchBar.favourites,
                           style: context.theme.textTheme.bodyLarge,
                         ),
                       ),
@@ -2428,7 +2430,7 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
                           child: Row(
                             children: [
                               Text(
-                                '[All]',
+                                context.loc.searchBar.all,
                                 style: context.theme.textTheme.bodySmall,
                               ),
                               const SizedBox(width: 4),
@@ -2520,7 +2522,7 @@ class _SingleDatePickerBottomSheetState extends State<SingleDatePickerBottomShee
   Widget build(BuildContext context) {
     return SettingsBottomSheet(
       title: Text(
-        'Select date',
+        context.loc.searchBar.selectDate,
         style: context.theme.textTheme.titleLarge,
       ),
       contentItems: [
@@ -2599,7 +2601,7 @@ class _RangeDatePickerBottomSheetState extends State<RangeDatePickerBottomSheet>
   Widget build(BuildContext context) {
     return SettingsBottomSheet(
       title: Text(
-        'Select dates range',
+        context.loc.searchBar.selectDatesRange,
         style: context.theme.textTheme.titleLarge,
       ),
       contentItems: [
@@ -2681,7 +2683,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
             const SizedBox(width: double.maxFinite),
             Align(alignment: Alignment.center, child: row),
             const SizedBox(height: 10),
-            Text('Last search: ${formatDate(entry.timestamp)}', textAlign: TextAlign.center),
+            Text(context.loc.searchBar.lastSearch(date: formatDate(entry.timestamp)), textAlign: TextAlign.center),
             //
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -2692,7 +2694,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 } else {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: const Text('Unknown Booru type!', style: TextStyle(fontSize: 20)),
+                    title: Text(context.loc.searchBar.unknownBooruType, style: const TextStyle(fontSize: 20)),
                     leadingIcon: Icons.warning_amber,
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
@@ -2703,7 +2705,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 Navigator.of(context).popUntil(ModalRoute.withName('/'));
               },
               icon: const Icon(Icons.open_in_browser),
-              label: const Text('Open'),
+              label: Text(context.loc.open),
             ),
             //
             const SizedBox(height: 10),
@@ -2719,7 +2721,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 } else {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: const Text('Unknown Booru type!', style: TextStyle(fontSize: 20)),
+                    title: Text(context.loc.searchBar.unknownBooruType, style: const TextStyle(fontSize: 20)),
                     leadingIcon: Icons.warning_amber,
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
@@ -2730,7 +2732,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 Navigator.of(context).popUntil(ModalRoute.withName('/'));
               },
               icon: const Icon(Icons.add_circle_outline),
-              label: const Text('Open in new tab'),
+              label: Text(context.loc.openInNewTab),
             ),
             //
             const SizedBox(height: 10),
@@ -2740,7 +2742,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
-                  title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
+                  title: Text(context.loc.copied, style: const TextStyle(fontSize: 20)),
                   content: Text(entry.searchText, style: const TextStyle(fontSize: 16)),
                   leadingIcon: Icons.copy,
                   sideColor: Colors.green,
@@ -2748,7 +2750,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 Navigator.of(context).pop();
               },
               icon: const Icon(Icons.copy),
-              label: const Text('Copy'),
+              label: Text(context.loc.copy),
             ),
           ],
         );
@@ -2791,7 +2793,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'History',
+                    context.loc.searchBar.history,
                     style: context.theme.textTheme.bodyLarge,
                   ),
                 ),
@@ -2965,7 +2967,7 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Metatags',
+                    context.loc.searchBar.metatags,
                     style: context.theme.textTheme.bodyLarge,
                   ),
                 ),
@@ -3006,7 +3008,7 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ActionChip(
-                      label: const Text('...'),
+                      label: Text(context.loc.searchBar.more),
                       onPressed: openMetatagsDialog,
                     ),
                   );
@@ -3073,7 +3075,7 @@ class _PrefixEditDialog extends StatelessWidget {
     final searchHandler = SearchHandler.instance;
 
     return AlertDialog(
-      title: const Text('Prefix'),
+      title: Text(context.loc.searchBar.prefix),
       content: ValueListenableBuilder(
         valueListenable: controller,
         builder: (context, value, child) {
@@ -3113,9 +3115,9 @@ class _PrefixEditDialog extends StatelessWidget {
                 },
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Exclude (—)',
+                        context.loc.searchBar.exclude,
                       ),
                     ),
                     IgnorePointer(
@@ -3136,8 +3138,8 @@ class _PrefixEditDialog extends StatelessWidget {
                 },
                 child: Row(
                   children: [
-                    const Expanded(
-                      child: Text('Or (~)'),
+                    Expanded(
+                      child: Text(context.loc.or),
                     ),
                     IgnorePointer(
                       ignoring: true,
@@ -3166,7 +3168,7 @@ class _PrefixEditDialog extends StatelessWidget {
                       controller.text =
                           '${newBooru == null ? '' : usedBoorus.indexOf(newBooru) + 1}${newBooru == null ? '' : '#'}${isExclude ? '-' : ''}${isOr ? '~' : ''}$text';
                     },
-                    title: 'Booru (N#)',
+                    title: context.loc.searchBar.booruNumberPrefix,
                     contentPadding: EdgeInsets.zero,
                     itemBuilder: (booru, _) {
                       if (booru == null) {
@@ -3204,8 +3206,8 @@ class _PrefixEditDialog extends StatelessWidget {
                   ),
                 ),
               //
-              const CancelButton(
-                text: 'Return',
+              CancelButton(
+                text: context.loc.searchBar.returnButton,
                 withIcon: true,
               ),
             ],

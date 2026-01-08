@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -63,7 +64,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
             Navigator.of(context).pop(true);
           },
           icon: const Icon(Icons.vertical_align_top),
-          label: const Text('Move To Top'),
+          label: Text(context.loc.tabs.move.moveToTop),
         ),
         //
         const SizedBox(height: 10),
@@ -74,13 +75,13 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
             Navigator.of(context).pop(true);
           },
           icon: const Icon(Icons.vertical_align_bottom),
-          label: const Text('Move To Bottom'),
+          label: Text(context.loc.tabs.move.moveToBottom),
         ),
         //
         const SizedBox(height: 30),
         SettingsTextInput(
-          title: 'Tab Number',
-          hintText: 'Tab Number',
+          title: context.loc.tabs.move.tabNumber,
+          hintText: context.loc.tabs.move.tabNumber,
           onlyInput: true,
           controller: indexController,
           inputType: TextInputType.number,
@@ -99,17 +100,17 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
                   final int? enteredIndex = int.tryParse(indexController.text);
                   if (enteredIndex == null || (enteredIndex < 1 || enteredIndex > searchHandler.total)) {
                     return await FlashElements.showSnackbar(
-                      title: const Text('Invalid Tab Number'),
+                      title: Text(context.loc.tabs.move.invalidTabNumber),
                       content: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (enteredIndex == null)
-                            const Text('Invalid Input')
+                            Text(context.loc.tabs.move.invalidInput)
                           else if (enteredIndex < 1 || enteredIndex > searchHandler.total)
-                            const Text('Out of range'),
+                            Text(context.loc.tabs.move.outOfRange),
                           //
                           const SizedBox(height: 10),
-                          const Text('Please enter a valid tab number'),
+                          Text(context.loc.tabs.move.pleaseEnterValidTabNumber),
                         ],
                       ),
                     );
@@ -124,16 +125,16 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
                 }
               : null,
           icon: const Icon(Icons.vertical_align_center),
-          label: Text('Move To #${controllerNumber?.toFormattedString() ?? '?'}'),
+          label: Text(context.loc.tabs.move.moveTo(formattedNumber: controllerNumber?.toFormattedString() ?? '?')),
         ),
         //
         const SizedBox(height: 20),
-        const CancelButton(
-          text: 'Return',
+        CancelButton(
+          text: context.loc.tabs.move.returnButton,
           withIcon: true,
         ),
         const SizedBox(height: 10),
-        const Text('Preview:'),
+        Text(context.loc.tabs.move.preview),
         const SizedBox(height: 10),
         TabMovePreview(
           index: widget.index,

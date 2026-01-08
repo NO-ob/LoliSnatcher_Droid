@@ -208,7 +208,7 @@ class MainDrawer extends StatelessWidget {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Select booru for webview'),
+            title: Text(context.loc.mobileHome.selectBooruForWebview),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -227,7 +227,7 @@ class MainDrawer extends StatelessWidget {
                         Navigator.of(context).pop(newBooru);
                       });
                     },
-                    title: 'Booru',
+                    title: context.loc.booru,
                     contentPadding: EdgeInsets.zero,
                     drawBottomBorder: false,
                   ),
@@ -281,7 +281,7 @@ class MainDrawer extends StatelessWidget {
                         return const SizedBox.shrink();
                       },
                       child: SettingsButton(
-                        name: 'Lock app',
+                        name: context.loc.mobileHome.lockApp,
                         icon: const Icon(Icons.lock),
                         action: () => LocalAuthHandler.instance.lock(manually: true),
                       ),
@@ -768,19 +768,19 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                   children: [
                                     Text(
                                       isExists
-                                          ? 'File already exists'
+                                          ? context.loc.mobileHome.fileAlreadyExists
                                           : isFailed
-                                          ? 'Failed to download'
-                                          : 'Cancelled by user',
+                                          ? context.loc.mobileHome.failedToDownload
+                                          : context.loc.mobileHome.cancelledByUser,
                                     ),
                                     RetryButton(
-                                      text: isExists ? 'Save anyway' : 'Retry',
+                                      text: isExists ? context.loc.mobileHome.saveAnyway : context.loc.retry,
                                       withIcon: true,
                                       onTap: () => onRetryFailedItem(record, isExists, false),
                                       onLongTap: () => onRetryFailedItem(record, isExists, true),
                                     ),
                                     DeleteButton(
-                                      text: 'Skip',
+                                      text: context.loc.mobileHome.skip,
                                       customIcon: Icons.skip_next,
                                       action: () => snatchHandler.onRemoveRetryItem(record),
                                       withIcon: true,
@@ -874,9 +874,13 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                   action: () => onRetryAllFailed(false),
                                                   onLongPress: () => onRetryAllFailed(true),
                                                   icon: const Icon(Icons.refresh),
-                                                  name:
-                                                      'Retry all (${snatchHandler.existsItems.length + snatchHandler.failedItems.length + snatchHandler.cancelledItems.length})',
-                                                  subtitle: const Text('Existing, failed or cancelled items'),
+                                                  name: context.loc.mobileHome.retryAll(
+                                                    count:
+                                                        snatchHandler.existsItems.length +
+                                                        snatchHandler.failedItems.length +
+                                                        snatchHandler.cancelledItems.length,
+                                                  ),
+                                                  subtitle: Text(context.loc.mobileHome.existingFailedOrCancelledItems),
                                                 ),
                                         ),
                                       ),
@@ -895,7 +899,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                                   drawTopBorder: true,
                                                   action: snatchHandler.onClearRetryableItems,
                                                   icon: const Icon(Icons.delete_forever),
-                                                  name: 'Clear all retryable items',
+                                                  name: context.loc.mobileHome.clearAllRetryableItems,
                                                 ),
                                         ),
                                       ),

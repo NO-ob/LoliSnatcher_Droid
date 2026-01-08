@@ -199,7 +199,9 @@ class _MediaLoadingState extends State<MediaLoading> {
                       fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
                     ),
                     label: LoadingText(
-                      text: (widget.isTooBig || widget.item.isHated) ? 'Load anyway' : 'Restart loading',
+                      text: (widget.isTooBig || widget.item.isHated)
+                          ? context.loc.media.loading.loadAnyway
+                          : context.loc.media.loading.restartLoading,
                       fontSize: 16,
                       color: Colors.blue,
                     ),
@@ -250,7 +252,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                         fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
                       ),
                       label: LoadingText(
-                        text: 'Stop loading',
+                        text: context.loc.media.loading.stopLoading,
                         fontSize: 18,
                         color: Theme.of(context).colorScheme.error,
                       ),
@@ -280,17 +282,25 @@ class _MediaLoadingState extends State<MediaLoading> {
     String percentDoneText = '';
     if (hasProgressData) {
       if (isVideo) {
-        percentDoneText = (percentDone == 1) ? 'Rendering...' : '${(percentDone * 100).toStringAsFixed(2)}%';
+        percentDoneText = (percentDone == 1)
+            ? context.loc.media.loading.rendering
+            : '${(percentDone * 100).toStringAsFixed(2)}%';
       } else {
         percentDoneText = (percentDone == 1)
-            ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...'
+            ? (widget.isFromCache
+                  ? context.loc.media.loading.loadingAndRenderingFromCache
+                  : context.loc.media.loading.rendering)
             : '${(percentDone * 100).toStringAsFixed(2)}%';
       }
     } else {
       if (isVideo) {
-        percentDoneText = '${widget.isFromCache ? 'Loading from cache' : 'Buffering'}...';
+        percentDoneText = widget.isFromCache
+            ? context.loc.media.loading.loadingFromCache
+            : context.loc.media.loading.buffering;
       } else {
-        percentDoneText = widget.isDone ? 'Rendering...' : 'Loading${widget.isFromCache ? ' from cache' : ''}...';
+        percentDoneText = widget.isDone
+            ? context.loc.media.loading.rendering
+            : '${context.loc.media.loading.loading}${widget.isFromCache ? ' ${context.loc.media.loading.loadingFromCache.toLowerCase().replaceAll('...', '')}' : ''}...';
       }
     }
 
@@ -313,7 +323,9 @@ class _MediaLoadingState extends State<MediaLoading> {
         : '';
 
     final int sinceStartSeconds = (sinceStart / 1000).floor();
-    final String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds}s ago' : '';
+    final String sinceStartText = (!widget.isDone && percentDone < 1)
+        ? context.loc.media.loading.startedSecondsAgo(seconds: sinceStartSeconds)
+        : '';
 
     final bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated;
 
@@ -345,7 +357,9 @@ class _MediaLoadingState extends State<MediaLoading> {
             fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
           ),
           label: LoadingText(
-            text: (widget.isTooBig || widget.item.isHated) ? 'Load anyway' : 'Restart loading',
+            text: (widget.isTooBig || widget.item.isHated)
+                ? context.loc.media.loading.loadAnyway
+                : context.loc.media.loading.restartLoading,
             fontSize: 16,
             color: Colors.blue,
           ),
@@ -400,7 +414,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                 fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
               ),
               label: LoadingText(
-                text: 'Stop loading',
+                text: context.loc.media.loading.stopLoading,
                 fontSize: 18,
                 color: Theme.of(context).colorScheme.error,
               ),

@@ -336,7 +336,7 @@ class _NoteBuildState extends State<NoteBuild> {
         },
         onTap: () {
           FlashElements.showSnackbar(
-            title: const Text('Note'),
+            title: Text(context.loc.viewer.notes.note),
             content: Text.rich(
               parse(
                 widget.text ?? '',
@@ -426,7 +426,7 @@ class NotesDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SettingsDialog(
-      title: const Text('Notes'),
+      title: Text(context.loc.viewer.notes.notes),
       content: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Material(
@@ -465,9 +465,9 @@ class NotesDialog extends StatelessWidget {
       // titlePadding: const EdgeInsets.fromLTRB(6, 18, 2, 6),
       // insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
       scrollable: false,
-      actionButtons: const [
+      actionButtons: [
         CancelButton(
-          text: 'Close',
+          text: context.loc.viewer.notes.closeDialog,
           withIcon: true,
         ),
       ],

@@ -37,7 +37,10 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
     } else {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text('Empty input!', style: TextStyle(fontSize: 20)),
+        title: Text(
+          context.loc.tagsFiltersDialogs.emptyInput,
+          style: const TextStyle(fontSize: 20),
+        ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
@@ -54,7 +57,7 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
           child: AbsorbPointer(
             absorbing: true,
             child: TagsFiltersListItem(
-              tag: '[Add new ${widget.tagFilterType} filter]',
+              tag: context.loc.tagsFiltersDialogs.addNewFilter(type: widget.tagFilterType),
               overrideIcon: const Icon(Icons.add),
             ),
           ),
@@ -63,8 +66,8 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
         Container(
           margin: const EdgeInsets.symmetric(vertical: 20),
           child: SettingsTextInput(
-            title: 'New ${widget.tagFilterType} tag filter',
-            hintText: 'New filter',
+            title: context.loc.tagsFiltersDialogs.newTagFilter(type: widget.tagFilterType),
+            hintText: context.loc.tagsFiltersDialogs.newFilter,
             onlyInput: true,
             controller: _controller,
             autofocus: true,
@@ -82,7 +85,7 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
           withIcon: true,
         ),
         ConfirmButton(
-          text: 'Add',
+          text: context.loc.add,
           withIcon: true,
           customIcon: Icons.save,
           action: () => onSubmit(_controller.text),

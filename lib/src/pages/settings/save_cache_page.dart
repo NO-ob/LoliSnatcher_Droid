@@ -36,13 +36,13 @@ class _SaveCachePageState extends State<SaveCachePage> {
       favouriteOnSnatch = false;
 
   static const List<_CacheType> cacheTypes = [
-    _CacheType('Total', null),
+    _CacheType(_CacheTypeEnum.total, null),
     // TODO ask before deleting favicons, since they cause unneeded network requests on each render if not cached
-    _CacheType('Favicons', 'favicons'),
-    _CacheType('Thumbnails', 'thumbnails'),
-    _CacheType('Samples', 'samples'),
-    _CacheType('Media', 'media'),
-    _CacheType('WebView', 'WebView'),
+    _CacheType(_CacheTypeEnum.favicons, 'favicons'),
+    _CacheType(_CacheTypeEnum.thumbnails, 'thumbnails'),
+    _CacheType(_CacheTypeEnum.samples, 'samples'),
+    _CacheType(_CacheTypeEnum.media, 'media'),
+    _CacheType(_CacheTypeEnum.webView, 'WebView'),
   ]; // {displayed name, cache folder}
   List<Map<String, dynamic>> cacheStats = [];
   Map<String, dynamic>? cacheDurationSelected;
@@ -162,14 +162,18 @@ class _SaveCachePageState extends State<SaveCachePage> {
       },
     );
     final String? folder = type.folder;
-    final String label = type.label;
+    final String label = type.type.locName(context);
     final String size = Tools.formatBytes(stat['totalSize']!, 2);
     final int fileCount = stat['fileNum'] ?? 0;
     final bool isEmpty = stat['fileNum'] == 0 || stat['totalSize'] == 0;
     final bool isLoading = stat['type'] == 'loading';
     final String text = isLoading
-        ? 'Loading...'
-        : (isEmpty ? 'Empty' : '$size in $fileCount ${Tools.pluralize('file', fileCount)}');
+        ? context.loc.settings.cache.loading
+        : (isEmpty
+              ? context.loc.settings.cache.empty
+              : (fileCount == 1
+                    ? context.loc.settings.cache.inFileSingular(size: size)
+                    : context.loc.settings.cache.inFilesPlural(size: size, count: fileCount)));
 
     final bool allowedToClear = folder != null && folder != 'favicons' && !isEmpty;
 
@@ -182,12 +186,12 @@ class _SaveCachePageState extends State<SaveCachePage> {
             context: context,
             position: FlashPosition.top,
             duration: const Duration(seconds: 2),
-            title: const Text(
-              'Cache cleared!',
-              style: TextStyle(fontSize: 20),
+            title: Text(
+              context.loc.settings.cache.cacheCleared,
+              style: const TextStyle(fontSize: 20),
             ),
             content: Text(
-              'Cleared $label cache!',
+              context.loc.settings.cache.clearedCacheType(type: label),
               style: const TextStyle(fontSize: 16),
             ),
             leadingIcon: Icons.delete_forever,
@@ -210,7 +214,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text('Snatching & Caching'),
+          title: Text(context.loc.settings.cache.title),
         ),
         body: Center(
           child: ListView(
@@ -223,11 +227,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     snatchMode = newValue ?? settingsHandler.map['snatchMode']!['default'];
                   });
                 },
-                title: 'Snatch quality',
+                title: context.loc.settings.cache.snatchQuality,
               ),
               SettingsTextInput(
                 controller: snatchCooldownController,
-                title: 'Snatch cooldown (in ms)',
+                title: context.loc.settings.cache.snatchCooldown,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['snatchCooldown']!['default']!.toString(),
@@ -238,11 +242,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid timeout value';
+                    return context.loc.settings.cache.pleaseEnterAValidTimeout;
                   } else if (parse < 10) {
-                    return 'Please enter a value bigger than 10ms';
+                    return context.loc.settings.cache.biggerThan10;
                   } else {
                     return null;
                   }
@@ -255,7 +259,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     downloadNotifications = newValue;
                   });
                 },
-                title: 'Show download notifications',
+                title: context.loc.settings.cache.showDownloadNotifications,
               ),
               SettingsToggle(
                 value: snatchOnFavourite,
@@ -271,7 +275,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     Icon(Icons.save),
                   ],
                 ),
-                title: 'Snatch items on favouriting',
+                title: context.loc.settings.cache.snatchItemsOnFavouriting,
               ),
               SettingsToggle(
                 value: favouriteOnSnatch,
@@ -287,7 +291,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     Icon(Icons.favorite, color: Colors.red),
                   ],
                 ),
-                title: 'Favourite items on snatching',
+                title: context.loc.settings.cache.favouriteItemsOnSnatching,
               ),
               SettingsToggle(
                 value: (!Platform.isAndroid || extPathOverride.isNotEmpty) && jsonWrite,
@@ -297,14 +301,16 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   });
                 },
                 enabled: !Platform.isAndroid || extPathOverride.isNotEmpty,
-                title: 'Write image data to JSON on save',
+                title: context.loc.settings.cache.writeImageDataOnSave,
                 subtitle: (!Platform.isAndroid || extPathOverride.isNotEmpty)
                     ? null
-                    : const Text('Requires custom storage directory'),
+                    : Text(context.loc.settings.cache.requiresCustomStorageDirectory),
               ),
               SettingsButton(
-                name: 'Set storage directory',
-                subtitle: extPathOverride.isEmpty ? null : Text('Current: $extPathOverride'),
+                name: context.loc.settings.cache.setStorageDirectory,
+                subtitle: extPathOverride.isEmpty
+                    ? null
+                    : Text(context.loc.settings.cache.currentPath(path: extPathOverride)),
                 icon: const Icon(Icons.folder_outlined),
                 action: () async {
                   //String url = await ServiceHandler.setExtDir();
@@ -337,13 +343,13 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
                     FlashElements.showSnackbar(
                       context: context,
-                      title: const Text(
-                        'Error!',
-                        style: TextStyle(fontSize: 20),
+                      title: Text(
+                        context.loc.settings.cache.errorExclamation,
+                        style: const TextStyle(fontSize: 20),
                       ),
-                      content: const Text(
-                        'Currently not available for this platform',
-                        style: TextStyle(fontSize: 16),
+                      content: Text(
+                        context.loc.settings.cache.notAvailableForPlatform,
+                        style: const TextStyle(fontSize: 16),
                       ),
                       leadingIcon: Icons.error_outline,
                       leadingIconColor: Colors.red,
@@ -354,7 +360,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
               ),
               if (extPathOverride.isNotEmpty)
                 SettingsButton(
-                  name: 'Reset storage directory',
+                  name: context.loc.settings.cache.resetStorageDirectory,
                   icon: const Icon(Icons.refresh),
                   action: () {
                     setState(() {
@@ -370,7 +376,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     thumbnailCache = newValue;
                   });
                 },
-                title: 'Cache previews',
+                title: context.loc.settings.cache.cachePreviews,
               ),
               SettingsToggle(
                 value: mediaCache,
@@ -379,7 +385,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     mediaCache = newValue;
                   });
                 },
-                title: 'Cache media',
+                title: context.loc.settings.cache.cacheMedia,
               ),
               SettingsOptionsList(
                 value: videoCacheMode,
@@ -389,7 +395,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     videoCacheMode = newValue ?? settingsHandler.map['videoCacheMode']!['default'];
                   });
                 },
-                title: 'Video cache mode',
+                title: context.loc.settings.cache.videoCacheMode,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -397,18 +403,16 @@ class _SaveCachePageState extends State<SaveCachePage> {
                       context: context,
                       builder: (context) {
                         return SettingsDialog(
-                          title: const Text('Video cache modes'),
+                          title: Text(context.loc.settings.cache.videoCacheModesTitle),
                           contentItems: [
-                            const Text("- Stream - Don't cache, start playing as soon as possible"),
-                            const Text(
-                              '- Cache - Saves the file to device storage, plays only when download is complete',
-                            ),
-                            const Text('- Stream+Cache - Mix of both, but currently leads to double download'),
+                            Text(context.loc.settings.cache.videoCacheModeStream),
+                            Text(context.loc.settings.cache.videoCacheModeCache),
+                            Text(context.loc.settings.cache.videoCacheModeStreamCache),
                             const Text(''),
-                            const Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
+                            Text(context.loc.settings.cache.videoCacheNoteEnable),
                             const Text(''),
                             if (SettingsHandler.isDesktopPlatform)
-                              const Text('[Warning]: On desktop Stream mode can work incorrectly for some Boorus.'),
+                              Text(context.loc.settings.cache.videoCacheWarningDesktop),
                           ],
                         );
                       },
@@ -431,12 +435,12 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     cacheDuration = cacheDurationSelected!['value'];
                   });
                 },
-                title: 'Delete cache after:',
+                title: context.loc.settings.cache.deleteCacheAfter,
               ),
               SettingsTextInput(
                 controller: cacheSizeController,
-                title: 'Cache size Limit (in GB)',
-                hintText: 'Maximum total cache size',
+                title: context.loc.settings.cache.cacheSizeLimit,
+                hintText: context.loc.settings.cache.maximumTotalCacheSize,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['cacheSize']!['default']!.toString(),
@@ -446,10 +450,10 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 numberMax: double.infinity,
               ),
               const SettingsButton(name: '', enabled: false),
-              const SettingsButton(name: 'Cache stats:'),
+              SettingsButton(name: context.loc.settings.cache.cacheStats),
               ...cacheTypes.map(buildCacheButton),
               SettingsButton(
-                name: 'Clear all cache',
+                name: context.loc.settings.cache.clearAllCache,
                 icon: Icon(
                   Icons.delete_forever,
                   color: Theme.of(context).colorScheme.error,
@@ -458,20 +462,20 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   FlashElements.showSnackbar(
                     context: context,
                     position: FlashPosition.top,
-                    title: const Text(
-                      'Cache cleared!',
-                      style: TextStyle(fontSize: 20),
+                    title: Text(
+                      context.loc.settings.cache.cacheCleared,
+                      style: const TextStyle(fontSize: 20),
                     ),
-                    content: const Column(
+                    content: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Cleared cache completely!',
-                          style: TextStyle(fontSize: 16),
+                          context.loc.settings.cache.clearedCacheCompletely,
+                          style: const TextStyle(fontSize: 16),
                         ),
                         Text(
-                          'App Restart may be required!',
-                          style: TextStyle(fontSize: 16),
+                          context.loc.settings.cache.appRestartRequired,
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ],
                     ),
@@ -495,12 +499,39 @@ class _SaveCachePageState extends State<SaveCachePage> {
   }
 }
 
+enum _CacheTypeEnum {
+  total,
+  favicons,
+  thumbnails,
+  samples,
+  media,
+  webView,
+  ;
+
+  String locName(BuildContext context) {
+    switch (this) {
+      case total:
+        return context.loc.settings.cache.cacheTypeTotal;
+      case favicons:
+        return context.loc.settings.cache.cacheTypeFavicons;
+      case thumbnails:
+        return context.loc.settings.cache.cacheTypeThumbnails;
+      case samples:
+        return context.loc.settings.cache.cacheTypeSamples;
+      case media:
+        return context.loc.settings.cache.cacheTypeMedia;
+      case webView:
+        return context.loc.settings.cache.cacheTypeWebView;
+    }
+  }
+}
+
 class _CacheType {
   const _CacheType(
-    this.label,
+    this.type,
     this.folder,
   );
 
-  final String label;
+  final _CacheTypeEnum type;
   final String? folder;
 }

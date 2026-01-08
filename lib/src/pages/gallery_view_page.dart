@@ -321,8 +321,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                         valueListenable: widget.tab.booruHandler.filteredFetched,
                         builder: (context, filteredFetched, child) {
                           if (filteredFetched.isEmpty) {
-                            return const Center(
-                              child: Text('No items', style: TextStyle(color: Colors.white)),
+                            return Center(
+                              child: Text(context.loc.galleryView.noItems, style: const TextStyle(color: Colors.white)),
                             );
                           }
 
@@ -603,17 +603,17 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                   builder: (context, page, child) {
                     if (widget.tab.booruHandler.filteredFetched.isEmpty ||
                         page >= widget.tab.booruHandler.filteredFetched.length) {
-                      return const Center(
+                      return Center(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           spacing: 16,
                           children: [
-                            Text('No item selected'),
+                            Text(context.loc.galleryView.noItemSelected),
                             Padding(
-                              padding: EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(8),
                               child: SizedBox(
                                 width: double.infinity,
-                                child: CancelButton(text: 'Close'),
+                                child: CancelButton(text: context.loc.galleryView.close),
                               ),
                             ),
                           ],

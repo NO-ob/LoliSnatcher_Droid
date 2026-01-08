@@ -46,7 +46,10 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
     } else {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text('Empty input!', style: TextStyle(fontSize: 20)),
+        title: Text(
+          context.loc.tagsFiltersDialogs.emptyInput,
+          style: const TextStyle(fontSize: 20),
+        ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
@@ -76,8 +79,8 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
         Container(
           margin: const EdgeInsets.symmetric(vertical: 20),
           child: SettingsTextInput(
-            title: 'Edit Filter',
-            hintText: 'Edit Filter',
+            title: context.loc.tagsFiltersDialogs.editTagFilter,
+            hintText: context.loc.tagsFiltersDialogs.editTagFilter,
             onlyInput: true,
             controller: _controller,
             autofocus: false,
@@ -90,8 +93,8 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
         ),
       ],
       actionButtons: [
-        const CancelButton(
-          text: 'Close',
+        CancelButton(
+          text: context.loc.close,
           withIcon: true,
         ),
         DeleteButton(
@@ -99,7 +102,7 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
           action: onDelete,
         ),
         ConfirmButton(
-          text: 'Save',
+          text: context.loc.save,
           withIcon: true,
           customIcon: Icons.save,
           action: () => onSubmit(_controller.text),

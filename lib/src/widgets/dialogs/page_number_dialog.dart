@@ -41,14 +41,14 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
     final int possibleMaxPageNum = total != 0 ? (total / settingsHandler.itemLimit).round() : 0;
 
     return SettingsBottomSheet(
-      title: const Text(
-        'Page changer',
-        style: TextStyle(fontSize: 20),
+      title: Text(
+        context.loc.pageChanger.title,
+        style: const TextStyle(fontSize: 20),
       ),
       contentItems: [
         SettingsTextInput(
-          title: 'Page #',
-          hintText: 'Page #',
+          title: context.loc.pageChanger.pageLabel,
+          hintText: context.loc.pageChanger.pageLabel,
           onlyInput: true,
           controller: pageNumberController,
           autofocus: true,
@@ -59,16 +59,16 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
           numberMax: double.infinity,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter a number';
+              return context.loc.pageChanger.pleaseEnterANumber;
             } else if (int.tryParse(value) == null) {
-              return 'Please enter a valid number';
+              return context.loc.pageChanger.pleaseEnterAValidNumber;
             }
             return null;
           },
         ),
         SettingsTextInput(
-          title: 'Delay between loadings (ms)',
-          hintText: 'Delay in ms',
+          title: context.loc.pageChanger.delayBetweenLoadings,
+          hintText: context.loc.pageChanger.delayInMs,
           onlyInput: true,
           controller: delayController,
           autofocus: false,
@@ -79,15 +79,15 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
           numberMax: 10000,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter a number';
+              return context.loc.pageChanger.pleaseEnterANumber;
             } else if (int.tryParse(value) == null) {
-              return 'Please enter a valid number';
+              return context.loc.pageChanger.pleaseEnterAValidNumber;
             }
             return null;
           },
         ),
         SettingsButton(
-          name: 'Current page #${searchHandler.pageNum.value}',
+          name: context.loc.pageChanger.currentPage(number: searchHandler.pageNum.value),
           action: () {
             pageNumberController.text = searchHandler.pageNum.value.toString();
           },
@@ -95,16 +95,16 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
         ),
         if (possibleMaxPageNum != 0)
           SettingsButton(
-            name: 'Possible max page #~$possibleMaxPageNum',
+            name: context.loc.pageChanger.possibleMaxPage(number: possibleMaxPageNum),
             action: () {
               pageNumberController.text = possibleMaxPageNum.toString();
             },
           ),
         Obx(
           () => searchHandler.isRunningAutoSearch.value
-              ? const SettingsButton(
-                  name: 'Search currently running!',
-                  icon: PulseWidget(
+              ? SettingsButton(
+                  name: context.loc.pageChanger.searchCurrentlyRunning,
+                  icon: const PulseWidget(
                     child: Icon(
                       Icons.warning_amber,
                       color: Colors.yellow,
@@ -117,7 +117,7 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
       actionButtons: [
         ElevatedButton.icon(
           icon: const Icon(Icons.subdirectory_arrow_right_rounded),
-          label: const Text('Jump to page'),
+          label: Text(context.loc.pageChanger.jumpToPage),
           onPressed: () {
             if (pageNumberController.text.isNotEmpty) {
               searchHandler.changeCurrentTabPageNumber((int.tryParse(pageNumberController.text) ?? 0) - 1);
@@ -128,7 +128,7 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
         Obx(
           () => ElevatedButton.icon(
             icon: const Icon(Icons.search_rounded),
-            label: const Text('Search until page'),
+            label: Text(context.loc.pageChanger.searchUntilPage),
             onPressed: searchHandler.isRunningAutoSearch.value
                 ? null
                 : () {
@@ -146,7 +146,7 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
           () => searchHandler.isRunningAutoSearch.value
               ? ElevatedButton.icon(
                   icon: const Icon(Icons.cancel_outlined),
-                  label: const Text('Stop searching'),
+                  label: Text(context.loc.pageChanger.stopSearching),
                   onPressed: () {
                     searchHandler.isRunningAutoSearch.value = false;
                   },
