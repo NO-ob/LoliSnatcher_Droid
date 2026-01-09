@@ -118,6 +118,32 @@
         "temporaryLockout": "Temporary lockout",
         "somethingWentWrong(param=error)": "Something went wrong: ${error: String}"
     },
+    "searchHandler": {
+        "removedLastTab": "Removed Last Tab",
+        "resettingSearchToDefaultTags": "Resetting search to default tags!",
+        "uoh": "UOOOOOOOHHH",
+        "ratingsChanged": "Ratings changed",
+        "ratingsChangedMessage(param=booruType)": "On ${booruType: String} [rating:safe] is now replaced with [rating:general] and [rating:sensitive]",
+        "appFixedRatingAutomatically": "App fixed the rating automatically, but consider changing to correct rating in your future queries",
+        "tabsRestored": "Tabs restored",
+        "restoredTabsCount(param=count)": {
+            "one": "Restored 1 tab from previous session!",
+            "other": "Restored ${count} tabs from previous session!"
+        },
+        "someRestoredTabsHadIssues": "Some restored tabs had unknown boorus or broken characters.",
+        "theyWereSetToDefaultOrIgnored": "They were set to default or ignored.",
+        "listOfBrokenTabs": "List of broken tabs:",
+        "tabsMerged": "Tabs merged",
+        "addedTabsCount(param=count)": {
+            "one": "Added 1 new tab!",
+            "other": "Added ${count} new tabs!"
+        },
+        "tabsReplaced": "Tabs replaced",
+        "receivedTabsCount(param=count)": {
+            "one": "Received 1 tab!",
+            "other": "Received ${count} tabs!"
+        }
+    },
     "snatcher": {
         "title": "Snatcher",
         "snatchingHistory": "Snatching history",
@@ -126,7 +152,35 @@
         "amountOfFilesToSnatch": "Amount of Files to Snatch",
         "delayInMs": "Delay (in ms)",
         "delayBetweenEachDownload": "Delay between each download",
-        "snatchFiles": "Snatch Files"
+        "snatchFiles": "Snatch Files",
+        "itemWasAlreadySnatched": "Item was already snatched before",
+        "failedToSnatchItem": "Failed to snatch the item",
+        "itemWasCancelled": "Item was cancelled",
+        "startingNextQueueItem": "Starting next queue item...",
+        "itemsSnatched": "Items Snatched",
+        "snatchedCount(param=count)": {
+            "one": "Snatched: 1 item",
+            "other": "Snatched: ${count} items"
+        },
+        "filesAlreadySnatched(param=count)": {
+            "one": "1 file was already snatched",
+            "other": "${count} files were already snatched"
+        },
+        "failedToSnatchFiles(param=count)": {
+            "one": "Failed to snatch 1 file",
+            "other": "Failed to snatch ${count} files"
+        },
+        "cancelledFiles(param=count)": {
+            "one": "Cancelled 1 file",
+            "other": "Cancelled ${count} files"
+        },
+        "snatchingImages": "Snatching Images",
+        "doNotCloseApp": "Do not close the app!",
+        "addedItemToQueue": "Added item to snatch queue",
+        "addedItemsToQueue(param=count)": {
+            "one": "Added 1 item to snatch queue",
+            "other": "Added ${count} items to snatch queue"
+        }
     },
     "multibooru": {
         "title": "Multibooru",
@@ -135,6 +189,12 @@
         "selectSecondaryBoorus": "Select secondary boorus:",
         "akaMultibooruMode": "aka Multibooru mode",
         "labelSecondaryBoorusToInclude": "Secondary boorus to include"
+    },
+    "hydrus": {
+        "importError": "Something went wrong importing to hydrus",
+        "apiPermissionsRequired": "You might not have given the correct API permissions, this can be edited in Review Services",
+        "addTagsToFile": "Add tags to file",
+        "addUrls": "Add URLs"
     },
     "tabs": {
         "tab": "Tab",
@@ -188,7 +248,6 @@
         "longPressToMove": "Long press on a tab to move it",
         "removedLastTab": "Removed Last Tab",
         "resettingToDefaultTags": "Resetting search to default tags!",
-        "uohhh": "UOOOOOOOHHH",
         "ratingsChanged": "Ratings changed",
         "ratingsChangedOn(param=booruType)": "On ${booruType: String} ",
         "ratingReplacedWith": " is now replaced with ",
@@ -224,7 +283,10 @@
         "byBooru": "By Booru",
         "alphabetically": "Alphabetically",
         "reversed": "(reversed)",
-        "areYouSureDeleteTabs(param=count, param=tabsPlural)": "Are you sure you want to delete ${count: int} ${tabsPlural: String}?",
+        "areYouSureDeleteTabs(param=count)": {
+            "one": "Are you sure you want to delete 1 tab?",
+            "other": "Are you sure you want to delete ${count} tabs?"
+        },
         "filters": {
             "loaded": "Loaded",
             "tagType": "Tag Type",
@@ -293,10 +355,16 @@
         "copiedToClipboard": "Copied to clipboard!",
         "delete": "Delete",
         "deleteHistoryEntries": "Delete History Entries",
-        "deleteItemsConfirm(param=count, param=itemsPlural)": "Are you sure you want to delete ${count: int} ${itemsPlural: String}?",
+        "deleteItemsConfirm(param=count)": {
+            "one": "Are you sure you want to delete 1 item?",
+            "other": "Are you sure you want to delete ${count} items?"
+        },
         "selectAll": "Select all",
         "clearSelection": "Clear selection",
-        "deleteItems(param=count, param=itemsPlural)": "Delete ${count: int} ${itemsPlural: String}"
+        "deleteItems(param=count)": {
+            "one": "Delete 1 item",
+            "other": "Delete ${count} items"
+        }
     },
     "webview": {
         "title": "Webview",
@@ -541,7 +609,15 @@
             "mpvUseHardwareAcceleration": "MPV: use hardware acceleration",
             "mpvVO": "MPV: VO",
             "mpvHWDEC": "MPV: HWDEC",
-            "videoCacheMode": "Video cache mode"
+            "videoCacheMode": "Video cache mode",
+            "cacheModes": {
+                "title": "Video cache modes",
+                "streamMode": "- Stream - Don't cache, start playing as soon as possible",
+                "cacheMode": "- Cache - Saves the file to device storage, plays only when download is complete",
+                "streamCacheMode": "- Stream+Cache - Mix of both, but currently leads to double download",
+                "cacheNote": "[Note]: Videos will cache only if 'Cache Media' is enabled.",
+                "desktopWarning": "[Warning]: On desktop Stream mode can work incorrectly for some Boorus."
+            }
         },
         "downloads": {
             "title": "Snatching",
@@ -988,7 +1064,10 @@
         "makeUnstaleable": "Make Unstaleable",
         "close": "Close",
         "selectAll": "Select all",
-        "deleteTags(param=count, param=tagsPlural)": "Delete ${count: int} ${tagsPlural: String}",
+        "deleteTags(param=count)": {
+            "one": "Delete 1 tag",
+            "other": "Delete ${count} tags"
+        },
         "deleteTagsTitle": "Delete Tags",
         "clearSelection": "Clear selection"
     },
@@ -1012,7 +1091,12 @@
         "noConnection": "No connection",
         "waitingForConnection": "Waiting for connection...",
         "startingServer": "Starting server...",
-        "keepScreenAwake": "Keep the screen awake"
+        "keepScreenAwake": "Keep the screen awake",
+        "serverKilled": "LoliSync server killed!",
+        "testError(param=statusCode, param=reasonPhrase)": "Test error: ${statusCode: int} ${reasonPhrase: String}",
+        "testErrorException(param=error)": "Test error: ${error: String}",
+        "testSuccess": "Test request received a positive response",
+        "testSuccessMessage": "There should be a 'Test' message on the other device"
     },
     "imageSearch": {
         "title": "Image search"
@@ -1184,7 +1268,8 @@
         "notes": {
             "note": "Note",
             "notes": "Notes",
-            "closeDialog": "Close"
+            "closeDialog": "Close",
+            "coordinates(param=posX, param=posY)": "X:${posX: int}, Y:${posY: int}"
         }
     },
     "common": {
@@ -1197,7 +1282,11 @@
         "copiedToClipboard": "Copied to clipboard!",
         "loadingFile": "Loading File...",
         "loadingFileMessage": "This can take some time, please wait...",
-        "failedToOpenLink": "Failed to open link"
+        "failedToOpenLink": "Failed to open link",
+        "sources(param=count)": {
+            "one": "Source",
+            "other": "Sources"
+        }
     },
     "media": {
         "loading": {
@@ -1220,8 +1309,16 @@
             "retry": "Retry",
             "openFileInBrowser": "Open file in browser",
             "openPostInBrowser": "Open post in browser",
-            "currentlyChecking": "Currently checking:"
+            "currentlyChecking": "Currently checking:",
+            "unknownFileFormat(param=fileExt)": "Unknown file format (.${fileExt: String}), tap here to open in browser"
         }
+    },
+    "imageStats": {
+        "live(param=count)": "Live: ${count: int}",
+        "pending(param=count)": "Pending: ${count: int}",
+        "total(param=count)": "Total: ${count: int}",
+        "size(param=size)": "Size: ${size: String}",
+        "max(param=max)": "Max: ${max: String}"
     },
     "preview": {
         "searchForTags": "Search for tags",
@@ -1232,7 +1329,10 @@
             "reachedEnd": "You reached the end",
             "reachedEndSubtitle(param=pageNum)": "Loaded ${pageNum: int} pages\nTap here to reload last page",
             "loadingPage(param=pageNum)": "Loading page #${pageNum: int}...",
-            "startedAgo(param=seconds, param=secondsPlural)": "Started ${seconds: int} ${secondsPlural: String} ago",
+            "startedAgo(param=seconds)": {
+                "one": "Started 1 second ago",
+                "other": "Started ${seconds} seconds ago"
+            },
             "tapToRetryIfStuck": "Tap here to retry if search is taking too long or seems stuck",
             "errorLoadingPage(param=pageNum)": "Error when loading page #${pageNum: int}",
             "errorWithMessage": "Tap here to retry",

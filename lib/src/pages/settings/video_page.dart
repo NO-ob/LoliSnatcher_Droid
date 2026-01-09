@@ -251,22 +251,16 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                                   context: context,
                                   builder: (context) {
                                     return SettingsDialog(
-                                      title: const Text('Video cache modes'),
+                                      title: Text(context.loc.settings.video.cacheModes.title),
                                       contentItems: [
-                                        const Text("- Stream - Don't cache, start playing as soon as possible"),
-                                        const Text(
-                                          '- Cache - Saves the file to device storage, plays only when download is complete',
-                                        ),
-                                        const Text(
-                                          '- Stream+Cache - Mix of both, but currently leads to double download',
-                                        ),
+                                        Text(context.loc.settings.video.cacheModes.streamMode),
+                                        Text(context.loc.settings.video.cacheModes.cacheMode),
+                                        Text(context.loc.settings.video.cacheModes.streamCacheMode),
                                         const Text(''),
-                                        const Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
+                                        Text(context.loc.settings.video.cacheModes.cacheNote),
                                         const Text(''),
                                         if (SettingsHandler.isDesktopPlatform)
-                                          const Text(
-                                            '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
-                                          ),
+                                          Text(context.loc.settings.video.cacheModes.desktopWarning),
                                       ],
                                     );
                                   },

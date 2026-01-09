@@ -99,6 +99,47 @@
         "loadingTags": "{Loading Tags...}",
         "restoringTabs": "{Restoring Tabs...}"
     },
+    "permissions": {
+        "noAccessToCustomStorageDirectory": "{No access to custom storage directory}",
+        "pleaseSetStorageDirectoryAgain": "{Please set storage directory again to grant the app access to it}",
+        "currentPath(param=path)": "{Current path: ${path: String}}",
+        "setDirectory": "{Set directory}",
+        "currentlyNotAvailableForThisPlatform": "{Currently not available for this platform}",
+        "resetDirectory": "{Reset directory}",
+        "afterResetFilesWillBeSavedToDefaultDirectory": "{After reset files will be saved to default system directory}"
+    },
+    "authentication": {
+        "pleaseAuthenticateToUseTheApp": "{Please authenticate to use the app}",
+        "noBiometricHardwareAvailable": "{No biometric hardware available}",
+        "temporaryLockout": "{Temporary lockout}",
+        "somethingWentWrong(param=error)": "{Something went wrong: ${error: String}}"
+    },
+    "searchHandler": {
+        "removedLastTab": "{Removed Last Tab}",
+        "resettingSearchToDefaultTags": "{Resetting search to default tags!}",
+        "uoh": "{UOOOOOOOHHH}",
+        "ratingsChanged": "{Ratings changed}",
+        "ratingsChangedMessage(param=booruType)": "{On ${booruType: String} [rating:safe] is now replaced with [rating:general] and [rating:sensitive]}",
+        "appFixedRatingAutomatically": "{App fixed the rating automatically, but consider changing to correct rating in your future queries}",
+        "tabsRestored": "{Tabs restored}",
+        "restoredTabsCount(param=count)": {
+            "one": "{Restored 1 tab from previous session!}",
+            "other": "{Restored ${count} tabs from previous session!}"
+        },
+        "someRestoredTabsHadIssues": "{Some restored tabs had unknown boorus or broken characters.}",
+        "theyWereSetToDefaultOrIgnored": "{They were set to default or ignored.}",
+        "listOfBrokenTabs": "{List of broken tabs:}",
+        "tabsMerged": "{Tabs merged}",
+        "addedTabsCount(param=count)": {
+            "one": "{Added 1 new tab!}",
+            "other": "{Added ${count} new tabs!}"
+        },
+        "tabsReplaced": "{Tabs replaced}",
+        "receivedTabsCount(param=count)": {
+            "one": "{Received 1 tab!}",
+            "other": "{Received ${count} tabs!}"
+        }
+    },
     "snatcher": {
         "title": "{Snatcher}",
         "snatchingHistory": "{Snatching history}",
@@ -107,7 +148,35 @@
         "amountOfFilesToSnatch": "{Amount of Files to Snatch}",
         "delayInMs": "{Delay (in ms)}",
         "delayBetweenEachDownload": "{Delay between each download}",
-        "snatchFiles": "{Snatch Files}"
+        "snatchFiles": "{Snatch Files}",
+        "itemWasAlreadySnatched": "{Item was already snatched before}",
+        "failedToSnatchItem": "{Failed to snatch the item}",
+        "itemWasCancelled": "{Item was cancelled}",
+        "startingNextQueueItem": "{Starting next queue item...}",
+        "itemsSnatched": "{Items Snatched}",
+        "snatchedCount(param=count)": {
+            "one": "{Snatched: 1 item}",
+            "other": "{Snatched: ${count} items}"
+        },
+        "filesAlreadySnatched(param=count)": {
+            "one": "{1 file was already snatched}",
+            "other": "{${count} files were already snatched}"
+        },
+        "failedToSnatchFiles(param=count)": {
+            "one": "{Failed to snatch 1 file}",
+            "other": "{Failed to snatch ${count} files}"
+        },
+        "cancelledFiles(param=count)": {
+            "one": "{Cancelled 1 file}",
+            "other": "{Cancelled ${count} files}"
+        },
+        "snatchingImages": "{Snatching Images}",
+        "doNotCloseApp": "{Do not close the app!}",
+        "addedItemToQueue": "{Added item to snatch queue}",
+        "addedItemsToQueue(param=count)": {
+            "one": "{Added 1 item to snatch queue}",
+            "other": "{Added ${count} items to snatch queue}"
+        }
     },
     "multibooru": {
         "title": "{Multibooru}",
@@ -116,6 +185,12 @@
         "selectSecondaryBoorus": "{Select secondary boorus:}",
         "akaMultibooruMode": "{aka Multibooru mode}",
         "labelSecondaryBoorusToInclude": "{Secondary boorus to include}"
+    },
+    "hydrus": {
+        "importError": "{Something went wrong importing to hydrus}",
+        "apiPermissionsRequired": "{You might not have given the correct API permissions, this can be edited in Review Services}",
+        "addTagsToFile": "{Add tags to file}",
+        "addUrls": "{Add URLs}"
     },
     "tabs": {
         "tab": "{Tab}",
@@ -167,6 +242,22 @@
         "selectDeselectAll": "{Select/deselect all tabs}",
         "deleteSelectedTabs": "{Delete selected tabs}",
         "longPressToMove": "{Long press on a tab to move it}",
+        "removedLastTab": "{Removed Last Tab}",
+        "resettingToDefaultTags": "{Resetting search to default tags!}",
+        "ratingsChanged": "{Ratings changed}",
+        "ratingsChangedOn(param=booruType)": "{On ${booruType: String} }",
+        "ratingReplacedWith": "{ is now replaced with }",
+        "ratingAnd": "{ and }",
+        "ratingsFixedAutomatically": "{App fixed the rating automatically, but consider changing to correct rating in your future queries}",
+        "tabsRestored": "{Tabs restored}",
+        "restoredTabs(param=count, param=tabsPlural)": "{Restored ${count: int} ${tabsPlural: String} from previous session!}",
+        "someTabsHadUnknownBoorus": "{Some restored tabs had unknown boorus or broken characters.}",
+        "brokenTabsSetToDefault": "{They were set to default or ignored.}",
+        "listOfBrokenTabs": "{List of broken tabs:}",
+        "tabsMerged": "{Tabs merged}",
+        "addedNewTabs(param=count, param=tabsPlural)": "{Added ${count: int} new ${tabsPlural: String}!}",
+        "tabsReplaced": "{Tabs replaced}",
+        "receivedTabs(param=count, param=tabsPlural)": "{Received ${count: int} ${tabsPlural: String}!}",
         "numbersInBottomRight": "{Numbers in the bottom right of the tab:}",
         "firstNumberTabIndex": "{First number - tab index in default list order}",
         "secondNumberTabIndex": "{Second number - tab index in current list order, appears when filtering/sorting is active}",
@@ -188,7 +279,10 @@
         "byBooru": "{By Booru}",
         "alphabetically": "{Alphabetically}",
         "reversed": "{(reversed)}",
-        "areYouSureDeleteTabs(param=count, param=tabsPlural)": "{Are you sure you want to delete ${count: int} ${tabsPlural: String}?}",
+        "areYouSureDeleteTabs(param=count)": {
+            "one": "{Are you sure you want to delete 1 tab?}",
+            "other": "{Are you sure you want to delete ${count} tabs?}"
+        },
         "filters": {
             "loaded": "{Loaded}",
             "tagType": "{Tag Type}",
@@ -257,10 +351,16 @@
         "copiedToClipboard": "{Copied to clipboard!}",
         "delete": "{Delete}",
         "deleteHistoryEntries": "{Delete History Entries}",
-        "deleteItemsConfirm(param=count, param=itemsPlural)": "{Are you sure you want to delete ${count: int} ${itemsPlural: String}?}",
+        "deleteItemsConfirm(param=count)": {
+            "one": "{Are you sure you want to delete 1 item?}",
+            "other": "{Are you sure you want to delete ${count} items?}"
+        },
         "selectAll": "{Select all}",
         "clearSelection": "{Clear selection}",
-        "deleteItems(param=count, param=itemsPlural)": "{Delete ${count: int} ${itemsPlural: String}}"
+        "deleteItems(param=count)": {
+            "one": "{Delete 1 item}",
+            "other": "{Delete ${count} items}"
+        }
     },
     "webview": {
         "title": "{Webview}",
@@ -501,7 +601,15 @@
             "mpvUseHardwareAcceleration": "{MPV: use hardware acceleration}",
             "mpvVO": "{MPV: VO}",
             "mpvHWDEC": "{MPV: HWDEC}",
-            "videoCacheMode": "{Video cache mode}"
+            "videoCacheMode": "{Video cache mode}",
+            "cacheModes": {
+                "title": "{Video cache modes}",
+                "streamMode": "{- Stream - Don't cache, start playing as soon as possible}",
+                "cacheMode": "{- Cache - Saves the file to device storage, plays only when download is complete}",
+                "streamCacheMode": "{- Stream+Cache - Mix of both, but currently leads to double download}",
+                "cacheNote": "{[Note]: Videos will cache only if 'Cache Media' is enabled.}",
+                "desktopWarning": "{[Warning]: On desktop Stream mode can work incorrectly for some Boorus.}"
+            }
         },
         "downloads": {
             "title": "{Snatching}",
@@ -628,7 +736,22 @@
             "enableSelfSignedSSLCertificates": "{Enable self signed SSL certificates}",
             "proxy": "{Proxy}",
             "proxySubtitle": "{Does not apply to streaming video mode, use caching video mode instead}",
-            "customUserAgent": "{Custom user agent}"
+            "customUserAgent": "{Custom user agent}",
+            "customUserAgentTitle": "{Custom user agent}",
+            "keepEmptyForDefault": "{Keep empty to use default value}",
+            "defaultUserAgent(param=agent)": "{Default: ${agent: String}}",
+            "userAgentUsedOnRequests": "{Will be used on requests for almost all boorus and on the webview}",
+            "valueSavedAfterLeaving": "{Value is saved after leaving this page}",
+            "setBrowserUserAgent": "{Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):}",
+            "cookieCleaner": "{Cookie cleaner}",
+            "booru": "{Booru}",
+            "selectBooruToClearCookies": "{Select a booru to clear cookies for or leave empty to clear all}",
+            "cookiesFor(param=booruName)": "{Cookies for ${booruName: String}:}",
+            "cookieDeleted(param=cookieName)": "{\"${cookieName: String}\" cookie deleted}",
+            "clearCookies": "{Clear cookies}",
+            "clearCookiesFor(param=booruName)": "{Clear cookies for ${booruName: String}}",
+            "cookiesForBooruDeleted(param=booruName)": "{Cookies for ${booruName: String} deleted}",
+            "allCookiesDeleted": "{All cookies deleted}"
         },
         "privacy": {
             "title": "{Privacy}",
@@ -846,8 +969,20 @@
             "vibration": "{Vibration}",
             "vibrationTests": "{Vibration tests}",
             "duration": "{Duration}",
+            "amplitude": "{Amplitude}",
             "flutterway": "{Flutterway}",
-            "sessionString": "{Session string}"
+            "vibrate": "{Vibrate}",
+            "resolution(param=width, param=height)": "{Res: ${width: String}x${height: String}}",
+            "pixelRatio(param=ratio)": "{Pixel Ratio: ${ratio: String}}",
+            "logger": "{Logger}",
+            "webview": "{Webview}",
+            "deleteAllCookies": "{Delete All Cookies}",
+            "clearSecureStorage": "{Clear secure storage}",
+            "getSessionString": "{Get Session String}",
+            "copiedToClipboard": "{Copied to clipboard!}",
+            "setSessionString": "{Set Session String}",
+            "sessionString": "{Session string}",
+            "restoredSessionFromString": "{Restored session from string!}"
         },
         "logging": {
             "title": "{Logging}",
@@ -858,11 +993,21 @@
         },
         "webview": {
             "openWebview": "{Open webview}",
-            "openWebviewTip": "{to login or obtain cookies}",
-            "dirPicker": {
-                "defaultPath": "{/0}",
-                "directoryName": "{Directory Name}"
-            }
+            "openWebviewTip": "{to login or obtain cookies}"
+        },
+        "dirPicker": {
+            "defaultPath": "{/0}",
+            "directoryName": "{Directory Name}",
+            "selectADirectory": "{Select a Directory}",
+            "areYouSure": "{Are you sure?}",
+            "closeWithoutChoosing": "{Do you want to close the picker without choosing a directory?}",
+            "no": "{No}",
+            "yes": "{Yes}",
+            "error": "{Error!}",
+            "failedToCreateDirectory": "{Failed to create directory!}",
+            "directoryNotWritable": "{Directory is not writable!}",
+            "newDirectory": "{New Directory}",
+            "create": "{Create}"
         },
         "version": "{Version}"
     },
@@ -911,7 +1056,10 @@
         "makeUnstaleable": "{Make Unstaleable}",
         "close": "{Close}",
         "selectAll": "{Select all}",
-        "deleteTags(param=count, param=tagsPlural)": "{Delete ${count: int} ${tagsPlural: String}}",
+        "deleteTags(param=count)": {
+            "one": "{Delete 1 tag}",
+            "other": "{Delete ${count} tags}"
+        },
         "deleteTagsTitle": "{Delete Tags}",
         "clearSelection": "{Clear selection}"
     },
@@ -935,7 +1083,12 @@
         "noConnection": "{No connection}",
         "waitingForConnection": "{Waiting for connection...}",
         "startingServer": "{Starting server...}",
-        "keepScreenAwake": "{Keep the screen awake}"
+        "keepScreenAwake": "{Keep the screen awake}",
+        "serverKilled": "{LoliSync server killed!}",
+        "testError(param=statusCode, param=reasonPhrase)": "{Test error: ${statusCode: int} ${reasonPhrase: String}}",
+        "testErrorException(param=error)": "{Test error: ${error: String}}",
+        "testSuccess": "{Test request received a positive response}",
+        "testSuccessMessage": "{There should be a 'Test' message on the other device}"
     },
     "imageSearch": {
         "title": "{Image search}"
@@ -1107,7 +1260,8 @@
         "notes": {
             "note": "{Note}",
             "notes": "{Notes}",
-            "closeDialog": "{Close}"
+            "closeDialog": "{Close}",
+            "coordinates(param=posX, param=posY)": "{X:${posX: int}, Y:${posY: int}}"
         }
     },
     "common": {
@@ -1120,7 +1274,11 @@
         "copiedToClipboard": "{Copied to clipboard!}",
         "loadingFile": "{Loading File...}",
         "loadingFileMessage": "{This can take some time, please wait...}",
-        "failedToOpenLink": "{Failed to open link}"
+        "failedToOpenLink": "{Failed to open link}",
+        "sources(param=count)": {
+            "one": "{Source}",
+            "other": "{Sources}"
+        }
     },
     "media": {
         "loading": {
@@ -1143,8 +1301,16 @@
             "retry": "{Retry}",
             "openFileInBrowser": "{Open file in browser}",
             "openPostInBrowser": "{Open post in browser}",
-            "currentlyChecking": "{Currently checking:}"
+            "currentlyChecking": "{Currently checking:}",
+            "unknownFileFormat(param=fileExt)": "{Unknown file format (.${fileExt: String}), tap here to open in browser}"
         }
+    },
+    "imageStats": {
+        "live(param=count)": "{Live: ${count: int}}",
+        "pending(param=count)": "{Pending: ${count: int}}",
+        "total(param=count)": "{Total: ${count: int}}",
+        "size(param=size)": "{Size: ${size: String}}",
+        "max(param=max)": "{Max: ${max: String}}"
     },
     "preview": {
         "searchForTags": "{Search for tags}",
@@ -1155,7 +1321,10 @@
             "reachedEnd": "{You reached the end}",
             "reachedEndSubtitle(param=pageNum)": "{Loaded ${pageNum: int} pages\nTap here to reload last page}",
             "loadingPage(param=pageNum)": "{Loading page #${pageNum: int}...}",
-            "startedAgo(param=seconds, param=secondsPlural)": "{Started ${seconds: int} ${secondsPlural: String} ago}",
+            "startedAgo(param=seconds)": {
+                "one": "{Started 1 second ago}",
+                "other": "{Started ${seconds} seconds ago}"
+            },
             "tapToRetryIfStuck": "{Tap here to retry if search is taking too long or seems stuck}",
             "errorLoadingPage(param=pageNum)": "{Error when loading page #${pageNum: int}}",
             "errorWithMessage": "{Tap here to retry}",

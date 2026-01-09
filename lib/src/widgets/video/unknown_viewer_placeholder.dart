@@ -7,6 +7,7 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
+import 'package:lolisnatcher/gen/strings.g.dart';
 
 class UnknownViewerPlaceholder extends StatelessWidget {
   const UnknownViewerPlaceholder({
@@ -43,7 +44,7 @@ class UnknownViewerPlaceholder extends StatelessWidget {
                   child: Center(
                     child: SizedBox(
                       child: SettingsButton(
-                        name: 'Unknown file format (.${item.fileExt}), tap here to open in browser',
+                        name: context.loc.media.video.unknownFileFormat(fileExt: item.fileExt ?? 'unknown'),
                         action: () {
                           launchUrlString(
                             item.postURL,

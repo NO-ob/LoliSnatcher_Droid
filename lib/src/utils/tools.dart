@@ -182,10 +182,6 @@ class Tools {
     }
   }
 
-  static String pluralize(String str, int count) {
-    return count == 1 ? str : '${str}s';
-  }
-
   static bool isGoodStatusCode(int? statusCode) {
     return statusCode != null && statusCode >= 200 && statusCode < 300;
   }

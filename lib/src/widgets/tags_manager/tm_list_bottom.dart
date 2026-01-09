@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -55,10 +54,7 @@ class TagsManagerListBottom extends StatelessWidget {
             margin: const EdgeInsets.all(10),
             child: ElevatedButton.icon(
               label: Text(
-                context.loc.tagsManager.deleteTags(
-                  count: selected.length,
-                  tagsPlural: Tools.pluralize('tag', selected.length),
-                ),
+                context.loc.tagsManager.deleteTags(count: selected.length),
               ),
               icon: const Icon(Icons.delete_forever),
               onPressed: () {
@@ -75,10 +71,7 @@ class TagsManagerListBottom extends StatelessWidget {
                       shrinkWrap: true,
                       children: [
                         Text(
-                          context.loc.history.deleteItemsConfirm(
-                            count: selected.length,
-                            itemsPlural: Tools.pluralize('tag', selected.length),
-                          ),
+                          context.loc.history.deleteItemsConfirm(count: selected.length),
                         ),
                         const SizedBox(height: 10),
                         ...selected.map((Tag entry) {

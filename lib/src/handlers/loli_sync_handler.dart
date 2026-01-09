@@ -14,6 +14,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
@@ -332,10 +333,11 @@ class LoliSync {
 
   Future<void> killServer() async {
     await server?.close();
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text(
-        'LoliSync server killed!',
-        style: TextStyle(fontSize: 20),
+      title: Text(
+        context.loc.loliSync.serverKilled,
+        style: const TextStyle(fontSize: 20),
       ),
       leadingIcon: Icons.warning_amber,
       leadingIconColor: Colors.yellow,
@@ -420,13 +422,17 @@ class LoliSync {
   // TODO add timeout
   Future<String> sendTest() async {
     Logger.Inst().log('Sending test', 'LoliSync', 'sendTest', LogTypes.loliSyncInfo);
+    final context = NavigationHandler.instance.navContext;
     try {
       final HttpClientRequest request = await HttpClient().post(ip, port, '/lolisync/test');
       final HttpClientResponse response = await request.close();
       if (response.statusCode != 200) {
         FlashElements.showSnackbar(
           title: Text(
-            'Test error: ${response.statusCode} ${response.reasonPhrase}',
+            context.loc.loliSync.testError(
+              statusCode: response.statusCode,
+              reasonPhrase: response.reasonPhrase,
+            ),
             style: const TextStyle(fontSize: 20),
           ),
           leadingIcon: Icons.warning_amber,
@@ -436,13 +442,13 @@ class LoliSync {
         return 'Test error';
       } else {
         FlashElements.showSnackbar(
-          title: const Text(
-            'Test request received a positive response',
-            style: TextStyle(fontSize: 20),
+          title: Text(
+            context.loc.loliSync.testSuccess,
+            style: const TextStyle(fontSize: 20),
           ),
-          content: const Text(
-            "There should be a 'Test' message on the other device",
-            style: TextStyle(fontSize: 20),
+          content: Text(
+            context.loc.loliSync.testSuccessMessage,
+            style: const TextStyle(fontSize: 20),
           ),
           leadingIcon: Icons.warning_amber,
           leadingIconColor: Colors.green,
@@ -460,7 +466,7 @@ class LoliSync {
       );
       FlashElements.showSnackbar(
         title: Text(
-          'Test error: $e',
+          context.loc.loliSync.testErrorException(error: e.toString()),
           style: const TextStyle(fontSize: 20),
         ),
         leadingIcon: Icons.warning_amber,

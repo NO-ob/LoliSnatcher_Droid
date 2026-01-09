@@ -12,7 +12,6 @@ import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/custom_scroll_bar_thumb.dart';
 import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
@@ -503,7 +502,7 @@ class _HistoryListState extends State<HistoryList> {
           child: Container(
             margin: const EdgeInsets.all(10),
             child: ElevatedButton.icon(
-              label: Text(context.loc.history.deleteItems(count: selectedEntries.length, itemsPlural: Tools.pluralize('item', selectedEntries.length))),
+              label: Text(context.loc.history.deleteItems(count: selectedEntries.length)),
               icon: const Icon(Icons.delete_forever),
               onPressed: () {
                 if (selectedEntries.isEmpty) {
@@ -519,7 +518,7 @@ class _HistoryListState extends State<HistoryList> {
                       shrinkWrap: true,
                       children: [
                         Text(
-                          context.loc.history.deleteItemsConfirm(count: selectedEntries.length, itemsPlural: Tools.pluralize('item', selectedEntries.length)),
+                          context.loc.history.deleteItemsConfirm(count: selectedEntries.length),
                         ),
                         const SizedBox(height: 10),
                         ...selectedEntries.map((HistoryItem entry) {

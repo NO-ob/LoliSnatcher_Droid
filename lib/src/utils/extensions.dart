@@ -53,10 +53,6 @@ extension UIExtras on Widget {
 }
 
 extension StringExtras on String {
-  String pluralize(int count) {
-    return count == 1 ? this : '${this}s';
-  }
-
   String _capitalize() => isEmpty ? '' : '${this[0].toUpperCase()}${substring(1)}';
 
   String get capitalizeFirst => _capitalize();

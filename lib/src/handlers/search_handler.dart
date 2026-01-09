@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
@@ -152,12 +153,13 @@ class SearchHandler {
       }
     } else {
       // if there is only one tab, reset to default tags
+      final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
-        title: const Text('Removed Last Tab', style: TextStyle(fontSize: 20)),
-        content: const Column(
+        title: Text(context.loc.searchHandler.removedLastTab, style: const TextStyle(fontSize: 20)),
+        content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Resetting search to default tags!'),
+            Text(context.loc.searchHandler.resettingSearchToDefaultTags),
           ],
         ),
         leadingIcon: Icons.warning_amber,
@@ -186,12 +188,13 @@ class SearchHandler {
     }
 
     if (totalTabs == tabsToRemove.length) {
+      final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
-        title: const Text('Removed last tab', style: TextStyle(fontSize: 20)),
-        content: const Column(
+        title: Text(context.loc.searchHandler.removedLastTab, style: const TextStyle(fontSize: 20)),
+        content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Resetting search to default tags!'),
+            Text(context.loc.searchHandler.resettingSearchToDefaultTags),
           ],
         ),
         leadingIcon: Icons.warning_amber,
@@ -508,9 +511,10 @@ class SearchHandler {
   void searchReactions(String text, Booru booru) {
     // UOOOOOHHHHH
     if (text.toLowerCase().contains('loli')) {
+      final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
         duration: const Duration(seconds: 2),
-        title: const Text('UOOOOOOOHHH', style: TextStyle(fontSize: 20)),
+        title: Text(context.loc.searchHandler.uoh, style: const TextStyle(fontSize: 20)),
         // TODO replace with image asset to avoid system-to-system font differences
         overrideLeadingIconWidget: const Text(' 😭 ', style: TextStyle(fontSize: 40)),
         sideColor: Colors.pink,
@@ -523,39 +527,21 @@ class SearchHandler {
           (booru.type?.isGelbooru == true && booru.baseURL!.contains('gelbooru.com')) ||
           (booru.type?.isDanbooru == true && booru.baseURL!.contains('danbooru.donmai.us'));
       if (isOnBooruWhereRatingsChanged) {
+        final context = NavigationHandler.instance.navContext;
         FlashElements.showSnackbar(
           duration: null,
-          title: const Text('Ratings changed', style: TextStyle(fontSize: 20)),
+          title: Text(context.loc.searchHandler.ratingsChanged, style: const TextStyle(fontSize: 20)),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text.rich(
-                TextSpan(
-                  style: const TextStyle(fontSize: 16),
-                  children: [
-                    TextSpan(text: 'On ${booru.type?.name} '),
-                    const TextSpan(
-                      text: '[rating:safe]',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const TextSpan(text: ' is now replaced with '),
-                    const TextSpan(
-                      text: '[rating:general]',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const TextSpan(text: ' and '),
-                    const TextSpan(
-                      text: '[rating:sensitive]',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
+              Text(
+                context.loc.searchHandler.ratingsChangedMessage(booruType: booru.type?.name ?? ''),
                 style: const TextStyle(fontSize: 16),
               ),
               const Text(''),
-              const Text(
-                'App fixed the rating automatically, but consider changing to correct rating in your future queries',
-                style: TextStyle(fontSize: 18),
+              Text(
+                context.loc.searchHandler.appFixedRatingAutomatically,
+                style: const TextStyle(fontSize: 18),
               ),
             ],
           ),
@@ -739,22 +725,23 @@ class SearchHandler {
 
     // set parsed tabs OR set first default tab if nothing to restore
     if (restoredGlobals.isNotEmpty) {
+      final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
-        title: const Text('Tabs restored', style: TextStyle(fontSize: 20)),
+        title: Text(context.loc.searchHandler.tabsRestored, style: const TextStyle(fontSize: 20)),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Restored ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)} from previous session!',
+              context.loc.searchHandler.restoredTabsCount(count: restoredGlobals.length),
             ),
             if (foundBrokenItem)
             // notify user if there was unknown booru or invalid entry in the tabs
             ...[
-              const Text(
-                'Some restored tabs had unknown boorus or broken characters.',
+              Text(
+                context.loc.searchHandler.someRestoredTabsHadIssues,
               ),
-              const Text('They were set to default or ignored.'),
-              const Text('List of broken tabs:'),
+              Text(context.loc.searchHandler.theyWereSetToDefaultOrIgnored),
+              Text(context.loc.searchHandler.listOfBrokenTabs),
               Text(brokenItems.join(', ')),
             ],
           ],
@@ -814,10 +801,11 @@ class SearchHandler {
     }
     tabs.addAll(restoredGlobals);
 
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text('Tabs merged'),
+      title: Text(context.loc.searchHandler.tabsMerged),
       content: Text(
-        'Added ${restoredGlobals.length} new ${Tools.pluralize('tab', restoredGlobals.length)}!',
+        context.loc.searchHandler.addedTabsCount(count: restoredGlobals.length),
       ),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore,
@@ -857,10 +845,11 @@ class SearchHandler {
     tabs.value = restoredGlobals;
     changeTabIndex(newIndex);
 
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text('Tabs replaced'),
+      title: Text(context.loc.searchHandler.tabsReplaced),
       content: Text(
-        'Received ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)}!',
+        context.loc.searchHandler.receivedTabsCount(count: restoredGlobals.length),
       ),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore,
@@ -914,19 +903,20 @@ class SearchHandler {
     isRestored.value = true;
 
     if (restoredTabs.isNotEmpty) {
+      final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
-        title: const Text('Tabs restored', style: TextStyle(fontSize: 20)),
+        title: Text(context.loc.searchHandler.tabsRestored, style: const TextStyle(fontSize: 20)),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Restored ${restoredTabs.length} ${Tools.pluralize('tab', restoredTabs.length)} from previous session!',
+              context.loc.searchHandler.restoredTabsCount(count: restoredTabs.length),
             ),
             if (foundBrokenItems) ...[
               // notify user if there was unknown booru or invalid entry in the tabs
-              const Text('Some restored tabs had unknown boorus or broken characters.'),
-              const Text('They were set to default or ignored.'),
-              const Text('List of broken tabs:'),
+              Text(context.loc.searchHandler.someRestoredTabsHadIssues),
+              Text(context.loc.searchHandler.theyWereSetToDefaultOrIgnored),
+              Text(context.loc.searchHandler.listOfBrokenTabs),
               Text(
                 brokenItems
                     .map((t) => '${tabBackups.indexOf(t)}${t.booru}: ${t.tags.isEmpty ? '[empty]' : t.tags}')
@@ -982,10 +972,11 @@ class SearchHandler {
 
     tabs.addAll(restoredTabs);
 
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text('Tabs merged'),
+      title: Text(context.loc.searchHandler.tabsMerged),
       content: Text(
-        'Added ${restoredTabs.length} new ${Tools.pluralize('tab', restoredTabs.length)}!',
+        context.loc.searchHandler.addedTabsCount(count: restoredTabs.length),
       ),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore,
@@ -1014,10 +1005,11 @@ class SearchHandler {
     tabs.value = restoredTabs;
     changeTabIndex(newSelectedIndex);
 
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text('Tabs replaced'),
+      title: Text(context.loc.searchHandler.tabsReplaced),
       content: Text(
-        'Received ${restoredTabs.length} ${Tools.pluralize('tab', restoredTabs.length)}!',
+        context.loc.searchHandler.receivedTabsCount(count: restoredTabs.length),
       ),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore,

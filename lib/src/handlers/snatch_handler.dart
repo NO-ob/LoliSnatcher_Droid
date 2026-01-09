@@ -8,9 +8,9 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
@@ -192,12 +192,13 @@ class SnatchHandler {
             // but show this message only when queue is empty => snatching is complete
             if (SettingsHandler.instance.downloadNotifications && isLastMessage) {
               if (current.value!.booruItems.length == 1) {
+                final context = NavigationHandler.instance.navContext;
                 FlashElements.showSnackbar(
                   duration: const Duration(seconds: 2),
                   position: FlashPosition.top,
-                  title: const Text(
-                    'Item Snatched',
-                    style: TextStyle(fontSize: 20),
+                  title: Text(
+                    context.loc.snatcher.itemsSnatched,
+                    style: const TextStyle(fontSize: 20),
                   ),
                   content: Row(
                     children: [
@@ -206,10 +207,10 @@ class SnatchHandler {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (exists.isNotEmpty) const Text('Item was already snatched before'),
-                              if (failed.isNotEmpty) const Text('Failed to snatch the item'),
-                              if (cancelled.isNotEmpty) const Text('Item was cancelled'),
-                              if (queuedList.isNotEmpty) const Text('Starting next queue item...'),
+                              if (exists.isNotEmpty) Text(context.loc.snatcher.itemWasAlreadySnatched),
+                              if (failed.isNotEmpty) Text(context.loc.snatcher.failedToSnatchItem),
+                              if (cancelled.isNotEmpty) Text(context.loc.snatcher.itemWasCancelled),
+                              if (queuedList.isNotEmpty) Text(context.loc.snatcher.startingNextQueueItem),
                             ],
                           ),
                         ),
@@ -236,23 +237,30 @@ class SnatchHandler {
                       : ((exists.isNotEmpty || cancelled.isNotEmpty) ? Colors.yellow : Colors.green),
                 );
               } else {
+                final context = NavigationHandler.instance.navContext;
                 FlashElements.showSnackbar(
                   duration: const Duration(seconds: 2),
                   position: FlashPosition.top,
-                  title: const Text('Items Snatched', style: TextStyle(fontSize: 20)),
+                  title: Text(context.loc.snatcher.itemsSnatched, style: const TextStyle(fontSize: 20)),
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Snatched: ${queueProgress.value} ${Tools.pluralize('item', queueProgress.value)}"),
+                      Text(
+                        context.loc.snatcher.snatchedCount(count: queueProgress.value),
+                      ),
                       if (exists.isNotEmpty)
                         Text(
-                          '${exists.length} ${Tools.pluralize('file', exists.length)} ${exists.length == 1 ? 'was' : 'were'} already snatched',
+                          context.loc.snatcher.filesAlreadySnatched(count: exists.length),
                         ),
                       if (failed.isNotEmpty)
-                        Text('Failed to snatch ${failed.length} ${Tools.pluralize('file', failed.length)}'),
+                        Text(
+                          context.loc.snatcher.failedToSnatchFiles(count: failed.length),
+                        ),
                       if (cancelled.isNotEmpty)
-                        Text('Cancelled ${cancelled.length} ${Tools.pluralize('file', cancelled.length)}'),
-                      if (queuedList.isNotEmpty) const Text('Starting next queue item...'),
+                        Text(
+                          context.loc.snatcher.cancelledFiles(count: cancelled.length),
+                        ),
+                      if (queuedList.isNotEmpty) Text(context.loc.snatcher.startingNextQueueItem),
                     ],
                   ),
                   leadingIcon: Icons.done_all,
@@ -321,9 +329,10 @@ class SnatchHandler {
 
       if (booruItems.length > 1) {
         if (SettingsHandler.instance.downloadNotifications) {
+          final context = NavigationHandler.instance.navContext;
           FlashElements.showSnackbar(
             title: Text(
-              'Added ${booruItems.length} items to snatch queue',
+              context.loc.snatcher.addedItemsToQueue(count: booruItems.length),
               style: const TextStyle(fontSize: 20),
             ),
             position: FlashPosition.top,
@@ -334,10 +343,11 @@ class SnatchHandler {
         }
       } else {
         if (SettingsHandler.instance.downloadNotifications) {
+          final context = NavigationHandler.instance.navContext;
           FlashElements.showSnackbar(
-            title: const Text(
-              'Added item to snatch queue',
-              style: TextStyle(fontSize: 20),
+            title: Text(
+              context.loc.snatcher.addedItemToQueue,
+              style: const TextStyle(fontSize: 20),
             ),
             position: FlashPosition.top,
             duration: const Duration(seconds: 2),
@@ -381,13 +391,14 @@ class SnatchHandler {
     booruHandler.pageNum = temp.startingPage;
     booruHandler.pageNum++;
 
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text('Snatching Images', style: TextStyle(fontSize: 20)),
+      title: Text(context.loc.snatcher.snatchingImages, style: const TextStyle(fontSize: 20)),
       position: FlashPosition.top,
-      content: const Column(
+      content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Do not close the app!'),
+          Text(context.loc.snatcher.doNotCloseApp),
         ],
       ),
       leadingIcon: Icons.warning_amber,

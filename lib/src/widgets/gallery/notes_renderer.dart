@@ -448,7 +448,7 @@ class NotesDialog extends StatelessWidget {
                       false,
                     ),
                   ),
-                  subtitle: Text('X:${note.posX}, Y:${note.posY}'),
+                  subtitle: Text(context.loc.viewer.notes.coordinates(posX: note.posX, posY: note.posY)),
                   shape: Border(
                     bottom: BorderSide(
                       color: Colors.grey.shade600,

@@ -507,7 +507,7 @@ class _TagViewState extends State<TagView> {
           Divider(
             color: context.theme.dividerTheme.color?.withValues(alpha: 0.66),
           ),
-          infoText(Tools.pluralize('Source', sources.length), ' ', canCopy: false),
+          infoText(context.loc.gallery.sources(count: sources.length), ' ', canCopy: false),
           Column(
             children: sources
                 .map(

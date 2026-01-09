@@ -165,7 +165,7 @@ class _GalleryPageState extends State<GalleryPage> {
               SettingsTextInput(
                 controller: preloadSizeController,
                 title: context.loc.settings.viewer.preloadSizeLimit,
-                subtitle: const Text('in GB, 0 for no limit'),
+                subtitle: Text(context.loc.settings.viewer.preloadSizeLimitSubtitle),
                 inputType: TextInputType.number,
                 resetText: () => settingsHandler.map['preloadSizeLimit']!['default']!.toString(),
                 numberButtons: true,

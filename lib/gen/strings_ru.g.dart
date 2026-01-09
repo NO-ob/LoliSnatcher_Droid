@@ -260,8 +260,6 @@ class _TranslationsSettingsRu extends TranslationsSettingsEn {
   @override
   String get downloadsAndCache => TranslationOverrides.string(_root.$meta, 'settings.downloadsAndCache', {}) ?? 'Загрузки и Кэширование';
   @override
-  late final _TranslationsSettingsTagFiltersRu tagFilters = _TranslationsSettingsTagFiltersRu._(_root);
-  @override
   late final _TranslationsSettingsDatabaseRu database = _TranslationsSettingsDatabaseRu._(_root);
   @override
   late final _TranslationsSettingsBackupAndRestoreRu backupAndRestore = _TranslationsSettingsBackupAndRestoreRu._(_root);
@@ -559,17 +557,6 @@ class _TranslationsSettingsCacheRu extends TranslationsSettingsCacheEn {
   // Translations
   @override
   String get title => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Кэш';
-}
-
-// Path: settings.tagFilters
-class _TranslationsSettingsTagFiltersRu extends TranslationsSettingsTagFiltersEn {
-  _TranslationsSettingsTagFiltersRu._(TranslationsRu root) : this._root = root, super.internal(root);
-
-  final TranslationsRu _root; // ignore: unused_field
-
-  // Translations
-  @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.tagFilters.title', {}) ?? 'Фильтры тегов';
 }
 
 // Path: settings.database
@@ -1110,7 +1097,6 @@ extension on TranslationsRu {
       'settings.downloads.updatingData' => TranslationOverrides.string(_root.$meta, 'settings.downloads.updatingData', {}) ?? 'Обновление данных...',
       'settings.cache.title' => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Кэш',
       'settings.downloadsAndCache' => TranslationOverrides.string(_root.$meta, 'settings.downloadsAndCache', {}) ?? 'Загрузки и Кэширование',
-      'settings.tagFilters.title' => TranslationOverrides.string(_root.$meta, 'settings.tagFilters.title', {}) ?? 'Фильтры тегов',
       'settings.database.title' => TranslationOverrides.string(_root.$meta, 'settings.database.title', {}) ?? 'База данных',
       'settings.database.indexingDatabase' =>
         TranslationOverrides.string(_root.$meta, 'settings.database.indexingDatabase', {}) ?? 'Индексирование базы данных',

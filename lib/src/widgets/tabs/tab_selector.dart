@@ -15,7 +15,6 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -911,10 +910,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
         children: [
           Text(context.loc.tabs.deleteTabs),
           Text(
-            context.loc.tabs.areYouSureDeleteTabs(
-              count: selectedTabs.length,
-              tabsPlural: Tools.pluralize('tab', selectedTabs.length),
-            ),
+            context.loc.tabs.areYouSureDeleteTabs(count: selectedTabs.length),
             style: const TextStyle(fontSize: 16),
           ),
         ],
@@ -1691,9 +1687,9 @@ class TabSortingIcon extends StatelessWidget {
             child: Icon(sortingMode.isNone ? Icons.sort_by_alpha : Icons.sort),
           ),
           if (sortingMode.isAnyBooru)
-            const Positioned(
+            Positioned(
               bottom: -10,
-              child: Text('Booru', style: TextStyle(fontSize: 12)),
+              child: Text(context.loc.tabs.byBooru, style: const TextStyle(fontSize: 12)),
             ),
         ],
       ),

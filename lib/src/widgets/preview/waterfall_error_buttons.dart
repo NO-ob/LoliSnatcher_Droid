@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/html.dart';
 
 class WaterfallErrorButtons extends StatefulWidget {
@@ -127,9 +126,8 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           final int nowMils = DateTime.now().millisecondsSinceEpoch;
           final int sinceStart = _startedAt == 0 ? 0 : Duration(milliseconds: nowMils - _startedAt).inSeconds;
           final bool isTakingTooLong = sinceStart > 5;
-          final String secondsPlural = Tools.pluralize('second', sinceStart);
           final String sinceStartText = sinceStart > 0
-              ? '${context.loc.preview.error.startedAgo(seconds: sinceStart, secondsPlural: secondsPlural)}${isTakingTooLong ? '\n${context.loc.preview.error.tapToRetryIfStuck}' : ''}'
+              ? '${context.loc.preview.error.startedAgo(seconds: sinceStart)}${isTakingTooLong ? '\n${context.loc.preview.error.tapToRetryIfStuck}' : ''}'
               : '';
 
           title = context.loc.preview.error.loadingPage(pageNum: pageNum);

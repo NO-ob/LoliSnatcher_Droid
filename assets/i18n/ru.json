@@ -167,9 +167,6 @@
       "title": "Кэш"
     },
     "downloadsAndCache": "Загрузки и Кэширование",
-    "tagFilters": {
-      "title": "Фильтры тегов"
-    },
     "database": {
       "title": "База данных",
       "indexingDatabase": "Индексирование базы данных",
