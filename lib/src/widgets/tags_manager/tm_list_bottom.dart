@@ -35,7 +35,7 @@ class TagsManagerListBottom extends StatelessWidget {
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.select_all),
-                  label: Text(context.loc.tagsManager.selectAll),
+                  label: Text(context.loc.selectAll),
                   onPressed: onSelectAll,
                 ),
               ),

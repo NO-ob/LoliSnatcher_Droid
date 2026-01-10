@@ -59,9 +59,9 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
           numberMax: double.infinity,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return context.loc.pageChanger.pleaseEnterANumber;
+              return context.loc.validationErrors.invalidNumber;
             } else if (int.tryParse(value) == null) {
-              return context.loc.pageChanger.pleaseEnterAValidNumber;
+              return context.loc.validationErrors.invalidNumericValue;
             }
             return null;
           },
@@ -79,9 +79,9 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
           numberMax: 10000,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return context.loc.pageChanger.pleaseEnterANumber;
+              return context.loc.validationErrors.invalidNumber;
             } else if (int.tryParse(value) == null) {
-              return context.loc.pageChanger.pleaseEnterAValidNumber;
+              return context.loc.validationErrors.invalidNumericValue;
             }
             return null;
           },

@@ -46,7 +46,7 @@ class _DirPickerState extends State<DirPicker> {
         context: context,
         builder: (context) {
           return SettingsDialog(
-            title: Text(context.loc.settings.dirPicker.areYouSure),
+            title: Text(context.loc.areYouSure),
             contentItems: [
               Text(context.loc.settings.dirPicker.closeWithoutChoosing),
             ],

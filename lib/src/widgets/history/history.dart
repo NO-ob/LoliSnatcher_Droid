@@ -246,7 +246,7 @@ class _HistoryListState extends State<HistoryList> {
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
-                  title: Text(context.loc.history.copiedToClipboard, style: const TextStyle(fontSize: 20)),
+                  title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
                   content: Text(entry.searchText, style: const TextStyle(fontSize: 16)),
                   leadingIcon: Icons.copy,
                   sideColor: Colors.green,
@@ -456,7 +456,7 @@ class _HistoryListState extends State<HistoryList> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  context.loc.history.nothingFound,
+                  context.loc.nothingFound,
                   style: const TextStyle(fontSize: 20),
                 ),
               ],
@@ -480,7 +480,7 @@ class _HistoryListState extends State<HistoryList> {
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.select_all),
-                  label: Text(context.loc.history.selectAll),
+                  label: Text(context.loc.selectAll),
                   onPressed: () {
                     // create new list through spread to avoid modifying the original list
                     selectedEntries = [...filteredHistory];

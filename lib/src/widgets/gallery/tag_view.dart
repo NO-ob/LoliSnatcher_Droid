@@ -1141,7 +1141,7 @@ Future<void> showTagDialog({
                 context: context,
                 duration: const Duration(seconds: 2),
                 title: Text(
-                  context.loc.tagView.copiedToClipboard,
+                  context.loc.copiedToClipboard,
                   style: const TextStyle(fontSize: 20),
                 ),
                 content: Text(
@@ -1299,7 +1299,7 @@ Future<void> showTagDialog({
               Icons.cancel_outlined,
               color: Theme.of(context).iconTheme.color,
             ),
-            title: Text(context.loc.tagView.close),
+            title: Text(context.loc.close),
             onTap: () {
               Navigator.of(context).pop();
             },
@@ -1366,7 +1366,7 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
         context: context,
         duration: const Duration(seconds: 2),
         title: Text(
-          context.loc.tagView.failedToOpenLink,
+          context.loc.failedToOpenLink,
           style: const TextStyle(fontSize: 20),
         ),
         content: Text(link, style: const TextStyle(fontSize: 16)),
@@ -1423,7 +1423,7 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
               if (!res) {
                 FlashElements.showSnackbar(
                   title: Text(context.loc.error),
-                  content: Text(context.loc.gallery.failedToOpenLink),
+                  content: Text(context.loc.failedToOpenLink),
                 );
               }
             },
@@ -1904,7 +1904,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                               style: TextStyle(fontSize: 24),
                                             ),
                                             Text(
-                                              context.loc.tagView.nothingFound,
+                                              context.loc.nothingFound,
                                               style: const TextStyle(fontSize: 16),
                                             ),
                                           ],
@@ -2201,7 +2201,7 @@ class _TagPreviewsListDialog extends StatelessWidget {
                   Icons.cancel_outlined,
                   color: Theme.of(context).iconTheme.color,
                 ),
-                title: Text(context.loc.tagView.close),
+                title: Text(context.loc.close),
                 onTap: () {
                   Navigator.of(context).pop();
                 },

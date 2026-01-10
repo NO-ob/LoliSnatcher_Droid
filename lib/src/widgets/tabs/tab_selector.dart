@@ -824,7 +824,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             FlashElements.showSnackbar(
               context: context,
               duration: const Duration(seconds: 2),
-              title: Text(context.loc.tabs.copiedToClipboard, style: const TextStyle(fontSize: 20)),
+              title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
               content: Text(tab.tags, style: const TextStyle(fontSize: 16)),
               leadingIcon: Icons.copy,
               sideColor: Colors.green,
@@ -882,7 +882,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             Navigator.of(context).pop();
           },
           leading: const Icon(Icons.cancel_outlined),
-          title: Text(context.loc.tabs.close),
+          title: Text(context.loc.close),
         ),
         const SizedBox(height: 10),
         // TODO more stuff?
@@ -1452,7 +1452,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
                           size: iconSize,
                         ),
                         label: AutoSizeText(
-                          context.loc.tabs.close,
+                          context.loc.close,
                           maxLines: 1,
                           overflowReplacement: const SizedBox.shrink(),
                         ),

@@ -252,9 +252,9 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                           numberMax: double.infinity,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return context.loc.tabs.pleaseEnterANumber;
+                              return context.loc.validationErrors.invalidNumber;
                             } else if (int.tryParse(value) == null) {
-                              return context.loc.tabs.pleaseEnterAValidNumber;
+                              return context.loc.validationErrors.invalidNumericValue;
                             }
                             return null;
                           },

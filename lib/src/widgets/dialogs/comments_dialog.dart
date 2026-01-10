@@ -392,7 +392,7 @@ class _CommentEntry extends StatelessWidget {
                       if (!res) {
                         FlashElements.showSnackbar(
                           title: Text(context.loc.error),
-                          content: Text(context.loc.comments.failedToOpenLink),
+                          content: Text(context.loc.failedToOpenLink),
                         );
                       }
                     },

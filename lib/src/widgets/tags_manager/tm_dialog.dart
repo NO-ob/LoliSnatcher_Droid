@@ -167,7 +167,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
             Center(
               child: Column(
                 children: [
-                  if (filteredTags.isEmpty) Text(context.loc.tagsManager.nothingFound),
+                  if (filteredTags.isEmpty) Text(context.loc.nothingFound),
                 ],
               ),
             ),

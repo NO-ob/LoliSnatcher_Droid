@@ -759,7 +759,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       FlashElements.showSnackbar(
         context: context,
         duration: const Duration(seconds: 2),
-        title: Text(context.loc.gallery.copiedToClipboard, style: const TextStyle(fontSize: 20)),
+        title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
         content: Text(Uri.encodeFull(text), style: const TextStyle(fontSize: 16)),
         leadingIcon: Icons.copy,
         sideColor: Colors.green,

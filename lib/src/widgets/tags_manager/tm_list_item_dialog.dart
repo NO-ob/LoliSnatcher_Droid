@@ -128,7 +128,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             FlashElements.showSnackbar(
               context: context,
               duration: const Duration(seconds: 2),
-              title: Text(context.loc.tagsManager.copiedToClipboard, style: const TextStyle(fontSize: 20)),
+              title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
               content: Text(widget.tag.fullString, style: const TextStyle(fontSize: 16)),
               leadingIcon: Icons.copy,
               sideColor: Colors.green,
@@ -197,7 +197,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           ),
           onTap: () => Navigator.of(context).pop(),
           leading: const Icon(Icons.cancel_outlined),
-          title: Text(context.loc.tagsManager.close),
+          title: Text(context.loc.close),
         ),
       ],
     );

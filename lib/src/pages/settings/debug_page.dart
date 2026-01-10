@@ -348,7 +348,7 @@ class _DebugPageState extends State<DebugPage> {
                   FlashElements.showSnackbar(
                     context: context,
                     duration: const Duration(seconds: 2),
-                    title: Text(context.loc.settings.debug.copiedToClipboard, style: const TextStyle(fontSize: 20)),
+                    title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
                     content: Text(
                       str,
                       style: const TextStyle(fontSize: 16),
