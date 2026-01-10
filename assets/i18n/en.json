@@ -383,12 +383,9 @@
         },
         "booruEditor": {
             "title": "Booru Editor",
-            "testBooru": "Test Booru",
-            "testBooruSuccessMsg": "Tap the Save button to save this config",
             "testBooruFailedTitle": "Booru test failed",
             "testBooruFailedMsg": "Config parameters may be incorrect, booru doesn't allow api access, request didn't return any data or there was a network error.",
             "saveBooru": "Save Booru",
-            "runTestFirst": "Run test first",
             "runningTest": "Running test...",
             "booruConfigExistsError": "This Booru config already exists",
             "booruSameNameExistsError": "Booru config with same name already exists",
@@ -414,7 +411,9 @@
             "booruApiCredsInfo(param=userIdTitle, param=apiKeyTitle)": "${userIdTitle: String} and ${apiKeyTitle: String} may be needed with some boorus but in most cases aren't necessary.",
             "booruDefTags": "Default tags",
             "booruDefTagsPlaceholder": "Default search for booru",
-            "booruDefaultInstructions": "Fields below may be required for some boorus"
+            "booruDefaultInstructions": "Fields below may be required for some boorus",
+            "booruConfigShouldSave": "Confirm saving this booru config",
+            "booruConfigSelectedType(param=booruType)": "Selected/Detected booru type: ${booruType: String}"
          },
         "interface": {
             "title": "Interface",
@@ -1238,5 +1237,13 @@
             "errorNoResultsLoaded": "Error, no results loaded",
             "tapToRetry": "Tap here to retry"
         }
+    },
+    "tagType": {
+        "artist": "Artist",
+        "character": "Character",
+        "copyright": "Copyright",
+        "meta": "Meta",
+        "species": "Species",
+        "none": "None/General"
     }
 }

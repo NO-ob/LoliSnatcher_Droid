@@ -375,12 +375,9 @@
     },
     "booruEditor": {
       "title": "Редактор конфига сайта",
-      "testBooru": "Проверить сайт",
-      "testBooruSuccessMsg": "Нажми кнопку Сохранить чтобы сохранить этот конфиг",
       "testBooruFailedTitle": "Проверка сайта не удалась",
       "testBooruFailedMsg": "Данные конфига неверны, сайт не дает доступ к API, запрос не вернул данные или есть проблемы с сетью.",
       "saveBooru": "Сохранить конфиг",
-      "runTestFirst": "Сначала запусти проверку",
       "runningTest": "Выполнение теста...",
       "booruConfigExistsError": "Такой конфиг уже существует",
       "booruSameNameExistsError": "Конфиг с таким именем уже существует",
@@ -406,7 +403,9 @@
       "booruApiCredsInfo(param=userIdTitle, param=apiKeyTitle)": "${userIdTitle} и ${apiKeyTitle} могут быть обязательны для некоторых сайтов, но в большинстве случаев не нужны.",
       "booruDefTags": "Теги по умолчанию",
       "booruDefTagsPlaceholder": "Поиск по умолчанию для сайта",
-      "booruDefaultInstructions": "Поля ниже могут быть обязательны для некоторых сайтов"
+      "booruDefaultInstructions": "Поля ниже могут быть обязательны для некоторых сайтов",
+      "booruConfigShouldSave": "Подтверди сохранение конфига для этого сайта",
+      "booruConfigSelectedType(param=booruType)": "Выбранный/Обнаруженный тип сайта: ${booruType: String}"
     },
     "interface": {
       "title": "Интерфейс",
@@ -921,7 +920,7 @@
       "logger": "Логгер"
     },
     "webview": {
-      "openWebview": "Открыть webview",
+      "openWebview": "Открыть вебвью",
       "openWebviewTip": "чтобы залогиниться или получить куки"
     },
     "dirPicker": {
@@ -1230,5 +1229,13 @@
       "errorNoResultsLoaded": "Ошибка, результаты не загружены",
       "tapToRetry": "Нажми здесь для повтора"
     }
+  },
+  "tagType": {
+    "artist": "Автор",
+    "character": "Персонаж",
+    "copyright": "Франшиза",
+    "meta": "Мета",
+    "species": "Раса",
+    "none": "Нет/Общее"
   }
 }

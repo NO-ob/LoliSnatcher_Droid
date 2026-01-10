@@ -247,6 +247,8 @@ class TranslationsRu extends Translations with BaseTranslations<AppLocale, Trans
   late final _TranslationsImageStatsRu imageStats = _TranslationsImageStatsRu._(_root);
   @override
   late final _TranslationsPreviewRu preview = _TranslationsPreviewRu._(_root);
+  @override
+  late final _TranslationsTagTypeRu tagType = _TranslationsTagTypeRu._(_root);
 }
 
 // Path: validationErrors
@@ -1444,6 +1446,27 @@ class _TranslationsPreviewRu extends TranslationsPreviewEn {
   late final _TranslationsPreviewErrorRu error = _TranslationsPreviewErrorRu._(_root);
 }
 
+// Path: tagType
+class _TranslationsTagTypeRu extends TranslationsTagTypeEn {
+  _TranslationsTagTypeRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get artist => TranslationOverrides.string(_root.$meta, 'tagType.artist', {}) ?? 'Автор';
+  @override
+  String get character => TranslationOverrides.string(_root.$meta, 'tagType.character', {}) ?? 'Персонаж';
+  @override
+  String get copyright => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Франшиза';
+  @override
+  String get meta => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'Мета';
+  @override
+  String get species => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? 'Раса';
+  @override
+  String get none => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'Нет/Общее';
+}
+
 // Path: tabs.filters
 class _TranslationsTabsFiltersRu extends TranslationsTabsFiltersEn {
   _TranslationsTabsFiltersRu._(TranslationsRu root) : this._root = root, super.internal(root);
@@ -1675,12 +1698,6 @@ class _TranslationsSettingsBooruEditorRu extends TranslationsSettingsBooruEditor
   @override
   String get title => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Редактор конфига сайта';
   @override
-  String get testBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooru', {}) ?? 'Проверить сайт';
-  @override
-  String get testBooruSuccessMsg =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruSuccessMsg', {}) ??
-      'Нажми кнопку Сохранить чтобы сохранить этот конфиг';
-  @override
   String get testBooruFailedTitle =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Проверка сайта не удалась';
   @override
@@ -1689,8 +1706,6 @@ class _TranslationsSettingsBooruEditorRu extends TranslationsSettingsBooruEditor
       'Данные конфига неверны, сайт не дает доступ к API, запрос не вернул данные или есть проблемы с сетью.';
   @override
   String get saveBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Сохранить конфиг';
-  @override
-  String get runTestFirst => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runTestFirst', {}) ?? 'Сначала запусти проверку';
   @override
   String get runningTest => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Выполнение теста...';
   @override
@@ -1766,6 +1781,13 @@ class _TranslationsSettingsBooruEditorRu extends TranslationsSettingsBooruEditor
   String get booruDefaultInstructions =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefaultInstructions', {}) ??
       'Поля ниже могут быть обязательны для некоторых сайтов';
+  @override
+  String get booruConfigShouldSave =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigShouldSave', {}) ?? 'Подтверди сохранение конфига для этого сайта';
+  @override
+  String booruConfigSelectedType({required String booruType}) =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigSelectedType', {'booruType': booruType}) ??
+      'Выбранный/Обнаруженный тип сайта: ${booruType}';
 }
 
 // Path: settings.interface
@@ -3256,7 +3278,7 @@ class _TranslationsSettingsWebviewRu extends TranslationsSettingsWebviewEn {
 
   // Translations
   @override
-  String get openWebview => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? 'Открыть webview';
+  String get openWebview => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? 'Открыть вебвью';
   @override
   String get openWebviewTip =>
       TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'чтобы залогиниться или получить куки';
@@ -4080,18 +4102,12 @@ extension on TranslationsRu {
           'settings.booru.removeRelatedTabsFirst' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Сначала удалите связанные вкладки',
           'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Редактор конфига сайта',
-          'settings.booruEditor.testBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooru', {}) ?? 'Проверить сайт',
-          'settings.booruEditor.testBooruSuccessMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruSuccessMsg', {}) ??
-                'Нажми кнопку Сохранить чтобы сохранить этот конфиг',
           'settings.booruEditor.testBooruFailedTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Проверка сайта не удалась',
           'settings.booruEditor.testBooruFailedMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
                 'Данные конфига неверны, сайт не дает доступ к API, запрос не вернул данные или есть проблемы с сетью.',
           'settings.booruEditor.saveBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Сохранить конфиг',
-          'settings.booruEditor.runTestFirst' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runTestFirst', {}) ?? 'Сначала запусти проверку',
           'settings.booruEditor.runningTest' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Выполнение теста...',
           'settings.booruEditor.booruConfigExistsError' =>
@@ -4152,6 +4168,13 @@ extension on TranslationsRu {
           'settings.booruEditor.booruDefaultInstructions' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefaultInstructions', {}) ??
                 'Поля ниже могут быть обязательны для некоторых сайтов',
+          'settings.booruEditor.booruConfigShouldSave' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigShouldSave', {}) ??
+                'Подтверди сохранение конфига для этого сайта',
+          'settings.booruEditor.booruConfigSelectedType' =>
+            ({required String booruType}) =>
+                TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigSelectedType', {'booruType': booruType}) ??
+                'Выбранный/Обнаруженный тип сайта: ${booruType}',
           'settings.interface.title' => TranslationOverrides.string(_root.$meta, 'settings.interface.title', {}) ?? 'Интерфейс',
           'settings.interface.appUIMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.appUIMode', {}) ?? 'Режим интерфейса приложения',
@@ -4507,12 +4530,12 @@ extension on TranslationsRu {
           'settings.database.searchHistoryFavouritesInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ??
                 'Избранные запросы закреплены вверху списка и не будут учитываться в лимите.',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.database.tagTypeFetchingInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ??
                 'Будет искать типы тегов на поддерживаемых сайтах',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.database.tagTypeFetchingWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'Это может привести к ограничению запросов',
           'settings.database.deleteDatabase' =>
@@ -5149,7 +5172,7 @@ extension on TranslationsRu {
           'settings.debug.restoredSessionFromString' =>
             TranslationOverrides.string(_root.$meta, 'settings.debug.restoredSessionFromString', {}) ?? 'Сессия восстановлена из строки',
           'settings.logging.logger' => TranslationOverrides.string(_root.$meta, 'settings.logging.logger', {}) ?? 'Логгер',
-          'settings.webview.openWebview' => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? 'Открыть webview',
+          'settings.webview.openWebview' => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? 'Открыть вебвью',
           'settings.webview.openWebviewTip' =>
             TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'чтобы залогиниться или получить куки',
           'settings.dirPicker.directoryName' => TranslationOverrides.string(_root.$meta, 'settings.dirPicker.directoryName', {}) ?? 'Имя папки',
@@ -5459,9 +5482,6 @@ extension on TranslationsRu {
           'gallery.loadingFile' => TranslationOverrides.string(_root.$meta, 'gallery.loadingFile', {}) ?? 'Загрузка файла...',
           'gallery.loadingFileMessage' =>
             TranslationOverrides.string(_root.$meta, 'gallery.loadingFileMessage', {}) ?? 'Это может занять некоторое время, пожалуйста, подожди...',
-          _ => null,
-        } ??
-        switch (path) {
           'gallery.sources' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
@@ -5470,6 +5490,9 @@ extension on TranslationsRu {
                   one: 'Источник',
                   other: 'Источники',
                 ),
+          _ => null,
+        } ??
+        switch (path) {
           'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'Рендеринг...',
           'media.loading.loadingAndRenderingFromCache' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'Загрузка и рендеринг из кэша...',
@@ -5545,6 +5568,12 @@ extension on TranslationsRu {
           'preview.error.errorNoResultsLoaded' =>
             TranslationOverrides.string(_root.$meta, 'preview.error.errorNoResultsLoaded', {}) ?? 'Ошибка, результаты не загружены',
           'preview.error.tapToRetry' => TranslationOverrides.string(_root.$meta, 'preview.error.tapToRetry', {}) ?? 'Нажми здесь для повтора',
+          'tagType.artist' => TranslationOverrides.string(_root.$meta, 'tagType.artist', {}) ?? 'Автор',
+          'tagType.character' => TranslationOverrides.string(_root.$meta, 'tagType.character', {}) ?? 'Персонаж',
+          'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Франшиза',
+          'tagType.meta' => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'Мета',
+          'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? 'Раса',
+          'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'Нет/Общее',
           _ => null,
         };
   }

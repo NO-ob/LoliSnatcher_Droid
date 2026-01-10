@@ -19,6 +19,8 @@ import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/html.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -129,8 +131,6 @@ class _BooruEditState extends State<BooruEdit> {
       body: Center(
         child: ListView(
           children: [
-            testButton(),
-            webviewButton(),
             saveButton(),
             const SettingsButton(name: '', enabled: false),
             SettingsTextInput(
@@ -150,6 +150,7 @@ class _BooruEditState extends State<BooruEdit> {
               pasteable: true,
               enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
+            webviewButton(),
             SettingsDropdown(
               value: selectedBooruType,
               items: BooruType.dropDownValues,
@@ -330,155 +331,135 @@ class _BooruEditState extends State<BooruEdit> {
     setState(() {});
   }
 
-  SettingsButton testButton() {
-    return SettingsButton(
-      name: booruEditorLoc.testBooru,
-      icon: isTesting ? const CircularProgressIndicator() : const Icon(Icons.public),
-      action: () async {
-        sanitizeBooruName();
+  Future<bool> onTest() async {
+    sanitizeBooruName();
 
-        if (booruNameController.text.trim().isEmpty) {
-          FlashElements.showSnackbar(
-            context: context,
-            title: Text(
-              booruEditorLoc.booruNameRequired,
-              style: const TextStyle(fontSize: 20),
-            ),
-            leadingIcon: Icons.warning_amber,
-            leadingIconColor: Colors.red,
-            sideColor: Colors.red,
-          );
-          return;
-        }
+    if (booruNameController.text.trim().isEmpty) {
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(
+          booruEditorLoc.booruNameRequired,
+          style: const TextStyle(fontSize: 20),
+        ),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.red,
+        sideColor: Colors.red,
+      );
+      return false;
+    }
 
-        if (booruURLController.text.trim().isEmpty) {
-          FlashElements.showSnackbar(
-            context: context,
-            title: Text(
-              booruEditorLoc.booruUrlRequired,
-              style: const TextStyle(fontSize: 20),
-            ),
-            leadingIcon: Icons.warning_amber,
-            leadingIconColor: Colors.red,
-            sideColor: Colors.red,
-          );
-          return;
-        }
+    if (booruURLController.text.trim().isEmpty) {
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(
+          booruEditorLoc.booruUrlRequired,
+          style: const TextStyle(fontSize: 20),
+        ),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.red,
+        sideColor: Colors.red,
+      );
+      return false;
+    }
 
-        // add https if not specified
-        if (!booruURLController.text.contains('http://') && !booruURLController.text.contains('https://')) {
-          booruURLController.text = 'https://${booruURLController.text}';
-        }
-        if (booruURLController.text.endsWith('/')) {
-          booruURLController.text = booruURLController.text.substring(0, booruURLController.text.length - 1);
-        }
+    // add https if not specified
+    if (!booruURLController.text.contains('http://') && !booruURLController.text.contains('https://')) {
+      booruURLController.text = 'https://${booruURLController.text}';
+    }
+    if (booruURLController.text.endsWith('/')) {
+      booruURLController.text = booruURLController.text.substring(0, booruURLController.text.length - 1);
+    }
 
-        booruURLController.text = convertSiteUrlToApiUrl();
+    booruURLController.text = convertSiteUrlToApiUrl();
 
-        booruFaviconController.text = booruFaviconController.text.trim().isEmpty
-            ? convertSiteUrlToFaviconUrl()
-            : booruFaviconController.text;
+    booruFaviconController.text = booruFaviconController.text.trim().isEmpty
+        ? convertSiteUrlToFaviconUrl()
+        : booruFaviconController.text;
 
-        //Call the booru test
-        final Booru testBooru = Booru.withKey(
-          booruNameController.text,
-          booruType,
-          booruFaviconController.text,
-          booruURLController.text,
-          booruDefTagsController.text,
-          booruAPIKeyController.text.isEmpty ? null : booruAPIKeyController.text,
-          booruUserIDController.text.isEmpty ? null : booruUserIDController.text,
-        );
+    //Call the booru test
+    final Booru testBooru = Booru.withKey(
+      booruNameController.text,
+      booruType,
+      booruFaviconController.text,
+      booruURLController.text,
+      booruDefTagsController.text,
+      booruAPIKeyController.text.isEmpty ? null : booruAPIKeyController.text,
+      booruUserIDController.text.isEmpty ? null : booruUserIDController.text,
+    );
 
-        isTesting = true;
-        setState(() {});
-        final testResults = await booruTest(testBooru, selectedBooruType);
-        final BooruType? testBooruType = testResults.booruType;
-        final String errorString = testResults.errorString?.isNotEmpty == true ? testResults.errorString! : '';
+    isTesting = true;
+    setState(() {});
 
-        // If a booru type is returned set the widget state
-        if (testBooruType != null) {
-          booruType = testBooruType;
-          selectedBooruType = testBooruType;
-          // Alert user about the results of the test
-          FlashElements.showSnackbar(
-            context: context,
-            title: Text(
-              booruEditorLoc.booruTypeIs(booruType: testBooruType.alias),
-              style: const TextStyle(fontSize: 20),
-            ),
-            content: Text(
-              booruEditorLoc.testBooruSuccessMsg,
+    final testResults = await booruTest(testBooru, selectedBooruType);
+    final BooruType? testBooruType = testResults.booruType;
+    final String errorString = testResults.errorString?.isNotEmpty == true ? testResults.errorString! : '';
+
+    isTesting = false;
+    setState(() {});
+
+    // If a booru type is returned set the widget state
+    if (testBooruType != null) {
+      booruType = testBooruType;
+      selectedBooruType = testBooruType;
+      return true;
+    } else {
+      FlashElements.showSnackbar(
+        context: context,
+        duration: const Duration(seconds: 5),
+        title: Text(
+          booruEditorLoc.testBooruFailedTitle,
+          style: const TextStyle(fontSize: 20),
+        ),
+        content: Column(
+          children: [
+            Text(
+              booruEditorLoc.testBooruFailedMsg,
               style: const TextStyle(fontSize: 16),
             ),
-            leadingIcon: Icons.done,
-            leadingIconColor: Colors.green,
-            sideColor: Colors.green,
-          );
-        } else {
-          FlashElements.showSnackbar(
-            context: context,
-            duration: const Duration(seconds: 5),
-            title: Text(
-              booruEditorLoc.testBooruFailedTitle,
-              style: const TextStyle(fontSize: 20),
-            ),
-            content: Column(
-              children: [
-                Text(
-                  booruEditorLoc.testBooruFailedMsg,
-                  style: const TextStyle(fontSize: 16),
-                ),
-                if (errorString.trim().isNotEmpty)
-                  Text(
-                    '${context.loc.error}: $errorString',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-              ],
-            ),
-            actionsBuilder: (context, controller) {
-              return [
-                if (errorString.trim().isNotEmpty)
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      Clipboard.setData(ClipboardData(text: errorString));
-                      FlashElements.showSnackbar(
-                        context: context,
-                        title: Text(
-                          context.loc.copied,
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        sideColor: Colors.green,
-                        leadingIcon: Icons.check,
-                        leadingIconColor: Colors.green,
-                        duration: const Duration(seconds: 2),
-                      );
-                    },
-                    icon: const Icon(Icons.copy),
-                    label: Text(context.loc.copyErrorText),
-                  ),
-              ];
-            },
-            leadingIcon: Icons.warning_amber,
-            leadingIconColor: Colors.red,
-            sideColor: Colors.red,
-          );
-        }
-        isTesting = false;
-        setState(() {});
-      },
-    );
+            if (errorString.trim().isNotEmpty)
+              Text(
+                '${context.loc.error}: $errorString',
+                style: const TextStyle(fontSize: 16),
+              ),
+          ],
+        ),
+        actionsBuilder: (context, controller) {
+          return [
+            if (errorString.trim().isNotEmpty)
+              ElevatedButton.icon(
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: errorString));
+                  FlashElements.showSnackbar(
+                    context: context,
+                    title: Text(
+                      context.loc.copied,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    sideColor: Colors.green,
+                    leadingIcon: Icons.check,
+                    leadingIconColor: Colors.green,
+                    duration: const Duration(seconds: 2),
+                  );
+                },
+                icon: const Icon(Icons.copy),
+                label: Text(context.loc.copyErrorText),
+              ),
+          ];
+        },
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.red,
+        sideColor: Colors.red,
+      );
+      return false;
+    }
   }
 
   /// The save button is displayed once the test function has run and completed
   /// allowing the user to save the booru config otherwise an empty container is returned
   Widget saveButton() {
     return SettingsButton(
-      name: '${booruEditorLoc.saveBooru}${booruType == null ? ' (${booruEditorLoc.runTestFirst})' : ''}'.trim(),
-      icon: Icon(
-        Icons.save,
-        color: booruType == null ? Colors.red : Colors.green,
-      ),
+      name: booruEditorLoc.saveBooru,
+      icon: isTesting ? const CircularProgressIndicator() : const Icon(Icons.save),
       action: onSave,
       onLongPress: settingsHandler.isDebug.value ? () => onSave(force: true) : null,
     );
@@ -505,8 +486,11 @@ class _BooruEditState extends State<BooruEdit> {
         leadingIconColor: Colors.yellow,
         sideColor: Colors.yellow,
       );
-      testButton().action!();
-      return;
+      final res = await onTest();
+      await FlashElements.dismissAll();
+      if (!res) {
+        return;
+      }
     }
 
     await getStoragePermission();
@@ -577,6 +561,50 @@ class _BooruEditState extends State<BooruEdit> {
         sideColor: Colors.red,
       );
     } else {
+      final bool confirmRes =
+          await showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text(booruEditorLoc.booruConfigShouldSave),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image(
+                          image: NetworkImage(booruFaviconController.text),
+                          fit: BoxFit.fill,
+                          errorBuilder: (context, error, stackTrace) => const Icon(
+                            Icons.error,
+                            size: 24,
+                            color: Colors.redAccent,
+                          ),
+                          loadingBuilder: (context, child, loadingProgress) =>
+                              loadingProgress == null ? child : const CircularProgressIndicator(),
+                        ),
+                        const SizedBox(width: 10),
+                        Text('${newBooru.name} (${newBooru.baseURL})'),
+                      ],
+                    ),
+                    Text(booruEditorLoc.booruConfigSelectedType(booruType: newBooru.type!.name)),
+                  ],
+                ),
+                actions: const [
+                  CancelButton(returnData: false),
+                  ConfirmButton(returnData: true),
+                ],
+              );
+            },
+          ) ??
+          false;
+
+      if (!confirmRes) {
+        return;
+      }
+
       await settingsHandler.saveBooru(newBooru);
 
       FlashElements.showSnackbar(

@@ -247,6 +247,8 @@ class TranslationsDev extends Translations with BaseTranslations<AppLocale, Tran
   late final _TranslationsImageStatsDev imageStats = _TranslationsImageStatsDev._(_root);
   @override
   late final _TranslationsPreviewDev preview = _TranslationsPreviewDev._(_root);
+  @override
+  late final _TranslationsTagTypeDev tagType = _TranslationsTagTypeDev._(_root);
 }
 
 // Path: validationErrors
@@ -1431,6 +1433,27 @@ class _TranslationsPreviewDev extends TranslationsPreviewEn {
   late final _TranslationsPreviewErrorDev error = _TranslationsPreviewErrorDev._(_root);
 }
 
+// Path: tagType
+class _TranslationsTagTypeDev extends TranslationsTagTypeEn {
+  _TranslationsTagTypeDev._(TranslationsDev root) : this._root = root, super.internal(root);
+
+  final TranslationsDev _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get artist => TranslationOverrides.string(_root.$meta, 'tagType.artist', {}) ?? '{Artist}';
+  @override
+  String get character => TranslationOverrides.string(_root.$meta, 'tagType.character', {}) ?? '{Character}';
+  @override
+  String get copyright => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? '{Copyright}';
+  @override
+  String get meta => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? '{Meta}';
+  @override
+  String get species => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '{Species}';
+  @override
+  String get none => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? '{None/General}';
+}
+
 // Path: tabs.filters
 class _TranslationsTabsFiltersDev extends TranslationsTabsFiltersEn {
   _TranslationsTabsFiltersDev._(TranslationsDev root) : this._root = root, super.internal(root);
@@ -1661,11 +1684,6 @@ class _TranslationsSettingsBooruEditorDev extends TranslationsSettingsBooruEdito
   @override
   String get title => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? '{Booru Editor}';
   @override
-  String get testBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooru', {}) ?? '{Test Booru}';
-  @override
-  String get testBooruSuccessMsg =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruSuccessMsg', {}) ?? '{Tap the Save button to save this config}';
-  @override
   String get testBooruFailedTitle =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? '{Booru test failed}';
   @override
@@ -1674,8 +1692,6 @@ class _TranslationsSettingsBooruEditorDev extends TranslationsSettingsBooruEdito
       '{Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error.}';
   @override
   String get saveBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? '{Save Booru}';
-  @override
-  String get runTestFirst => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runTestFirst', {}) ?? '{Run test first}';
   @override
   String get runningTest => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? '{Running test...}';
   @override
@@ -1750,6 +1766,13 @@ class _TranslationsSettingsBooruEditorDev extends TranslationsSettingsBooruEdito
   String get booruDefaultInstructions =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefaultInstructions', {}) ??
       '{Fields below may be required for some boorus}';
+  @override
+  String get booruConfigShouldSave =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigShouldSave', {}) ?? '{Confirm saving this booru config}';
+  @override
+  String booruConfigSelectedType({required String booruType}) =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigSelectedType', {'booruType': booruType}) ??
+      '{Selected/Detected booru type: ${booruType}}';
 }
 
 // Path: settings.interface
@@ -4013,17 +4036,12 @@ extension on TranslationsDev {
           'settings.booru.removeRelatedTabsFirst' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? '{Remove related tabs first}',
           'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? '{Booru Editor}',
-          'settings.booruEditor.testBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooru', {}) ?? '{Test Booru}',
-          'settings.booruEditor.testBooruSuccessMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruSuccessMsg', {}) ?? '{Tap the Save button to save this config}',
           'settings.booruEditor.testBooruFailedTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? '{Booru test failed}',
           'settings.booruEditor.testBooruFailedMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
                 '{Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error.}',
           'settings.booruEditor.saveBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? '{Save Booru}',
-          'settings.booruEditor.runTestFirst' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runTestFirst', {}) ?? '{Run test first}',
           'settings.booruEditor.runningTest' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? '{Running test...}',
           'settings.booruEditor.booruConfigExistsError' =>
@@ -4086,6 +4104,12 @@ extension on TranslationsDev {
           'settings.booruEditor.booruDefaultInstructions' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefaultInstructions', {}) ??
                 '{Fields below may be required for some boorus}',
+          'settings.booruEditor.booruConfigShouldSave' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigShouldSave', {}) ?? '{Confirm saving this booru config}',
+          'settings.booruEditor.booruConfigSelectedType' =>
+            ({required String booruType}) =>
+                TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigSelectedType', {'booruType': booruType}) ??
+                '{Selected/Detected booru type: ${booruType}}',
           'settings.interface.title' => TranslationOverrides.string(_root.$meta, 'settings.interface.title', {}) ?? '{Interface}',
           'settings.interface.appUIMode' => TranslationOverrides.string(_root.$meta, 'settings.interface.appUIMode', {}) ?? '{App UI mode}',
           'settings.interface.appUIModeWarningTitle' =>
@@ -4426,12 +4450,12 @@ extension on TranslationsDev {
           'settings.database.searchHistoryFavouritesInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ??
                 '{Favourited queries are pinned to the top of the list and will not be counted towards the limit.}',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.database.tagTypeFetchingInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ??
                 '{Will search for tag types on supported boorus}',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.database.tagTypeFetchingWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? '{This can lead to rate limiting}',
           'settings.database.deleteDatabase' =>
@@ -5356,9 +5380,6 @@ extension on TranslationsDev {
           'gallery.loadingFile' => TranslationOverrides.string(_root.$meta, 'gallery.loadingFile', {}) ?? '{Loading file...}',
           'gallery.loadingFileMessage' =>
             TranslationOverrides.string(_root.$meta, 'gallery.loadingFileMessage', {}) ?? '{This can take some time, please wait...}',
-          _ => null,
-        } ??
-        switch (path) {
           'gallery.sources' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
@@ -5367,6 +5388,9 @@ extension on TranslationsDev {
                   one: '{Source}',
                   other: '{Sources}',
                 ),
+          _ => null,
+        } ??
+        switch (path) {
           'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? '{Rendering...}',
           'media.loading.loadingAndRenderingFromCache' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? '{Loading and rendering from cache...}',
@@ -5439,6 +5463,12 @@ extension on TranslationsDev {
           'preview.error.errorNoResultsLoaded' =>
             TranslationOverrides.string(_root.$meta, 'preview.error.errorNoResultsLoaded', {}) ?? '{Error, no results loaded}',
           'preview.error.tapToRetry' => TranslationOverrides.string(_root.$meta, 'preview.error.tapToRetry', {}) ?? '{Tap here to retry}',
+          'tagType.artist' => TranslationOverrides.string(_root.$meta, 'tagType.artist', {}) ?? '{Artist}',
+          'tagType.character' => TranslationOverrides.string(_root.$meta, 'tagType.character', {}) ?? '{Character}',
+          'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? '{Copyright}',
+          'tagType.meta' => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? '{Meta}',
+          'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '{Species}',
+          'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? '{None/General}',
           _ => null,
         };
   }

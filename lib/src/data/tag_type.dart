@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'package:lolisnatcher/src/utils/extensions.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 enum TagType {
   artist,
@@ -8,7 +8,8 @@ enum TagType {
   copyright,
   meta,
   species,
-  none;
+  none
+  ;
 
   bool get isArtist => this == TagType.artist;
   bool get isCharacter => this == TagType.character;
@@ -36,45 +37,41 @@ enum TagType {
 
   @override
   String toString() {
-    switch (this) {
-      case TagType.artist:
-        return 'artist';
-      case TagType.character:
-        return 'character';
-      case TagType.copyright:
-        return 'copyright';
-      case TagType.meta:
-        return 'meta';
-      case TagType.species:
-        return 'species';
-      default:
-        return 'none';
-    }
+    return name;
   }
 
   Color getColour() {
     switch (this) {
       case artist:
         return Colors.red;
-      case copyright:
-        return Colors.purple;
       case character:
         return Colors.green;
-      case species:
-        return Colors.brown;
+      case copyright:
+        return Colors.purple;
       case meta:
         return Colors.orange;
+      case species:
+        return Colors.brown;
       default:
         return Colors.transparent;
     }
   }
 
   String get locName {
+    final ctx = NavigationHandler.instance.navContext;
     switch (this) {
+      case artist:
+        return ctx.loc.tagType.artist;
+      case character:
+        return ctx.loc.tagType.character;
+      case copyright:
+        return ctx.loc.tagType.copyright;
+      case meta:
+        return ctx.loc.tagType.meta;
+      case species:
+        return ctx.loc.tagType.species;
       case none:
-        return 'None/General';
-      default:
-        return name.capitalizeFirst;
+        return ctx.loc.tagType.none;
     }
   }
 }
