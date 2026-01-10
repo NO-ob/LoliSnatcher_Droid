@@ -4,9 +4,6 @@
     "appName": "{LoliSnatcher}",
     "error": "{Error}",
     "errorExclamation": "{Error!}",
-    "warning": "{Warning}",
-    "warningExclamation": "{Warning!}",
-    "info": "{Info}",
     "success": "{Success}",
     "successExclamation": "{Success!}",
     "cancel": "{Cancel}",
@@ -60,12 +57,7 @@
     "move": "{Move}",
     "shuffle": "{Shuffle}",
     "sort": "{Sort}",
-    "sortTabs": "{Sort tabs}",
     "go": "{Go}",
-    "jump": "{Jump}",
-    "jumpToPage": "{Jump to page}",
-    "searchUntilPage": "{Search until page}",
-    "stopSearching": "{Stop searching}",
     "search": "{Search}",
     "filter": "{Filter}",
     "or": "{Or (~)}",
@@ -87,13 +79,11 @@
         "greaterThanOrEqualZero": "{Please enter a value equal to or greater than 0}",
         "lessThan4": "{Please enter a value less than 4}",
         "biggerThan100": "{Please enter a value bigger than 100}",
-        "validTabNumber": "{Please enter a valid tab number}",
         "moreThan4ColumnsWarning": "{Using more than 4 columns can affect performance}",
         "moreThan8ColumnsWarning": "{Using more than 8 columns can affect performance}"
     },
     "init": {
         "initError": "{Initialization error!}",
-        "postInitError": "{Post initialization error!}",
         "settingUpProxy": "{Setting up proxy...}",
         "loadingDatabase": "{Loading database...}",
         "loadingBoorus": "{Loading boorus...}",
@@ -241,22 +231,7 @@
         "selectDeselectAll": "{Select/deselect all tabs}",
         "deleteSelectedTabs": "{Delete selected tabs}",
         "longPressToMove": "{Long press on a tab to move it}",
-        "removedLastTab": "{Removed last tab}",
         "resettingToDefaultTags": "{Resetting search to default tags}",
-        "ratingsChanged": "{Ratings changed}",
-        "ratingsChangedOn(param=booruType)": "{On ${booruType: String} }",
-        "ratingReplacedWith": "{ is now replaced with }",
-        "ratingAnd": "{ and }",
-        "ratingsFixedAutomatically": "{App fixed the rating automatically, but consider changing to correct rating in your future queries}",
-        "tabsRestored": "{Tabs restored}",
-        "restoredTabs(param=count, param=tabsPlural)": "{Restored ${count: int} ${tabsPlural: String} from previous session}",
-        "someTabsHadUnknownBoorus": "{Some restored tabs had unknown boorus or broken characters.}",
-        "brokenTabsSetToDefault": "{They were set to default or ignored.}",
-        "listOfBrokenTabs": "{List of broken tabs:}",
-        "tabsMerged": "{Tabs merged}",
-        "addedNewTabs(param=count, param=tabsPlural)": "{Added ${count: int} new ${tabsPlural: String}}",
-        "tabsReplaced": "{Tabs replaced}",
-        "receivedTabs(param=count, param=tabsPlural)": "{Received ${count: int} ${tabsPlural: String}}",
         "numbersInBottomRight": "{Numbers in the bottom right of the tab:}",
         "firstNumberTabIndex": "{First number - tab index in default list order}",
         "secondNumberTabIndex": "{Second number - tab index in current list order, appears when filtering/sorting is active}",
@@ -306,28 +281,8 @@
             "outOfRange": "{Out of range}",
             "pleaseEnterValidTabNumber": "{Please enter a valid tab number}",
             "moveTo(param=formattedNumber)": "{Move to #${formattedNumber: String}}",
-            "returnButton": "{Return}",
             "preview": "{Preview:}"
         }
-    },
-    "dialogs": {
-        "pageChanger": "{Page changer}",
-        "delayBetweenLoadingsMs": "{Delay between loadings (ms)}",
-        "delayInMs": "{Delay in ms}",
-        "cookies": "{Cookies}",
-        "cookiesGone": "{There were cookies. Now, they are gone}",
-        "favicon": "{Favicon}",
-        "noFaviconFound": "{No favicon found}",
-        "host": "{Host:}",
-        "textAboveIsSelectable": "{(text above is selectable)}",
-        "fieldToMergeTexts": "{Field to merge texts:}",
-        "navigateTo(param=url)": "{Navigate to ${url: String}}",
-        "listCookies": "{List cookies}",
-        "clearCookies": "{Clear cookies}",
-        "getFavicon": "{Get favicon}",
-        "history": "{History}",
-        "noBackHistoryItem": "{No back history item}",
-        "noForwardHistoryItem": "{No forward history item}"
     },
     "history": {
         "searchHistory": "{Search history}",
@@ -461,8 +416,6 @@
             "appUIModeHelpMobile": "{- Mobile - Normal Mobile UI}",
             "appUIModeHelpDesktop": "{- Desktop - Ahoviewer Style UI [DEPRECATED, NEEDS REWORK]}",
             "appUIModeHelpWarning": "{[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.}",
-            "appUIModeHelpAndroid10": "{If you are on android versions below 11 you can remove the appMode line from /LoliSnatcher/config/settings.json}",
-            "appUIModeHelpAndroid11": "{If you are on android 11 or higher you will have to wipe app data via system settings}",
             "handSide": "{Hand side}",
             "handSideHelp": "{Changes position of some UI elements according to selected side}",
             "showSearchBarInPreviewGrid": "{Show search bar in preview grid}",
@@ -570,10 +523,7 @@
             "viewerPageChangeAnimation": "{Viewer page change animation}",
             "usingDefaultAnimation": "{Using default animation}",
             "usingCustomAnimation": "{Using custom animation}",
-            "kannaLoadingGif": "{Kanna loading Gif}",
-            "searchTags": "{Search tags}",
-            "selectTags": "{Select tags}",
-            "noteCoordinates(param=x, param=y)": "{X:${x: double}, Y:${y: double}}"
+            "kannaLoadingGif": "{Kanna loading Gif}"
         },
         "video": {
             "title": "{Video}",
@@ -606,7 +556,6 @@
             }
         },
         "downloads": {
-            "title": "{Snatching}",
             "fromNextItemInQueue": "{From next item in queue}",
             "pleaseProvideStoragePermission": "{Please provide storage permission in order to download files}",
             "noItemsSelected": "{No items selected}",
@@ -619,7 +568,6 @@
             "clearSelected": "{Clear selected}",
             "updatingData": "{Updating data...}"
         },
-        "downloadsAndCache": "{Snatching & Cache}",
         "database": {
             "title": "{Database}",
             "indexingDatabase": "{Indexing database}",
@@ -628,11 +576,9 @@
             "enableIndexing": "{Enable indexing}",
             "enableSearchHistory": "{Enable search history}",
             "enableTagTypeFetching": "{Enable tag type fetching}",
-            "failedItemPurgeStarted": "{Failed item purge started}",
             "sankakuTypeToUpdate": "{Sankaku type to update}",
             "searchQuery": "{Search query}",
             "searchQueryOptional": "{(optional, may make the process slower)}",
-            "errorLoadingTags": "{Error loading tags}",
             "cantLeavePageNow": "{Can't leave the page right now!}",
             "sankakuDataUpdating": "{Sankaku data is being updated, wait until it ends or cancel manually at the bottom of the page}",
             "pleaseWaitTitle": "{Please wait!}",
@@ -843,9 +789,6 @@
             "searchFiltersFilteredCount(param=filtered, param=total)": "{Search filters (${filtered: int}/${total: int})}",
             "noFiltersFound": "{No filters found}",
             "noFiltersAdded": "{No filters added}",
-            "newFilterType(param=type)": "{New ${type: String} tag filter}",
-            "newFilter": "{New filter}",
-            "editFilter": "{Edit Filter}",
             "searchFilters": "{Search filters}",
             "removeHated": "{Remove items with Hated tags}",
             "removeFavourited": "{Remove favourited items}",
@@ -909,8 +852,7 @@
             "selectedInterfaceIP(param=ip)": "{Selected interface IP: ${ip: String}}",
             "serverPort": "{Server port}",
             "serverPortPlaceholder": "{(will default to '8080' if empty)}",
-            "startReceiverServer": "{Start receiver server}",
-            "keepTheScreenAwake": "{Keep the screen awake}"
+            "startReceiverServer": "{Start receiver server}"
         },
         "about": {
             "title": "{About}",
@@ -950,8 +892,6 @@
             "enabledSnackbarMsg": "{Debug mode is enabled!}",
             "disabledSnackbarMsg": "{Debug mode is disabled!}",
             "alreadyEnabledSnackbarMsg": "{Debug mode is already enabled!}",
-            "openAlice": "{Open network inspector}",
-            "openLogger": "{Open logger}",
             "showPerformanceGraph": "{Show performance graph}",
             "showFPSGraph": "{Show FPS graph}",
             "showImageStats": "{Show image stats}",
@@ -978,18 +918,13 @@
             "restoredSessionFromString": "{Restored session from string}"
         },
         "logging": {
-            "title": "{Logging}",
-            "logger": "{Logger}",
-            "enabledMsg": "{Logging is enabled}",
-            "enabledLogTypes": "{Enabled log types}",
-            "disableTip": "{You can disable logging in the debug settings}"
+            "logger": "{Logger}"
         },
         "webview": {
             "openWebview": "{Open webview}",
             "openWebviewTip": "{to login or obtain cookies}"
         },
         "dirPicker": {
-            "defaultPath": "{/0}",
             "directoryName": "{Directory name}",
             "selectADirectory": "{Select a directory}",
             "closeWithoutChoosing": "{Do you want to close the picker without choosing a directory?}",
@@ -1025,8 +960,7 @@
         "addNewFilter(param=type)": "{[Add new ${type: String} filter]}",
         "newTagFilter(param=type)": "{New ${type: String} tag filter}",
         "newFilter": "{New filter}",
-        "editTagFilter": "{Edit tag filter}",
-        "confirmDelete": "{Confirm delete}"
+        "editFilter": "{Edit filter}"
     },
     "tagsManager": {
         "title": "{Tags}",
@@ -1055,13 +989,6 @@
     },
     "loliSync": {
         "title": "{LoliSync}",
-        "favourites": "{Favourites}",
-        "favouritesv2": "{Favouritesv2}",
-        "snatched": "{Snatched}",
-        "settingsData": "{Settings}",
-        "booruData": "{Booru}",
-        "tabsData": "{Tabs}",
-        "tagsData": "{Tags}",
         "stopSyncingQuestion": "{Do you want to stop syncing?}",
         "stopServerQuestion": "{Do you want to stop the server?}",
         "noConnection": "{No connection}",
@@ -1083,7 +1010,6 @@
         "showNotes(param=count)": "{Show notes (${count: int})}",
         "hideNotes(param=count)": "{Hide notes (${count: int})}",
         "loadNotes": "{Load notes}",
-        "copiedToClipboard(param=title)": "{Copied ${title: String} to clipboard}",
         "thisTagAlreadyInSearch": "{This tag is already in the current search query:}",
         "addedToCurrentSearch": "{Added to current search query:}",
         "addedNewTab": "{Added new tab:}",
@@ -1123,7 +1049,6 @@
         "selected": "{selected}",
         "all": "{all}",
         "openSelected(param=type)": "{Open ${type: String}}",
-        "returnButton": "{Return}",
         "preview": "{Preview}",
         "booru": "{Booru}",
         "selectBooruToLoad": "{Select a booru to load}",
@@ -1146,7 +1071,6 @@
         "prefix": "{Prefix}",
         "exclude": "{Exclude (—)}",
         "booruNumberPrefix": "{Booru (N#)}",
-        "returnButton": "{Return}",
         "metatags": "{Metatags}",
         "freeMetatags": "{Free metatags}",
         "freeMetatagsDescription": "{Free metatags do not count against the tag search limits}",
@@ -1240,7 +1164,6 @@
         "notes": {
             "note": "{Note}",
             "notes": "{Notes}",
-            "closeDialog": "{Close}",
             "coordinates(param=posX, param=posY)": "{X:${posX: int}, Y:${posY: int}}"
         }
     },
@@ -1291,8 +1214,6 @@
         "max(param=max)": "{Max: ${max: String}}"
     },
     "preview": {
-        "searchForTags": "{Search for tags}",
-        "booruNumber(param=number)": "{Booru (${number: int}#)}",
         "error": {
             "noResults": "{No results}",
             "noResultsSubtitle": "{Try changing your search query or tap here to retry}",

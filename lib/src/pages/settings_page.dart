@@ -113,7 +113,7 @@ class SettingsPage extends StatelessWidget {
                 page: () => const VideoSettingsPage(),
               ),
               SettingsButton(
-                name: context.loc.settings.downloadsAndCache,
+                name: context.loc.settings.cache.title,
                 icon: const Icon(Icons.sd_storage_sharp),
                 page: () => const SaveCachePage(),
               ),

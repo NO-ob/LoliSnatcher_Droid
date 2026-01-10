@@ -161,12 +161,6 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                               Text(
                                 context.loc.settings.interface.appUIModeHelpWarning,
                               ),
-                              Text(
-                                context.loc.settings.interface.appUIModeHelpAndroid10,
-                              ),
-                              Text(
-                                context.loc.settings.interface.appUIModeHelpAndroid11,
-                              ),
                             ],
                           );
                         },
