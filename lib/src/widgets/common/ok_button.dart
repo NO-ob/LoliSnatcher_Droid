@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/gen/strings.g.dart';
-
-class ConfirmButton extends StatelessWidget {
-  const ConfirmButton({
+class OkButton extends StatelessWidget {
+  const OkButton({
     this.action,
     this.returnData = true,
     this.withIcon = false,
+    this.count,
     super.key,
   });
 
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
+  final int? count;
 
   @override
   Widget build(BuildContext context) {
+    final String label = count == null || count == 0 ? 'OK' : 'OK ($count)';
+
     if (withIcon) {
       return ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
@@ -32,7 +34,7 @@ class ConfirmButton extends StatelessWidget {
           }
         },
         icon: const Icon(Icons.check),
-        label: Text(context.loc.confirm),
+        label: Text(label),
       );
     }
 
@@ -50,7 +52,7 @@ class ConfirmButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(context.loc.confirm),
+      child: Text(label),
     );
   }
 }

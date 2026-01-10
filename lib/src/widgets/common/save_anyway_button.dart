@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/gen/strings.g.dart';
 
-class RetryButton extends StatelessWidget {
-  const RetryButton({
+class SaveAnywayButton extends StatelessWidget {
+  const SaveAnywayButton({
     this.onTap,
     this.onLongTap,
     this.withIcon = false,
@@ -30,7 +30,7 @@ class RetryButton extends StatelessWidget {
         onPressed: onTap,
         onLongPress: onLongTap,
         icon: const Icon(Icons.refresh),
-        label: Text(context.loc.retry),
+        label: Text(context.loc.mobileHome.saveAnyway),
       );
     }
 
@@ -46,7 +46,7 @@ class RetryButton extends StatelessWidget {
       ),
       onPressed: onTap,
       onLongPress: onLongTap,
-      child: Text(context.loc.retry),
+      child: Text(context.loc.mobileHome.saveAnyway),
     );
   }
 }

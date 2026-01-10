@@ -3206,10 +3206,7 @@ class _PrefixEditDialog extends StatelessWidget {
                   ),
                 ),
               //
-              CancelButton(
-                text: context.loc.searchBar.returnButton,
-                withIcon: true,
-              ),
+              const CancelButton(withIcon: true),
             ],
           );
         },

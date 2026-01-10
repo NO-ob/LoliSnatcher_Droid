@@ -129,10 +129,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
         ),
         //
         const SizedBox(height: 20),
-        CancelButton(
-          text: context.loc.tabs.move.returnButton,
-          withIcon: true,
-        ),
+        const CancelButton(withIcon: true),
         const SizedBox(height: 10),
         Text(context.loc.tabs.move.preview),
         const SizedBox(height: 10),

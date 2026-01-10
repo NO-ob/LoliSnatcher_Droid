@@ -4,19 +4,15 @@ import 'package:lolisnatcher/gen/strings.g.dart';
 
 class DeleteButton extends StatelessWidget {
   const DeleteButton({
-    this.text,
     this.action,
     this.returnData,
     this.withIcon = false,
-    this.customIcon,
     super.key,
   });
 
-  final String? text;
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
-  final IconData? customIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +34,8 @@ class DeleteButton extends StatelessWidget {
             Navigator.of(context).pop(returnData);
           }
         },
-        icon: Icon(withIcon ? (customIcon ?? Icons.delete_forever) : null),
-        label: Text(text ?? context.loc.delete),
+        icon: const Icon(Icons.delete_forever),
+        label: Text(context.loc.delete),
       );
     }
 
@@ -57,7 +53,7 @@ class DeleteButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(text ?? context.loc.delete),
+      child: Text(context.loc.delete),
     );
   }
 }

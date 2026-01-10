@@ -25,13 +25,14 @@ import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
-import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/inner_drawer.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
 import 'package:lolisnatcher/src/widgets/common/retry_button.dart';
+import 'package:lolisnatcher/src/widgets/common/save_anyway_button.dart';
+import 'package:lolisnatcher/src/widgets/common/skip_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
 import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
@@ -611,7 +612,6 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                             if (index == 0)
                                               CancelButton(
                                                 withIcon: true,
-                                                customIcon: Icons.cancel_outlined,
                                                 action: snatchHandler.onCancel,
                                               ),
                                           ],
@@ -773,15 +773,20 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                           ? context.loc.mobileHome.failedToDownload
                                           : context.loc.mobileHome.cancelledByUser,
                                     ),
-                                    RetryButton(
-                                      text: isExists ? context.loc.mobileHome.saveAnyway : context.loc.retry,
-                                      withIcon: true,
-                                      onTap: () => onRetryFailedItem(record, isExists, false),
-                                      onLongTap: () => onRetryFailedItem(record, isExists, true),
-                                    ),
-                                    DeleteButton(
-                                      text: context.loc.mobileHome.skip,
-                                      customIcon: Icons.skip_next,
+                                    if (isExists)
+                                      SaveAnywayButton(
+                                        withIcon: true,
+                                        onTap: () => onRetryFailedItem(record, isExists, false),
+                                        onLongTap: () => onRetryFailedItem(record, isExists, true),
+                                      )
+                                    else
+                                      RetryButton(
+                                        withIcon: true,
+                                        onTap: () => onRetryFailedItem(record, isExists, false),
+                                        onLongTap: () => onRetryFailedItem(record, isExists, true),
+                                      ),
+                                    //
+                                    SkipButton(
                                       action: () => snatchHandler.onRemoveRetryItem(record),
                                       withIcon: true,
                                     ),

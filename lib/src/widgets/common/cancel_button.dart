@@ -4,19 +4,15 @@ import 'package:lolisnatcher/gen/strings.g.dart';
 
 class CancelButton extends StatelessWidget {
   const CancelButton({
-    this.text,
     this.action,
     this.returnData,
     this.withIcon = false,
-    this.customIcon,
     super.key,
   });
 
-  final String? text;
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
-  final IconData? customIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +34,8 @@ class CancelButton extends StatelessWidget {
             Navigator.of(context).pop(returnData);
           }
         },
-        icon: Icon(withIcon ? (customIcon ?? Icons.keyboard_return_rounded) : null),
-        label: Text(text ?? context.loc.cancel),
+        icon: const Icon(Icons.keyboard_return_rounded),
+        label: Text(context.loc.cancel),
       );
     }
 
@@ -60,7 +56,7 @@ class CancelButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(text ?? context.loc.cancel),
+      child: Text(context.loc.cancel),
     );
   }
 }

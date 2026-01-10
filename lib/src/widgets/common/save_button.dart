@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/gen/strings.g.dart';
 
-class RetryButton extends StatelessWidget {
-  const RetryButton({
-    this.onTap,
-    this.onLongTap,
+class SaveButton extends StatelessWidget {
+  const SaveButton({
+    this.action,
+    this.returnData = true,
     this.withIcon = false,
     super.key,
   });
 
-  final VoidCallback? onTap;
-  final VoidCallback? onLongTap;
+  final VoidCallback? action;
+  final dynamic returnData;
   final bool withIcon;
 
   @override
@@ -19,34 +19,38 @@ class RetryButton extends StatelessWidget {
     if (withIcon) {
       return ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.grey[300],
-          foregroundColor: Colors.black,
-          iconColor: Colors.black,
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
         ),
-        onPressed: onTap,
-        onLongPress: onLongTap,
-        icon: const Icon(Icons.refresh),
-        label: Text(context.loc.retry),
+        onPressed: () {
+          if (action != null) {
+            action?.call();
+          } else {
+            Navigator.of(context).pop(returnData);
+          }
+        },
+        icon: const Icon(Icons.save),
+        label: Text(context.loc.save),
       );
     }
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[300],
-        foregroundColor: Colors.black,
-        iconColor: Colors.black,
         textStyle: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w600,
         ),
       ),
-      onPressed: onTap,
-      onLongPress: onLongTap,
-      child: Text(context.loc.retry),
+      onPressed: () {
+        if (action != null) {
+          action?.call();
+        } else {
+          Navigator.of(context).pop(returnData);
+        }
+      },
+      child: Text(context.loc.save),
     );
   }
 }

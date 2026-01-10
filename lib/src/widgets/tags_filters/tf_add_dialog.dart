@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/add_button.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
-import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
@@ -84,10 +84,8 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
         const CancelButton(
           withIcon: true,
         ),
-        ConfirmButton(
-          text: context.loc.add,
+        AddButton(
           withIcon: true,
-          customIcon: Icons.save,
           action: () => onSubmit(_controller.text),
         ),
       ],

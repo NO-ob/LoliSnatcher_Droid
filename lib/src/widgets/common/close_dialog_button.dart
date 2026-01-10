@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/gen/strings.g.dart';
 
-class RetryButton extends StatelessWidget {
-  const RetryButton({
-    this.onTap,
-    this.onLongTap,
+class CloseDialogButton extends StatelessWidget {
+  const CloseDialogButton({
+    this.action,
+    this.returnData,
     this.withIcon = false,
     super.key,
   });
 
-  final VoidCallback? onTap;
-  final VoidCallback? onLongTap;
+  final VoidCallback? action;
+  final dynamic returnData;
   final bool withIcon;
 
   @override
@@ -27,10 +27,15 @@ class RetryButton extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        onPressed: onTap,
-        onLongPress: onLongTap,
-        icon: const Icon(Icons.refresh),
-        label: Text(context.loc.retry),
+        onPressed: () {
+          if (action != null) {
+            action?.call();
+          } else {
+            Navigator.of(context).pop(returnData);
+          }
+        },
+        icon: const Icon(Icons.keyboard_return_rounded),
+        label: Text(context.loc.galleryView.close),
       );
     }
 
@@ -44,9 +49,14 @@ class RetryButton extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
       ),
-      onPressed: onTap,
-      onLongPress: onLongTap,
-      child: Text(context.loc.retry),
+      onPressed: () {
+        if (action != null) {
+          action?.call();
+        } else {
+          Navigator.of(context).pop(returnData);
+        }
+      },
+      child: Text(context.loc.galleryView.close),
     );
   }
 }

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/gen/strings.g.dart';
 
-class ConfirmButton extends StatelessWidget {
-  const ConfirmButton({
+class SkipButton extends StatelessWidget {
+  const SkipButton({
     this.action,
-    this.returnData = true,
+    this.returnData,
     this.withIcon = false,
     super.key,
   });
@@ -19,6 +19,9 @@ class ConfirmButton extends StatelessWidget {
     if (withIcon) {
       return ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.red,
+          foregroundColor: Colors.white,
+          iconColor: Colors.white,
           textStyle: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -31,8 +34,8 @@ class ConfirmButton extends StatelessWidget {
             Navigator.of(context).pop(returnData);
           }
         },
-        icon: const Icon(Icons.check),
-        label: Text(context.loc.confirm),
+        icon: const Icon(Icons.skip_next),
+        label: Text(context.loc.mobileHome.skip),
       );
     }
 
@@ -50,7 +53,7 @@ class ConfirmButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(context.loc.confirm),
+      child: Text(context.loc.mobileHome.skip),
     );
   }
 }

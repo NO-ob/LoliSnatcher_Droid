@@ -17,7 +17,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
-import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/close_dialog_button.dart';
 import 'package:lolisnatcher/src/widgets/gallery/gallery_buttons.dart';
 import 'package:lolisnatcher/src/widgets/gallery/hideable_appbar.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
@@ -609,11 +609,11 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                           spacing: 16,
                           children: [
                             Text(context.loc.galleryView.noItemSelected),
-                            Padding(
-                              padding: const EdgeInsets.all(8),
+                            const Padding(
+                              padding: EdgeInsets.all(8),
                               child: SizedBox(
                                 width: double.infinity,
-                                child: CancelButton(text: context.loc.galleryView.close),
+                                child: CloseDialogButton(),
                               ),
                             ),
                           ],

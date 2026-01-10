@@ -11,7 +11,7 @@ import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/html_parse.dart';
-import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/close_dialog_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
@@ -465,11 +465,8 @@ class NotesDialog extends StatelessWidget {
       // titlePadding: const EdgeInsets.fromLTRB(6, 18, 2, 6),
       // insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
       scrollable: false,
-      actionButtons: [
-        CancelButton(
-          text: context.loc.viewer.notes.closeDialog,
-          withIcon: true,
-        ),
+      actionButtons: const [
+        CloseDialogButton(withIcon: true),
       ],
     );
   }

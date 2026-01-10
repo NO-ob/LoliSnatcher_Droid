@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/clear_button.dart';
-import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
+import 'package:lolisnatcher/src/widgets/common/ok_button.dart';
+import 'package:lolisnatcher/src/widgets/common/return_button.dart';
 
 class LoliDropdown<T> extends StatelessWidget {
   const LoliDropdown({
@@ -299,8 +299,7 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
     final bool isLeftHanded = SettingsHandler.instance.handSide.value.isLeft;
 
     List<Widget> actions = [
-      const CancelButton(
-        text: 'Return',
+      const ReturnButton(
         withIcon: true,
         returnData: false,
       ),
@@ -597,8 +596,7 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
     final isAllSelected = value.length == widget.items.length;
 
     List<Widget> actions = [
-      const CancelButton(
-        text: 'Return',
+      const ReturnButton(
         withIcon: true,
         returnData: false,
       ),
@@ -626,9 +624,9 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
         icon: const Icon(Icons.select_all),
         label: Text(context.loc.selectAll),
       ),
-      ConfirmButton(
-        text: 'OK ${value.isEmpty ? '' : '(${value.length})'.trim()}',
+      OkButton(
         withIcon: true,
+        count: value.isEmpty ? null : value.length,
         action: () {
           widget.onChanged(value);
           Navigator.of(context).pop(true);

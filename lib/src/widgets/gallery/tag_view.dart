@@ -1480,10 +1480,7 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
           label: Text(context.loc.tagView.openSelected(type: hasSelected ? context.loc.tagView.selected : '')),
           icon: const Icon(Icons.open_in_new),
         ),
-        CancelButton(
-          text: context.loc.tagView.returnButton,
-          withIcon: true,
-        ),
+        const CancelButton(withIcon: true),
       ],
     );
   }
