@@ -1564,10 +1564,10 @@ packages:
     dependency: "direct main"
     description:
       name: slang
-      sha256: "263159a93864a13a0f2486326e200cb38214a8e82a3c83a48c20ac24a8eed329"
+      sha256: e97bbb72af7882e4f714b90a8a07f787ed2e5b6c901a1e2b7f73c11772247fa9
       url: "https://pub.dev"
     source: hosted
-    version: "4.11.1"
+    version: "4.11.2"
   slang_flutter:
     dependency: "direct main"
     description:
