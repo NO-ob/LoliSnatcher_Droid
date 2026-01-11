@@ -300,7 +300,7 @@ class _MediaLoadingState extends State<MediaLoading> {
       } else {
         percentDoneText = widget.isDone
             ? context.loc.media.loading.rendering
-            : '${context.loc.media.loading.loading}${widget.isFromCache ? ' ${context.loc.media.loading.loadingFromCache.toLowerCase().replaceAll('...', '')}' : ''}...';
+            : (widget.isFromCache ? context.loc.media.loading.loadingFromCache : context.loc.media.loading.loading);
       }
     }
 

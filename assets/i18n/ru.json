@@ -1211,7 +1211,7 @@
       "loadingFromCache": "Загрузка из кэша...",
       "buffering": "Буферизация...",
       "loading": "Загрузка...",
-      "loadAnyway": "Загрузить в любом случае",
+      "loadAnyway": "Все равно загрузить",
       "restartLoading": "Перезапустить загрузку",
       "stopLoading": "Остановить загрузку",
       "startedSecondsAgo(param=seconds)": "Начато ${seconds: int}с назад"
