@@ -118,7 +118,9 @@
         "appFixedRatingAutomatically": "App fixed the rating automatically, but consider changing to correct rating in your future queries",
         "tabsRestored": "Tabs restored",
         "restoredTabsCount(param=count)": {
-            "one": "Restored 1 tab from previous session",
+            "one": "Restored ${count} tab from previous session",
+            "few": "Restored ${count} tabs from previous session",
+            "many": "Restored ${count} tabs from previous session",
             "other": "Restored ${count} tabs from previous session"
         },
         "someRestoredTabsHadIssues": "Some restored tabs had unknown boorus or broken characters.",
@@ -126,12 +128,16 @@
         "listOfBrokenTabs": "List of broken tabs:",
         "tabsMerged": "Tabs merged",
         "addedTabsCount(param=count)": {
-            "one": "Added 1 new tab",
+            "one": "Added ${count} new tab",
+            "few": "Added ${count} new tabs",
+            "many": "Added ${count} new tabs",
             "other": "Added ${count} new tabs"
         },
         "tabsReplaced": "Tabs replaced",
         "receivedTabsCount(param=count)": {
-            "one": "Received 1 tab",
+            "one": "Received ${count} tab",
+            "few": "Received ${count} tabs",
+            "many": "Received ${count} tabs",
             "other": "Received ${count} tabs"
         }
     },
@@ -150,26 +156,36 @@
         "startingNextQueueItem": "Starting next queue item...",
         "itemsSnatched": "Items snatched",
         "snatchedCount(param=count)": {
-            "one": "Snatched: 1 item",
+            "one": "Snatched: ${count} item",
+            "few": "Snatched: ${count} items",
+            "many": "Snatched: ${count} items",
             "other": "Snatched: ${count} items"
         },
         "filesAlreadySnatched(param=count)": {
-            "one": "1 file was already snatched",
+            "one": "${count} file was already snatched",
+            "few": "${count} files were already snatched",
+            "many": "${count} files were already snatched",
             "other": "${count} files were already snatched"
         },
         "failedToSnatchFiles(param=count)": {
-            "one": "Failed to snatch 1 file",
+            "one": "Failed to snatch ${count} file",
+            "few": "Failed to snatch ${count} files",
+            "many": "Failed to snatch ${count} files",
             "other": "Failed to snatch ${count} files"
         },
         "cancelledFiles(param=count)": {
-            "one": "Cancelled 1 file",
+            "one": "Cancelled ${count} file",
+            "few": "Cancelled ${count} files",
+            "many": "Cancelled ${count} files",
             "other": "Cancelled ${count} files"
         },
         "snatchingImages": "Snatching images",
         "doNotCloseApp": "Do not close the app!",
         "addedItemToQueue": "Added item to snatch queue",
         "addedItemsToQueue(param=count)": {
-            "one": "Added 1 item to snatch queue",
+            "one": "Added ${count} item to snatch queue",
+            "few": "Added ${count} items to snatch queue",
+            "many": "Added ${count} items to snatch queue",
             "other": "Added ${count} items to snatch queue"
         }
     },
@@ -256,7 +272,9 @@
         "alphabetically": "Alphabetically",
         "reversed": "(reversed)",
         "areYouSureDeleteTabs(param=count)": {
-            "one": "Are you sure you want to delete 1 tab?",
+            "one": "Are you sure you want to delete ${count} tab?",
+            "few": "Are you sure you want to delete ${count} tabs?",
+            "many": "Are you sure you want to delete ${count} tabs?",
             "other": "Are you sure you want to delete ${count} tabs?"
         },
         "filters": {
@@ -306,12 +324,16 @@
         "delete": "Delete",
         "deleteHistoryEntries": "Delete history entries",
         "deleteItemsConfirm(param=count)": {
-            "one": "Are you sure you want to delete 1 item?",
+            "one": "Are you sure you want to delete ${count} item?",
+            "few": "Are you sure you want to delete ${count} items?",
+            "many": "Are you sure you want to delete ${count} items?",
             "other": "Are you sure you want to delete ${count} items?"
         },
         "clearSelection": "Clear selection",
         "deleteItems(param=count)": {
-            "one": "Delete 1 item",
+            "one": "Delete ${count} item",
+            "few": "Delete ${count} items",
+            "many": "Delete ${count} items",
             "other": "Delete ${count} items"
         }
     },
@@ -983,7 +1005,9 @@
         "resetStale": "Reset stale",
         "makeUnstaleable": "Make unstaleable",
         "deleteTags(param=count)": {
-            "one": "Delete 1 tag",
+            "one": "Delete ${count} tag",
+            "few": "Delete ${count} tags",
+            "many": "Delete ${count} tags",
             "other": "Delete ${count} tags"
         },
         "deleteTagsTitle": "Delete tags",
@@ -1228,7 +1252,9 @@
             "reachedEndSubtitle(param=pageNum)": "Loaded ${pageNum: int} pages\nTap here to reload last page",
             "loadingPage(param=pageNum)": "Loading page #${pageNum: int}...",
             "startedAgo(param=seconds)": {
-                "one": "Started 1 second ago",
+                "one": "Started ${seconds} second ago",
+                "few": "Started ${seconds} seconds ago",
+                "many": "Started ${seconds} seconds ago",
                 "other": "Started ${seconds} seconds ago"
             },
             "tapToRetryIfStuck": "Tap here to retry if search is taking too long or seems stuck",

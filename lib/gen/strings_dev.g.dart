@@ -398,7 +398,9 @@ class _TranslationsSearchHandlerDev extends TranslationsSearchHandlerEn {
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Restored 1 tab from previous session}',
+        one: '{Restored ${count} tab from previous session}',
+        few: '{Restored ${count} tabs from previous session}',
+        many: '{Restored ${count} tabs from previous session}',
         other: '{Restored ${count} tabs from previous session}',
       );
   @override
@@ -417,7 +419,9 @@ class _TranslationsSearchHandlerDev extends TranslationsSearchHandlerEn {
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Added 1 new tab}',
+        one: '{Added ${count} new tab}',
+        few: '{Added ${count} new tabs}',
+        many: '{Added ${count} new tabs}',
         other: '{Added ${count} new tabs}',
       );
   @override
@@ -427,7 +431,9 @@ class _TranslationsSearchHandlerDev extends TranslationsSearchHandlerEn {
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Received 1 tab}',
+        one: '{Received ${count} tab}',
+        few: '{Received ${count} tabs}',
+        many: '{Received ${count} tabs}',
         other: '{Received ${count} tabs}',
       );
 }
@@ -473,7 +479,9 @@ class _TranslationsSnatcherDev extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Snatched: 1 item}',
+        one: '{Snatched: ${count} item}',
+        few: '{Snatched: ${count} items}',
+        many: '{Snatched: ${count} items}',
         other: '{Snatched: ${count} items}',
       );
   @override
@@ -481,7 +489,9 @@ class _TranslationsSnatcherDev extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{1 file was already snatched}',
+        one: '{${count} file was already snatched}',
+        few: '{${count} files were already snatched}',
+        many: '{${count} files were already snatched}',
         other: '{${count} files were already snatched}',
       );
   @override
@@ -489,7 +499,9 @@ class _TranslationsSnatcherDev extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Failed to snatch 1 file}',
+        one: '{Failed to snatch ${count} file}',
+        few: '{Failed to snatch ${count} files}',
+        many: '{Failed to snatch ${count} files}',
         other: '{Failed to snatch ${count} files}',
       );
   @override
@@ -497,7 +509,9 @@ class _TranslationsSnatcherDev extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Cancelled 1 file}',
+        one: '{Cancelled ${count} file}',
+        few: '{Cancelled ${count} files}',
+        many: '{Cancelled ${count} files}',
         other: '{Cancelled ${count} files}',
       );
   @override
@@ -511,7 +525,9 @@ class _TranslationsSnatcherDev extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Added 1 item to snatch queue}',
+        one: '{Added ${count} item to snatch queue}',
+        few: '{Added ${count} items to snatch queue}',
+        many: '{Added ${count} items to snatch queue}',
         other: '{Added ${count} items to snatch queue}',
       );
 }
@@ -720,7 +736,9 @@ class _TranslationsTabsDev extends TranslationsTabsEn {
       TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Are you sure you want to delete 1 tab?}',
+        one: '{Are you sure you want to delete ${count} tab?}',
+        few: '{Are you sure you want to delete ${count} tabs?}',
+        many: '{Are you sure you want to delete ${count} tabs?}',
         other: '{Are you sure you want to delete ${count} tabs?}',
       );
   @override
@@ -779,7 +797,9 @@ class _TranslationsHistoryDev extends TranslationsHistoryEn {
       TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Are you sure you want to delete 1 item?}',
+        one: '{Are you sure you want to delete ${count} item?}',
+        few: '{Are you sure you want to delete ${count} items?}',
+        many: '{Are you sure you want to delete ${count} items?}',
         other: '{Are you sure you want to delete ${count} items?}',
       );
   @override
@@ -789,7 +809,9 @@ class _TranslationsHistoryDev extends TranslationsHistoryEn {
       TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Delete 1 item}',
+        one: '{Delete ${count} item}',
+        few: '{Delete ${count} items}',
+        many: '{Delete ${count} items}',
         other: '{Delete ${count} items}',
       );
 }
@@ -978,7 +1000,9 @@ class _TranslationsTagsManagerDev extends TranslationsTagsManagerEn {
       TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         count,
-        one: '{Delete 1 tag}',
+        one: '{Delete ${count} tag}',
+        few: '{Delete ${count} tags}',
+        many: '{Delete ${count} tags}',
         other: '{Delete ${count} tags}',
       );
   @override
@@ -3468,7 +3492,9 @@ class _TranslationsPreviewErrorDev extends TranslationsPreviewErrorEn {
       TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
         seconds,
-        one: '{Started 1 second ago}',
+        one: '{Started ${seconds} second ago}',
+        few: '{Started ${seconds} seconds ago}',
+        many: '{Started ${seconds} seconds ago}',
         other: '{Started ${seconds} seconds ago}',
       );
   @override
@@ -3673,7 +3699,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Restored 1 tab from previous session}',
+                  one: '{Restored ${count} tab from previous session}',
+                  few: '{Restored ${count} tabs from previous session}',
+                  many: '{Restored ${count} tabs from previous session}',
                   other: '{Restored ${count} tabs from previous session}',
                 ),
           'searchHandler.someRestoredTabsHadIssues' =>
@@ -3689,7 +3717,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Added 1 new tab}',
+                  one: '{Added ${count} new tab}',
+                  few: '{Added ${count} new tabs}',
+                  many: '{Added ${count} new tabs}',
                   other: '{Added ${count} new tabs}',
                 ),
           'searchHandler.tabsReplaced' => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsReplaced', {}) ?? '{Tabs replaced}',
@@ -3698,7 +3728,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Received 1 tab}',
+                  one: '{Received ${count} tab}',
+                  few: '{Received ${count} tabs}',
+                  many: '{Received ${count} tabs}',
                   other: '{Received ${count} tabs}',
                 ),
           'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? '{Snatcher}',
@@ -3724,7 +3756,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Snatched: 1 item}',
+                  one: '{Snatched: ${count} item}',
+                  few: '{Snatched: ${count} items}',
+                  many: '{Snatched: ${count} items}',
                   other: '{Snatched: ${count} items}',
                 ),
           'snatcher.filesAlreadySnatched' =>
@@ -3732,7 +3766,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{1 file was already snatched}',
+                  one: '{${count} file was already snatched}',
+                  few: '{${count} files were already snatched}',
+                  many: '{${count} files were already snatched}',
                   other: '{${count} files were already snatched}',
                 ),
           'snatcher.failedToSnatchFiles' =>
@@ -3740,7 +3776,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Failed to snatch 1 file}',
+                  one: '{Failed to snatch ${count} file}',
+                  few: '{Failed to snatch ${count} files}',
+                  many: '{Failed to snatch ${count} files}',
                   other: '{Failed to snatch ${count} files}',
                 ),
           'snatcher.cancelledFiles' =>
@@ -3748,7 +3786,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Cancelled 1 file}',
+                  one: '{Cancelled ${count} file}',
+                  few: '{Cancelled ${count} files}',
+                  many: '{Cancelled ${count} files}',
                   other: '{Cancelled ${count} files}',
                 ),
           'snatcher.snatchingImages' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingImages', {}) ?? '{Snatching images}',
@@ -3759,7 +3799,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Added 1 item to snatch queue}',
+                  one: '{Added ${count} item to snatch queue}',
+                  few: '{Added ${count} items to snatch queue}',
+                  many: '{Added ${count} items to snatch queue}',
                   other: '{Added ${count} items to snatch queue}',
                 ),
           'multibooru.title' => TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? '{Multibooru}',
@@ -3866,7 +3908,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Are you sure you want to delete 1 tab?}',
+                  one: '{Are you sure you want to delete ${count} tab?}',
+                  few: '{Are you sure you want to delete ${count} tabs?}',
+                  many: '{Are you sure you want to delete ${count} tabs?}',
                   other: '{Are you sure you want to delete ${count} tabs?}',
                 ),
           'tabs.filters.loaded' => TranslationOverrides.string(_root.$meta, 'tabs.filters.loaded', {}) ?? '{Loaded}',
@@ -3933,7 +3977,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Are you sure you want to delete 1 item?}',
+                  one: '{Are you sure you want to delete ${count} item?}',
+                  few: '{Are you sure you want to delete ${count} items?}',
+                  many: '{Are you sure you want to delete ${count} items?}',
                   other: '{Are you sure you want to delete ${count} items?}',
                 ),
           'history.clearSelection' => TranslationOverrides.string(_root.$meta, 'history.clearSelection', {}) ?? '{Clear selection}',
@@ -3942,7 +3988,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Delete 1 item}',
+                  one: '{Delete ${count} item}',
+                  few: '{Delete ${count} items}',
+                  many: '{Delete ${count} items}',
                   other: '{Delete ${count} items}',
                 ),
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? '{Webview}',
@@ -5145,7 +5193,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   count,
-                  one: '{Delete 1 tag}',
+                  one: '{Delete ${count} tag}',
+                  few: '{Delete ${count} tags}',
+                  many: '{Delete ${count} tags}',
                   other: '{Delete ${count} tags}',
                 ),
           'tagsManager.deleteTagsTitle' => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? '{Delete tags}',
@@ -5449,7 +5499,9 @@ extension on TranslationsDev {
                 TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('dev'))(
                   seconds,
-                  one: '{Started 1 second ago}',
+                  one: '{Started ${seconds} second ago}',
+                  few: '{Started ${seconds} seconds ago}',
+                  many: '{Started ${seconds} seconds ago}',
                   other: '{Started ${seconds} seconds ago}',
                 ),
           'preview.error.tapToRetryIfStuck' =>
