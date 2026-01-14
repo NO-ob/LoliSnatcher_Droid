@@ -1423,7 +1423,7 @@ class _TranslationsGalleryRu extends TranslationsGalleryEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(
         count,
         one: 'Источник',
-        other: 'Источники',
+        other: 'Источников',
       );
 }
 
@@ -1670,7 +1670,7 @@ class _TranslationsSettingsBooruRu extends TranslationsSettingsBooruEn {
   @override
   String get booruSharingMsgAndroid =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-      'Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на "Добавить ссылку" и выберите все доступные опции';
+      'Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на "Добавить ссылку" и выбери все доступные опции';
   @override
   String get addedBoorus => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Добавленные сайты';
   @override
@@ -1842,7 +1842,7 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
   @override
   String get appUIModeHelpWarning =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpWarning', {}) ??
-      '[Предупреждение]: Не устанавливайте режим интерфейса на Компьютерный на телефоне, вы можете сломать приложение и вам придётся удалить все настройки, включая конфигурации сайтов.';
+      '[Предупреждение]: Не устанавливай режим интерфейса на Компьютерный на телефоне, ты можешь сломать приложение и тебе придётся удалить все настройки, включая конфигурации сайтов.';
   @override
   String get handSide => TranslationOverrides.string(_root.$meta, 'settings.interface.handSide', {}) ?? 'Преобладающая рука';
   @override
@@ -1890,7 +1890,7 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
   @override
   String get previewQualityHelpNote =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpNote', {}) ??
-      '[Примечание]: Качество "Семплы" может заметно снизить производительность, особенно если у вас слишком много столбцов в сетке превью';
+      '[Примечание]: Качество "Семплы" может заметно снизить производительность, особенно если у тебя слишком много столбцов в сетке превью';
   @override
   String get previewDisplay => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplay', {}) ?? 'Отображение превью';
   @override
@@ -2207,7 +2207,7 @@ class _TranslationsSettingsVideoRu extends TranslationsSettingsVideoEn {
   @override
   String get mpvSettingsHelp =>
       TranslationOverrides.string(_root.$meta, 'settings.video.mpvSettingsHelp', {}) ??
-      'Попробуйте разные значения настроек \'MPV\' ниже, если видео не работают корректно или выдают ошибки кодеков:';
+      'Попробуй разные значения настроек \'MPV\' ниже, если видео не работают корректно или выдают ошибки кодеков:';
   @override
   String get mpvUseHardwareAcceleration =>
       TranslationOverrides.string(_root.$meta, 'settings.video.mpvUseHardwareAcceleration', {}) ?? 'MPV: использовать аппаратное ускорение';
@@ -2310,7 +2310,7 @@ class _TranslationsSettingsDatabaseRu extends TranslationsSettingsDatabaseEn {
   @override
   String get indexingInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.database.indexingInfo', {}) ??
-      'Индексация помогает ускорить поиск в базе данных, но занимает больше места на диске (возможно, удваивая размер вашей базы данных).\nНе покидайте страницу и не закрывайте приложение во время индексации, чтобы избежать повреждения базы данных.';
+      'Индексация помогает ускорить поиск в базе данных, но занимает больше места на диске (возможно, удваивая размер твоей базы данных).\nНе покидай страницу и не закрывай приложение во время индексации, чтобы избежать повреждения базы данных.';
   @override
   String get createIndexesDebug =>
       TranslationOverrides.string(_root.$meta, 'settings.database.createIndexesDebug', {}) ?? 'Создать индексы [Отладка]';
@@ -2326,7 +2326,7 @@ class _TranslationsSettingsDatabaseRu extends TranslationsSettingsDatabaseEn {
   @override
   String get searchHistoryTapInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ??
-      'Нажмите на любую запись истории для дополнительных действий (Удалить, Добавить в избранное...)';
+      'Нажми на любую запись истории для дополнительных действий (Удалить, Добавить в избранное...)';
   @override
   String get searchHistoryFavouritesInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ??
@@ -2586,7 +2586,7 @@ class _TranslationsSettingsNetworkRu extends TranslationsSettingsNetworkEn {
   @override
   String get proxySubtitle =>
       TranslationOverrides.string(_root.$meta, 'settings.network.proxySubtitle', {}) ??
-      'Не применяется к режиму потокового видео, используйте вместо него режим кэширования видео';
+      'Не применяется к режиму потокового видео, используй вместо него режим кэширования видео';
   @override
   String get customUserAgent => TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Пользовательский user agent';
   @override
@@ -2667,7 +2667,7 @@ class _TranslationsSettingsPrivacyRu extends TranslationsSettingsPrivacyEn {
   @override
   String get incognitoKeyboardMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
-      'Сообщает системной клавиатуре не сохранять историю ввода и отключить обучение на основе вашего ввода.\nБудет применено к большинству полей ввода';
+      'Сообщает системной клавиатуре не сохранять историю ввода и отключить обучение на основе твоего ввода.\nБудет применено к большинству полей ввода';
 }
 
 // Path: settings.performance
@@ -2997,7 +2997,7 @@ class _TranslationsSettingsSyncRu extends TranslationsSettingsSyncEn {
   @override
   String get syncFavsFromHelpText3 =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText3', {}) ??
-      'Пример: У тебя есть X элементов в избранном, напиши в это поле 100, синхронизация начнётся с элемента #100 и будет продолжаться, пока не достигнет X';
+      'Пример: У тебя есть X элементов в избранном, введи в это поле 100, синхронизация начнётся с элемента #100 и будет продолжаться, пока не достигнет X';
   @override
   String get syncFavsFromHelpText4 =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText4', {}) ?? 'Порядок избранного: От старого (0) к новому (X)';
@@ -3020,7 +3020,7 @@ class _TranslationsSettingsSyncRu extends TranslationsSettingsSyncEn {
   @override
   String get syncSnatchedFromHelpText3 =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText3', {}) ??
-      'Пример: У вас есть X количество скачанного, установите в это поле 100, синхронизация начнётся с элемента #100 и будет продолжаться, пока не достигнет X';
+      'Пример: У тебя есть X скачанных элементов, введи в это поле 100, синхронизация начнётся с элемента #100 и будет продолжаться, пока не достигнет X';
   @override
   String get syncSnatchedFromHelpText4 =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText4', {}) ?? 'Порядок скачанного: От старого (0) к новому (X)';
@@ -3480,7 +3480,7 @@ class _TranslationsMediaLoadingRu extends TranslationsMediaLoadingEn {
   @override
   String get loading => TranslationOverrides.string(_root.$meta, 'media.loading.loading', {}) ?? 'Загрузка...';
   @override
-  String get loadAnyway => TranslationOverrides.string(_root.$meta, 'media.loading.loadAnyway', {}) ?? 'Загрузить в любом случае';
+  String get loadAnyway => TranslationOverrides.string(_root.$meta, 'media.loading.loadAnyway', {}) ?? 'Все равно загрузить';
   @override
   String get restartLoading => TranslationOverrides.string(_root.$meta, 'media.loading.restartLoading', {}) ?? 'Перезапустить загрузку';
   @override
@@ -4120,7 +4120,7 @@ extension on TranslationsRu {
           'settings.booru.booruSharing' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Поделиться конфигом сайта',
           'settings.booru.booruSharingMsgAndroid' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-                'Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на "Добавить ссылку" и выберите все доступные опции',
+                'Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на "Добавить ссылку" и выбери все доступные опции',
           'settings.booru.addedBoorus' => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Добавленные сайты',
           'settings.booru.editBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.editBooru', {}) ?? 'Редактировать конфиг',
           'settings.booru.importBooru' =>
@@ -4238,7 +4238,7 @@ extension on TranslationsRu {
                 '- Компьютерный - Интерфейс в стиле Ahoviewer [УСТАРЕЛ, ТРЕБУЕТ ДОРАБОТКИ]',
           'settings.interface.appUIModeHelpWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpWarning', {}) ??
-                '[Предупреждение]: Не устанавливайте режим интерфейса на Компьютерный на телефоне, вы можете сломать приложение и вам придётся удалить все настройки, включая конфигурации сайтов.',
+                '[Предупреждение]: Не устанавливай режим интерфейса на Компьютерный на телефоне, ты можешь сломать приложение и тебе придётся удалить все настройки, включая конфигурации сайтов.',
           'settings.interface.handSide' => TranslationOverrides.string(_root.$meta, 'settings.interface.handSide', {}) ?? 'Преобладающая рука',
           'settings.interface.handSideHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.handSideHelp', {}) ??
@@ -4275,7 +4275,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpThumbnail', {}) ?? ' - Миниатюра - Низкое разрешение',
           'settings.interface.previewQualityHelpNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpNote', {}) ??
-                '[Примечание]: Качество "Семплы" может заметно снизить производительность, особенно если у вас слишком много столбцов в сетке превью',
+                '[Примечание]: Качество "Семплы" может заметно снизить производительность, особенно если у тебя слишком много столбцов в сетке превью',
           'settings.interface.previewDisplay' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplay', {}) ?? 'Отображение превью',
           'settings.interface.previewDisplayFallback' =>
@@ -4479,7 +4479,7 @@ extension on TranslationsRu {
                 'Основан на libmdk, может иметь лучшую производительность для некоторых кодеков/устройств\n[МОЖЕТ ВЫЗВАТЬ ВЫЛЕТЫ]',
           'settings.video.mpvSettingsHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.mpvSettingsHelp', {}) ??
-                'Попробуйте разные значения настроек \'MPV\' ниже, если видео не работают корректно или выдают ошибки кодеков:',
+                'Попробуй разные значения настроек \'MPV\' ниже, если видео не работают корректно или выдают ошибки кодеков:',
           'settings.video.mpvUseHardwareAcceleration' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.mpvUseHardwareAcceleration', {}) ?? 'MPV: использовать аппаратное ускорение',
           'settings.video.mpvVO' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvVO', {}) ?? 'MPV: VO',
@@ -4561,7 +4561,7 @@ extension on TranslationsRu {
                 'Если элемент был скачан, он не будет скачан снова',
           'settings.database.indexingInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.indexingInfo', {}) ??
-                'Индексация помогает ускорить поиск в базе данных, но занимает больше места на диске (возможно, удваивая размер вашей базы данных).\nНе покидайте страницу и не закрывайте приложение во время индексации, чтобы избежать повреждения базы данных.',
+                'Индексация помогает ускорить поиск в базе данных, но занимает больше места на диске (возможно, удваивая размер твоей базы данных).\nНе покидай страницу и не закрывай приложение во время индексации, чтобы избежать повреждения базы данных.',
           'settings.database.createIndexesDebug' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.createIndexesDebug', {}) ?? 'Создать индексы [Отладка]',
           'settings.database.dropIndexesDebug' =>
@@ -4574,7 +4574,7 @@ extension on TranslationsRu {
                 'Записывает последние ${limit} поисковых запросов.',
           'settings.database.searchHistoryTapInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ??
-                'Нажмите на любую запись истории для дополнительных действий (Удалить, Добавить в избранное...)',
+                'Нажми на любую запись истории для дополнительных действий (Удалить, Добавить в избранное...)',
           'settings.database.searchHistoryFavouritesInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ??
                 'Избранные запросы закреплены вверху списка и не будут учитываться в лимите.',
@@ -4767,7 +4767,7 @@ extension on TranslationsRu {
           'settings.network.proxy' => TranslationOverrides.string(_root.$meta, 'settings.network.proxy', {}) ?? 'Прокси',
           'settings.network.proxySubtitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.proxySubtitle', {}) ??
-                'Не применяется к режиму потокового видео, используйте вместо него режим кэширования видео',
+                'Не применяется к режиму потокового видео, используй вместо него режим кэширования видео',
           'settings.network.customUserAgent' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Пользовательский user agent',
           'settings.network.customUserAgentTitle' =>
@@ -4828,7 +4828,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboard', {}) ?? 'Режим инкогнито клавиатуры',
           'settings.privacy.incognitoKeyboardMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
-                'Сообщает системной клавиатуре не сохранять историю ввода и отключить обучение на основе вашего ввода.\nБудет применено к большинству полей ввода',
+                'Сообщает системной клавиатуре не сохранять историю ввода и отключить обучение на основе твоего ввода.\nБудет применено к большинству полей ввода',
           'settings.performance.title' => TranslationOverrides.string(_root.$meta, 'settings.performance.title', {}) ?? 'Производительность',
           'settings.performance.lowPerformanceMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceMode', {}) ?? 'Режим низкой производительности',
@@ -5046,7 +5046,7 @@ extension on TranslationsRu {
                 'Если ты хочешь синхронизировать с начала, оставь это поле пустым',
           'settings.sync.syncFavsFromHelpText3' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText3', {}) ??
-                'Пример: У тебя есть X элементов в избранном, напиши в это поле 100, синхронизация начнётся с элемента #100 и будет продолжаться, пока не достигнет X',
+                'Пример: У тебя есть X элементов в избранном, введи в это поле 100, синхронизация начнётся с элемента #100 и будет продолжаться, пока не достигнет X',
           'settings.sync.syncFavsFromHelpText4' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText4', {}) ?? 'Порядок избранного: От старого (0) к новому (X)',
           'settings.sync.sendSnatchedHistory' =>
@@ -5064,7 +5064,7 @@ extension on TranslationsRu {
                 'Если ты хочешь синхронизировать с начала, оставь это поле пустым',
           'settings.sync.syncSnatchedFromHelpText3' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText3', {}) ??
-                'Пример: У вас есть X количество скачанного, установите в это поле 100, синхронизация начнётся с элемента #100 и будет продолжаться, пока не достигнет X',
+                'Пример: У тебя есть X скачанных элементов, введи в это поле 100, синхронизация начнётся с элемента #100 и будет продолжаться, пока не достигнет X',
           'settings.sync.syncSnatchedFromHelpText4' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText4', {}) ??
                 'Порядок скачанного: От старого (0) к новому (X)',
@@ -5538,7 +5538,7 @@ extension on TranslationsRu {
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(
                   count,
                   one: 'Источник',
-                  other: 'Источники',
+                  other: 'Источников',
                 ),
           _ => null,
         } ??
@@ -5549,7 +5549,7 @@ extension on TranslationsRu {
           'media.loading.loadingFromCache' => TranslationOverrides.string(_root.$meta, 'media.loading.loadingFromCache', {}) ?? 'Загрузка из кэша...',
           'media.loading.buffering' => TranslationOverrides.string(_root.$meta, 'media.loading.buffering', {}) ?? 'Буферизация...',
           'media.loading.loading' => TranslationOverrides.string(_root.$meta, 'media.loading.loading', {}) ?? 'Загрузка...',
-          'media.loading.loadAnyway' => TranslationOverrides.string(_root.$meta, 'media.loading.loadAnyway', {}) ?? 'Загрузить в любом случае',
+          'media.loading.loadAnyway' => TranslationOverrides.string(_root.$meta, 'media.loading.loadAnyway', {}) ?? 'Все равно загрузить',
           'media.loading.restartLoading' => TranslationOverrides.string(_root.$meta, 'media.loading.restartLoading', {}) ?? 'Перезапустить загрузку',
           'media.loading.stopLoading' => TranslationOverrides.string(_root.$meta, 'media.loading.stopLoading', {}) ?? 'Остановить загрузку',
           'media.loading.startedSecondsAgo' =>
