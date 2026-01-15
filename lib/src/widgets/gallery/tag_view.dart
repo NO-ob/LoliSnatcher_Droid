@@ -47,7 +47,7 @@ import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
-import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
+import 'package:lolisnatcher/src/widgets/preview/main_search_tag_chip.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 

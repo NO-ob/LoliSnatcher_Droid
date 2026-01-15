@@ -35,7 +35,7 @@ import 'package:lolisnatcher/src/widgets/common/save_anyway_button.dart';
 import 'package:lolisnatcher/src/widgets/common/skip_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
-import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
+import 'package:lolisnatcher/src/widgets/preview/main_search_bar.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_secondary_booru_selector.dart';

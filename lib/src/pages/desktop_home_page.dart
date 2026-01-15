@@ -16,7 +16,7 @@ import 'package:lolisnatcher/src/widgets/desktop/desktop_image_listener.dart';
 import 'package:lolisnatcher/src/widgets/desktop/resizable_split_view.dart';
 import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
-import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
+import 'package:lolisnatcher/src/widgets/preview/main_search_bar.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
