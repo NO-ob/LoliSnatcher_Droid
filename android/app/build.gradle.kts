@@ -1,4 +1,6 @@
 import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -16,7 +18,7 @@ if (localPropertiesFile.exists()) {
 }
 
 val flutterRoot = localProperties.getProperty("flutter.sdk")
-    ?: throw java.io.FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+    ?: throw FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 
 val flutterVersionCode = localProperties.getProperty("flutter.versionCode") ?: "1"
 val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0"
@@ -35,7 +37,7 @@ if (project.hasProperty("dart-defines")) {
     dartEnvVars = dartEnvVars + (project.property("dart-defines") as String)
         .split(",")
         .associate { entry ->
-            val pair = String(java.util.Base64.getDecoder().decode(entry), Charsets.UTF_8).split("=")
+            val pair = String(Base64.getDecoder().decode(entry), Charsets.UTF_8).split("=")
             pair.first() to pair.last()
         }
 }
