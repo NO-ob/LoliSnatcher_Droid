@@ -6,6 +6,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 
 class AddNewTabDialog extends StatefulWidget {
@@ -137,14 +138,15 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
               },
               title: context.loc.tabs.usedQuery,
               subtitle: queryMode == _Querymode.custom
-                  ? SettingsTextInput(
+                  ? TagSearchBox(
                       controller: customTagsController,
                       title: context.loc.tabs.customQuery,
+                      hintText: context.loc.snatcher.enterTags,
                       onlyInput: true,
-                      inputType: TextInputType.text,
+                      booru: booru ?? searchHandler.currentBooru,
+                      allowMultipleTags: true,
+                      showBooruSelector: true,
                       clearable: true,
-                      pasteable: true,
-                      enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                     )
                   : Text(
                       usedQuery.isEmpty ? context.loc.tabs.empty : usedQuery,

@@ -12,8 +12,8 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
+import 'package:lolisnatcher/src/widgets/preview/main_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/preview/main_search_tag_chip.dart';
-import 'package:lolisnatcher/src/widgets/preview/search_query_editor_page.dart';
 
 class MainSearchBarWithActions extends StatelessWidget {
   const MainSearchBarWithActions(
@@ -32,7 +32,7 @@ class MainSearchBarWithActions extends StatelessWidget {
     int tagIndex,
   ) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => SearchQueryEditorPage(subTag: subTag)),
+      MaterialPageRoute(builder: (_) => MainSearchQueryEditorPage(subTag: subTag)),
     );
   }
 
@@ -43,7 +43,7 @@ class MainSearchBarWithActions extends StatelessWidget {
   ) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => SearchQueryEditorPage(
+        builder: (_) => MainSearchQueryEditorPage(
           subTag: subTag,
           tagToEditIndex: tagIndex,
         ),
@@ -62,7 +62,7 @@ class MainSearchBarWithActions extends StatelessWidget {
   void onSearchBackgroundTap(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => SearchQueryEditorPage(
+        builder: (_) => MainSearchQueryEditorPage(
           subTag: subTag,
           autoFocus: settingsHandler.autofocusSearchbar,
         ),

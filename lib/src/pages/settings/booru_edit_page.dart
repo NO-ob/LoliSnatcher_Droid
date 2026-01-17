@@ -24,6 +24,7 @@ import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/html.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class BooruEdit extends StatefulWidget {
@@ -186,14 +187,22 @@ class _BooruEditState extends State<BooruEdit> {
                 ),
               ),
             ),
-            SettingsTextInput(
+            TagSearchBox(
               controller: booruDefTagsController,
               title: booruEditorLoc.booruDefTags,
-              onChanged: (_) => setState(() {}),
+              onChanged: (_, _) => setState(() {}),
               hintText: booruEditorLoc.booruDefTagsPlaceholder,
+              booru: (!selectedBooruType.isAutodetect && booruURLController.text.isNotEmpty)
+                  ? Booru(
+                      'Temp',
+                      selectedBooruType,
+                      '',
+                      booruURLController.text,
+                      booruFaviconController.text,
+                    )
+                  : null,
+              allowMultipleTags: true,
               clearable: true,
-              pasteable: true,
-              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(10, 16, 10, 16),

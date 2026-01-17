@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
+import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 // TODO move all buttons to separate widgets/unified functions to be used in other places?
@@ -448,14 +449,15 @@ class _BooruPageState extends State<BooruPage> {
         body: Center(
           child: ListView(
             children: [
-              SettingsTextInput(
+              TagSearchBox(
                 controller: defaultTagsController,
                 title: booruLoc.defaultTags,
-                inputType: TextInputType.text,
+                hintText: context.loc.snatcher.enterTags,
+                booru: selectedBooru,
+                allowMultipleTags: true,
+                showBooruSelector: true,
                 clearable: true,
-                pasteable: true,
-                resetText: () => 'rating:safe',
-                enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
+                // resetText: () => 'rating:safe', // TODO
               ),
               SettingsTextInput(
                 controller: limitController,

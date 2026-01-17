@@ -7,6 +7,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 
 /// This is the page which allows the user to batch download images
 class SnatcherPage extends StatefulWidget {
@@ -56,14 +57,13 @@ class _SnatcherPageState extends State<SnatcherPage> {
       body: Center(
         child: ListView(
           children: [
-            SettingsTextInput(
+            TagSearchBox(
               controller: snatcherTagsController,
               title: context.loc.tags,
               hintText: context.loc.snatcher.enterTags,
-              inputType: TextInputType.text,
+              booru: selectedBooru,
+              allowMultipleTags: true,
               clearable: true,
-              pasteable: true,
-              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsTextInput(
               controller: snatcherAmountController,
