@@ -6,12 +6,17 @@ import 'package:flutter/material.dart';
 
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/ok_button.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 extension ThemeModeExt on ThemeMode {
@@ -32,6 +37,7 @@ class _ThemePageState extends State<ThemePage> {
   late ThemeMode themeMode;
   late bool useDynamicColor;
   late bool isAmoled;
+  late String fontFamily;
   late bool enableMascot;
   late String mascotPathOverride;
   late Color? primaryPickerColor; // Color for picker shown in Card on the screen.
@@ -49,6 +55,7 @@ class _ThemePageState extends State<ThemePage> {
     themeMode = settingsHandler.themeMode.value;
     useDynamicColor = settingsHandler.useDynamicColor.value;
     isAmoled = settingsHandler.isAmoled.value;
+    fontFamily = settingsHandler.fontFamily.value;
     enableMascot = settingsHandler.enableDrawerMascot;
     mascotPathOverride = settingsHandler.drawerMascotPathOverride;
     primaryPickerColor = settingsHandler.customPrimaryColor.value;
@@ -86,6 +93,7 @@ class _ThemePageState extends State<ThemePage> {
     settingsHandler.themeMode.value = themeMode;
     settingsHandler.useDynamicColor.value = useDynamicColor;
     settingsHandler.isAmoled.value = isAmoled;
+    settingsHandler.fontFamily.value = fontFamily;
     settingsHandler.enableDrawerMascot = enableMascot;
 
     // print('onPrimary: ${ThemeData.estimateBrightnessForColor(primaryPickerColor!) == Brightness.dark}');
@@ -121,6 +129,58 @@ class _ThemePageState extends State<ThemePage> {
         setState(() {});
       },
       duration: const Duration(milliseconds: 500),
+    );
+  }
+
+  TextStyle? _getFontStyle(String font) {
+    if (font == 'System') return null;
+
+    try {
+      return GoogleFonts.getFont(font);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> _showFontPicker() async {
+    final List<String> defaultFonts = [
+      'System',
+      'Roboto',
+      'Open Sans',
+      'Lato',
+      'Montserrat',
+      'Oswald',
+      'Raleway',
+      'Poppins',
+      'Nunito',
+      'Ubuntu',
+      'Merriweather',
+    ];
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (_, scrollController) {
+            return _FontPickerSheet(
+              currentFont: fontFamily,
+              defaultFonts: defaultFonts,
+              onFontSelected: (String font) {
+                fontFamily = font;
+                updateTheme(withRestate: true);
+                Navigator.of(ctx).pop();
+              },
+              getFontStyle: _getFontStyle,
+              scrollController: scrollController,
+            );
+          },
+        );
+      },
     );
   }
 
@@ -415,6 +475,31 @@ class _ThemePageState extends State<ThemePage> {
                   },
                 ),
               const SettingsButton(name: '', enabled: false),
+              SettingsButton(
+                name: themeLoc.fontFamily,
+                subtitle: Text(
+                  fontFamily == 'System' ? themeLoc.systemDefault : fontFamily,
+                  style: _getFontStyle(fontFamily),
+                ),
+                icon: const Icon(Icons.font_download),
+                trailingIcon: fontFamily == 'System'
+                    ? null
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.refresh),
+                            onPressed: () {
+                              fontFamily = 'System';
+                              updateTheme();
+                            },
+                          ),
+                          const Icon(Icons.chevron_right),
+                        ],
+                      ),
+                action: _showFontPicker,
+              ),
+              const SettingsButton(name: '', enabled: false),
               SettingsToggle(
                 value: enableMascot,
                 onChanged: (bool newValue) {
@@ -520,4 +605,332 @@ class _ThemeRightClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class _FontPickerSheet extends StatefulWidget {
+  const _FontPickerSheet({
+    required this.currentFont,
+    required this.defaultFonts,
+    required this.onFontSelected,
+    required this.getFontStyle,
+    required this.scrollController,
+  });
+
+  final String currentFont;
+  final List<String> defaultFonts;
+  final ValueChanged<String> onFontSelected;
+  final TextStyle? Function(String) getFontStyle;
+  final ScrollController scrollController;
+
+  @override
+  State<_FontPickerSheet> createState() => _FontPickerSheetState();
+}
+
+class _FontPickerSheetState extends State<_FontPickerSheet> {
+  late bool showAllFonts;
+
+  // Extended list of popular Google Fonts
+  static const List<String> extendedFonts = [
+    'Playfair Display',
+    'Source Sans 3',
+    'Noto Sans',
+    'Inter',
+    'Quicksand',
+    'Work Sans',
+    'Fira Sans',
+    'Josefin Sans',
+    'Cabin',
+    'Karla',
+    'Libre Baskerville',
+    'Inconsolata',
+    'Source Code Pro',
+    'Space Mono',
+    'JetBrains Mono',
+    'Crimson Text',
+    'Bitter',
+    'Archivo',
+    'Rubik',
+    'Comfortaa',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-expand if current font is from extended list or is a custom font
+    final isCustomFont =
+        !widget.defaultFonts.contains(widget.currentFont) &&
+        !extendedFonts.contains(widget.currentFont) &&
+        widget.currentFont != 'System';
+    showAllFonts = extendedFonts.contains(widget.currentFont) || isCustomFont;
+  }
+
+  Future<void> _showCustomFontDialog(BuildContext context) async {
+    final themeLoc = context.loc.settings.theme;
+    final initialText =
+        !widget.defaultFonts.contains(widget.currentFont) &&
+            !extendedFonts.contains(widget.currentFont) &&
+            widget.currentFont != 'System'
+        ? widget.currentFont
+        : '';
+    final controller = TextEditingController(text: initialText);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => _CustomFontDialog(
+        controller: controller,
+        themeLoc: themeLoc,
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      widget.onFontSelected(result);
+    }
+  }
+
+  TextStyle? _getExtendedFontStyle(String font) {
+    if (font == 'System') {
+      return context.isDark ? ThemeData.dark().textTheme.bodyMedium : ThemeData.light().textTheme.bodyMedium;
+    }
+
+    // First check if it's in the default fonts
+    final defaultStyle = widget.getFontStyle(font);
+    if (defaultStyle != null) return defaultStyle;
+
+    // Extended fonts
+    try {
+      return GoogleFonts.getFont(font);
+    } catch (_) {
+      return defaultStyle;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeLoc = context.loc.settings.theme;
+    final List<String> fontsToShow = showAllFonts ? [...widget.defaultFonts, ...extendedFonts] : widget.defaultFonts;
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Text(
+                themeLoc.fontFamily,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        ),
+        const Divider(height: 1),
+        Expanded(
+          child: ListView.builder(
+            controller: widget.scrollController,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            // +1 for "View more fonts" (when collapsed) or "Custom font" (when expanded)
+            itemCount: fontsToShow.length + 1,
+            itemBuilder: (context, index) {
+              // "View more fonts" button (when collapsed)
+              if (!showAllFonts && index == fontsToShow.length) {
+                return ListTile(
+                  leading: const Icon(Icons.expand_more),
+                  title: Text(themeLoc.viewMoreFonts),
+                  onTap: () => setState(() => showAllFonts = true),
+                );
+              }
+
+              // "Custom font" option (when expanded, at the end)
+              if (showAllFonts && index == fontsToShow.length) {
+                final isCustomSelected =
+                    !widget.defaultFonts.contains(widget.currentFont) &&
+                    !extendedFonts.contains(widget.currentFont) &&
+                    widget.currentFont != 'System';
+
+                return ListTile(
+                  leading: isCustomSelected ? const Icon(Icons.check) : const SizedBox(width: 24),
+                  title: Text(themeLoc.customFont),
+                  subtitle: Text(themeLoc.customFontSubtitle),
+                  trailing: const Icon(Icons.edit),
+                  selectedTileColor: Theme.of(context).colorScheme.secondary,
+                  selectedColor: Theme.of(context).colorScheme.onSecondary,
+                  selected: isCustomSelected,
+                  onTap: () => _showCustomFontDialog(context),
+                );
+              }
+
+              final font = fontsToShow[index];
+              final isSelected = font == widget.currentFont;
+              final fontStyle = _getExtendedFontStyle(font);
+
+              return Material(
+                color: Colors.transparent,
+                child: ListTile(
+                  leading: isSelected ? const Icon(Icons.check) : const SizedBox(width: 24),
+                  title: Text(
+                    font == 'System' ? themeLoc.systemDefault : font,
+                    style: fontStyle?.copyWith(fontSize: 16),
+                  ),
+                  subtitle: Text(
+                    themeLoc.fontPreviewText,
+                    style: fontStyle?.copyWith(fontSize: 14),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  selectedTileColor: Theme.of(context).colorScheme.secondary,
+                  selectedColor: Theme.of(context).colorScheme.onSecondary,
+                  selected: isSelected,
+                  onTap: () => widget.onFontSelected(font),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CustomFontDialog extends StatefulWidget {
+  const _CustomFontDialog({
+    required this.controller,
+    required this.themeLoc,
+  });
+
+  final TextEditingController controller;
+  final TranslationsSettingsThemeEn themeLoc;
+
+  @override
+  State<_CustomFontDialog> createState() => _CustomFontDialogState();
+}
+
+class _CustomFontDialogState extends State<_CustomFontDialog> {
+  String _previewText = '';
+  TextStyle? _previewStyle;
+  bool _fontError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _previewText = widget.controller.text;
+    _updatePreview(_previewText);
+    widget.controller.addListener(_onTextChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onTextChanged);
+    super.dispose();
+  }
+
+  void _onTextChanged() {
+    final text = widget.controller.text.trim();
+    if (text != _previewText) {
+      _previewText = text;
+      _updatePreview(text);
+    }
+  }
+
+  void _updatePreview(String fontName) {
+    if (fontName.isEmpty) {
+      setState(() {
+        _previewStyle = null;
+        _fontError = false;
+      });
+      return;
+    }
+
+    try {
+      final style = GoogleFonts.getFont(fontName);
+      setState(() {
+        _previewStyle = style;
+        _fontError = false;
+      });
+    } catch (_) {
+      setState(() {
+        _previewStyle = null;
+        _fontError = true;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.themeLoc.customFont),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: widget.controller,
+            decoration: InputDecoration(
+              labelText: widget.themeLoc.fontName,
+              hintText: 'e.g. Pacifico',
+              errorText: _fontError ? widget.themeLoc.fontNotFound : null,
+            ),
+            autofocus: true,
+            textCapitalization: TextCapitalization.words,
+            onSubmitted: (value) {
+              if (value.trim().isNotEmpty && !_fontError) {
+                Navigator.of(context).pop(value.trim());
+              }
+            },
+          ),
+          const SizedBox(height: 12),
+          if (_previewStyle != null) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                widget.themeLoc.fontPreviewText,
+                style: _previewStyle?.copyWith(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          GestureDetector(
+            onTap: () {
+              launchUrlString(
+                'https://fonts.google.com/',
+                mode: LaunchMode.externalApplication,
+              );
+            },
+            child: Text(
+              widget.themeLoc.customFontHint,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        const CancelButton(withIcon: true),
+        OkButton(
+          withIcon: true,
+          action: _fontError || widget.controller.text.trim().isEmpty
+              ? null
+              : () {
+                  Navigator.of(context).pop(widget.controller.text.trim());
+                },
+        ),
+      ],
+    );
+  }
 }

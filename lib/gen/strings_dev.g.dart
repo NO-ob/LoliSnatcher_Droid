@@ -1975,6 +1975,26 @@ class _TranslationsSettingsThemeDev extends TranslationsSettingsThemeEn {
   @override
   String get selectedColorAndShades =>
       TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? '{Selected color and its shades}';
+  @override
+  String get fontFamily => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? '{Font}';
+  @override
+  String get systemDefault => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? '{System default}';
+  @override
+  String get viewMoreFonts => TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? '{View more fonts}';
+  @override
+  String get fontPreviewText =>
+      TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ?? '{The quick brown fox jumps over the lazy dog}';
+  @override
+  String get customFont => TranslationOverrides.string(_root.$meta, 'settings.theme.customFont', {}) ?? '{Custom font}';
+  @override
+  String get customFontSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'settings.theme.customFontSubtitle', {}) ?? '{Enter any Google Font name}';
+  @override
+  String get fontName => TranslationOverrides.string(_root.$meta, 'settings.theme.fontName', {}) ?? '{Font name}';
+  @override
+  String get customFontHint => TranslationOverrides.string(_root.$meta, 'settings.theme.customFontHint', {}) ?? '{Browse fonts at fonts.google.com}';
+  @override
+  String get fontNotFound => TranslationOverrides.string(_root.$meta, 'settings.theme.fontNotFound', {}) ?? '{Font not found}';
 }
 
 // Path: settings.viewer
@@ -4268,6 +4288,18 @@ extension on TranslationsDev {
           'settings.theme.selectedColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColor', {}) ?? '{Selected color}',
           'settings.theme.selectedColorAndShades' =>
             TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? '{Selected color and its shades}',
+          'settings.theme.fontFamily' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? '{Font}',
+          'settings.theme.systemDefault' => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? '{System default}',
+          'settings.theme.viewMoreFonts' => TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? '{View more fonts}',
+          'settings.theme.fontPreviewText' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ?? '{The quick brown fox jumps over the lazy dog}',
+          'settings.theme.customFont' => TranslationOverrides.string(_root.$meta, 'settings.theme.customFont', {}) ?? '{Custom font}',
+          'settings.theme.customFontSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.customFontSubtitle', {}) ?? '{Enter any Google Font name}',
+          'settings.theme.fontName' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontName', {}) ?? '{Font name}',
+          'settings.theme.customFontHint' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.customFontHint', {}) ?? '{Browse fonts at fonts.google.com}',
+          'settings.theme.fontNotFound' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontNotFound', {}) ?? '{Font not found}',
           'settings.viewer.title' => TranslationOverrides.string(_root.$meta, 'settings.viewer.title', {}) ?? '{Viewer}',
           'settings.viewer.preloadAmount' => TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadAmount', {}) ?? '{Preload amount}',
           'settings.viewer.preloadSizeLimit' =>
@@ -4476,6 +4508,9 @@ extension on TranslationsDev {
           'settings.database.databaseInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ??
                 '{The database will store favourites and also track if an item is snatched}',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.database.databaseInfoSnatch' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ??
                 '{If an item is snatched it wont be snatched again}',
@@ -4501,9 +4536,6 @@ extension on TranslationsDev {
           'settings.database.tagTypeFetchingInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ??
                 '{Will search for tag types on supported boorus}',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.database.tagTypeFetchingWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? '{This can lead to rate limiting}',
           'settings.database.deleteDatabase' =>
@@ -5418,6 +5450,9 @@ extension on TranslationsDev {
           'viewer.appBar.hydrus' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.hydrus', {}) ?? '{Hydrus}',
           'viewer.appBar.selectTags' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.selectTags', {}) ?? '{Select tags}',
           'viewer.notes.note' => TranslationOverrides.string(_root.$meta, 'viewer.notes.note', {}) ?? '{Note}',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.notes.notes' => TranslationOverrides.string(_root.$meta, 'viewer.notes.notes', {}) ?? '{Notes}',
           'viewer.notes.coordinates' =>
             ({required int posX, required int posY}) =>
@@ -5438,9 +5473,6 @@ extension on TranslationsDev {
                   one: '{Source}',
                   other: '{Sources}',
                 ),
-          _ => null,
-        } ??
-        switch (path) {
           'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? '{Rendering...}',
           'media.loading.loadingAndRenderingFromCache' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? '{Loading and rendering from cache...}',

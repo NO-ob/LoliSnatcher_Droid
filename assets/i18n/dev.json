@@ -492,7 +492,16 @@
             "custom": "{Custom}",
             "selectColor": "{Select color}",
             "selectedColor": "{Selected color}",
-            "selectedColorAndShades": "{Selected color and its shades}"
+            "selectedColorAndShades": "{Selected color and its shades}",
+            "fontFamily": "{Font}",
+            "systemDefault": "{System default}",
+            "viewMoreFonts": "{View more fonts}",
+            "fontPreviewText": "{The quick brown fox jumps over the lazy dog}",
+            "customFont": "{Custom font}",
+            "customFontSubtitle": "{Enter any Google Font name}",
+            "fontName": "{Font name}",
+            "customFontHint": "{Browse fonts at fonts.google.com}",
+            "fontNotFound": "{Font not found}"
         },
         "viewer": {
             "title": "{Viewer}",

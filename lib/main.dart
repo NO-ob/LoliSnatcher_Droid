@@ -179,11 +179,13 @@ class _MainAppState extends State<MainApp> {
         final ThemeMode themeMode = settingsHandler.themeMode.value;
         final bool useDynamicColor = settingsHandler.useDynamicColor.value;
         final bool isAmoled = settingsHandler.isAmoled.value;
+        final String fontFamily = settingsHandler.fontFamily.value;
 
         final ThemeHandler themeHandler = ThemeHandler(
           theme: theme,
           themeMode: themeMode,
           isAmoled: isAmoled,
+          fontFamily: fontFamily,
           context: context,
         );
 

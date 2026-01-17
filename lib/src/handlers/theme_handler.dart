@@ -13,6 +13,7 @@ class ThemeHandler {
     required this.theme,
     required this.themeMode,
     required this.isAmoled,
+    required this.fontFamily,
     required this.context,
   }) {
     final platformBrigtness = MediaQuery.platformBrightnessOf(context);
@@ -31,6 +32,7 @@ class ThemeHandler {
   final ThemeItem theme;
   final ThemeMode themeMode;
   final bool isAmoled;
+  final String fontFamily;
   final BuildContext context;
   ColorScheme? lightDynamic;
   ColorScheme? darkDynamic;
@@ -167,8 +169,21 @@ class ThemeHandler {
     );
   }
 
-  TextTheme textTheme() =>
-      GoogleFonts.notoSansTextTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme);
+  TextTheme textTheme() {
+    final baseTheme = isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme;
+
+    if (fontFamily == 'System') {
+      return baseTheme;
+    }
+
+    try {
+      return baseTheme.apply(
+        fontFamily: GoogleFonts.getFont(fontFamily).fontFamily,
+      );
+    } catch (_) {
+      return baseTheme;
+    }
+  }
 
   TextSelectionThemeData textSelectionTheme(ColorScheme colorScheme) => TextSelectionThemeData(
     cursorColor: colorScheme.secondary,
@@ -185,6 +200,7 @@ class ThemeHandler {
       disabledBackgroundColor: Colors.grey,
       disabledIconColor: Colors.black,
       textStyle: TextStyle(
+        fontFamily: textTheme().bodyMedium!.fontFamily,
         color: accentIsDark ? Colors.white : Colors.black,
         fontSize: 16,
         fontWeight: FontWeight.w600,
@@ -198,11 +214,13 @@ class ThemeHandler {
 
   AppBarTheme appBarTheme(ColorScheme colorScheme) => AppBarTheme(
     titleTextStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
       color: primaryIsDark ? Colors.white : Colors.black,
       fontSize: 18,
       fontWeight: FontWeight.w600,
     ),
     toolbarTextStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
       color: primaryIsDark ? Colors.white : Colors.black,
       fontSize: 18,
       fontWeight: FontWeight.w600,
@@ -246,11 +264,13 @@ class ThemeHandler {
     fillColor: colorScheme.surfaceContainerHigh,
     filled: true,
     labelStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
       color: isDark ? Colors.white : Colors.black,
       fontSize: 18,
       fontWeight: FontWeight.w500,
     ),
     hintStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
       color: isDark ? Colors.grey[300] : Colors.grey[900],
       fontSize: 18,
       fontWeight: FontWeight.w500,
@@ -283,9 +303,12 @@ class ThemeHandler {
     ),
   );
 
-  MaterialBannerThemeData bannerTheme() => const MaterialBannerThemeData(
+  MaterialBannerThemeData bannerTheme() => MaterialBannerThemeData(
     backgroundColor: Colors.red,
-    contentTextStyle: TextStyle(color: Colors.white),
+    contentTextStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
+      color: Colors.white,
+    ),
   );
 
   CardThemeData cardTheme(ColorScheme colorScheme) => CardThemeData(
@@ -413,8 +436,14 @@ class ThemeHandler {
   TabBarThemeData tabBarTheme(ColorScheme colorScheme) => TabBarThemeData(
     labelColor: colorScheme.secondary,
     unselectedLabelColor: isDark ? Colors.grey[300]! : Colors.grey[900]!,
-    labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+    labelStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
+      fontWeight: FontWeight.w600,
+    ),
+    unselectedLabelStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
+      fontWeight: FontWeight.w400,
+    ),
     indicatorSize: TabBarIndicatorSize.tab,
   );
 

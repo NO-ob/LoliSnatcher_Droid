@@ -492,7 +492,16 @@
       "custom": "Пользовательская",
       "selectColor": "Выбери цвет",
       "selectedColor": "Выбранный цвет",
-      "selectedColorAndShades": "Выбранный цвет и его оттенки"
+      "selectedColorAndShades": "Выбранный цвет и его оттенки",
+      "fontFamily": "Шрифт",
+      "systemDefault": "Системный",
+      "viewMoreFonts": "Посмотреть больше шрифтов",
+      "fontPreviewText": "Съешь ещё этих мягких французских булок, да выпей же чаю",
+      "customFont": "Свой шрифт",
+      "customFontSubtitle": "Введи имя любого шрифта Google",
+      "fontName": "Имя шрифта",
+      "customFontHint": "Смотри шрифты на fonts.google.com",
+      "fontNotFound": "Шрифт не найден"
     },
     "viewer": {
       "title": "Просмотрщик",

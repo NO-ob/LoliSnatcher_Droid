@@ -2474,6 +2474,34 @@ class TranslationsSettingsThemeEn {
   /// en: 'Selected color and its shades'
   String get selectedColorAndShades =>
       TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Selected color and its shades';
+
+  /// en: 'Font'
+  String get fontFamily => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? 'Font';
+
+  /// en: 'System default'
+  String get systemDefault => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'System default';
+
+  /// en: 'View more fonts'
+  String get viewMoreFonts => TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? 'View more fonts';
+
+  /// en: 'The quick brown fox jumps over the lazy dog'
+  String get fontPreviewText =>
+      TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ?? 'The quick brown fox jumps over the lazy dog';
+
+  /// en: 'Custom font'
+  String get customFont => TranslationOverrides.string(_root.$meta, 'settings.theme.customFont', {}) ?? 'Custom font';
+
+  /// en: 'Enter any Google Font name'
+  String get customFontSubtitle => TranslationOverrides.string(_root.$meta, 'settings.theme.customFontSubtitle', {}) ?? 'Enter any Google Font name';
+
+  /// en: 'Font name'
+  String get fontName => TranslationOverrides.string(_root.$meta, 'settings.theme.fontName', {}) ?? 'Font name';
+
+  /// en: 'Browse fonts at fonts.google.com'
+  String get customFontHint => TranslationOverrides.string(_root.$meta, 'settings.theme.customFontHint', {}) ?? 'Browse fonts at fonts.google.com';
+
+  /// en: 'Font not found'
+  String get fontNotFound => TranslationOverrides.string(_root.$meta, 'settings.theme.fontNotFound', {}) ?? 'Font not found';
 }
 
 // Path: settings.viewer
@@ -5235,6 +5263,18 @@ extension on Translations {
           'settings.theme.selectedColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColor', {}) ?? 'Selected color',
           'settings.theme.selectedColorAndShades' =>
             TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Selected color and its shades',
+          'settings.theme.fontFamily' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? 'Font',
+          'settings.theme.systemDefault' => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'System default',
+          'settings.theme.viewMoreFonts' => TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? 'View more fonts',
+          'settings.theme.fontPreviewText' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ?? 'The quick brown fox jumps over the lazy dog',
+          'settings.theme.customFont' => TranslationOverrides.string(_root.$meta, 'settings.theme.customFont', {}) ?? 'Custom font',
+          'settings.theme.customFontSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.customFontSubtitle', {}) ?? 'Enter any Google Font name',
+          'settings.theme.fontName' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontName', {}) ?? 'Font name',
+          'settings.theme.customFontHint' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.customFontHint', {}) ?? 'Browse fonts at fonts.google.com',
+          'settings.theme.fontNotFound' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontNotFound', {}) ?? 'Font not found',
           'settings.viewer.title' => TranslationOverrides.string(_root.$meta, 'settings.viewer.title', {}) ?? 'Viewer',
           'settings.viewer.preloadAmount' => TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadAmount', {}) ?? 'Preload amount',
           'settings.viewer.preloadSizeLimit' =>
@@ -5436,6 +5476,9 @@ extension on Translations {
           'settings.database.databaseInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ??
                 'The database will store favourites and also track if an item is snatched',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.database.databaseInfoSnatch' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ??
                 'If an item is snatched it wont be snatched again',
@@ -5460,9 +5503,6 @@ extension on Translations {
                 'Favourited queries are pinned to the top of the list and will not be counted towards the limit.',
           'settings.database.tagTypeFetchingInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ?? 'Will search for tag types on supported boorus',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.database.tagTypeFetchingWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'This can lead to rate limiting',
           'settings.database.deleteDatabase' => TranslationOverrides.string(_root.$meta, 'settings.database.deleteDatabase', {}) ?? 'Delete database',
@@ -6363,6 +6403,9 @@ extension on Translations {
           'viewer.appBar.hydrus' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.hydrus', {}) ?? 'Hydrus',
           'viewer.appBar.selectTags' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.selectTags', {}) ?? 'Select tags',
           'viewer.notes.note' => TranslationOverrides.string(_root.$meta, 'viewer.notes.note', {}) ?? 'Note',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.notes.notes' => TranslationOverrides.string(_root.$meta, 'viewer.notes.notes', {}) ?? 'Notes',
           'viewer.notes.coordinates' =>
             ({required int posX, required int posY}) =>
@@ -6383,9 +6426,6 @@ extension on Translations {
                   one: 'Source',
                   other: 'Sources',
                 ),
-          _ => null,
-        } ??
-        switch (path) {
           'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'Rendering...',
           'media.loading.loadingAndRenderingFromCache' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'Loading and rendering from cache...',

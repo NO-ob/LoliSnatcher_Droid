@@ -1994,6 +1994,26 @@ class _TranslationsSettingsThemeRu extends TranslationsSettingsThemeEn {
   @override
   String get selectedColorAndShades =>
       TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Выбранный цвет и его оттенки';
+  @override
+  String get fontFamily => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? 'Шрифт';
+  @override
+  String get systemDefault => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Системный';
+  @override
+  String get viewMoreFonts => TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? 'Посмотреть больше шрифтов';
+  @override
+  String get fontPreviewText =>
+      TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ?? 'Съешь ещё этих мягких французских булок, да выпей же чаю';
+  @override
+  String get customFont => TranslationOverrides.string(_root.$meta, 'settings.theme.customFont', {}) ?? 'Свой шрифт';
+  @override
+  String get customFontSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'settings.theme.customFontSubtitle', {}) ?? 'Введи имя любого шрифта Google';
+  @override
+  String get fontName => TranslationOverrides.string(_root.$meta, 'settings.theme.fontName', {}) ?? 'Имя шрифта';
+  @override
+  String get customFontHint => TranslationOverrides.string(_root.$meta, 'settings.theme.customFontHint', {}) ?? 'Смотри шрифты на fonts.google.com';
+  @override
+  String get fontNotFound => TranslationOverrides.string(_root.$meta, 'settings.theme.fontNotFound', {}) ?? 'Шрифт не найден';
 }
 
 // Path: settings.viewer
@@ -4338,6 +4358,20 @@ extension on TranslationsRu {
           'settings.theme.selectedColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColor', {}) ?? 'Выбранный цвет',
           'settings.theme.selectedColorAndShades' =>
             TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Выбранный цвет и его оттенки',
+          'settings.theme.fontFamily' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? 'Шрифт',
+          'settings.theme.systemDefault' => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Системный',
+          'settings.theme.viewMoreFonts' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? 'Посмотреть больше шрифтов',
+          'settings.theme.fontPreviewText' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ??
+                'Съешь ещё этих мягких французских булок, да выпей же чаю',
+          'settings.theme.customFont' => TranslationOverrides.string(_root.$meta, 'settings.theme.customFont', {}) ?? 'Свой шрифт',
+          'settings.theme.customFontSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.customFontSubtitle', {}) ?? 'Введи имя любого шрифта Google',
+          'settings.theme.fontName' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontName', {}) ?? 'Имя шрифта',
+          'settings.theme.customFontHint' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.customFontHint', {}) ?? 'Смотри шрифты на fonts.google.com',
+          'settings.theme.fontNotFound' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontNotFound', {}) ?? 'Шрифт не найден',
           'settings.viewer.title' => TranslationOverrides.string(_root.$meta, 'settings.viewer.title', {}) ?? 'Просмотрщик',
           'settings.viewer.preloadAmount' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadAmount', {}) ?? 'Количество предзагрузки',
@@ -4556,6 +4590,9 @@ extension on TranslationsRu {
           'settings.database.databaseInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ??
                 'База данных будет отслеживать избранное и был ли скачан элемент',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.database.databaseInfoSnatch' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ??
                 'Если элемент был скачан, он не будет скачан снова',
@@ -4581,9 +4618,6 @@ extension on TranslationsRu {
           'settings.database.tagTypeFetchingInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ??
                 'Будет искать типы тегов на поддерживаемых сайтах',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.database.tagTypeFetchingWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'Это может привести к ограничению запросов',
           'settings.database.deleteDatabase' =>
@@ -5520,6 +5554,9 @@ extension on TranslationsRu {
           'viewer.appBar.hydrus' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.hydrus', {}) ?? 'Hydrus',
           'viewer.appBar.selectTags' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.selectTags', {}) ?? 'Выбрать теги',
           'viewer.notes.note' => TranslationOverrides.string(_root.$meta, 'viewer.notes.note', {}) ?? 'Заметка',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.notes.notes' => TranslationOverrides.string(_root.$meta, 'viewer.notes.notes', {}) ?? 'Заметки',
           'viewer.notes.coordinates' =>
             ({required int posX, required int posY}) =>
@@ -5540,9 +5577,6 @@ extension on TranslationsRu {
                   one: 'Источник',
                   other: 'Источников',
                 ),
-          _ => null,
-        } ??
-        switch (path) {
           'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'Рендеринг...',
           'media.loading.loadingAndRenderingFromCache' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'Загрузка и рендеринг из кэша...',

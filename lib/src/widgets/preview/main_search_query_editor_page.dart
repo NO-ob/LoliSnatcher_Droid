@@ -37,8 +37,8 @@ import 'package:lolisnatcher/src/widgets/history/history.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/preview/main_search_bar.dart';
 
-class SearchQueryEditorPage extends StatefulWidget {
-  const SearchQueryEditorPage({
+class MainSearchQueryEditorPage extends StatefulWidget {
+  const MainSearchQueryEditorPage({
     this.subTag,
     this.tagToEditIndex,
     this.autoFocus = true,
@@ -50,10 +50,10 @@ class SearchQueryEditorPage extends StatefulWidget {
   final bool autoFocus;
 
   @override
-  State<SearchQueryEditorPage> createState() => _SearchQueryEditorPageState();
+  State<MainSearchQueryEditorPage> createState() => _MainSearchQueryEditorPageState();
 }
 
-class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
+class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
   final SearchHandler searchHandler = SearchHandler.instance;
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;

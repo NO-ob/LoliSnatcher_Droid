@@ -229,6 +229,8 @@ class SettingsHandler {
   final RxBool useDynamicColor = false.obs;
   final RxBool isAmoled = false.obs;
 
+  final Rx<String> fontFamily = 'System'.obs;
+
   final Rxn<AppLocale> locale = Rxn<AppLocale>(null);
   ////////////////////////////////////////////////////
 
@@ -264,6 +266,7 @@ class SettingsHandler {
     'theme',
     'themeMode',
     'isAmoled',
+    'fontFamily',
     'locale',
     'useDynamicColor',
     'customPrimaryColor',
@@ -789,6 +792,10 @@ class SettingsHandler {
       'type': 'bool',
       'default': false,
     },
+    'fontFamily': {
+      'type': 'string',
+      'default': 'System',
+    },
     'locale': {
       'type': 'locale',
       'default': null,
@@ -1254,6 +1261,8 @@ class SettingsHandler {
         return useDynamicColor;
       case 'isAmoled':
         return isAmoled;
+      case 'fontFamily':
+        return fontFamily;
       case 'customPrimaryColor':
         return customPrimaryColor;
       case 'customAccentColor':
@@ -1539,6 +1548,9 @@ class SettingsHandler {
       case 'isAmoled':
         isAmoled.value = validatedValue;
         break;
+      case 'fontFamily':
+        fontFamily.value = validatedValue;
+        break;
       case 'customPrimaryColor':
         customPrimaryColor.value = validatedValue;
         break;
@@ -1653,6 +1665,7 @@ class SettingsHandler {
       'themeMode': validateValue('themeMode', null, toJSON: true),
       'useDynamicColor': validateValue('useDynamicColor', null, toJSON: true),
       'isAmoled': validateValue('isAmoled', null, toJSON: true),
+      'fontFamily': validateValue('fontFamily', null, toJSON: true),
       'enableDrawerMascot': validateValue('enableDrawerMascot', null, toJSON: true),
       'drawerMascotPathOverride': validateValue('drawerMascotPathOverride', null, toJSON: true),
       'customPrimaryColor': validateValue('customPrimaryColor', null, toJSON: true),
