@@ -522,7 +522,10 @@ class _ThumbnailState extends State<Thumbnail> {
                 );
               },
               child: GestureDetector(
-                onTap: (widget.item.isHated && !settingsHandler.shitDevice && widget.isStandalone)
+                // TODO reenable after filters rework (when blur/hide will be separate for each filter)
+                // ignore: dead_code
+                onTap: false && (widget.item.isHated && !settingsHandler.shitDevice && widget.isStandalone)
+                    // ignore: dead_code
                     ? () => setState(() => isBlurred = !isBlurred)
                     : null,
                 child: ImageFiltered(
