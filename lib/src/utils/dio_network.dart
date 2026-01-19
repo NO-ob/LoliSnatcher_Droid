@@ -12,7 +12,10 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 class DioNetwork {
   DioNetwork._();
 
-  static Dio getClient({String? baseUrl}) {
+  static Dio getClient({
+    String? baseUrl,
+    bool skipLogging = false,
+  }) {
     final dio = Dio();
 
     final settingsHandler = SettingsHandler.instance;
@@ -32,8 +35,10 @@ class DioNetwork {
     // dio.options.receiveTimeout = Duration(seconds: 30);
     // dio.options.sendTimeout = Duration(seconds: 10);
 
-    dio.interceptors.add(Logger.dioInterceptor!);
-    dio.interceptors.add(settingsHandler.alice.getDioInterceptor());
+    if (!skipLogging) {
+      dio.interceptors.add(Logger.dioInterceptor!);
+      dio.interceptors.add(settingsHandler.alice.getDioInterceptor());
+    }
     cookieInterceptor(dio);
 
     return dio;

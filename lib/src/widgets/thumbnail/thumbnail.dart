@@ -214,19 +214,21 @@ class _ThumbnailState extends State<Thumbnail> {
     total.value = totalNew ?? 0;
   }
 
-  void onError(Object error, {bool delayed = false}) {
+  void onError(Object error) {
     if (error is DioException && CancelToken.isCancel(error)) {
       //
     } else {
-      if (restartedCount < (kDebugMode ? 1 : 3)) {
-        // attempt to reload 3 times with a 1s delay
+      final int retryLimit = (kDebugMode || settingsHandler.shitDevice) ? 4 : 8;
+
+      if (restartedCount < retryLimit) {
+        // attempt to reload N times with a 1s delay
         Debounce.debounce(
           tag: 'thumbnail_reload_${widget.item.hashCode}',
           callback: () async {
             await restartLoading();
             restartedCount++;
           },
-          duration: const Duration(seconds: 1),
+          duration: Duration(milliseconds: settingsHandler.shitDevice ? 1000 : 500),
         );
       } else {
         isFailed.value = true;
@@ -299,7 +301,7 @@ class _ThumbnailState extends State<Thumbnail> {
           LogTypes.imageLoadingError,
           s: s,
         );
-        onError(e, delayed: true);
+        onError(e);
       },
     );
     mainImageStream!.addListener(mainImageListener!);
