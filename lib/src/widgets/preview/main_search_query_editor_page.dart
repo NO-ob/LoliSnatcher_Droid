@@ -20,6 +20,7 @@ import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/data/meta_tag.dart';
+import 'package:lolisnatcher/src/data/pinned_tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -479,6 +480,30 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                 Navigator.of(context).pop();
               },
             ),
+            FutureBuilder<PinnedTag?>(
+              future: settingsHandler.dbHandler.getPinnedTag(
+                tag.tag,
+                booruType: searchHandler.currentBooru.type?.name,
+                booruName: searchHandler.currentBooru.name,
+              ),
+              builder: (context, snapshot) {
+                final isPinned = snapshot.data != null;
+                final pinnedTag = snapshot.data;
+
+                return ListTile(
+                  title: Text(isPinned ? context.loc.pinnedTags.unpinTag : context.loc.pinnedTags.pinTag),
+                  leading: Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    if (isPinned && pinnedTag != null) {
+                      await showUnpinTagDialog(context, tag.tag, pinnedTag);
+                    } else {
+                      await showPinTagDialog(context, tag.tag, searchHandler.currentBooru);
+                    }
+                  },
+                );
+              },
+            ),
             SizedBox(height: MediaQuery.paddingOf(context).bottom),
           ],
         );
@@ -744,6 +769,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                             if (suggestionTextControllerRawInput.isEmpty) {
                               return SuggestionsMainContent(
                                 onMetatagSelect: onMetatagSelect,
+                                onPinnedTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
                               );
                             }
 
@@ -777,7 +803,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                           return Container(
                             height: kMinInteractiveDimension + (tag.hasDescription ? 8 : 0),
                             alignment: Alignment.centerLeft,
-                            color: tagColor == Colors.transparent ? null : tagColor.withValues(alpha: 0.1),
+                            color: tagColor?.withValues(alpha: 0.1),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(
@@ -1337,10 +1363,12 @@ class AddMetatagBottomSheet extends StatelessWidget {
 class SuggestionsMainContent extends StatefulWidget {
   const SuggestionsMainContent({
     required this.onMetatagSelect,
+    required this.onPinnedTagTap,
     super.key,
   });
 
   final void Function(AddMetatagBottomSheetResult result) onMetatagSelect;
+  final void Function(String tag) onPinnedTagTap;
 
   @override
   State<SuggestionsMainContent> createState() => _SuggestionsMainContentState();
@@ -1349,10 +1377,20 @@ class SuggestionsMainContent extends StatefulWidget {
 class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
   final ScrollController scrollController = ScrollController();
 
+  final GlobalKey<_PinnedTagsBlockState> _pinnedTagsKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        PinnedTagsBlock(
+          key: _pinnedTagsKey,
+          onTagTap: widget.onPinnedTagTap,
+          onTagLongTap: (tagName, pinnedTag) async {
+            await showUnpinTagDialog(context, tagName, pinnedTag);
+            await _pinnedTagsKey.currentState?.init();
+          },
+        ),
         const HistoryBlock(),
         MetatagsBlock(onSelect: widget.onMetatagSelect),
         const SizedBox(height: 16),
@@ -2248,6 +2286,1353 @@ class _PrefixEditDialog extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class PinnedTagsBlock extends StatefulWidget {
+  const PinnedTagsBlock({
+    required this.onTagTap,
+    required this.onTagLongTap,
+    super.key,
+  });
+
+  final void Function(String tag) onTagTap;
+  final void Function(String tag, PinnedTag pinnedTag) onTagLongTap;
+
+  @override
+  State<PinnedTagsBlock> createState() => _PinnedTagsBlockState();
+}
+
+enum PinnedTagsSortMode { custom, alphabetical, reverseAlphabetical }
+
+class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
+  final settingsHandler = SettingsHandler.instance;
+  final searchHandler = SearchHandler.instance;
+  final tagHandler = TagHandler.instance;
+
+  List<PinnedTag> allPinnedTags = [];
+  List<PinnedTag> filteredPinnedTags = [];
+  List<String> availableLabels = [];
+  String? selectedLabel;
+  bool loading = true;
+  PinnedTagsSortMode sortMode = PinnedTagsSortMode.custom;
+
+  final scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  Future<void> init() async {
+    loading = true;
+    if (mounted) setState(() {});
+
+    final booru = searchHandler.currentBooru;
+    allPinnedTags = await settingsHandler.dbHandler.getPinnedTags(
+      booruType: booru.type?.name,
+      booruName: booru.name,
+    );
+
+    // Get unique labels from all tags
+    final labelsSet = <String>{};
+    for (final t in allPinnedTags) {
+      labelsSet.addAll(t.labels);
+    }
+    availableLabels = labelsSet.toList()..sort();
+
+    // Validate selected label still exists
+    if (selectedLabel != null && !availableLabels.contains(selectedLabel)) {
+      selectedLabel = null;
+    }
+
+    _applyFiltersAndSorting();
+    loading = false;
+    if (mounted) setState(() {});
+  }
+
+  void _applyFiltersAndSorting() {
+    // Apply label filter
+    if (selectedLabel != null) {
+      filteredPinnedTags = allPinnedTags.where((t) => t.hasLabel(selectedLabel!)).toList();
+    } else {
+      filteredPinnedTags = List.from(allPinnedTags);
+    }
+
+    // Apply sorting
+    switch (sortMode) {
+      case PinnedTagsSortMode.custom:
+        // Already sorted by sortOrder from DB
+        break;
+      case PinnedTagsSortMode.alphabetical:
+        filteredPinnedTags.sort((a, b) => a.tagName.toLowerCase().compareTo(b.tagName.toLowerCase()));
+        break;
+      case PinnedTagsSortMode.reverseAlphabetical:
+        filteredPinnedTags.sort((a, b) => b.tagName.toLowerCase().compareTo(a.tagName.toLowerCase()));
+        break;
+    }
+  }
+
+  void _cycleSortMode() {
+    setState(() {
+      sortMode = PinnedTagsSortMode.values[(sortMode.index + 1) % PinnedTagsSortMode.values.length];
+      _applyFiltersAndSorting();
+    });
+    scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _selectLabel(String? label) {
+    setState(() {
+      selectedLabel = label;
+      _applyFiltersAndSorting();
+    });
+    scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  IconData get _sortIcon => switch (sortMode) {
+    PinnedTagsSortMode.custom => Icons.sort,
+    PinnedTagsSortMode.alphabetical => Icons.sort_by_alpha,
+    PinnedTagsSortMode.reverseAlphabetical => Icons.sort_by_alpha,
+  };
+
+  String get _sortTooltip => switch (sortMode) {
+    PinnedTagsSortMode.custom => 'Custom order',
+    PinnedTagsSortMode.alphabetical => 'A-Z',
+    PinnedTagsSortMode.reverseAlphabetical => 'Z-A',
+  };
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!settingsHandler.dbEnabled || (allPinnedTags.isEmpty && !loading)) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: GestureDetector(
+            onTap: () {
+              scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.push_pin_rounded,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.loc.pinnedTags.pinnedTags,
+                    textAlign: TextAlign.left,
+                    style: context.theme.textTheme.bodyLarge,
+                  ),
+                ),
+                if (availableLabels.isNotEmpty)
+                  PopupMenuButton<String?>(
+                    onSelected: _selectLabel,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            selectedLabel ?? context.loc.pinnedTags.all,
+                            style: context.theme.textTheme.bodyLarge,
+                          ),
+                          const Icon(Icons.arrow_drop_down),
+                        ],
+                      ),
+                    ),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: null,
+                        onTap: () => _selectLabel(null),
+                        child: Row(
+                          children: [
+                            if (selectedLabel == null) const Icon(Icons.check, size: 18) else const SizedBox(width: 18),
+                            const SizedBox(width: 8),
+                            Text(context.loc.pinnedTags.all),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuDivider(),
+                      ...availableLabels.map(
+                        (label) => PopupMenuItem(
+                          value: label,
+                          child: Row(
+                            children: [
+                              if (selectedLabel == label)
+                                const Icon(Icons.check, size: 18)
+                              else
+                                const SizedBox(width: 18),
+                              const SizedBox(width: 8),
+                              Text(label),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(width: 8),
+                if (allPinnedTags.length > 1)
+                  IconButton(
+                    onPressed: _cycleSortMode,
+                    icon: Stack(
+                      children: [
+                        Icon(_sortIcon),
+                        if (sortMode == PinnedTagsSortMode.reverseAlphabetical)
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Icon(
+                              Icons.arrow_downward,
+                              size: 10,
+                              color: context.theme.colorScheme.primary,
+                            ),
+                          ),
+                      ],
+                    ),
+                    tooltip: _sortTooltip,
+                  ),
+                IconButton(
+                  onPressed: () async {
+                    await showPinnedTagsManageDialog(
+                      context,
+                      currentBooru: searchHandler.currentBooru,
+                      onTagTap: widget.onTagTap,
+                    );
+                    // Always refresh after closing the dialog since changes might have been made
+                    await init();
+                  },
+                  icon: const Icon(Icons.chevron_right_rounded),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 50,
+          child: FadingEdgeScrollView.fromScrollView(
+            child: ListView.builder(
+              controller: scrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: (filteredPinnedTags.isEmpty && loading) ? 1 : filteredPinnedTags.length,
+              itemBuilder: (BuildContext context, int index) {
+                if (filteredPinnedTags.isEmpty) {
+                  return GestureDetector(
+                    onTap: init,
+                    child: Container(
+                      alignment: Alignment.center,
+                      height: 30,
+                      width: 30,
+                      child: const CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                final pinnedTag = filteredPinnedTags[index];
+                final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
+
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: InputChip(
+                    avatar: pinnedTag.isGlobal
+                        ? null
+                        : BooruFavicon(
+                            settingsHandler.booruList.value.firstWhere(
+                              (b) => b.name == pinnedTag.booruName && b.type == pinnedTag.booruType,
+                              orElse: Booru.unknown,
+                            ),
+                          ),
+                    label: Text(
+                      pinnedTag.tagName.replaceAll('_', ' '),
+                      style: TextStyle(color: tagColor),
+                    ),
+                    onPressed: () => widget.onTagTap(pinnedTag.tagName),
+                    onDeleted: () => widget.onTagLongTap(pinnedTag.tagName, pinnedTag),
+                    deleteIcon: const Icon(Icons.more_vert, size: 18),
+                    deleteButtonTooltipMessage: '',
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+}
+
+class PinTagDialogResult {
+  PinTagDialogResult({
+    required this.pinForCurrentBooru,
+    this.labels = const [],
+  });
+
+  final bool pinForCurrentBooru;
+  final List<String> labels;
+}
+
+class PinTagDialog extends StatefulWidget {
+  const PinTagDialog({
+    required this.tagName,
+    required this.currentBooru,
+    required this.existingLabels,
+    super.key,
+  });
+
+  final String tagName;
+  final Booru currentBooru;
+  final List<String> existingLabels;
+
+  @override
+  State<PinTagDialog> createState() => _PinTagDialogState();
+}
+
+class _PinTagDialogState extends State<PinTagDialog> {
+  bool pinForCurrentBooru = false;
+  final labelController = TextEditingController();
+  final Set<String> selectedLabels = {};
+
+  @override
+  void dispose() {
+    labelController.dispose();
+    super.dispose();
+  }
+
+  void _addLabel(String label) {
+    final trimmed = label.trim();
+    if (trimmed.isNotEmpty && !selectedLabels.contains(trimmed)) {
+      setState(() {
+        selectedLabels.add(trimmed);
+        labelController.clear();
+      });
+    }
+  }
+
+  void _removeLabel(String label) {
+    setState(() => selectedLabels.remove(label));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.loc.pinnedTags.pinTag),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.loc.pinnedTags.pinQuestion(tag: widget.tagName.replaceAll('_', ' ')),
+            style: context.theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 16),
+          CheckboxListTile(
+            value: pinForCurrentBooru,
+            onChanged: (value) => setState(() => pinForCurrentBooru = value ?? false),
+            title: Text(context.loc.pinnedTags.onlyForBooru(name: widget.currentBooru.name ?? '')),
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: labelController,
+                  decoration: InputDecoration(
+                    labelText: context.loc.pinnedTags.labelsOptional,
+                    hintText: context.loc.pinnedTags.typeAndEnterToAdd,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                    suffixIcon: labelController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.add, size: 18),
+                            onPressed: () => _addLabel(labelController.text),
+                          )
+                        : null,
+                  ),
+                  onSubmitted: _addLabel,
+                ),
+              ),
+              if (widget.existingLabels.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.arrow_drop_down),
+                  tooltip: context.loc.pinnedTags.selectExistingLabel,
+                  onSelected: _addLabel,
+                  itemBuilder: (context) => widget.existingLabels
+                      .where((l) => !selectedLabels.contains(l))
+                      .map(
+                        (label) => PopupMenuItem(
+                          value: label,
+                          child: Text(label),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+            ],
+          ),
+          if (selectedLabels.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: selectedLabels
+                  .map(
+                    (label) => Chip(
+                      label: Text(label),
+                      onDeleted: () => _removeLabel(label),
+                      deleteIconColor: context.theme.colorScheme.error,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        const CancelButton(),
+        ElevatedButton.icon(
+          onPressed: () => Navigator.of(context).pop(
+            PinTagDialogResult(
+              pinForCurrentBooru: pinForCurrentBooru,
+              labels: selectedLabels.toList(),
+            ),
+          ),
+          icon: const Icon(Icons.push_pin),
+          label: Text(context.loc.pinnedTags.pin),
+        ),
+      ],
+    );
+  }
+}
+
+Future<void> showPinTagDialog(
+  BuildContext context,
+  String tagName,
+  Booru currentBooru,
+) async {
+  final settingsHandler = SettingsHandler.instance;
+
+  // Load existing labels for the dropdown
+  final existingLabels = await settingsHandler.dbHandler.getPinnedTagLabels(
+    booruType: currentBooru.type?.name,
+    booruName: currentBooru.name,
+  );
+
+  if (!context.mounted) return;
+
+  final result = await showDialog<PinTagDialogResult>(
+    context: context,
+    builder: (_) => PinTagDialog(
+      tagName: tagName,
+      currentBooru: currentBooru,
+      existingLabels: existingLabels,
+    ),
+  );
+
+  if (result != null) {
+    await settingsHandler.dbHandler.addPinnedTag(
+      tagName,
+      booruType: result.pinForCurrentBooru ? currentBooru.type?.name : null,
+      booruName: result.pinForCurrentBooru ? currentBooru.name : null,
+      labels: result.labels,
+    );
+
+    if (context.mounted) {
+      final labelText = result.labels.isNotEmpty ? ' [${result.labels.join(', ')}]' : '';
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(context.loc.pinnedTags.tagPinned, style: const TextStyle(fontSize: 20)),
+        content: Text(
+          result.pinForCurrentBooru
+              ? context.loc.pinnedTags.pinnedForBooru(name: currentBooru.name ?? '', labels: labelText)
+              : context.loc.pinnedTags.pinnedGloballyWithLabels(labels: labelText),
+        ),
+        sideColor: Colors.green,
+        leadingIcon: Icons.push_pin,
+        leadingIconColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      );
+    }
+  }
+}
+
+Future<void> showUnpinTagDialog(
+  BuildContext context,
+  String tagName,
+  PinnedTag pinnedTag,
+) async {
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(ctx.loc.pinnedTags.unpinTag),
+      content: Text(
+        ctx.loc.pinnedTags.unpinQuestion(tag: tagName.replaceAll('_', ' ')),
+      ),
+      actions: [
+        const CancelButton(),
+        ElevatedButton.icon(
+          onPressed: () => Navigator.of(ctx).pop(true),
+          icon: const Icon(Icons.push_pin_outlined),
+          label: Text(ctx.loc.pinnedTags.unpin),
+        ),
+      ],
+    ),
+  );
+
+  if (result == true) {
+    final settingsHandler = SettingsHandler.instance;
+    await settingsHandler.dbHandler.removePinnedTag(pinnedTag.id);
+
+    if (context.mounted) {
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(context.loc.pinnedTags.tagUnpinned, style: const TextStyle(fontSize: 20)),
+        sideColor: Colors.orange,
+        leadingIcon: Icons.push_pin_outlined,
+        leadingIconColor: Colors.orange,
+        duration: const Duration(seconds: 2),
+      );
+    }
+  }
+}
+
+Future<bool?> showPinnedTagsReorderDialog(
+  BuildContext context,
+  List<PinnedTag> initialTags,
+) async {
+  return showDialog<bool>(
+    context: context,
+    builder: (_) => PinnedTagsReorderDialog(initialTags: initialTags),
+  );
+}
+
+class PinnedTagsReorderDialog extends StatefulWidget {
+  const PinnedTagsReorderDialog({
+    required this.initialTags,
+    super.key,
+  });
+
+  final List<PinnedTag> initialTags;
+
+  @override
+  State<PinnedTagsReorderDialog> createState() => _PinnedTagsReorderDialogState();
+}
+
+class _PinnedTagsReorderDialogState extends State<PinnedTagsReorderDialog> {
+  final settingsHandler = SettingsHandler.instance;
+  final tagHandler = TagHandler.instance;
+
+  late List<PinnedTag> tags;
+  bool saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    tags = List.from(widget.initialTags);
+  }
+
+  Future<void> saveOrder() async {
+    setState(() => saving = true);
+    await settingsHandler.dbHandler.updatePinnedTagsOrder(tags);
+    setState(() => saving = false);
+    if (mounted) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.loc.pinnedTags.reorderPinnedTags),
+      contentPadding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
+      content: SizedBox(
+        width: double.maxFinite,
+        height: min(tags.length * 56.0 + 16, MediaQuery.sizeOf(context).height * 0.5),
+        child: ReorderableListView.builder(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          itemCount: tags.length,
+          onReorder: (oldIndex, newIndex) {
+            setState(() {
+              if (newIndex > oldIndex) newIndex--;
+              final item = tags.removeAt(oldIndex);
+              tags.insert(newIndex, item);
+            });
+          },
+          itemBuilder: (context, index) {
+            final pinnedTag = tags[index];
+            final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
+
+            return ListTile(
+              key: ValueKey(pinnedTag.id),
+              leading: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: const Icon(Icons.drag_handle),
+                  ),
+                  const SizedBox(width: 8),
+                  if (pinnedTag.isGlobal)
+                    const Icon(Icons.public, size: 20)
+                  else
+                    BooruFavicon(
+                      settingsHandler.booruList.value.firstWhere(
+                        (b) => b.name == pinnedTag.booruName && b.type == pinnedTag.booruType,
+                        orElse: Booru.unknown,
+                      ),
+                    ),
+                ],
+              ),
+              title: Text(
+                pinnedTag.tagName.replaceAll('_', ' '),
+                style: TextStyle(color: tagColor),
+              ),
+              subtitle: pinnedTag.isGlobal ? const Text('Global') : Text(pinnedTag.booruName ?? ''),
+              trailing: IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () async {
+                  await settingsHandler.dbHandler.removePinnedTag(pinnedTag.id);
+                  setState(() {
+                    tags.removeAt(index);
+                  });
+                  if (tags.isEmpty && mounted) {
+                    Navigator.of(context).pop(true);
+                  }
+                },
+              ),
+            );
+          },
+        ),
+      ),
+      actions: [
+        const CancelButton(),
+        ElevatedButton.icon(
+          onPressed: saving ? null : saveOrder,
+          icon: saving
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.check),
+          label: Text(saving ? context.loc.pinnedTags.saving : context.loc.save),
+        ),
+      ],
+    );
+  }
+}
+
+Future<bool?> showPinnedTagsManageDialog(
+  BuildContext context, {
+  required Booru currentBooru,
+  required void Function(String tag) onTagTap,
+}) async {
+  return showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (_) => PinnedTagsManageDialog(currentBooru: currentBooru, onTagTap: onTagTap),
+  );
+}
+
+class PinnedTagsManageDialog extends StatefulWidget {
+  const PinnedTagsManageDialog({
+    required this.currentBooru,
+    required this.onTagTap,
+    super.key,
+  });
+
+  final Booru currentBooru;
+  final void Function(String tag) onTagTap;
+
+  @override
+  State<PinnedTagsManageDialog> createState() => _PinnedTagsManageDialogState();
+}
+
+class _PinnedTagsManageDialogState extends State<PinnedTagsManageDialog> {
+  final settingsHandler = SettingsHandler.instance;
+  final searchHandler = SearchHandler.instance;
+  final tagHandler = TagHandler.instance;
+
+  List<PinnedTag> allTags = [];
+  List<PinnedTag> filteredTags = [];
+  bool loading = true;
+  bool hasChanges = false;
+  PinnedTagsSortMode sortMode = PinnedTagsSortMode.custom;
+
+  final searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    searchController.addListener(_onSearchChanged);
+    init();
+  }
+
+  @override
+  void dispose() {
+    searchController.removeListener(_onSearchChanged);
+    searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    _applyFilter();
+  }
+
+  Future<void> init() async {
+    loading = true;
+    if (mounted) setState(() {});
+
+    final booru = searchHandler.currentBooru;
+    allTags = await settingsHandler.dbHandler.getPinnedTags(
+      booruType: booru.type?.name,
+      booruName: booru.name,
+    );
+
+    _applySorting();
+    _applyFilter();
+    loading = false;
+    if (mounted) setState(() {});
+  }
+
+  void _applySorting() {
+    switch (sortMode) {
+      case PinnedTagsSortMode.custom:
+        allTags.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+        break;
+      case PinnedTagsSortMode.alphabetical:
+        allTags.sort((a, b) => a.tagName.toLowerCase().compareTo(b.tagName.toLowerCase()));
+        break;
+      case PinnedTagsSortMode.reverseAlphabetical:
+        allTags.sort((a, b) => b.tagName.toLowerCase().compareTo(a.tagName.toLowerCase()));
+        break;
+    }
+    _applyFilter();
+  }
+
+  void _applyFilter() {
+    final query = searchController.text.toLowerCase().trim();
+    if (query.isEmpty) {
+      filteredTags = List.from(allTags);
+    } else {
+      // Search in both tag name and labels
+      filteredTags = allTags.where((tag) {
+        final matchesName = tag.tagName.toLowerCase().contains(query);
+        final matchesLabel = tag.labels.any((l) => l.toLowerCase().contains(query));
+        return matchesName || matchesLabel;
+      }).toList();
+    }
+    if (mounted) setState(() {});
+  }
+
+  void _cycleSortMode() {
+    sortMode = PinnedTagsSortMode.values[(sortMode.index + 1) % PinnedTagsSortMode.values.length];
+    _applySorting();
+  }
+
+  IconData get _sortIcon => switch (sortMode) {
+    PinnedTagsSortMode.custom => Icons.sort,
+    PinnedTagsSortMode.alphabetical => Icons.sort_by_alpha,
+    PinnedTagsSortMode.reverseAlphabetical => Icons.sort_by_alpha,
+  };
+
+  String get _sortTooltip => switch (sortMode) {
+    PinnedTagsSortMode.custom => 'Custom order',
+    PinnedTagsSortMode.alphabetical => 'A-Z',
+    PinnedTagsSortMode.reverseAlphabetical => 'Z-A',
+  };
+
+  Future<void> _deleteTag(PinnedTag tag) async {
+    await settingsHandler.dbHandler.removePinnedTag(tag.id);
+    allTags.removeWhere((t) => t.id == tag.id);
+    _applyFilter();
+    hasChanges = true;
+  }
+
+  Future<void> _editTagLabels(PinnedTag tag) async {
+    // Collect all unique labels from all tags
+    final existingLabels = <String>{};
+    for (final t in allTags) {
+      existingLabels.addAll(t.labels);
+    }
+    final sortedLabels = existingLabels.toList()..sort();
+
+    final result = await showDialog<List<String>>(
+      context: context,
+      builder: (context) => EditLabelsDialog(
+        currentLabels: tag.labels,
+        existingLabels: sortedLabels,
+      ),
+    );
+
+    if (result != null) {
+      await settingsHandler.dbHandler.updatePinnedTagLabels(tag.id, result);
+
+      // Update local state
+      final index = allTags.indexWhere((t) => t.id == tag.id);
+      if (index != -1) {
+        allTags[index] = allTags[index].copyWith(labels: result, clearLabels: result.isEmpty);
+      }
+      _applyFilter();
+      hasChanges = true;
+    }
+  }
+
+  Future<void> _openReorderDialog() async {
+    final result = await showPinnedTagsReorderDialog(context, allTags);
+    if (result == true) {
+      hasChanges = true;
+      await init();
+    }
+  }
+
+  Future<void> _addManualTag() async {
+    final existingLabels = allTags.expand((t) => t.labels).toSet().toList()..sort();
+
+    final result = await showDialog<ManualPinTagDialogResult>(
+      context: context,
+      builder: (context) => ManualPinTagDialog(
+        currentBooru: widget.currentBooru,
+        existingLabels: existingLabels,
+      ),
+    );
+
+    if (result != null) {
+      await settingsHandler.dbHandler.addPinnedTag(
+        result.tagName,
+        booruType: result.pinForCurrentBooru ? widget.currentBooru.type?.name : null,
+        booruName: result.pinForCurrentBooru ? widget.currentBooru.name : null,
+        labels: result.labels,
+      );
+      hasChanges = true;
+      await init();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.3,
+      maxChildSize: 0.9,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: BoxDecoration(
+            color: context.theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Drag handle
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: context.theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.loc.pinnedTags.pinnedTags,
+                        style: context.theme.textTheme.titleLarge,
+                      ),
+                    ),
+                    Text(
+                      '${allTags.length}',
+                      style: context.theme.textTheme.titleSmall?.copyWith(
+                        color: context.theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(hasChanges),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Search and actions bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: context.loc.pinnedTags.searchPinnedTags,
+                          prefixIcon: const Icon(Icons.search),
+                          suffixIcon: searchController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: searchController.clear,
+                                )
+                              : null,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: _cycleSortMode,
+                      icon: Stack(
+                        children: [
+                          Icon(_sortIcon),
+                          if (sortMode == PinnedTagsSortMode.reverseAlphabetical)
+                            Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Icon(
+                                Icons.arrow_downward,
+                                size: 10,
+                                color: context.theme.colorScheme.primary,
+                              ),
+                            ),
+                        ],
+                      ),
+                      tooltip: _sortTooltip,
+                    ),
+                    if (allTags.length > 1)
+                      IconButton(
+                        onPressed: _openReorderDialog,
+                        icon: const Icon(Icons.reorder_rounded),
+                        tooltip: context.loc.pinnedTags.reorder,
+                      ),
+                    IconButton(
+                      onPressed: _addManualTag,
+                      icon: const Icon(Icons.add_rounded),
+                      tooltip: context.loc.pinnedTags.addTagManually,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Tags list
+              Expanded(
+                child: loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : filteredTags.isEmpty
+                    ? Center(
+                        child: Text(
+                          searchController.text.isNotEmpty
+                              ? context.loc.pinnedTags.noTagsMatchSearch
+                              : context.loc.pinnedTags.noPinnedTagsYet,
+                          style: context.theme.textTheme.bodyLarge,
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: scrollController,
+                        itemCount: filteredTags.length,
+                        itemBuilder: (context, index) {
+                          final pinnedTag = filteredTags[index];
+                          final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
+
+                          final scopeText = pinnedTag.isGlobal ? 'Global' : pinnedTag.booruName ?? '';
+                          final labelText = pinnedTag.labels.isNotEmpty ? pinnedTag.labels.join(', ') : null;
+                          final subtitleParts = [
+                            scopeText,
+                            if (labelText != null && labelText.isNotEmpty) '[$labelText]',
+                          ];
+
+                          return ListTile(
+                            leading: pinnedTag.isGlobal
+                                ? null
+                                : BooruFavicon(
+                                    settingsHandler.booruList.value.firstWhere(
+                                      (b) => b.name == pinnedTag.booruName && b.type == pinnedTag.booruType,
+                                      orElse: Booru.unknown,
+                                    ),
+                                  ),
+                            title: Text(
+                              pinnedTag.tagName.replaceAll('_', ' '),
+                              style: TextStyle(color: tagColor),
+                            ),
+                            subtitle: Text(
+                              subtitleParts.join(' '),
+                              style: context.theme.textTheme.bodySmall,
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.add_rounded),
+                                  tooltip: context.loc.pinnedTags.addToSearch,
+                                  onPressed: () {
+                                    widget.onTagTap(pinnedTag.tagName);
+                                    Navigator.of(context).pop(hasChanges);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    pinnedTag.labels.isNotEmpty ? Icons.label : Icons.label_outline,
+                                    size: 20,
+                                  ),
+                                  tooltip: context.loc.pinnedTags.editLabels,
+                                  onPressed: () => _editTagLabels(pinnedTag),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  tooltip: context.loc.pinnedTags.unpin,
+                                  onPressed: () => _deleteTag(pinnedTag),
+                                ),
+                              ],
+                            ),
+                            onTap: () {
+                              widget.onTagTap(pinnedTag.tagName);
+                              Navigator.of(context).pop(hasChanges);
+                            },
+                          );
+                        },
+                      ),
+              ),
+              // Bottom safe area
+              SizedBox(height: MediaQuery.paddingOf(context).bottom),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class EditLabelsDialog extends StatefulWidget {
+  const EditLabelsDialog({
+    required this.currentLabels,
+    required this.existingLabels,
+    super.key,
+  });
+
+  final List<String> currentLabels;
+  final List<String> existingLabels;
+
+  @override
+  State<EditLabelsDialog> createState() => _EditLabelsDialogState();
+}
+
+class _EditLabelsDialogState extends State<EditLabelsDialog> {
+  final TextEditingController labelController = TextEditingController();
+  late final Set<String> selectedLabels;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedLabels = Set.from(widget.currentLabels);
+  }
+
+  @override
+  void dispose() {
+    labelController.dispose();
+    super.dispose();
+  }
+
+  void _addLabel(String label) {
+    final trimmed = label.trim();
+    if (trimmed.isNotEmpty && !selectedLabels.contains(trimmed)) {
+      setState(() {
+        selectedLabels.add(trimmed);
+        labelController.clear();
+      });
+    }
+  }
+
+  void _removeLabel(String label) {
+    setState(() => selectedLabels.remove(label));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.loc.pinnedTags.editLabels),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: labelController,
+                  decoration: InputDecoration(
+                    labelText: context.loc.pinnedTags.labels,
+                    hintText: context.loc.pinnedTags.typeAndEnterToAdd,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                    suffixIcon: labelController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.add, size: 18),
+                            onPressed: () => _addLabel(labelController.text),
+                          )
+                        : null,
+                  ),
+                  onSubmitted: _addLabel,
+                  autofocus: true,
+                ),
+              ),
+              if (widget.existingLabels.isNotEmpty) ...[
+                const SizedBox(width: 8),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.arrow_drop_down),
+                  tooltip: context.loc.pinnedTags.selectExistingLabel,
+                  onSelected: _addLabel,
+                  itemBuilder: (context) => widget.existingLabels
+                      .where((l) => !selectedLabels.contains(l))
+                      .map(
+                        (label) => PopupMenuItem(
+                          value: label,
+                          child: Text(label),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+            ],
+          ),
+          if (selectedLabels.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: selectedLabels
+                  .map(
+                    (label) => Chip(
+                      label: Text(label),
+                      onDeleted: () => _removeLabel(label),
+                      deleteIconColor: context.theme.colorScheme.error,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        const CancelButton(),
+        ElevatedButton.icon(
+          onPressed: () => Navigator.of(context).pop(selectedLabels.toList()),
+          icon: const Icon(Icons.check),
+          label: Text(context.loc.save),
+        ),
+      ],
+    );
+  }
+}
+
+class ManualPinTagDialogResult {
+  ManualPinTagDialogResult({
+    required this.tagName,
+    required this.pinForCurrentBooru,
+    this.labels = const [],
+  });
+
+  final String tagName;
+  final bool pinForCurrentBooru;
+  final List<String> labels;
+}
+
+class ManualPinTagDialog extends StatefulWidget {
+  const ManualPinTagDialog({
+    required this.currentBooru,
+    required this.existingLabels,
+    super.key,
+  });
+
+  final Booru currentBooru;
+  final List<String> existingLabels;
+
+  @override
+  State<ManualPinTagDialog> createState() => _ManualPinTagDialogState();
+}
+
+class _ManualPinTagDialogState extends State<ManualPinTagDialog> {
+  final tagController = TextEditingController();
+  final labelController = TextEditingController();
+  bool pinForCurrentBooru = false;
+  final Set<String> selectedLabels = {};
+
+  @override
+  void dispose() {
+    tagController.dispose();
+    labelController.dispose();
+    super.dispose();
+  }
+
+  void _addLabel(String label) {
+    final trimmed = label.trim();
+    if (trimmed.isNotEmpty && !selectedLabels.contains(trimmed)) {
+      setState(() {
+        selectedLabels.add(trimmed);
+        labelController.clear();
+      });
+    }
+  }
+
+  void _removeLabel(String label) {
+    setState(() => selectedLabels.remove(label));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final canSubmit = tagController.text.trim().isNotEmpty;
+
+    return AlertDialog(
+      title: Text(context.loc.pinnedTags.addPinnedTag),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: tagController,
+              decoration: InputDecoration(
+                labelText: context.loc.pinnedTags.tagQuery,
+                hintText: context.loc.pinnedTags.tagQueryHint,
+                border: const OutlineInputBorder(),
+              ),
+              onChanged: (_) => setState(() {}),
+              autofocus: true,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.loc.pinnedTags.rawQueryHelp,
+              style: context.theme.textTheme.bodySmall?.copyWith(
+                color: context.theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            CheckboxListTile(
+              value: pinForCurrentBooru,
+              onChanged: (value) => setState(() => pinForCurrentBooru = value ?? false),
+              title: Text(context.loc.pinnedTags.onlyForBooru(name: widget.currentBooru.name ?? '')),
+              controlAffinity: ListTileControlAffinity.leading,
+              contentPadding: EdgeInsets.zero,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: labelController,
+                    decoration: InputDecoration(
+                      labelText: context.loc.pinnedTags.labelsOptional,
+                      hintText: context.loc.pinnedTags.typeAndEnterToAdd,
+                      border: const OutlineInputBorder(),
+                      isDense: true,
+                      suffixIcon: labelController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.add, size: 18),
+                              onPressed: () => _addLabel(labelController.text),
+                            )
+                          : null,
+                    ),
+                    onSubmitted: _addLabel,
+                  ),
+                ),
+                if (widget.existingLabels.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.arrow_drop_down),
+                    tooltip: context.loc.pinnedTags.selectExistingLabel,
+                    onSelected: _addLabel,
+                    itemBuilder: (context) => widget.existingLabels
+                        .where((l) => !selectedLabels.contains(l))
+                        .map(
+                          (label) => PopupMenuItem(
+                            value: label,
+                            child: Text(label),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ],
+              ],
+            ),
+            if (selectedLabels.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: selectedLabels
+                    .map(
+                      (label) => Chip(
+                        label: Text(label),
+                        onDeleted: () => _removeLabel(label),
+                        deleteIconColor: context.theme.colorScheme.error,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        const CancelButton(),
+        ElevatedButton.icon(
+          onPressed: canSubmit
+              ? () => Navigator.of(context).pop(
+                  ManualPinTagDialogResult(
+                    tagName: tagController.text.trim(),
+                    pinForCurrentBooru: pinForCurrentBooru,
+                    labels: selectedLabels.toList(),
+                  ),
+                )
+              : null,
+          icon: const Icon(Icons.push_pin),
+          label: Text(context.loc.pinnedTags.pin),
+        ),
+      ],
     );
   }
 }

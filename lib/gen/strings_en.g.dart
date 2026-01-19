@@ -277,6 +277,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   late final TranslationsLoliSyncEn loliSync = TranslationsLoliSyncEn.internal(_root);
   late final TranslationsImageSearchEn imageSearch = TranslationsImageSearchEn.internal(_root);
   late final TranslationsTagViewEn tagView = TranslationsTagViewEn.internal(_root);
+  late final TranslationsPinnedTagsEn pinnedTags = TranslationsPinnedTagsEn.internal(_root);
   late final TranslationsSearchBarEn searchBar = TranslationsSearchBarEn.internal(_root);
   late final TranslationsMobileHomeEn mobileHome = TranslationsMobileHomeEn.internal(_root);
   late final TranslationsDesktopHomeEn desktopHome = TranslationsDesktopHomeEn.internal(_root);
@@ -1488,6 +1489,111 @@ class TranslationsTagViewEn {
 
   /// en: 'Try again'
   String get tryAgain => TranslationOverrides.string(_root.$meta, 'tagView.tryAgain', {}) ?? 'Try again';
+}
+
+// Path: pinnedTags
+class TranslationsPinnedTagsEn {
+  TranslationsPinnedTagsEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Pinned tags'
+  String get pinnedTags => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedTags', {}) ?? 'Pinned tags';
+
+  /// en: 'Pin tag'
+  String get pinTag => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinTag', {}) ?? 'Pin tag';
+
+  /// en: 'Unpin tag'
+  String get unpinTag => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinTag', {}) ?? 'Unpin tag';
+
+  /// en: 'Pin'
+  String get pin => TranslationOverrides.string(_root.$meta, 'pinnedTags.pin', {}) ?? 'Pin';
+
+  /// en: 'Unpin'
+  String get unpin => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpin', {}) ?? 'Unpin';
+
+  /// en: 'Pin "${tag: String}" to quick access?'
+  String pinQuestion({required String tag}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Pin "${tag}" to quick access?';
+
+  /// en: 'Remove "${tag: String}" from pinned tags?'
+  String unpinQuestion({required String tag}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Remove "${tag}" from pinned tags?';
+
+  /// en: 'Only for ${name: String}'
+  String onlyForBooru({required String name}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Only for ${name}';
+
+  /// en: 'Labels (optional)'
+  String get labelsOptional => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? 'Labels (optional)';
+
+  /// en: 'Type and press Send to add'
+  String get typeAndEnterToAdd => TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndEnterToAdd', {}) ?? 'Type and press Send to add';
+
+  /// en: 'Select existing label'
+  String get selectExistingLabel => TranslationOverrides.string(_root.$meta, 'pinnedTags.selectExistingLabel', {}) ?? 'Select existing label';
+
+  /// en: 'Tag pinned'
+  String get tagPinned => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagPinned', {}) ?? 'Tag pinned';
+
+  /// en: 'Pinned for ${name: String}${labels: String}'
+  String pinnedForBooru({required String name, required String labels}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedForBooru', {'name': name, 'labels': labels}) ?? 'Pinned for ${name}${labels}';
+
+  /// en: 'Pinned globally${labels: String}'
+  String pinnedGloballyWithLabels({required String labels}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedGloballyWithLabels', {'labels': labels}) ?? 'Pinned globally${labels}';
+
+  /// en: 'Tag unpinned'
+  String get tagUnpinned => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagUnpinned', {}) ?? 'Tag unpinned';
+
+  /// en: 'All'
+  String get all => TranslationOverrides.string(_root.$meta, 'pinnedTags.all', {}) ?? 'All';
+
+  /// en: 'Reorder pinned tags'
+  String get reorderPinnedTags => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? 'Reorder pinned tags';
+
+  /// en: 'Saving...'
+  String get saving => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? 'Saving...';
+
+  /// en: 'Search pinned tags...'
+  String get searchPinnedTags => TranslationOverrides.string(_root.$meta, 'pinnedTags.searchPinnedTags', {}) ?? 'Search pinned tags...';
+
+  /// en: 'Reorder'
+  String get reorder => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? 'Reorder';
+
+  /// en: 'Add tag manually'
+  String get addTagManually => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? 'Add tag manually';
+
+  /// en: 'No tags match your search'
+  String get noTagsMatchSearch => TranslationOverrides.string(_root.$meta, 'pinnedTags.noTagsMatchSearch', {}) ?? 'No tags match your search';
+
+  /// en: 'No pinned tags yet'
+  String get noPinnedTagsYet => TranslationOverrides.string(_root.$meta, 'pinnedTags.noPinnedTagsYet', {}) ?? 'No pinned tags yet';
+
+  /// en: 'Add to search'
+  String get addToSearch => TranslationOverrides.string(_root.$meta, 'pinnedTags.addToSearch', {}) ?? 'Add to search';
+
+  /// en: 'Edit labels'
+  String get editLabels => TranslationOverrides.string(_root.$meta, 'pinnedTags.editLabels', {}) ?? 'Edit labels';
+
+  /// en: 'Labels'
+  String get labels => TranslationOverrides.string(_root.$meta, 'pinnedTags.labels', {}) ?? 'Labels';
+
+  /// en: 'Add pinned tag'
+  String get addPinnedTag => TranslationOverrides.string(_root.$meta, 'pinnedTags.addPinnedTag', {}) ?? 'Add pinned tag';
+
+  /// en: 'Tag query'
+  String get tagQuery => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagQuery', {}) ?? 'Tag query';
+
+  /// en: 'tag_name'
+  String get tagQueryHint => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagQueryHint', {}) ?? 'tag_name';
+
+  /// en: 'You can enter any search query, including tags with spaces'
+  String get rawQueryHelp =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.rawQueryHelp', {}) ?? 'You can enter any search query, including tags with spaces';
 }
 
 // Path: searchBar
@@ -6283,6 +6389,50 @@ extension on Translations {
           'tagView.failedToLoadPreviewPage' =>
             TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreviewPage', {}) ?? 'Failed to load preview page',
           'tagView.tryAgain' => TranslationOverrides.string(_root.$meta, 'tagView.tryAgain', {}) ?? 'Try again',
+          'pinnedTags.pinnedTags' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedTags', {}) ?? 'Pinned tags',
+          'pinnedTags.pinTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinTag', {}) ?? 'Pin tag',
+          'pinnedTags.unpinTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinTag', {}) ?? 'Unpin tag',
+          'pinnedTags.pin' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pin', {}) ?? 'Pin',
+          'pinnedTags.unpin' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpin', {}) ?? 'Unpin',
+          'pinnedTags.pinQuestion' =>
+            ({required String tag}) =>
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Pin "${tag}" to quick access?',
+          'pinnedTags.unpinQuestion' =>
+            ({required String tag}) =>
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Remove "${tag}" from pinned tags?',
+          'pinnedTags.onlyForBooru' =>
+            ({required String name}) => TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Only for ${name}',
+          'pinnedTags.labelsOptional' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? 'Labels (optional)',
+          'pinnedTags.typeAndEnterToAdd' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndEnterToAdd', {}) ?? 'Type and press Send to add',
+          'pinnedTags.selectExistingLabel' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.selectExistingLabel', {}) ?? 'Select existing label',
+          'pinnedTags.tagPinned' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagPinned', {}) ?? 'Tag pinned',
+          'pinnedTags.pinnedForBooru' =>
+            ({required String name, required String labels}) =>
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedForBooru', {'name': name, 'labels': labels}) ??
+                'Pinned for ${name}${labels}',
+          'pinnedTags.pinnedGloballyWithLabels' =>
+            ({required String labels}) =>
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedGloballyWithLabels', {'labels': labels}) ?? 'Pinned globally${labels}',
+          'pinnedTags.tagUnpinned' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagUnpinned', {}) ?? 'Tag unpinned',
+          'pinnedTags.all' => TranslationOverrides.string(_root.$meta, 'pinnedTags.all', {}) ?? 'All',
+          'pinnedTags.reorderPinnedTags' => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? 'Reorder pinned tags',
+          'pinnedTags.saving' => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? 'Saving...',
+          'pinnedTags.searchPinnedTags' => TranslationOverrides.string(_root.$meta, 'pinnedTags.searchPinnedTags', {}) ?? 'Search pinned tags...',
+          'pinnedTags.reorder' => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? 'Reorder',
+          'pinnedTags.addTagManually' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? 'Add tag manually',
+          'pinnedTags.noTagsMatchSearch' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.noTagsMatchSearch', {}) ?? 'No tags match your search',
+          'pinnedTags.noPinnedTagsYet' => TranslationOverrides.string(_root.$meta, 'pinnedTags.noPinnedTagsYet', {}) ?? 'No pinned tags yet',
+          'pinnedTags.addToSearch' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addToSearch', {}) ?? 'Add to search',
+          'pinnedTags.editLabels' => TranslationOverrides.string(_root.$meta, 'pinnedTags.editLabels', {}) ?? 'Edit labels',
+          'pinnedTags.labels' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labels', {}) ?? 'Labels',
+          'pinnedTags.addPinnedTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addPinnedTag', {}) ?? 'Add pinned tag',
+          'pinnedTags.tagQuery' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagQuery', {}) ?? 'Tag query',
+          'pinnedTags.tagQueryHint' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagQueryHint', {}) ?? 'tag_name',
+          'pinnedTags.rawQueryHelp' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.rawQueryHelp', {}) ?? 'You can enter any search query, including tags with spaces',
           'searchBar.searchForTags' => TranslationOverrides.string(_root.$meta, 'searchBar.searchForTags', {}) ?? 'Search for tags',
           'searchBar.failedToLoadSuggestions' =>
             ({required String msg}) =>
@@ -6361,6 +6511,9 @@ extension on Translations {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Pause',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Start',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Unfavourite',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Reload with scaling',
@@ -6403,9 +6556,6 @@ extension on Translations {
           'viewer.appBar.hydrus' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.hydrus', {}) ?? 'Hydrus',
           'viewer.appBar.selectTags' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.selectTags', {}) ?? 'Select tags',
           'viewer.notes.note' => TranslationOverrides.string(_root.$meta, 'viewer.notes.note', {}) ?? 'Note',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.notes.notes' => TranslationOverrides.string(_root.$meta, 'viewer.notes.notes', {}) ?? 'Notes',
           'viewer.notes.coordinates' =>
             ({required int posX, required int posY}) =>

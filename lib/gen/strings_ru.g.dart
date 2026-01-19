@@ -226,6 +226,8 @@ class TranslationsRu extends Translations with BaseTranslations<AppLocale, Trans
   @override
   late final _TranslationsTagViewRu tagView = _TranslationsTagViewRu._(_root);
   @override
+  late final _TranslationsPinnedTagsRu pinnedTags = _TranslationsPinnedTagsRu._(_root);
+  @override
   late final _TranslationsSearchBarRu searchBar = _TranslationsSearchBarRu._(_root);
   @override
   late final _TranslationsMobileHomeRu mobileHome = _TranslationsMobileHomeRu._(_root);
@@ -1217,6 +1219,82 @@ class _TranslationsTagViewRu extends TranslationsTagViewEn {
       TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreviewPage', {}) ?? 'Не удалось загрузить страницу предпросмотра';
   @override
   String get tryAgain => TranslationOverrides.string(_root.$meta, 'tagView.tryAgain', {}) ?? 'Попробовать снова';
+}
+
+// Path: pinnedTags
+class _TranslationsPinnedTagsRu extends TranslationsPinnedTagsEn {
+  _TranslationsPinnedTagsRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get pinnedTags => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedTags', {}) ?? 'Закрепленные теги';
+  @override
+  String get pinTag => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinTag', {}) ?? 'Закрепить тег';
+  @override
+  String get unpinTag => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinTag', {}) ?? 'Открепить тег';
+  @override
+  String get pin => TranslationOverrides.string(_root.$meta, 'pinnedTags.pin', {}) ?? 'Закрепить';
+  @override
+  String get unpin => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpin', {}) ?? 'Открепить';
+  @override
+  String pinQuestion({required String tag}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Закрепить "${tag}" для быстрого доступа?';
+  @override
+  String unpinQuestion({required String tag}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Убрать "${tag}" из закрепленных тегов?';
+  @override
+  String onlyForBooru({required String name}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Только для ${name}';
+  @override
+  String get labelsOptional => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? 'Метки (необязательно)';
+  @override
+  String get typeAndEnterToAdd =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndEnterToAdd', {}) ?? 'Введи и нажми отправить для добавления';
+  @override
+  String get selectExistingLabel => TranslationOverrides.string(_root.$meta, 'pinnedTags.selectExistingLabel', {}) ?? 'Выбери существующую метку';
+  @override
+  String get tagPinned => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagPinned', {}) ?? 'Тег закреплен';
+  @override
+  String pinnedForBooru({required String name, required String labels}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedForBooru', {'name': name, 'labels': labels}) ?? 'Закреплен для ${name}${labels}';
+  @override
+  String pinnedGloballyWithLabels({required String labels}) =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedGloballyWithLabels', {'labels': labels}) ?? 'Закреплен глобально${labels}';
+  @override
+  String get tagUnpinned => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagUnpinned', {}) ?? 'Тег откреплен';
+  @override
+  String get all => TranslationOverrides.string(_root.$meta, 'pinnedTags.all', {}) ?? 'Все';
+  @override
+  String get reorderPinnedTags =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? 'Поменять порядок закрепленных тегов';
+  @override
+  String get saving => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? 'Сохраняется...';
+  @override
+  String get searchPinnedTags => TranslationOverrides.string(_root.$meta, 'pinnedTags.searchPinnedTags', {}) ?? 'Искать закрепленные теги...';
+  @override
+  String get reorder => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? 'Поменять порядок';
+  @override
+  String get addTagManually => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? 'Добавить тег вручную';
+  @override
+  String get noTagsMatchSearch => TranslationOverrides.string(_root.$meta, 'pinnedTags.noTagsMatchSearch', {}) ?? 'Нет подходящих тегов';
+  @override
+  String get noPinnedTagsYet => TranslationOverrides.string(_root.$meta, 'pinnedTags.noPinnedTagsYet', {}) ?? 'Пока нет закрепленных тегов';
+  @override
+  String get addToSearch => TranslationOverrides.string(_root.$meta, 'pinnedTags.addToSearch', {}) ?? 'Добавить в поиск';
+  @override
+  String get editLabels => TranslationOverrides.string(_root.$meta, 'pinnedTags.editLabels', {}) ?? 'Редактировать метки';
+  @override
+  String get labels => TranslationOverrides.string(_root.$meta, 'pinnedTags.labels', {}) ?? 'Метки';
+  @override
+  String get addPinnedTag => TranslationOverrides.string(_root.$meta, 'pinnedTags.addPinnedTag', {}) ?? 'Добавить закрепленный тег';
+  @override
+  String get tagQuery => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagQuery', {}) ?? 'Строка тега';
+  @override
+  String get tagQueryHint => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagQueryHint', {}) ?? 'tag_name';
+  @override
+  String get rawQueryHelp => TranslationOverrides.string(_root.$meta, 'pinnedTags.rawQueryHelp', {}) ?? 'Можно ввести любую строку, включая пробелы';
 }
 
 // Path: searchBar
@@ -5429,6 +5507,51 @@ extension on TranslationsRu {
           'tagView.failedToLoadPreviewPage' =>
             TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreviewPage', {}) ?? 'Не удалось загрузить страницу предпросмотра',
           'tagView.tryAgain' => TranslationOverrides.string(_root.$meta, 'tagView.tryAgain', {}) ?? 'Попробовать снова',
+          'pinnedTags.pinnedTags' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedTags', {}) ?? 'Закрепленные теги',
+          'pinnedTags.pinTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinTag', {}) ?? 'Закрепить тег',
+          'pinnedTags.unpinTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinTag', {}) ?? 'Открепить тег',
+          'pinnedTags.pin' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pin', {}) ?? 'Закрепить',
+          'pinnedTags.unpin' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpin', {}) ?? 'Открепить',
+          'pinnedTags.pinQuestion' =>
+            ({required String tag}) =>
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Закрепить "${tag}" для быстрого доступа?',
+          'pinnedTags.unpinQuestion' =>
+            ({required String tag}) =>
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Убрать "${tag}" из закрепленных тегов?',
+          'pinnedTags.onlyForBooru' =>
+            ({required String name}) => TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Только для ${name}',
+          'pinnedTags.labelsOptional' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? 'Метки (необязательно)',
+          'pinnedTags.typeAndEnterToAdd' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndEnterToAdd', {}) ?? 'Введи и нажми отправить для добавления',
+          'pinnedTags.selectExistingLabel' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.selectExistingLabel', {}) ?? 'Выбери существующую метку',
+          'pinnedTags.tagPinned' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagPinned', {}) ?? 'Тег закреплен',
+          'pinnedTags.pinnedForBooru' =>
+            ({required String name, required String labels}) =>
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedForBooru', {'name': name, 'labels': labels}) ??
+                'Закреплен для ${name}${labels}',
+          'pinnedTags.pinnedGloballyWithLabels' =>
+            ({required String labels}) =>
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedGloballyWithLabels', {'labels': labels}) ?? 'Закреплен глобально${labels}',
+          'pinnedTags.tagUnpinned' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagUnpinned', {}) ?? 'Тег откреплен',
+          'pinnedTags.all' => TranslationOverrides.string(_root.$meta, 'pinnedTags.all', {}) ?? 'Все',
+          'pinnedTags.reorderPinnedTags' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? 'Поменять порядок закрепленных тегов',
+          'pinnedTags.saving' => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? 'Сохраняется...',
+          'pinnedTags.searchPinnedTags' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.searchPinnedTags', {}) ?? 'Искать закрепленные теги...',
+          'pinnedTags.reorder' => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? 'Поменять порядок',
+          'pinnedTags.addTagManually' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? 'Добавить тег вручную',
+          'pinnedTags.noTagsMatchSearch' => TranslationOverrides.string(_root.$meta, 'pinnedTags.noTagsMatchSearch', {}) ?? 'Нет подходящих тегов',
+          'pinnedTags.noPinnedTagsYet' => TranslationOverrides.string(_root.$meta, 'pinnedTags.noPinnedTagsYet', {}) ?? 'Пока нет закрепленных тегов',
+          'pinnedTags.addToSearch' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addToSearch', {}) ?? 'Добавить в поиск',
+          'pinnedTags.editLabels' => TranslationOverrides.string(_root.$meta, 'pinnedTags.editLabels', {}) ?? 'Редактировать метки',
+          'pinnedTags.labels' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labels', {}) ?? 'Метки',
+          'pinnedTags.addPinnedTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addPinnedTag', {}) ?? 'Добавить закрепленный тег',
+          'pinnedTags.tagQuery' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagQuery', {}) ?? 'Строка тега',
+          'pinnedTags.tagQueryHint' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagQueryHint', {}) ?? 'tag_name',
+          'pinnedTags.rawQueryHelp' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.rawQueryHelp', {}) ?? 'Можно ввести любую строку, включая пробелы',
           'searchBar.searchForTags' => TranslationOverrides.string(_root.$meta, 'searchBar.searchForTags', {}) ?? 'Искать теги',
           'searchBar.failedToLoadSuggestions' =>
             ({required String msg}) =>
@@ -5509,6 +5632,9 @@ extension on TranslationsRu {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Пауза',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Старт',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Удалить из избранного',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Перезагрузить с масштабированием',
@@ -5554,9 +5680,6 @@ extension on TranslationsRu {
           'viewer.appBar.hydrus' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.hydrus', {}) ?? 'Hydrus',
           'viewer.appBar.selectTags' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.selectTags', {}) ?? 'Выбрать теги',
           'viewer.notes.note' => TranslationOverrides.string(_root.$meta, 'viewer.notes.note', {}) ?? 'Заметка',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.notes.notes' => TranslationOverrides.string(_root.$meta, 'viewer.notes.notes', {}) ?? 'Заметки',
           'viewer.notes.coordinates' =>
             ({required int posX, required int posY}) =>

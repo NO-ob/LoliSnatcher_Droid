@@ -9,6 +9,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
+import 'package:lolisnatcher/src/data/pinned_tag.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -85,6 +86,17 @@ class DBHandler {
       'CREATE TABLE IF NOT EXISTS TabRestore ( '
       'id INTEGER PRIMARY KEY, '
       'restore TEXT '
+      ')',
+    );
+    await db?.execute(
+      'CREATE TABLE IF NOT EXISTS PinnedTag ( '
+      'id INTEGER PRIMARY KEY, '
+      'tagName TEXT NOT NULL, '
+      'booruType TEXT, '
+      'booruName TEXT, '
+      'pinnedAt INTEGER NOT NULL, '
+      'sortOrder INTEGER DEFAULT 0, '
+      'label TEXT '
       ')',
     );
     try {
@@ -788,6 +800,146 @@ class DBHandler {
     return;
   }
 
+  ///////
+  /// Pinned Tags methods
+
+  /// Add a pinned tag (global or booru-specific)
+  Future<int?> addPinnedTag(
+    String tagName, {
+    String? booruType,
+    String? booruName,
+    List<String> labels = const [],
+  }) async {
+    // Check if already pinned with same scope
+    final existing = await db?.rawQuery(
+      'SELECT id FROM PinnedTag WHERE tagName = ? AND (booruName IS ? OR (booruName = ? AND booruType = ?))',
+      [tagName, booruName, booruName, booruType],
+    );
+    if (existing != null && existing.isNotEmpty) {
+      return null; // Already pinned
+    }
+
+    final pinnedAt = DateTime.now().millisecondsSinceEpoch;
+    final labelsString = labels.isNotEmpty ? labels.join(',') : null;
+    final result = await db?.rawInsert(
+      'INSERT INTO PinnedTag(tagName, booruType, booruName, pinnedAt, sortOrder, label) VALUES(?, ?, ?, ?, ?, ?)',
+      [tagName, booruType, booruName, pinnedAt, 0, labelsString],
+    );
+    return result;
+  }
+
+  /// Remove a pinned tag by id
+  Future<void> removePinnedTag(int id) async {
+    await db?.rawDelete('DELETE FROM PinnedTag WHERE id = ?', [id]);
+  }
+
+  /// Remove a pinned tag by tagName and scope
+  Future<void> removePinnedTagByName(String tagName, {String? booruType, String? booruName}) async {
+    if (booruName == null) {
+      await db?.rawDelete('DELETE FROM PinnedTag WHERE tagName = ? AND booruName IS NULL', [tagName]);
+    } else {
+      await db?.rawDelete(
+        'DELETE FROM PinnedTag WHERE tagName = ? AND booruName = ? AND booruType = ?',
+        [tagName, booruName, booruType],
+      );
+    }
+  }
+
+  /// Get all pinned tags (both global and booru-specific for the given booru)
+  Future<List<PinnedTag>> getPinnedTags({String? booruType, String? booruName}) async {
+    final List<Map<String, dynamic>>? result = await db?.rawQuery(
+      'SELECT * FROM PinnedTag WHERE booruName IS NULL OR (booruName = ? AND booruType = ?) ORDER BY sortOrder ASC, pinnedAt DESC',
+      [booruName, booruType],
+    );
+
+    if (result == null || result.isEmpty) {
+      return [];
+    }
+
+    return result.map(PinnedTag.fromMap).toList();
+  }
+
+  /// Get all pinned tags (regardless of booru)
+  Future<List<PinnedTag>> getAllPinnedTags() async {
+    final List<Map<String, dynamic>>? result = await db?.rawQuery(
+      'SELECT * FROM PinnedTag ORDER BY sortOrder ASC, pinnedAt DESC',
+    );
+
+    if (result == null || result.isEmpty) {
+      return [];
+    }
+
+    return result.map(PinnedTag.fromMap).toList();
+  }
+
+  /// Check if a tag is pinned (either globally or for specific booru)
+  Future<PinnedTag?> getPinnedTag(String tagName, {String? booruType, String? booruName}) async {
+    // First check for booru-specific pin
+    if (booruName != null) {
+      final booruSpecific = await db?.rawQuery(
+        'SELECT * FROM PinnedTag WHERE tagName = ? AND booruName = ? AND booruType = ?',
+        [tagName, booruName, booruType],
+      );
+      if (booruSpecific != null && booruSpecific.isNotEmpty) {
+        return PinnedTag.fromMap(booruSpecific.first);
+      }
+    }
+
+    // Then check for global pin
+    final global = await db?.rawQuery(
+      'SELECT * FROM PinnedTag WHERE tagName = ? AND booruName IS NULL',
+      [tagName],
+    );
+    if (global != null && global.isNotEmpty) {
+      return PinnedTag.fromMap(global.first);
+    }
+
+    return null;
+  }
+
+  /// Update sort order for pinned tags
+  Future<void> updatePinnedTagOrder(int id, int sortOrder) async {
+    await db?.rawUpdate('UPDATE PinnedTag SET sortOrder = ? WHERE id = ?', [sortOrder, id]);
+  }
+
+  /// Batch update sort order for multiple pinned tags
+  Future<void> updatePinnedTagsOrder(List<PinnedTag> tags) async {
+    final batch = db?.batch();
+    for (int i = 0; i < tags.length; i++) {
+      batch?.rawUpdate('UPDATE PinnedTag SET sortOrder = ? WHERE id = ?', [i, tags[i].id]);
+    }
+    await batch?.commit(noResult: true);
+  }
+
+  /// Update labels for a pinned tag (stored as comma-separated string)
+  Future<void> updatePinnedTagLabels(int id, List<String> labels) async {
+    final labelsString = labels.join(',');
+    await db?.rawUpdate('UPDATE PinnedTag SET label = ? WHERE id = ?', [labelsString, id]);
+  }
+
+  /// Get all unique labels from pinned tags (parses comma-separated labels)
+  Future<List<String>> getPinnedTagLabels({String? booruType, String? booruName}) async {
+    final List<Map<String, dynamic>>? result = await db?.rawQuery(
+      "SELECT DISTINCT label FROM PinnedTag WHERE label IS NOT NULL AND label != '' AND (booruName IS NULL OR (booruName = ? AND booruType = ?))",
+      [booruName, booruType],
+    );
+
+    if (result == null || result.isEmpty) {
+      return [];
+    }
+
+    // Parse comma-separated labels and collect unique ones
+    final Set<String> uniqueLabels = {};
+    for (final row in result) {
+      final labelString = row['label'] as String;
+      final labels = labelString.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty);
+      uniqueLabels.addAll(labels);
+    }
+
+    final labelsList = uniqueLabels.toList()..sort();
+    return labelsList;
+  }
+
   /// Return a list of boolean for isSnatched and isFavourite
   Future<List<bool>> getTrackedValues(BooruItem item) async {
     final List<bool> values = [false, false];
@@ -913,7 +1065,7 @@ class DBHandler {
     ]) {
       for (final type in ['fileURL', 'sampleURL', 'thumbnailURL']) {
         conditions.add(
-          '($type LIKE "%${server.keys.first}%.gelbooru.com%" AND $type NOT LIKE "%${server.values.first}.gelbooru.com%")',
+          "($type LIKE '%${server.keys.first}%.gelbooru.com%' AND $type NOT LIKE '%${server.values.first}.gelbooru.com%')",
         );
       }
     }
@@ -963,7 +1115,7 @@ class DBHandler {
 
     final List<Map<String, dynamic>> items =
         await db?.rawQuery(
-          'SELECT id, postURL FROM BooruItem WHERE postURL LIKE "%api.rule34.xxx%";',
+          "SELECT id, postURL FROM BooruItem WHERE postURL LIKE '%api.rule34.xxx%';",
         ) ??
         [];
 
