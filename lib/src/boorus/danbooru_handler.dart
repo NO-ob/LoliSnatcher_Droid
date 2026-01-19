@@ -4,6 +4,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -126,7 +127,7 @@ class DanbooruHandler extends BooruHandler {
           fileURL: isZip ? current['large_file_url'].toString() : current['file_url'].toString(),
           sampleURL: current['large_file_url'].toString(),
           thumbnailURL: current['preview_file_url'].toString(),
-          tagsList: current['tag_string'].toString().split(' '),
+          tagsList: current['tag_string'].toString().split(' ').map(Tag.new).toList(),
           postURL: makePostURL(current['id'].toString()),
           fileSize: int.tryParse(current['file_size'].toString()),
           fileHeight: double.tryParse(current['image_height'].toString()),

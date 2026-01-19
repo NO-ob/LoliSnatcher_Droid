@@ -110,7 +110,7 @@ class GelbooruHandler extends BooruHandler {
         sampleURL: sampleURL,
         thumbnailURL: previewURL,
         // parseFragment to parse html elements (i.e. &amp; => &)
-        tagsList: parseFragment(current['tags']).text?.split(' ') ?? [],
+        tagsList: (parseFragment(current['tags']).text?.split(' ') ?? []).map(Tag.new).toList(),
         postURL: makePostURL(current['id']!.toString()),
         fileWidth: double.tryParse(current['width']?.toString() ?? ''),
         fileHeight: double.tryParse(current['height']?.toString() ?? ''),
@@ -449,15 +449,22 @@ class GelbooruHandler extends BooruHandler {
 
         final sidebar = html.getElementById('tag-list');
         final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright'));
-        addTagsWithType(copyrightTags, TagType.copyright);
+        addTagsWithType(copyrightTags.map((t) => t.tag).toList(), TagType.copyright);
         final characterTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-character'));
-        addTagsWithType(characterTags, TagType.character);
+        addTagsWithType(characterTags.map((t) => t.tag).toList(), TagType.character);
         final artistTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-artist'));
-        addTagsWithType(artistTags, TagType.artist);
+        addTagsWithType(artistTags.map((t) => t.tag).toList(), TagType.artist);
         final generalTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-general'));
-        addTagsWithType(generalTags, TagType.none);
+        addTagsWithType(generalTags.map((t) => t.tag).toList(), TagType.none);
         final metaTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-metadata'));
-        addTagsWithType(metaTags, TagType.meta);
+        addTagsWithType(metaTags.map((t) => t.tag).toList(), TagType.meta);
+
+        for (final t in [...copyrightTags, ...characterTags, ...artistTags, ...generalTags, ...metaTags]) {
+          final tagIndex = item.tagsList.indexWhere((tt) => tt.fullString == t.tag);
+          if (tagIndex != -1) {
+            item.tagsList[tagIndex].count = t.count;
+          }
+        }
         item.isUpdated = true;
         return (item: item, failed: false, error: null);
       }
@@ -474,17 +481,26 @@ class GelbooruHandler extends BooruHandler {
   }
 }
 
-List<String> _tagsFromHtml(List<Element>? elements) {
+List<({String tag, int count})> _tagsFromHtml(List<Element>? elements) {
   if (elements == null || elements.isEmpty) {
     return [];
   }
 
-  final tags = <String>[];
+  final List<({String tag, int count})> tagsWithCount = [];
   for (final element in elements) {
-    final tag = element.getElementsByTagName('a').firstWhereOrNull((e) => e.text.isNotEmpty && e.text != '?');
+    final String? tag = element
+        .getElementsByTagName('a')
+        .firstWhereOrNull((e) => e.text.isNotEmpty && e.text != '?')
+        ?.text;
+    final int? count = int.tryParse(
+      element.getElementsByTagName('span').lastWhereOrNull((e) => e.text.isNotEmpty)?.text ?? '',
+    );
     if (tag != null) {
-      tags.add(tag.text.replaceAll(' ', '_'));
+      tagsWithCount.add((
+        tag: tag.replaceAll(' ', '_'),
+        count: count ?? 0,
+      ));
     }
   }
-  return tags;
+  return tagsWithCount;
 }

@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -67,7 +68,7 @@ class MoebooruHandler extends BooruHandler {
         fileURL: fileURL,
         sampleURL: sampleURL,
         thumbnailURL: previewURL,
-        tagsList: current.getAttribute('tags')!.split(' '),
+        tagsList: current.getAttribute('tags')!.split(' ').map(Tag.new).toList(),
         postURL: makePostURL(current.getAttribute('id')!),
         fileWidth: double.tryParse(current.getAttribute('width') ?? ''),
         fileHeight: double.tryParse(current.getAttribute('height') ?? ''),

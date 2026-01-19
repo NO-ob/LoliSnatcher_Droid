@@ -1,4 +1,5 @@
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
@@ -55,7 +56,7 @@ class PhilomenaHandler extends BooruHandler {
         fileSize: current['size'],
         sampleURL: sampleURL,
         thumbnailURL: thumbURL,
-        tagsList: currentTags,
+        tagsList: currentTags.map(Tag.new).toList(),
         postURL: makePostURL(current['id'].toString()),
         serverId: current['id'].toString(),
         score: current['score'].toString(),

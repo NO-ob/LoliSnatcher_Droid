@@ -1319,11 +1319,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
 Future<List<String>> showSelectTagsDialog(
   BuildContext context,
-  List<String> tags,
+  List<Tag> tags,
 ) async {
   if (tags.isEmpty) return [];
 
-  tags = tags.where((t) => t.trim().isNotEmpty).toList();
+  tags = tags.where((t) => t.fullString.trim().isNotEmpty).toList();
 
   final tagHandler = TagHandler.instance;
 
@@ -1331,7 +1331,7 @@ Future<List<String>> showSelectTagsDialog(
     for (final type in TagType.values) type: [],
   };
   for (final t in tags) {
-    final tag = tagHandler.getTag(t);
+    final tag = tagHandler.getTag(t.fullString);
     tagMap[tag.tagType]?.add(tag);
   }
   final List<Tag> items = tagMap.values.expand((i) => i).toList();
@@ -1361,8 +1361,8 @@ Future<List<String>> showSelectTagsDialog(
           return Text(
             item.fullString,
             style: TextStyle(
-              color: color == Colors.transparent ? null : color,
-              backgroundColor: color == Colors.transparent ? null : color.withValues(alpha: 0.1),
+              color: color,
+              backgroundColor: color?.withValues(alpha: 0.1),
             ),
           );
         },

@@ -444,7 +444,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
                           return Container(
                             height: kMinInteractiveDimension + (tag.hasDescription ? 8 : 0),
                             alignment: Alignment.centerLeft,
-                            color: tagColor == Colors.transparent ? null : tagColor.withValues(alpha: 0.1),
+                            color: tagColor?.withValues(alpha: 0.1),
                             child: Material(
                               color: Colors.transparent,
                               child: InkWell(

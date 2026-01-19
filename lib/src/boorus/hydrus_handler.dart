@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -152,7 +153,7 @@ class HydrusHandler extends BooruHandler {
                     "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
                 thumbnailURL:
                     "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
-                tagsList: tagList,
+                tagsList: tagList.map(Tag.new).toList(),
                 postURL:
                     "${booru.baseURL}/get_files/file_metadata?file_ids=[${parsedResponse['metadata'][i]['file_id']}]&Hydrus-Client-API-Access-Key=${booru.apiKey}",
                 fileExt: parsedResponse['metadata'][i]['ext'].toString().substring(1),
@@ -194,7 +195,7 @@ class HydrusHandler extends BooruHandler {
       final List<String> tags = [];
       String tagString = '';
       for (final element in item.tagsList) {
-        tags.add(element.replaceAll('_', ' '));
+        tags.add(element.fullString.replaceAll('_', ' '));
         tagString += '"$element",';
       }
       tagString = tagString.substring(0, tagString.length - 1);
@@ -206,7 +207,7 @@ class HydrusHandler extends BooruHandler {
         },
         data: {
           'url': usePostUrl ? item.postURL : item.fileURL,
-          'filterable_tags': item.tagsList,
+          'filterable_tags': item.tagsList.map((t) => t.fullString).toList(),
         },
       );
     } catch (e, s) {

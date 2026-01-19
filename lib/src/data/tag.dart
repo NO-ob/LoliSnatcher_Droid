@@ -7,6 +7,7 @@ class Tag {
   Tag(
     this.fullString, {
     this.tagType = TagType.none,
+    this.count = 0,
     this.updatedAt = 0,
   }) {
     if (updatedAt == 0) {
@@ -14,31 +15,49 @@ class Tag {
     }
   }
 
-  Tag.fromJson(Map<String, dynamic> json) {
-    fullString = json['fullString']?.toString() ?? json['name']?.toString() ?? 'unknown';
-    // if no updatedAt is stored, set it to the current time minus 3 days (will make it stale)
-    updatedAt = json['updatedAt'] ?? (DateTime.now().millisecondsSinceEpoch - Constants.tagStaleTime);
-    tagType = TagType.values.byName(json['tagType']?.toString() ?? 'none');
+  static Tag fromJson(Map<String, dynamic> json) {
+    return Tag(
+      json['fullString']?.toString() ?? json['name']?.toString() ?? 'unknown',
+      tagType: TagType.values.byName(json['tagType']?.toString() ?? 'none'),
+      count: json['count'] ?? 0,
+      updatedAt: json['updatedAt'] ?? (DateTime.now().millisecondsSinceEpoch - Constants.tagStaleTime),
+    );
   }
 
-  String fullString = '';
-  TagType tagType = TagType.none;
-  int updatedAt = 0;
+  String fullString;
+  TagType tagType;
+  int count;
+  int updatedAt;
 
   Map<String, dynamic> toJson() {
     return {
       'fullString': fullString,
       'updatedAt': updatedAt,
       'tagType': tagType.name,
+      if (count > 0) 'count': count,
     };
   }
 
   @override
   String toString() {
-    return 'fullString: $fullString, updatedAt: $updatedAt, tagType: ${tagType.name}';
+    return toJson().toString();
   }
 
-  Color getColour() {
+  Color? getColour() {
     return tagType.getColour();
+  }
+
+  Tag copyWith({
+    String? fullString,
+    TagType? tagType,
+    int? count,
+    int? updatedAt,
+  }) {
+    return Tag(
+      fullString ?? this.fullString,
+      tagType: tagType ?? this.tagType,
+      count: count ?? this.count,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
   }
 }

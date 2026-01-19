@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -61,8 +62,8 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
       return;
     }
 
-    settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList);
-    settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList);
+    settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList.map(Tag.new).toList());
+    settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList.map(Tag.new).toList());
     settingsHandler.filterHated = filterHated;
     settingsHandler.filterFavourites = filterFavourites;
     settingsHandler.filterSnatched = filterSnatched;
@@ -129,7 +130,10 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     FlashElements.showSnackbar(
       context: context,
       title: Text(context.loc.settings.tagsFilters.duplicateTag, style: const TextStyle(fontSize: 20)),
-      content: Text(context.loc.settings.tagsFilters.alreadyInList(tag: tag, type: type), style: const TextStyle(fontSize: 16)),
+      content: Text(
+        context.loc.settings.tagsFilters.alreadyInList(tag: tag, type: type),
+        style: const TextStyle(fontSize: 16),
+      ),
       leadingIcon: Icons.warning_amber,
       leadingIconColor: Colors.yellow,
       sideColor: Colors.yellow,

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -10,6 +11,9 @@ import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
+
+// TODO check what's wrong with booru.xxx
+// TODO handle auth logic?
 
 class ShimmieHandler extends BooruHandler {
   ShimmieHandler(super.booru, super.limit);
@@ -72,7 +76,7 @@ class ShimmieHandler extends BooruHandler {
         fileURL: fileUrl,
         sampleURL: fileUrl,
         thumbnailURL: thumbnailUrl,
-        tagsList: current.getAttribute('tags')!.split(' '),
+        tagsList: current.getAttribute('tags')!.split(' ').map(Tag.new).toList(),
         postURL: makePostURL(current.getAttribute('id')!),
         fileWidth: double.tryParse(current.getAttribute('width') ?? ''),
         fileHeight: double.tryParse(current.getAttribute('height') ?? ''),
@@ -231,7 +235,7 @@ class ShimmieHtmlHandler extends BooruHandler {
         previewHeight: thumbHeight,
         fileWidth: fileWidth,
         fileHeight: fileHeight,
-        tagsList: tags,
+        tagsList: tags.map(Tag.new).toList(),
         md5String: fileURL.split('/').last.split('?').first,
         postURL: makePostURL(id),
         serverId: id,

@@ -9,6 +9,7 @@ import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
@@ -100,7 +101,7 @@ class IdolSankakuHandler extends SankakuHandler {
         fileURL: protocol + current['file_url'],
         sampleURL: protocol + current['sample_url'],
         thumbnailURL: protocol + current['preview_url'],
-        tagsList: tags,
+        tagsList: tags.map(Tag.new).toList(),
         postURL: makePostURL(current['id'].toString()),
         fileSize: current['file_size'],
         fileWidth: current['width'].toDouble(),

@@ -1,4 +1,5 @@
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
@@ -69,7 +70,7 @@ class BooruOnRailsHandler extends BooruHandler {
         fileExt: responseItem['format']?.toString(),
         sampleURL: sampleURL,
         thumbnailURL: thumbURL,
-        tagsList: currentTags,
+        tagsList: currentTags.map(Tag.new).toList(),
         postURL: makePostURL(id),
         serverId: id,
         score: responseItem['score']?.toString(),

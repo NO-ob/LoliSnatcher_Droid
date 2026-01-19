@@ -38,7 +38,7 @@ abstract class BooruHandler {
   Booru booru;
 
   String errorString = '';
-  List failedItems = [];
+  List<({BooruItem item, Object e, StackTrace? s})> failedItems = [];
 
   Map<String, TagType> get tagTypeMap => {};
 
@@ -286,7 +286,7 @@ abstract class BooruHandler {
             LogTypes.booruHandlerRawFetched,
             s: s,
           );
-          failedItems.add([post, e]);
+          failedItems.add((item: post, e: e, s: s));
         }
       }
     }
@@ -769,15 +769,15 @@ abstract class BooruHandler {
     final List<String> unTyped = [];
     for (int x = 0; x < items.length; x++) {
       for (int i = 0; i < items[x].tagsList.length; i++) {
-        final String tag = items[x].tagsList[i];
+        final Tag tag = items[x].tagsList[i];
 
         final bool alreadyStoredAndNotStale = TagHandler.instance.hasTagAndNotStale(
-          tag,
+          tag.fullString,
         ); //TagHandler.instance.hasTag(tag);
         if (!alreadyStoredAndNotStale) {
-          final bool isPresent = unTyped.contains(tag);
+          final bool isPresent = unTyped.contains(tag.fullString);
           if (!isPresent) {
-            unTyped.add(tag);
+            unTyped.add(tag.fullString);
           }
         }
       }

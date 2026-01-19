@@ -1,4 +1,5 @@
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 class NyanPalsHandler extends BooruHandler {
@@ -29,7 +30,7 @@ class NyanPalsHandler extends BooruHandler {
       fileURL: fileURL,
       sampleURL: fileURL,
       thumbnailURL: '',
-      tagsList: currentTags,
+      tagsList: currentTags.map(Tag.new).toList(),
       postURL: fileURL,
       md5String: md5,
     );

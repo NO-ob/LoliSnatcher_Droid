@@ -40,7 +40,7 @@ enum TagType {
     return name;
   }
 
-  Color getColour() {
+  Color? getColour() {
     switch (this) {
       case artist:
         return Colors.red;
@@ -53,7 +53,7 @@ enum TagType {
       case species:
         return Colors.brown;
       default:
-        return Colors.transparent;
+        return null;
     }
   }
 

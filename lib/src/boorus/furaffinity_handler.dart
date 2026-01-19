@@ -3,6 +3,7 @@ import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -76,7 +77,7 @@ class FurAffinityHandler extends BooruHandler {
         fileURL: fileURL,
         sampleURL: sampleURL == 'https:' ? fileURL : sampleURL,
         thumbnailURL: thumbURL,
-        tagsList: tags,
+        tagsList: tags.map(Tag.new).toList(),
         postURL: makePostURL(id),
         rating: postPage.querySelector('div.rating')?.firstChild?.text,
         description: postPage.querySelector('div.submission-description')?.innerHtml.replaceAll(RegExp('<.*?>'), ''),

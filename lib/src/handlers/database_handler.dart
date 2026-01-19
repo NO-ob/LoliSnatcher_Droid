@@ -164,7 +164,7 @@ class DBHandler {
         ],
       );
       itemID = result?.toString();
-      await updateTags(item.tagsList, itemID);
+      await updateTags(item.tagsList.map((t) => t.fullString).toList(), itemID);
       resultStr = 'Inserted';
     } else if (mode == BooruUpdateMode.local) {
       await db?.rawUpdate(
@@ -213,7 +213,7 @@ class DBHandler {
           ],
         );
         itemID = result?.toString();
-        await updateTags(item.tagsList, itemID);
+        await updateTags(item.tagsList.map((t) => t.fullString).toList(), itemID);
         saved++;
       } else if (mode == BooruUpdateMode.local) {
         await db?.rawUpdate(
@@ -584,7 +584,7 @@ class DBHandler {
   }
 
   /// Adds tags for a BooruItem to the database
-  Future<void> updateTags(List tags, String? itemID) async {
+  Future<void> updateTags(List<String> tags, String? itemID) async {
     if (itemID == null) {
       return;
     }

@@ -1,6 +1,9 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 extension BuildContextExtras on BuildContext {
   MediaQueryData get mediaQuery => MediaQuery.of(this);
@@ -104,11 +107,10 @@ extension BoolExtras on bool {
 }
 
 String formatNumber(num number) {
-  final String formattedPart = number.toString().replaceAllMapped(
-    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-    (Match match) => '${match[1]} ',
+  final formatter = NumberFormat.decimalPattern(
+    SettingsHandler.instance.locale.value?.languageCode ?? PlatformDispatcher.instance.locale.languageCode,
   );
-  return formattedPart.trim();
+  return formatter.format(number);
 }
 
 extension ListExts<T> on List<T> {

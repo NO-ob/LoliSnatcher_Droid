@@ -7,6 +7,7 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -77,11 +78,16 @@ class SankakuHandler extends BooruHandler {
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final dynamic current = responseItem;
 
-    final List<String> tags = [];
+    final List<Tag> tags = [];
     final Map<TagType, List<String>> tagMap = {};
 
     for (int x = 0; x < current['tags'].length; x++) {
-      tags.add(current['tags'][x]['tagName'].toString());
+      tags.add(
+        Tag(
+          current['tags'][x]['tagName'].toString(),
+          count: current['tags'][x]['post_count'].toInt(),
+        ),
+      );
       final String typeStr = current['tags'][x]['type'].toString();
       final TagType type = tagTypeMap[typeStr] ?? TagType.none;
       if (tagMap.containsKey(type)) {
@@ -90,7 +96,7 @@ class SankakuHandler extends BooruHandler {
         tagMap[type] = [current['tags'][x]['tagName'].toString()];
       }
     }
-    tags.sort((a, b) => a.compareTo(b));
+    tags.sort((a, b) => a.fullString.compareTo(b.fullString));
 
     if (current['file_url'] != null) {
       for (int i = 0; i < tagMap.entries.length; i++) {

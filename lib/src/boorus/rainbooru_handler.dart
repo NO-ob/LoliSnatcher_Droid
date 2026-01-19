@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -53,7 +54,7 @@ class RainbooruHandler extends BooruHandler {
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: thumbURL,
-          tagsList: currentTags,
+          tagsList: currentTags.map(Tag.new).toList(),
           postURL: url,
         );
 

@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -64,7 +65,7 @@ class BooruItem extends Equatable {
   String sampleURL;
   String thumbnailURL;
   String postURL;
-  List<String> tagsList;
+  List<Tag> tagsList;
   late Rx<MediaType> mediaType;
   Rxn<MediaType> possibleMediaType = Rxn<MediaType>(null);
   RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
@@ -100,19 +101,19 @@ class BooruItem extends Equatable {
   }
 
   bool get isHated {
-    return SettingsHandler.instance.containsHated(tagsList);
+    return SettingsHandler.instance.containsHated(tagsList.map((t) => t.fullString).toList());
   }
 
   bool get isLoved {
-    return SettingsHandler.instance.containsLoved(tagsList);
+    return SettingsHandler.instance.containsLoved(tagsList.map((t) => t.fullString).toList());
   }
 
   bool get isSound {
-    return SettingsHandler.instance.containsSound(tagsList);
+    return SettingsHandler.instance.containsSound(tagsList.map((t) => t.fullString).toList());
   }
 
   bool get isAI {
-    return SettingsHandler.instance.containsAI(tagsList);
+    return SettingsHandler.instance.containsAI(tagsList.map((t) => t.fullString).toList());
   }
 
   Map<String, dynamic> toJson() {
@@ -197,7 +198,7 @@ class BooruItem extends Equatable {
       fileURL: json['fileURL'].toString(),
       sampleURL: json['sampleURL'].toString(),
       thumbnailURL: json['thumbnailURL'].toString(),
-      tagsList: tags,
+      tagsList: tags.map(Tag.new).toList(),
       postURL: json['postURL'].toString(),
       // TODO stringify other options here
     );
@@ -213,7 +214,7 @@ class BooruItem extends Equatable {
       thumbnailURL: row['thumbnailURL'].toString(),
       // use custom separator to avoid conflicts with tags containing commas
       fileExt: row['fileURL'].toString().contains('Hydrus-Client-API') ? 'extra' : null,
-      tagsList: tags,
+      tagsList: tags.map(Tag.new).toList(),
       postURL: row['postURL'].toString(),
     );
     item.isFavourite.value = Tools.intToBool(row['isFavourite']);
@@ -229,7 +230,8 @@ enum MediaType {
   notSupportedAnimation,
   unknown,
   needToGuess,
-  needToLoadItem;
+  needToLoadItem
+  ;
 
   bool get isImage {
     return this == MediaType.image;

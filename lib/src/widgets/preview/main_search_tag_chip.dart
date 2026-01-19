@@ -82,9 +82,9 @@ class MainSearchTagChip extends StatelessWidget {
           }
 
           // get color before removing underscores
-          Color tagColor = tagHandler.getTag(formattedTag).getColour();
+          Color? tagColor = tagHandler.getTag(formattedTag).getColour();
           if (isMetaTag) tagColor = Colors.pink;
-          if (tagColor == Colors.transparent) tagColor = Colors.blue;
+          tagColor ??= Colors.blue;
 
           formattedTag = formattedTag.replaceAll('_', ' ').trim();
 

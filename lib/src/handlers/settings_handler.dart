@@ -11,6 +11,7 @@ import 'package:alice_lightweight/helper/alice_save_helper.dart';
 import 'package:fvp/fvp.dart' as fvp;
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/gen/strings.g.dart';
@@ -1645,8 +1646,8 @@ class SettingsHandler {
 
       'buttonOrder': validateValue('buttonOrder', null, toJSON: true),
       'disabledButtons': validateValue('disabledButtons', null, toJSON: true),
-      'hatedTags': cleanTagsList(hatedTags),
-      'lovedTags': cleanTagsList(lovedTags),
+      'hatedTags': cleanTagsList(hatedTags.map(Tag.new).toList()),
+      'lovedTags': cleanTagsList(lovedTags.map(Tag.new).toList()),
 
       'prefBooru': validateValue('prefBooru', null, toJSON: true),
       'appMode': validateValue('appMode', null, toJSON: true),
@@ -2058,7 +2059,7 @@ class SettingsHandler {
     'stable-diffusion',
   ];
 
-  TagsListData parseTagsList(List<String> itemTags, {bool isCapped = true}) {
+  TagsListData parseTagsList(List<Tag> itemTags, {bool isCapped = true}) {
     final List<String> cleanItemTags = cleanTagsList(itemTags);
     List<String> hatedInItem = hatedTags.where(cleanItemTags.contains).toList();
     List<String> lovedInItem = lovedTags.where(cleanItemTags.contains).toList();
@@ -2129,9 +2130,12 @@ class SettingsHandler {
     saveSettings(restate: false);
   }
 
-  List<String> cleanTagsList(List<String> tags) {
+  List<String> cleanTagsList(List<Tag> tags) {
     List<String> cleanTags = [];
-    cleanTags = tags.where((tag) => tag.isNotEmpty).map((tag) => tag.trim().toLowerCase()).toList();
+    cleanTags = tags
+        .where((tag) => tag.fullString.isNotEmpty)
+        .map((tag) => tag.fullString.trim().toLowerCase())
+        .toList();
     cleanTags.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return cleanTags;
   }

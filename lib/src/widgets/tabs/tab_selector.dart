@@ -1119,20 +1119,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            RichText(
-              text: TextSpan(
-                style: Theme.of(context).appBarTheme.titleTextStyle,
-                children: [
-                  TextSpan(text: context.loc.tabs.tabsManager),
-                  if (isFilterActive) ...[
-                    const TextSpan(text: ' | '),
-                    const WidgetSpan(
-                      alignment: PlaceholderAlignment.middle,
-                      child: Icon(Icons.filter_alt),
-                    ),
-                  ],
-                ],
-              ),
+            Text(
+              context.loc.tabs.tabsManager,
+              style: Theme.of(context).appBarTheme.titleTextStyle,
             ),
             RichText(
               text: TextSpan(

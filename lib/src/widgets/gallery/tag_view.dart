@@ -13,6 +13,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fpdart/fpdart.dart' show FpdartOnIterable;
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/widgets/common/draggable_overflow_text.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:uuid/uuid.dart';
@@ -86,8 +87,8 @@ class _TagViewState extends State<TagView> {
   BooruHandler? possibleBooruHandler;
   bool hasLoadItemSupport = false;
   bool canLoadItemOnStart = false;
-  List<String> tags = [];
-  List<String> filteredTags = [];
+  List<Tag> tags = [];
+  List<Tag> filteredTags = [];
   final Map<String, HasTabWithTagResult> tabMatchesMap = {};
   bool? sortTags;
   final TextEditingController searchController = TextEditingController();
@@ -237,14 +238,14 @@ class _TagViewState extends State<TagView> {
     tagsData = settingsHandler.parseTagsList(tags, isCapped: false);
   }
 
-  List<String> filterTags(List<String> tagsToFilter) {
-    final List<String> tags = [];
+  List<Tag> filterTags(List<Tag> tagsToFilter) {
+    final List<Tag> tags = [];
     if (searchController.text.isEmpty) {
       return tagsToFilter;
     }
 
     for (int i = 0; i < tagsToFilter.length; i++) {
-      if (tagsToFilter[i].toLowerCase().contains(searchController.text.toLowerCase())) {
+      if (tagsToFilter[i].fullString.toLowerCase().contains(searchController.text.toLowerCase())) {
         tags.add(tagsToFilter[i]);
       }
     }
@@ -256,7 +257,9 @@ class _TagViewState extends State<TagView> {
       tags = [...item.tagsList];
       groupTagsList();
     } else {
-      tags.sort((a, b) => sortTags == true ? a.compareTo(b) : b.compareTo(a));
+      tags.sort(
+        (a, b) => sortTags == true ? a.fullString.compareTo(b.fullString) : b.fullString.compareTo(a.fullString),
+      );
       filteredTags = [
         ...filterTags([...tags]),
       ];
@@ -264,15 +267,15 @@ class _TagViewState extends State<TagView> {
   }
 
   void groupTagsList() {
-    final Map<TagType, List<String>> tagMap = {};
-    final List<String> groupedTags = [];
+    final Map<TagType, List<Tag>> tagMap = {};
+    final List<Tag> groupedTags = [];
     for (int i = 0; i < TagType.values.length; i++) {
       tagMap[TagType.values[i]] = [];
     }
 
     for (int i = 0; i < tags.length; i++) {
-      if (tagHandler.hasTag(tags[i])) {
-        tagMap[tagHandler.getTag(tags[i]).tagType]?.add(tags[i]);
+      if (tagHandler.hasTag(tags[i].fullString)) {
+        tagMap[tagHandler.getTag(tags[i].fullString).tagType]?.add(tags[i]);
       } else {
         tagMap[TagType.none]?.add(tags[i]);
       }
@@ -291,7 +294,7 @@ class _TagViewState extends State<TagView> {
 
   Future<void> cacheTabMatchData() async {
     for (final tag in filteredTags) {
-      tabMatchesMap[tag] = searchHandler.hasTabWithTag(tag);
+      tabMatchesMap[tag.fullString] = searchHandler.hasTabWithTag(tag.fullString);
     }
   }
 
@@ -593,18 +596,23 @@ class _TagViewState extends State<TagView> {
                 fontWeight: FontWeight.w900,
               ),
             ),
-            Expanded(
-              child: Text(
-                data,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 14,
+            if (!isLink)
+              Expanded(
+                child: Text(
+                  data,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 14),
                 ),
               ),
-            ),
           ],
         ),
+        subtitle: isLink
+            ? DraggableOverflowText(
+                data,
+                style: const TextStyle(fontSize: 14),
+              )
+            : null,
         trailing: isLink
             ? IconButton(
                 icon: const Icon(Icons.exit_to_app),
@@ -620,7 +628,10 @@ class _TagViewState extends State<TagView> {
     return const SizedBox.shrink();
   }
 
-  Widget tagsItemBuilder(BuildContext context, String currentTag) {
+  Widget tagsItemBuilder(BuildContext context, Tag tag) {
+    final String currentTag = tag.fullString;
+    final int tagCount = tag.count;
+
     final bool isHated = tagsData.hatedTags.contains(currentTag);
     final bool isLoved = tagsData.lovedTags.contains(currentTag);
     final bool isSound = tagsData.soundTags.contains(currentTag);
@@ -653,11 +664,11 @@ class _TagViewState extends State<TagView> {
       final tag = tagHandler.getTag(currentTag);
 
       return ColoredBox(
-        color: tag.getColour() == Colors.transparent
+        color: tag.getColour() == null
             ? Colors.transparent
             : Color.lerp(
                 context.isLight ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
-                tag.getColour().withValues(alpha: 0.1),
+                tag.getColour()?.withValues(alpha: 0.1),
                 0.4,
               )!,
         child: Column(
@@ -680,10 +691,24 @@ class _TagViewState extends State<TagView> {
                     child: Container(
                       height: 50,
                       padding: const EdgeInsets.only(left: 12),
-                      child: _TagText(
-                        key: ValueKey(currentTag),
-                        tag: tag,
-                        filterText: searchController.text,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _TagText(
+                            key: ValueKey(currentTag),
+                            tag: tag,
+                            filterText: searchController.text,
+                          ),
+                          if (tagCount > 0)
+                            Text(
+                              tagCount.toFormattedString(),
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -893,7 +918,13 @@ class _TagViewState extends State<TagView> {
                   infoText(context.loc.tagView.postURL, item.postURL, isLink: true),
                   infoText(context.loc.tagView.posted, formattedDate, canCopy: false),
                   ExpansionTile(
-                    title: Text(context.loc.tagView.details),
+                    title: Text(
+                      context.loc.tagView.details,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
                     initiallyExpanded: detailsExpanded ?? settingsHandler.expandDetails,
                     onExpansionChanged: (expanded) {
                       setState(() {

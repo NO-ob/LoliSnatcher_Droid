@@ -1013,8 +1013,8 @@ class TagSuggestionText extends StatelessWidget {
   Widget build(BuildContext context) {
     final tagHandler = TagHandler.instance;
 
-    Color tagColor = !tag.type.isNone ? tag.type.getColour() : tagHandler.getTag(tag.tag).getColour();
-    if (tagColor == Colors.transparent) tagColor = context.theme.colorScheme.onSurface;
+    Color? tagColor = !tag.type.isNone ? tag.type.getColour() : tagHandler.getTag(tag.tag).getColour();
+    tagColor ??= context.theme.colorScheme.onSurface;
 
     //
 
