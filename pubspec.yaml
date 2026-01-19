@@ -48,7 +48,7 @@ dependencies:
   font_awesome_flutter: ^10.12.0
   fpdart: ^1.2.0
   fvp: ^0.35.2
-  get_it: ^9.1.1
+  get_it: ^9.2.0
   get: ^5.0.0-release-candidate-9.3.2 # ^4.7.3
   google_fonts: ^7.0.2
   html: ^0.15.6
@@ -57,7 +57,7 @@ dependencies:
       url: https://github.com/NANI-SORE/http_proxy.git
       ref: 36a202ceec982d199acdcd717ce85436372f447d # master - forked to fix build errors and remove allowing all bad certs
   huge_listview: ^2.0.12
-  image: ^4.5.4
+  image: ^4.7.2
   intl: ^0.20.2
   keyboard_actions: # ^4.2.0
     git:
@@ -66,7 +66,7 @@ dependencies:
   lemberfpsmonitor: ^0.0.3+6
   local_auth: ^3.0.0
   material_color_utilities: ^0.13.0
-  media_kit: ^1.2.3
+  media_kit: ^1.2.6
   media_kit_video: ^2.0.1
   media_kit_libs_video: ^1.0.7
   native_dio_adapter: ^1.5.0 # TODO use this for http3, probably should rewrite http client use to reduce amount of created clients
@@ -84,15 +84,15 @@ dependencies:
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
   share_plus: ^12.0.1 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
-  slang_flutter: ^4.11.0
-  slang: ^4.11.2
+  slang_flutter: ^4.12.0
+  slang: ^4.12.0
   sqflite_common_ffi: ^2.4.0+2
   sqflite: ^2.4.2
   sqlite3: ^3.1.3
-  talker_dio_logger: ^5.1.11
-  talker_flutter: ^5.1.11
-  talker_logger: ^5.1.11
-  talker: ^5.1.11
+  talker_dio_logger: ^5.1.12
+  talker_flutter: ^5.1.12
+  talker_logger: ^5.1.12
+  talker: ^5.1.12
   url_launcher: ^6.3.2
   uuid: ^4.5.2
   vibration: ^3.1.5

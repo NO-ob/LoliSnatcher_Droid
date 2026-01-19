@@ -21,10 +21,10 @@ packages:
     dependency: transitive
     description:
       name: analyzer
-      sha256: "92584d8f77b0095cb0cc7041dd4baea8bb3ec1a5a5f84037c93b1cf414942633"
+      sha256: de7148ed2fcec579b19f122c1800933dfa028f6d9fd38a152b04b1516cec120b
       url: "https://pub.dev"
     source: hosted
-    version: "10.0.0"
+    version: "10.0.1"
   android_intent_plus:
     dependency: "direct overridden"
     description:
@@ -1564,18 +1564,18 @@ packages:
     dependency: "direct main"
     description:
       name: slang
-      sha256: e97bbb72af7882e4f714b90a8a07f787ed2e5b6c901a1e2b7f73c11772247fa9
+      sha256: "13e3b6f07adc51ab751e7889647774d294cbce7a3382f81d9e5029acfe9c37b2"
       url: "https://pub.dev"
     source: hosted
-    version: "4.11.2"
+    version: "4.12.0"
   slang_flutter:
     dependency: "direct main"
     description:
       name: slang_flutter
-      sha256: a6ebc0a855faa62053f44d333ae3b3cde24945357e88506d1d3e7fb0d3fc0c70
+      sha256: "0a4545cca5404d6b7487cf61cf1fe56c52daeb08de56a7574ee8381fbad035a0"
       url: "https://pub.dev"
     source: hosted
-    version: "4.11.0"
+    version: "4.12.0"
   source_span:
     dependency: transitive
     description:
@@ -1692,34 +1692,34 @@ packages:
     dependency: "direct main"
     description:
       name: talker
-      sha256: c300f9ea5f5433b2db03b6ff61224f25e024ad94b0b6ed996f61686118ae68ec
+      sha256: a9a76f677905bc5cf62ace21a6eea49303cf06ac187bcad52b2004f0b9623fd7
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.11"
+    version: "5.1.12"
   talker_dio_logger:
     dependency: "direct main"
     description:
       name: talker_dio_logger
-      sha256: a55fe723f3d6f34ecc7ec589b6d66dd6cf9465bd70ea2243573926c994b01255
+      sha256: "51b0ca82c842abb787fd48d409e4e0299dca1cda010c17b42db74c8a81389b59"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.11"
+    version: "5.1.12"
   talker_flutter:
     dependency: "direct main"
     description:
       name: talker_flutter
-      sha256: "5010a5309c8ff2910407634d38415576a52e689bd631378d0882db5d2e129a31"
+      sha256: "93a287fd7f5a898de6b4b02a5def9acd1cda73ff3f2aa9873877a0cefa943281"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.11"
+    version: "5.1.12"
   talker_logger:
     dependency: "direct main"
     description:
       name: talker_logger
-      sha256: "6ae95df093f1eabd2827b2e2d72c96ca881acb47dd19456beb1b1e589304916e"
+      sha256: da3d91c36bad10838cba5123b6bdf7d4310411f8f7500539ce364deda3550ac6
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.11"
+    version: "5.1.12"
   term_glyph:
     dependency: transitive
     description:
@@ -1812,10 +1812,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_web
-      sha256: "4bd2b7b4dc4d4d0b94e5babfffbca8eac1a126c7f3d6ecbc1a11013faa3abba2"
+      sha256: d0412fcf4c6b31ecfdb7762359b7206ffba3bbffd396c6d9f9c4616ece476c1f
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.2"
   url_launcher_windows:
     dependency: transitive
     description:
