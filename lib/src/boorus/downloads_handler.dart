@@ -43,7 +43,6 @@ class DownloadsHandler extends BooruHandler {
       (pageNum * limit).toString(),
       limit.toString(),
       'DESC',
-      'Favourites',
       isDownloads: true,
     );
 
@@ -97,7 +96,7 @@ class DownloadsHandler extends BooruHandler {
           MetaTagValue(name: 'Random', value: 'random'),
         ],
       ),
-      StringMetaTag(name: 'Site', keyName: 'site'),
+      LocalDbSiteMetaTag(),
     ];
   }
 }

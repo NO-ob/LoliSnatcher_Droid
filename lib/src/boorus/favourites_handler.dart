@@ -43,7 +43,6 @@ class FavouritesHandler extends BooruHandler {
       (pageNum * limit).toString(),
       limit.toString(),
       'DESC',
-      'Favourites',
     );
 
     await afterParseResponse(newItems);
@@ -94,7 +93,7 @@ class FavouritesHandler extends BooruHandler {
           MetaTagValue(name: 'Random', value: 'random'),
         ],
       ),
-      StringMetaTag(name: 'Site', keyName: 'site'),
+      LocalDbSiteMetaTag(),
     ];
   }
 }

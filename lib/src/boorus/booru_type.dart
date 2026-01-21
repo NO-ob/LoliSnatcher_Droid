@@ -32,7 +32,8 @@ enum BooruType {
   GelbooruAlike,
   Merge,
   Downloads,
-  Favourites;
+  Favourites,
+  ;
 
   static List<BooruType> get dropDownValues {
     final settingsHandler = SettingsHandler.instance;
@@ -47,6 +48,8 @@ enum BooruType {
       ..remove(isDebug ? BooruType.WildCritters : null);
   }
 
+  bool get isDropDownValue => dropDownValues.contains(this);
+
   static List<BooruType> get detectable {
     return [...values]
       ..remove(BooruType.Autodetect)
@@ -56,6 +59,8 @@ enum BooruType {
       ..remove(BooruType.Merge);
   }
 
+  bool get isDetectable => detectable.contains(this);
+
   static List<BooruType> get saveable {
     return [...values]
       ..remove(BooruType.Autodetect)
@@ -63,6 +68,8 @@ enum BooruType {
       ..remove(BooruType.Favourites)
       ..remove(BooruType.Merge);
   }
+
+  bool get isSaveable => saveable.contains(this);
 
   String get alias {
     switch (this) {

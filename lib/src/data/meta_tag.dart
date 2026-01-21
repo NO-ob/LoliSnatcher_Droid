@@ -5,6 +5,7 @@
 // https://rule34.xxx/index.php?page=help&topic=cheatsheet
 
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 enum MetaTagType {
   boolean,
@@ -13,7 +14,8 @@ enum MetaTagType {
   number,
   sort,
   string,
-  stringFromList;
+  stringFromList,
+  ;
 
   bool get isBool => this == MetaTagType.boolean;
   bool get isComparableNumber => this == MetaTagType.comparableNumber;
@@ -214,7 +216,8 @@ class OrderMetaTag extends MetaTagWithValues<MetaTagValue> {
 enum CompareMode {
   less,
   exact,
-  greater;
+  greater,
+  ;
 
   bool get isLess => this == CompareMode.less;
   bool get isGreater => this == CompareMode.greater;
@@ -357,5 +360,24 @@ class DanbooruGelbooruRatingMetaTag extends MetaTagWithValues<MetaTagValue> {
            MetaTagValue(name: 'Questionable', value: 'questionable'),
            MetaTagValue(name: 'Explicit', value: 'explicit'),
          ],
+       );
+}
+
+class LocalDbSiteMetaTag extends MetaTagWithValues<MetaTagValue> {
+  LocalDbSiteMetaTag({
+    super.isFree = false,
+  }) : super(
+         name: 'Site',
+         keyName: 'site',
+         values: SettingsHandler.instance.booruList
+             .where((b) => b.type?.isSaveable == true)
+             .map(
+               (b) => MetaTagValue(
+                 name: b.name ?? '?',
+                 value: Uri.tryParse(b.baseURL ?? '')?.host ?? '',
+               ),
+             )
+             .where((t) => t.value.isNotEmpty)
+             .toList(),
        );
 }

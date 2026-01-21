@@ -542,9 +542,13 @@ class LoliSync {
                   offset.toString(),
                   limit.toString(),
                   'ASC',
-                  isSnatched ? 'loliSyncSnatch' : 'loliSyncFav',
                   isDownloads: isSnatched,
                 );
+                if (!isSnatched) {
+                  for (final item in fetched) {
+                    item.isSnatched.value = false;
+                  }
+                }
                 Logger.Inst().log(
                   'fetched is ${fetched.length} i is $i',
                   'LoliSync',
@@ -583,8 +587,10 @@ class LoliSync {
                   offset.toString(),
                   limit.toString(),
                   'ASC',
-                  'loliSyncFav',
                 );
+                for (final item in fetched) {
+                  item.isSnatched.value = false;
+                }
                 yield 'Fetched ${fetched.length} favourites';
                 Logger.Inst().log(
                   'fetched is ${fetched.length} i is $i',
