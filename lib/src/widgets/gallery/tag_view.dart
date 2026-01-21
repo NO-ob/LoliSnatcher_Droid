@@ -728,10 +728,14 @@ class _TagViewState extends State<TagView> {
                             filterText: searchController.text,
                           ),
                           if (tagCount > 0)
-                            Text(
-                              tagCount.toFormattedString(),
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Text(
+                                tagCount.toFormattedString(),
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  fontSize: 10,
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                ),
                               ),
                             ),
                         ],
