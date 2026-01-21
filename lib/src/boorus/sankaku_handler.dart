@@ -12,6 +12,7 @@ import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -168,6 +169,21 @@ class SankakuHandler extends BooruHandler {
           item.sampleURL = current['sample_url'];
           item.thumbnailURL = current['preview_url'];
           item.mediaType.value = MediaType.fromExtension(Tools.getFileExt(item.fileURL));
+
+          final List<Tag> newTags = [];
+          for (final t in item.tagsList) {
+            int count = 0;
+            try {
+              count =
+                  (current['tags'] as List<dynamic>?)?.firstWhereOrNull(
+                    (e) => e['tagName'] == t.fullString,
+                  )?['post_count'] ??
+                  0;
+            } catch (_) {}
+            newTags.add(Tag(t.fullString, count: count));
+          }
+          item.tagsList = newTags;
+
           item.isUpdated = true;
         }
         return (item: item, failed: false, error: null);
