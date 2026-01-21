@@ -8,6 +8,9 @@ import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
+import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+
+// TODO redesign
 
 class MediaLoading extends StatefulWidget {
   const MediaLoading({
@@ -23,7 +26,8 @@ class MediaLoading extends StatefulWidget {
     required this.onRestart,
     required this.onStop,
     this.isTooBig = false,
-    this.stopReasons = const [],
+    this.stopReason,
+    this.stopDetails,
     super.key,
   });
 
@@ -35,7 +39,8 @@ class MediaLoading extends StatefulWidget {
 
   final bool isTooBig;
   final bool isStopped;
-  final List<String> stopReasons;
+  final ViewerStopReason? stopReason;
+  final String? stopDetails;
   final bool isViewed;
 
   final ValueNotifier<int> total;
@@ -181,12 +186,16 @@ class _MediaLoadingState extends State<MediaLoading> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: widget.isStopped
               ? [
-                  ...widget.stopReasons.map((String reason) {
-                    return LoadingText(
-                      text: reason,
+                  if (widget.stopReason != null)
+                    LoadingText(
+                      text: widget.stopReason?.description ?? '',
+                      fontSize: 20,
+                    ),
+                  if (widget.stopDetails != null)
+                    LoadingText(
+                      text: widget.stopDetails ?? '',
                       fontSize: 18,
-                    );
-                  }),
+                    ),
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
                     icon: const Icon(
@@ -339,12 +348,16 @@ class _MediaLoadingState extends State<MediaLoading> {
     List<Widget> children = [];
     if (widget.isStopped) {
       children = [
-        ...widget.stopReasons.map((String reason) {
-          return LoadingText(
-            text: reason,
+        if (widget.stopReason != null)
+          LoadingText(
+            text: widget.stopReason?.description ?? '',
+            fontSize: 20,
+          ),
+        if (widget.stopDetails != null)
+          LoadingText(
+            text: widget.stopDetails ?? '',
             fontSize: 18,
-          );
-        }),
+          ),
         const SizedBox(height: 10),
         ElevatedButton.icon(
           icon: const Icon(
@@ -496,6 +509,7 @@ class LoadingText extends StatelessWidget {
       strokeWidth: 3,
       child: Text(
         text,
+        textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: fontSize,
           color: color,

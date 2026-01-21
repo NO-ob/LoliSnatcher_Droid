@@ -231,6 +231,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
             const SizedBox(height: 16),
             MarqueeText(
               text: tag.tag,
+              isExpanded: false,
               style: context.theme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),

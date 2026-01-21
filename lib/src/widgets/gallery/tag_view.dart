@@ -13,6 +13,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fpdart/fpdart.dart' show FpdartOnIterable;
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/widgets/common/draggable_overflow_text.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -180,7 +181,28 @@ class _TagViewState extends State<TagView> {
     super.didUpdateWidget(oldWidget);
     if (widget.item != item) {
       item = widget.item;
-      parseSortGroupTags();
+      checkForPossibleBooruHandler();
+      tags = [...item.tagsList];
+      filteredTags = [...tags];
+
+      // debounce to avoid getting rate limited due to going too fast by using buttons on left side of tag view
+      Debounce.debounce(
+        tag: 'tag_view_reload_item',
+        callback: () {
+          cancelToken?.cancel();
+          reloadItemData(initial: true).then((_) async {
+            await Future.delayed(const Duration(seconds: 3));
+            if (mounted) {
+              parseSortGroupTagsWithoutCache();
+              sortTimer?.cancel();
+              sortTimer = Timer.periodic(
+                const Duration(seconds: 5),
+                (_) => parseSortGroupTagsWithoutCache(),
+              );
+            }
+          });
+        },
+      );
     }
     if (widget.handler != handler) {
       handler = widget.handler;
@@ -206,25 +228,31 @@ class _TagViewState extends State<TagView> {
     bool initial = false,
     bool force = false,
   }) async {
+    if (loadingUpdate) return;
+
     if (hasLoadItemSupport && (!initial || canLoadItemOnStart) && (!item.isUpdated || force)) {
       loadingUpdate = true;
       failedUpdate = false;
       setState(() {});
       cancelToken = CancelToken();
-      final res = await (possibleBooruHandler ?? handler).loadItem(
-        item: item,
-        cancelToken: cancelToken,
-        withCapcthaCheck: !initial,
-      );
-      if (res.failed) {
-        failedUpdate = true;
-      } else if (res.item != null) {
-        unawaited(
-          SettingsHandler.instance.dbHandler.updateBooruItem(
-            res.item!,
-            BooruUpdateMode.urlUpdate,
-          ),
+      try {
+        final res = await (possibleBooruHandler ?? handler).loadItem(
+          item: item,
+          cancelToken: cancelToken,
+          withCapcthaCheck: !initial,
         );
+        if (res.failed) {
+          failedUpdate = true;
+        } else if (res.item != null && (res.item?.isSnatched.value == true || res.item?.isFavourite.value == true)) {
+          unawaited(
+            SettingsHandler.instance.dbHandler.updateBooruItem(
+              res.item!,
+              BooruUpdateMode.urlUpdate,
+            ),
+          );
+        }
+      } catch (e) {
+        failedUpdate = true;
       }
       loadingUpdate = false;
       setState(() {});
@@ -389,9 +417,7 @@ class _TagViewState extends State<TagView> {
                     )
                   else
                     IconButton(
-                      onPressed: () {
-                        reloadItemData(force: true);
-                      },
+                      onPressed: () => reloadItemData(force: true),
                       icon: Icon(
                         failedUpdate ? Icons.error_outline : Icons.refresh,
                         color: failedUpdate ? Colors.red : Theme.of(context).iconTheme.color,

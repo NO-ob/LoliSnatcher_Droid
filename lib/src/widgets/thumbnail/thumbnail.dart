@@ -741,7 +741,9 @@ Future<bool?> tryToLoadAndUpdateItem(
           withCapcthaCheck: true,
         );
 
-        if (!result.failed && result.item != null) {
+        if (!result.failed &&
+            result.item != null &&
+            (result.item?.isSnatched.value == true || result.item?.isFavourite.value == true)) {
           unawaited(
             SettingsHandler.instance.dbHandler.updateBooruItem(
               result.item!,

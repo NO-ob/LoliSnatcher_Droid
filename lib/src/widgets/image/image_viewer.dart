@@ -19,6 +19,44 @@ import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
+enum ViewerStopReason {
+  user,
+  error,
+  tooBig,
+  hated,
+  videoError,
+  reset,
+  ;
+
+  String get description {
+    switch (this) {
+      case ViewerStopReason.user:
+        return 'Stopped by user';
+      case ViewerStopReason.error:
+        return 'Loading error';
+      case ViewerStopReason.tooBig:
+        return 'File is too big';
+      case ViewerStopReason.hated:
+        return 'Contains hated tags';
+      case ViewerStopReason.videoError:
+        return 'Video error';
+      case ViewerStopReason.reset:
+        return '';
+    }
+  }
+}
+
+enum PreloadBlockState {
+  tooBig,
+  ignore,
+  initial
+  ;
+
+  bool get isTooBig => this == tooBig;
+  bool get isIgnore => this == ignore;
+  bool get isInitial => this == initial;
+}
+
 class ImageViewer extends StatefulWidget {
   const ImageViewer(
     this.booruItem, {
@@ -50,8 +88,9 @@ class ImageViewerState extends State<ImageViewer> {
   final ValueNotifier<bool> isZoomed = ValueNotifier(false);
   final ValueNotifier<bool> isStopped = ValueNotifier(false);
   final ValueNotifier<bool> showLoading = ValueNotifier(true);
-  int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
-  final ValueNotifier<List<String>> stopReason = ValueNotifier([]);
+  PreloadBlockState blockPreloadState = .initial;
+  final ValueNotifier<ViewerStopReason?> stopReason = ValueNotifier(null);
+  final ValueNotifier<String?> stopDetails = ValueNotifier(null);
 
   final ValueNotifier<ImageProvider?> mainProvider = ValueNotifier(null);
   ImageStreamListener? imageListener;
@@ -69,17 +108,19 @@ class ImageViewerState extends State<ImageViewer> {
     if (size == null) {
       return;
     } else if (size == 0) {
-      killLoading([
-        'File is zero bytes',
-      ]);
-    } else if (maxSize != null && (size > maxSize) && isTooBig != 2) {
+      stopLoading(
+        reason: ViewerStopReason.error,
+        title: 'File is zero bytes',
+      );
+    } else if (maxSize != null && (size > maxSize) && !blockPreloadState.isIgnore) {
       // TODO add check if resolution is too big
-      isTooBig = 1;
-      killLoading([
-        'File is too big',
-        'File size: ${Tools.formatBytes(size, 2)}',
-        'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
-      ]);
+      blockPreloadState = .tooBig;
+      stopLoading(
+        reason: ViewerStopReason.tooBig,
+        details:
+            'File size: ${Tools.formatBytes(size, 2)}'
+            'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
+      );
     }
 
     if (size > 0) {
@@ -101,15 +142,15 @@ class ImageViewerState extends State<ImageViewer> {
       //
     } else {
       if (error is DioException) {
-        killLoading([
-          'Loading error: ${error.type.name}',
-          if (error.response?.statusCode != null)
-            '${error.response?.statusCode} - ${error.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(error.response?.statusCode)}',
-        ]);
+        stopLoading(
+          reason: ViewerStopReason.error,
+          title: error.type.name,
+          details: (error.response?.statusCode != null)
+              ? '${error.response?.statusCode} - ${error.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(error.response?.statusCode)}'
+              : null,
+        );
       } else {
-        killLoading([
-          'Loading error: $error',
-        ]);
+        stopLoading(reason: ViewerStopReason.error);
       }
     }
   }
@@ -139,7 +180,7 @@ class ImageViewerState extends State<ImageViewer> {
     // force redraw on item data change
     if (oldWidget.booruItem != widget.booruItem) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        killLoading([]);
+        stopLoading(reason: ViewerStopReason.reset);
         initViewer(false);
       });
     }
@@ -169,15 +210,24 @@ class ImageViewerState extends State<ImageViewer> {
 
     if (widget.booruItem.isHated && !ignoreTagsCheck) {
       if (widget.booruItem.isHated) {
-        killLoading([
-          'Contains Hated tags:',
-          ...settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true).hatedTags,
-        ]);
+        stopLoading(
+          reason: ViewerStopReason.hated,
+          details: settingsHandler
+              .parseTagsList(
+                widget.booruItem.tagsList,
+                isCapped: true,
+              )
+              .hatedTags
+              .join('\n'),
+        );
         return;
       }
     }
 
     isStopped.value = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewerHandler.setStopped(widget.key, false);
+    });
 
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
@@ -212,13 +262,19 @@ class ImageViewerState extends State<ImageViewer> {
     imageStream!.addListener(imageListener!);
   }
 
+  void forceLoad() {
+    if (isStopped.value) {
+      onManualRestart();
+    }
+  }
+
   void noScaleListener() {
-    killLoading([]);
+    stopLoading(reason: ViewerStopReason.reset);
     initViewer(false);
   }
 
   void toggleQualityListener() {
-    killLoading([]);
+    stopLoading(reason: ViewerStopReason.reset);
     initViewer(false);
   }
 
@@ -313,7 +369,11 @@ class ImageViewerState extends State<ImageViewer> {
     return provider;
   }
 
-  void killLoading(List<String> reason) {
+  void stopLoading({
+    required ViewerStopReason reason,
+    String? title,
+    String? details,
+  }) {
     disposables();
 
     total.value = 0;
@@ -325,8 +385,12 @@ class ImageViewerState extends State<ImageViewer> {
     isFromCache.value = false;
     isStopped.value = true;
     stopReason.value = reason;
+    stopDetails.value = '${title != null ? '$title\n' : ''}${details ?? ''}';
 
-    viewerHandler.setLoaded(widget.key, false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewerHandler.setStopped(widget.key, true);
+      viewerHandler.setLoaded(widget.key, false);
+    });
   }
 
   @override
@@ -413,43 +477,52 @@ class ImageViewerState extends State<ImageViewer> {
   }
 
   Future<void> onManualRestart() async {
-    if (isTooBig == 1) {
-      isTooBig = 2;
+    if (blockPreloadState.isTooBig) {
+      blockPreloadState = .ignore;
     }
     isStopped.value = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewerHandler.setStopped(widget.key, false);
+    });
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
-    final updateRes = await tryToLoadAndUpdateItem(
-      widget.booruItem,
-      loadItemCancelToken,
-    );
 
-    if (updateRes != true && widget.booru.baseURL?.isNotEmpty == true) {
-      await DioNetwork.get(
-        widget.booru.baseURL ?? '',
-        headers: await Tools.getFileCustomHeaders(
-          widget.booru,
-          item: widget.booruItem,
-          checkForReferer: true,
-        ),
-        customInterceptor: (dio) => DioNetwork.captchaInterceptor(
-          dio,
-          customUserAgent: Tools.appUserAgent,
-        ),
+    final bool shouldUpdate = switch (stopReason.value) {
+      ViewerStopReason.error => true,
+      _ => false,
+    };
+    bool shouldDoCaptchaCheck = false;
+    if (shouldUpdate) {
+      final updateRes = await tryToLoadAndUpdateItem(
+        widget.booruItem,
+        loadItemCancelToken,
       );
+
+      shouldDoCaptchaCheck = updateRes != true;
+
+      if (updateRes != true && widget.booru.baseURL?.isNotEmpty == true) {
+        await DioNetwork.get(
+          widget.booru.baseURL ?? '',
+          headers: await Tools.getFileCustomHeaders(
+            widget.booru,
+            item: widget.booruItem,
+            checkForReferer: true,
+          ),
+          customInterceptor: (dio) => DioNetwork.captchaInterceptor(
+            dio,
+            customUserAgent: Tools.appUserAgent,
+          ),
+        );
+      }
     }
 
     await initViewer(
       true,
-      withCaptchaCheck: updateRes != true,
+      withCaptchaCheck: shouldDoCaptchaCheck,
     );
   }
 
-  Future<void> onManualStop({
-    List<String>? reason,
-  }) async {
-    killLoading(
-      reason ?? ['Stopped by user'],
-    );
+  Future<void> onManualStop() async {
+    stopLoading(reason: ViewerStopReason.user);
   }
 
   @override
@@ -510,20 +583,26 @@ class ImageViewerState extends State<ImageViewer> {
                             return ValueListenableBuilder(
                               valueListenable: stopReason,
                               builder: (context, stopReason, _) {
-                                return MediaLoading(
-                                  item: widget.booruItem,
-                                  hasProgress: true,
-                                  isFromCache: isFromCache,
-                                  isDone: isLoaded,
-                                  isTooBig: isTooBig > 0,
-                                  isStopped: isStopped,
-                                  stopReasons: stopReason,
-                                  isViewed: isViewed,
-                                  total: total,
-                                  received: received,
-                                  startedAt: startedAt,
-                                  onRestart: onManualRestart,
-                                  onStop: onManualStop,
+                                return ValueListenableBuilder(
+                                  valueListenable: stopDetails,
+                                  builder: (context, stopDetails, _) {
+                                    return MediaLoading(
+                                      item: widget.booruItem,
+                                      hasProgress: true,
+                                      isFromCache: isFromCache,
+                                      isDone: isLoaded,
+                                      isTooBig: blockPreloadState.isTooBig,
+                                      isStopped: isStopped,
+                                      stopReason: stopReason,
+                                      stopDetails: stopDetails,
+                                      isViewed: isViewed,
+                                      total: total,
+                                      received: received,
+                                      startedAt: startedAt,
+                                      onRestart: onManualRestart,
+                                      onStop: onManualStop,
+                                    );
+                                  },
                                 );
                               },
                             );

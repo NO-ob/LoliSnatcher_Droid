@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 
 import 'package:photo_view/photo_view.dart';
 import 'package:preload_page_view/preload_page_view.dart';
@@ -594,40 +595,106 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
             ),
           ),
           child: SizedBox(
-            width: maxDrawerWidth,
-            child: Drawer(
-              width: maxDrawerWidth,
-              child: SafeArea(
-                child: ValueListenableBuilder(
-                  valueListenable: page,
-                  builder: (context, page, child) {
-                    if (widget.tab.booruHandler.filteredFetched.isEmpty ||
-                        page >= widget.tab.booruHandler.filteredFetched.length) {
-                      return Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: 16,
-                          children: [
-                            Text(context.loc.galleryView.noItemSelected),
-                            const Padding(
-                              padding: EdgeInsets.all(8),
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: CloseDialogButton(),
-                              ),
-                            ),
-                          ],
+            width: maxDrawerWidth + 66,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  alignment: Alignment.bottomCenter,
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  height: 60 * 3 + 32,
+                  width: 50,
+                  child: Column(
+                    spacing: 16,
+                    children: [
+                      // TODO fav/dl buttons?
+                      Expanded(
+                        child: ValueListenableBuilder(
+                          valueListenable: viewerHandler.isStopped,
+                          builder: (context, isStopped, child) {
+                            return AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              child: isStopped
+                                  ? SizedBox.expand(
+                                      child: OutlinedButton(
+                                        onPressed: viewerHandler.forceLoadCurrentItem,
+                                        child: const Icon(Icons.refresh),
+                                      ),
+                                    )
+                                  : null,
+                            );
+                          },
                         ),
-                      );
-                    }
-
-                    return TagView(
-                      item: widget.tab.booruHandler.filteredFetched[page],
-                      handler: widget.tab.booruHandler,
-                    );
-                  },
+                      ),
+                      Expanded(
+                        child: LongPressRepeater(
+                          onStart: () async {
+                            controller.jumpToPage(page.value - 1);
+                            await Future.delayed(const Duration(milliseconds: 100));
+                          },
+                          fasterAfter: 20,
+                          child: OutlinedButton(
+                            onPressed: () => controller.jumpToPage(page.value - 1),
+                            child: settingsHandler.galleryScrollDirection == 'Vertical'
+                                ? const Icon(Icons.arrow_upward)
+                                : const Icon(Icons.arrow_back),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: LongPressRepeater(
+                          onStart: () async {
+                            controller.jumpToPage(page.value + 1);
+                            await Future.delayed(const Duration(milliseconds: 100));
+                          },
+                          fasterAfter: 20,
+                          child: OutlinedButton(
+                            onPressed: () => controller.jumpToPage(page.value + 1),
+                            child: settingsHandler.galleryScrollDirection == 'Vertical'
+                                ? const Icon(Icons.arrow_downward)
+                                : const Icon(Icons.arrow_forward),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+
+                Drawer(
+                  width: maxDrawerWidth,
+                  child: SafeArea(
+                    child: ValueListenableBuilder(
+                      valueListenable: page,
+                      builder: (context, page, _) {
+                        if (widget.tab.booruHandler.filteredFetched.isEmpty ||
+                            page >= widget.tab.booruHandler.filteredFetched.length) {
+                          return Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 16,
+                              children: [
+                                Text(context.loc.galleryView.noItemSelected),
+                                const Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: CloseDialogButton(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return TagView(
+                          item: widget.tab.booruHandler.filteredFetched[page],
+                          handler: widget.tab.booruHandler,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

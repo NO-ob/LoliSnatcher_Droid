@@ -72,6 +72,7 @@ class ThemeHandler {
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(lightColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(lightColorScheme),
+      outlinedButtonTheme: outlinedButtonTheme(lightColorScheme),
       splashFactory: InkSparkle.splashFactory,
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(lightColorScheme),
@@ -109,6 +110,7 @@ class ThemeHandler {
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(darkColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(darkColorScheme),
+      outlinedButtonTheme: outlinedButtonTheme(darkColorScheme),
       splashFactory: InkSparkle.splashFactory,
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(darkColorScheme),
@@ -210,6 +212,33 @@ class ThemeHandler {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       splashFactory: InkSparkle.splashFactory,
     ),
+  );
+
+  OutlinedButtonThemeData outlinedButtonTheme(ColorScheme colorScheme) => OutlinedButtonThemeData(
+    style:
+        OutlinedButton.styleFrom(
+          side: BorderSide(color: colorScheme.secondary, width: 2.5),
+          foregroundColor: colorScheme.secondary,
+          textStyle: TextStyle(
+            fontFamily: textTheme().bodyMedium!.fontFamily,
+            color: colorScheme.secondary,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          fixedSize: const Size(double.infinity, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ).copyWith(
+          side: WidgetStateProperty.resolveWith<BorderSide>(
+            (states) {
+              if (states.contains(WidgetState.disabled)) {
+                return const BorderSide(color: Colors.grey, width: 2.5);
+              }
+
+              return BorderSide(color: colorScheme.secondary, width: 2.5);
+            },
+          ),
+        ),
   );
 
   AppBarTheme appBarTheme(ColorScheme colorScheme) => AppBarTheme(

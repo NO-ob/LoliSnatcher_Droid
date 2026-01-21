@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 
 import 'package:chewie/chewie.dart';
 import 'package:dio/dio.dart';
+import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 
@@ -58,14 +59,15 @@ class VideoViewerState extends State<VideoViewer> {
 
   final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
   int lastViewedIndex = -1;
-  int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
+  PreloadBlockState blockPreloadState = .initial;
   final ValueNotifier<bool> isFromCache = ValueNotifier(false);
   final ValueNotifier<bool> isStopped = ValueNotifier(false);
   final ValueNotifier<bool> isViewed = ValueNotifier(false);
   final ValueNotifier<bool> isZoomed = ValueNotifier(false);
   final ValueNotifier<bool> showControls = ValueNotifier(true);
   final ValueNotifier<bool> forceCache = ValueNotifier(false);
-  final ValueNotifier<List<String>> stopReason = ValueNotifier([]);
+  final ValueNotifier<ViewerStopReason?> stopReason = ValueNotifier(null);
+  final ValueNotifier<String?> stopDetails = ValueNotifier(null);
   Timer? bufferingTimer, pauseCheckTimer;
 
   CancelToken? cancelToken, sizeCancelToken;
@@ -77,6 +79,9 @@ class VideoViewerState extends State<VideoViewer> {
 
   Future<void> downloadVideo() async {
     isStopped.value = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewerHandler.setStopped(widget.key, false);
+    });
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     unawaited(getSize());
@@ -163,17 +168,19 @@ class VideoViewerState extends State<VideoViewer> {
         : (1024 * 1024 * settingsHandler.preloadSizeLimit * 1000).round();
     // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
-      killLoading([
-        'File is zero bytes',
-      ]);
-    } else if (maxSize != null && (size > maxSize) && isTooBig != 2) {
+      stopLoading(
+        reason: ViewerStopReason.error,
+        title: 'File is zero bytes',
+      );
+    } else if (maxSize != null && (size > maxSize) && !blockPreloadState.isIgnore) {
       // TODO add check if resolution is too big
-      isTooBig = 1;
-      killLoading([
-        'File is too big',
-        'File size: ${Tools.formatBytes(size, 2)}',
-        'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
-      ]);
+      blockPreloadState = .tooBig;
+      stopLoading(
+        reason: ViewerStopReason.tooBig,
+        details:
+            'File size: ${Tools.formatBytes(size, 2)}'
+            'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
+      );
     }
 
     if (size > 0) {
@@ -213,19 +220,20 @@ class VideoViewerState extends State<VideoViewer> {
       // print('Canceled by user: $imageURL | $error');
     } else {
       if (error is DioException) {
-        killLoading([
-          'Loading error: ${error.type.name}',
-          if (error.response?.statusCode != null)
-            '${error.response?.statusCode} - ${error.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(error.response?.statusCode)}',
-        ]);
+        stopLoading(
+          reason: ViewerStopReason.error,
+          title: error.type.name,
+          details: (error.response?.statusCode != null)
+              ? '${error.response?.statusCode} - ${error.response?.statusMessage ?? DioNetwork.badResponseExceptionMessage(error.response?.statusCode)}'
+              : null,
+        );
       } else {
-        killLoading([
-          'Loading error: $error',
-          if (settingsHandler.videoBackendMode.isNormal) ...[
-            '',
-            'Try changing "Video player backend" in Settings->Video if you encounter playback issues often',
-          ],
-        ]);
+        stopLoading(
+          reason: ViewerStopReason.error,
+          details: settingsHandler.videoBackendMode.isNormal
+              ? '\nTry changing "Video player backend" in Settings->Video if you encounter playback issues often'
+              : null,
+        );
       }
       // print('Dio request cancelled: $error');
     }
@@ -250,7 +258,7 @@ class VideoViewerState extends State<VideoViewer> {
     // force redraw on item data change
     if (oldWidget.booruItem != widget.booruItem) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        killLoading([]);
+        stopLoading(reason: ViewerStopReason.reset);
         initVideo(false);
         updateState();
       });
@@ -285,16 +293,20 @@ class VideoViewerState extends State<VideoViewer> {
   Future<void> initVideo(bool ignoreTagsCheck) async {
     if (widget.booruItem.isHated && !ignoreTagsCheck) {
       final tagsData = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
-      killLoading([
-        'Contains Hated tags:',
-        ...tagsData.hatedTags,
-      ]);
+      stopLoading(
+        reason: ViewerStopReason.hated,
+        details: tagsData.hatedTags.join('\n'),
+      );
     } else {
       await downloadVideo();
     }
   }
 
-  void killLoading(List<String> reason) {
+  void stopLoading({
+    required ViewerStopReason reason,
+    String? title,
+    String? details,
+  }) {
     disposables();
 
     bufferingTimer?.cancel();
@@ -307,8 +319,12 @@ class VideoViewerState extends State<VideoViewer> {
     isFromCache.value = false;
     isStopped.value = true;
     stopReason.value = reason;
+    stopDetails.value = '${title != null ? '$title\n' : ''}${details ?? ''}';
 
-    viewerHandler.setLoaded(widget.key, false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewerHandler.setStopped(widget.key, true);
+      viewerHandler.setLoaded(widget.key, false);
+    });
 
     resetZoom();
 
@@ -438,10 +454,10 @@ class VideoViewerState extends State<VideoViewer> {
     }
 
     if (!isStopped.value && videoController.value?.value.hasError == true) {
-      killLoading([
-        'Video error:',
-        videoController.value!.value.errorDescription ?? '',
-      ]);
+      stopLoading(
+        reason: ViewerStopReason.videoError,
+        details: videoController.value?.value.errorDescription,
+      );
     }
   }
 
@@ -550,7 +566,7 @@ class VideoViewerState extends State<VideoViewer> {
           if (!isVideoInited && (total.value == 0 || total.value < maxForceCacheSize)) {
             forceCache.value = true;
             WidgetsBinding.instance.addPostFrameCallback((_) async {
-              killLoading([]);
+              stopLoading(reason: ViewerStopReason.reset);
               await initVideo(false);
               updateState();
             });
@@ -569,6 +585,12 @@ class VideoViewerState extends State<VideoViewer> {
 
     // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
     updateState();
+  }
+
+  void forceLoad() {
+    if (isStopped.value) {
+      onManualRestart();
+    }
   }
 
   Future<void> pauseOnAppLock() async {
@@ -633,32 +655,42 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   Future<void> onManualRestart() async {
-    if (isTooBig == 1) {
-      isTooBig = 2;
+    if (blockPreloadState.isTooBig) {
+      blockPreloadState = .ignore;
     }
     isStopped.value = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      viewerHandler.setStopped(widget.key, false);
+    });
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
     updateState();
-    final bool? updateRes = await tryToLoadAndUpdateItem(
-      widget.booruItem,
-      loadItemCancelToken,
-    );
-    forceCache.value = false;
-    updateState();
-
-    if (updateRes != true && widget.booru.baseURL?.isNotEmpty == true) {
-      await DioNetwork.get(
-        widget.booru.baseURL ?? '',
-        headers: await Tools.getFileCustomHeaders(
-          widget.booru,
-          item: widget.booruItem,
-          checkForReferer: true,
-        ),
-        customInterceptor: (dio) => DioNetwork.captchaInterceptor(
-          dio,
-          customUserAgent: Tools.appUserAgent,
-        ),
+    final bool shouldUpdate = switch (stopReason.value) {
+      ViewerStopReason.error => true,
+      ViewerStopReason.videoError => true,
+      _ => false,
+    };
+    if (shouldUpdate) {
+      final bool? updateRes = await tryToLoadAndUpdateItem(
+        widget.booruItem,
+        loadItemCancelToken,
       );
+      forceCache.value = false;
+      updateState();
+
+      if (updateRes != true && widget.booru.baseURL?.isNotEmpty == true) {
+        await DioNetwork.get(
+          widget.booru.baseURL ?? '',
+          headers: await Tools.getFileCustomHeaders(
+            widget.booru,
+            item: widget.booruItem,
+            checkForReferer: true,
+          ),
+          customInterceptor: (dio) => DioNetwork.captchaInterceptor(
+            dio,
+            customUserAgent: Tools.appUserAgent,
+          ),
+        );
+      }
     }
 
     await initVideo(true);
@@ -666,9 +698,7 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   void onManualStop({List<String>? reason}) {
-    killLoading(
-      reason ?? ['Stopped by user'],
-    );
+    stopLoading(reason: ViewerStopReason.user);
   }
 
   @override
@@ -715,21 +745,48 @@ class VideoViewerState extends State<VideoViewer> {
                 child: (isVideoInited || !showControls) ? const SizedBox.shrink() : child,
               );
             },
-            child: MediaLoading(
-              item: widget.booruItem,
-              hasProgress:
-                  settingsHandler.mediaCache && (forceCache.value || settingsHandler.videoCacheMode != 'Stream'),
-              isFromCache: isFromCache.value,
-              isDone: isVideoInited,
-              isTooBig: isTooBig > 0,
-              isStopped: isStopped.value,
-              stopReasons: stopReason.value,
-              isViewed: isViewed.value,
-              total: total,
-              received: received,
-              startedAt: startedAt,
-              onRestart: onManualRestart,
-              onStop: onManualStop,
+            child: ValueListenableBuilder(
+              valueListenable: isViewed,
+              builder: (context, isViewed, _) {
+                return ValueListenableBuilder(
+                  valueListenable: isStopped,
+                  builder: (context, isStopped, _) {
+                    return ValueListenableBuilder(
+                      valueListenable: isFromCache,
+                      builder: (context, isFromCache, _) {
+                        return ValueListenableBuilder(
+                          valueListenable: stopReason,
+                          builder: (context, stopReason, _) {
+                            return ValueListenableBuilder(
+                              valueListenable: stopDetails,
+                              builder: (context, stopDetails, _) {
+                                return MediaLoading(
+                                  item: widget.booruItem,
+                                  hasProgress:
+                                      settingsHandler.mediaCache &&
+                                      (forceCache.value || settingsHandler.videoCacheMode != 'Stream'),
+                                  isFromCache: isFromCache,
+                                  isDone: isVideoInited,
+                                  isTooBig: blockPreloadState.isTooBig,
+                                  isStopped: isStopped,
+                                  stopReason: stopReason,
+                                  stopDetails: stopDetails,
+                                  isViewed: isViewed,
+                                  total: total,
+                                  received: received,
+                                  startedAt: startedAt,
+                                  onRestart: onManualRestart,
+                                  onStop: onManualStop,
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                );
+              },
             ),
           ),
           //
