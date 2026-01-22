@@ -94,7 +94,14 @@ class _BooruFaviconState extends State<BooruFavicon> {
       //
     } else {
       if (error is Exception && (error as dynamic).message == 'Invalid image data') {
-        await ((mainProvider! as ResizeImage).imageProvider as CustomNetworkImage).deleteCacheFile();
+        switch ((mainProvider! as ResizeImage).imageProvider) {
+          case CustomNetworkImage _:
+            await (mainProvider! as CustomNetworkImage).deleteCacheFile();
+            break;
+          case CustomNetworkAvifImage _:
+            await (mainProvider! as CustomNetworkAvifImage).deleteCacheFile();
+            break;
+        }
         disposables();
       }
       if (error is DioException &&

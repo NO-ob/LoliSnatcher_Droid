@@ -363,19 +363,29 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   Future<void> cleanProviderCache() async {
-    if (mainProvider.value != null) {
-      final CustomNetworkImage usedMainProvider =
-          (mainProvider.value is ResizeImage ? (mainProvider.value! as ResizeImage).imageProvider : mainProvider.value!)
-              as CustomNetworkImage;
-      await usedMainProvider.deleteCacheFile();
-    }
-    if (extraProvider.value != null) {
-      final CustomNetworkImage usedExtraProvider =
-          (extraProvider.value is ResizeImage
-                  ? (extraProvider.value! as ResizeImage).imageProvider
-                  : extraProvider.value!)
-              as CustomNetworkImage;
-      await usedExtraProvider.deleteCacheFile();
+    for (final provider in [
+      if (mainProvider.value != null && mainProvider.value is ResizeImage)
+        (mainProvider.value! as ResizeImage).imageProvider
+      else
+        mainProvider.value,
+      //
+      if (extraProvider.value != null && extraProvider.value is ResizeImage)
+        (extraProvider.value! as ResizeImage).imageProvider
+      else
+        extraProvider.value,
+    ]) {
+      if (provider == null) {
+        continue;
+      }
+
+      switch (provider) {
+        case CustomNetworkImage _:
+          await provider.deleteCacheFile();
+          break;
+        case CustomNetworkAvifImage _:
+          await provider.deleteCacheFile();
+          break;
+      }
     }
   }
 
