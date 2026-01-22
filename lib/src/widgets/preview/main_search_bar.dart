@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
+import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -240,73 +241,76 @@ class _MainSearchBarState extends State<MainSearchBar> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
-                      child: FadingEdgeScrollView.fromScrollView(
-                        child: ListView(
-                          controller: scrollController,
-                          scrollDirection: Axis.horizontal,
-                          // scrollconfig allows to control physics outside of the widget
-                          physics: tags.isEmpty
-                              ? const NeverScrollableScrollPhysics()
-                              : ScrollConfiguration.of(context).getScrollPhysics(context),
-                          padding: const EdgeInsets.fromLTRB(8, 6, 60, 6),
-                          children: [
-                            if (tags.isEmpty)
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Text(
-                                    'Search',
-                                    style: context.theme.textTheme.bodyLarge?.copyWith(
-                                      color: context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                                      fontSize: 16,
-                                      height: 1,
+                      child: Listener(
+                        onPointerSignal: (event) => desktopPointerScroll(scrollController, event),
+                        child: FadingEdgeScrollView.fromScrollView(
+                          child: ListView(
+                            controller: scrollController,
+                            scrollDirection: Axis.horizontal,
+                            // scrollconfig allows to control physics outside of the widget
+                            physics: tags.isEmpty
+                                ? const NeverScrollableScrollPhysics()
+                                : ScrollConfiguration.of(context).getScrollPhysics(context),
+                            padding: const EdgeInsets.fromLTRB(8, 6, 60, 6),
+                            children: [
+                              if (tags.isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                    child: Text(
+                                      'Search',
+                                      style: context.theme.textTheme.bodyLarge?.copyWith(
+                                        color: context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                        fontSize: 16,
+                                        height: 1,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            //
-                            for (int i = 0; i < tags.length; i++)
-                              AutoScrollTag(
-                                key: Key('${tags[i]}-$currentTabId'),
-                                controller: scrollController,
-                                index: i,
-                                child: Padding(
-                                  padding: (i < tags.length - 1) ? const EdgeInsets.only(right: 8) : EdgeInsets.zero,
-                                  child: Stack(
-                                    children: [
-                                      MainSearchTagChip(
-                                        tag: tags[i],
-                                        tab: searchHandler.currentTab,
-                                        onTap: () => widget.onChipTap(tags[i], i),
-                                        onLongTap: widget.onChipLongTap == null
-                                            ? null
-                                            : () => widget.onChipLongTap!(tags[i], i),
-                                        onDeleteTap: widget.onChipDeleteTap == null
-                                            ? null
-                                            : () => widget.onChipDeleteTap!(tags[i], i),
-                                        canDelete: widget.selectedTagIndex != i,
-                                        isSelected: widget.selectedTag == tags[i] || widget.selectedTagIndex == i,
-                                      ),
-                                      if (widget.selectedTag == tags[i] || widget.selectedTagIndex == i)
-                                        Positioned.fill(
-                                          child: TransparentPointer(
-                                            child: DecoratedBox(
-                                              decoration: BoxDecoration(
-                                                color: Colors.transparent,
-                                                borderRadius: BorderRadius.circular(12),
-                                                border: Border.all(
-                                                  color: context.theme.colorScheme.secondary,
-                                                  width: 2,
+                              //
+                              for (int i = 0; i < tags.length; i++)
+                                AutoScrollTag(
+                                  key: Key('${tags[i]}-$currentTabId'),
+                                  controller: scrollController,
+                                  index: i,
+                                  child: Padding(
+                                    padding: (i < tags.length - 1) ? const EdgeInsets.only(right: 8) : EdgeInsets.zero,
+                                    child: Stack(
+                                      children: [
+                                        MainSearchTagChip(
+                                          tag: tags[i],
+                                          tab: searchHandler.currentTab,
+                                          onTap: () => widget.onChipTap(tags[i], i),
+                                          onLongTap: widget.onChipLongTap == null
+                                              ? null
+                                              : () => widget.onChipLongTap!(tags[i], i),
+                                          onDeleteTap: widget.onChipDeleteTap == null
+                                              ? null
+                                              : () => widget.onChipDeleteTap!(tags[i], i),
+                                          canDelete: widget.selectedTagIndex != i,
+                                          isSelected: widget.selectedTag == tags[i] || widget.selectedTagIndex == i,
+                                        ),
+                                        if (widget.selectedTag == tags[i] || widget.selectedTagIndex == i)
+                                          Positioned.fill(
+                                            child: TransparentPointer(
+                                              child: DecoratedBox(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.transparent,
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: context.theme.colorScheme.secondary,
+                                                    width: 2,
+                                                  ),
                                                 ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

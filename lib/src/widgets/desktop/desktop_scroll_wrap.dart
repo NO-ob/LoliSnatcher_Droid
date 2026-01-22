@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
@@ -11,6 +12,15 @@ ScrollPhysics? getListPhysics() {
     return const NeverScrollableScrollPhysics();
   } else {
     return const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
+  }
+}
+
+void desktopPointerScroll(
+  ScrollController controller,
+  PointerSignalEvent event,
+) {
+  if (event is PointerScrollEvent) {
+    controller.jumpTo(controller.offset + event.scrollDelta.dy);
   }
 }
 

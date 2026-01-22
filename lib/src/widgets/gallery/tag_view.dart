@@ -1939,106 +1939,109 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               interactive: true,
                               thickness: 6,
                               thumbVisibility: true,
-                              child: FadingEdgeScrollView.fromScrollView(
-                                child: ListView.builder(
-                                  controller: scrollController,
-                                  physics: getListPhysics(),
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: tab!.booruHandler.filteredFetched.isEmpty
-                                      ? 1
-                                      : tab!.booruHandler.filteredFetched.length +
-                                            ((loading || errorString.isNotEmpty) ? 1 : 0),
-                                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-                                  itemBuilder: (context, index) {
-                                    if (tab!.booruHandler.filteredFetched.isEmpty) {
-                                      return Center(
-                                        child: Column(
-                                          // mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            const Kaomoji(
-                                              type: KaomojiType.shrug,
-                                              style: TextStyle(fontSize: 24),
-                                            ),
-                                            Text(
-                                              context.loc.nothingFound,
-                                              style: const TextStyle(fontSize: 16),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-
-                                    if (loading && index == tab!.booruHandler.filteredFetched.length) {
-                                      return const Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 32),
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      );
-                                    }
-
-                                    if (errorString.isNotEmpty && index == tab!.booruHandler.filteredFetched.length) {
-                                      return Center(
-                                        child: Container(
-                                          padding: const EdgeInsets.all(16),
-                                          margin: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).colorScheme.surface,
-                                            border: Border.all(color: Theme.of(context).dividerColor),
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
+                              child: Listener(
+                                onPointerSignal: (event) => desktopPointerScroll(scrollController, event),
+                                child: FadingEdgeScrollView.fromScrollView(
+                                  child: ListView.builder(
+                                    controller: scrollController,
+                                    physics: getListPhysics(),
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: tab!.booruHandler.filteredFetched.isEmpty
+                                        ? 1
+                                        : tab!.booruHandler.filteredFetched.length +
+                                              ((loading || errorString.isNotEmpty) ? 1 : 0),
+                                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                                    itemBuilder: (context, index) {
+                                      if (tab!.booruHandler.filteredFetched.isEmpty) {
+                                        return Center(
                                           child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            spacing: 8,
+                                            // mainAxisSize: MainAxisSize.max,
+                                            mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                              const Icon(
-                                                Icons.error_outline,
-                                                size: 30,
+                                              const Kaomoji(
+                                                type: KaomojiType.shrug,
+                                                style: TextStyle(fontSize: 24),
                                               ),
                                               Text(
-                                                context.loc.tagView.failedToLoadPreviewPage,
+                                                context.loc.nothingFound,
                                                 style: const TextStyle(fontSize: 16),
-                                              ),
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  loadPreview(retry: true);
-                                                },
-                                                child: Text(context.loc.tagView.tryAgain),
                                               ),
                                             ],
                                           ),
+                                        );
+                                      }
+
+                                      if (loading && index == tab!.booruHandler.filteredFetched.length) {
+                                        return const Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: 32),
+                                            child: CircularProgressIndicator(),
+                                          ),
+                                        );
+                                      }
+
+                                      if (errorString.isNotEmpty && index == tab!.booruHandler.filteredFetched.length) {
+                                        return Center(
+                                          child: Container(
+                                            padding: const EdgeInsets.all(16),
+                                            margin: const EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: Theme.of(context).colorScheme.surface,
+                                              border: Border.all(color: Theme.of(context).dividerColor),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              spacing: 8,
+                                              children: [
+                                                const Icon(
+                                                  Icons.error_outline,
+                                                  size: 30,
+                                                ),
+                                                Text(
+                                                  context.loc.tagView.failedToLoadPreviewPage,
+                                                  style: const TextStyle(fontSize: 16),
+                                                ),
+                                                ElevatedButton(
+                                                  onPressed: () {
+                                                    loadPreview(retry: true);
+                                                  },
+                                                  child: Text(context.loc.tagView.tryAgain),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }
+
+                                      return Material(
+                                        color: Colors.transparent,
+                                        child: Container(
+                                          padding: const EdgeInsets.only(right: 8),
+                                          height: 180,
+                                          width: 120,
+                                          child: ValueListenableBuilder(
+                                            valueListenable: viewedIndex,
+                                            builder: (context, viewedIndex, _) {
+                                              return ThumbnailCardBuild(
+                                                index: index,
+                                                item: tab!.booruHandler.filteredFetched[index],
+                                                handler: tab!.booruHandler,
+                                                scrollController: scrollController,
+                                                isHighlighted: viewedIndex == index,
+                                                selectable: false,
+                                                onTap: onPreviewTap,
+                                                onDoubleTap: onPreviewDoubleTap,
+                                                // onLongPress: onPreviewLongPress, // TODO use select here somehow?
+                                                onSecondaryTap: onPreviewSecondaryTap,
+                                              );
+                                            },
+                                          ),
                                         ),
                                       );
-                                    }
-
-                                    return Material(
-                                      color: Colors.transparent,
-                                      child: Container(
-                                        padding: const EdgeInsets.only(right: 8),
-                                        height: 180,
-                                        width: 120,
-                                        child: ValueListenableBuilder(
-                                          valueListenable: viewedIndex,
-                                          builder: (context, viewedIndex, _) {
-                                            return ThumbnailCardBuild(
-                                              index: index,
-                                              item: tab!.booruHandler.filteredFetched[index],
-                                              handler: tab!.booruHandler,
-                                              scrollController: scrollController,
-                                              isHighlighted: viewedIndex == index,
-                                              selectable: false,
-                                              onTap: onPreviewTap,
-                                              onDoubleTap: onPreviewDoubleTap,
-                                              // onLongPress: onPreviewLongPress, // TODO use select here somehow?
-                                              onSecondaryTap: onPreviewSecondaryTap,
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                    },
+                                  ),
                                 ),
                               ),
                             ),

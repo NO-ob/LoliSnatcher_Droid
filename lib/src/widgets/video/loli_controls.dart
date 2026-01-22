@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' hide e;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:chewie/chewie.dart';
@@ -1211,39 +1212,46 @@ class _PlaybackSpeedDialogState extends State<_PlaybackSpeedDialog> {
               builder: (context, _, _) {
                 return SizedBox(
                   height: 50,
-                  child: PageView.builder(
-                    itemCount: widget.speeds.length,
-                    scrollDirection: Axis.horizontal,
-                    controller: controller,
-                    onPageChanged: (value) {
-                      selectedIndex.value = value;
+                  child: Listener(
+                    onPointerSignal: (event) {
+                      if (event is PointerScrollEvent) {
+                        changeValue(event.scrollDelta.dy > 0 ? 1 : -1);
+                      }
                     },
-                    itemBuilder: (context, i) {
-                      return GestureDetector(
-                        onTap: () {
-                          if (i != selectedIndex.value) {
-                            changeValue(i - selectedIndex.value);
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceContainer,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${widget.speeds[i].truncateTrailingZeroes(2)}x',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: i == selectedIndex.value ? Theme.of(context).colorScheme.secondary : null,
+                    child: PageView.builder(
+                      itemCount: widget.speeds.length,
+                      scrollDirection: Axis.horizontal,
+                      controller: controller,
+                      onPageChanged: (value) {
+                        selectedIndex.value = value;
+                      },
+                      itemBuilder: (context, i) {
+                        return GestureDetector(
+                          onTap: () {
+                            if (i != selectedIndex.value) {
+                              changeValue(i - selectedIndex.value);
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surfaceContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${widget.speeds[i].truncateTrailingZeroes(2)}x',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  color: i == selectedIndex.value ? Theme.of(context).colorScheme.secondary : null,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 );
               },
