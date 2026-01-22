@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
+import 'package:lolisnatcher/src/pages/settings/text_parser_test_page.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -158,6 +159,12 @@ class _DebugPageState extends State<DebugPage> {
                 action: () {
                   showTagsManager(context);
                 },
+              ),
+
+              SettingsButton(
+                name: 'Text Parser Test',
+                icon: const Icon(Icons.text_fields),
+                page: () => const TextParserTestPage(),
               ),
 
               if (kDebugMode && (Platform.isAndroid || Platform.isIOS)) ...[

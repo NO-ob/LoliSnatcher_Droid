@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -11,16 +10,11 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
-import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
+import 'package:lolisnatcher/src/widgets/common/parsed_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
-
-// TODO parse [quote] https://github.com/flexbooru/flexbooru/blob/2084976a1db68c312ec4b9169f88e7425f35a539/android/src/main/java/onlymash/flexbooru/widget/CommentView.kt
-// TODO add support for more boorus
-// GelbooruV1, Shimmie, R34Hentai - can parse post html, but there won't be "has_comments" bool
-// Others - don't have api / broken api (e621) / I don't care enough to do them
 
 class CommentsDialog extends StatefulWidget {
   const CommentsDialog({
@@ -223,51 +217,31 @@ class _CommentsDialogState extends State<CommentsDialog> {
 class _CommentEntry extends StatelessWidget {
   const _CommentEntry({
     required this.comment,
+    this.onTagTap,
   });
 
   final CommentItem comment;
-
-  String parseContent(String? content) {
-    if (content == null) {
-      return '';
-    }
-
-    // TODO more rules
-    // TODO make a better/more optimized way to do this?
-    return content
-        // sankaku(?) quoting
-        .replaceAll('[quote]', '[ ')
-        .replaceAll('[/quote]', ' ]\n')
-        .replaceAll('said:', 'said: ')
-        // .replaceAll(RegExp(r'\[\w+\]'), '[') // probably not correct to do, will trigger on everything that has [smth]
-        // .replaceAll(RegExp(r'\[\/\w+\]'), ']\n')
-        // move three dots away from everything
-        .replaceAll('...', ' ... ')
-        // multiple spaces to one
-        .replaceAll(RegExp(' +'), ' ')
-        // multiple new lines to one
-        .replaceAll(RegExp(r'\n+'), '\n');
-  }
+  final OnTagTap? onTagTap;
 
   Widget scoreText(int? score) {
     if (score == null) {
-      return const Text('');
-    } else {
-      Color color = Colors.grey;
-      if (score > 0) {
-        color = Colors.green;
-      } else if (score < 0) {
-        color = Colors.red;
-      }
-
-      return Text(
-        '${score > 0 ? '+' : ''}$score',
-        style: TextStyle(
-          fontSize: 12,
-          color: color,
-        ),
-      );
+      return const SizedBox.shrink();
     }
+
+    Color color = Colors.grey;
+    if (score > 0) {
+      color = Colors.green;
+    } else if (score < 0) {
+      color = Colors.red;
+    }
+
+    return Text(
+      '${score > 0 ? '+' : ''}$score',
+      style: TextStyle(
+        fontSize: 12,
+        color: color,
+      ),
+    );
   }
 
   String formatDate(String date, String format) {
@@ -294,12 +268,80 @@ class _CommentEntry extends StatelessWidget {
     return formattedDate;
   }
 
+  String _normalizeContent(String? content) {
+    if (content == null || content.isEmpty) {
+      return '';
+    }
+    // Normalize whitespace only - parsing is handled by ParsedText
+    return content.replaceAll(RegExp(' +'), ' ').replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
+  }
+
+  void _showAvatarDialog(BuildContext context, String avatarUrl, String? authorName) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (authorName?.isNotEmpty == true)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  authorName!,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    shadows: [Shadow(blurRadius: 4, color: Colors.black)],
+                  ),
+                ),
+              ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.sizeOf(context).width * 0.8,
+                  maxHeight: MediaQuery.sizeOf(context).height * 0.6,
+                ),
+                child: Image.network(
+                  avatarUrl,
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.medium,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      width: 200,
+                      height: 200,
+                      color: Theme.of(context).colorScheme.surface,
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 200,
+                      height: 200,
+                      color: Theme.of(context).colorScheme.surface,
+                      child: const Center(child: Icon(Icons.error_outline, size: 48)),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
       child: Material(
-        color: Theme.of(context).colorScheme.surface,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
@@ -311,22 +353,27 @@ class _CommentEntry extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Container(
-                      width: comment.avatarUrl != null ? 60 : 40,
-                      height: comment.avatarUrl != null ? 60 : 40,
-                      margin: const EdgeInsets.only(right: 10),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(comment.avatarUrl != null ? 10 : 20),
-                        child: comment.avatarUrl != null
-                            ? Image.network(
-                                comment.avatarUrl!,
-                                fit: BoxFit.cover,
-                                filterQuality: FilterQuality.medium,
-                                errorBuilder: (context, url, error) {
-                                  return Center(child: Text(comment.authorName?.substring(0, 2) ?? '?'));
-                                },
-                              )
-                            : Center(child: Text(comment.authorName?.substring(0, 2) ?? '?')),
+                    GestureDetector(
+                      onTap: comment.avatarUrl != null
+                          ? () => _showAvatarDialog(context, comment.avatarUrl!, comment.authorName)
+                          : null,
+                      child: Container(
+                        width: comment.avatarUrl != null ? 60 : 40,
+                        height: comment.avatarUrl != null ? 60 : 40,
+                        margin: const EdgeInsets.only(right: 10),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(comment.avatarUrl != null ? 10 : 20),
+                          child: comment.avatarUrl != null
+                              ? Image.network(
+                                  comment.avatarUrl!,
+                                  fit: BoxFit.cover,
+                                  filterQuality: FilterQuality.medium,
+                                  errorBuilder: (context, url, error) {
+                                    return Center(child: Text(comment.authorName?.substring(0, 2) ?? '?'));
+                                  },
+                                )
+                              : Center(child: Text(comment.authorName?.substring(0, 2) ?? '?')),
+                        ),
                       ),
                     ),
                     Expanded(
@@ -347,17 +394,19 @@ class _CommentEntry extends StatelessWidget {
                             child: Row(
                               children: [
                                 if (comment.title?.isNotEmpty == true)
-                                  SelectableText(
-                                    comment.title!,
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 5),
+                                    child: SelectableText(
+                                      comment.title!,
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
                                   ),
-                                const SizedBox(width: 5),
                                 if (comment.createDate?.isNotEmpty == true)
                                   Text(
                                     formatDate(comment.createDate!, comment.createDateFormat!),
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                     ),
                                   ),
                                 const SizedBox(width: 15),
@@ -374,32 +423,10 @@ class _CommentEntry extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   width: double.maxFinite,
-                  child: SelectableLinkify(
-                    text: parseContent(comment.content?.trim()),
-                    options: const LinkifyOptions(
-                      humanize: false,
-                      removeWww: true,
-                      looseUrl: true,
-                      defaultToHttps: true,
-                      excludeLastPeriod: true,
-                    ),
-                    scrollPhysics: const NeverScrollableScrollPhysics(),
-                    onOpen: (link) async {
-                      final res = await launchUrlString(
-                        link.url,
-                        mode: LaunchMode.externalApplication,
-                      );
-                      if (!res) {
-                        FlashElements.showSnackbar(
-                          title: Text(context.loc.error),
-                          content: Text(context.loc.failedToOpenLink),
-                        );
-                      }
-                    },
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: ParsedText(
+                    text: _normalizeContent(comment.content),
+                    style: const TextStyle(fontSize: 16),
+                    onTagTap: onTagTap,
                   ),
                 ),
               ],
