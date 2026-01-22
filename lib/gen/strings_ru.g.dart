@@ -3586,6 +3586,20 @@ class _TranslationsMediaLoadingRu extends TranslationsMediaLoadingEn {
   @override
   String startedSecondsAgo({required int seconds}) =>
       TranslationOverrides.string(_root.$meta, 'media.loading.startedSecondsAgo', {'seconds': seconds}) ?? 'Начато ${seconds}с назад';
+  @override
+  late final _TranslationsMediaLoadingStopReasonsRu stopReasons = _TranslationsMediaLoadingStopReasonsRu._(_root);
+  @override
+  String get fileIsZeroBytes => TranslationOverrides.string(_root.$meta, 'media.loading.fileIsZeroBytes', {}) ?? 'Пустой файл';
+  @override
+  String fileSize({required String size}) =>
+      TranslationOverrides.string(_root.$meta, 'media.loading.fileSize', {'size': size}) ?? 'Размер файла: ${size}';
+  @override
+  String sizeLimit({required String limit}) =>
+      TranslationOverrides.string(_root.$meta, 'media.loading.sizeLimit', {'limit': limit}) ?? 'Лимит: ${limit}';
+  @override
+  String get tryChangingVideoBackend =>
+      TranslationOverrides.string(_root.$meta, 'media.loading.tryChangingVideoBackend', {}) ??
+      'Попробуй изменить "Движок видеоплеера" в Настройках->Видео, если у тебя часто возникают проблемы с воспроизведением видео';
 }
 
 // Path: media.video
@@ -3698,6 +3712,26 @@ class _TranslationsSettingsVideoCacheModesRu extends TranslationsSettingsVideoCa
   String get desktopWarning =>
       TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
       '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.';
+}
+
+// Path: media.loading.stopReasons
+class _TranslationsMediaLoadingStopReasonsRu extends TranslationsMediaLoadingStopReasonsEn {
+  _TranslationsMediaLoadingStopReasonsRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get stoppedByUser => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.stoppedByUser', {}) ?? 'Остановлено пользователем';
+  @override
+  String get loadingError => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.loadingError', {}) ?? 'Ошибка загрузки';
+  @override
+  String get fileIsTooBig => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.fileIsTooBig', {}) ?? 'Файл слишком большой';
+  @override
+  String get containsHatedTags =>
+      TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.containsHatedTags', {}) ?? 'Содержит ненавистные теги';
+  @override
+  String get videoError => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.videoError', {}) ?? 'Ошибка видео';
 }
 
 /// The flat map containing all translations for locale <ru>.
@@ -5712,6 +5746,24 @@ extension on TranslationsRu {
           'media.loading.startedSecondsAgo' =>
             ({required int seconds}) =>
                 TranslationOverrides.string(_root.$meta, 'media.loading.startedSecondsAgo', {'seconds': seconds}) ?? 'Начато ${seconds}с назад',
+          'media.loading.stopReasons.stoppedByUser' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.stoppedByUser', {}) ?? 'Остановлено пользователем',
+          'media.loading.stopReasons.loadingError' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.loadingError', {}) ?? 'Ошибка загрузки',
+          'media.loading.stopReasons.fileIsTooBig' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.fileIsTooBig', {}) ?? 'Файл слишком большой',
+          'media.loading.stopReasons.containsHatedTags' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.containsHatedTags', {}) ?? 'Содержит ненавистные теги',
+          'media.loading.stopReasons.videoError' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.videoError', {}) ?? 'Ошибка видео',
+          'media.loading.fileIsZeroBytes' => TranslationOverrides.string(_root.$meta, 'media.loading.fileIsZeroBytes', {}) ?? 'Пустой файл',
+          'media.loading.fileSize' =>
+            ({required String size}) => TranslationOverrides.string(_root.$meta, 'media.loading.fileSize', {'size': size}) ?? 'Размер файла: ${size}',
+          'media.loading.sizeLimit' =>
+            ({required String limit}) => TranslationOverrides.string(_root.$meta, 'media.loading.sizeLimit', {'limit': limit}) ?? 'Лимит: ${limit}',
+          'media.loading.tryChangingVideoBackend' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.tryChangingVideoBackend', {}) ??
+                'Попробуй изменить "Движок видеоплеера" в Настройках->Видео, если у тебя часто возникают проблемы с воспроизведением видео',
           'media.video.videosDisabledOrNotSupported' =>
             TranslationOverrides.string(_root.$meta, 'media.video.videosDisabledOrNotSupported', {}) ?? 'Видео отключены или не поддерживаются',
           'media.video.openVideoInExternalPlayer' =>

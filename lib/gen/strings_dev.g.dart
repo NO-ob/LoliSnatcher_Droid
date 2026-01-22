@@ -3528,6 +3528,20 @@ class _TranslationsMediaLoadingDev extends TranslationsMediaLoadingEn {
   @override
   String startedSecondsAgo({required int seconds}) =>
       TranslationOverrides.string(_root.$meta, 'media.loading.startedSecondsAgo', {'seconds': seconds}) ?? '{Started ${seconds}s ago}';
+  @override
+  late final _TranslationsMediaLoadingStopReasonsDev stopReasons = _TranslationsMediaLoadingStopReasonsDev._(_root);
+  @override
+  String get fileIsZeroBytes => TranslationOverrides.string(_root.$meta, 'media.loading.fileIsZeroBytes', {}) ?? '{File is zero bytes}';
+  @override
+  String fileSize({required String size}) =>
+      TranslationOverrides.string(_root.$meta, 'media.loading.fileSize', {'size': size}) ?? '{File size: ${size}}';
+  @override
+  String sizeLimit({required String limit}) =>
+      TranslationOverrides.string(_root.$meta, 'media.loading.sizeLimit', {'limit': limit}) ?? '{Limit: ${limit}}';
+  @override
+  String get tryChangingVideoBackend =>
+      TranslationOverrides.string(_root.$meta, 'media.loading.tryChangingVideoBackend', {}) ??
+      '{Try changing "Video player backend" in Settings->Video if you encounter playback issues often}';
 }
 
 // Path: media.video
@@ -3639,6 +3653,26 @@ class _TranslationsSettingsVideoCacheModesDev extends TranslationsSettingsVideoC
   String get desktopWarning =>
       TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
       '{[Warning]: On desktop Stream mode can work incorrectly for some Boorus.}';
+}
+
+// Path: media.loading.stopReasons
+class _TranslationsMediaLoadingStopReasonsDev extends TranslationsMediaLoadingStopReasonsEn {
+  _TranslationsMediaLoadingStopReasonsDev._(TranslationsDev root) : this._root = root, super.internal(root);
+
+  final TranslationsDev _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get stoppedByUser => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.stoppedByUser', {}) ?? '{Stopped by user}';
+  @override
+  String get loadingError => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.loadingError', {}) ?? '{Loading error}';
+  @override
+  String get fileIsTooBig => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.fileIsTooBig', {}) ?? '{File is too big}';
+  @override
+  String get containsHatedTags =>
+      TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.containsHatedTags', {}) ?? '{Contains hated tags}';
+  @override
+  String get videoError => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.videoError', {}) ?? '{Video error}';
 }
 
 /// The flat map containing all translations for locale <dev>.
@@ -5607,6 +5641,24 @@ extension on TranslationsDev {
           'media.loading.startedSecondsAgo' =>
             ({required int seconds}) =>
                 TranslationOverrides.string(_root.$meta, 'media.loading.startedSecondsAgo', {'seconds': seconds}) ?? '{Started ${seconds}s ago}',
+          'media.loading.stopReasons.stoppedByUser' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.stoppedByUser', {}) ?? '{Stopped by user}',
+          'media.loading.stopReasons.loadingError' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.loadingError', {}) ?? '{Loading error}',
+          'media.loading.stopReasons.fileIsTooBig' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.fileIsTooBig', {}) ?? '{File is too big}',
+          'media.loading.stopReasons.containsHatedTags' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.containsHatedTags', {}) ?? '{Contains hated tags}',
+          'media.loading.stopReasons.videoError' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.videoError', {}) ?? '{Video error}',
+          'media.loading.fileIsZeroBytes' => TranslationOverrides.string(_root.$meta, 'media.loading.fileIsZeroBytes', {}) ?? '{File is zero bytes}',
+          'media.loading.fileSize' =>
+            ({required String size}) => TranslationOverrides.string(_root.$meta, 'media.loading.fileSize', {'size': size}) ?? '{File size: ${size}}',
+          'media.loading.sizeLimit' =>
+            ({required String limit}) => TranslationOverrides.string(_root.$meta, 'media.loading.sizeLimit', {'limit': limit}) ?? '{Limit: ${limit}}',
+          'media.loading.tryChangingVideoBackend' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.tryChangingVideoBackend', {}) ??
+                '{Try changing "Video player backend" in Settings->Video if you encounter playback issues often}',
           'media.video.videosDisabledOrNotSupported' =>
             TranslationOverrides.string(_root.$meta, 'media.video.videosDisabledOrNotSupported', {}) ?? '{Videos disabled or not supported}',
           'media.video.openVideoInExternalPlayer' =>

@@ -26,24 +26,6 @@ enum ViewerStopReason {
   hated,
   videoError,
   reset,
-  ;
-
-  String get description {
-    switch (this) {
-      case ViewerStopReason.user:
-        return 'Stopped by user';
-      case ViewerStopReason.error:
-        return 'Loading error';
-      case ViewerStopReason.tooBig:
-        return 'File is too big';
-      case ViewerStopReason.hated:
-        return 'Contains hated tags';
-      case ViewerStopReason.videoError:
-        return 'Video error';
-      case ViewerStopReason.reset:
-        return '';
-    }
-  }
 }
 
 enum PreloadBlockState {
@@ -110,7 +92,7 @@ class ImageViewerState extends State<ImageViewer> {
     } else if (size == 0) {
       stopLoading(
         reason: ViewerStopReason.error,
-        title: 'File is zero bytes',
+        title: context.loc.media.loading.fileIsZeroBytes,
       );
     } else if (maxSize != null && (size > maxSize) && !blockPreloadState.isIgnore) {
       // TODO add check if resolution is too big
@@ -118,8 +100,8 @@ class ImageViewerState extends State<ImageViewer> {
       stopLoading(
         reason: ViewerStopReason.tooBig,
         details:
-            'File size: ${Tools.formatBytes(size, 2)}'
-            'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
+            '${context.loc.media.loading.fileSize(size: Tools.formatBytes(size, 2))}'
+            '${context.loc.media.loading.sizeLimit(limit: Tools.formatBytes(maxSize, 2, withTrailingZeroes: false))}',
       );
     }
 

@@ -1255,7 +1255,18 @@
       "loadAnyway": "Все равно загрузить",
       "restartLoading": "Перезапустить загрузку",
       "stopLoading": "Остановить загрузку",
-      "startedSecondsAgo(param=seconds)": "Начато ${seconds: int}с назад"
+      "startedSecondsAgo(param=seconds)": "Начато ${seconds: int}с назад",
+      "stopReasons": {
+        "stoppedByUser": "Остановлено пользователем",
+        "loadingError": "Ошибка загрузки",
+        "fileIsTooBig": "Файл слишком большой",
+        "containsHatedTags": "Содержит ненавистные теги",
+        "videoError": "Ошибка видео"
+      },
+      "fileIsZeroBytes": "Пустой файл",
+      "fileSize(param=size)": "Размер файла: ${size: String}",
+      "sizeLimit(param=limit)": "Лимит: ${limit: String}",
+      "tryChangingVideoBackend": "Попробуй изменить \"Движок видеоплеера\" в Настройках->Видео, если у тебя часто возникают проблемы с воспроизведением видео"
     },
     "video": {
       "videosDisabledOrNotSupported": "Видео отключены или не поддерживаются",

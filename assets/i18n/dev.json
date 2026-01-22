@@ -1255,7 +1255,18 @@
             "loadAnyway": "{Load anyway}",
             "restartLoading": "{Restart loading}",
             "stopLoading": "{Stop loading}",
-            "startedSecondsAgo(param=seconds)": "{Started ${seconds: int}s ago}"
+            "startedSecondsAgo(param=seconds)": "{Started ${seconds: int}s ago}",
+            "stopReasons": {
+                "stoppedByUser": "{Stopped by user}",
+                "loadingError": "{Loading error}",
+                "fileIsTooBig": "{File is too big}",
+                "containsHatedTags": "{Contains hated tags}",
+                "videoError": "{Video error}"
+            },
+            "fileIsZeroBytes": "{File is zero bytes}",
+            "fileSize(param=size)": "{File size: ${size: String}}",
+            "sizeLimit(param=limit)": "{Limit: ${limit: String}}",
+            "tryChangingVideoBackend": "{Try changing \"Video player backend\" in Settings->Video if you encounter playback issues often}"
         },
         "video": {
             "videosDisabledOrNotSupported": "{Videos disabled or not supported}",

@@ -170,7 +170,7 @@ class VideoViewerState extends State<VideoViewer> {
     if (size == 0) {
       stopLoading(
         reason: ViewerStopReason.error,
-        title: 'File is zero bytes',
+        title: context.loc.media.loading.fileIsZeroBytes,
       );
     } else if (maxSize != null && (size > maxSize) && !blockPreloadState.isIgnore) {
       // TODO add check if resolution is too big
@@ -178,8 +178,8 @@ class VideoViewerState extends State<VideoViewer> {
       stopLoading(
         reason: ViewerStopReason.tooBig,
         details:
-            'File size: ${Tools.formatBytes(size, 2)}'
-            'Limit: ${Tools.formatBytes(maxSize, 2, withTrailingZeroes: false)}',
+            '${context.loc.media.loading.fileSize(size: Tools.formatBytes(size, 2))}'
+            '${context.loc.media.loading.sizeLimit(limit: Tools.formatBytes(maxSize, 2, withTrailingZeroes: false))}',
       );
     }
 
@@ -231,7 +231,7 @@ class VideoViewerState extends State<VideoViewer> {
         stopLoading(
           reason: ViewerStopReason.error,
           details: settingsHandler.videoBackendMode.isNormal
-              ? '\nTry changing "Video player backend" in Settings->Video if you encounter playback issues often'
+              ? '\n${context.loc.media.loading.tryChangingVideoBackend}'
               : null,
         );
       }

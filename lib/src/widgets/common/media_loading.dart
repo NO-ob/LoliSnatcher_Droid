@@ -12,6 +12,7 @@ import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 
 // TODO redesign
 
+
 class MediaLoading extends StatefulWidget {
   const MediaLoading({
     required this.item,
@@ -56,6 +57,18 @@ class MediaLoading extends StatefulWidget {
 
 class _MediaLoadingState extends State<MediaLoading> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+
+  String _getStopReasonDescription(BuildContext context, ViewerStopReason? reason) {
+    if (reason == null) return '';
+    return switch (reason) {
+      ViewerStopReason.user => context.loc.media.loading.stopReasons.stoppedByUser,
+      ViewerStopReason.error => context.loc.media.loading.stopReasons.loadingError,
+      ViewerStopReason.tooBig => context.loc.media.loading.stopReasons.fileIsTooBig,
+      ViewerStopReason.hated => context.loc.media.loading.stopReasons.containsHatedTags,
+      ViewerStopReason.videoError => context.loc.media.loading.stopReasons.videoError,
+      ViewerStopReason.reset => '',
+    };
+  }
 
   bool isVisible = false;
   int _total = 0, _received = 0, _startedAt = 0;
@@ -188,7 +201,7 @@ class _MediaLoadingState extends State<MediaLoading> {
               ? [
                   if (widget.stopReason != null)
                     LoadingText(
-                      text: widget.stopReason?.description ?? '',
+                      text: _getStopReasonDescription(context, widget.stopReason),
                       fontSize: 20,
                     ),
                   if (widget.stopDetails != null)
@@ -350,7 +363,7 @@ class _MediaLoadingState extends State<MediaLoading> {
       children = [
         if (widget.stopReason != null)
           LoadingText(
-            text: widget.stopReason?.description ?? '',
+            text: _getStopReasonDescription(context, widget.stopReason),
             fontSize: 20,
           ),
         if (widget.stopDetails != null)
