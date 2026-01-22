@@ -664,6 +664,51 @@ class DBHandler {
     return tags;
   }
 
+  /// Get tags sorted by usage count (how many items they're attached to)
+  /// If [queryStr] is provided, filters tags that start with the query
+  /// Returns a list of maps with 'name' and 'count' keys
+  Future<List<({String name, int count})>> getTagsByUsageCount(String? queryStr, int limit) async {
+    final List<({String name, int count})> tags = [];
+
+    String query;
+    List<Object?> args;
+
+    if (queryStr != null && queryStr.isNotEmpty) {
+      query = '''
+        SELECT t.name, COUNT(it.booruItemID) as count
+        FROM Tag t
+        LEFT JOIN ImageTag it ON t.id = it.tagID
+        WHERE lower(t.name) LIKE (?)
+        GROUP BY t.id
+        ORDER BY count DESC
+        LIMIT ?
+      ''';
+      args = ['${queryStr.toLowerCase()}%', limit];
+    } else {
+      query = '''
+        SELECT t.name, COUNT(it.booruItemID) as count
+        FROM Tag t
+        LEFT JOIN ImageTag it ON t.id = it.tagID
+        GROUP BY t.id
+        ORDER BY count DESC
+        LIMIT ?
+      ''';
+      args = [limit];
+    }
+
+    final result = await db?.rawQuery(query, args);
+    if (result != null && result.isNotEmpty) {
+      for (final row in result) {
+        final name = row['name']?.toString() ?? '';
+        final count = row['count'] as int? ?? 0;
+        if (name.isNotEmpty) {
+          tags.add((name: name, count: count));
+        }
+      }
+    }
+    return tags;
+  }
+
   /// functions related to tab backup logic:
   Future<void> addTabRestore(String restore) async {
     final result = await db?.rawQuery('SELECT id FROM TabRestore ORDER BY id DESC LIMIT 1');

@@ -63,10 +63,14 @@ class DownloadsHandler extends BooruHandler {
     CancelToken? cancelToken,
   }) async {
     try {
-      final List<TagSuggestion> tags = (await SettingsHandler.instance.dbHandler.getTags(
-        input,
+      final tagsWithCount = await SettingsHandler.instance.dbHandler.getTagsByUsageCount(
+        input.isEmpty ? null : input,
         limit,
-      )).map((t) => TagSuggestion(tag: t)).where((t) => t.tag.trim().isNotEmpty).toList();
+      );
+      final List<TagSuggestion> tags = tagsWithCount
+          .where((t) => t.name.trim().isNotEmpty)
+          .map((t) => TagSuggestion(tag: t.name, count: t.count))
+          .toList();
       return Right(tags);
     } catch (e, s) {
       return Left(
