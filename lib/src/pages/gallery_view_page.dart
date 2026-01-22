@@ -64,6 +64,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
 
   bool isOpeningAnimation = true;
   final ValueNotifier<double> dismissProgress = ValueNotifier(1);
+  final ValueNotifier<bool> drawerOpen = ValueNotifier(false);
 
   final ValueNotifier<bool> isActive = ValueNotifier(true);
 
@@ -186,8 +187,6 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
         viewerScaffoldKey.currentState?.openEndDrawer();
       },
     );
-
-    final double maxDrawerWidth = MediaQuery.sizeOf(context).shortestSide * 0.8;
 
     return Scaffold(
       key: viewerScaffoldKey,
@@ -562,11 +561,16 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                       ),
                     ),
                     ValueListenableBuilder(
-                      valueListenable: dismissProgress,
-                      builder: (context, dismissProgress, child) {
-                        return AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: dismissProgress == 0 ? child : const SizedBox.shrink(),
+                      valueListenable: drawerOpen,
+                      builder: (context, drawerOpen, child) {
+                        return ValueListenableBuilder(
+                          valueListenable: dismissProgress,
+                          builder: (context, dismissProgress, _) {
+                            return AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              child: (dismissProgress == 0 && !drawerOpen) ? child : const SizedBox.shrink(),
+                            );
+                          },
                         );
                       },
                       child: GalleryButtons(pageController: controller),
@@ -581,86 +585,190 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
       ),
       endDrawerEnableOpenDragGesture: false,
       onEndDrawerChanged: (isOpened) {
-        // if (!isOpened) {
-        //   final item = widget.tab.booruHandler.filteredFetched[page.value];
-        //   viewerHandler.setCurrent(item.key);
-        // }
+        drawerOpen.value = isOpened;
       },
-      endDrawer: RepaintBoundary(
-        child: Theme(
-          data: Theme.of(context).copyWith(
-            // copy existing main app theme, but make background semitransparent
-            drawerTheme: Theme.of(context).drawerTheme.copyWith(
-              backgroundColor: Theme.of(context).canvasColor.withValues(alpha: 0.66),
-            ),
-          ),
-          child: SizedBox(
-            width: maxDrawerWidth + 66,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  alignment: Alignment.bottomCenter,
-                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  height: 60 * 3 + 32,
-                  width: 50,
-                  child: Column(
-                    spacing: 16,
-                    children: [
-                      // TODO fav/dl buttons?
-                      Expanded(
-                        child: ValueListenableBuilder(
-                          valueListenable: viewerHandler.isStopped,
-                          builder: (context, isStopped, child) {
-                            return AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              child: isStopped
-                                  ? SizedBox.expand(
-                                      child: OutlinedButton(
-                                        onPressed: viewerHandler.forceLoadCurrentItem,
-                                        child: const Icon(Icons.refresh),
-                                      ),
-                                    )
-                                  : null,
-                            );
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        child: LongPressRepeater(
-                          onStart: () async {
-                            controller.jumpToPage(page.value - 1);
-                            await Future.delayed(const Duration(milliseconds: 100));
-                          },
-                          fasterAfter: 20,
-                          child: OutlinedButton(
-                            onPressed: () => controller.jumpToPage(page.value - 1),
-                            child: settingsHandler.galleryScrollDirection == 'Vertical'
-                                ? const Icon(Icons.arrow_upward)
-                                : const Icon(Icons.arrow_back),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: LongPressRepeater(
-                          onStart: () async {
-                            controller.jumpToPage(page.value + 1);
-                            await Future.delayed(const Duration(milliseconds: 100));
-                          },
-                          fasterAfter: 20,
-                          child: OutlinedButton(
-                            onPressed: () => controller.jumpToPage(page.value + 1),
-                            child: settingsHandler.galleryScrollDirection == 'Vertical'
-                                ? const Icon(Icons.arrow_downward)
-                                : const Icon(Icons.arrow_forward),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      endDrawer: ItemInfoDrawer(
+        tab: widget.tab,
+        pageController: controller,
+      ),
+    );
+  }
+}
 
-                Drawer(
+Widget slidePageTransition(
+  BuildContext context,
+  PreloadPageController pageController,
+  Axis direction,
+  int index,
+  Widget? child,
+) {
+  double delta = 0;
+  if (pageController.hasClients && pageController.position.haveDimensions) {
+    final position = (pageController.page! - index).clamp(-1.0, 1.0);
+    final viewport = pageController.position.viewportDimension;
+    delta = position * viewport / 2;
+  }
+  return ClipRect(
+    child: Transform.translate(
+      offset: Offset(
+        direction == Axis.horizontal ? delta : 0,
+        direction == Axis.vertical ? delta : 0,
+      ),
+      child: child,
+    ),
+  );
+}
+
+class ItemInfoDrawer extends StatefulWidget {
+  const ItemInfoDrawer({
+    required this.tab,
+    required this.pageController,
+    super.key,
+  });
+
+  final SearchTab tab;
+  final PreloadPageController pageController;
+
+  @override
+  State<ItemInfoDrawer> createState() => _ItemInfoDrawerState();
+}
+
+class _ItemInfoDrawerState extends State<ItemInfoDrawer> {
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
+
+  final ValueNotifier<bool> isVisible = ValueNotifier(true);
+
+  final ValueNotifier<int> page = ValueNotifier(0);
+
+  @override
+  void initState() {
+    super.initState();
+
+    page.value = widget.pageController.page?.round() ?? 0;
+    widget.pageController.addListener(pageListener);
+  }
+
+  void pageListener() {
+    page.value = widget.pageController.page?.round() ?? 0;
+    print('page: ${page.value}/${widget.pageController.page}');
+  }
+
+  @override
+  void dispose() {
+    widget.pageController.removeListener(pageListener);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double maxDrawerWidth = MediaQuery.sizeOf(context).shortestSide * 0.8;
+
+    final List<Widget> buttons = [
+      // TODO fav/dl buttons?
+      Expanded(
+        child: ValueListenableBuilder(
+          valueListenable: viewerHandler.isStopped,
+          builder: (context, isStopped, child) {
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: isStopped
+                  ? SizedBox.expand(
+                      child: OutlinedButton(
+                        onPressed: viewerHandler.forceLoadCurrentItem,
+                        child: const Icon(Icons.refresh),
+                      ),
+                    )
+                  : null,
+            );
+          },
+        ),
+      ),
+      Expanded(
+        child: ValueListenableBuilder(
+          valueListenable: isVisible,
+          builder: (context, _, _) {
+            return GestureDetector(
+              onLongPressDown: (_) => isVisible.value = !isVisible.value,
+              onLongPressUp: () => isVisible.value = !isVisible.value,
+              onLongPressCancel: () => isVisible.value = !isVisible.value,
+              child: OutlinedButton(
+                onPressed: () => isVisible.value = !isVisible.value,
+                child: isVisible.value ? const Icon(Icons.remove_red_eye) : const Icon(Icons.remove_red_eye_outlined),
+              ),
+            );
+          },
+        ),
+      ),
+      Expanded(
+        child: LongPressRepeater(
+          onStart: () async {
+            widget.pageController.jumpToPage(page.value - 1);
+            await Future.delayed(const Duration(milliseconds: 100));
+          },
+          fasterAfter: 20,
+          child: OutlinedButton(
+            onPressed: () => widget.pageController.jumpToPage(page.value - 1),
+            child: settingsHandler.galleryScrollDirection == 'Vertical'
+                ? const Icon(Icons.arrow_upward)
+                : const Icon(Icons.arrow_back),
+          ),
+        ),
+      ),
+      Expanded(
+        child: LongPressRepeater(
+          onStart: () async {
+            widget.pageController.jumpToPage(page.value + 1);
+            await Future.delayed(const Duration(milliseconds: 100));
+          },
+          fasterAfter: 20,
+          child: OutlinedButton(
+            onPressed: () => widget.pageController.jumpToPage(page.value + 1),
+            child: settingsHandler.galleryScrollDirection == 'Vertical'
+                ? const Icon(Icons.arrow_downward)
+                : const Icon(Icons.arrow_forward),
+          ),
+        ),
+      ),
+    ];
+
+    return RepaintBoundary(
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          // copy existing main app theme, but make background semitransparent
+          drawerTheme: Theme.of(context).drawerTheme.copyWith(
+            backgroundColor: Theme.of(context).canvasColor.withValues(alpha: 0.66),
+          ),
+        ),
+        child: SizedBox(
+          width: maxDrawerWidth + 66,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                alignment: Alignment.bottomCenter,
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                height: (50 * buttons.length) + (12 * (buttons.length - 1)),
+                width: 50,
+                child: Column(
+                  spacing: 12,
+                  children: buttons,
+                ),
+              ),
+
+              ValueListenableBuilder(
+                valueListenable: isVisible,
+                builder: (context, isVisible, child) {
+                  return AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: isVisible ? 1 : 0,
+                    child: IgnorePointer(
+                      ignoring: !isVisible,
+                      child: child,
+                    ),
+                  );
+                },
+                child: Drawer(
                   width: maxDrawerWidth,
                   child: SafeArea(
                     child: ValueListenableBuilder(
@@ -694,35 +802,11 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-}
-
-Widget slidePageTransition(
-  BuildContext context,
-  PreloadPageController pageController,
-  Axis direction,
-  int index,
-  Widget? child,
-) {
-  double delta = 0;
-  if (pageController.hasClients && pageController.position.haveDimensions) {
-    final position = (pageController.page! - index).clamp(-1.0, 1.0);
-    final viewport = pageController.position.viewportDimension;
-    delta = position * viewport / 2;
-  }
-  return ClipRect(
-    child: Transform.translate(
-      offset: Offset(
-        direction == Axis.horizontal ? delta : 0,
-        direction == Axis.vertical ? delta : 0,
-      ),
-      child: child,
-    ),
-  );
 }
