@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -90,7 +91,6 @@ class WorldXyzHandler extends BooruHandler {
       31: 'PicThumbnailAvif',
       32: 'PicThumbnailExAvif',
     };
-
     const Map<int, String> sampleTypes = {
       13: 'PicPreview',
       14: 'PicSmall',
@@ -373,9 +373,9 @@ class WorldXyzHandler extends BooruHandler {
         final List<dynamic> tags = current['tags'] ?? [];
         final newTags = [...item.tagsList];
         for (final rawTag in tags) {
-          final tag = rawTag['value']!.replaceAll(' ', '_');
-          if (item.tagsList.contains(tag)) continue;
-          newTags.add(tag);
+          final String tag = rawTag['value']!.replaceAll(' ', '_');
+          if (item.tagsList.any((t) => t.fullString == tag)) continue;
+          newTags.add(Tag(tag));
           if (rawTag['type'] != null) {
             addTagsWithType(
               [tag],
