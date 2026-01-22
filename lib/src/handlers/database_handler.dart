@@ -1137,4 +1137,38 @@ class DBHandler {
       await batch?.commit(noResult: true);
     }
   }
+
+  /// Scans for empty tags and deletes them.
+  // TODO expand with more? duplicates?
+  Future<void> tagsCleanup() async {
+    if (db == null) return;
+
+    try {
+      final emptyTags = await db?.rawQuery("SELECT id FROM Tag WHERE trim(name) = '' OR name IS NULL") ?? [];
+
+      if (emptyTags.isNotEmpty) {
+        Logger.Inst().log(
+          '[TagCleanup] Found ${emptyTags.length} empty tags. Removing...',
+          'DBHandler',
+          'tagsCleanup',
+          LogTypes.booruHandlerInfo,
+        );
+
+        await db?.transaction((txn) async {
+          final ids = emptyTags.map((e) => e['id']! as int).toList();
+          final placeholders = List.filled(ids.length, '?').join(',');
+          await txn.rawDelete('DELETE FROM ImageTag WHERE tagID IN ($placeholders)', ids);
+          await txn.rawDelete('DELETE FROM Tag WHERE id IN ($placeholders)', ids);
+        });
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        s: s,
+        'DBHandler',
+        'tagsCleanup',
+        LogTypes.exception,
+      );
+    }
+  }
 }

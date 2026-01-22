@@ -376,6 +376,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   Timer? backupTimer;
   Timer? cacheStaleTimer;
+  Timer? dbCleanupTimer;
   ImageWriter imageWriter = ImageWriter();
 
   AppLinks? appLinks;
@@ -399,6 +400,12 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     cacheStaleTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       clearCache();
     });
+
+    dbCleanupTimer = Timer(
+      const Duration(minutes: kDebugMode ? 1 : 20),
+      // happens only once N minutes after start, to avoid long db lockup during early work
+      () => settingsHandler.dbHandler.tagsCleanup(),
+    );
 
     // consider app launch as return to the app
     WidgetsBinding.instance.addObserver(this);
@@ -453,6 +460,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void dispose() {
     backupTimer?.cancel();
     cacheStaleTimer?.cancel();
+    dbCleanupTimer?.cancel();
     appLinksSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
