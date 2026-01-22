@@ -1138,8 +1138,7 @@ class DBHandler {
     }
   }
 
-  /// Scans for empty tags and deletes them.
-  // TODO expand with more? duplicates?
+  /// Scans for empty tags and direct duplicates, then deletes them.
   Future<void> tagsCleanup() async {
     if (db == null) return;
 
@@ -1161,12 +1160,91 @@ class DBHandler {
           await txn.rawDelete('DELETE FROM Tag WHERE id IN ($placeholders)', ids);
         });
       }
+
+      //
+
+      final duplicateGroups =
+          await db?.rawQuery('''
+        SELECT name as cleanName, COUNT(*) as count 
+        FROM Tag 
+        GROUP BY name 
+        HAVING count > 1
+      ''') ??
+          [];
+
+      if (duplicateGroups.isEmpty) return;
+
+      Logger.Inst().log(
+        '[TagCleanup] Found ${duplicateGroups.length} duplicate tag groups.',
+        'DBHandler',
+        'tagsCleanup',
+        LogTypes.booruHandlerInfo,
+      );
+
+      for (final g in duplicateGroups) {
+        final String cleanName = g['cleanName']! as String;
+
+        final variants =
+            await db?.rawQuery('SELECT id, name FROM Tag WHERE name = ? ORDER BY id ASC', [cleanName]) ?? [];
+
+        if (variants.length < 2) continue;
+
+        int winnerId = -1;
+        int maxUsage = -1;
+
+        for (final v in variants) {
+          final int id = v['id']! as int;
+          final int count =
+              Sqflite.firstIntValue(await db?.rawQuery('SELECT COUNT(*) FROM ImageTag WHERE tagID = ?', [id]) ?? []) ??
+              0;
+
+          if (count > maxUsage) {
+            maxUsage = count;
+            winnerId = id;
+          }
+        }
+
+        await db?.transaction((txn) async {
+          for (final v in variants) {
+            final int id = v['id']! as int;
+            if (id == winnerId) continue;
+            await txn.rawUpdate(
+              '''
+              UPDATE ImageTag 
+              SET tagID = ? 
+              WHERE tagID = ? 
+              AND booruItemID NOT IN (
+                SELECT booruItemID FROM ImageTag WHERE tagID = ?
+              )
+            ''',
+              [winnerId, id, winnerId],
+            );
+            await txn.rawDelete('DELETE FROM ImageTag WHERE tagID = ?', [id]);
+            await txn.rawDelete('DELETE FROM Tag WHERE id = ?', [id]);
+          }
+        });
+        if (kDebugMode) {
+          Logger.Inst().log(
+            '[TagCleanup] Removed duplicate tags for "$cleanName".',
+            'DBHandler',
+            'tagsCleanup',
+            LogTypes.booruHandlerInfo,
+          );
+        }
+      }
+
+      Logger.Inst().log(
+        '[TagCleanup] Done.',
+        'DBHandler',
+        'tagsCleanup',
+        LogTypes.booruHandlerInfo,
+      );
     } catch (e, s) {
       Logger.Inst().log(
         e.toString(),
         s: s,
         'DBHandler',
-        'tagsCleanup',
+        'deduplicateTags',
         LogTypes.exception,
       );
     }
