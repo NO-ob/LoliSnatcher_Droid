@@ -83,12 +83,16 @@ extension IntExtras on int {
   bool toBool() => this == 1;
 
   String toFormattedString() => formatNumber(this);
+
+  String toShortString() => formatNumberShort(this);
 }
 
 extension DoubleExtras on double {
   double clamp(double min, double max) => (min > this ? min : (max < this ? max : this));
 
   String toFormattedString() => formatNumber(this);
+
+  String toShortString() => formatNumberShort(this);
 
   double toPrecision(int fractionDigits) {
     final mod = pow(10, fractionDigits.toDouble()).toDouble();
@@ -109,6 +113,13 @@ extension BoolExtras on bool {
 String formatNumber(num number) {
   final formatter = NumberFormat.decimalPattern(
     SettingsHandler.instance.locale.value?.languageCode ?? PlatformDispatcher.instance.locale.languageCode,
+  );
+  return formatter.format(number);
+}
+
+String formatNumberShort(num number) {
+  final formatter = NumberFormat.compact(
+    locale: SettingsHandler.instance.locale.value?.languageCode ?? PlatformDispatcher.instance.locale.languageCode,
   );
   return formatter.format(number);
 }

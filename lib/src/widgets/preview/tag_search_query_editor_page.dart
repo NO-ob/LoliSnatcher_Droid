@@ -8,9 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
@@ -20,6 +22,7 @@ import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
+import 'package:lolisnatcher/src/widgets/preview/main_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/preview/main_search_tag_chip.dart';
 import 'package:lolisnatcher/src/widgets/preview/query_editor_core.dart';
 
@@ -123,11 +126,8 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
     );
 
     queryController.initialize();
-
-    if (widget.initialTags == null || widget.initialTags!.isEmpty) {
-      queryController.suggestionTextFocusNode.requestFocus();
-      queryController.runSearch();
-    }
+    queryController.suggestionTextFocusNode.requestFocus();
+    queryController.runSearch();
   }
 
   void onChipTap(String tag, int tagIndex) {
@@ -304,6 +304,20 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
     }
   }
 
+  Future<void> onMetatagSelect(AddMetatagBottomSheetResult result) async {
+    final tag = result.tag.tagBuilder(
+      null,
+      result.compareMode == null ? null : (result.tag as MetaTagWithCompareModes).dividerForMode(result.compareMode),
+      result.value,
+    );
+    if (result.shouldAddDirectly) {
+      onSuggestionTap(TagSuggestion(tag: tag));
+    } else {
+      queryController.suggestionTextController.text = tag;
+    }
+    queryController.suggestionTextFocusNode.requestFocus();
+  }
+
   void onConfirmTap() {
     widget.onTagsSelected?.call(tags.join(' '), selectedBooru);
     Navigator.of(context).pop(tags.join(' '));
@@ -397,23 +411,9 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
                             }
 
                             if (queryController.suggestionTextControllerRawInput.isEmpty) {
-                              return Center(
-                                child: Container(
-                                  height: constraints.maxHeight - 32,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.search, size: 48),
-                                      const SizedBox(height: 16),
-                                      Text(
-                                        context.loc.searchBar.searchForTags,
-                                        style: context.theme.textTheme.bodyLarge,
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              return SuggestionsMainContent(
+                                onMetatagSelect: onMetatagSelect,
+                                onPinnedTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
                               );
                             }
 
@@ -537,33 +537,36 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
               ),
             ),
           ),
-          child: FadingEdgeScrollView.fromScrollView(
-            child: ListView(
-              controller: tagsScrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const AlwaysScrollableScrollPhysics(
-                parent: BouncingScrollPhysics(),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              children: [
-                for (int i = 0; i < tags.length; i++)
-                  AutoScrollTag(
-                    key: Key('${tags[i]}-$i'),
-                    controller: tagsScrollController,
-                    index: i,
-                    child: Padding(
-                      padding: (i < tags.length - 1) ? const EdgeInsets.only(right: 8) : EdgeInsets.zero,
-                      child: MainSearchTagChip(
-                        tag: tags[i],
-                        booru: selectedBooru,
-                        onTap: () => onChipTap(tags[i], i),
-                        onDeleteTap: () => onChipDeleteTap(tags[i], i),
-                        canDelete: tagToEditIndex != i,
-                        isSelected: tagToEditIndex == i,
+          child: Listener(
+            onPointerSignal: (event) => desktopPointerScroll(tagsScrollController, event),
+            child: FadingEdgeScrollView.fromScrollView(
+              child: ListView(
+                controller: tagsScrollController,
+                scrollDirection: Axis.horizontal,
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                children: [
+                  for (int i = 0; i < tags.length; i++)
+                    AutoScrollTag(
+                      key: Key('${tags[i]}-$i'),
+                      controller: tagsScrollController,
+                      index: i,
+                      child: Padding(
+                        padding: (i < tags.length - 1) ? const EdgeInsets.only(right: 8) : EdgeInsets.zero,
+                        child: MainSearchTagChip(
+                          tag: tags[i],
+                          booru: selectedBooru,
+                          onTap: () => onChipTap(tags[i], i),
+                          onDeleteTap: () => onChipDeleteTap(tags[i], i),
+                          canDelete: tagToEditIndex != i,
+                          isSelected: tagToEditIndex == i,
+                        ),
                       ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

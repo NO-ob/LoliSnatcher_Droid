@@ -12,6 +12,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
+import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -713,12 +714,17 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                   scrollbarOrientation: settingsHandler.handSide.value.isLeft
                       ? ScrollbarOrientation.left
                       : ScrollbarOrientation.right,
-                  child: RefreshIndicator(
-                    triggerMode: RefreshIndicatorTriggerMode.anywhere,
-                    strokeWidth: 4,
-                    color: context.theme.colorScheme.secondary,
-                    // edgeOffset: MediaQuery.paddingOf(context).top,
-                    onRefresh: runSearch,
+                  child: ValueListenableBuilder(
+                    valueListenable: suggestionTextController,
+                    builder: (context, suggestionText, child) => RefreshIndicator(
+                      triggerMode: RefreshIndicatorTriggerMode.anywhere,
+                      strokeWidth: 4,
+                      color: context.theme.colorScheme.secondary,
+                      // edgeOffset: MediaQuery.paddingOf(context).top,
+                      onRefresh: runSearch,
+                      notificationPredicate: (_) => suggestionText.text.isNotEmpty,
+                      child: child!,
+                    ),
                     child: FadingEdgeScrollView.fromScrollView(
                       child: ListView.builder(
                         reverse: !settingsHandler.useTopSearchbarInput,
@@ -1383,6 +1389,18 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // blocks have a small delay to force order of requests, from fast to slow (i.e. favs popular search will lock db for too long and history and pinned won't load until it's done)
+        PopularTagsBlock(
+          onTagTap: widget.onPinnedTagTap,
+          delay: const Duration(milliseconds: 20),
+        ),
+        const SizedBox(height: 16),
+        const HistoryBlock(
+          delay: Duration(milliseconds: 10),
+        ),
+        const SizedBox(height: 16),
+        MetatagsBlock(onSelect: widget.onMetatagSelect),
+        const SizedBox(height: 16),
         PinnedTagsBlock(
           key: _pinnedTagsKey,
           onTagTap: widget.onPinnedTagTap,
@@ -1391,168 +1409,7 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
             await _pinnedTagsKey.currentState?.init();
           },
         ),
-        const HistoryBlock(),
-        MetatagsBlock(onSelect: widget.onMetatagSelect),
-        const SizedBox(height: 16),
-        //
-        // TODO popular tags on boorus which support it (danbooru has it, possibly sankaku too)
-        if (false)
-          // ignore: dead_code
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GestureDetector(
-                  onTap: () => scrollController.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Icon(
-                        Icons.trending_up_rounded,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        context.loc.searchBar.popular,
-                        style: context.theme.textTheme.bodyLarge,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerRight,
-                          child: SizedBox(
-                            width: 200,
-                            child: SettingsBooruDropdown(
-                              value: null,
-                              onChanged: (booru) {},
-                              title: context.loc.booru,
-                              placeholder: context.loc.select,
-                              drawBottomBorder: false,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 50,
-                child: FadingEdgeScrollView.fromScrollView(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: 30,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                          color: context.theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Placeholder(fallbackWidth: 150),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        //
-        // TODO block with pinned/favourite (need to decide on the name) search queries, with dialog where you can sort/fav/label/search them
-        if (false)
-          // ignore: dead_code
-          Column(
-            children: [
-              const SizedBox(height: 32),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: GestureDetector(
-                  onTap: () => scrollController.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Icon(
-                        Icons.favorite_rounded,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          context.loc.searchBar.favourites,
-                          style: context.theme.textTheme.bodyLarge,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () {
-                          // TODO bottomsheet with search
-                        },
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Row(
-                            children: [
-                              Text(
-                                context.loc.searchBar.all,
-                                style: context.theme.textTheme.bodySmall,
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(
-                                Icons.arrow_drop_down,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          // TODO edit/search/filter dialog for fav tags, which can have multiple labels to allow filtering them
-                        },
-                        icon: const Icon(Icons.settings),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 50,
-                child: FadingEdgeScrollView.fromScrollView(
-                  child: ListView.builder(
-                    controller: scrollController,
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: 30,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Container(
-                        margin: const EdgeInsets.only(right: 8),
-                        decoration: BoxDecoration(
-                          color: context.theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Placeholder(fallbackWidth: 150),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        //
-        const SizedBox(height: 16),
+        const SizedBox(height: 32),
       ],
     );
   }
@@ -1717,7 +1574,9 @@ class _RangeDatePickerBottomSheetState extends State<RangeDatePickerBottomSheet>
 }
 
 class HistoryBlock extends StatefulWidget {
-  const HistoryBlock({super.key});
+  const HistoryBlock({this.delay = Duration.zero, super.key});
+
+  final Duration delay;
 
   @override
   State<HistoryBlock> createState() => _HistoryBlockState();
@@ -1735,7 +1594,8 @@ class _HistoryBlockState extends State<HistoryBlock> {
   @override
   void initState() {
     super.initState();
-    init();
+
+    Future.delayed(widget.delay, init);
   }
 
   Future<void> init() async {
@@ -1889,72 +1749,75 @@ class _HistoryBlockState extends State<HistoryBlock> {
         const SizedBox(height: 8),
         SizedBox(
           height: 50,
-          child: FadingEdgeScrollView.fromScrollView(
-            child: ListView.builder(
-              controller: scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: (history.isEmpty && loading) ? 1 : history.length,
-              itemBuilder: (BuildContext context, int index) {
-                if (history.isEmpty) {
-                  return GestureDetector(
-                    onTap: init,
-                    child: Container(
-                      alignment: Alignment.center,
-                      height: 30,
-                      width: 30,
-                      child: const CircularProgressIndicator(),
+          child: Listener(
+            onPointerSignal: (event) => desktopPointerScroll(scrollController, event),
+            child: FadingEdgeScrollView.fromScrollView(
+              child: ListView.builder(
+                controller: scrollController,
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: (history.isEmpty && loading) ? 1 : history.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (history.isEmpty) {
+                    return GestureDetector(
+                      onTap: init,
+                      child: Container(
+                        alignment: Alignment.center,
+                        height: 30,
+                        width: 30,
+                        child: const CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  final item = history[index];
+                  final booru = settingsHandler.booruList.value.firstWhere(
+                    (b) => b.name == item.booruName && b.type == item.booruType,
+                    orElse: Booru.unknown,
+                  );
+
+                  const favIcon = Padding(
+                    padding: EdgeInsets.only(left: 6),
+                    child: Icon(
+                      Icons.favorite,
+                      color: Colors.red,
+                      size: 16,
                     ),
                   );
-                }
 
-                final item = history[index];
-                final booru = settingsHandler.booruList.value.firstWhere(
-                  (b) => b.name == item.booruName && b.type == item.booruType,
-                  orElse: Booru.unknown,
-                );
-
-                const favIcon = Padding(
-                  padding: EdgeInsets.only(left: 6),
-                  child: Icon(
-                    Icons.favorite,
-                    color: Colors.red,
-                    size: 16,
-                  ),
-                );
-
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: InputChip(
-                    avatar: BooruFavicon(booru),
-                    onPressed: () => showHistoryEntryActions(
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: context.theme.colorScheme.surfaceContainer,
-                          borderRadius: BorderRadius.circular(10),
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: InputChip(
+                      avatar: BooruFavicon(booru),
+                      onPressed: () => showHistoryEntryActions(
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: context.theme.colorScheme.surfaceContainer,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              BooruFavicon(booru),
+                              const SizedBox(width: 8),
+                              Flexible(child: Text(item.searchText)),
+                              if (item.isFavourite) favIcon,
+                            ],
+                          ),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            BooruFavicon(booru),
-                            const SizedBox(width: 8),
-                            Flexible(child: Text(item.searchText)),
-                            if (item.isFavourite) favIcon,
-                          ],
-                        ),
+                        item,
+                        booru,
                       ),
-                      item,
-                      booru,
+                      label: Text(item.searchText),
+                      onDeleted: item.isFavourite ? () {} : null,
+                      deleteIcon: item.isFavourite ? favIcon : null,
+                      deleteButtonTooltipMessage: '',
                     ),
-                    label: Text(item.searchText),
-                    onDeleted: item.isFavourite ? () {} : null,
-                    deleteIcon: item.isFavourite ? favIcon : null,
-                    deleteButtonTooltipMessage: '',
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -2023,7 +1886,6 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
 
     return Column(
       children: [
-        const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: GestureDetector(
@@ -2071,70 +1933,278 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
         const SizedBox(height: 8),
         SizedBox(
           height: 50,
-          child: FadingEdgeScrollView.fromScrollView(
-            child: ListView.builder(
-              controller: scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: metaTags.length + (overflows ? 1 : 0),
-              itemBuilder: (BuildContext context, int index) {
-                if (overflows && index == metaTags.length) {
+          child: Listener(
+            onPointerSignal: (event) => desktopPointerScroll(scrollController, event),
+            child: FadingEdgeScrollView.fromScrollView(
+              child: ListView.builder(
+                controller: scrollController,
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: metaTags.length + (overflows ? 1 : 0),
+                itemBuilder: (BuildContext context, int index) {
+                  if (overflows && index == metaTags.length) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        label: Text(context.loc.searchBar.more),
+                        onPressed: openMetatagsDialog,
+                      ),
+                    );
+                  }
+
+                  final tag = metaTags[index];
+
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ActionChip(
-                      label: Text(context.loc.searchBar.more),
-                      onPressed: openMetatagsDialog,
+                      label: Text(tag.name),
+                      avatar: switch (tag.type) {
+                        MetaTagType.date => Icon(
+                          Icons.calendar_month_rounded,
+                          color: context.theme.colorScheme.onSurface,
+                        ),
+                        MetaTagType.sort => Icon(
+                          Icons.sort_rounded,
+                          color: context.theme.colorScheme.onSurface,
+                        ),
+                        _ => null,
+                      },
+                      onPressed: () async {
+                        switch (tag.type) {
+                          case MetaTagType.date:
+                            final metaTag = tag as DateMetaTag;
+                            final res = await showSingleDatePicker(
+                              context,
+                              dateFormat: metaTag.dateFormat,
+                            );
+
+                            if (res is DateTime) {
+                              onOptionSelect(
+                                context,
+                                tag,
+                                compareMode: null,
+                                value: DateFormat(metaTag.dateFormat).format(res),
+                              );
+                            }
+                            break;
+                          default:
+                            onOptionSelect(context, tag);
+                            break;
+                        }
+                      },
                     ),
                   );
-                }
-
-                final tag = metaTags[index];
-
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ActionChip(
-                    label: Text(tag.name),
-                    avatar: switch (tag.type) {
-                      MetaTagType.date => Icon(
-                        Icons.calendar_month_rounded,
-                        color: context.theme.colorScheme.onSurface,
-                      ),
-                      MetaTagType.sort => Icon(
-                        Icons.sort_rounded,
-                        color: context.theme.colorScheme.onSurface,
-                      ),
-                      _ => null,
-                    },
-                    onPressed: () async {
-                      switch (tag.type) {
-                        case MetaTagType.date:
-                          final metaTag = tag as DateMetaTag;
-                          final res = await showSingleDatePicker(
-                            context,
-                            dateFormat: metaTag.dateFormat,
-                          );
-
-                          if (res is DateTime) {
-                            onOptionSelect(
-                              context,
-                              tag,
-                              compareMode: null,
-                              value: DateFormat(metaTag.dateFormat).format(res),
-                            );
-                          }
-                          break;
-                        default:
-                          onOptionSelect(context, tag);
-                          break;
-                      }
-                    },
-                  ),
-                );
-              },
+                },
+              ),
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class PopularTagsBlock extends StatefulWidget {
+  const PopularTagsBlock({
+    required this.onTagTap,
+    this.delay = Duration.zero,
+    super.key,
+  });
+
+  final void Function(String tag) onTagTap;
+  final Duration delay;
+
+  @override
+  State<PopularTagsBlock> createState() => _PopularTagsBlockState();
+}
+
+class _PopularTagsBlockState extends State<PopularTagsBlock> {
+  final searchHandler = SearchHandler.instance;
+  final tagHandler = TagHandler.instance;
+  final scrollController = ScrollController();
+
+  List<TagSuggestion> popularTags = [];
+  bool loading = true;
+  bool failed = false;
+  CancelToken? cancelToken;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(widget.delay, loadPopularTags);
+  }
+
+  Future<void> loadPopularTags() async {
+    if (!searchHandler.currentBooruHandler.hasTagSuggestions) {
+      loading = false;
+      if (mounted) setState(() {});
+      return;
+    }
+
+    loading = true;
+    failed = false;
+    if (mounted) setState(() {});
+
+    // TODO: Replace with actual popular tags API
+    // For now, loads results from empty query
+    cancelToken?.cancel();
+    cancelToken = CancelToken();
+    final res = await searchHandler.currentBooruHandler.getTagSuggestions(
+      '',
+      cancelToken: cancelToken,
+    );
+    res.fold(
+      (e) {
+        loading = false;
+        failed = true;
+        if (mounted) setState(() {});
+      },
+      (data) {
+        loading = false;
+        failed = false;
+        popularTags = data;
+        if (mounted) setState(() {});
+
+        for (final tag in popularTags.where((t) => !t.type.isNone)) {
+          unawaited(tagHandler.addTagsWithType([tag.tag], tag.type));
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    cancelToken?.cancel();
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!searchHandler.currentBooruHandler.hasTagSuggestions) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: GestureDetector(
+            onTap: () => scrollController.animateTo(
+              0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Icon(
+                  Icons.trending_up_rounded,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.loc.searchBar.popular,
+                    style: context.theme.textTheme.bodyLarge,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (loading)
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                else if (failed)
+                  IconButton(
+                    onPressed: loadPopularTags,
+                    icon: const Icon(Icons.refresh),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (loading)
+          const SizedBox(
+            height: 50,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else if (failed)
+          SizedBox(
+            height: 50,
+            child: Center(
+              child: TextButton.icon(
+                onPressed: loadPopularTags,
+                icon: const Icon(Icons.refresh),
+                label: Text(context.loc.retry),
+              ),
+            ),
+          )
+        else if (popularTags.isEmpty)
+          SizedBox(
+            height: 50,
+            child: Center(
+              child: Text(
+                context.loc.searchBar.noSuggestionsFound,
+                style: context.theme.textTheme.bodyMedium?.copyWith(
+                  color: context.theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+          )
+        else
+          SizedBox(
+            height: 50,
+            child: Listener(
+              onPointerSignal: (event) => desktopPointerScroll(scrollController, event),
+              child: FadingEdgeScrollView.fromScrollView(
+                child: ListView.builder(
+                  controller: scrollController,
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: popularTags.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final tag = popularTags[index];
+                    final tagColor = tagHandler.getTag(tag.tag).getColour();
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ActionChip(
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              tag.tag.replaceAll('_', ' '),
+                              style: TextStyle(
+                                color: tagColor == Colors.transparent ? null : tagColor,
+                              ),
+                            ),
+                            if (tag.count > 0)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8),
+                                child: Text(
+                                  tag.count.toShortString(),
+                                  style: context.theme.textTheme.bodySmall,
+                                ),
+                              ),
+                          ],
+                        ),
+                        onPressed: () => widget.onTagTap(tag.tag),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -2537,55 +2607,57 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
         const SizedBox(height: 8),
         SizedBox(
           height: 50,
-          child: FadingEdgeScrollView.fromScrollView(
-            child: ListView.builder(
-              controller: scrollController,
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: (filteredPinnedTags.isEmpty && loading) ? 1 : filteredPinnedTags.length,
-              itemBuilder: (BuildContext context, int index) {
-                if (filteredPinnedTags.isEmpty) {
-                  return GestureDetector(
-                    onTap: init,
-                    child: Container(
-                      alignment: Alignment.center,
-                      height: 30,
-                      width: 30,
-                      child: const CircularProgressIndicator(),
+          child: Listener(
+            onPointerSignal: (event) => desktopPointerScroll(scrollController, event),
+            child: FadingEdgeScrollView.fromScrollView(
+              child: ListView.builder(
+                controller: scrollController,
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: (filteredPinnedTags.isEmpty && loading) ? 1 : filteredPinnedTags.length,
+                itemBuilder: (BuildContext context, int index) {
+                  if (filteredPinnedTags.isEmpty) {
+                    return GestureDetector(
+                      onTap: init,
+                      child: Container(
+                        alignment: Alignment.center,
+                        height: 30,
+                        width: 30,
+                        child: const CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+
+                  final pinnedTag = filteredPinnedTags[index];
+                  final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
+
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: InputChip(
+                      avatar: pinnedTag.isGlobal
+                          ? null
+                          : BooruFavicon(
+                              settingsHandler.booruList.value.firstWhere(
+                                (b) => b.name == pinnedTag.booruName && b.type == pinnedTag.booruType,
+                                orElse: Booru.unknown,
+                              ),
+                            ),
+                      label: Text(
+                        pinnedTag.tagName.replaceAll('_', ' '),
+                        style: TextStyle(color: tagColor),
+                      ),
+                      onPressed: () => widget.onTagTap(pinnedTag.tagName),
+                      onDeleted: () => widget.onTagLongTap(pinnedTag.tagName, pinnedTag),
+                      deleteIcon: const Icon(Icons.more_vert, size: 18),
+                      deleteButtonTooltipMessage: '',
                     ),
                   );
-                }
-
-                final pinnedTag = filteredPinnedTags[index];
-                final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
-
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: InputChip(
-                    avatar: pinnedTag.isGlobal
-                        ? null
-                        : BooruFavicon(
-                            settingsHandler.booruList.value.firstWhere(
-                              (b) => b.name == pinnedTag.booruName && b.type == pinnedTag.booruType,
-                              orElse: Booru.unknown,
-                            ),
-                          ),
-                    label: Text(
-                      pinnedTag.tagName.replaceAll('_', ' '),
-                      style: TextStyle(color: tagColor),
-                    ),
-                    onPressed: () => widget.onTagTap(pinnedTag.tagName),
-                    onDeleted: () => widget.onTagLongTap(pinnedTag.tagName, pinnedTag),
-                    deleteIcon: const Icon(Icons.more_vert, size: 18),
-                    deleteButtonTooltipMessage: '',
-                  ),
-                );
-              },
+                },
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 16),
       ],
     );
   }
