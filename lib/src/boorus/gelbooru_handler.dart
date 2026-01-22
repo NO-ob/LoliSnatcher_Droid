@@ -434,7 +434,7 @@ class GelbooruHandler extends BooruHandler {
           item.fileURL = source.attributes['src'] ?? source.children.firstOrNull?.attributes['src'] ?? item.fileURL;
         } else {
           // image
-          source = html.querySelector('.image-container img');
+          source = html.getElementById('image');
           if (source != null) {
             final String? src = source.attributes['src'];
             item.fileURL = src ?? item.fileURL;
@@ -446,6 +446,10 @@ class GelbooruHandler extends BooruHandler {
             item.thumbnailURL = isSample ? item.sampleURL : item.thumbnailURL;
           }
         }
+
+        item.thumbnailURL = item.thumbnailURL.replaceAll('(?<!https?:)//', '/');
+        item.sampleURL = item.sampleURL.replaceAll('(?<!https?:)//', '/');
+        item.fileURL = item.fileURL.replaceAll('(?<!https?:)//', '/');
 
         final sidebar = html.getElementById('tag-list');
         final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright'));
