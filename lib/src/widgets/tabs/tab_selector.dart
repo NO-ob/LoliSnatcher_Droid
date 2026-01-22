@@ -178,6 +178,8 @@ class TabSelector extends StatelessWidget {
                               ],
                             ],
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         );
                       }),
                       labelStyle: inputDecoration.labelStyle?.copyWith(
