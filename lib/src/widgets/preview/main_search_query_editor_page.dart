@@ -461,6 +461,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                       ...(searchHandler.currentBooruHandler as MergebooruHandler).booruHandlers.map((e) => e.booru),
                     ]
                   : [searchHandler.currentBooru],
+              parentTab: null,
             ),
             ListTile(
               title: Text(context.loc.copy),
@@ -1370,11 +1371,13 @@ class SuggestionsMainContent extends StatefulWidget {
   const SuggestionsMainContent({
     required this.onMetatagSelect,
     required this.onPinnedTagTap,
+    this.hideHistory = false,
     super.key,
   });
 
   final void Function(AddMetatagBottomSheetResult result) onMetatagSelect;
   final void Function(String tag) onPinnedTagTap;
+  final bool hideHistory;
 
   @override
   State<SuggestionsMainContent> createState() => _SuggestionsMainContentState();
@@ -1388,19 +1391,21 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      spacing: 16,
       children: [
         // blocks have a small delay to force order of requests, from fast to slow (i.e. favs popular search will lock db for too long and history and pinned won't load until it's done)
         PopularTagsBlock(
           onTagTap: widget.onPinnedTagTap,
           delay: const Duration(milliseconds: 20),
         ),
-        const SizedBox(height: 16),
-        const HistoryBlock(
-          delay: Duration(milliseconds: 10),
-        ),
-        const SizedBox(height: 16),
+        //
+        if (!widget.hideHistory)
+          const HistoryBlock(
+            delay: Duration(milliseconds: 10),
+          ),
+        //
         MetatagsBlock(onSelect: widget.onMetatagSelect),
-        const SizedBox(height: 16),
+        //
         PinnedTagsBlock(
           key: _pinnedTagsKey,
           onTagTap: widget.onPinnedTagTap,
@@ -1409,7 +1414,8 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
             await _pinnedTagsKey.currentState?.init();
           },
         ),
-        const SizedBox(height: 32),
+        //
+        const SizedBox(height: 16),
       ],
     );
   }

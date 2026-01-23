@@ -14,7 +14,8 @@ enum GalleryButton {
   reloadnoscale,
   toggleQuality,
   externalPlayer,
-  imageSearch;
+  imageSearch,
+  ;
 
   /// Returns the string value used for JSON serialization.
   /// Maintains backwards compatibility with old string values.
@@ -61,19 +62,23 @@ enum GalleryButton {
     }
   }
 
-  /// List of all button values as strings (for backwards compatibility).
-  static List<String> get allStrings => values.map((e) => e.toJson()).toList();
-
   /// List of buttons that can be disabled (all except 'info').
-  static List<GalleryButton> get disableable =>
-      values.where((e) => e != GalleryButton.info).toList();
-
-  /// List of disableable buttons as strings.
-  static List<String> get disableableStrings =>
-      disableable.map((e) => e.toJson()).toList();
+  static List<GalleryButton> get disableable => values.where((e) => e != GalleryButton.info).toList();
 
   /// Whether this button can be disabled by the user.
   bool get canBeDisabled => this != GalleryButton.info;
+
+  bool get isSnatch => this == GalleryButton.snatch;
+  bool get isFavourite => this == GalleryButton.favourite;
+  bool get isInfo => this == GalleryButton.info;
+  bool get isShare => this == GalleryButton.share;
+  bool get isSelect => this == GalleryButton.select;
+  bool get isOpen => this == GalleryButton.open;
+  bool get isAutoscroll => this == GalleryButton.autoscroll;
+  bool get isReloadNoScale => this == GalleryButton.reloadnoscale;
+  bool get isToggleQuality => this == GalleryButton.toggleQuality;
+  bool get isExternalPlayer => this == GalleryButton.externalPlayer;
+  bool get isImageSearch => this == GalleryButton.imageSearch;
 
   /// Returns the localized display name for this button.
   String locName(BuildContext context) {

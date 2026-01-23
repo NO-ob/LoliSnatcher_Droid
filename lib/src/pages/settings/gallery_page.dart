@@ -37,8 +37,8 @@ class _GalleryPageState extends State<GalleryPage> {
   late ButtonPosition zoomButtonPosition;
   late ButtonPosition changePageButtonsPosition;
 
-  late final List<String> buttonOrder;
-  late final List<String> disabledButtons;
+  late final List<GalleryButton> buttonOrder;
+  late final List<GalleryButton> disabledButtons;
 
   final TextEditingController preloadAmountController = TextEditingController();
   final TextEditingController preloadSizeController = TextEditingController();
@@ -52,10 +52,8 @@ class _GalleryPageState extends State<GalleryPage> {
     autoHideImageBar = settingsHandler.autoHideImageBar;
     galleryMode = settingsHandler.galleryMode;
     galleryBarPosition = settingsHandler.galleryBarPosition;
-    buttonOrder = settingsHandler.buttonOrder;
-    disabledButtons = [
-      ...settingsHandler.disabledButtons,
-    ];
+    buttonOrder = [...settingsHandler.buttonOrder];
+    disabledButtons = [...settingsHandler.disabledButtons];
     galleryScrollDirection = settingsHandler.galleryScrollDirection;
 
     shareAction = settingsHandler.shareAction;
@@ -96,8 +94,8 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.autoHideImageBar = autoHideImageBar;
     settingsHandler.galleryMode = galleryMode;
     settingsHandler.galleryBarPosition = galleryBarPosition;
-    settingsHandler.buttonOrder = buttonOrder;
-    settingsHandler.disabledButtons = disabledButtons;
+    settingsHandler.buttonOrder = [...buttonOrder];
+    settingsHandler.disabledButtons = [...disabledButtons];
     settingsHandler.galleryScrollDirection = galleryScrollDirection;
     settingsHandler.shareAction = shareAction;
     settingsHandler.zoomButtonPosition = zoomButtonPosition;
@@ -357,22 +355,21 @@ class _GalleryPageState extends State<GalleryPage> {
                             index: index,
                             child: Builder(
                               builder: (context) {
-                                final name = buttonOrder[index];
-                                final button = GalleryButton.fromString(name);
-                                final title = button?.locName(context) ?? name;
+                                final button = buttonOrder[index];
+                                final title = button.locName(context);
 
-                                final bool isInfo = name == 'info';
+                                final bool isInfo = button.isInfo;
 
-                                final bool isActive = !disabledButtons.contains(name) || isInfo;
+                                final bool isActive = !disabledButtons.contains(button) || isInfo;
 
                                 return ListTile(
                                   onTap: () {
                                     if (!isInfo) {
                                       setState(() {
                                         if (isActive) {
-                                          disabledButtons.add(name);
+                                          disabledButtons.add(button);
                                         } else {
-                                          disabledButtons.remove(name);
+                                          disabledButtons.remove(button);
                                         }
                                       });
                                     }
@@ -390,18 +387,18 @@ class _GalleryPageState extends State<GalleryPage> {
                                       sideColor: Colors.yellow,
                                     );
                                   },
-                                  key: Key('item-$name'),
+                                  key: Key('item-${button.name}'),
                                   minTileHeight: 64,
                                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                                   title: Text(title),
-                                  subtitle: switch (name) {
-                                    'external_player' => Text(context.loc.settings.viewer.onlyForVideos),
+                                  subtitle: switch (button) {
+                                    .externalPlayer => Text(context.loc.settings.viewer.onlyForVideos),
                                     _ => null,
                                   },
                                   leading: Opacity(
                                     opacity: isInfo ? 0.5 : 1,
                                     child: Checkbox(
-                                      key: Key('checkbox-$name'),
+                                      key: Key('checkbox-${button.name}'),
                                       value: isActive,
                                       onChanged: (_) {
                                         if (isInfo) {
@@ -416,9 +413,9 @@ class _GalleryPageState extends State<GalleryPage> {
 
                                         setState(() {
                                           if (isActive) {
-                                            disabledButtons.add(name);
+                                            disabledButtons.add(button);
                                           } else {
-                                            disabledButtons.remove(name);
+                                            disabledButtons.remove(button);
                                           }
                                         });
                                       },
@@ -428,19 +425,18 @@ class _GalleryPageState extends State<GalleryPage> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        switch (name) {
-                                          'snatch' => Icons.save,
-                                          'favourite' => Icons.favorite,
-                                          'info' => Icons.info,
-                                          'share' => Icons.share,
-                                          'select' => Icons.check_box,
-                                          'open' => Icons.public,
-                                          'autoscroll' => Icons.play_arrow,
-                                          'reloadnoscale' => Icons.refresh,
-                                          'toggle_quality' => Icons.high_quality,
-                                          'external_player' => Icons.exit_to_app,
-                                          'image_search' => Icons.image_search_rounded,
-                                          _ => null,
+                                        switch (button) {
+                                          .snatch => Icons.save,
+                                          .favourite => Icons.favorite,
+                                          .info => Icons.info,
+                                          .share => Icons.share,
+                                          .select => Icons.check_box,
+                                          .open => Icons.public,
+                                          .autoscroll => Icons.play_arrow,
+                                          .reloadnoscale => Icons.refresh,
+                                          .toggleQuality => Icons.high_quality,
+                                          .externalPlayer => Icons.exit_to_app,
+                                          .imageSearch => Icons.image_search_rounded,
                                         },
                                       ),
                                       ReorderableDragStartListener(
@@ -463,7 +459,7 @@ class _GalleryPageState extends State<GalleryPage> {
                           if (oldIndex < newIndex) {
                             newIndex -= 1;
                           }
-                          final String item = buttonOrder.removeAt(oldIndex);
+                          final item = buttonOrder.removeAt(oldIndex);
                           buttonOrder.insert(newIndex, item);
                         });
                       },

@@ -151,13 +151,8 @@ class SettingsHandler {
 
   Duration cacheDuration = Duration.zero;
 
-  /// @Deprecated Use GalleryButton.allStrings instead
-  static List<String> get buttonList => GalleryButton.allStrings;
-  /// @Deprecated Use GalleryButton.disableableStrings instead
-  static List<String> get disableableButtonList => GalleryButton.disableableStrings;
-
-  List<String> buttonOrder = [...GalleryButton.allStrings];
-  List<String> disabledButtons = [];
+  List<GalleryButton> buttonOrder = [...GalleryButton.values];
+  List<GalleryButton> disabledButtons = [];
 
   bool jsonWrite = false;
   bool autoPlayEnabled = true;
@@ -686,14 +681,14 @@ class SettingsHandler {
     'buttonOrder': {
       'type': 'stringList',
       'default': <String>[
-        ...GalleryButton.allStrings,
+        ...GalleryButton.values.map((b) => b.toJson()),
       ],
     },
     'disabledButtons': {
       'type': 'stringList',
       'default': <String>[],
       'options': <String>[
-        ...GalleryButton.disableableStrings,
+        ...GalleryButton.disableable.map((b) => b.toJson()),
       ],
     },
     'cacheDuration': {
@@ -1559,17 +1554,12 @@ class SettingsHandler {
         // print('btnorder is a ${tempBtnOrder.runtimeType} type');
         tempBtnOrder = [];
       }
-      final allButtons = GalleryButton.allStrings;
-      final List<String> btnOrder = List<String>.from(tempBtnOrder)
-          .map((bstr) {
-            final String button = allButtons.singleWhere((e) => e == bstr, orElse: () => '');
-            return button;
-          })
-          .where((el) => el.isNotEmpty)
-          .toList();
+      final List<GalleryButton> btnOrder = List<GalleryButton?>.from(
+        tempBtnOrder.map((b) => b is String ? GalleryButton.fromString(b) : null),
+      ).where((b) => b != null).toList().cast<GalleryButton>();
       btnOrder.addAll(
-        allButtons.where(
-          (el) => !btnOrder.contains(el),
+        GalleryButton.values.where(
+          (b) => !btnOrder.contains(b),
         ),
       ); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
       buttonOrder = btnOrder;
@@ -1584,17 +1574,23 @@ class SettingsHandler {
     }
 
     try {
-      final dynamic tempDisabledButtons = json['disabledButtons'];
+      dynamic tempDisabledButtons = json['disabledButtons'];
       if (tempDisabledButtons is List) {
-        disabledButtons = [...tempDisabledButtons];
+        tempDisabledButtons = [
+          ...tempDisabledButtons
+              .map((b) => b is String ? GalleryButton.fromString(b) : null)
+              .where((b) => b != null)
+              .toList()
+              .cast<GalleryButton>(),
+        ];
 
-        final disableableButtons = GalleryButton.disableableStrings;
-        for (final buttonName in disabledButtons) {
-          if (disableableButtons.any((e) => e == buttonName)) {
+        final disableableButtons = [...GalleryButton.disableable];
+        for (final button in tempDisabledButtons) {
+          if (disableableButtons.any((e) => e == button)) {
             // do nothing
           } else {
             // remove unknown and not allowed to remove buttons
-            tempDisabledButtons.remove(buttonName);
+            tempDisabledButtons.remove(button);
           }
         }
 

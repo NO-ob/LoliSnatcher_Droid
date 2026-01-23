@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -69,6 +70,7 @@ class TagSearchQueryEditorPage extends StatefulWidget {
     this.initialBooru,
     this.allowMultipleTags = false,
     this.showBooruSelector = false,
+    this.readOnlyPreview = false,
     this.onTagsSelected,
     super.key,
   });
@@ -85,6 +87,8 @@ class TagSearchQueryEditorPage extends StatefulWidget {
 
   /// If true, shows a dropdown to select which booru to search
   final bool showBooruSelector;
+
+  final bool readOnlyPreview;
 
   /// Optional callback when tags are selected (also returns via Navigator.pop)
   final void Function(String tags, Booru? booru)? onTagsSelected;
@@ -111,7 +115,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
   void initState() {
     super.initState();
 
-    selectedBooru = widget.initialBooru;
+    selectedBooru = widget.initialBooru ?? SearchHandler.instance.currentBooru;
     if (widget.initialTags != null && widget.initialTags!.isNotEmpty) {
       tags = widget.initialTags!.trim().split(' ').where((t) => t.isNotEmpty).toList();
     }
@@ -266,10 +270,13 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
                 Navigator.of(context).pop();
               },
             ),
-            TagContentPreview(
-              tag: tag.tag,
-              boorus: [if (selectedBooru != null) selectedBooru!],
-            ),
+            if (selectedBooru != null)
+              TagContentPreview(
+                tag: tag.tag,
+                boorus: [?selectedBooru],
+                parentTab: null,
+                readOnly: widget.readOnlyPreview,
+              ),
             ListTile(
               title: Text(context.loc.copy),
               leading: const Icon(Icons.copy),
@@ -414,6 +421,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
                               return SuggestionsMainContent(
                                 onMetatagSelect: onMetatagSelect,
                                 onPinnedTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
+                                hideHistory: true,
                               );
                             }
 
@@ -707,6 +715,7 @@ class TagSearchBox extends StatefulWidget {
     this.clearable = true,
     this.enabled = true,
     this.onlyInput = false,
+    this.readOnlyPreview = false,
     super.key,
   });
 
@@ -740,6 +749,7 @@ class TagSearchBox extends StatefulWidget {
   final bool clearable;
   final bool enabled;
   final bool onlyInput;
+  final bool readOnlyPreview;
 
   @override
   State<TagSearchBox> createState() => _TagSearchBoxState();
@@ -775,6 +785,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           initialBooru: _selectedBooru,
           allowMultipleTags: widget.allowMultipleTags,
           showBooruSelector: widget.showBooruSelector,
+          readOnlyPreview: widget.readOnlyPreview,
           onTagsSelected: (tags, booru) {
             setState(() {
               _controller.text = tags;

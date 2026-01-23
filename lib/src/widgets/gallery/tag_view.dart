@@ -1188,6 +1188,7 @@ Future<void> showTagDialog({
                     ...(handler as MergebooruHandler).booruHandlers.map((e) => e.booru),
                   ]
                 : [handler.booru],
+            parentTab: searchHandler.currentTab,
           ),
           //
           ListTile(
@@ -1551,6 +1552,8 @@ class TagContentPreview extends StatefulWidget {
   TagContentPreview({
     required this.tag,
     required this.boorus,
+    required this.parentTab,
+    this.readOnly = false,
     super.key,
   }) : assert(
          boorus.isNotEmpty,
@@ -1559,6 +1562,8 @@ class TagContentPreview extends StatefulWidget {
 
   final String tag;
   final List<Booru> boorus;
+  final SearchTab? parentTab;
+  final bool readOnly;
 
   @override
   State<TagContentPreview> createState() => _TagContentPreviewState();
@@ -1566,7 +1571,6 @@ class TagContentPreview extends StatefulWidget {
 
 class _TagContentPreviewState extends State<TagContentPreview> {
   final settingsHandler = SettingsHandler.instance;
-  final searchHandler = SearchHandler.instance;
   final viewerHandler = ViewerHandler.instance;
 
   final AutoScrollController scrollController = AutoScrollController();
@@ -1589,7 +1593,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
     super.initState();
 
     viewerHandler.addTagPreview(
-      searchHandler.currentTab.id,
+      widget.parentTab?.id,
       previewId,
       widget.tag,
     );
@@ -1676,6 +1680,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
           tab: tab!,
           initialIndex: index,
           canSelect: false,
+          readOnly: widget.readOnly,
           onPageChanged: (page) async {
             viewedIndex.value = page;
             await scrollController.scrollToIndex(
@@ -1705,6 +1710,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
   }
 
   Future<void> onPreviewDoubleTap(int index) async {
+    if (widget.readOnly) return;
+
     await tab?.toggleItemFavourite(index);
   }
 
@@ -1725,16 +1732,18 @@ class _TagContentPreviewState extends State<TagContentPreview> {
   }
 
   Future<void> showTagPreviewsListDialog() async {
+    if (widget.parentTab == null) return;
+
     await showDialog(
       context: context,
-      builder: (_) => _TagPreviewsListDialog(searchHandler.currentTab.id),
+      builder: (_) => _TagPreviewsListDialog(widget.parentTab!.id),
     );
   }
 
   @override
   void dispose() {
     viewerHandler.removeTagPreview(
-      searchHandler.currentTab.id,
+      widget.parentTab?.id,
       previewId,
     );
     super.dispose();
@@ -1753,10 +1762,12 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                   color: Theme.of(context).iconTheme.color,
                 ),
                 title: Text(context.loc.tagView.preview),
-                trailing: IconButton(
-                  icon: const Icon(Icons.list),
-                  onPressed: showTagPreviewsListDialog,
-                ),
+                trailing: widget.parentTab == null
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.list),
+                        onPressed: showTagPreviewsListDialog,
+                      ),
                 subtitle: isSingleBooru
                     ? null
                     : SizedBox(
@@ -1785,10 +1796,12 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                       ),
                       trailing: loading
                           ? const CircularProgressIndicator()
-                          : IconButton(
-                              icon: const Icon(Icons.list),
-                              onPressed: showTagPreviewsListDialog,
-                            ),
+                          : (widget.parentTab == null
+                                ? null
+                                : IconButton(
+                                    icon: const Icon(Icons.list),
+                                    onPressed: showTagPreviewsListDialog,
+                                  )),
                       title: loading
                           ? Text(context.loc.tagView.previewIsLoading)
                           : Text(context.loc.tagView.failedToLoadPreview),
@@ -1829,14 +1842,15 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               icon: const Icon(Icons.refresh),
                             ),
                             const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.list),
-                              onPressed: showTagPreviewsListDialog,
-                            ),
+                            if (widget.parentTab != null)
+                              IconButton(
+                                icon: const Icon(Icons.list),
+                                onPressed: showTagPreviewsListDialog,
+                              ),
                             IconButton(
                               icon: const Icon(Icons.fiber_new),
                               onPressed: () {
-                                searchHandler.addTabByString(
+                                SearchHandler.instance.addTabByString(
                                   widget.tag,
                                   customBooru: selectedBooru,
                                 );
@@ -1860,7 +1874,9 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                               Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                                             }
                                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                                              searchHandler.changeTabIndex(searchHandler.tabs.length - 1);
+                                              SearchHandler.instance.changeTabIndex(
+                                                SearchHandler.instance.tabs.length - 1,
+                                              );
                                             });
                                             controller.dismiss();
                                           },
@@ -1885,7 +1901,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                   Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                                 }
                                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  searchHandler.addTabByString(
+                                  SearchHandler.instance.addTabByString(
                                     widget.tag,
                                     customBooru: selectedBooru,
                                     switchToNew: true,

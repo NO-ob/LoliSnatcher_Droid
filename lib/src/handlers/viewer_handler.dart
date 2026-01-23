@@ -324,10 +324,12 @@ class ViewerHandler {
   Map<String, List<List<MapEntry<String, String>>>> tagPreviewsHistory = {};
 
   void addTagPreview(
-    String tabId,
+    String? tabId,
     String previewId,
     String tag,
   ) {
+    if (tabId == null) return;
+
     if (tagPreviews[tabId] == null) {
       tagPreviews[tabId] = [];
     }
@@ -336,22 +338,28 @@ class ViewerHandler {
   }
 
   void removeTagPreview(
-    String tabId,
+    String? tabId,
     String previewId,
   ) {
+    if (tabId == null) return;
+
     tagPreviews[tabId]?.removeWhere((e) => e.key == previewId);
     updateTagPreviewHistory(tabId);
   }
 
   List<MapEntry<String, String>> currentTagPreviewState(
-    String tabId,
+    String? tabId,
   ) {
+    if (tabId == null) return [];
+
     return tagPreviews[tabId] ?? [];
   }
 
   void updateTagPreviewHistory(
-    String tabId,
+    String? tabId,
   ) {
+    if (tabId == null) return;
+
     // debounce to ignore multiple page pops affecting history more than needed
     Debounce.debounce(
       tag: 'tag_previews_history_update',

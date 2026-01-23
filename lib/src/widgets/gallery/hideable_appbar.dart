@@ -47,6 +47,7 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
     required this.tab,
     required this.pageController,
     this.canSelect = true,
+    this.readOnly = false,
     this.onOpenDrawer,
     super.key,
   });
@@ -54,6 +55,7 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   final SearchTab tab;
   final PreloadPageController pageController;
   final bool canSelect;
+  final bool readOnly;
   final VoidCallback? onOpenDrawer;
 
   double get defaultHeight => kToolbarHeight; // 56
@@ -163,18 +165,18 @@ class _HideableAppBarState extends State<HideableAppBar> {
   ////////// Toolbar Stuff ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   List<Widget> getActions() {
-    final disabled = settingsHandler.disabledButtons;
-    final List<String> filteredButtonOrder = settingsHandler.buttonOrder.where((name) {
+    final disabled = [...settingsHandler.disabledButtons];
+    final filteredButtonOrder = settingsHandler.buttonOrder.where((button) {
       if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
         return false;
       }
 
-      if (name == 'info') {
+      if (button.isInfo) {
         // Info button should always be available (if onOpenDrawer is present)
         return widget.onOpenDrawer != null;
       }
 
-      if (disabled.contains(name)) {
+      if (disabled.contains(button)) {
         return false;
       }
 
@@ -182,27 +184,35 @@ class _HideableAppBarState extends State<HideableAppBar> {
       final bool isImage = item.mediaType.value.isImageOrAnimation;
       final bool isVideo = item.mediaType.value.isVideo;
 
-      switch (name) {
-        case 'favourite':
-          return settingsHandler.dbEnabled;
-        case 'reloadnoscale':
+      switch (button) {
+        case .snatch:
+          return !widget.readOnly;
+        case .favourite:
+          return settingsHandler.dbEnabled && !widget.readOnly;
+        case .reloadnoscale:
           return isImage && !settingsHandler.disableImageScaling;
-        case 'toggle_quality':
+        case .toggleQuality:
           return isImage && item.sampleURL != item.fileURL;
-        case 'select':
+        case .select:
           return widget.canSelect;
-        case 'external_player':
+        case .externalPlayer:
           return isVideo && Platform.isAndroid;
-        case 'image_search':
+        case .imageSearch:
           return isImage;
-      }
 
-      return true;
+        //
+
+        case .info:
+        case .share:
+        case .open:
+        case .autoscroll:
+          return true;
+      }
     }).toList();
 
     final List<Widget> actions = [];
-    List<String> overFlowList = [];
-    List<String> buttonList = [];
+    List<GalleryButton> overFlowList = [];
+    List<GalleryButton> buttonList = [];
     // at least first 4 buttons will show on toolbar
     final int listSplit = max(4, (MediaQuery.sizeOf(context).width / 100).floor());
     if (listSplit < filteredButtonOrder.length) {
@@ -211,19 +221,19 @@ class _HideableAppBarState extends State<HideableAppBar> {
     } else {
       buttonList = filteredButtonOrder;
     }
-    for (final name in buttonList) {
+    for (final button in buttonList) {
       actions.add(
         ToolbarAction(
-          key: ValueKey(name),
-          icon: buttonIcon(name),
-          subIcon: buttonSubicon(name),
+          key: ValueKey(button.name),
+          icon: buttonIcon(button),
+          subIcon: buttonSubicon(button),
           onTap: () async {
-            await buttonClick(name);
+            await buttonClick(button);
           },
           onLongTap: () {
-            buttonHold(name);
+            buttonHold(button);
           },
-          stackWidget: buttonStackWidget(name),
+          stackWidget: buttonStackWidget(button),
         ),
       );
     }
@@ -239,8 +249,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
     // all buttons after that will be in overflow menu
     if (overFlowList.isNotEmpty) {
-      final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn == 'autoscroll') != -1;
-      final bool isSelectOverflowed = overFlowList.indexWhere((btn) => btn == 'select') != -1;
+      final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn.isAutoscroll) != -1;
+      final bool isSelectOverflowed = overFlowList.indexWhere((btn) => btn.isSelect) != -1;
 
       final bool isSelected = widget.tab.selected.contains(
         widget.tab.booruHandler.filteredFetched[page.value],
@@ -273,27 +283,27 @@ class _HideableAppBarState extends State<HideableAppBar> {
           ),
           color: Theme.of(context).colorScheme.surface,
           itemBuilder: (BuildContext itemBuilder) => overFlowList.map(
-            (name) {
+            (button) {
               return PopupMenuItem(
                 padding: EdgeInsets.zero,
-                value: name,
+                value: button,
                 child: SizedBox(
                   width: double.infinity, // force button to take full width
                   child: ListTile(
                     onLongPress: () {
-                      buttonHold(name);
+                      buttonHold(button);
                     },
                     onTap: () async {
                       Navigator.of(context).pop(); // remove overflow menu
-                      await buttonClick(name);
+                      await buttonClick(button);
                     },
                     leading: ToolbarAction(
-                      key: ValueKey(name),
-                      icon: buttonIcon(name),
-                      subIcon: buttonSubicon(name),
-                      stackWidget: buttonStackWidget(name),
+                      key: ValueKey(button.name),
+                      icon: buttonIcon(button),
+                      subIcon: buttonSubicon(button),
+                      stackWidget: buttonStackWidget(button),
                     ),
-                    title: Text(buttonText(name)),
+                    title: Text(buttonText(button)),
                   ),
                 ),
               );
@@ -305,25 +315,25 @@ class _HideableAppBarState extends State<HideableAppBar> {
     return actions;
   }
 
-  Widget buttonIcon(String action) {
+  Widget buttonIcon(GalleryButton button) {
     late IconData icon;
 
     final item = widget.tab.booruHandler.filteredFetched[page.value];
 
-    switch (action) {
-      case 'info':
+    switch (button) {
+      case .info:
         icon = Icons.info;
         break;
-      case 'open':
+      case .open:
         icon = Icons.public;
         break;
-      case 'autoscroll':
+      case .autoscroll:
         icon = autoScroll ? Icons.pause : Icons.play_arrow;
         break;
-      case 'snatch':
+      case .snatch:
         icon = Icons.save;
         break;
-      case 'favourite':
+      case .favourite:
         // icon = isFav == true ? Icons.favorite : Icons.favorite_border;
         // early return to override with animated icon
         return Obx(() {
@@ -341,10 +351,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
             ),
           );
         });
-      case 'share':
+      case .share:
         icon = Icons.share;
         break;
-      case 'select':
+      case .select:
         return Obx(() {
           final int selectedIndex = widget.tab.selected.indexOf(item);
           final bool isSelected = selectedIndex != -1;
@@ -398,27 +408,27 @@ class _HideableAppBarState extends State<HideableAppBar> {
             ],
           );
         });
-      case 'reloadnoscale':
+      case .reloadnoscale:
         icon = Icons.refresh;
         break;
-      case 'toggle_quality':
+      case .toggleQuality:
         final bool isHq = settingsHandler.galleryMode.isFullRes ? !item.toggleQuality.value : item.toggleQuality.value;
         icon = isHq ? Icons.high_quality : Icons.high_quality_outlined;
-      case 'external_player':
+      case .externalPlayer:
         icon = Icons.exit_to_app;
         break;
-      case 'image_search':
+      case .imageSearch:
         icon = Icons.image_search_rounded;
         break;
     }
     return Icon(icon);
   }
 
-  Widget buttonSubicon(String action) {
+  Widget buttonSubicon(GalleryButton button) {
     final item = widget.tab.booruHandler.filteredFetched[page.value];
 
-    switch (action) {
-      case 'snatch':
+    switch (button) {
+      case .snatch:
         return Obx(() {
           if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
             return const SizedBox.shrink();
@@ -443,9 +453,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
     }
   }
 
-  Widget? buttonStackWidget(String name) {
-    switch (name) {
-      case 'snatch':
+  Widget? buttonStackWidget(GalleryButton button) {
+    switch (button) {
+      case .snatch:
         if (page.value == -1 || widget.tab.booruHandler.filteredFetched.isEmpty) {
           return null;
         }
@@ -473,14 +483,14 @@ class _HideableAppBarState extends State<HideableAppBar> {
             ),
           );
         });
-      case 'autoscroll':
+      case .autoscroll:
         if (autoScroll) {
           return RestartableProgressIndicator(
             controller: autoScrollProgressController!,
           );
         }
         break;
-      case 'share':
+      case .share:
         if (sharedItem != null && shareProgress != 0) {
           return AnimatedProgressIndicator(
             value: shareProgress,
@@ -491,13 +501,24 @@ class _HideableAppBarState extends State<HideableAppBar> {
           );
         }
         break;
+
+      //
+
+      case .favourite:
+      case .info:
+      case .select:
+      case .open:
+      case .reloadnoscale:
+      case .toggleQuality:
+      case .externalPlayer:
+      case .imageSearch:
+        break;
     }
     return null;
   }
 
-  String buttonText(String name) {
-    final button = GalleryButton.fromString(name);
-    final String defaultLabel = button?.locName(context) ?? name;
+  String buttonText(GalleryButton button) {
+    final String defaultLabel = button.locName(context);
     late String label;
 
     if (page.value == -1) {
@@ -506,21 +527,21 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
     final item = widget.tab.booruHandler.filteredFetched[page.value];
 
-    switch (name) {
-      case 'autoscroll':
+    switch (button) {
+      case .autoscroll:
         label = '${autoScroll ? context.loc.viewer.appBar.pause : context.loc.viewer.appBar.start} $defaultLabel';
         break;
-      case 'favourite':
+      case .favourite:
         label = item.isFavourite.value == true ? context.loc.viewer.appBar.unfavourite : defaultLabel;
         break;
-      case 'select':
+      case .select:
         final bool isSelected = widget.tab.selected.contains(item);
         label = isSelected ? context.loc.viewer.appBar.deselect : defaultLabel;
         break;
-      case 'reloadnoscale':
+      case .reloadnoscale:
         label = item.isNoScale.value ? context.loc.viewer.appBar.reloadWithScaling : defaultLabel;
         break;
-      case 'toggle_quality':
+      case .toggleQuality:
         final bool isHq = settingsHandler.galleryMode.isFullRes ? !item.toggleQuality.value : item.toggleQuality.value;
         label = isHq ? context.loc.viewer.appBar.loadSampleQuality : context.loc.viewer.appBar.loadHighQuality;
         break;
@@ -532,14 +553,14 @@ class _HideableAppBarState extends State<HideableAppBar> {
     return label;
   }
 
-  Future<void> buttonClick(String action) async {
+  Future<void> buttonClick(GalleryButton button) async {
     final item = widget.tab.booruHandler.filteredFetched[page.value];
 
-    switch (action) {
-      case 'info':
+    switch (button) {
+      case .info:
         widget.onOpenDrawer?.call();
         break;
-      case 'open':
+      case .open:
         // url to html encoded
         final String url = Uri.encodeFull(item.postURL);
         unawaited(
@@ -549,10 +570,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
           ),
         );
         break;
-      case 'autoscroll':
+      case .autoscroll:
         autoScrollState(!autoScroll);
         break;
-      case 'snatch':
+      case .snatch:
         if (!await setPermissions()) return;
 
         // call a function to save the currently viewed image when the save button is pressed
@@ -570,7 +591,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           );
         }
         break;
-      case 'favourite':
+      case .favourite:
         await widget.tab.toggleItemFavourite(page.value);
 
         // set viewed item again in case favourites filter is enabled
@@ -579,10 +600,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
           viewerHandler.setCurrent(widget.tab.booruHandler.filteredFetched[page.value]);
         });
         break;
-      case 'share':
+      case .share:
         await onShareClick();
         break;
-      case 'select':
+      case .select:
         final bool isSelected = widget.tab.selected.contains(item);
         if (isSelected) {
           widget.tab.selected.remove(item);
@@ -590,30 +611,30 @@ class _HideableAppBarState extends State<HideableAppBar> {
           widget.tab.selected.add(item);
         }
         break;
-      case 'reloadnoscale':
+      case .reloadnoscale:
         item.isNoScale.toggle();
         break;
-      case 'toggle_quality':
+      case .toggleQuality:
         item.toggleQuality.toggle();
         break;
-      case 'external_player':
+      case .externalPlayer:
         ExternalVideoPlayerLauncher.launchOtherPlayer(item.fileURL, MIME.video, null);
         break;
-      case 'image_search':
+      case .imageSearch:
         await showImageSearchDialog(context, item);
         break;
     }
   }
 
-  Future<void> buttonHold(String action) async {
+  Future<void> buttonHold(GalleryButton button) async {
     // TODO long press slideshow button to set the timer
-    switch (action) {
-      case 'share':
+    switch (button) {
+      case .share:
         await ServiceHandler.vibrate();
         // Ignore share setting on long press
         showShareDialog(showTip: false);
         break;
-      case 'snatch':
+      case .snatch:
         await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -677,6 +698,19 @@ class _HideableAppBarState extends State<HideableAppBar> {
             );
           },
         );
+        break;
+
+      //
+
+      case .favourite:
+      case .info:
+      case .select:
+      case .open:
+      case .autoscroll:
+      case .reloadnoscale:
+      case .toggleQuality:
+      case .externalPlayer:
+      case .imageSearch:
         break;
     }
   }

@@ -36,12 +36,14 @@ class GalleryViewPage extends StatefulWidget {
     required this.initialIndex,
     required super.key, // key required to allow disabling rendering viewer items when there are too many active viewers at the same time
     this.canSelect = true,
+    this.readOnly = false,
     this.onPageChanged,
   });
 
   final SearchTab tab;
   final int initialIndex;
   final bool canSelect;
+  final bool readOnly;
   final ValueChanged<int>? onPageChanged;
 
   @override
@@ -183,6 +185,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
       tab: widget.tab,
       pageController: controller,
       canSelect: widget.canSelect,
+      readOnly: widget.readOnly,
       onOpenDrawer: () {
         viewerScaffoldKey.currentState?.openEndDrawer();
       },
@@ -216,8 +219,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
           onUpdate: (dismissUpdateDetails) {
             final prevValue = dismissProgress.value;
             dismissProgress.value =
-                (dismissUpdateDetails.progress *
-                        (1 / (settingsHandler.galleryScrollDirection.isVertical ? 0.3 : 0.2)))
+                (dismissUpdateDetails.progress * (1 / (settingsHandler.galleryScrollDirection.isVertical ? 0.3 : 0.2)))
                     .clamp(0, 1);
 
             if (prevValue != dismissProgress.value && dismissProgress.value == 1) {
@@ -284,6 +286,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                         controller.jumpToPage(page.value + 1);
                       }
                     } else if (event.physicalKey == PhysicalKeyboardKey.keyS) {
+                      if (widget.readOnly) return;
+
                       // save on S
                       snatchHandler.queue(
                         [widget.tab.booruHandler.filteredFetched[page.value]],
@@ -299,6 +303,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                         );
                       }
                     } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {
+                      if (widget.readOnly) return;
+
                       // favorite on F
                       if (settingsHandler.dbEnabled) {
                         await widget.tab.toggleItemFavourite(

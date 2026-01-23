@@ -5,6 +5,7 @@ import 'package:lolisnatcher/src/widgets/common/add_button.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
 
 class TagsFiltersAddDialog extends StatefulWidget {
@@ -65,18 +66,14 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
         //
         Container(
           margin: const EdgeInsets.symmetric(vertical: 20),
-          child: SettingsTextInput(
+          child: TagSearchBox(
             title: context.loc.tagsFiltersDialogs.newTagFilter(type: widget.tagFilterType),
             hintText: context.loc.tagsFiltersDialogs.newFilter,
             onlyInput: true,
             controller: _controller,
-            autofocus: true,
-            inputType: TextInputType.text,
             clearable: true,
-            pasteable: true,
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            onSubmitted: onSubmit,
-            enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
+            allowMultipleTags: false,
+            showBooruSelector: true,
           ),
         ),
       ],

@@ -187,22 +187,28 @@ class _BooruEditState extends State<BooruEdit> {
                 ),
               ),
             ),
-            TagSearchBox(
-              controller: booruDefTagsController,
-              title: booruEditorLoc.booruDefTags,
-              onChanged: (_, _) => setState(() {}),
-              hintText: booruEditorLoc.booruDefTagsPlaceholder,
-              booru: (!selectedBooruType.isAutodetect && booruURLController.text.isNotEmpty)
-                  ? Booru(
-                      'Temp',
-                      selectedBooruType,
-                      '',
-                      booruURLController.text,
-                      booruFaviconController.text,
-                    )
-                  : null,
-              allowMultipleTags: true,
-              clearable: true,
+            Builder(
+              builder: (context) {
+                final bool useNewBooru = !selectedBooruType.isAutodetect && booruURLController.text.isNotEmpty;
+                return TagSearchBox(
+                  controller: booruDefTagsController,
+                  title: booruEditorLoc.booruDefTags,
+                  onChanged: (_, _) => setState(() {}),
+                  hintText: booruEditorLoc.booruDefTagsPlaceholder,
+                  booru: useNewBooru
+                      ? Booru(
+                          'Temp',
+                          selectedBooruType,
+                          '',
+                          booruURLController.text,
+                          booruFaviconController.text,
+                        )
+                      : null,
+                  allowMultipleTags: true,
+                  readOnlyPreview: useNewBooru,
+                  clearable: true,
+                );
+              },
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(10, 16, 10, 16),
