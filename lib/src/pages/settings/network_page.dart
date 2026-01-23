@@ -6,8 +6,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/data/settings/proxy_type.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -39,7 +39,7 @@ class _NetworkPageState extends State<NetworkPage> {
 
     allowSelfSignedCerts = settingsHandler.allowSelfSignedCerts;
     userAgentController.text = settingsHandler.customUserAgent;
-    proxyType = ProxyType.fromName(settingsHandler.proxyType);
+    proxyType = settingsHandler.proxyType;
     proxyAddressController.text = settingsHandler.proxyAddress;
     proxyUsernameController.text = settingsHandler.proxyUsername;
     proxyPasswordController.text = settingsHandler.proxyPassword;
@@ -61,7 +61,7 @@ class _NetworkPageState extends State<NetworkPage> {
 
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     settingsHandler.customUserAgent = userAgentController.text;
-    settingsHandler.proxyType = proxyType.name;
+    settingsHandler.proxyType = proxyType;
     settingsHandler.proxyAddress = proxyAddressController.text;
     settingsHandler.proxyUsername = proxyUsernameController.text;
     settingsHandler.proxyPassword = proxyPasswordController.text;
@@ -99,15 +99,15 @@ class _NetworkPageState extends State<NetworkPage> {
               const SettingsButton(name: '', enabled: false),
               SettingsDropdown<ProxyType>(
                 value: proxyType,
-                items: (settingsHandler.map['proxyType']!['options'] as List<String>).map(ProxyType.fromName).toList(),
+                items: ProxyType.values,
                 onChanged: (ProxyType? newValue) {
                   setState(() {
-                    proxyType = newValue ?? ProxyType.direct;
+                    proxyType = newValue ?? ProxyType.defaultValue;
                   });
                 },
                 title: context.loc.settings.network.proxy,
                 subtitle: Text(context.loc.settings.network.proxySubtitle),
-                itemBuilder: (item) => Text(item?.name.capitalizeFirst ?? ''),
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
               if (!proxyType.isDirect && !proxyType.isSystem) ...[
                 SettingsTextInput(
@@ -258,23 +258,5 @@ class _NetworkPageState extends State<NetworkPage> {
         ),
       ),
     );
-  }
-}
-
-enum ProxyType {
-  direct,
-  system,
-  http,
-  socks5,
-  socks4;
-
-  bool get isDirect => this == direct;
-  bool get isSystem => this == system;
-  bool get isHttp => this == http;
-  bool get isSocks5 => this == socks5;
-  bool get isSocks4 => this == socks4;
-
-  static ProxyType fromName(String name) {
-    return ProxyType.values.firstWhereOrNull((e) => e.name == name) ?? direct;
   }
 }

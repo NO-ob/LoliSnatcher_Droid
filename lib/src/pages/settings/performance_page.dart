@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:lolisnatcher/src/data/settings/image_quality.dart';
+import 'package:lolisnatcher/src/data/settings/preview_quality.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -24,8 +26,8 @@ class _PerformancePageState extends State<PerformancePage> {
   bool autoPlayEnabled = true;
   bool disableVideo = false;
 
-  String previewMode = 'Sample';
-  String galleryMode = 'Full Res';
+  PreviewQuality previewMode = .sample;
+  ImageQuality galleryMode = .fullRes;
 
   final TextEditingController columnsLandscapeController = TextEditingController();
   final TextEditingController columnsPortraitController = TextEditingController();
@@ -142,8 +144,8 @@ class _PerformancePageState extends State<PerformancePage> {
                     setState(() {
                       shitDevice = newValue;
                       if (shitDevice) {
-                        previewMode = 'Thumbnail';
-                        galleryMode = 'Sample';
+                        previewMode = .thumbnail;
+                        galleryMode = .sample;
                         columnsPortraitController.text = '2';
                         columnsLandscapeController.text = '4';
                         preloadAmountController.text = '0';
@@ -161,25 +163,27 @@ class _PerformancePageState extends State<PerformancePage> {
                   onPressed: () => showLowPerfConfirmDialog(false),
                 ),
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<PreviewQuality>(
                 value: previewMode,
-                items: settingsHandler.map['previewMode']!['options'],
-                onChanged: (String? newValue) {
+                items: PreviewQuality.values,
+                onChanged: (PreviewQuality? newValue) {
                   setState(() {
-                    previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
+                    previewMode = newValue ?? PreviewQuality.defaultValue;
                   });
                 },
                 title: context.loc.settings.performance.previewQuality,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<ImageQuality>(
                 value: galleryMode,
-                items: settingsHandler.map['galleryMode']!['options'],
-                onChanged: (String? newValue) {
+                items: ImageQuality.values,
+                onChanged: (ImageQuality? newValue) {
                   setState(() {
-                    galleryMode = newValue ?? settingsHandler.map['galleryMode']!['default'];
+                    galleryMode = newValue ?? ImageQuality.defaultValue;
                   });
                 },
                 title: context.loc.settings.performance.imageQuality,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
               SettingsTextInput(
                 controller: columnsPortraitController,

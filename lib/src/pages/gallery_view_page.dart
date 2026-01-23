@@ -193,15 +193,15 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
       extendBodyBehindAppBar: true,
       extendBody: true,
       resizeToAvoidBottomInset: false,
-      appBar: settingsHandler.galleryBarPosition == 'Top' ? appBar : null,
-      bottomNavigationBar: settingsHandler.galleryBarPosition == 'Bottom' ? appBar : null,
+      appBar: settingsHandler.galleryBarPosition.isTop ? appBar : null,
+      bottomNavigationBar: settingsHandler.galleryBarPosition.isBottom ? appBar : null,
       backgroundColor: Colors.transparent,
       body: PhotoViewGestureDetectorScope(
         // vertical to prevent swipe-to-dismiss when zoomed
         // axis: Axis.vertical, // photo_view doesn't support locking both axises, so we use custom fork to fix this
         axis: Axis.values,
         child: Dismissible(
-          direction: settingsHandler.galleryScrollDirection == 'Vertical'
+          direction: settingsHandler.galleryScrollDirection.isVertical
               ? DismissDirection.horizontal
               : DismissDirection.vertical,
           // background: Container(color: Colors.black.withValues(alpha: 0.3)),
@@ -217,7 +217,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
             final prevValue = dismissProgress.value;
             dismissProgress.value =
                 (dismissUpdateDetails.progress *
-                        (1 / (settingsHandler.galleryScrollDirection == 'Vertical' ? 0.3 : 0.2)))
+                        (1 / (settingsHandler.galleryScrollDirection.isVertical ? 0.3 : 0.2)))
                     .clamp(0, 1);
 
             if (prevValue != dismissProgress.value && dismissProgress.value == 1) {
@@ -343,7 +343,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                   controller: controller,
                                   preloadPagesCount: preloadCount,
                                   // allowImplicitScrolling: true,
-                                  scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical'
+                                  scrollDirection: settingsHandler.galleryScrollDirection.isVertical
                                       ? Axis.vertical
                                       : Axis.horizontal,
                                   physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
@@ -492,7 +492,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                         return slidePageTransition(
                                           context,
                                           controller,
-                                          settingsHandler.galleryScrollDirection == 'Vertical'
+                                          settingsHandler.galleryScrollDirection.isVertical
                                               ? Axis.vertical
                                               : Axis.horizontal,
                                           index,
@@ -709,7 +709,7 @@ class _ItemInfoDrawerState extends State<ItemInfoDrawer> {
           fasterAfter: 20,
           child: OutlinedButton(
             onPressed: () => widget.pageController.jumpToPage(page.value - 1),
-            child: settingsHandler.galleryScrollDirection == 'Vertical'
+            child: settingsHandler.galleryScrollDirection.isVertical
                 ? const Icon(Icons.arrow_upward)
                 : const Icon(Icons.arrow_back),
           ),
@@ -724,7 +724,7 @@ class _ItemInfoDrawerState extends State<ItemInfoDrawer> {
           fasterAfter: 20,
           child: OutlinedButton(
             onPressed: () => widget.pageController.jumpToPage(page.value + 1),
-            child: settingsHandler.galleryScrollDirection == 'Vertical'
+            child: settingsHandler.galleryScrollDirection.isVertical
                 ? const Icon(Icons.arrow_downward)
                 : const Icon(Icons.arrow_forward),
           ),

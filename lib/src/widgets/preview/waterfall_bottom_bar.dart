@@ -89,8 +89,8 @@ class WaterfallBottomBarState extends State<WaterfallBottomBar> with TickerProvi
                 child: AnimatedPadding(
                   duration: const Duration(milliseconds: 100),
                   padding: EdgeInsets.only(
-                    left: (settingsHandler.scrollGridButtonsPosition == 'Left' ? buttonPadding : 0) + 10,
-                    right: (settingsHandler.scrollGridButtonsPosition == 'Right' ? buttonPadding : 0) + 10,
+                    left: (settingsHandler.scrollGridButtonsPosition.isLeft ? buttonPadding : 0) + 10,
+                    right: (settingsHandler.scrollGridButtonsPosition.isRight ? buttonPadding : 0) + 10,
                   ),
                   child: child,
                 ),

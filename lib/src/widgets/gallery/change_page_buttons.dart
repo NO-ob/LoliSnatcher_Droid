@@ -56,7 +56,7 @@ class ChangePageButtons extends StatelessWidget {
       fasterAfter: 20,
       child: IconButton(
         icon: Icon(
-          settingsHandler.galleryScrollDirection == 'Horizontal'
+          settingsHandler.galleryScrollDirection.isHorizontal
               ? (isPrev ? Icons.arrow_back : Icons.arrow_forward)
               : (isPrev ? Icons.arrow_upward : Icons.arrow_downward),
         ),

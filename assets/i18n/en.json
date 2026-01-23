@@ -472,7 +472,16 @@
             "gifThumbnailsRequires": "Requires \"Don't scale images\"",
             "scrollPreviewsButtonsPosition": "Scroll previews buttons position",
             "mouseWheelScrollModifier": "Mouse wheel scroll modifier",
-            "scrollModifier": "Scroll modifier"
+            "scrollModifier": "Scroll modifier",
+            "previewQualityValues": {
+                "thumbnail": "Thumbnail",
+                "sample": "Sample"
+            },
+            "previewDisplayModeValues": {
+                "square": "Square",
+                "rectangle": "Rectangle",
+                "staggered": "Staggered"
+            }
         },
         "theme": {
             "title": "Themes",
@@ -561,7 +570,34 @@
             "viewerPageChangeAnimation": "Viewer page change animation",
             "usingDefaultAnimation": "Using default animation",
             "usingCustomAnimation": "Using custom animation",
-            "kannaLoadingGif": "Kanna loading Gif"
+            "kannaLoadingGif": "Kanna loading Gif",
+            "imageQualityValues": {
+                "sample": "Sample",
+                "fullRes": "Original"
+            },
+            "scrollDirectionValues": {
+                "horizontal": "Horizontal",
+                "vertical": "Vertical"
+            },
+            "toolbarPositionValues": {
+                "top": "Top",
+                "bottom": "Bottom"
+            },
+            "buttonPositionValues": {
+                "disabled": "Disabled",
+                "left": "Left",
+                "right": "Right"
+            },
+            "shareActionValues": {
+                "ask": "Ask",
+                "postUrl": "Post URL",
+                "postUrlWithTags": "Post URL with tags",
+                "fileUrl": "File URL",
+                "fileUrlWithTags": "File URL with tags",
+                "file": "File",
+                "fileWithTags": "File with tags",
+                "hydrus": "Hydrus"
+            }
         },
         "video": {
             "title": "Video",
@@ -591,6 +627,11 @@
                 "streamCacheMode": "- Stream+Cache - Mix of both, but currently leads to double download",
                 "cacheNote": "[Note]: Videos will cache only if 'Cache Media' is enabled.",
                 "desktopWarning": "[Warning]: On desktop Stream mode can work incorrectly for some Boorus."
+            },
+            "cacheModeValues": {
+                "stream": "Stream",
+                "cache": "Cache",
+                "streamCache": "Stream+Cache"
             }
         },
         "downloads": {

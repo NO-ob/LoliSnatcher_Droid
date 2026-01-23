@@ -61,7 +61,7 @@ class _NotesRendererState extends State<NotesRenderer> {
   void initState() {
     super.initState();
 
-    shouldScale = settingsHandler.galleryMode == 'Sample' || !settingsHandler.disableImageScaling;
+    shouldScale = settingsHandler.galleryMode.isSample || !settingsHandler.disableImageScaling;
     resizeScale = 1;
     screenToImageRatio = 1;
 
@@ -192,7 +192,7 @@ class _NotesRendererState extends State<NotesRenderer> {
     screenToImageRatio =
         viewScale ?? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight));
 
-    final bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
+    final bool isVertical = settingsHandler.galleryScrollDirection.isVertical;
     final bool isUsingCustomAnim = !settingsHandler.disableCustomPageTransitions;
 
     final double page = widget.pageController?.hasClients == true ? (widget.pageController!.page ?? 0) : 0;

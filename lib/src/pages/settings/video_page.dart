@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:fvp/fvp.dart' as fvp;
 
+import 'package:lolisnatcher/src/data/settings/mpv_hardware_decoding.dart';
+import 'package:lolisnatcher/src/data/settings/mpv_video_output.dart';
 import 'package:lolisnatcher/src/data/settings/video_backend_mode.dart';
+import 'package:lolisnatcher/src/data/settings/video_cache_mode.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
@@ -25,7 +28,9 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
   VideoBackendMode videoBackendMode = SettingsHandler.isDesktopPlatform
       ? VideoBackendMode.mpv
       : VideoBackendMode.normal;
-  late String altVideoPlayerVO, altVideoPlayerHWDEC, videoCacheMode;
+  late MpvVideoOutput altVideoPlayerVO;
+  late MpvHardwareDecoding altVideoPlayerHWDEC;
+  late VideoCacheMode videoCacheMode;
 
   @override
   void initState() {
@@ -200,47 +205,49 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                               },
                               title: context.loc.settings.video.mpvUseHardwareAcceleration,
                             ),
-                            SettingsDropdown(
+                            SettingsDropdown<MpvVideoOutput>(
                               value: altVideoPlayerVO,
-                              items: settingsHandler.map['altVideoPlayerVO']!['options'],
+                              items: MpvVideoOutput.values,
                               onReset: () {
                                 setState(() {
-                                  altVideoPlayerVO = settingsHandler.map['altVideoPlayerVO']!['default'];
+                                  altVideoPlayerVO = MpvVideoOutput.defaultValue;
                                 });
                               },
-                              onChanged: (String? newValue) {
+                              onChanged: (MpvVideoOutput? newValue) {
                                 setState(() {
-                                  altVideoPlayerVO = newValue ?? settingsHandler.map['altVideoPlayerVO']!['default'];
+                                  altVideoPlayerVO = newValue ?? MpvVideoOutput.defaultValue;
                                 });
                               },
                               title: context.loc.settings.video.mpvVO,
+                              itemTitleBuilder: (e) => e?.locName(context) ?? '',
                             ),
-                            SettingsDropdown(
+                            SettingsDropdown<MpvHardwareDecoding>(
                               value: altVideoPlayerHWDEC,
-                              items: settingsHandler.map['altVideoPlayerHWDEC']!['options'],
+                              items: MpvHardwareDecoding.values,
                               onReset: () {
                                 setState(() {
-                                  altVideoPlayerHWDEC = settingsHandler.map['altVideoPlayerHWDEC']!['default'];
+                                  altVideoPlayerHWDEC = MpvHardwareDecoding.defaultValue;
                                 });
                               },
-                              onChanged: (String? newValue) {
+                              onChanged: (MpvHardwareDecoding? newValue) {
                                 setState(() {
-                                  altVideoPlayerHWDEC =
-                                      newValue ?? settingsHandler.map['altVideoPlayerHWDEC']!['default'];
+                                  altVideoPlayerHWDEC = newValue ?? MpvHardwareDecoding.defaultValue;
                                 });
                               },
                               title: context.loc.settings.video.mpvHWDEC,
+                              itemTitleBuilder: (e) => e?.locName(context) ?? '',
                             ),
                           ],
-                          SettingsOptionsList(
+                          SettingsOptionsList<VideoCacheMode>(
                             value: videoCacheMode,
-                            items: settingsHandler.map['videoCacheMode']!['options'],
-                            onChanged: (String? newValue) {
+                            items: VideoCacheMode.values,
+                            onChanged: (VideoCacheMode? newValue) {
                               setState(() {
-                                videoCacheMode = newValue ?? settingsHandler.map['videoCacheMode']!['default'];
+                                videoCacheMode = newValue ?? VideoCacheMode.defaultValue;
                               });
                             },
                             title: context.loc.settings.video.videoCacheMode,
+                            itemTitleBuilder: (e) => e?.locName(context) ?? '',
                             subtitle: const Text(
                               '''Videos on some Boorus may not work correctly (i.e. endless loading) when using Stream video cache mode. In that case try using Cache mode. Otherwise player will retry with Cache mode automatically if video is in initial buffering state for 10+ seconds and video file size is less than 25mb''',
                             ),

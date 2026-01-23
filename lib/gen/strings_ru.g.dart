@@ -2008,6 +2008,13 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
       TranslationOverrides.string(_root.$meta, 'settings.interface.mouseWheelScrollModifier', {}) ?? 'Модификатор прокрутки колёсиком мыши';
   @override
   String get scrollModifier => TranslationOverrides.string(_root.$meta, 'settings.interface.scrollModifier', {}) ?? 'Модификатор прокрутки';
+  @override
+  late final _TranslationsSettingsInterfacePreviewQualityValuesRu previewQualityValues = _TranslationsSettingsInterfacePreviewQualityValuesRu._(
+    _root,
+  );
+  @override
+  late final _TranslationsSettingsInterfacePreviewDisplayModeValuesRu previewDisplayModeValues =
+      _TranslationsSettingsInterfacePreviewDisplayModeValuesRu._(_root);
 }
 
 // Path: settings.theme
@@ -2252,6 +2259,16 @@ class _TranslationsSettingsViewerRu extends TranslationsSettingsViewerEn {
   String get usingCustomAnimation => TranslationOverrides.string(_root.$meta, 'settings.viewer.usingCustomAnimation', {}) ?? 'Анимация просмотрщика';
   @override
   String get kannaLoadingGif => TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? 'GIF-пасхалка во время загрузки';
+  @override
+  late final _TranslationsSettingsViewerImageQualityValuesRu imageQualityValues = _TranslationsSettingsViewerImageQualityValuesRu._(_root);
+  @override
+  late final _TranslationsSettingsViewerScrollDirectionValuesRu scrollDirectionValues = _TranslationsSettingsViewerScrollDirectionValuesRu._(_root);
+  @override
+  late final _TranslationsSettingsViewerToolbarPositionValuesRu toolbarPositionValues = _TranslationsSettingsViewerToolbarPositionValuesRu._(_root);
+  @override
+  late final _TranslationsSettingsViewerButtonPositionValuesRu buttonPositionValues = _TranslationsSettingsViewerButtonPositionValuesRu._(_root);
+  @override
+  late final _TranslationsSettingsViewerShareActionValuesRu shareActionValues = _TranslationsSettingsViewerShareActionValuesRu._(_root);
 }
 
 // Path: settings.video
@@ -2317,6 +2334,8 @@ class _TranslationsSettingsVideoRu extends TranslationsSettingsVideoEn {
   String get videoCacheMode => TranslationOverrides.string(_root.$meta, 'settings.video.videoCacheMode', {}) ?? 'Режим кэширования видео';
   @override
   late final _TranslationsSettingsVideoCacheModesRu cacheModes = _TranslationsSettingsVideoCacheModesRu._(_root);
+  @override
+  late final _TranslationsSettingsVideoCacheModeValuesRu cacheModeValues = _TranslationsSettingsVideoCacheModeValuesRu._(_root);
 }
 
 // Path: settings.downloads
@@ -3683,6 +3702,115 @@ class _TranslationsPreviewErrorRu extends TranslationsPreviewErrorEn {
   String get tapToRetry => TranslationOverrides.string(_root.$meta, 'preview.error.tapToRetry', {}) ?? 'Нажми здесь для повтора';
 }
 
+// Path: settings.interface.previewQualityValues
+class _TranslationsSettingsInterfacePreviewQualityValuesRu extends TranslationsSettingsInterfacePreviewQualityValuesEn {
+  _TranslationsSettingsInterfacePreviewQualityValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get thumbnail => TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.thumbnail', {}) ?? 'Превью';
+  @override
+  String get sample => TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.sample', {}) ?? 'Сэмпл';
+}
+
+// Path: settings.interface.previewDisplayModeValues
+class _TranslationsSettingsInterfacePreviewDisplayModeValuesRu extends TranslationsSettingsInterfacePreviewDisplayModeValuesEn {
+  _TranslationsSettingsInterfacePreviewDisplayModeValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get square => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.square', {}) ?? 'Квадрат';
+  @override
+  String get rectangle => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.rectangle', {}) ?? 'Прямоугольник';
+  @override
+  String get staggered => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Шахматный';
+}
+
+// Path: settings.viewer.imageQualityValues
+class _TranslationsSettingsViewerImageQualityValuesRu extends TranslationsSettingsViewerImageQualityValuesEn {
+  _TranslationsSettingsViewerImageQualityValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get sample => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? 'Сэмпл';
+  @override
+  String get fullRes => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.fullRes', {}) ?? 'Оригинал';
+}
+
+// Path: settings.viewer.scrollDirectionValues
+class _TranslationsSettingsViewerScrollDirectionValuesRu extends TranslationsSettingsViewerScrollDirectionValuesEn {
+  _TranslationsSettingsViewerScrollDirectionValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get horizontal => TranslationOverrides.string(_root.$meta, 'settings.viewer.scrollDirectionValues.horizontal', {}) ?? 'Горизонтально';
+  @override
+  String get vertical => TranslationOverrides.string(_root.$meta, 'settings.viewer.scrollDirectionValues.vertical', {}) ?? 'Вертикально';
+}
+
+// Path: settings.viewer.toolbarPositionValues
+class _TranslationsSettingsViewerToolbarPositionValuesRu extends TranslationsSettingsViewerToolbarPositionValuesEn {
+  _TranslationsSettingsViewerToolbarPositionValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get top => TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarPositionValues.top', {}) ?? 'Сверху';
+  @override
+  String get bottom => TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarPositionValues.bottom', {}) ?? 'Снизу';
+}
+
+// Path: settings.viewer.buttonPositionValues
+class _TranslationsSettingsViewerButtonPositionValuesRu extends TranslationsSettingsViewerButtonPositionValuesEn {
+  _TranslationsSettingsViewerButtonPositionValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get disabled => TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.disabled', {}) ?? 'Отключено';
+  @override
+  String get left => TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.left', {}) ?? 'Слева';
+  @override
+  String get right => TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.right', {}) ?? 'Справа';
+}
+
+// Path: settings.viewer.shareActionValues
+class _TranslationsSettingsViewerShareActionValuesRu extends TranslationsSettingsViewerShareActionValuesEn {
+  _TranslationsSettingsViewerShareActionValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get ask => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.ask', {}) ?? 'Спрашивать';
+  @override
+  String get postUrl => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.postUrl', {}) ?? 'URL поста';
+  @override
+  String get postUrlWithTags =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.postUrlWithTags', {}) ?? 'URL поста с тегами';
+  @override
+  String get fileUrl => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrl', {}) ?? 'URL файла';
+  @override
+  String get fileUrlWithTags =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrlWithTags', {}) ?? 'URL файла с тегами';
+  @override
+  String get file => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.file', {}) ?? 'Файл';
+  @override
+  String get fileWithTags => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileWithTags', {}) ?? 'Файл с тегами';
+  @override
+  String get hydrus => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.hydrus', {}) ?? 'Hydrus';
+}
+
 // Path: settings.video.cacheModes
 class _TranslationsSettingsVideoCacheModesRu extends TranslationsSettingsVideoCacheModesEn {
   _TranslationsSettingsVideoCacheModesRu._(TranslationsRu root) : this._root = root, super.internal(root);
@@ -3712,6 +3840,21 @@ class _TranslationsSettingsVideoCacheModesRu extends TranslationsSettingsVideoCa
   String get desktopWarning =>
       TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
       '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.';
+}
+
+// Path: settings.video.cacheModeValues
+class _TranslationsSettingsVideoCacheModeValuesRu extends TranslationsSettingsVideoCacheModeValuesEn {
+  _TranslationsSettingsVideoCacheModeValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get stream => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый';
+  @override
+  String get cache => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш';
+  @override
+  String get streamCache => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш';
 }
 
 // Path: media.loading.stopReasons
@@ -4437,6 +4580,16 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.interface.mouseWheelScrollModifier', {}) ?? 'Модификатор прокрутки колёсиком мыши',
           'settings.interface.scrollModifier' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.scrollModifier', {}) ?? 'Модификатор прокрутки',
+          'settings.interface.previewQualityValues.thumbnail' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.thumbnail', {}) ?? 'Превью',
+          'settings.interface.previewQualityValues.sample' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.sample', {}) ?? 'Сэмпл',
+          'settings.interface.previewDisplayModeValues.square' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.square', {}) ?? 'Квадрат',
+          'settings.interface.previewDisplayModeValues.rectangle' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.rectangle', {}) ?? 'Прямоугольник',
+          'settings.interface.previewDisplayModeValues.staggered' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Шахматный',
           'settings.theme.title' => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Темы',
           'settings.theme.themeMode' => TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Режим темы',
           'settings.theme.blackBg' => TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? 'Чёрный фон',
@@ -4594,6 +4747,40 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.viewer.usingCustomAnimation', {}) ?? 'Анимация просмотрщика',
           'settings.viewer.kannaLoadingGif' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? 'GIF-пасхалка во время загрузки',
+          'settings.viewer.imageQualityValues.sample' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? 'Сэмпл',
+          'settings.viewer.imageQualityValues.fullRes' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.fullRes', {}) ?? 'Оригинал',
+          'settings.viewer.scrollDirectionValues.horizontal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.scrollDirectionValues.horizontal', {}) ?? 'Горизонтально',
+          'settings.viewer.scrollDirectionValues.vertical' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.scrollDirectionValues.vertical', {}) ?? 'Вертикально',
+          'settings.viewer.toolbarPositionValues.top' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarPositionValues.top', {}) ?? 'Сверху',
+          'settings.viewer.toolbarPositionValues.bottom' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarPositionValues.bottom', {}) ?? 'Снизу',
+          'settings.viewer.buttonPositionValues.disabled' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.disabled', {}) ?? 'Отключено',
+          'settings.viewer.buttonPositionValues.left' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.left', {}) ?? 'Слева',
+          'settings.viewer.buttonPositionValues.right' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.right', {}) ?? 'Справа',
+          'settings.viewer.shareActionValues.ask' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.ask', {}) ?? 'Спрашивать',
+          'settings.viewer.shareActionValues.postUrl' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.postUrl', {}) ?? 'URL поста',
+          'settings.viewer.shareActionValues.postUrlWithTags' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.postUrlWithTags', {}) ?? 'URL поста с тегами',
+          'settings.viewer.shareActionValues.fileUrl' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrl', {}) ?? 'URL файла',
+          'settings.viewer.shareActionValues.fileUrlWithTags' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrlWithTags', {}) ?? 'URL файла с тегами',
+          'settings.viewer.shareActionValues.file' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.file', {}) ?? 'Файл',
+          'settings.viewer.shareActionValues.fileWithTags' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileWithTags', {}) ?? 'Файл с тегами',
+          'settings.viewer.shareActionValues.hydrus' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.hydrus', {}) ?? 'Hydrus',
           'settings.video.title' => TranslationOverrides.string(_root.$meta, 'settings.video.title', {}) ?? 'Видео',
           'settings.video.disableVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.disableVideos', {}) ?? 'Отключить видео',
           'settings.video.disableVideosHelp' =>
@@ -4649,8 +4836,16 @@ extension on TranslationsRu {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
+          'settings.video.cacheModeValues.stream' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
+          'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
+          'settings.video.cacheModeValues.streamCache' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
           'settings.downloads.fromNextItemInQueue' =>
             TranslationOverrides.string(_root.$meta, 'settings.downloads.fromNextItemInQueue', {}) ?? 'Со следующего элемента в очереди',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.downloads.pleaseProvideStoragePermission' =>
             TranslationOverrides.string(_root.$meta, 'settings.downloads.pleaseProvideStoragePermission', {}) ??
                 'Пожалуйста, предоставь разрешение на доступ к хранилищу, чтобы сохранять файлы',
@@ -4702,9 +4897,6 @@ extension on TranslationsRu {
           'settings.database.databaseInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ??
                 'База данных будет отслеживать избранное и был ли скачан элемент',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.database.databaseInfoSnatch' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ??
                 'Если элемент был скачан, он не будет скачан снова',
@@ -5627,6 +5819,9 @@ extension on TranslationsRu {
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Отменено пользователем',
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Сохранить в любом случае',
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'Пропустить',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.retryAll' =>
             ({required int count}) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Повторить все (${count})',
           'mobileHome.existingFailedOrCancelledItems' =>
@@ -5666,9 +5861,6 @@ extension on TranslationsRu {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Пауза',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Старт',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Удалить из избранного',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Перезагрузить с масштабированием',

@@ -33,7 +33,7 @@ class GridBuilder extends StatelessWidget {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    final String previewDisplay = (settingsHandler.previewDisplay == 'Staggered' && !tab.booruHandler.hasSizeData)
+    final previewDisplay = (settingsHandler.previewDisplay.isStaggered && !tab.booruHandler.hasSizeData)
         ? settingsHandler.previewDisplayFallback
         : settingsHandler.previewDisplay;
 
@@ -46,7 +46,7 @@ class GridBuilder extends StatelessWidget {
         itemCount: currentFetched.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columnCount,
-          childAspectRatio: previewDisplay == 'Square' ? 1 : 9 / 16,
+          childAspectRatio: previewDisplay.isSquare ? 1 : 9 / 16,
           mainAxisSpacing: 4,
           crossAxisSpacing: 4,
         ),

@@ -2492,6 +2492,12 @@ class TranslationsSettingsInterfaceEn {
 
   /// en: 'Scroll modifier'
   String get scrollModifier => TranslationOverrides.string(_root.$meta, 'settings.interface.scrollModifier', {}) ?? 'Scroll modifier';
+
+  late final TranslationsSettingsInterfacePreviewQualityValuesEn previewQualityValues = TranslationsSettingsInterfacePreviewQualityValuesEn.internal(
+    _root,
+  );
+  late final TranslationsSettingsInterfacePreviewDisplayModeValuesEn previewDisplayModeValues =
+      TranslationsSettingsInterfacePreviewDisplayModeValuesEn.internal(_root);
 }
 
 // Path: settings.theme
@@ -2808,6 +2814,16 @@ class TranslationsSettingsViewerEn {
 
   /// en: 'Kanna loading Gif'
   String get kannaLoadingGif => TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? 'Kanna loading Gif';
+
+  late final TranslationsSettingsViewerImageQualityValuesEn imageQualityValues = TranslationsSettingsViewerImageQualityValuesEn.internal(_root);
+  late final TranslationsSettingsViewerScrollDirectionValuesEn scrollDirectionValues = TranslationsSettingsViewerScrollDirectionValuesEn.internal(
+    _root,
+  );
+  late final TranslationsSettingsViewerToolbarPositionValuesEn toolbarPositionValues = TranslationsSettingsViewerToolbarPositionValuesEn.internal(
+    _root,
+  );
+  late final TranslationsSettingsViewerButtonPositionValuesEn buttonPositionValues = TranslationsSettingsViewerButtonPositionValuesEn.internal(_root);
+  late final TranslationsSettingsViewerShareActionValuesEn shareActionValues = TranslationsSettingsViewerShareActionValuesEn.internal(_root);
 }
 
 // Path: settings.video
@@ -2893,6 +2909,7 @@ class TranslationsSettingsVideoEn {
   String get videoCacheMode => TranslationOverrides.string(_root.$meta, 'settings.video.videoCacheMode', {}) ?? 'Video cache mode';
 
   late final TranslationsSettingsVideoCacheModesEn cacheModes = TranslationsSettingsVideoCacheModesEn.internal(_root);
+  late final TranslationsSettingsVideoCacheModeValuesEn cacheModeValues = TranslationsSettingsVideoCacheModeValuesEn.internal(_root);
 }
 
 // Path: settings.downloads
@@ -4636,6 +4653,137 @@ class TranslationsPreviewErrorEn {
   String get tapToRetry => TranslationOverrides.string(_root.$meta, 'preview.error.tapToRetry', {}) ?? 'Tap here to retry';
 }
 
+// Path: settings.interface.previewQualityValues
+class TranslationsSettingsInterfacePreviewQualityValuesEn {
+  TranslationsSettingsInterfacePreviewQualityValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Thumbnail'
+  String get thumbnail => TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.thumbnail', {}) ?? 'Thumbnail';
+
+  /// en: 'Sample'
+  String get sample => TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.sample', {}) ?? 'Sample';
+}
+
+// Path: settings.interface.previewDisplayModeValues
+class TranslationsSettingsInterfacePreviewDisplayModeValuesEn {
+  TranslationsSettingsInterfacePreviewDisplayModeValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Square'
+  String get square => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.square', {}) ?? 'Square';
+
+  /// en: 'Rectangle'
+  String get rectangle => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.rectangle', {}) ?? 'Rectangle';
+
+  /// en: 'Staggered'
+  String get staggered => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Staggered';
+}
+
+// Path: settings.viewer.imageQualityValues
+class TranslationsSettingsViewerImageQualityValuesEn {
+  TranslationsSettingsViewerImageQualityValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Sample'
+  String get sample => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? 'Sample';
+
+  /// en: 'Original'
+  String get fullRes => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.fullRes', {}) ?? 'Original';
+}
+
+// Path: settings.viewer.scrollDirectionValues
+class TranslationsSettingsViewerScrollDirectionValuesEn {
+  TranslationsSettingsViewerScrollDirectionValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Horizontal'
+  String get horizontal => TranslationOverrides.string(_root.$meta, 'settings.viewer.scrollDirectionValues.horizontal', {}) ?? 'Horizontal';
+
+  /// en: 'Vertical'
+  String get vertical => TranslationOverrides.string(_root.$meta, 'settings.viewer.scrollDirectionValues.vertical', {}) ?? 'Vertical';
+}
+
+// Path: settings.viewer.toolbarPositionValues
+class TranslationsSettingsViewerToolbarPositionValuesEn {
+  TranslationsSettingsViewerToolbarPositionValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Top'
+  String get top => TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarPositionValues.top', {}) ?? 'Top';
+
+  /// en: 'Bottom'
+  String get bottom => TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarPositionValues.bottom', {}) ?? 'Bottom';
+}
+
+// Path: settings.viewer.buttonPositionValues
+class TranslationsSettingsViewerButtonPositionValuesEn {
+  TranslationsSettingsViewerButtonPositionValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Disabled'
+  String get disabled => TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.disabled', {}) ?? 'Disabled';
+
+  /// en: 'Left'
+  String get left => TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.left', {}) ?? 'Left';
+
+  /// en: 'Right'
+  String get right => TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.right', {}) ?? 'Right';
+}
+
+// Path: settings.viewer.shareActionValues
+class TranslationsSettingsViewerShareActionValuesEn {
+  TranslationsSettingsViewerShareActionValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Ask'
+  String get ask => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.ask', {}) ?? 'Ask';
+
+  /// en: 'Post URL'
+  String get postUrl => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.postUrl', {}) ?? 'Post URL';
+
+  /// en: 'Post URL with tags'
+  String get postUrlWithTags =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.postUrlWithTags', {}) ?? 'Post URL with tags';
+
+  /// en: 'File URL'
+  String get fileUrl => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrl', {}) ?? 'File URL';
+
+  /// en: 'File URL with tags'
+  String get fileUrlWithTags =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrlWithTags', {}) ?? 'File URL with tags';
+
+  /// en: 'File'
+  String get file => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.file', {}) ?? 'File';
+
+  /// en: 'File with tags'
+  String get fileWithTags => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileWithTags', {}) ?? 'File with tags';
+
+  /// en: 'Hydrus'
+  String get hydrus => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.hydrus', {}) ?? 'Hydrus';
+}
+
 // Path: settings.video.cacheModes
 class TranslationsSettingsVideoCacheModesEn {
   TranslationsSettingsVideoCacheModesEn.internal(this._root);
@@ -4671,6 +4819,24 @@ class TranslationsSettingsVideoCacheModesEn {
   String get desktopWarning =>
       TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
       '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.';
+}
+
+// Path: settings.video.cacheModeValues
+class TranslationsSettingsVideoCacheModeValuesEn {
+  TranslationsSettingsVideoCacheModeValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Stream'
+  String get stream => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Stream';
+
+  /// en: 'Cache'
+  String get cache => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache';
+
+  /// en: 'Stream+Cache'
+  String get streamCache => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache';
 }
 
 // Path: media.loading.stopReasons
@@ -5381,6 +5547,16 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.interface.mouseWheelScrollModifier', {}) ?? 'Mouse wheel scroll modifier',
           'settings.interface.scrollModifier' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.scrollModifier', {}) ?? 'Scroll modifier',
+          'settings.interface.previewQualityValues.thumbnail' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.thumbnail', {}) ?? 'Thumbnail',
+          'settings.interface.previewQualityValues.sample' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.sample', {}) ?? 'Sample',
+          'settings.interface.previewDisplayModeValues.square' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.square', {}) ?? 'Square',
+          'settings.interface.previewDisplayModeValues.rectangle' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.rectangle', {}) ?? 'Rectangle',
+          'settings.interface.previewDisplayModeValues.staggered' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Staggered',
           'settings.theme.title' => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Themes',
           'settings.theme.themeMode' => TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Theme mode',
           'settings.theme.blackBg' => TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? 'Black background',
@@ -5525,6 +5701,39 @@ extension on Translations {
           'settings.viewer.usingCustomAnimation' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.usingCustomAnimation', {}) ?? 'Using custom animation',
           'settings.viewer.kannaLoadingGif' => TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? 'Kanna loading Gif',
+          'settings.viewer.imageQualityValues.sample' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? 'Sample',
+          'settings.viewer.imageQualityValues.fullRes' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.fullRes', {}) ?? 'Original',
+          'settings.viewer.scrollDirectionValues.horizontal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.scrollDirectionValues.horizontal', {}) ?? 'Horizontal',
+          'settings.viewer.scrollDirectionValues.vertical' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.scrollDirectionValues.vertical', {}) ?? 'Vertical',
+          'settings.viewer.toolbarPositionValues.top' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarPositionValues.top', {}) ?? 'Top',
+          'settings.viewer.toolbarPositionValues.bottom' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarPositionValues.bottom', {}) ?? 'Bottom',
+          'settings.viewer.buttonPositionValues.disabled' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.disabled', {}) ?? 'Disabled',
+          'settings.viewer.buttonPositionValues.left' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.left', {}) ?? 'Left',
+          'settings.viewer.buttonPositionValues.right' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonPositionValues.right', {}) ?? 'Right',
+          'settings.viewer.shareActionValues.ask' => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.ask', {}) ?? 'Ask',
+          'settings.viewer.shareActionValues.postUrl' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.postUrl', {}) ?? 'Post URL',
+          'settings.viewer.shareActionValues.postUrlWithTags' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.postUrlWithTags', {}) ?? 'Post URL with tags',
+          'settings.viewer.shareActionValues.fileUrl' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrl', {}) ?? 'File URL',
+          'settings.viewer.shareActionValues.fileUrlWithTags' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrlWithTags', {}) ?? 'File URL with tags',
+          'settings.viewer.shareActionValues.file' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.file', {}) ?? 'File',
+          'settings.viewer.shareActionValues.fileWithTags' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileWithTags', {}) ?? 'File with tags',
+          'settings.viewer.shareActionValues.hydrus' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.hydrus', {}) ?? 'Hydrus',
           'settings.video.title' => TranslationOverrides.string(_root.$meta, 'settings.video.title', {}) ?? 'Video',
           'settings.video.disableVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.disableVideos', {}) ?? 'Disable videos',
           'settings.video.disableVideosHelp' =>
@@ -5577,8 +5786,16 @@ extension on Translations {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
+          'settings.video.cacheModeValues.stream' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Stream',
+          'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache',
+          'settings.video.cacheModeValues.streamCache' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache',
           'settings.downloads.fromNextItemInQueue' =>
             TranslationOverrides.string(_root.$meta, 'settings.downloads.fromNextItemInQueue', {}) ?? 'From next item in queue',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.downloads.pleaseProvideStoragePermission' =>
             TranslationOverrides.string(_root.$meta, 'settings.downloads.pleaseProvideStoragePermission', {}) ??
                 'Please provide storage permission in order to download files',
@@ -5625,9 +5842,6 @@ extension on Translations {
           'settings.database.databaseInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ??
                 'The database will store favourites and also track if an item is snatched',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.database.databaseInfoSnatch' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ??
                 'If an item is snatched it wont be snatched again',
@@ -6517,6 +6731,9 @@ extension on Translations {
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Cancelled by user',
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Save anyway',
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'Skip',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.retryAll' =>
             ({required int count}) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Retry all (${count})',
           'mobileHome.existingFailedOrCancelledItems' =>
@@ -6554,9 +6771,6 @@ extension on Translations {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Pause',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Start',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Unfavourite',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Reload with scaling',

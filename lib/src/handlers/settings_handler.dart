@@ -19,8 +19,19 @@ import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/data/settings/button_position.dart';
 import 'package:lolisnatcher/src/data/settings/hand_side.dart';
+import 'package:lolisnatcher/src/data/settings/image_quality.dart';
+import 'package:lolisnatcher/src/data/settings/mpv_hardware_decoding.dart';
+import 'package:lolisnatcher/src/data/settings/mpv_video_output.dart';
+import 'package:lolisnatcher/src/data/settings/preview_display_mode.dart';
+import 'package:lolisnatcher/src/data/settings/preview_quality.dart';
+import 'package:lolisnatcher/src/data/settings/proxy_type.dart';
+import 'package:lolisnatcher/src/data/settings/scroll_direction.dart';
+import 'package:lolisnatcher/src/data/settings/share_action.dart';
+import 'package:lolisnatcher/src/data/settings/vertical_position.dart';
 import 'package:lolisnatcher/src/data/settings/video_backend_mode.dart';
+import 'package:lolisnatcher/src/data/settings/video_cache_mode.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
 import 'package:lolisnatcher/src/data/update_info.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
@@ -86,37 +97,35 @@ class SettingsHandler {
 
   // saveable settings vars
   String defTags = 'rating:safe';
-  String previewMode = 'Sample';
-  String videoCacheMode = 'Stream';
+  PreviewQuality previewMode = PreviewQuality.defaultValue;
+  VideoCacheMode videoCacheMode = VideoCacheMode.defaultValue;
   String prefBooru = '';
-  String previewDisplay = 'Square';
-  String previewDisplayFallback = 'Square';
-  String galleryMode = 'Full Res';
-  String snatchMode = 'Full Res';
-  String shareAction = 'Ask';
+  PreviewDisplayMode previewDisplay = PreviewDisplayMode.defaultValue;
+  PreviewDisplayMode previewDisplayFallback = PreviewDisplayMode.defaultValue;
+  ImageQuality galleryMode = ImageQuality.defaultValue;
+  ImageQuality snatchMode = ImageQuality.defaultValue;
+  ShareAction shareAction = ShareAction.defaultValue;
   final Rx<AppMode> appMode = AppMode.defaultValue.obs;
   final Rx<HandSide> handSide = HandSide.defaultValue.obs;
-  String galleryBarPosition = 'Top';
-  String galleryScrollDirection = 'Horizontal';
+  VerticalPosition galleryBarPosition = VerticalPosition.defaultValue;
+  ScrollDirection galleryScrollDirection = ScrollDirection.defaultValue;
   String extPathOverride = '';
   String drawerMascotPathOverride = '';
   String backupPath = '';
-  String zoomButtonPosition = 'Right';
-  String changePageButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
-  String scrollGridButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
+  ButtonPosition zoomButtonPosition = ButtonPosition.defaultValue;
+  ButtonPosition changePageButtonsPosition = ButtonPosition.defaultValueDesktopOnly;
+  ButtonPosition scrollGridButtonsPosition = ButtonPosition.defaultValueDesktopOnly;
   String lastSyncIp = '';
   String lastSyncPort = '';
   // TODO move it to boorus themselves to have different user agents for different boorus?
   String customUserAgent = '';
-  String proxyType = 'direct';
+  ProxyType proxyType = ProxyType.defaultValue;
   String proxyAddress = '';
   String proxyUsername = '';
   String proxyPassword = '';
   VideoBackendMode videoBackendMode = isDesktopPlatform ? VideoBackendMode.mpv : VideoBackendMode.normal;
-  String altVideoPlayerVO = isDesktopPlatform ? 'libmpv' : 'gpu'; // mediakit default: gpu - android, libmpv - desktop
-  String altVideoPlayerHWDEC = isDesktopPlatform
-      ? 'auto'
-      : 'auto-safe'; // mediakit default: auto-safe - android, auto - desktop
+  MpvVideoOutput altVideoPlayerVO = MpvVideoOutput.defaultValue;
+  MpvHardwareDecoding altVideoPlayerHWDEC = MpvHardwareDecoding.defaultValue;
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
@@ -302,76 +311,66 @@ class SettingsHandler {
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
   // TODO move it in another file?
   Map<String, Map<String, dynamic>> get map => {
-    // stringFromList
+    // enums
     'previewMode': {
-      'type': 'stringFromList',
-      'default': 'Sample',
-      'options': <String>['Thumbnail', 'Sample'],
+      'type': 'previewQuality',
+      'default': PreviewQuality.defaultValue,
+      'options': PreviewQuality.values,
     },
     'previewDisplay': {
-      'type': 'stringFromList',
-      'default': 'Square',
-      'options': <String>['Square', 'Rectangle', 'Staggered'],
+      'type': 'previewDisplayMode',
+      'default': PreviewDisplayMode.defaultValue,
+      'options': PreviewDisplayMode.values,
     },
     'previewDisplayFallback': {
-      'type': 'stringFromList',
-      'default': 'Square',
-      'options': <String>['Square', 'Rectangle'],
+      'type': 'previewDisplayMode',
+      'default': PreviewDisplayMode.defaultValue,
+      'options': PreviewDisplayMode.values.where((e) => e != PreviewDisplayMode.staggered).toList(),
     },
     'shareAction': {
-      'type': 'stringFromList',
-      'default': 'Ask',
-      // TODO replace with enum, don't forget to have these in serialization
-      'options': <String>[
-        'Ask',
-        'Post URL',
-        'Post URL with tags',
-        'File URL',
-        'File URL with tags',
-        'File',
-        'File with tags',
-        'Hydrus',
-      ],
+      'type': 'shareAction',
+      'default': ShareAction.defaultValue,
+      'options': ShareAction.values,
     },
     'videoCacheMode': {
-      'type': 'stringFromList',
-      'default': 'Stream',
-      'options': <String>['Stream', 'Cache', 'Stream+Cache'],
+      'type': 'videoCacheMode',
+      'default': VideoCacheMode.defaultValue,
+      'options': VideoCacheMode.values,
     },
     'galleryMode': {
-      'type': 'stringFromList',
-      'default': 'Full Res',
-      'options': <String>['Sample', 'Full Res'],
+      'type': 'imageQuality',
+      'default': ImageQuality.defaultValue,
+      'options': ImageQuality.values,
     },
     'snatchMode': {
-      'type': 'stringFromList',
-      'default': 'Full Res',
-      'options': <String>['Sample', 'Full Res'],
+      'type': 'imageQuality',
+      'default': ImageQuality.defaultValue,
+      'options': ImageQuality.values,
     },
     'galleryScrollDirection': {
-      'type': 'stringFromList',
-      'default': 'Horizontal',
-      'options': <String>['Horizontal', 'Vertical'],
+      'type': 'scrollDirection',
+      'default': ScrollDirection.defaultValue,
+      'options': ScrollDirection.values,
     },
     'galleryBarPosition': {
-      'type': 'stringFromList',
-      'default': 'Top',
-      'options': <String>['Top', 'Bottom'],
+      'type': 'verticalPosition',
+      'default': VerticalPosition.defaultValue,
+      'options': VerticalPosition.values,
     },
     'zoomButtonPosition': {
-      'type': 'stringFromList',
-      'default': 'Right',
-      'options': <String>['Disabled', 'Left', 'Right'],
+      'type': 'buttonPosition',
+      'default': ButtonPosition.defaultValue,
+      'options': ButtonPosition.values,
     },
     'changePageButtonsPosition': {
-      'type': 'stringFromList',
-      'default': isDesktopPlatform ? 'Right' : 'Disabled',
-      'options': <String>['Disabled', 'Left', 'Right'],
+      'type': 'buttonPosition',
+      'default': ButtonPosition.defaultValueDesktopOnly,
+      'options': ButtonPosition.values,
     },
     'scrollGridButtonsPosition': {
-      'type': 'stringFromList',
-      'default': isDesktopPlatform ? 'Right' : 'Disabled',
-      'options': <String>['Disabled', 'Left', 'Right'],
+      'type': 'buttonPosition',
+      'default': ButtonPosition.defaultValueDesktopOnly,
+      'options': ButtonPosition.values,
     },
     'videoBackendMode': {
       'type': 'videoBackendMode',
@@ -379,39 +378,19 @@ class SettingsHandler {
       'options': VideoBackendMode.values,
     },
     'altVideoPlayerVO': {
-      'type': 'stringFromList',
-      'default': isDesktopPlatform ? 'libmpv' : 'gpu', // mediakit default: gpu - android, libmpv - desktop
-      'options': <String>[
-        'gpu',
-        'gpu-next',
-        'libmpv',
-        'mediacodec_embed',
-        'sdl',
-      ],
+      'type': 'mpvVideoOutput',
+      'default': MpvVideoOutput.defaultValue,
+      'options': MpvVideoOutput.values,
     },
     'altVideoPlayerHWDEC': {
-      'type': 'stringFromList',
-      'default': isDesktopPlatform ? 'auto' : 'auto-safe', // mediakit default: auto-safe - android, auto - desktop
-      'options': <String>[
-        'auto',
-        'auto-safe',
-        'auto-copy',
-        'mediacodec',
-        'mediacodec-copy',
-        'vulkan',
-        'vulkan-copy',
-      ],
+      'type': 'mpvHardwareDecoding',
+      'default': MpvHardwareDecoding.defaultValue,
+      'options': MpvHardwareDecoding.values,
     },
     'proxyType': {
-      'type': 'stringFromList',
-      'default': 'direct',
-      'options': <String>[
-        'direct',
-        'system',
-        'http',
-        'socks5',
-        'socks4',
-      ],
+      'type': 'proxyType',
+      'default': ProxyType.defaultValue,
+      'options': ProxyType.values,
     },
 
     // string
@@ -974,6 +953,127 @@ class SettingsHandler {
           } else {
             if (value is String) {
               return AppLocale.values.firstWhereOrNull((e) => e.name == value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'previewQuality':
+          if (toJSON) {
+            return (value as PreviewQuality).toJson();
+          } else {
+            if (value is String) {
+              return PreviewQuality.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'previewDisplayMode':
+          if (toJSON) {
+            return (value as PreviewDisplayMode).toJson();
+          } else {
+            if (value is String) {
+              return PreviewDisplayMode.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'shareAction':
+          if (toJSON) {
+            return (value as ShareAction).toJson();
+          } else {
+            if (value is String) {
+              return ShareAction.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'videoCacheMode':
+          if (toJSON) {
+            return (value as VideoCacheMode).toJson();
+          } else {
+            if (value is String) {
+              return VideoCacheMode.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'imageQuality':
+          if (toJSON) {
+            return (value as ImageQuality).toJson();
+          } else {
+            if (value is String) {
+              return ImageQuality.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'scrollDirection':
+          if (toJSON) {
+            return (value as ScrollDirection).toJson();
+          } else {
+            if (value is String) {
+              return ScrollDirection.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'verticalPosition':
+          if (toJSON) {
+            return (value as VerticalPosition).toJson();
+          } else {
+            if (value is String) {
+              return VerticalPosition.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'buttonPosition':
+          if (toJSON) {
+            return (value as ButtonPosition).toJson();
+          } else {
+            if (value is String) {
+              return ButtonPosition.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'mpvVideoOutput':
+          if (toJSON) {
+            return (value as MpvVideoOutput).toJson();
+          } else {
+            if (value is String) {
+              return MpvVideoOutput.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'mpvHardwareDecoding':
+          if (toJSON) {
+            return (value as MpvHardwareDecoding).toJson();
+          } else {
+            if (value is String) {
+              return MpvHardwareDecoding.fromString(value);
+            } else {
+              return settingParams['default'];
+            }
+          }
+
+        case 'proxyType':
+          if (toJSON) {
+            return (value as ProxyType).toJson();
+          } else {
+            if (value is String) {
+              return ProxyType.fromString(value);
             } else {
               return settingParams['default'];
             }

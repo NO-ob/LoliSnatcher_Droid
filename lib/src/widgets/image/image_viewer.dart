@@ -178,7 +178,7 @@ class ImageViewerState extends State<ImageViewer> {
     super.didUpdateWidget(oldWidget);
   }
 
-  bool get useFullImage => settingsHandler.galleryMode == 'Full Res'
+  bool get useFullImage => settingsHandler.galleryMode.isFullRes
       ? !widget.booruItem.toggleQuality.value
       : widget.booruItem.toggleQuality.value;
 
@@ -273,7 +273,7 @@ class ImageViewerState extends State<ImageViewer> {
   Future<ImageProvider> getImageProvider({
     bool withCaptchaCheck = false,
   }) async {
-    if ((settingsHandler.galleryMode == 'Sample' &&
+    if ((settingsHandler.galleryMode.isSample &&
             widget.booruItem.sampleURL.isNotEmpty &&
             widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
         widget.booruItem.sampleURL == widget.booruItem.fileURL) {

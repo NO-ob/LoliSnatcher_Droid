@@ -37,7 +37,7 @@ class ThumbnailsShimmerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final String displayType = settingsHandler.previewDisplay;
+    final displayType = settingsHandler.previewDisplay;
     final int previewCount = settingsHandler.itemLimit;
     final int columnCount = context.isPortrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
@@ -46,7 +46,7 @@ class ThumbnailsShimmerList extends StatelessWidget {
       itemCount: previewCount,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columnCount,
-        childAspectRatio: displayType == 'Square' ? 1 : 9 / 16,
+        childAspectRatio: displayType.isSquare ? 1 : 9 / 16,
         mainAxisSpacing: 4,
         crossAxisSpacing: 4,
       ),

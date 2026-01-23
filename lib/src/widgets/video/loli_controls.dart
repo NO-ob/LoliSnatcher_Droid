@@ -408,7 +408,7 @@ class _LoliControlsState extends State<LoliControls> {
         valueListenable: viewerHandler.displayAppbar,
         builder: (context, displayAppbar, child) {
           final bool isFullScreen = chewieController.isFullScreen || !displayAppbar;
-          final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
+          final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition.isTop;
 
           return Container(
             // color: Colors.yellow.withValues(alpha: 0.66),

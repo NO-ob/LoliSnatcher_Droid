@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/data/settings/button_position.dart';
 import 'package:lolisnatcher/src/data/settings/hand_side.dart';
+import 'package:lolisnatcher/src/data/settings/preview_display_mode.dart';
+import 'package:lolisnatcher/src/data/settings/preview_quality.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
@@ -26,7 +29,9 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   final TextEditingController columnsPortraitController = TextEditingController();
   final TextEditingController mouseSpeedController = TextEditingController();
 
-  late String previewMode, previewDisplay, previewDisplayFallback, scrollGridButtonsPosition;
+  late PreviewQuality previewMode;
+  late PreviewDisplayMode previewDisplay, previewDisplayFallback;
+  late ButtonPosition scrollGridButtonsPosition;
   late bool showBottomSearchbar, useTopSearchbarInput, showSearchbarQuickActions, autofocusSearchbar, disableVibration;
   late AppMode appMode;
   late HandSide handSide;
@@ -177,6 +182,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: context.loc.settings.interface.handSide,
+                itemTitleBuilder: (item) => item?.locName(context) ?? '?',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.back_hand_outlined),
                   onPressed: () {
@@ -289,15 +295,16 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   }
                 },
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<PreviewQuality>(
                 value: previewMode,
-                items: settingsHandler.map['previewMode']!['options'],
-                onChanged: (String? newValue) {
+                items: PreviewQuality.values,
+                onChanged: (PreviewQuality? newValue) {
                   setState(() {
-                    previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
+                    previewMode = newValue ?? PreviewQuality.defaultValue;
                   });
                 },
                 title: context.loc.settings.interface.previewQuality,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -323,57 +330,57 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   },
                 ),
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<PreviewDisplayMode>(
                 value: previewDisplay,
-                items: settingsHandler.map['previewDisplay']!['options'],
+                items: PreviewDisplayMode.values,
                 itemTitleBuilder: (item) => switch (item) {
-                  'Square' => '${item!} (1:1)',
-                  'Rectangle' => '${item!} (9:16)',
-                  _ => item ?? '?',
+                  .square => '${item!.locName(context)} (1:1)',
+                  .rectangle => '${item!.locName(context)} (9:16)',
+                  .staggered => item!.locName(context),
+                  _ => '?',
                 },
                 itemLeadingBuilder: (item) {
                   return switch (item) {
-                    'Square' => const Icon(Icons.crop_square_outlined),
-                    'Rectangle' => Transform.rotate(
+                    .square => const Icon(Icons.crop_square_outlined),
+                    .rectangle => Transform.rotate(
                       angle: pi / 2,
                       child: const Icon(Icons.crop_16_9),
                     ),
-                    'Staggered' => const Icon(Icons.dashboard_outlined),
+                    .staggered => const Icon(Icons.dashboard_outlined),
                     _ => const Icon(null),
                   };
                 },
-                onChanged: (String? newValue) {
+                onChanged: (PreviewDisplayMode? newValue) {
                   setState(() {
-                    previewDisplay = newValue ?? settingsHandler.map['previewDisplay']!['default'];
+                    previewDisplay = newValue ?? PreviewDisplayMode.defaultValue;
                   });
                 },
                 title: context.loc.settings.interface.previewDisplay,
               ),
               AnimatedSize(
                 duration: const Duration(milliseconds: 300),
-                child: previewDisplay == 'Staggered'
-                    ? SettingsOptionsList(
+                child: previewDisplay.isStaggered
+                    ? SettingsOptionsList<PreviewDisplayMode>(
                         value: previewDisplayFallback,
-                        items: settingsHandler.map['previewDisplayFallback']!['options'],
+                        items: PreviewDisplayMode.values.where((e) => !e.isStaggered).toList(),
                         itemTitleBuilder: (item) => switch (item) {
-                          'Square' => '${item!} (1:1)',
-                          'Rectangle' => '${item!} (9:16)',
-                          _ => item ?? '?',
+                          .square => '${item!.locName(context)} (1:1)',
+                          .rectangle => '${item!.locName(context)} (9:16)',
+                          _ => '?',
                         },
                         itemLeadingBuilder: (item) {
                           return switch (item) {
-                            'Square' => const Icon(Icons.crop_square_outlined),
-                            'Rectangle' => Transform.rotate(
+                            .square => const Icon(Icons.crop_square_outlined),
+                            .rectangle => Transform.rotate(
                               angle: pi / 2,
                               child: const Icon(Icons.crop_16_9),
                             ),
                             _ => const Icon(null),
                           };
                         },
-                        onChanged: (String? newValue) {
+                        onChanged: (PreviewDisplayMode? newValue) {
                           setState(() {
-                            previewDisplayFallback =
-                                newValue ?? settingsHandler.map['previewDisplayFallback']!['default'];
+                            previewDisplayFallback = newValue ?? PreviewDisplayMode.defaultValue;
                           });
                         },
                         title: context.loc.settings.interface.previewDisplayFallback,
@@ -443,16 +450,16 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     ),
                 ],
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<ButtonPosition>(
                 value: scrollGridButtonsPosition,
-                items: settingsHandler.map['scrollGridButtonsPosition']!['options'],
-                onChanged: (String? newValue) {
+                items: ButtonPosition.values,
+                onChanged: (ButtonPosition? newValue) {
                   setState(() {
-                    scrollGridButtonsPosition =
-                        newValue ?? settingsHandler.map['scrollGridButtonsPosition']!['default'];
+                    scrollGridButtonsPosition = newValue ?? ButtonPosition.defaultValue;
                   });
                 },
                 title: context.loc.settings.interface.scrollPreviewsButtonsPosition,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
               if (SettingsHandler.isDesktopPlatform)
                 SettingsTextInput(

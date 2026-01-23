@@ -349,7 +349,7 @@ class _MediaLoadingState extends State<MediaLoading> {
         ? context.loc.media.loading.startedSecondsAgo(seconds: sinceStartSeconds)
         : '';
 
-    final bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated;
+    final bool isMovedBelow = settingsHandler.previewMode.isSample && !widget.item.isHated;
 
     // print('$percentDone | $percentDoneText');
 

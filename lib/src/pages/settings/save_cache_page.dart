@@ -5,6 +5,8 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:lolisnatcher/src/data/settings/image_quality.dart';
+import 'package:lolisnatcher/src/data/settings/video_cache_mode.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
@@ -27,7 +29,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
   final TextEditingController snatchCooldownController = TextEditingController();
   final TextEditingController cacheSizeController = TextEditingController();
 
-  late String videoCacheMode, extPathOverride, snatchMode;
+  late VideoCacheMode videoCacheMode;
+  late String extPathOverride;
+  late ImageQuality snatchMode;
   bool jsonWrite = false,
       thumbnailCache = true,
       mediaCache = false,
@@ -219,15 +223,16 @@ class _SaveCachePageState extends State<SaveCachePage> {
         body: Center(
           child: ListView(
             children: [
-              SettingsOptionsList(
+              SettingsOptionsList<ImageQuality>(
                 value: snatchMode,
-                items: settingsHandler.map['snatchMode']!['options'],
-                onChanged: (String? newValue) {
+                items: ImageQuality.values,
+                onChanged: (ImageQuality? newValue) {
                   setState(() {
-                    snatchMode = newValue ?? settingsHandler.map['snatchMode']!['default'];
+                    snatchMode = newValue ?? ImageQuality.defaultValue;
                   });
                 },
                 title: context.loc.settings.cache.snatchQuality,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
               SettingsTextInput(
                 controller: snatchCooldownController,
@@ -387,15 +392,16 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 },
                 title: context.loc.settings.cache.cacheMedia,
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<VideoCacheMode>(
                 value: videoCacheMode,
-                items: settingsHandler.map['videoCacheMode']!['options'],
-                onChanged: (String? newValue) {
+                items: VideoCacheMode.values,
+                onChanged: (VideoCacheMode? newValue) {
                   setState(() {
-                    videoCacheMode = newValue ?? settingsHandler.map['videoCacheMode']!['default'];
+                    videoCacheMode = newValue ?? VideoCacheMode.defaultValue;
                   });
                 },
                 title: context.loc.settings.cache.videoCacheMode,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {

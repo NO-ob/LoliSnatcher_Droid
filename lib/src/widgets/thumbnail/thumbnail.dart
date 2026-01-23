@@ -178,13 +178,13 @@ class _ThumbnailState extends State<Thumbnail> {
     }
 
     switch (settingsHandler.previewDisplay) {
-      case 'Rectangle':
+      case .rectangle:
         thumbRatio = 16 / 9;
         thumbWidth = widthLimit;
         thumbHeight = widthLimit * thumbRatio;
         break;
 
-      case 'Staggered':
+      case .staggered:
         if (hasSizeData) {
           thumbRatio = widget.item.fileAspectRatio!;
           if (thumbRatio < 1) {
@@ -201,8 +201,7 @@ class _ThumbnailState extends State<Thumbnail> {
         }
         break;
 
-      case 'Square':
-      default:
+      case .square:
         thumbWidth = widthLimit;
         thumbHeight = widthLimit;
         break;
@@ -253,7 +252,7 @@ class _ThumbnailState extends State<Thumbnail> {
         ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated : true);
 
     isThumbQuality =
-        settingsHandler.previewMode == 'Thumbnail' ||
+        settingsHandler.previewMode.isThumbnail ||
         (isGifSampleNotAllowed ||
             widget.item.mediaType.value.isVideo ||
             widget.item.mediaType.value.isNeedToGuess ||

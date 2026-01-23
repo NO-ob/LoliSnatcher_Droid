@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:lolisnatcher/src/data/settings/button_position.dart';
+import 'package:lolisnatcher/src/data/settings/image_quality.dart';
+import 'package:lolisnatcher/src/data/settings/scroll_direction.dart';
+import 'package:lolisnatcher/src/data/settings/share_action.dart';
+import 'package:lolisnatcher/src/data/settings/vertical_position.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -24,12 +29,12 @@ class _GalleryPageState extends State<GalleryPage> {
       enableHeroTransitions = true,
       disableCustomPageTransitions = false,
       disableVibration = false;
-  late String galleryMode,
-      galleryBarPosition,
-      galleryScrollDirection,
-      shareAction,
-      zoomButtonPosition,
-      changePageButtonsPosition;
+  late ImageQuality galleryMode;
+  late VerticalPosition galleryBarPosition;
+  late ScrollDirection galleryScrollDirection;
+  late ShareAction shareAction;
+  late ButtonPosition zoomButtonPosition;
+  late ButtonPosition changePageButtonsPosition;
 
   late final List<String> buttonOrder;
   late final List<String> disabledButtons;
@@ -53,8 +58,8 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryScrollDirection = settingsHandler.galleryScrollDirection;
 
     shareAction = settingsHandler.shareAction;
-    if (!settingsHandler.hasHydrus && settingsHandler.shareAction == 'Hydrus') {
-      shareAction = 'Ask';
+    if (!settingsHandler.hasHydrus && settingsHandler.shareAction.isHydrus) {
+      shareAction = .ask;
     }
 
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
@@ -189,56 +194,60 @@ class _GalleryPageState extends State<GalleryPage> {
                   }
                 },
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<ImageQuality>(
                 value: galleryMode,
-                items: settingsHandler.map['galleryMode']!['options'],
-                onChanged: (String? newValue) {
+                items: ImageQuality.values,
+                onChanged: (ImageQuality? newValue) {
                   setState(() {
-                    galleryMode = newValue ?? settingsHandler.map['galleryMode']!['default'];
+                    galleryMode = newValue ?? ImageQuality.defaultValue;
                   });
                 },
                 title: context.loc.settings.viewer.imageQuality,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<ScrollDirection>(
                 value: galleryScrollDirection,
-                items: settingsHandler.map['galleryScrollDirection']!['options'],
-                onChanged: (String? newValue) {
+                items: ScrollDirection.values,
+                onChanged: (ScrollDirection? newValue) {
                   setState(() {
-                    galleryScrollDirection = newValue ?? settingsHandler.map['galleryScrollDirection']!['default'];
+                    galleryScrollDirection = newValue ?? ScrollDirection.defaultValue;
                   });
                 },
                 title: context.loc.settings.viewer.viewerScrollDirection,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<VerticalPosition>(
                 value: galleryBarPosition,
-                items: settingsHandler.map['galleryBarPosition']!['options'],
-                onChanged: (String? newValue) {
+                items: VerticalPosition.values,
+                onChanged: (VerticalPosition? newValue) {
                   setState(() {
-                    galleryBarPosition = newValue ?? settingsHandler.map['galleryBarPosition']!['default'];
+                    galleryBarPosition = newValue ?? VerticalPosition.defaultValue;
                   });
                 },
                 title: context.loc.settings.viewer.viewerToolbarPosition,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<ButtonPosition>(
                 value: zoomButtonPosition,
-                items: settingsHandler.map['zoomButtonPosition']!['options'],
-                onChanged: (String? newValue) {
+                items: ButtonPosition.values,
+                onChanged: (ButtonPosition? newValue) {
                   setState(() {
-                    zoomButtonPosition = newValue ?? settingsHandler.map['zoomButtonPosition']!['default'];
+                    zoomButtonPosition = newValue ?? ButtonPosition.defaultValue;
                   });
                 },
                 title: context.loc.settings.viewer.zoomButtonPosition,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<ButtonPosition>(
                 value: changePageButtonsPosition,
-                items: settingsHandler.map['changePageButtonsPosition']!['options'],
-                onChanged: (String? newValue) {
+                items: ButtonPosition.values,
+                onChanged: (ButtonPosition? newValue) {
                   setState(() {
-                    changePageButtonsPosition =
-                        newValue ?? settingsHandler.map['changePageButtonsPosition']!['default'];
+                    changePageButtonsPosition = newValue ?? ButtonPosition.defaultValue;
                   });
                 },
                 title: context.loc.settings.viewer.changePageButtonsPosition,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
               ),
               SettingsToggle(
                 value: autoHideImageBar,
@@ -462,17 +471,16 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
               ),
 
-              SettingsDropdown(
+              SettingsDropdown<ShareAction>(
                 value: shareAction,
-                items: (settingsHandler.map['shareAction']!['options'] as List<String>)
-                    .where((element) => hasHydrus || element != 'Hydrus')
-                    .toList(),
-                onChanged: (String? newValue) {
+                items: ShareAction.values.where((element) => hasHydrus || !element.isHydrus).toList(),
+                onChanged: (ShareAction? newValue) {
                   setState(() {
-                    shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
+                    shareAction = newValue ?? ShareAction.defaultValue;
                   });
                 },
                 title: context.loc.settings.viewer.defaultShareAction,
+                itemTitleBuilder: (e) => e?.locName(context) ?? '',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {

@@ -99,8 +99,8 @@ class MediaKitVideoPlayer extends VideoPlayerPlatform {
       player,
       configuration: VideoControllerConfiguration(
         enableHardwareAcceleration: settingsHandler.altVideoPlayerHwAccel,
-        vo: settingsHandler.altVideoPlayerVO,
-        hwdec: settingsHandler.altVideoPlayerHWDEC,
+        vo: settingsHandler.altVideoPlayerVO.toJson(),
+        hwdec: settingsHandler.altVideoPlayerHWDEC.toJson(),
         // androidAttachSurfaceAfterVideoParameters: false,
       ),
     );

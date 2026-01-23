@@ -15,6 +15,7 @@ import 'package:video_player/video_player.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/settings/video_cache_mode.dart';
 import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -92,22 +93,21 @@ class VideoViewerState extends State<VideoViewer> {
       return;
     }
 
-    final usedVideoCacheMode = forceCache.value ? 'Cache' : settingsHandler.videoCacheMode;
+    final usedVideoCacheMode = forceCache.value ? VideoCacheMode.cache : settingsHandler.videoCacheMode;
 
     switch (usedVideoCacheMode) {
-      case 'Cache':
+      case .cache:
         // Cache to device from custom request
         break;
 
       // Load and stream from default player network request, cache to device from custom request
       // TODO: change video handler to allow viewing and caching from single network request
-      case 'Stream+Cache':
+      case .streamCache:
         unawaited(initPlayer());
         break;
 
       // Only stream, notice the return
-      case 'Stream':
-      default:
+      case .stream:
         unawaited(initPlayer());
         return;
     }
@@ -764,7 +764,7 @@ class VideoViewerState extends State<VideoViewer> {
                                   item: widget.booruItem,
                                   hasProgress:
                                       settingsHandler.mediaCache &&
-                                      (forceCache.value || settingsHandler.videoCacheMode != 'Stream'),
+                                      (forceCache.value || !settingsHandler.videoCacheMode.isStream),
                                   isFromCache: isFromCache,
                                   isDone: isVideoInited,
                                   isTooBig: blockPreloadState.isTooBig,

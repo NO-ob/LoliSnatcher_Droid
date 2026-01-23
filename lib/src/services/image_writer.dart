@@ -57,7 +57,7 @@ class ImageWriter {
         ...await Tools.getFileCustomHeaders(booru, item: item, checkForReferer: true),
       };
 
-      final String url = ((settingsHandler.snatchMode == 'Sample' && item.sampleURL.isNotEmpty)
+      final String url = ((settingsHandler.snatchMode.isSample && item.sampleURL.isNotEmpty)
           ? item.sampleURL
           : item.fileURL);
 

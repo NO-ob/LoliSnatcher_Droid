@@ -74,7 +74,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       ),
     );
 
-    isStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
+    isStaggered = settingsHandler.previewDisplay.isStaggered && searchHandler.currentBooruHandler.hasSizeData;
   }
 
   @override
@@ -132,7 +132,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
 
     // check if grid type changed when changing tab
     final bool newIsStaggered =
-        settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
+        settingsHandler.previewDisplay.isStaggered && searchHandler.currentBooruHandler.hasSizeData;
     if (isStaggered != newIsStaggered) {
       isStaggered = newIsStaggered;
       setState(() {});
@@ -325,7 +325,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   Widget build(BuildContext context) {
     // check if grid type changed when rebuilding the widget (must happen only on start and when saving settings)
     final bool newIsStaggered =
-        settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
+        settingsHandler.previewDisplay.isStaggered && searchHandler.currentBooruHandler.hasSizeData;
     if (isStaggered != newIsStaggered) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         isStaggered = newIsStaggered;
@@ -459,10 +459,10 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                   ),
                   Positioned(
                     bottom: MediaQuery.viewPaddingOf(context).bottom + 120,
-                    right: settingsHandler.scrollGridButtonsPosition == 'Right'
+                    right: settingsHandler.scrollGridButtonsPosition.isRight
                         ? MediaQuery.sizeOf(context).width * 0.07
                         : null,
-                    left: settingsHandler.scrollGridButtonsPosition == 'Left'
+                    left: settingsHandler.scrollGridButtonsPosition.isLeft
                         ? MediaQuery.sizeOf(context).width * 0.07
                         : null,
                     child: Obx(() {
@@ -473,7 +473,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                         duration: const Duration(milliseconds: 300),
                         child:
                             (isLoadingAndNoItems ||
-                                settingsHandler.scrollGridButtonsPosition == 'Disabled' ||
+                                settingsHandler.scrollGridButtonsPosition.isDisabled ||
                                 settingsHandler.appMode.value.isDesktop == true)
                             ? const SizedBox.shrink()
                             : WaterfallScrollButtons(

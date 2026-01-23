@@ -464,7 +464,16 @@
       "gifThumbnailsRequires": "Требует \"Не масштабировать изображения\"",
       "scrollPreviewsButtonsPosition": "Позиция кнопок прокрутки превью",
       "mouseWheelScrollModifier": "Модификатор прокрутки колёсиком мыши",
-      "scrollModifier": "Модификатор прокрутки"
+      "scrollModifier": "Модификатор прокрутки",
+      "previewQualityValues": {
+        "thumbnail": "Превью",
+        "sample": "Сэмпл"
+      },
+      "previewDisplayModeValues": {
+        "square": "Квадрат",
+        "rectangle": "Прямоугольник",
+        "staggered": "Шахматный"
+      }
     },
     "theme": {
       "title": "Темы",
@@ -553,7 +562,34 @@
       "viewerPageChangeAnimation": "Анимация смены страниц просмотрщика",
       "usingDefaultAnimation": "Использование анимации по умолчанию",
       "usingCustomAnimation": "Анимация просмотрщика",
-      "kannaLoadingGif": "GIF-пасхалка во время загрузки"
+      "kannaLoadingGif": "GIF-пасхалка во время загрузки",
+      "imageQualityValues": {
+        "sample": "Сэмпл",
+        "fullRes": "Оригинал"
+      },
+      "scrollDirectionValues": {
+        "horizontal": "Горизонтально",
+        "vertical": "Вертикально"
+      },
+      "toolbarPositionValues": {
+        "top": "Сверху",
+        "bottom": "Снизу"
+      },
+      "buttonPositionValues": {
+        "disabled": "Отключено",
+        "left": "Слева",
+        "right": "Справа"
+      },
+      "shareActionValues": {
+        "ask": "Спрашивать",
+        "postUrl": "URL поста",
+        "postUrlWithTags": "URL поста с тегами",
+        "fileUrl": "URL файла",
+        "fileUrlWithTags": "URL файла с тегами",
+        "file": "Файл",
+        "fileWithTags": "Файл с тегами",
+        "hydrus": "Hydrus"
+      }
     },
     "video": {
       "title": "Видео",
@@ -583,6 +619,11 @@
         "streamCacheMode": "- Потоковый+Кэш - Смешанный режим, но в данный момент приводит к двойной загрузке",
         "cacheNote": "[Примечание]: Видео будут кэшироваться только если включено 'Кэшировать медиа'.",
         "desktopWarning": "[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов."
+      },
+      "cacheModeValues": {
+        "stream": "Потоковый",
+        "cache": "Кэш",
+        "streamCache": "Потоковый+Кэш"
       }
     },
     "downloads": {

@@ -401,9 +401,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         icon = Icons.refresh;
         break;
       case 'toggle_quality':
-        final bool isHq = settingsHandler.galleryMode == 'Full Res'
-            ? !item.toggleQuality.value
-            : item.toggleQuality.value;
+        final bool isHq = settingsHandler.galleryMode.isFullRes ? !item.toggleQuality.value : item.toggleQuality.value;
         icon = isHq ? Icons.high_quality : Icons.high_quality_outlined;
       case 'external_player':
         icon = Icons.exit_to_app;
@@ -521,9 +519,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         label = item.isNoScale.value ? context.loc.viewer.appBar.reloadWithScaling : defaultLabel;
         break;
       case 'toggle_quality':
-        final bool isHq = settingsHandler.galleryMode == 'Full Res'
-            ? !item.toggleQuality.value
-            : item.toggleQuality.value;
+        final bool isHq = settingsHandler.galleryMode.isFullRes ? !item.toggleQuality.value : item.toggleQuality.value;
         label = isHq ? context.loc.viewer.appBar.loadSampleQuality : context.loc.viewer.appBar.loadHighQuality;
         break;
       default:
@@ -684,11 +680,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   Future<void> onShareClick() async {
-    final String shareSetting = settingsHandler.shareAction;
+    final shareSetting = settingsHandler.shareAction;
     final item = widget.tab.booruHandler.filteredFetched[page.value];
 
     switch (shareSetting) {
-      case 'Post URL':
+      case .postUrl:
         if (item.postURL.isEmpty) {
           FlashElements.showSnackbar(
             context: context,
@@ -702,7 +698,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
         shareTextAction(item.postURL);
         break;
-      case 'Post URL with tags':
+      case .postUrlWithTags:
         if (item.postURL.isEmpty) {
           FlashElements.showSnackbar(
             context: context,
@@ -721,10 +717,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
           shareTextAction(item.postURL);
         }
         break;
-      case 'File URL':
+      case .fileUrl:
         shareTextAction(item.fileURL);
         break;
-      case 'File URL with tags':
+      case .fileUrlWithTags:
         final tags = await showSelectTagsDialog(context, item.tagsList);
         if (tags.isNotEmpty) {
           shareTextAction('${item.fileURL} \n ${tags.join(' ')}');
@@ -732,10 +728,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
           shareTextAction(item.fileURL);
         }
         break;
-      case 'File':
+      case .file:
         await shareFileAction();
         break;
-      case 'File with tags':
+      case .fileWithTags:
         final tags = await showSelectTagsDialog(context, item.tagsList);
         if (tags.isNotEmpty) {
           await shareFileAction(text: tags.join(' '));
@@ -743,11 +739,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
           await shareFileAction();
         }
         break;
-      case 'Hydrus':
+      case .hydrus:
         await shareHydrusAction(item);
         break;
-      case 'Ask':
-      default:
+      case .ask:
         showShareDialog();
         break;
     }
@@ -1043,7 +1038,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(
                         color: Theme.of(context).colorScheme.secondary,
-                        width: settingsHandler.shareAction == 'Post URL' ? 3 : 1,
+                        width: settingsHandler.shareAction.isPostUrl ? 3 : 1,
                       ),
                     ),
                     onTap: () {
@@ -1060,7 +1055,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(
                         color: Theme.of(context).colorScheme.secondary,
-                        width: settingsHandler.shareAction == 'Post URL with tags' ? 3 : 1,
+                        width: settingsHandler.shareAction.isPostUrlWithTags ? 3 : 1,
                       ),
                     ),
                     onTap: () async {
@@ -1092,7 +1087,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     borderRadius: BorderRadius.circular(10),
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.secondary,
-                      width: settingsHandler.shareAction == 'File URL' ? 3 : 1,
+                      width: settingsHandler.shareAction.isFileUrl ? 3 : 1,
                     ),
                   ),
                   onTap: () {
@@ -1108,7 +1103,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     borderRadius: BorderRadius.circular(10),
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.secondary,
-                      width: settingsHandler.shareAction == 'File URL with tags' ? 3 : 1,
+                      width: settingsHandler.shareAction.isFileUrlWithTags ? 3 : 1,
                     ),
                   ),
                   onTap: () async {
@@ -1139,7 +1134,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     borderRadius: BorderRadius.circular(10),
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.secondary,
-                      width: settingsHandler.shareAction == 'File' ? 3 : 1,
+                      width: settingsHandler.shareAction.isFile ? 3 : 1,
                     ),
                   ),
                   onTap: () {
@@ -1155,7 +1150,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     borderRadius: BorderRadius.circular(10),
                     side: BorderSide(
                       color: Theme.of(context).colorScheme.secondary,
-                      width: settingsHandler.shareAction == 'File with tags' ? 3 : 1,
+                      width: settingsHandler.shareAction.isFileWithTags ? 3 : 1,
                     ),
                   ),
                   onTap: () async {
@@ -1187,7 +1182,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(
                         color: Theme.of(context).colorScheme.secondary,
-                        width: settingsHandler.shareAction == 'Hydrus' ? 3 : 1,
+                        width: settingsHandler.shareAction.isHydrus ? 3 : 1,
                       ),
                     ),
                     onTap: () async {
@@ -1216,7 +1211,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   void initState() {
     super.initState();
 
-    isOnTop = settingsHandler.galleryBarPosition == 'Top';
+    isOnTop = settingsHandler.galleryBarPosition.isTop;
 
     ServiceHandler.setSystemUiVisibility(!settingsHandler.autoHideImageBar);
     viewerHandler.displayAppbar.value = !settingsHandler.autoHideImageBar;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lolisnatcher/src/data/settings/button_position.dart';
 
 import 'package:preload_page_view/preload_page_view.dart';
 
@@ -32,7 +33,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
     super.initState();
 
     // place higher when toolbar is on the bottom, to avoid conflicts with video controls
-    bottomOffset = kToolbarHeight * (settingsHandler.galleryBarPosition == 'Top' ? 2 : 3);
+    bottomOffset = kToolbarHeight * (settingsHandler.galleryBarPosition.isTop ? 2 : 3);
 
     isVisible = settingsHandler.appMode.value.isMobile && viewerHandler.displayAppbar.value;
     viewerHandler.displayAppbar.addListener(appbarListener);
@@ -88,9 +89,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
     );
   }
 
-  List<Widget> getButtons(bool isVerticalDirection, bool isLeft) {
-    final String side = isLeft ? 'Left' : 'Right';
-
+  List<Widget> getButtons(bool isVerticalDirection, ButtonPosition side) {
     final bool isZoomHere = settingsHandler.zoomButtonPosition == side;
     final bool isPagesHere = settingsHandler.changePageButtonsPosition == side;
 
@@ -134,11 +133,11 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                         child: isVerticalDirection
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: getButtons(isVerticalDirection, true),
+                                children: getButtons(isVerticalDirection, .left),
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: getButtons(isVerticalDirection, true),
+                                children: getButtons(isVerticalDirection, .left),
                               ),
                       ),
                     ),
@@ -153,11 +152,11 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                         child: isVerticalDirection
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: getButtons(isVerticalDirection, false),
+                                children: getButtons(isVerticalDirection, .right),
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: getButtons(isVerticalDirection, false),
+                                children: getButtons(isVerticalDirection, .right),
                               ),
                       ),
                     ),
