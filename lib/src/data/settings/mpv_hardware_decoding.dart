@@ -10,7 +10,8 @@ enum MpvHardwareDecoding with SettingsEnum<MpvHardwareDecoding> {
   mediacodec,
   mediacodecCopy,
   vulkan,
-  vulkanCopy;
+  vulkanCopy,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): auto => 'auto', autoSafe => 'autoSafe', etc.

@@ -5,7 +5,8 @@ import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
 enum PreviewQuality with SettingsEnum<PreviewQuality> {
   thumbnail,
-  sample;
+  sample,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): thumbnail => 'thumbnail', sample => 'sample'

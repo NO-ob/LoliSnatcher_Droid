@@ -136,7 +136,8 @@ enum LogTypes {
   networkError,
   settingsError,
   settingsLoad,
-  tagHandlerInfo;
+  tagHandlerInfo,
+  ;
 
   @override
   String toString() {

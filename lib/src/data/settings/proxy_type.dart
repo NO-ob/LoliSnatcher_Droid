@@ -8,7 +8,8 @@ enum ProxyType with SettingsEnum<ProxyType> {
   system,
   http,
   socks5,
-  socks4;
+  socks4,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format is already lowercase so no change needed

@@ -190,8 +190,9 @@ class QueryEditorController {
             },
           );
         } else {
-          final databaseSearch = (await settingsHandler.dbHandler.getTags(suggestionTextControllerRawInput, 10))
-              .map((tag) {
+          final databaseSearch = (await settingsHandler.dbHandler.getTags(suggestionTextControllerRawInput, 10)).map((
+            tag,
+          ) {
             return TagSuggestion(
               tag: tag,
               type: tagHandler.getTag(tag).tagType,
@@ -209,7 +210,8 @@ class QueryEditorController {
                     );
                   })
                   .where(
-                    (htag) => !databaseSearch.any((dbtag) => dbtag.tag.trim().toLowerCase() == htag.tag.trim().toLowerCase()),
+                    (htag) =>
+                        !databaseSearch.any((dbtag) => dbtag.tag.trim().toLowerCase() == htag.tag.trim().toLowerCase()),
                   )
                   .toList();
 
@@ -254,11 +256,8 @@ class QueryEditorKeyboardActions extends StatelessWidget {
   final void Function(TagSuggestion) onLongTap;
   final Widget child;
 
-  String get suggestionTextControllerRawInput => controller.text
-      .replaceAll(RegExp('^-'), '')
-      .replaceAll(RegExp('^~'), '')
-      .replaceAll(RegExp(r'^\d+#'), '')
-      .trim();
+  String get suggestionTextControllerRawInput =>
+      controller.text.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '').replaceAll(RegExp(r'^\d+#'), '').trim();
 
   double get keyboardActionsHeight => 44;
 

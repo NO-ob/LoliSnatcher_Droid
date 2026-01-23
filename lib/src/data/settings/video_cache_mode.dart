@@ -6,7 +6,8 @@ import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 enum VideoCacheMode with SettingsEnum<VideoCacheMode> {
   stream,
   cache,
-  streamCache;
+  streamCache,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): stream => 'stream', cache => 'cache', streamCache => 'streamCache'

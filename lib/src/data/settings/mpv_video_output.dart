@@ -8,7 +8,8 @@ enum MpvVideoOutput with SettingsEnum<MpvVideoOutput> {
   gpuNext,
   libmpv,
   mediacodecEmbed,
-  sdl;
+  sdl,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): gpu => 'gpu', gpuNext => 'gpuNext', etc.

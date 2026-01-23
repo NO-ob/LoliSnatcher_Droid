@@ -12,7 +12,6 @@ import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 
 // TODO redesign
 
-
 class MediaLoading extends StatefulWidget {
   const MediaLoading({
     required this.item,

@@ -5,7 +5,8 @@ import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
 enum ScrollDirection with SettingsEnum<ScrollDirection> {
   horizontal,
-  vertical;
+  vertical,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): horizontal => 'horizontal', vertical => 'vertical'

@@ -200,7 +200,10 @@ class _NetworkPageState extends State<NetworkPage> {
                 subtitle: Text(context.loc.settings.network.selectBooruToClearCookies),
               ),
               if (selectedBooruCookies.isNotEmpty) ...[
-                SettingsButton(name: context.loc.settings.network.cookiesFor(booruName: selectedBooru?.name ?? ''), enabled: false),
+                SettingsButton(
+                  name: context.loc.settings.network.cookiesFor(booruName: selectedBooru?.name ?? ''),
+                  enabled: false,
+                ),
                 for (final Cookie cookie in selectedBooruCookies) ...[
                   SettingsButton(
                     name:
@@ -237,7 +240,9 @@ class _NetworkPageState extends State<NetworkPage> {
                     globalWindowsCookies[selectedBooru!.baseURL!]?.clear();
                     FlashElements.showSnackbar(
                       context: context,
-                      title: Text(context.loc.settings.network.cookiesForBooruDeleted(booruName: selectedBooru?.name ?? '')),
+                      title: Text(
+                        context.loc.settings.network.cookiesForBooruDeleted(booruName: selectedBooru?.name ?? ''),
+                      ),
                     );
                   } else {
                     await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteAllCookies();

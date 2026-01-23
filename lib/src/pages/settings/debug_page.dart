@@ -393,7 +393,10 @@ class _DebugPageState extends State<DebugPage> {
                                 FlashElements.showSnackbar(
                                   context: context,
                                   duration: const Duration(seconds: 2),
-                                  title: Text(context.loc.settings.debug.restoredSessionFromString, style: const TextStyle(fontSize: 20)),
+                                  title: Text(
+                                    context.loc.settings.debug.restoredSessionFromString,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
                                   content: Text(
                                     sessionStrController.text,
                                     style: const TextStyle(fontSize: 16),

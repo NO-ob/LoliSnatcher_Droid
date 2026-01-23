@@ -5,7 +5,8 @@ import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
 enum VerticalPosition with SettingsEnum<VerticalPosition> {
   top,
-  bottom;
+  bottom,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): top => 'top', bottom => 'bottom'

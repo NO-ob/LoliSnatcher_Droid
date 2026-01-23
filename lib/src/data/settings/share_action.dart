@@ -11,7 +11,8 @@ enum ShareAction with SettingsEnum<ShareAction> {
   fileUrlWithTags,
   file,
   fileWithTags,
-  hydrus;
+  hydrus,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): ask => 'ask', postUrl => 'postUrl', etc.

@@ -6,7 +6,8 @@ import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 /// Used for galleryMode and snatchMode settings
 enum ImageQuality with SettingsEnum<ImageQuality> {
   sample,
-  fullRes;
+  fullRes,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): sample => 'sample', fullRes => 'fullRes'

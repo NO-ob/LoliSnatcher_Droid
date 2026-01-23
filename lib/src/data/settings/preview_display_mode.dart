@@ -6,7 +6,8 @@ import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 enum PreviewDisplayMode with SettingsEnum<PreviewDisplayMode> {
   square,
   rectangle,
-  staggered;
+  staggered,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): square => 'square', rectangle => 'rectangle', staggered => 'staggered'

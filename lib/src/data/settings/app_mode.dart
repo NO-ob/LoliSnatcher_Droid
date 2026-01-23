@@ -7,7 +7,8 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 enum AppMode with SettingsEnum<AppMode> {
   Desktop,
-  Mobile;
+  Mobile,
+  ;
 
   @override
   String toJson() {

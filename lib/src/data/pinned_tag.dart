@@ -13,17 +13,17 @@ class PinnedTag {
   });
 
   PinnedTag.fromMap(Map<String, dynamic> map)
-      : id = map['id'] as int,
-        tagName = map['tagName'] as String,
-        booruType = map['booruType'] != null
-            ? BooruType.values.firstWhereOrNull(
-                (element) => map['booruType'].toString().toLowerCase() == element.name.toLowerCase(),
-              )
-            : null,
-        booruName = map['booruName'] as String?,
-        pinnedAt = map['pinnedAt'] as int,
-        sortOrder = map['sortOrder'] as int? ?? 0,
-        labels = _parseLabels(map['label'] as String?);
+    : id = map['id'] as int,
+      tagName = map['tagName'] as String,
+      booruType = map['booruType'] != null
+          ? BooruType.values.firstWhereOrNull(
+              (element) => map['booruType'].toString().toLowerCase() == element.name.toLowerCase(),
+            )
+          : null,
+      booruName = map['booruName'] as String?,
+      pinnedAt = map['pinnedAt'] as int,
+      sortOrder = map['sortOrder'] as int? ?? 0,
+      labels = _parseLabels(map['label'] as String?);
 
   /// Parse comma-separated labels string into a list
   static List<String> _parseLabels(String? labelString) {

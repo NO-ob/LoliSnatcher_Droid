@@ -149,7 +149,10 @@ class _HistoryListState extends State<HistoryList> {
         return SettingsDialog(
           contentItems: [
             SizedBox(width: double.maxFinite, child: row),
-            Text(context.loc.history.lastSearchWithDate(date: formatDate(entry.timestamp)), textAlign: TextAlign.center),
+            Text(
+              context.loc.history.lastSearchWithDate(date: formatDate(entry.timestamp)),
+              textAlign: TextAlign.center,
+            ),
             //
             const SizedBox(height: 20),
             ListTile(
@@ -232,7 +235,9 @@ class _HistoryListState extends State<HistoryList> {
                 entry.isFavourite ? Icons.favorite_border : Icons.favorite,
                 color: entry.isFavourite ? Colors.grey : Colors.red,
               ),
-              title: Text(entry.isFavourite ? context.loc.history.removeFromFavourites : context.loc.history.setAsFavourite),
+              title: Text(
+                entry.isFavourite ? context.loc.history.removeFromFavourites : context.loc.history.setAsFavourite,
+              ),
             ),
             //
             const SizedBox(height: 10),
@@ -382,7 +387,10 @@ class _HistoryListState extends State<HistoryList> {
               isExpanded: false,
             ),
           ),
-          subtitle: Text(booru?.name ?? context.loc.history.unknownBooru(name: currentEntry.booruName, type: currentEntry.booruType.toString())),
+          subtitle: Text(
+            booru?.name ??
+                context.loc.history.unknownBooru(name: currentEntry.booruName, type: currentEntry.booruType.toString()),
+          ),
         ),
       ),
     );

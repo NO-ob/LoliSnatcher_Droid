@@ -745,7 +745,7 @@
             "backupDatabase": "Backup database",
             "restoreDatabase": "Restore database",
             "restoreDatabaseInfo": "May take a while depending on the size of the database, will restart the app on success",
-            "databaseBackedUp": "Database backed up to database.json",
+            "databaseBackedUp": "Database backed up to store.db",
             "databaseRestored": "Database restored from backup! App will restart in a few seconds!",
             "backupDatabaseError": "Failed to backup database",
             "restoreDatabaseError": "Failed to restore database",

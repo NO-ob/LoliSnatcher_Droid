@@ -35,10 +35,10 @@ abstract class SettingDefinition<T> {
 
   /// Create a map entry for the settings map
   Map<String, dynamic> toMapEntry() => {
-        'type': type,
-        'default': defaultValue,
-        if (options != null) 'options': options,
-      };
+    'type': type,
+    'default': defaultValue,
+    if (options != null) 'options': options,
+  };
 }
 
 /// Setting definition for string values
@@ -97,11 +97,11 @@ class IntSetting extends SettingDefinition<int> {
 
   @override
   Map<String, dynamic> toMapEntry() => {
-        ...super.toMapEntry(),
-        'step': step,
-        'lowerLimit': lowerLimit,
-        'upperLimit': upperLimit,
-      };
+    ...super.toMapEntry(),
+    'step': step,
+    'lowerLimit': lowerLimit,
+    'upperLimit': upperLimit,
+  };
 }
 
 /// Setting definition for double values with range validation
@@ -129,10 +129,10 @@ class DoubleSetting extends SettingDefinition<double> {
     final double? parsed = value is String
         ? double.tryParse(value)
         : (value is double
-            ? value
-            : value is int
-                ? value.toDouble()
-                : null);
+              ? value
+              : value is int
+              ? value.toDouble()
+              : null);
     if (parsed == null) return defaultValue;
     if (parsed < lowerLimit || parsed > upperLimit) return defaultValue;
     return parsed;
@@ -143,11 +143,11 @@ class DoubleSetting extends SettingDefinition<double> {
 
   @override
   Map<String, dynamic> toMapEntry() => {
-        ...super.toMapEntry(),
-        'step': step,
-        'lowerLimit': lowerLimit,
-        'upperLimit': upperLimit,
-      };
+    ...super.toMapEntry(),
+    'step': step,
+    'lowerLimit': lowerLimit,
+    'upperLimit': upperLimit,
+  };
 }
 
 /// Setting definition for bool values

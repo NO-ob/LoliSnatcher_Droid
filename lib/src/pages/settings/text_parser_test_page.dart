@@ -211,21 +211,24 @@ class _TextParserTestPageState extends State<TextParserTestPage> {
       samples: [
         _SampleItem(
           name: 'Typical booru comment',
-          text: '[quote=ArtFan123]Great work on the shading![/quote]\n'
+          text:
+              '[quote=ArtFan123]Great work on the shading![/quote]\n'
               'Thanks! I used some_technique for the lighting.\n'
               'Check my other work at https://myportfolio.com\n'
               '#digital_art #fanart',
         ),
         _SampleItem(
           name: 'Forum reply',
-          text: '>>54321\n'
+          text:
+              '>>54321\n'
               'I disagree with your point. @moderator can you check this?\n'
               '[spoiler]The real answer is hidden here[/spoiler]\n'
               'More info: www.reference-site.org',
         ),
         _SampleItem(
           name: 'All features',
-          text: '[quote=User]Original post[/quote]\n'
+          text:
+              '[quote=User]Original post[/quote]\n'
               '@User I [b]strongly[/b] agree! See >>12345\n'
               'Tags: cool_art #amazing\n'
               'Link: https://example.com\n'
@@ -532,8 +535,7 @@ class _TextParserTestPageState extends State<TextParserTestPage> {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text('Text: "${segments[i].text}"'),
-                        if (segments[i].metadata.isNotEmpty)
-                          Text('Metadata: ${segments[i].metadata}'),
+                        if (segments[i].metadata.isNotEmpty) Text('Metadata: ${segments[i].metadata}'),
                       ],
                     ),
                   ),

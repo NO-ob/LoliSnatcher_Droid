@@ -118,7 +118,9 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
           title: Text(context.loc.areYouSure),
           contentItems: [
             Text(
-              widget.type == 'sender' ? context.loc.loliSync.stopSyncingQuestion : context.loc.loliSync.stopServerQuestion,
+              widget.type == 'sender'
+                  ? context.loc.loliSync.stopSyncingQuestion
+                  : context.loc.loliSync.stopServerQuestion,
             ),
           ],
           actionButtons: [

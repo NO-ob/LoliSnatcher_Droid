@@ -32,9 +32,37 @@ class UrlParseRule extends TextParseRule {
 
   // Common TLDs for bare URL matching (to avoid false positives)
   static const _commonTlds = [
-    'com', 'org', 'net', 'edu', 'gov', 'io', 'co', 'me', 'info', 'biz',
-    'dev', 'app', 'xyz', 'online', 'site', 'tech', 'art', 'moe', 'tv',
-    'us', 'uk', 'de', 'jp', 'ru', 'fr', 'it', 'es', 'ca', 'au', 'br',
+    'app',
+    'art',
+    'au',
+    'biz',
+    'br',
+    'ca',
+    'co',
+    'com',
+    'de',
+    'dev',
+    'edu',
+    'es',
+    'fr',
+    'gov',
+    'info',
+    'io',
+    'it',
+    'jp',
+    'me',
+    'moe',
+    'net',
+    'online',
+    'org',
+    'ru',
+    'site',
+    'tech',
+    'tv',
+    'uk',
+    'us',
+    'xxx',
+    'xyz',
   ];
 
   // Regex for bare URLs (domain.tld/path) - more restrictive to avoid false positives
@@ -57,15 +85,17 @@ class UrlParseRule extends TextParseRule {
       final scheme = Uri.tryParse(url)?.scheme ?? '';
       if (!schemes.contains(scheme.toLowerCase())) continue;
 
-      matches.add(TextParseMatch(
-        start: match.start,
-        end: match.end,
-        segment: ParsedTextSegment(
-          text: url,
-          type: type,
-          metadata: {'url': url},
+      matches.add(
+        TextParseMatch(
+          start: match.start,
+          end: match.end,
+          segment: ParsedTextSegment(
+            text: url,
+            type: type,
+            metadata: {'url': url},
+          ),
         ),
-      ));
+      );
     }
 
     // Find URLs without scheme (www.)
@@ -78,15 +108,17 @@ class UrlParseRule extends TextParseRule {
         );
         if (isOverlapping) continue;
 
-        matches.add(TextParseMatch(
-          start: match.start,
-          end: match.end,
-          segment: ParsedTextSegment(
-            text: url,
-            type: type,
-            metadata: {'url': 'https://$url'},
+        matches.add(
+          TextParseMatch(
+            start: match.start,
+            end: match.end,
+            segment: ParsedTextSegment(
+              text: url,
+              type: type,
+              metadata: {'url': 'https://$url'},
+            ),
           ),
-        ));
+        );
       }
     }
 
@@ -97,8 +129,7 @@ class UrlParseRule extends TextParseRule {
 
         // Skip if this position is already covered by another match
         final isOverlapping = matches.any(
-          (m) => (match.start >= m.start && match.start < m.end) ||
-              (match.end > m.start && match.end <= m.end),
+          (m) => (match.start >= m.start && match.start < m.end) || (match.end > m.start && match.end <= m.end),
         );
         if (isOverlapping) continue;
 
@@ -113,15 +144,17 @@ class UrlParseRule extends TextParseRule {
 
         if (!isLikelyUrl) continue;
 
-        matches.add(TextParseMatch(
-          start: match.start,
-          end: match.end,
-          segment: ParsedTextSegment(
-            text: url,
-            type: type,
-            metadata: {'url': 'https://$url'},
+        matches.add(
+          TextParseMatch(
+            start: match.start,
+            end: match.end,
+            segment: ParsedTextSegment(
+              text: url,
+              type: type,
+              metadata: {'url': 'https://$url'},
+            ),
           ),
-        ));
+        );
       }
     }
 

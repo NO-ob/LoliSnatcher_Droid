@@ -226,7 +226,10 @@ class _DatabasePageState extends State<DatabasePage> {
 
     if (isUpdating) {
       FlashElements.showSnackbar(
-        title: Text(context.loc.settings.database.sankakuFavouritesUpdateComplete, style: const TextStyle(fontSize: 20)),
+        title: Text(
+          context.loc.settings.database.sankakuFavouritesUpdateComplete,
+          style: const TextStyle(fontSize: 20),
+        ),
         leadingIcon: Icons.check,
         leadingIconColor: Colors.green,
         sideColor: Colors.green,
@@ -486,8 +489,14 @@ class _DatabasePageState extends State<DatabasePage> {
 
                                 FlashElements.showSnackbar(
                                   context: context,
-                                  title: Text(context.loc.settings.database.databaseDeleted, style: const TextStyle(fontSize: 20)),
-                                  content: Text(context.loc.settings.database.appRestartRequired, style: const TextStyle(fontSize: 16)),
+                                  title: Text(
+                                    context.loc.settings.database.databaseDeleted,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                  content: Text(
+                                    context.loc.settings.database.appRestartRequired,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
                                   leadingIcon: Icons.delete_forever,
                                   leadingIconColor: Colors.red,
                                   sideColor: Colors.yellow,
@@ -533,7 +542,10 @@ class _DatabasePageState extends State<DatabasePage> {
 
                                   FlashElements.showSnackbar(
                                     context: context,
-                                    title: Text(context.loc.settings.database.snatchedItemsCleared, style: const TextStyle(fontSize: 20)),
+                                    title: Text(
+                                      context.loc.settings.database.snatchedItemsCleared,
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
                                     content: Text(
                                       context.loc.settings.database.appRestartMayBeRequired,
                                       style: const TextStyle(fontSize: 16),
@@ -584,7 +596,10 @@ class _DatabasePageState extends State<DatabasePage> {
 
                                   FlashElements.showSnackbar(
                                     context: context,
-                                    title: Text(context.loc.settings.database.favouritesCleared, style: const TextStyle(fontSize: 20)),
+                                    title: Text(
+                                      context.loc.settings.database.favouritesCleared,
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
                                     content: Text(
                                       context.loc.settings.database.appRestartMayBeRequired,
                                       style: const TextStyle(fontSize: 16),
@@ -626,7 +641,10 @@ class _DatabasePageState extends State<DatabasePage> {
                                   settingsHandler.dbHandler.deleteFromSearchHistory(null);
                                   FlashElements.showSnackbar(
                                     context: context,
-                                    title: Text(context.loc.settings.database.searchHistoryCleared, style: const TextStyle(fontSize: 20)),
+                                    title: Text(
+                                      context.loc.settings.database.searchHistoryCleared,
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
                                     content: Text(
                                       context.loc.settings.database.appRestartMayBeRequired,
                                       style: const TextStyle(fontSize: 16),
@@ -708,8 +726,16 @@ class _DatabasePageState extends State<DatabasePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(context.loc.settings.database.updating(count: updatingItems.isEmpty ? 0 : updatingItems.length)),
-                          Text(context.loc.settings.database.left(count: max(updatingItems.length - updatingDone - updatingFailed, 0))),
+                          Text(
+                            context.loc.settings.database.updating(
+                              count: updatingItems.isEmpty ? 0 : updatingItems.length,
+                            ),
+                          ),
+                          Text(
+                            context.loc.settings.database.left(
+                              count: max(updatingItems.length - updatingDone - updatingFailed, 0),
+                            ),
+                          ),
                           Text(context.loc.settings.database.done(count: updatingDone)),
                           Text(context.loc.settings.database.failedSkipped(count: updatingFailed)),
                           const Text(''),

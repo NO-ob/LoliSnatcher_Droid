@@ -109,8 +109,12 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             true,
             false,
           ],
-          itemBuilder: (item) => item == null ? Text(context.loc.tabs.filters.all) : Text(item ? context.loc.tabs.filters.loaded : context.loc.tabs.filters.notLoaded),
-          itemTitleBuilder: (item) => item == null ? context.loc.tabs.filters.all : (item ? context.loc.tabs.filters.loaded : context.loc.tabs.filters.notLoaded),
+          itemBuilder: (item) => item == null
+              ? Text(context.loc.tabs.filters.all)
+              : Text(item ? context.loc.tabs.filters.loaded : context.loc.tabs.filters.notLoaded),
+          itemTitleBuilder: (item) => item == null
+              ? context.loc.tabs.filters.all
+              : (item ? context.loc.tabs.filters.loaded : context.loc.tabs.filters.notLoaded),
         ),
         SettingsDropdown<TagType?>(
           title: context.loc.tabs.filters.tagType,
@@ -158,8 +162,12 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             true,
             false,
           ],
-          itemBuilder: (item) => item == null ? Text(context.loc.tabs.filters.all) : Text(item ? context.loc.tabs.filters.enabled : context.loc.tabs.filters.disabled),
-          itemTitleBuilder: (item) => item == null ? context.loc.tabs.filters.all : (item ? context.loc.tabs.filters.enabled : context.loc.tabs.filters.disabled),
+          itemBuilder: (item) => item == null
+              ? Text(context.loc.tabs.filters.all)
+              : Text(item ? context.loc.tabs.filters.enabled : context.loc.tabs.filters.disabled),
+          itemTitleBuilder: (item) => item == null
+              ? context.loc.tabs.filters.all
+              : (item ? context.loc.tabs.filters.enabled : context.loc.tabs.filters.disabled),
         ),
         SettingsToggle(
           title: context.loc.tabs.filters.duplicates,

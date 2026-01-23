@@ -2672,7 +2672,7 @@ class _TranslationsSettingsBackupAndRestoreRu extends TranslationsSettingsBackup
       'Может занять время в зависимости от объема базы данных, приложение перезапустится после успешного восстановления';
   @override
   String get databaseBackedUp =>
-      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? 'База данных сохранена в database.json';
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? 'База данных сохранена в store.db';
   @override
   String get databaseRestored =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseRestored', {}) ??
@@ -5153,7 +5153,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabaseInfo', {}) ??
                 'Может занять время в зависимости от объема базы данных, приложение перезапустится после успешного восстановления',
           'settings.backupAndRestore.databaseBackedUp' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? 'База данных сохранена в database.json',
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? 'База данных сохранена в store.db',
           'settings.backupAndRestore.databaseRestored' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseRestored', {}) ??
                 'База данных восстановлена из бэкапа! Приложение будет перезапущено через несколько секунд!',

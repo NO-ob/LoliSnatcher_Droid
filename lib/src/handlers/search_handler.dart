@@ -1351,7 +1351,8 @@ enum HasTabWithTagResult {
   onlyTag,
   onlyTagDifferentBooru,
   containsTag,
-  noTag;
+  noTag,
+  ;
 
   bool get isOnlyTag => this == HasTabWithTagResult.onlyTag;
   bool get isOnlyTagDifferentBooru => this == HasTabWithTagResult.onlyTagDifferentBooru;
@@ -1366,7 +1367,8 @@ enum HasTabWithTagResult {
 enum TabAddMode {
   prev,
   next,
-  end;
+  end,
+  ;
 
   String locName(BuildContext context) {
     switch (this) {

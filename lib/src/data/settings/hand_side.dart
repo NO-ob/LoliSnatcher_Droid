@@ -5,7 +5,8 @@ import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
 enum HandSide with SettingsEnum<HandSide> {
   left,
-  right;
+  right,
+  ;
 
   @override
   String toJson() {

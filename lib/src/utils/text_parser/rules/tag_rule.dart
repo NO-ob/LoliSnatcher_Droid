@@ -37,15 +37,17 @@ class TagParseRule extends TextParseRule {
       final tag = match.group(1)!;
       if (tag.length < minLength) continue;
 
-      matches.add(TextParseMatch(
-        start: match.start,
-        end: match.end,
-        segment: ParsedTextSegment(
-          text: match.group(0)!,
-          type: type,
-          metadata: {'tag': tag},
+      matches.add(
+        TextParseMatch(
+          start: match.start,
+          end: match.end,
+          segment: ParsedTextSegment(
+            text: match.group(0)!,
+            type: type,
+            metadata: {'tag': tag},
+          ),
         ),
-      ));
+      );
     }
 
     return matches;
@@ -78,15 +80,17 @@ class HashtagParseRule extends TextParseRule {
       final tag = match.group(1)!;
       if (tag.length < minLength) continue;
 
-      matches.add(TextParseMatch(
-        start: match.start,
-        end: match.end,
-        segment: ParsedTextSegment(
-          text: match.group(0)!,
-          type: type,
-          metadata: {'tag': tag},
+      matches.add(
+        TextParseMatch(
+          start: match.start,
+          end: match.end,
+          segment: ParsedTextSegment(
+            text: match.group(0)!,
+            type: type,
+            metadata: {'tag': tag},
+          ),
         ),
-      ));
+      );
     }
 
     return matches;

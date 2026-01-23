@@ -7,7 +7,8 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 enum ButtonPosition with SettingsEnum<ButtonPosition> {
   disabled,
   left,
-  right;
+  right,
+  ;
 
   // For JSON serialization - returns ORIGINAL string values for backwards compatibility
   // New format (uncomment after grace period): disabled => 'disabled', left => 'left', right => 'right'

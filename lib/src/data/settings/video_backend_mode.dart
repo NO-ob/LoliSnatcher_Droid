@@ -6,7 +6,8 @@ import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 enum VideoBackendMode with SettingsEnum<VideoBackendMode> {
   normal,
   mpv, // mediakit
-  mdk; // fvp
+  mdk, // fvp
+  ;
 
   @override
   String toJson() {

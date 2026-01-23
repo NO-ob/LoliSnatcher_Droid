@@ -2639,7 +2639,7 @@ class _TranslationsSettingsBackupAndRestoreDev extends TranslationsSettingsBacku
       '{May take a while depending on the size of the database, will restart the app on success}';
   @override
   String get databaseBackedUp =>
-      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? '{Database backed up to database.json}';
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? '{Database backed up to store.db}';
   @override
   String get databaseRestored =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseRestored', {}) ??
@@ -5066,7 +5066,7 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabaseInfo', {}) ??
                 '{May take a while depending on the size of the database, will restart the app on success}',
           'settings.backupAndRestore.databaseBackedUp' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? '{Database backed up to database.json}',
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseBackedUp', {}) ?? '{Database backed up to store.db}',
           'settings.backupAndRestore.databaseRestored' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseRestored', {}) ??
                 '{Database restored from backup! App will restart in a few seconds!}',

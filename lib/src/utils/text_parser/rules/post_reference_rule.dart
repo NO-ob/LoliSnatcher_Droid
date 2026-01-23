@@ -34,43 +34,49 @@ class PostReferenceParseRule extends TextParseRule {
     // Find >>12345 style
     for (final match in _doubleArrowRegex.allMatches(text)) {
       final postId = match.group(1)!;
-      matches.add(TextParseMatch(
-        start: match.start,
-        end: match.end,
-        segment: ParsedTextSegment(
-          text: match.group(0)!,
-          type: type,
-          metadata: {'postId': postId, 'style': 'arrow'},
+      matches.add(
+        TextParseMatch(
+          start: match.start,
+          end: match.end,
+          segment: ParsedTextSegment(
+            text: match.group(0)!,
+            type: type,
+            metadata: {'postId': postId, 'style': 'arrow'},
+          ),
         ),
-      ));
+      );
     }
 
     // Find post #12345 style
     for (final match in _postHashRegex.allMatches(text)) {
       final postId = match.group(1)!;
-      matches.add(TextParseMatch(
-        start: match.start,
-        end: match.end,
-        segment: ParsedTextSegment(
-          text: match.group(0)!,
-          type: type,
-          metadata: {'postId': postId, 'style': 'post'},
+      matches.add(
+        TextParseMatch(
+          start: match.start,
+          end: match.end,
+          segment: ParsedTextSegment(
+            text: match.group(0)!,
+            type: type,
+            metadata: {'postId': postId, 'style': 'post'},
+          ),
         ),
-      ));
+      );
     }
 
     // Find comment #12345 style
     for (final match in _commentHashRegex.allMatches(text)) {
       final postId = match.group(1)!;
-      matches.add(TextParseMatch(
-        start: match.start,
-        end: match.end,
-        segment: ParsedTextSegment(
-          text: match.group(0)!,
-          type: type,
-          metadata: {'postId': postId, 'style': 'comment'},
+      matches.add(
+        TextParseMatch(
+          start: match.start,
+          end: match.end,
+          segment: ParsedTextSegment(
+            text: match.group(0)!,
+            type: type,
+            metadata: {'postId': postId, 'style': 'comment'},
+          ),
         ),
-      ));
+      );
     }
 
     return matches;

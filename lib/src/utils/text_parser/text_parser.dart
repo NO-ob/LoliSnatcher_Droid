@@ -122,24 +122,28 @@ class TextParser {
       // Add plain text before this match
       if (m.match.start > currentPos) {
         final plainText = text.substring(currentPos, m.match.start);
-        segments.add(ParsedTextSegment(
-          text: plainText,
-          type: 'text',
-        ));
+        segments.add(
+          ParsedTextSegment(
+            text: plainText,
+            type: 'text',
+          ),
+        );
       }
 
       // Handle nested parsing if the rule supports it
       if (m.rule.allowNested && m.match.innerContent != null) {
         final nestedSegments = parse(m.match.innerContent!);
         // Wrap nested segments in a container segment
-        segments.add(ParsedTextSegment(
-          text: m.match.segment.text,
-          type: m.match.segment.type,
-          metadata: {
-            ...m.match.segment.metadata,
-            'nested': nestedSegments,
-          },
-        ));
+        segments.add(
+          ParsedTextSegment(
+            text: m.match.segment.text,
+            type: m.match.segment.type,
+            metadata: {
+              ...m.match.segment.metadata,
+              'nested': nestedSegments,
+            },
+          ),
+        );
       } else {
         segments.add(m.match.segment);
       }
@@ -149,10 +153,12 @@ class TextParser {
 
     // Add remaining plain text
     if (currentPos < text.length) {
-      segments.add(ParsedTextSegment(
-        text: text.substring(currentPos),
-        type: 'text',
-      ));
+      segments.add(
+        ParsedTextSegment(
+          text: text.substring(currentPos),
+          type: 'text',
+        ),
+      );
     }
 
     return segments;
@@ -209,12 +215,13 @@ class SegmentBuilderRegistry {
 }
 
 /// Builder function type for rendering parsed segments
-typedef SegmentBuilderFn = InlineSpan Function(
-  BuildContext context,
-  ParsedTextSegment segment,
-  TextStyle? style,
-  SegmentBuilderRegistry registry,
-);
+typedef SegmentBuilderFn =
+    InlineSpan Function(
+      BuildContext context,
+      ParsedTextSegment segment,
+      TextStyle? style,
+      SegmentBuilderRegistry registry,
+    );
 
 /// Default builder that just returns a TextSpan
 InlineSpan defaultSegmentBuilder(

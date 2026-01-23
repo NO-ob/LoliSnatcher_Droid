@@ -19,7 +19,8 @@ typedef InnerDragUpdateCallback =
 
 enum InnerDrawerDirection {
   start,
-  end;
+  end,
+  ;
 
   bool get isStart => this == InnerDrawerDirection.start;
   bool get isEnd => this == InnerDrawerDirection.end;

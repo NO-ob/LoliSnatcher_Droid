@@ -27,15 +27,17 @@ class MentionParseRule extends TextParseRule {
       final username = match.group(1)!;
       if (username.length < minLength) continue;
 
-      matches.add(TextParseMatch(
-        start: match.start,
-        end: match.end,
-        segment: ParsedTextSegment(
-          text: match.group(0)!,
-          type: type,
-          metadata: {'username': username},
+      matches.add(
+        TextParseMatch(
+          start: match.start,
+          end: match.end,
+          segment: ParsedTextSegment(
+            text: match.group(0)!,
+            type: type,
+            metadata: {'username': username},
+          ),
         ),
-      ));
+      );
     }
 
     return matches;
@@ -65,15 +67,17 @@ class SaidParseRule extends TextParseRule {
     for (final match in _saidRegex.allMatches(text)) {
       final username = match.group(1)!;
 
-      matches.add(TextParseMatch(
-        start: match.start,
-        end: match.end,
-        segment: ParsedTextSegment(
-          text: match.group(0)!,
-          type: type,
-          metadata: {'username': username},
+      matches.add(
+        TextParseMatch(
+          start: match.start,
+          end: match.end,
+          segment: ParsedTextSegment(
+            text: match.group(0)!,
+            type: type,
+            metadata: {'username': username},
+          ),
         ),
-      ));
+      );
     }
 
     return matches;
