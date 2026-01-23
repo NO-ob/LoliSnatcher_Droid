@@ -9,7 +9,6 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/html.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
-import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 
 const double borderWidth = 1;
@@ -232,13 +231,11 @@ class SettingsToggle extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            Builder(
-              builder: (context) {
-                return MarqueeText(
-                  text: title,
-                  style: DefaultTextStyle.of(context).style,
-                );
-              },
+            Expanded(
+              child: Text(
+                title,
+                style: DefaultTextStyle.of(context).style,
+              ),
             ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
@@ -327,13 +324,11 @@ class SettingsToggleTristate extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            Builder(
-              builder: (context) {
-                return MarqueeText(
-                  text: title,
-                  style: DefaultTextStyle.of(context).style,
-                );
-              },
+            Expanded(
+              child: Text(
+                title,
+                style: DefaultTextStyle.of(context).style,
+              ),
             ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
@@ -407,13 +402,11 @@ class SettingsSegmentedButton<T> extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            Builder(
-              builder: (context) {
-                return MarqueeText(
-                  text: title,
-                  style: DefaultTextStyle.of(context).style,
-                );
-              },
+            Expanded(
+              child: Text(
+                title,
+                style: DefaultTextStyle.of(context).style,
+              ),
             ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
