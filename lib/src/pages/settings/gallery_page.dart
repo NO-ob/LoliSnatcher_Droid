@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/data/settings/button_position.dart';
+import 'package:lolisnatcher/src/data/settings/gallery_button.dart';
 import 'package:lolisnatcher/src/data/settings/image_quality.dart';
 import 'package:lolisnatcher/src/data/settings/scroll_direction.dart';
 import 'package:lolisnatcher/src/data/settings/share_action.dart';
@@ -357,7 +358,8 @@ class _GalleryPageState extends State<GalleryPage> {
                             child: Builder(
                               builder: (context) {
                                 final name = buttonOrder[index];
-                                final title = SettingsHandler.buttonNames[name] ?? '';
+                                final button = GalleryButton.fromString(name);
+                                final title = button?.locName(context) ?? name;
 
                                 final bool isInfo = name == 'info';
 

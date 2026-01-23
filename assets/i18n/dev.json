@@ -473,6 +473,14 @@
                 "square": "{Square}",
                 "rectangle": "{Rectangle}",
                 "staggered": "{Staggered}"
+            },
+            "appModeValues": {
+                "desktop": "{Desktop}",
+                "mobile": "{Mobile}"
+            },
+            "handSideValues": {
+                "left": "{Left}",
+                "right": "{Right}"
             }
         },
         "theme": {
@@ -624,6 +632,11 @@
                 "stream": "{Stream}",
                 "cache": "{Cache}",
                 "streamCache": "{Stream+Cache}"
+            },
+            "videoBackendModeValues": {
+                "normal": "{Default}",
+                "mpv": "{MPV}",
+                "mdk": "{MDK}"
             }
         },
         "downloads": {
@@ -1285,6 +1298,19 @@
             "one": "{Source}",
             "other": "{Sources}"
         }
+    },
+    "galleryButtons": {
+        "snatch": "{Snatch}",
+        "favourite": "{Favourite}",
+        "info": "{Info}",
+        "share": "{Share}",
+        "select": "{Select}",
+        "open": "{Open in browser}",
+        "slideshow": "{Slideshow}",
+        "reloadNoScale": "{Toggle scaling}",
+        "toggleQuality": "{Toggle quality}",
+        "externalPlayer": "{External player}",
+        "imageSearch": "{Image search}"
     },
     "media": {
         "loading": {

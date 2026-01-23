@@ -24,6 +24,7 @@ import 'package:lolisnatcher/src/handlers/notify_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
@@ -70,6 +71,7 @@ void main() async {
   TagHandler.register();
   NotifyHandler.register();
   SecureStorageHandler.register();
+  initSettingsEnumRegistry();
   await SettingsHandler.register().initialize();
   LocalAuthHandler.register();
 

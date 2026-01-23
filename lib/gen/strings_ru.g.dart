@@ -244,6 +244,8 @@ class TranslationsRu extends Translations with BaseTranslations<AppLocale, Trans
   @override
   late final _TranslationsGalleryRu gallery = _TranslationsGalleryRu._(_root);
   @override
+  late final _TranslationsGalleryButtonsRu galleryButtons = _TranslationsGalleryButtonsRu._(_root);
+  @override
   late final _TranslationsMediaRu media = _TranslationsMediaRu._(_root);
   @override
   late final _TranslationsImageStatsRu imageStats = _TranslationsImageStatsRu._(_root);
@@ -1505,6 +1507,37 @@ class _TranslationsGalleryRu extends TranslationsGalleryEn {
       );
 }
 
+// Path: galleryButtons
+class _TranslationsGalleryButtonsRu extends TranslationsGalleryButtonsEn {
+  _TranslationsGalleryButtonsRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get snatch => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'Скачать';
+  @override
+  String get favourite => TranslationOverrides.string(_root.$meta, 'galleryButtons.favourite', {}) ?? 'В избранное';
+  @override
+  String get info => TranslationOverrides.string(_root.$meta, 'galleryButtons.info', {}) ?? 'Инфо';
+  @override
+  String get share => TranslationOverrides.string(_root.$meta, 'galleryButtons.share', {}) ?? 'Поделиться';
+  @override
+  String get select => TranslationOverrides.string(_root.$meta, 'galleryButtons.select', {}) ?? 'Выбрать';
+  @override
+  String get open => TranslationOverrides.string(_root.$meta, 'galleryButtons.open', {}) ?? 'Открыть в браузере';
+  @override
+  String get slideshow => TranslationOverrides.string(_root.$meta, 'galleryButtons.slideshow', {}) ?? 'Слайдшоу';
+  @override
+  String get reloadNoScale => TranslationOverrides.string(_root.$meta, 'galleryButtons.reloadNoScale', {}) ?? 'Переключить масштабирование';
+  @override
+  String get toggleQuality => TranslationOverrides.string(_root.$meta, 'galleryButtons.toggleQuality', {}) ?? 'Переключить качество';
+  @override
+  String get externalPlayer => TranslationOverrides.string(_root.$meta, 'galleryButtons.externalPlayer', {}) ?? 'Внешний плеер';
+  @override
+  String get imageSearch => TranslationOverrides.string(_root.$meta, 'galleryButtons.imageSearch', {}) ?? 'Поиск по картинке';
+}
+
 // Path: media
 class _TranslationsMediaRu extends TranslationsMediaEn {
   _TranslationsMediaRu._(TranslationsRu root) : this._root = root, super.internal(root);
@@ -2015,6 +2048,10 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
   @override
   late final _TranslationsSettingsInterfacePreviewDisplayModeValuesRu previewDisplayModeValues =
       _TranslationsSettingsInterfacePreviewDisplayModeValuesRu._(_root);
+  @override
+  late final _TranslationsSettingsInterfaceAppModeValuesRu appModeValues = _TranslationsSettingsInterfaceAppModeValuesRu._(_root);
+  @override
+  late final _TranslationsSettingsInterfaceHandSideValuesRu handSideValues = _TranslationsSettingsInterfaceHandSideValuesRu._(_root);
 }
 
 // Path: settings.theme
@@ -2336,6 +2373,8 @@ class _TranslationsSettingsVideoRu extends TranslationsSettingsVideoEn {
   late final _TranslationsSettingsVideoCacheModesRu cacheModes = _TranslationsSettingsVideoCacheModesRu._(_root);
   @override
   late final _TranslationsSettingsVideoCacheModeValuesRu cacheModeValues = _TranslationsSettingsVideoCacheModeValuesRu._(_root);
+  @override
+  late final _TranslationsSettingsVideoVideoBackendModeValuesRu videoBackendModeValues = _TranslationsSettingsVideoVideoBackendModeValuesRu._(_root);
 }
 
 // Path: settings.downloads
@@ -3730,6 +3769,32 @@ class _TranslationsSettingsInterfacePreviewDisplayModeValuesRu extends Translati
   String get staggered => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Шахматный';
 }
 
+// Path: settings.interface.appModeValues
+class _TranslationsSettingsInterfaceAppModeValuesRu extends TranslationsSettingsInterfaceAppModeValuesEn {
+  _TranslationsSettingsInterfaceAppModeValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get desktop => TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.desktop', {}) ?? 'Компьютер';
+  @override
+  String get mobile => TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.mobile', {}) ?? 'Мобильный';
+}
+
+// Path: settings.interface.handSideValues
+class _TranslationsSettingsInterfaceHandSideValuesRu extends TranslationsSettingsInterfaceHandSideValuesEn {
+  _TranslationsSettingsInterfaceHandSideValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get left => TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.left', {}) ?? 'Левая';
+  @override
+  String get right => TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.right', {}) ?? 'Правая';
+}
+
 // Path: settings.viewer.imageQualityValues
 class _TranslationsSettingsViewerImageQualityValuesRu extends TranslationsSettingsViewerImageQualityValuesEn {
   _TranslationsSettingsViewerImageQualityValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
@@ -3855,6 +3920,21 @@ class _TranslationsSettingsVideoCacheModeValuesRu extends TranslationsSettingsVi
   String get cache => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш';
   @override
   String get streamCache => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш';
+}
+
+// Path: settings.video.videoBackendModeValues
+class _TranslationsSettingsVideoVideoBackendModeValuesRu extends TranslationsSettingsVideoVideoBackendModeValuesEn {
+  _TranslationsSettingsVideoVideoBackendModeValuesRu._(TranslationsRu root) : this._root = root, super.internal(root);
+
+  final TranslationsRu _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get normal => TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'По умолчанию';
+  @override
+  String get mpv => TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV';
+  @override
+  String get mdk => TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mdk', {}) ?? 'MDK';
 }
 
 // Path: media.loading.stopReasons
@@ -4590,6 +4670,14 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.rectangle', {}) ?? 'Прямоугольник',
           'settings.interface.previewDisplayModeValues.staggered' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Шахматный',
+          'settings.interface.appModeValues.desktop' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.desktop', {}) ?? 'Компьютер',
+          'settings.interface.appModeValues.mobile' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.mobile', {}) ?? 'Мобильный',
+          'settings.interface.handSideValues.left' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.left', {}) ?? 'Левая',
+          'settings.interface.handSideValues.right' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.right', {}) ?? 'Правая',
           'settings.theme.title' => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Темы',
           'settings.theme.themeMode' => TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Режим темы',
           'settings.theme.blackBg' => TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? 'Чёрный фон',
@@ -4836,16 +4924,22 @@ extension on TranslationsRu {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
+          'settings.video.videoBackendModeValues.normal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'По умолчанию',
+          'settings.video.videoBackendModeValues.mpv' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV',
+          'settings.video.videoBackendModeValues.mdk' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mdk', {}) ?? 'MDK',
           'settings.downloads.fromNextItemInQueue' =>
             TranslationOverrides.string(_root.$meta, 'settings.downloads.fromNextItemInQueue', {}) ?? 'Со следующего элемента в очереди',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.downloads.pleaseProvideStoragePermission' =>
             TranslationOverrides.string(_root.$meta, 'settings.downloads.pleaseProvideStoragePermission', {}) ??
                 'Пожалуйста, предоставь разрешение на доступ к хранилищу, чтобы сохранять файлы',
@@ -5811,6 +5905,9 @@ extension on TranslationsRu {
           'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? 'Неизвестный тип сайта!',
           'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? 'История',
           'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '...',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.selectBooruForWebview' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.selectBooruForWebview', {}) ?? 'Выбери сайт для вебвью',
           'mobileHome.lockApp' => TranslationOverrides.string(_root.$meta, 'mobileHome.lockApp', {}) ?? 'Заблокировать приложение',
@@ -5819,9 +5916,6 @@ extension on TranslationsRu {
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Отменено пользователем',
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Сохранить в любом случае',
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'Пропустить',
-          _ => null,
-        } ??
-        switch (path) {
           'mobileHome.retryAll' =>
             ({required int count}) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Повторить все (${count})',
           'mobileHome.existingFailedOrCancelledItems' =>
@@ -5926,6 +6020,18 @@ extension on TranslationsRu {
                   one: 'Источник',
                   other: 'Источников',
                 ),
+          'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'Скачать',
+          'galleryButtons.favourite' => TranslationOverrides.string(_root.$meta, 'galleryButtons.favourite', {}) ?? 'В избранное',
+          'galleryButtons.info' => TranslationOverrides.string(_root.$meta, 'galleryButtons.info', {}) ?? 'Инфо',
+          'galleryButtons.share' => TranslationOverrides.string(_root.$meta, 'galleryButtons.share', {}) ?? 'Поделиться',
+          'galleryButtons.select' => TranslationOverrides.string(_root.$meta, 'galleryButtons.select', {}) ?? 'Выбрать',
+          'galleryButtons.open' => TranslationOverrides.string(_root.$meta, 'galleryButtons.open', {}) ?? 'Открыть в браузере',
+          'galleryButtons.slideshow' => TranslationOverrides.string(_root.$meta, 'galleryButtons.slideshow', {}) ?? 'Слайдшоу',
+          'galleryButtons.reloadNoScale' =>
+            TranslationOverrides.string(_root.$meta, 'galleryButtons.reloadNoScale', {}) ?? 'Переключить масштабирование',
+          'galleryButtons.toggleQuality' => TranslationOverrides.string(_root.$meta, 'galleryButtons.toggleQuality', {}) ?? 'Переключить качество',
+          'galleryButtons.externalPlayer' => TranslationOverrides.string(_root.$meta, 'galleryButtons.externalPlayer', {}) ?? 'Внешний плеер',
+          'galleryButtons.imageSearch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.imageSearch', {}) ?? 'Поиск по картинке',
           'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'Рендеринг...',
           'media.loading.loadingAndRenderingFromCache' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'Загрузка и рендеринг из кэша...',

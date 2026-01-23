@@ -473,6 +473,14 @@
         "square": "Квадрат",
         "rectangle": "Прямоугольник",
         "staggered": "Шахматный"
+      },
+      "appModeValues": {
+        "desktop": "Компьютер",
+        "mobile": "Мобильный"
+      },
+      "handSideValues": {
+        "left": "Левая",
+        "right": "Правая"
       }
     },
     "theme": {
@@ -624,6 +632,11 @@
         "stream": "Потоковый",
         "cache": "Кэш",
         "streamCache": "Потоковый+Кэш"
+      },
+      "videoBackendModeValues": {
+        "normal": "По умолчанию",
+        "mpv": "MPV",
+        "mdk": "MDK"
       }
     },
     "downloads": {
@@ -1285,6 +1298,19 @@
       "one": "Источник",
       "other": "Источников"
     }
+  },
+  "galleryButtons": {
+    "snatch": "Скачать",
+    "favourite": "В избранное",
+    "info": "Инфо",
+    "share": "Поделиться",
+    "select": "Выбрать",
+    "open": "Открыть в браузере",
+    "slideshow": "Слайдшоу",
+    "reloadNoScale": "Переключить масштабирование",
+    "toggleQuality": "Переключить качество",
+    "externalPlayer": "Внешний плеер",
+    "imageSearch": "Поиск по картинке"
   },
   "media": {
     "loading": {

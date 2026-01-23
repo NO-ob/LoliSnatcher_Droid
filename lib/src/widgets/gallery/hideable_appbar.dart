@@ -13,6 +13,7 @@ import 'package:preload_page_view/preload_page_view.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
+import 'package:lolisnatcher/src/data/settings/gallery_button.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
@@ -495,7 +496,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   String buttonText(String name) {
-    final String defaultLabel = SettingsHandler.buttonNames[name] ?? '';
+    final button = GalleryButton.fromString(name);
+    final String defaultLabel = button?.locName(context) ?? name;
     late String label;
 
     if (page.value == -1) {

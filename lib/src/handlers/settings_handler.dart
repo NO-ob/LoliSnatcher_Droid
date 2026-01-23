@@ -20,6 +20,8 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 import 'package:lolisnatcher/src/data/settings/button_position.dart';
+import 'package:lolisnatcher/src/data/settings/gallery_button.dart';
+import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/data/settings/hand_side.dart';
 import 'package:lolisnatcher/src/data/settings/image_quality.dart';
 import 'package:lolisnatcher/src/data/settings/mpv_hardware_decoding.dart';
@@ -149,35 +151,12 @@ class SettingsHandler {
 
   Duration cacheDuration = Duration.zero;
 
-  // TODO convert to enum
-  static const List<String> buttonList = [
-    'snatch',
-    'favourite',
-    'info',
-    'share',
-    'select',
-    'open',
-    'autoscroll',
-    'reloadnoscale',
-    'toggle_quality',
-    'external_player',
-    'image_search',
-  ];
-  static const Map<String, String> buttonNames = {
-    'autoscroll': 'Slideshow',
-    'snatch': 'Snatch',
-    'favourite': 'Favourite',
-    'info': 'Info',
-    'share': 'Share',
-    'select': 'Select',
-    'open': 'Open in browser',
-    'reloadnoscale': 'Reload w/out scaling',
-    'toggle_quality': 'Toggle quality',
-    'external_player': 'External player',
-    'image_search': 'Image search',
-  };
-  static final List<String> disableableButtonList = buttonList.where((e) => e != 'info').toList();
-  List<String> buttonOrder = [...buttonList];
+  /// @Deprecated Use GalleryButton.allStrings instead
+  static List<String> get buttonList => GalleryButton.allStrings;
+  /// @Deprecated Use GalleryButton.disableableStrings instead
+  static List<String> get disableableButtonList => GalleryButton.disableableStrings;
+
+  List<String> buttonOrder = [...GalleryButton.allStrings];
   List<String> disabledButtons = [];
 
   bool jsonWrite = false;
@@ -297,7 +276,6 @@ class SettingsHandler {
     'isDebug',
     'desktopListsDrag',
     'incognitoKeyboard',
-    'backupPath',
     'showBottomSearchbar',
     'useTopSearchbarInput',
     'showSearchbarQuickActions',
@@ -708,14 +686,14 @@ class SettingsHandler {
     'buttonOrder': {
       'type': 'stringList',
       'default': <String>[
-        ...buttonList,
+        ...GalleryButton.allStrings,
       ],
     },
     'disabledButtons': {
       'type': 'stringList',
       'default': <String>[],
       'options': <String>[
-        ...disableableButtonList,
+        ...GalleryButton.disableableStrings,
       ],
     },
     'cacheDuration': {
@@ -810,7 +788,19 @@ class SettingsHandler {
     }
 
     try {
-      switch (settingParams['type']) {
+      final String type = settingParams['type'];
+
+      // Check if this is a registered SettingsEnum type - handles all enums generically
+      if (SettingsEnumRegistry.isRegistered(type)) {
+        return SettingsEnumRegistry.validate(
+          type,
+          value,
+          settingParams['default'],
+          toJSON: toJSON,
+        );
+      }
+
+      switch (type) {
         case 'stringFromList':
           final String validValue = List<String>.from(
             settingParams['options']!,
@@ -853,39 +843,7 @@ class SettingsHandler {
             return value;
           }
 
-        case 'appMode':
-          if (toJSON) {
-            return (value as AppMode).toString();
-          } else {
-            if (value is String) {
-              return AppMode.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'handSide':
-          if (toJSON) {
-            return (value as HandSide).toString();
-          } else {
-            if (value is String) {
-              return HandSide.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'videoBackendMode':
-          if (toJSON) {
-            return (value as VideoBackendMode).toString();
-          } else {
-            if (value is String) {
-              return VideoBackendMode.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
+        // Special types with custom handling
         case 'theme':
           if (toJSON) {
             return (value as ThemeItem).name;
@@ -953,127 +911,6 @@ class SettingsHandler {
           } else {
             if (value is String) {
               return AppLocale.values.firstWhereOrNull((e) => e.name == value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'previewQuality':
-          if (toJSON) {
-            return (value as PreviewQuality).toJson();
-          } else {
-            if (value is String) {
-              return PreviewQuality.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'previewDisplayMode':
-          if (toJSON) {
-            return (value as PreviewDisplayMode).toJson();
-          } else {
-            if (value is String) {
-              return PreviewDisplayMode.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'shareAction':
-          if (toJSON) {
-            return (value as ShareAction).toJson();
-          } else {
-            if (value is String) {
-              return ShareAction.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'videoCacheMode':
-          if (toJSON) {
-            return (value as VideoCacheMode).toJson();
-          } else {
-            if (value is String) {
-              return VideoCacheMode.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'imageQuality':
-          if (toJSON) {
-            return (value as ImageQuality).toJson();
-          } else {
-            if (value is String) {
-              return ImageQuality.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'scrollDirection':
-          if (toJSON) {
-            return (value as ScrollDirection).toJson();
-          } else {
-            if (value is String) {
-              return ScrollDirection.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'verticalPosition':
-          if (toJSON) {
-            return (value as VerticalPosition).toJson();
-          } else {
-            if (value is String) {
-              return VerticalPosition.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'buttonPosition':
-          if (toJSON) {
-            return (value as ButtonPosition).toJson();
-          } else {
-            if (value is String) {
-              return ButtonPosition.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'mpvVideoOutput':
-          if (toJSON) {
-            return (value as MpvVideoOutput).toJson();
-          } else {
-            if (value is String) {
-              return MpvVideoOutput.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'mpvHardwareDecoding':
-          if (toJSON) {
-            return (value as MpvHardwareDecoding).toJson();
-          } else {
-            if (value is String) {
-              return MpvHardwareDecoding.fromString(value);
-            } else {
-              return settingParams['default'];
-            }
-          }
-
-        case 'proxyType':
-          if (toJSON) {
-            return (value as ProxyType).toJson();
-          } else {
-            if (value is String) {
-              return ProxyType.fromString(value);
             } else {
               return settingParams['default'];
             }
@@ -1673,110 +1510,24 @@ class SettingsHandler {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> json = {
-      'defTags': validateValue('defTags', null, toJSON: true),
-      'previewMode': validateValue('previewMode', null, toJSON: true),
-      'videoCacheMode': validateValue('videoCacheMode', null, toJSON: true),
-      'previewDisplay': validateValue('previewDisplay', null, toJSON: true),
-      'previewDisplayFallback': validateValue('previewDisplayFallback', null, toJSON: true),
-      'galleryMode': validateValue('galleryMode', null, toJSON: true),
-      'snatchMode': validateValue('snatchMode', null, toJSON: true),
-      'shareAction': validateValue('shareAction', null, toJSON: true),
-      'limit': validateValue('limit', null, toJSON: true),
-      'portraitColumns': validateValue('portraitColumns', null, toJSON: true),
-      'landscapeColumns': validateValue('landscapeColumns', null, toJSON: true),
-      'preloadCount': validateValue('preloadCount', null, toJSON: true),
-      'snatchCooldown': validateValue('snatchCooldown', null, toJSON: true),
-      'galleryBarPosition': validateValue('galleryBarPosition', null, toJSON: true),
-      'galleryScrollDirection': validateValue('galleryScrollDirection', null, toJSON: true),
-      'jsonWrite': validateValue('jsonWrite', null, toJSON: true),
-      'autoPlayEnabled': validateValue('autoPlayEnabled', null, toJSON: true),
-      'loadingGif': validateValue('loadingGif', null, toJSON: true),
-      'thumbnailCache': validateValue('thumbnailCache', null, toJSON: true),
-      'mediaCache': validateValue('mediaCache', null, toJSON: true),
-      'autoHideImageBar': validateValue('autoHideImageBar', null, toJSON: true),
-      'dbEnabled': validateValue('dbEnabled', null, toJSON: true),
-      'indexesEnabled': validateValue('indexesEnabled', null, toJSON: true),
-      'searchHistoryEnabled': validateValue('searchHistoryEnabled', null, toJSON: true),
-      'filterHated': validateValue('filterHated', null, toJSON: true),
-      'filterFavourites': validateValue('filterFavourites', null, toJSON: true),
-      'filterSnatched': validateValue('filterSnatched', null, toJSON: true),
-      'filterAi': validateValue('filterAi', null, toJSON: true),
-      'useVolumeButtonsForScroll': validateValue('useVolumeButtonsForScroll', null, toJSON: true),
-      'volumeButtonsScrollSpeed': validateValue('volumeButtonsScrollSpeed', null, toJSON: true),
-      'mousewheelScrollSpeed': validateValue('mousewheelScrollSpeed', null, toJSON: true),
-      'preloadSizeLimit': validateValue('preloadSizeLimit', null, toJSON: true),
-      'disableVideo': validateValue('disableVideo', null, toJSON: true),
-      'longTapFastForwardVideo': validateValue('longTapFastForwardVideo', null, toJSON: true),
-      'shitDevice': validateValue('shitDevice', null, toJSON: true),
-      'galleryAutoScrollTime': validateValue('galleryAutoScrollTime', null, toJSON: true),
-      'zoomButtonPosition': validateValue('zoomButtonPosition', null, toJSON: true),
-      'changePageButtonsPosition': validateValue('changePageButtonsPosition', null, toJSON: true),
-      'scrollGridButtonsPosition': validateValue('scrollGridButtonsPosition', null, toJSON: true),
-      'disableImageScaling': validateValue('disableImageScaling', null, toJSON: true),
-      'gifsAsThumbnails': validateValue('gifsAsThumbnails', null, toJSON: true),
-      'desktopListsDrag': validateValue('desktopListsDrag', null, toJSON: true),
-      'cacheDuration': validateValue('cacheDuration', null, toJSON: true),
-      'cacheSize': validateValue('cacheSize', null, toJSON: true),
-      'autoLockTimeout': validateValue('autoLockTimeout', null, toJSON: true),
-      'allowSelfSignedCerts': validateValue('allowSelfSignedCerts', null, toJSON: true),
-      'wakeLockEnabled': validateValue('wakeLockEnabled', null, toJSON: true),
-      'tagTypeFetchEnabled': validateValue('tagTypeFetchEnabled', null, toJSON: true),
-      'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
-      'allowRotation': validateValue('allowRotation', null, toJSON: true),
-      'enableHeroTransitions': validateValue('enableHeroTransitions', null, toJSON: true),
-      'disableCustomPageTransitions': validateValue('disableCustomPageTransitions', null, toJSON: true),
-      'incognitoKeyboard': validateValue('incognitoKeyboard', null, toJSON: true),
-      'hideNotes': validateValue('hideNotes', null, toJSON: true),
-      'startVideosMuted': validateValue('startVideosMuted', null, toJSON: true),
-      'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),
-      'favouriteOnSnatch': validateValue('favouriteOnSnatch', null, toJSON: true),
-      'disableVibration': validateValue('disableVibration', null, toJSON: true),
-      'videoBackendMode': validateValue('videoBackendMode', null, toJSON: true),
-      'altVideoPlayerHwAccel': validateValue('altVideoPlayerHwAccel', null, toJSON: true),
-      'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
-      'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
-      'showBottomSearchbar': validateValue('showBottomSearchbar', null, toJSON: true),
-      'useTopSearchbarInput': validateValue('useTopSearchbarInput', null, toJSON: true),
-      'showSearchbarQuickActions': validateValue('showSearchbarQuickActions', null, toJSON: true),
-      'autofocusSearchbar': validateValue('autofocusSearchbar', null, toJSON: true),
-      'expandDetails': validateValue('expandDetails', null, toJSON: true),
-      'useLockscreen': validateValue('useLockscreen', null, toJSON: true),
-      'blurOnLeave': validateValue('blurOnLeave', null, toJSON: true),
+    final Map<String, dynamic> json = {};
 
-      'buttonOrder': validateValue('buttonOrder', null, toJSON: true),
-      'disabledButtons': validateValue('disabledButtons', null, toJSON: true),
-      'hatedTags': cleanTagsList(hatedTags.map(Tag.new).toList()),
-      'lovedTags': cleanTagsList(lovedTags.map(Tag.new).toList()),
+    // Auto-generate JSON from map keys
+    for (final key in map.keys) {
+      // Special handling for tags (need to be cleaned)
+      if (key == 'hatedTags') {
+        json[key] = cleanTagsList(hatedTags.map(Tag.new).toList());
+      } else if (key == 'lovedTags') {
+        json[key] = cleanTagsList(lovedTags.map(Tag.new).toList());
+      } else {
+        json[key] = validateValue(key, null, toJSON: true);
+      }
+    }
 
-      'prefBooru': validateValue('prefBooru', null, toJSON: true),
-      'appMode': validateValue('appMode', null, toJSON: true),
-      'handSide': validateValue('handSide', null, toJSON: true),
-      'extPathOverride': validateValue('extPathOverride', null, toJSON: true),
-      'backupPath': validateValue('backupPath', null, toJSON: true),
-      'lastSyncIp': validateValue('lastSyncIp', null, toJSON: true),
-      'lastSyncPort': validateValue('lastSyncPort', null, toJSON: true),
-      'customUserAgent': validateValue('customUserAgent', null, toJSON: true),
-      'proxyType': validateValue('proxyType', null, toJSON: true),
-      'proxyAddress': validateValue('proxyAddress', null, toJSON: true),
-      'proxyUsername': validateValue('proxyUsername', null, toJSON: true),
-      'proxyPassword': validateValue('proxyPassword', null, toJSON: true),
+    // Add version info
+    json['version'] = Constants.updateInfo.versionName;
+    json['build'] = Constants.updateInfo.buildNumber;
 
-      'theme': validateValue('theme', null, toJSON: true),
-      'themeMode': validateValue('themeMode', null, toJSON: true),
-      'useDynamicColor': validateValue('useDynamicColor', null, toJSON: true),
-      'isAmoled': validateValue('isAmoled', null, toJSON: true),
-      'fontFamily': validateValue('fontFamily', null, toJSON: true),
-      'enableDrawerMascot': validateValue('enableDrawerMascot', null, toJSON: true),
-      'drawerMascotPathOverride': validateValue('drawerMascotPathOverride', null, toJSON: true),
-      'customPrimaryColor': validateValue('customPrimaryColor', null, toJSON: true),
-      'customAccentColor': validateValue('customAccentColor', null, toJSON: true),
-      'locale': validateValue('locale', null, toJSON: true),
-      'version': Constants.updateInfo.versionName,
-      'build': Constants.updateInfo.buildNumber,
-    };
-
-    // print('JSON $json');
     return json;
   }
 
@@ -1808,15 +1559,16 @@ class SettingsHandler {
         // print('btnorder is a ${tempBtnOrder.runtimeType} type');
         tempBtnOrder = [];
       }
+      final allButtons = GalleryButton.allStrings;
       final List<String> btnOrder = List<String>.from(tempBtnOrder)
           .map((bstr) {
-            final String button = buttonList.singleWhere((e) => e == bstr, orElse: () => '');
+            final String button = allButtons.singleWhere((e) => e == bstr, orElse: () => '');
             return button;
           })
           .where((el) => el.isNotEmpty)
           .toList();
       btnOrder.addAll(
-        buttonList.where(
+        allButtons.where(
           (el) => !btnOrder.contains(el),
         ),
       ); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
@@ -1836,8 +1588,9 @@ class SettingsHandler {
       if (tempDisabledButtons is List) {
         disabledButtons = [...tempDisabledButtons];
 
+        final disableableButtons = GalleryButton.disableableStrings;
         for (final buttonName in disabledButtons) {
-          if (disableableButtonList.any((e) => e == buttonName)) {
+          if (disableableButtons.any((e) => e == buttonName)) {
             // do nothing
           } else {
             // remove unknown and not allowed to remove buttons

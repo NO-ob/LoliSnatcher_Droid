@@ -286,6 +286,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   late final TranslationsViewerEn viewer = TranslationsViewerEn.internal(_root);
   late final TranslationsCommonEn common = TranslationsCommonEn.internal(_root);
   late final TranslationsGalleryEn gallery = TranslationsGalleryEn.internal(_root);
+  late final TranslationsGalleryButtonsEn galleryButtons = TranslationsGalleryButtonsEn.internal(_root);
   late final TranslationsMediaEn media = TranslationsMediaEn.internal(_root);
   late final TranslationsImageStatsEn imageStats = TranslationsImageStatsEn.internal(_root);
   late final TranslationsPreviewEn preview = TranslationsPreviewEn.internal(_root);
@@ -1850,6 +1851,48 @@ class TranslationsGalleryEn {
       );
 }
 
+// Path: galleryButtons
+class TranslationsGalleryButtonsEn {
+  TranslationsGalleryButtonsEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Snatch'
+  String get snatch => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'Snatch';
+
+  /// en: 'Favourite'
+  String get favourite => TranslationOverrides.string(_root.$meta, 'galleryButtons.favourite', {}) ?? 'Favourite';
+
+  /// en: 'Info'
+  String get info => TranslationOverrides.string(_root.$meta, 'galleryButtons.info', {}) ?? 'Info';
+
+  /// en: 'Share'
+  String get share => TranslationOverrides.string(_root.$meta, 'galleryButtons.share', {}) ?? 'Share';
+
+  /// en: 'Select'
+  String get select => TranslationOverrides.string(_root.$meta, 'galleryButtons.select', {}) ?? 'Select';
+
+  /// en: 'Open in browser'
+  String get open => TranslationOverrides.string(_root.$meta, 'galleryButtons.open', {}) ?? 'Open in browser';
+
+  /// en: 'Slideshow'
+  String get slideshow => TranslationOverrides.string(_root.$meta, 'galleryButtons.slideshow', {}) ?? 'Slideshow';
+
+  /// en: 'Toggle scaling'
+  String get reloadNoScale => TranslationOverrides.string(_root.$meta, 'galleryButtons.reloadNoScale', {}) ?? 'Toggle scaling';
+
+  /// en: 'Toggle quality'
+  String get toggleQuality => TranslationOverrides.string(_root.$meta, 'galleryButtons.toggleQuality', {}) ?? 'Toggle quality';
+
+  /// en: 'External player'
+  String get externalPlayer => TranslationOverrides.string(_root.$meta, 'galleryButtons.externalPlayer', {}) ?? 'External player';
+
+  /// en: 'Image search'
+  String get imageSearch => TranslationOverrides.string(_root.$meta, 'galleryButtons.imageSearch', {}) ?? 'Image search';
+}
+
 // Path: media
 class TranslationsMediaEn {
   TranslationsMediaEn.internal(this._root);
@@ -2498,6 +2541,8 @@ class TranslationsSettingsInterfaceEn {
   );
   late final TranslationsSettingsInterfacePreviewDisplayModeValuesEn previewDisplayModeValues =
       TranslationsSettingsInterfacePreviewDisplayModeValuesEn.internal(_root);
+  late final TranslationsSettingsInterfaceAppModeValuesEn appModeValues = TranslationsSettingsInterfaceAppModeValuesEn.internal(_root);
+  late final TranslationsSettingsInterfaceHandSideValuesEn handSideValues = TranslationsSettingsInterfaceHandSideValuesEn.internal(_root);
 }
 
 // Path: settings.theme
@@ -2910,6 +2955,9 @@ class TranslationsSettingsVideoEn {
 
   late final TranslationsSettingsVideoCacheModesEn cacheModes = TranslationsSettingsVideoCacheModesEn.internal(_root);
   late final TranslationsSettingsVideoCacheModeValuesEn cacheModeValues = TranslationsSettingsVideoCacheModeValuesEn.internal(_root);
+  late final TranslationsSettingsVideoVideoBackendModeValuesEn videoBackendModeValues = TranslationsSettingsVideoVideoBackendModeValuesEn.internal(
+    _root,
+  );
 }
 
 // Path: settings.downloads
@@ -4686,6 +4734,36 @@ class TranslationsSettingsInterfacePreviewDisplayModeValuesEn {
   String get staggered => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Staggered';
 }
 
+// Path: settings.interface.appModeValues
+class TranslationsSettingsInterfaceAppModeValuesEn {
+  TranslationsSettingsInterfaceAppModeValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Desktop'
+  String get desktop => TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.desktop', {}) ?? 'Desktop';
+
+  /// en: 'Mobile'
+  String get mobile => TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.mobile', {}) ?? 'Mobile';
+}
+
+// Path: settings.interface.handSideValues
+class TranslationsSettingsInterfaceHandSideValuesEn {
+  TranslationsSettingsInterfaceHandSideValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Left'
+  String get left => TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.left', {}) ?? 'Left';
+
+  /// en: 'Right'
+  String get right => TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.right', {}) ?? 'Right';
+}
+
 // Path: settings.viewer.imageQualityValues
 class TranslationsSettingsViewerImageQualityValuesEn {
   TranslationsSettingsViewerImageQualityValuesEn.internal(this._root);
@@ -4837,6 +4915,24 @@ class TranslationsSettingsVideoCacheModeValuesEn {
 
   /// en: 'Stream+Cache'
   String get streamCache => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache';
+}
+
+// Path: settings.video.videoBackendModeValues
+class TranslationsSettingsVideoVideoBackendModeValuesEn {
+  TranslationsSettingsVideoVideoBackendModeValuesEn.internal(this._root);
+
+  final Translations _root; // ignore: unused_field
+
+  // Translations
+
+  /// en: 'Default'
+  String get normal => TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Default';
+
+  /// en: 'MPV'
+  String get mpv => TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV';
+
+  /// en: 'MDK'
+  String get mdk => TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mdk', {}) ?? 'MDK';
 }
 
 // Path: media.loading.stopReasons
@@ -5557,6 +5653,14 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.rectangle', {}) ?? 'Rectangle',
           'settings.interface.previewDisplayModeValues.staggered' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Staggered',
+          'settings.interface.appModeValues.desktop' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.desktop', {}) ?? 'Desktop',
+          'settings.interface.appModeValues.mobile' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.mobile', {}) ?? 'Mobile',
+          'settings.interface.handSideValues.left' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.left', {}) ?? 'Left',
+          'settings.interface.handSideValues.right' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.right', {}) ?? 'Right',
           'settings.theme.title' => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Themes',
           'settings.theme.themeMode' => TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Theme mode',
           'settings.theme.blackBg' => TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? 'Black background',
@@ -5786,16 +5890,22 @@ extension on Translations {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Stream',
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache',
+          'settings.video.videoBackendModeValues.normal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Default',
+          'settings.video.videoBackendModeValues.mpv' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV',
+          'settings.video.videoBackendModeValues.mdk' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mdk', {}) ?? 'MDK',
           'settings.downloads.fromNextItemInQueue' =>
             TranslationOverrides.string(_root.$meta, 'settings.downloads.fromNextItemInQueue', {}) ?? 'From next item in queue',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.downloads.pleaseProvideStoragePermission' =>
             TranslationOverrides.string(_root.$meta, 'settings.downloads.pleaseProvideStoragePermission', {}) ??
                 'Please provide storage permission in order to download files',
@@ -6723,6 +6833,9 @@ extension on Translations {
           'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? 'Unknown Booru type!',
           'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? 'History',
           'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '...',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.selectBooruForWebview' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.selectBooruForWebview', {}) ?? 'Select booru for webview',
           'mobileHome.lockApp' => TranslationOverrides.string(_root.$meta, 'mobileHome.lockApp', {}) ?? 'Lock app',
@@ -6731,9 +6844,6 @@ extension on Translations {
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Cancelled by user',
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Save anyway',
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'Skip',
-          _ => null,
-        } ??
-        switch (path) {
           'mobileHome.retryAll' =>
             ({required int count}) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Retry all (${count})',
           'mobileHome.existingFailedOrCancelledItems' =>
@@ -6833,6 +6943,17 @@ extension on Translations {
                   one: 'Source',
                   other: 'Sources',
                 ),
+          'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'Snatch',
+          'galleryButtons.favourite' => TranslationOverrides.string(_root.$meta, 'galleryButtons.favourite', {}) ?? 'Favourite',
+          'galleryButtons.info' => TranslationOverrides.string(_root.$meta, 'galleryButtons.info', {}) ?? 'Info',
+          'galleryButtons.share' => TranslationOverrides.string(_root.$meta, 'galleryButtons.share', {}) ?? 'Share',
+          'galleryButtons.select' => TranslationOverrides.string(_root.$meta, 'galleryButtons.select', {}) ?? 'Select',
+          'galleryButtons.open' => TranslationOverrides.string(_root.$meta, 'galleryButtons.open', {}) ?? 'Open in browser',
+          'galleryButtons.slideshow' => TranslationOverrides.string(_root.$meta, 'galleryButtons.slideshow', {}) ?? 'Slideshow',
+          'galleryButtons.reloadNoScale' => TranslationOverrides.string(_root.$meta, 'galleryButtons.reloadNoScale', {}) ?? 'Toggle scaling',
+          'galleryButtons.toggleQuality' => TranslationOverrides.string(_root.$meta, 'galleryButtons.toggleQuality', {}) ?? 'Toggle quality',
+          'galleryButtons.externalPlayer' => TranslationOverrides.string(_root.$meta, 'galleryButtons.externalPlayer', {}) ?? 'External player',
+          'galleryButtons.imageSearch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.imageSearch', {}) ?? 'Image search',
           'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'Rendering...',
           'media.loading.loadingAndRenderingFromCache' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'Loading and rendering from cache...',

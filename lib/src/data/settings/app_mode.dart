@@ -1,13 +1,16 @@
 // ignore_for_file: constant_identifier_names
 
+import 'package:flutter/widgets.dart';
+
+import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
-enum AppMode {
+enum AppMode with SettingsEnum<AppMode> {
   Desktop,
   Mobile;
 
   @override
-  String toString() {
+  String toJson() {
     switch (this) {
       case AppMode.Desktop:
         return 'Desktop';
@@ -23,7 +26,7 @@ enum AppMode {
       case 'Mobile':
         return AppMode.Mobile;
     }
-    return AppMode.Mobile;
+    return defaultValue;
   }
 
   bool get isDesktop {
@@ -36,5 +39,15 @@ enum AppMode {
 
   static AppMode get defaultValue {
     return SettingsHandler.isDesktopPlatform ? AppMode.Desktop : AppMode.Mobile;
+  }
+
+  @override
+  String locName(BuildContext context) {
+    switch (this) {
+      case AppMode.Desktop:
+        return context.loc.settings.interface.appModeValues.desktop;
+      case AppMode.Mobile:
+        return context.loc.settings.interface.appModeValues.mobile;
+    }
   }
 }
