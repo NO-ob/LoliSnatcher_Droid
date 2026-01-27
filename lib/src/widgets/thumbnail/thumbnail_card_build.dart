@@ -44,7 +44,9 @@ class ThumbnailCardBuild extends StatelessWidget {
   Widget build(BuildContext context) {
     final snatchHandler = SnatchHandler.instance;
 
-    final isSelected = selectable && selectedIndex != null;
+    final bool isSelected = selectable && selectedIndex != null;
+    final bool showHighlightBorder = isHighlighted || isSelected;
+    final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
 
     return AutoScrollTag(
       highlightColor: Colors.red,
@@ -72,7 +74,7 @@ class ThumbnailCardBuild extends StatelessWidget {
                             final bool isCurrentlyBeingSnatched =
                                 current?.booruItems[queueProgress] == item && total != 0;
 
-                            final bool showBorder = isHighlighted || isSelected || isCurrentlyBeingSnatched;
+                            final bool showBorder = showHighlightBorder || isCurrentlyBeingSnatched;
                             final Color borderColor = isCurrentlyBeingSnatched
                                 ? Colors.transparent
                                 : Theme.of(context).colorScheme.secondary;
@@ -119,6 +121,7 @@ class ThumbnailCardBuild extends StatelessWidget {
                 ),
               ),
             ),
+            //
             Positioned.fill(
               child: ValueListenableBuilder(
                 valueListenable: snatchHandler.current,
@@ -134,9 +137,6 @@ class ThumbnailCardBuild extends StatelessWidget {
                             builder: (_, _, _) {
                               final bool isCurrentlyBeingSnatched =
                                   current?.booruItems[queueProgress] == item && total != 0;
-                              final double borderRadius = isCurrentlyBeingSnatched ? 10 : 4;
-                              final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
-                              final double borderWidth = defaultBorderWidth * (isCurrentlyBeingSnatched ? 3 : 1);
 
                               if (isCurrentlyBeingSnatched) {
                                 return AnimatedProgressIndicator(
@@ -144,8 +144,8 @@ class ThumbnailCardBuild extends StatelessWidget {
                                   animationDuration: const Duration(milliseconds: 50),
                                   indicatorStyle: IndicatorStyle.square,
                                   valueColor: Theme.of(context).progressIndicatorTheme.color,
-                                  strokeWidth: borderWidth,
-                                  borderRadius: borderRadius,
+                                  strokeWidth: defaultBorderWidth * 3,
+                                  borderRadius: 10,
                                 );
                               }
 
