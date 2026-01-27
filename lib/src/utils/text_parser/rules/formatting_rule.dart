@@ -16,7 +16,8 @@ class BoldParseRule extends TextParseRule {
   bool get allowNested => true;
 
   // Matches [b]...[/b], <b>...</b>, or <strong>...</strong>
-  static final RegExp _boldRegex = RegExp(
+  // Uses [\s\S]*? for non-greedy matching of any content
+  static final RegExp _regex = RegExp(
     r'(?:\[b\]([\s\S]*?)\[\/b\]|<b>([\s\S]*?)<\/b>|<strong>([\s\S]*?)<\/strong>)',
     caseSensitive: false,
   );
@@ -25,8 +26,7 @@ class BoldParseRule extends TextParseRule {
   List<TextParseMatch> findMatches(String text) {
     final List<TextParseMatch> matches = [];
 
-    for (final match in _boldRegex.allMatches(text)) {
-      // Get content from whichever group matched
+    for (final match in _regex.allMatches(text)) {
       final content = match.group(1) ?? match.group(2) ?? match.group(3) ?? '';
 
       matches.add(
@@ -60,8 +60,7 @@ class ItalicParseRule extends TextParseRule {
   @override
   bool get allowNested => true;
 
-  // Matches [i]...[/i], <i>...</i>, or <em>...</em>
-  static final RegExp _italicRegex = RegExp(
+  static final RegExp _regex = RegExp(
     r'(?:\[i\]([\s\S]*?)\[\/i\]|<i>([\s\S]*?)<\/i>|<em>([\s\S]*?)<\/em>)',
     caseSensitive: false,
   );
@@ -70,7 +69,7 @@ class ItalicParseRule extends TextParseRule {
   List<TextParseMatch> findMatches(String text) {
     final List<TextParseMatch> matches = [];
 
-    for (final match in _italicRegex.allMatches(text)) {
+    for (final match in _regex.allMatches(text)) {
       final content = match.group(1) ?? match.group(2) ?? match.group(3) ?? '';
 
       matches.add(
@@ -104,8 +103,7 @@ class UnderlineParseRule extends TextParseRule {
   @override
   bool get allowNested => true;
 
-  // Matches [u]...[/u] or <u>...</u>
-  static final RegExp _underlineRegex = RegExp(
+  static final RegExp _regex = RegExp(
     r'(?:\[u\]([\s\S]*?)\[\/u\]|<u>([\s\S]*?)<\/u>)',
     caseSensitive: false,
   );
@@ -114,7 +112,7 @@ class UnderlineParseRule extends TextParseRule {
   List<TextParseMatch> findMatches(String text) {
     final List<TextParseMatch> matches = [];
 
-    for (final match in _underlineRegex.allMatches(text)) {
+    for (final match in _regex.allMatches(text)) {
       final content = match.group(1) ?? match.group(2) ?? '';
 
       matches.add(
@@ -149,8 +147,7 @@ class StrikethroughParseRule extends TextParseRule {
   @override
   bool get allowNested => true;
 
-  // Matches [s]...[/s], <s>...</s>, <strike>...</strike>, or <del>...</del>
-  static final RegExp _strikeRegex = RegExp(
+  static final RegExp _regex = RegExp(
     r'(?:\[s\]([\s\S]*?)\[\/s\]|<s>([\s\S]*?)<\/s>|<strike>([\s\S]*?)<\/strike>|<del>([\s\S]*?)<\/del>)',
     caseSensitive: false,
   );
@@ -159,7 +156,7 @@ class StrikethroughParseRule extends TextParseRule {
   List<TextParseMatch> findMatches(String text) {
     final List<TextParseMatch> matches = [];
 
-    for (final match in _strikeRegex.allMatches(text)) {
+    for (final match in _regex.allMatches(text)) {
       final content = match.group(1) ?? match.group(2) ?? match.group(3) ?? match.group(4) ?? '';
 
       matches.add(
@@ -180,7 +177,7 @@ class StrikethroughParseRule extends TextParseRule {
   }
 }
 
-/// Rule for parsing code blocks `[code]...[/code]` or `<code>...</code>`
+/// Rule for parsing code blocks [code]...[/code] or <code>...</code>
 class CodeParseRule extends TextParseRule {
   const CodeParseRule();
 
@@ -193,8 +190,7 @@ class CodeParseRule extends TextParseRule {
   @override
   bool get allowNested => false; // Don't parse content inside code blocks
 
-  // Matches [code]...[/code] or <code>...</code>
-  static final RegExp _codeRegex = RegExp(
+  static final RegExp _regex = RegExp(
     r'(?:\[code\]([\s\S]*?)\[\/code\]|<code>([\s\S]*?)<\/code>)',
     caseSensitive: false,
   );
@@ -203,7 +199,7 @@ class CodeParseRule extends TextParseRule {
   List<TextParseMatch> findMatches(String text) {
     final List<TextParseMatch> matches = [];
 
-    for (final match in _codeRegex.allMatches(text)) {
+    for (final match in _regex.allMatches(text)) {
       final content = match.group(1) ?? match.group(2) ?? '';
 
       matches.add(

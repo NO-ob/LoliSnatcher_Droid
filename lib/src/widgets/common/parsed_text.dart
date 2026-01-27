@@ -116,7 +116,79 @@ class _ParsedTextState extends State<ParsedText> {
 
   void _parseText() {
     final parser = widget.parser ?? CommentParser.instance;
-    _segments = parser.parse(widget.text);
+    _segments = parser.parse(_fixOverlappingTags(widget.text));
+  }
+
+  /// Fix common malformed overlapping tags by removing orphaned closing tags
+  // ignore: comment_references
+  /// This handles cases like [i][u]text[/i][/u] -> [i][u]text[/u][/i]
+  /// by removing orphaned tags that appear outside their opening tag's scope
+  String _fixOverlappingTags(String text) {
+    // Pattern to match formatting tags
+    final tagPattern = RegExp(
+      r'(\[(/?)([biusBIUS]|em|strong|strike|del)\]|<(/?)([biusBIUS]|em|strong|strike|del)>)',
+      caseSensitive: false,
+    );
+
+    final List<_TagInfo> openTags = [];
+    final result = StringBuffer();
+    int lastEnd = 0;
+
+    for (final match in tagPattern.allMatches(text)) {
+      // Add text before this tag
+      result.write(text.substring(lastEnd, match.start));
+
+      final fullTag = match.group(0)!;
+      final isBBCode = fullTag.startsWith('[');
+      final isClosing = isBBCode ? (match.group(2)?.isNotEmpty ?? false) : (match.group(4)?.isNotEmpty ?? false);
+      final tagName = (isBBCode ? match.group(3) : match.group(5))!.toLowerCase();
+
+      // Normalize tag names
+      final normalizedName = switch (tagName) {
+        'em' => 'i',
+        'strong' => 'b',
+        'strike' || 'del' => 's',
+        _ => tagName,
+      };
+
+      if (isClosing) {
+        // Find matching open tag
+        final openIndex = openTags.lastIndexWhere((t) => t.name == normalizedName);
+        if (openIndex >= 0) {
+          // Close all tags opened after this one (in reverse order)
+          final tagsToClose = openTags.sublist(openIndex + 1).reversed.toList();
+          for (final tag in tagsToClose) {
+            result.write(tag.isBBCode ? '[/${tag.name}]' : '</${tag.name}>');
+          }
+
+          // Close this tag
+          openTags.removeAt(openIndex);
+          result.write(fullTag);
+
+          // Re-open the tags that were closed
+          for (final tag in tagsToClose.reversed) {
+            result.write(tag.isBBCode ? '[${tag.name}]' : '<${tag.name}>');
+          }
+        }
+        // Orphaned closing tag - skip it
+      } else {
+        // Opening tag
+        openTags.add(_TagInfo(normalizedName, isBBCode));
+        result.write(fullTag);
+      }
+
+      lastEnd = match.end;
+    }
+
+    // Add remaining text
+    result.write(text.substring(lastEnd));
+
+    // Close any unclosed tags
+    for (final tag in openTags.reversed) {
+      result.write(tag.isBBCode ? '[/${tag.name}]' : '</${tag.name}>');
+    }
+
+    return result.toString();
   }
 
   void _onUrlTap(String url) {
@@ -204,7 +276,10 @@ class _ParsedTextState extends State<ParsedText> {
                   widget.urlStyle ??
                   baseStyle?.copyWith(
                     color: Colors.blue.shade300,
-                    decoration: TextDecoration.underline,
+                    decoration: TextDecoration.combine([
+                      TextDecoration.underline,
+                      ?baseStyle.decoration,
+                    ]),
                     decorationColor: Colors.blue.shade300,
                   ),
               recognizer: TapGestureRecognizer()..onTap = () => _onUrlTap(url),
@@ -431,7 +506,12 @@ class _ParsedTextState extends State<ParsedText> {
         case 'underline':
           final nested = segment.metadata['nested'] as List<ParsedTextSegment>?;
           final content = segment.metadata['content'] as String? ?? '';
-          final underlineStyle = baseStyle?.copyWith(decoration: TextDecoration.underline);
+          final underlineStyle = baseStyle?.copyWith(
+            decoration: TextDecoration.combine([
+              TextDecoration.underline,
+              ?baseStyle.decoration,
+            ]),
+          );
 
           if (nested != null && nested.isNotEmpty) {
             spans.addAll(_buildSpans(context, nested, underlineStyle, globalIndex * 1000));
@@ -442,7 +522,12 @@ class _ParsedTextState extends State<ParsedText> {
         case 'strikethrough':
           final nested = segment.metadata['nested'] as List<ParsedTextSegment>?;
           final content = segment.metadata['content'] as String? ?? '';
-          final strikeStyle = baseStyle?.copyWith(decoration: TextDecoration.lineThrough);
+          final strikeStyle = baseStyle?.copyWith(
+            decoration: TextDecoration.combine([
+              TextDecoration.lineThrough,
+              ?baseStyle.decoration,
+            ]),
+          );
 
           if (nested != null && nested.isNotEmpty) {
             spans.addAll(_buildSpans(context, nested, strikeStyle, globalIndex * 1000));
@@ -471,4 +556,11 @@ class _ParsedTextState extends State<ParsedText> {
 
     return spans;
   }
+}
+
+/// Helper class for tracking tag information during overlap fixing
+class _TagInfo {
+  const _TagInfo(this.name, this.isBBCode);
+  final String name;
+  final bool isBBCode;
 }

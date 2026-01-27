@@ -272,7 +272,8 @@ class _CommentEntry extends StatelessWidget {
     if (content == null || content.isEmpty) {
       return '';
     }
-    // Normalize whitespace only - parsing is handled by ParsedText
+
+    // Normalize whitespace
     return content.replaceAll(RegExp(' +'), ' ').replaceAll(RegExp(r'\n{3,}'), '\n\n').trim();
   }
 
