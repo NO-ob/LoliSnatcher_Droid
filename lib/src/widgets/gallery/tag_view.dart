@@ -13,8 +13,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fpdart/fpdart.dart' show FpdartOnIterable;
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
-import 'package:lolisnatcher/src/utils/debouncer.dart';
-import 'package:lolisnatcher/src/widgets/common/draggable_overflow_text.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:uuid/uuid.dart';
@@ -25,12 +23,12 @@ import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
 import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -38,14 +36,16 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
+import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/draggable_overflow_text.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
+import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
@@ -934,127 +934,123 @@ class _TagViewState extends State<TagView> {
     return Scrollbar(
       interactive: true,
       controller: scrollController,
-      child: DesktopScrollWrap(
+      child: CustomScrollView(
         controller: scrollController,
-        child: CustomScrollView(
-          controller: scrollController,
-          physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-          slivers: [
-            SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  const SizedBox(height: kMinInteractiveDimension),
-                  infoText(context.loc.tagView.id, itemId),
-                  infoText(context.loc.tagView.postURL, item.postURL, isLink: true),
-                  infoText(context.loc.tagView.posted, formattedDate, canCopy: false),
-                  ExpansionTile(
-                    title: Text(
-                      context.loc.tagView.details,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                      ),
+        slivers: [
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                const SizedBox(height: kMinInteractiveDimension),
+                infoText(context.loc.tagView.id, itemId),
+                infoText(context.loc.tagView.postURL, item.postURL, isLink: true),
+                infoText(context.loc.tagView.posted, formattedDate, canCopy: false),
+                ExpansionTile(
+                  title: Text(
+                    context.loc.tagView.details,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
                     ),
-                    initiallyExpanded: detailsExpanded ?? settingsHandler.expandDetails,
-                    onExpansionChanged: (expanded) {
-                      setState(() {
-                        detailsExpanded = expanded;
-                      });
-                    },
-                    iconColor: Colors.white.withValues(alpha: 0.66),
-                    collapsedIconColor: Colors.white.withValues(alpha: 0.66),
-                    shape: const Border(),
-                    collapsedShape: const Border(),
-                    children: [
-                      if (settingsHandler.isDebug.value) infoText(context.loc.tagView.filename, fileName),
-                      infoText(context.loc.tagView.url, fileUrl, isLink: true),
-                      infoText(context.loc.tagView.extension, fileExt),
-                      infoText(context.loc.tagView.resolution, fileRes),
-                      infoText(context.loc.tagView.size, fileSize),
-                      infoText(context.loc.tagView.md5, md5),
-                      infoText(context.loc.tagView.rating, rating),
-                      infoText(context.loc.tagView.score, score),
-                    ],
                   ),
-                  commentsButton(),
-                  notesButton(),
-                  sourcesList(sources),
-                  if (tagsAvailable) ...[
-                    Divider(
-                      color: context.theme.dividerTheme.color?.withValues(alpha: 0.66),
-                    ),
-                    tagsButton(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
-                            filled: false,
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: context.theme.dividerTheme.color!.withValues(alpha: 0.66),
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
+                  initiallyExpanded: detailsExpanded ?? settingsHandler.expandDetails,
+                  onExpansionChanged: (expanded) {
+                    setState(() {
+                      detailsExpanded = expanded;
+                    });
+                  },
+                  iconColor: Colors.white.withValues(alpha: 0.66),
+                  collapsedIconColor: Colors.white.withValues(alpha: 0.66),
+                  shape: const Border(),
+                  collapsedShape: const Border(),
+                  children: [
+                    if (settingsHandler.isDebug.value) infoText(context.loc.tagView.filename, fileName),
+                    infoText(context.loc.tagView.url, fileUrl, isLink: true),
+                    infoText(context.loc.tagView.extension, fileExt),
+                    infoText(context.loc.tagView.resolution, fileRes),
+                    infoText(context.loc.tagView.size, fileSize),
+                    infoText(context.loc.tagView.md5, md5),
+                    infoText(context.loc.tagView.rating, rating),
+                    infoText(context.loc.tagView.score, score),
+                  ],
+                ),
+                commentsButton(),
+                notesButton(),
+                sourcesList(sources),
+                if (tagsAvailable) ...[
+                  Divider(
+                    color: context.theme.dividerTheme.color?.withValues(alpha: 0.66),
+                  ),
+                  tagsButton(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+                          filled: false,
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: context.theme.dividerTheme.color!.withValues(alpha: 0.66),
+                              width: 1,
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                color: context.theme.dividerTheme.color!.withValues(alpha: 0.66),
-                                width: 1,
-                              ),
-                              borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: context.theme.dividerTheme.color!.withValues(alpha: 0.66),
+                              width: 1,
                             ),
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: SettingsTextInput(
-                          key: searchKey,
-                          controller: searchController,
-                          focusNode: searchFocusNode,
-                          title: context.loc.tagView.searchTags,
-                          onlyInput: true,
-                          clearable: true,
-                          pasteable: true,
-                          onChanged: (_) {
-                            parseSortGroupTagsWithoutCache();
-                          },
-                          enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
-                        ),
+                      ),
+                      child: SettingsTextInput(
+                        key: searchKey,
+                        controller: searchController,
+                        focusNode: searchFocusNode,
+                        title: context.loc.tagView.searchTags,
+                        onlyInput: true,
+                        clearable: true,
+                        pasteable: true,
+                        onChanged: (_) {
+                          parseSortGroupTagsWithoutCache();
+                        },
+                        enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
                       ),
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
-            SliverToBoxAdapter(
-              child: (filteredTags.isEmpty && tags.isNotEmpty)
-                  ? Column(
-                      children: [
-                        const Kaomoji(
-                          type: KaomojiType.shrug,
-                          style: TextStyle(fontSize: 40),
-                        ),
-                        Text(
-                          context.loc.tagView.noTagsFound,
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        const SizedBox(height: 60),
-                      ],
-                    )
-                  : const SizedBox.shrink(),
+          ),
+          SliverToBoxAdapter(
+            child: (filteredTags.isEmpty && tags.isNotEmpty)
+                ? Column(
+                    children: [
+                      const Kaomoji(
+                        type: KaomojiType.shrug,
+                        style: TextStyle(fontSize: 40),
+                      ),
+                      Text(
+                        context.loc.tagView.noTagsFound,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      const SizedBox(height: 60),
+                    ],
+                  )
+                : const SizedBox.shrink(),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (c, i) => tagsItemBuilder(c, filteredTags[i]),
+              childCount: filteredTags.length,
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (c, i) => tagsItemBuilder(c, filteredTags[i]),
-                childCount: filteredTags.length,
-              ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: MediaQuery.viewInsetsOf(context).bottom + kMinInteractiveDimension,
             ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: MediaQuery.viewInsetsOf(context).bottom + kMinInteractiveDimension,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1960,7 +1956,6 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                 child: FadingEdgeScrollView.fromScrollView(
                                   child: ListView.builder(
                                     controller: scrollController,
-                                    physics: getListPhysics(),
                                     shrinkWrap: true,
                                     scrollDirection: Axis.horizontal,
                                     itemCount: tab!.booruHandler.filteredFetched.isEmpty

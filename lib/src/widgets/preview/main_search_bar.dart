@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
+import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';

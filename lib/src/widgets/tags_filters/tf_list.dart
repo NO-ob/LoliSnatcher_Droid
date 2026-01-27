@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
 
 class TagsFiltersList extends StatelessWidget {
@@ -70,29 +69,25 @@ class TagsFiltersList extends StatelessWidget {
             ),
           //
           Expanded(
-            child: DesktopScrollWrap(
+            child: ListView.builder(
               controller: scrollController,
-              child: ListView.builder(
-                controller: scrollController,
-                padding: EdgeInsets.fromLTRB(
-                  10,
-                  5,
-                  10,
-                  15 + MediaQuery.paddingOf(context).bottom,
-                ),
-                shrinkWrap: false,
-                itemCount: filteredTagsList.length,
-                scrollDirection: Axis.vertical,
-                physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                itemBuilder: (BuildContext context, int index) {
-                  final String currentEntry = filteredTagsList[index];
-
-                  return TagsFiltersListItem(
-                    tag: currentEntry,
-                    onTap: onTagSelected,
-                  );
-                },
+              padding: EdgeInsets.fromLTRB(
+                10,
+                5,
+                10,
+                15 + MediaQuery.paddingOf(context).bottom,
               ),
+              shrinkWrap: false,
+              itemCount: filteredTagsList.length,
+              scrollDirection: Axis.vertical,
+              itemBuilder: (BuildContext context, int index) {
+                final String currentEntry = filteredTagsList[index];
+
+                return TagsFiltersListItem(
+                  tag: currentEntry,
+                  onTap: onTagSelected,
+                );
+              },
             ),
           ),
         ],

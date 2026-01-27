@@ -13,7 +13,6 @@ import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/parsed_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class CommentsDialog extends StatefulWidget {
@@ -161,29 +160,25 @@ class _CommentsDialogState extends State<CommentsDialog> {
             onRefresh: () async {
               await getComments(initial: true);
             },
-            child: DesktopScrollWrap(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
               controller: scrollController,
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                controller: scrollController,
-                physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                itemCount: areThereErrors ? 2 : comments.length + 1,
-                scrollDirection: Axis.vertical,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return _CommentsHeader(
-                      item: widget.item,
-                      handler: widget.handler,
-                    );
-                  }
+              itemCount: areThereErrors ? 2 : comments.length + 1,
+              scrollDirection: Axis.vertical,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return _CommentsHeader(
+                    item: widget.item,
+                    handler: widget.handler,
+                  );
+                }
 
-                  return areThereErrors //
-                      ? errorEntryBuild(context, index)
-                      : _CommentEntry(
-                          comment: comments[index - 1],
-                        );
-                },
-              ),
+                return areThereErrors //
+                    ? errorEntryBuild(context, index)
+                    : _CommentEntry(
+                        comment: comments[index - 1],
+                      );
+              },
             ),
           ),
         ),

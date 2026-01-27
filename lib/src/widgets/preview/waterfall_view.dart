@@ -16,7 +16,6 @@ import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/preview/grid_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/staggered_builder.dart';
@@ -375,71 +374,53 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
               },
               child: Stack(
                 children: [
-                  DesktopScrollWrap(
-                    controller: searchHandler.gridScrollController,
-                    child: ValueListenableBuilder(
-                      valueListenable: isActive,
-                      builder: (context, isActive, child) {
-                        return ShimmerWrap(
-                          enabled: isActive && !SettingsHandler.instance.shitDevice,
-                          child: child ?? const SizedBox.shrink(),
-                        );
-                      },
-                      child: Obx(() {
-                        final bool isLoadingAndNoItems =
-                            searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
+                  ValueListenableBuilder(
+                    valueListenable: isActive,
+                    builder: (context, isActive, child) {
+                      return ShimmerWrap(
+                        enabled: isActive && !SettingsHandler.instance.shitDevice,
+                        child: child ?? const SizedBox.shrink(),
+                      );
+                    },
+                    child: Obx(() {
+                      final bool isLoadingAndNoItems =
+                          searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
 
-                        if (isLoadingAndNoItems) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            // reset scroll position if in loading state
-                            searchHandler.gridScrollController.jumpTo(0);
-                          });
-                        }
+                      if (isLoadingAndNoItems) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          // reset scroll position if in loading state
+                          searchHandler.gridScrollController.jumpTo(0);
+                        });
+                      }
 
-                        return CustomScrollView(
-                          key: ValueKey('CustomScrollView-${searchHandler.currentTabId}'),
-                          controller: searchHandler.gridScrollController,
-                          physics: isLoadingAndNoItems
-                              ? const NeverScrollableScrollPhysics()
-                              : getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                          shrinkWrap: false,
-                          cacheExtent: 200,
-                          slivers: [
-                            const MainAppBar(),
-                            SliverPadding(
-                              padding: const EdgeInsets.fromLTRB(10, 16, 10, 180),
-                              sliver: Builder(
-                                builder: (context) {
-                                  if (isLoadingAndNoItems) {
-                                    if (settingsHandler.shitDevice) {
-                                      return const SliverToBoxAdapter(
-                                        child: Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                      );
-                                    }
-
-                                    return const ThumbnailsShimmerList();
-                                  }
-
-                                  if (isStaggered) {
-                                    return Obx(
-                                      () => StaggeredBuilder(
-                                        key: ValueKey('StaggeredBuilder-${searchHandler.currentTabId}'),
-                                        tab: searchHandler.currentTab,
-                                        scrollController: searchHandler.gridScrollController,
-                                        onTap: onTap,
-                                        onDoubleTap: onDoubleTap,
-                                        onLongPress: onLongPress,
-                                        onSecondaryTap: (i) => onSecondaryTap(i, context),
-                                        onSelected: onLongPress,
+                      return CustomScrollView(
+                        key: ValueKey('CustomScrollView-${searchHandler.currentTabId}'),
+                        controller: searchHandler.gridScrollController,
+                        physics: isLoadingAndNoItems ? const NeverScrollableScrollPhysics() : null,
+                        shrinkWrap: false,
+                        cacheExtent: 200,
+                        slivers: [
+                          const MainAppBar(),
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(10, 16, 10, 180),
+                            sliver: Builder(
+                              builder: (context) {
+                                if (isLoadingAndNoItems) {
+                                  if (settingsHandler.shitDevice) {
+                                    return const SliverToBoxAdapter(
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
                                       ),
                                     );
                                   }
 
+                                  return const ThumbnailsShimmerList();
+                                }
+
+                                if (isStaggered) {
                                   return Obx(
-                                    () => GridBuilder(
-                                      key: ValueKey('GridBuilder-${searchHandler.currentTabId}'),
+                                    () => StaggeredBuilder(
+                                      key: ValueKey('StaggeredBuilder-${searchHandler.currentTabId}'),
                                       tab: searchHandler.currentTab,
                                       scrollController: searchHandler.gridScrollController,
                                       onTap: onTap,
@@ -449,13 +430,26 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                       onSelected: onLongPress,
                                     ),
                                   );
-                                },
-                              ),
+                                }
+
+                                return Obx(
+                                  () => GridBuilder(
+                                    key: ValueKey('GridBuilder-${searchHandler.currentTabId}'),
+                                    tab: searchHandler.currentTab,
+                                    scrollController: searchHandler.gridScrollController,
+                                    onTap: onTap,
+                                    onDoubleTap: onDoubleTap,
+                                    onLongPress: onLongPress,
+                                    onSecondaryTap: (i) => onSecondaryTap(i, context),
+                                    onSelected: onLongPress,
+                                  ),
+                                );
+                              },
                             ),
-                          ],
-                        );
-                      }),
-                    ),
+                          ),
+                        ],
+                      );
+                    }),
                   ),
                   Positioned(
                     bottom: MediaQuery.viewPaddingOf(context).bottom + 120,

@@ -567,14 +567,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  flutter_improved_scrolling:
-    dependency: "direct main"
-    description:
-      name: flutter_improved_scrolling
-      sha256: "46aec4599cdec31f1cd481d6614a9de98a6d6bff865f1d5fae3d7de9b5b7f74f"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3"
   flutter_inappwebview:
     dependency: "direct main"
     description:
