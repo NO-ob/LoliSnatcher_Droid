@@ -420,7 +420,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
                             if (queryController.suggestionTextControllerRawInput.isEmpty) {
                               return SuggestionsMainContent(
                                 onMetatagSelect: onMetatagSelect,
-                                onPinnedTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
+                                onTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
                                 hideHistory: true,
                               );
                             }

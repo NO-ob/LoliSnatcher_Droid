@@ -270,7 +270,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
                               //
                               for (int i = 0; i < tags.length; i++)
                                 AutoScrollTag(
-                                  key: Key('${tags[i]}-$currentTabId'),
+                                  key: Key('${tags[i]}-$i-$currentTabId'),
                                   controller: scrollController,
                                   index: i,
                                   child: Padding(

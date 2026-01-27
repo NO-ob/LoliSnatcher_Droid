@@ -776,7 +776,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                             if (suggestionTextControllerRawInput.isEmpty) {
                               return SuggestionsMainContent(
                                 onMetatagSelect: onMetatagSelect,
-                                onPinnedTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
+                                onTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
                               );
                             }
 
@@ -1370,13 +1370,13 @@ class AddMetatagBottomSheet extends StatelessWidget {
 class SuggestionsMainContent extends StatefulWidget {
   const SuggestionsMainContent({
     required this.onMetatagSelect,
-    required this.onPinnedTagTap,
+    required this.onTagTap,
     this.hideHistory = false,
     super.key,
   });
 
   final void Function(AddMetatagBottomSheetResult result) onMetatagSelect;
-  final void Function(String tag) onPinnedTagTap;
+  final void Function(String tag) onTagTap;
   final bool hideHistory;
 
   @override
@@ -1395,20 +1395,21 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
       children: [
         // blocks have a small delay to force order of requests, from fast to slow (i.e. favs popular search will lock db for too long and history and pinned won't load until it's done)
         PopularTagsBlock(
-          onTagTap: widget.onPinnedTagTap,
+          onTagTap: widget.onTagTap,
           delay: const Duration(milliseconds: 20),
         ),
         //
         if (!widget.hideHistory)
-          const HistoryBlock(
-            delay: Duration(milliseconds: 10),
+          HistoryBlock(
+            delay: const Duration(milliseconds: 10),
+            onTagApply: widget.onTagTap,
           ),
         //
         MetatagsBlock(onSelect: widget.onMetatagSelect),
         //
         PinnedTagsBlock(
           key: _pinnedTagsKey,
-          onTagTap: widget.onPinnedTagTap,
+          onTagTap: widget.onTagTap,
           onTagLongTap: (tagName, pinnedTag) async {
             await showUnpinTagDialog(context, tagName, pinnedTag);
             await _pinnedTagsKey.currentState?.init();
@@ -1580,9 +1581,14 @@ class _RangeDatePickerBottomSheetState extends State<RangeDatePickerBottomSheet>
 }
 
 class HistoryBlock extends StatefulWidget {
-  const HistoryBlock({this.delay = Duration.zero, super.key});
+  const HistoryBlock({
+    this.delay = Duration.zero,
+    this.onTagApply,
+    super.key,
+  });
 
   final Duration delay;
+  final void Function(String tag)? onTagApply;
 
   @override
   State<HistoryBlock> createState() => _HistoryBlockState();
@@ -1627,6 +1633,19 @@ class _HistoryBlockState extends State<HistoryBlock> {
             Text(context.loc.searchBar.lastSearch(date: formatDate(entry.timestamp)), textAlign: TextAlign.center),
             //
             const SizedBox(height: 20),
+            if (widget.onTagApply != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    widget.onTagApply?.call(entry.searchText);
+                    Navigator.of(context).pop();
+                  },
+                  icon: const Icon(Icons.add),
+                  label: Text(context.loc.tabs.filters.apply),
+                ),
+              ),
+            //
             ElevatedButton.icon(
               onPressed: () {
                 if (booru != null) {
