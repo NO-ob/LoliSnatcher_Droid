@@ -68,6 +68,8 @@
   "name": "Имя",
   "address": "Адрес",
   "username": "Имя пользователя",
+  "favourites": "Избранное",
+  "downloads": "Скачанное",
   "validationErrors": {
     "required": "Введи значение",
     "invalid": "Введи валидное значение",

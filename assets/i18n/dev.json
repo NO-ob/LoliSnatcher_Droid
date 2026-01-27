@@ -68,6 +68,8 @@
     "name": "{Name}",
     "address": "{Address}",
     "username": "{Username}",
+    "favourites": "{Favourites}",
+    "downloads": "{Downloads}",
     "validationErrors": {
         "required": "{Please enter a value}",
         "invalid": "{Please enter a valid value}",

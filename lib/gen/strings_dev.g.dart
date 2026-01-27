@@ -186,6 +186,10 @@ class TranslationsDev extends Translations with BaseTranslations<AppLocale, Tran
   @override
   String get username => TranslationOverrides.string(_root.$meta, 'username', {}) ?? '{Username}';
   @override
+  String get favourites => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? '{Favourites}';
+  @override
+  String get downloads => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? '{Downloads}';
+  @override
   late final _TranslationsValidationErrorsDev validationErrors = _TranslationsValidationErrorsDev._(_root);
   @override
   late final _TranslationsInitDev init = _TranslationsInitDev._(_root);
@@ -3977,6 +3981,8 @@ extension on TranslationsDev {
           'name' => TranslationOverrides.string(_root.$meta, 'name', {}) ?? '{Name}',
           'address' => TranslationOverrides.string(_root.$meta, 'address', {}) ?? '{Address}',
           'username' => TranslationOverrides.string(_root.$meta, 'username', {}) ?? '{Username}',
+          'favourites' => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? '{Favourites}',
+          'downloads' => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? '{Downloads}',
           'validationErrors.required' => TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? '{Please enter a value}',
           'validationErrors.invalid' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? '{Please enter a valid value}',
           'validationErrors.invalidNumber' =>
@@ -4836,15 +4842,15 @@ extension on TranslationsDev {
           'settings.video.cacheModes.streamCacheMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamCacheMode', {}) ??
                 '{- Stream+Cache - Mix of both, but currently leads to double download}',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '{[Note]: Videos will cache only if \'Cache Media\' is enabled.}',
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '{[Warning]: On desktop Stream mode can work incorrectly for some Boorus.}',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? '{Stream}',
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? '{Cache}',
@@ -5803,11 +5809,11 @@ extension on TranslationsDev {
           'searchBar.lastSearch' =>
             ({required String date}) => TranslationOverrides.string(_root.$meta, 'searchBar.lastSearch', {'date': date}) ?? '{Last search: ${date}}',
           'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? '{Unknown Booru type!}',
-          'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? '{History}',
-          'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '{...}',
           _ => null,
         } ??
         switch (path) {
+          'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? '{History}',
+          'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '{...}',
           'mobileHome.selectBooruForWebview' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.selectBooruForWebview', {}) ?? '{Select booru for webview}',
           'mobileHome.lockApp' => TranslationOverrides.string(_root.$meta, 'mobileHome.lockApp', {}) ?? '{Lock app}',

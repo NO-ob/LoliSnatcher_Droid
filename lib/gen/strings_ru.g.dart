@@ -186,6 +186,10 @@ class TranslationsRu extends Translations with BaseTranslations<AppLocale, Trans
   @override
   String get username => TranslationOverrides.string(_root.$meta, 'username', {}) ?? 'Имя пользователя';
   @override
+  String get favourites => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? 'Избранное';
+  @override
+  String get downloads => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'Скачанное';
+  @override
   late final _TranslationsValidationErrorsRu validationErrors = _TranslationsValidationErrorsRu._(_root);
   @override
   late final _TranslationsInitRu init = _TranslationsInitRu._(_root);
@@ -4034,6 +4038,8 @@ extension on TranslationsRu {
           'name' => TranslationOverrides.string(_root.$meta, 'name', {}) ?? 'Имя',
           'address' => TranslationOverrides.string(_root.$meta, 'address', {}) ?? 'Адрес',
           'username' => TranslationOverrides.string(_root.$meta, 'username', {}) ?? 'Имя пользователя',
+          'favourites' => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? 'Избранное',
+          'downloads' => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'Скачанное',
           'validationErrors.required' => TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? 'Введи значение',
           'validationErrors.invalid' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? 'Введи валидное значение',
           'validationErrors.invalidNumber' =>
@@ -4918,15 +4924,15 @@ extension on TranslationsRu {
           'settings.video.cacheModes.streamCacheMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamCacheMode', {}) ??
                 '- Потоковый+Кэш - Смешанный режим, но в данный момент приводит к двойной загрузке',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '[Примечание]: Видео будут кэшироваться только если включено \'Кэшировать медиа\'.',
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
@@ -5903,11 +5909,11 @@ extension on TranslationsRu {
             ({required String date}) =>
                 TranslationOverrides.string(_root.$meta, 'searchBar.lastSearch', {'date': date}) ?? 'Последний поиск: ${date}',
           'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? 'Неизвестный тип сайта!',
-          'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? 'История',
-          'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '...',
           _ => null,
         } ??
         switch (path) {
+          'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? 'История',
+          'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '...',
           'mobileHome.selectBooruForWebview' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.selectBooruForWebview', {}) ?? 'Выбери сайт для вебвью',
           'mobileHome.lockApp' => TranslationOverrides.string(_root.$meta, 'mobileHome.lockApp', {}) ?? 'Заблокировать приложение',
