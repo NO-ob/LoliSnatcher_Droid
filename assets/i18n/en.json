@@ -963,6 +963,7 @@
         "checkForUpdates": {
             "title": "Check for updates",
             "updateAvailable": "Update available!",
+            "whatsNew": "What's new",
             "updateChangelog": "Update changelog",
             "updateCheckError": "Update check error!",
             "youHaveLatestVersion": "You have the latest version",

@@ -3315,6 +3315,8 @@ class _TranslationsSettingsCheckForUpdatesRu extends TranslationsSettingsCheckFo
   @override
   String get updateAvailable => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateAvailable', {}) ?? 'Доступно обновление!';
   @override
+  String get whatsNew => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.whatsNew', {}) ?? 'Что нового';
+  @override
   String get updateChangelog =>
       TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateChangelog', {}) ?? 'Список изменений обновления';
   @override
@@ -3333,7 +3335,7 @@ class _TranslationsSettingsCheckForUpdatesRu extends TranslationsSettingsCheckFo
   @override
   String get visitPlayStore => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitPlayStore', {}) ?? 'Перейти в Play Store';
   @override
-  String get visitReleases => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitReleases', {}) ?? 'Перейти к Релизам';
+  String get visitReleases => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitReleases', {}) ?? 'Перейти к релизам';
 }
 
 // Path: settings.logs
@@ -5584,6 +5586,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.title', {}) ?? 'Проверить наличие обновлений',
           'settings.checkForUpdates.updateAvailable' =>
             TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateAvailable', {}) ?? 'Доступно обновление!',
+          'settings.checkForUpdates.whatsNew' => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.whatsNew', {}) ?? 'Что нового',
           'settings.checkForUpdates.updateChangelog' =>
             TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.updateChangelog', {}) ?? 'Список изменений обновления',
           'settings.checkForUpdates.updateCheckError' =>
@@ -5599,7 +5602,7 @@ extension on TranslationsRu {
           'settings.checkForUpdates.visitPlayStore' =>
             TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitPlayStore', {}) ?? 'Перейти в Play Store',
           'settings.checkForUpdates.visitReleases' =>
-            TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitReleases', {}) ?? 'Перейти к Релизам',
+            TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitReleases', {}) ?? 'Перейти к релизам',
           'settings.logs.title' => TranslationOverrides.string(_root.$meta, 'settings.logs.title', {}) ?? 'Логи',
           'settings.logs.shareLogs' => TranslationOverrides.string(_root.$meta, 'settings.logs.shareLogs', {}) ?? 'Поделиться логами',
           'settings.logs.shareLogsWarningTitle' =>
@@ -5908,10 +5911,10 @@ extension on TranslationsRu {
           'searchBar.lastSearch' =>
             ({required String date}) =>
                 TranslationOverrides.string(_root.$meta, 'searchBar.lastSearch', {'date': date}) ?? 'Последний поиск: ${date}',
-          'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? 'Неизвестный тип сайта!',
           _ => null,
         } ??
         switch (path) {
+          'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? 'Неизвестный тип сайта!',
           'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? 'История',
           'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '...',
           'mobileHome.selectBooruForWebview' =>

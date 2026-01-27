@@ -955,6 +955,7 @@
     "checkForUpdates": {
       "title": "Проверить наличие обновлений",
       "updateAvailable": "Доступно обновление!",
+      "whatsNew": "Что нового",
       "updateChangelog": "Список изменений обновления",
       "updateCheckError": "Ошибка при проверке обновлений!",
       "youHaveLatestVersion": "У тебя последняя версия!",
@@ -962,7 +963,7 @@
       "currentVersion": "Текущая версия",
       "changelog": "Список изменений",
       "visitPlayStore": "Перейти в Play Store",
-      "visitReleases": "Перейти к Релизам"
+      "visitReleases": "Перейти к релизам"
     },
     "logs": {
       "title": "Логи",
