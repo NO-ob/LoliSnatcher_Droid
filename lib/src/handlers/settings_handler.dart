@@ -2120,7 +2120,11 @@ class SettingsHandler {
               );
             },
             icon: const Icon(Icons.list_alt_rounded),
-            label: Text(loc.settings.checkForUpdates.viewLatestChangelog),
+            label: Text(
+              loc.settings.checkForUpdates.viewLatestChangelog,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ];
       },
@@ -2151,7 +2155,7 @@ class SettingsHandler {
           body: SafeArea(
             child: Column(
               children: [
-                Flexible(
+                Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Column(

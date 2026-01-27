@@ -688,10 +688,11 @@ class SearchHandler {
         final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
         if (isEntryValid) {
           // find booru by name and create searchtab with given tags
-          final Booru findBooru = settingsHandler.booruList.firstWhere(
+          Booru findBooru = settingsHandler.booruList.firstWhere(
             (booru) => booru.name == booruAndTags[0],
             orElse: Booru.unknown,
           );
+          findBooru = handleFavDlsNameChange(findBooru);
           if (findBooru.name != null) {
             final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
             restoredGlobals.add(newTab);
@@ -783,10 +784,11 @@ class SearchHandler {
       final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if (isEntryValid) {
         // find booru by name and create searchtab with given tags
-        final Booru findBooru = settingsHandler.booruList.firstWhere(
+        Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
           orElse: Booru.unknown,
         );
+        findBooru = handleFavDlsNameChange(findBooru);
         if (findBooru.name != null) {
           final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
           // add only if there are not already the same tab in the list and booru is available on this device
@@ -827,10 +829,11 @@ class SearchHandler {
       final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if (isEntryValid) {
         // find booru by name and create searchtab with given tags
-        final Booru findBooru = settingsHandler.booruList.firstWhere(
+        Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
           orElse: Booru.unknown,
         );
+        findBooru = handleFavDlsNameChange(findBooru);
         if (findBooru.name != null) {
           final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
           restoredGlobals.add(newTab);
@@ -1052,11 +1055,12 @@ class SearchHandler {
   SearchTab parseTabFromBackup(TabBackup backup) {
     final booruList = SettingsHandler.instance.booruList;
 
-    final Booru selectedBooru = booruList.firstWhere(
+    Booru selectedBooru = booruList.firstWhere(
       (b) => b.name == backup.booru,
       orElse: Booru.unknown,
     );
-    final List<Booru> secondaryBoorus = backup.secondaryBoorus
+    selectedBooru = handleFavDlsNameChange(selectedBooru);
+    List<Booru> secondaryBoorus = backup.secondaryBoorus
         .map(
           (b) => booruList.firstWhere(
             (booru) => booru.name == b,
@@ -1065,12 +1069,33 @@ class SearchHandler {
         )
         .where((b) => b.name != null)
         .toList();
+    secondaryBoorus = secondaryBoorus.map(handleFavDlsNameChange).where((b) => b.name != null).toList();
 
     return SearchTab(
       selectedBooru,
       secondaryBoorus.isEmpty ? null : secondaryBoorus,
       backup.tags,
     );
+  }
+
+  Booru handleFavDlsNameChange(Booru booru) {
+    if (booru.name != null) {
+      return booru;
+    }
+
+    final booruList = SettingsHandler.instance.booruList;
+    Booru tempBooru = Booru.unknown();
+    // a workaround to fix favs/dls tabs not parsing/restoring correctly due to localized names
+    for (final l in AppLocale.values) {
+      tempBooru = booruList.firstWhere(
+        (b) => b.name == l.translations['favourites'] || b.name == l.translations['downloads'],
+        orElse: Booru.unknown,
+      );
+      if (tempBooru.name != null) {
+        break;
+      }
+    }
+    return tempBooru;
   }
 
   Future<void> restoreTabs() async {

@@ -46,7 +46,7 @@ class _BooruPageState extends State<BooruPage> {
 
     if (settingsHandler.prefBooru.isNotEmpty) {
       selectedBooru = settingsHandler.booruList.firstWhereOrNull(
-        (booru) => booru.name == settingsHandler.prefBooru,
+        (booru) => booru.type?.isSaveable == true && booru.name == settingsHandler.prefBooru,
       );
     } else if (settingsHandler.booruList.isNotEmpty) {
       selectedBooru = settingsHandler.booruList[0];
@@ -393,7 +393,7 @@ class _BooruPageState extends State<BooruPage> {
         if (url.isNotEmpty) {
           if (url.contains('loli.snatcher')) {
             final Booru booru = Booru.fromLink(url);
-            if (booru.name != null && booru.name!.isNotEmpty) {
+            if (booru.name != null && booru.name!.isNotEmpty && booru.type!.isSaveable) {
               if (settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
                 // Rename config if its already in the list
                 booru.name = '${booru.name!} (duplicate)';

@@ -207,7 +207,7 @@ class ThemeHandler {
         fontSize: 16,
         fontWeight: FontWeight.w600,
       ),
-      fixedSize: const Size(double.infinity, 44),
+      minimumSize: const Size(48, 44),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       splashFactory: InkSparkle.splashFactory,
@@ -225,7 +225,7 @@ class ThemeHandler {
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
-          fixedSize: const Size(double.infinity, 44),
+          minimumSize: const Size(48, 44),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ).copyWith(

@@ -208,7 +208,7 @@ class LoliSync {
         final String content = await utf8.decoder.bind(req).join(); /*2*/
         final Booru booru = Booru.fromJSON(content);
 
-        if (booru.name != 'Favourites') {
+        if (booru.type?.isSaveable == true) {
           // Remove existing booru if base url is the same
           // TODO merge their data (i.e. api keys) or don't do anything if they have the same name+base url instead
           // for (int i=0; i < settingsHandler.booruList.length; i++){

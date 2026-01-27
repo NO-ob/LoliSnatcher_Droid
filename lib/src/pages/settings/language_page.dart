@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:country_flags/country_flags.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -35,7 +38,11 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
 
     settingsHandler.locale.value = locale;
     await settingsHandler.setLocale(locale);
+    // load boorus and force tab backup to avoid losing tabs from favs/dls
+    await settingsHandler.loadBoorus();
     final bool result = await settingsHandler.saveSettings(restate: false);
+    unawaited(SearchHandler.instance.backupTabs());
+
     if (result) {
       Navigator.of(context).pop();
     }

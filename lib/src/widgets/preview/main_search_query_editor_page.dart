@@ -1779,7 +1779,9 @@ class _HistoryBlockState extends State<HistoryBlock> {
 
                   final item = history[index];
                   final booru = settingsHandler.booruList.value.firstWhere(
-                    (b) => b.name == item.booruName && b.type == item.booruType,
+                    (b) =>
+                        b.type == item.booruType &&
+                        (b.type?.isFavouritesOrDownloads == true || b.name == item.booruName),
                     orElse: Booru.unknown,
                   );
 
@@ -2645,7 +2647,9 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
                           ? null
                           : BooruFavicon(
                               settingsHandler.booruList.value.firstWhere(
-                                (b) => b.name == pinnedTag.booruName && b.type == pinnedTag.booruType,
+                                (b) =>
+                                    b.type == pinnedTag.booruType &&
+                                    (b.type?.isFavouritesOrDownloads == true || b.name == pinnedTag.booruName),
                                 orElse: Booru.unknown,
                               ),
                             ),
@@ -2990,7 +2994,9 @@ class _PinnedTagsReorderDialogState extends State<PinnedTagsReorderDialog> {
                   else
                     BooruFavicon(
                       settingsHandler.booruList.value.firstWhere(
-                        (b) => b.name == pinnedTag.booruName && b.type == pinnedTag.booruType,
+                        (b) =>
+                            b.type == pinnedTag.booruType &&
+                            (b.type?.isFavouritesOrDownloads == true || b.name == pinnedTag.booruName),
                         orElse: Booru.unknown,
                       ),
                     ),
@@ -3366,7 +3372,9 @@ class _PinnedTagsManageDialogState extends State<PinnedTagsManageDialog> {
                                 ? null
                                 : BooruFavicon(
                                     settingsHandler.booruList.value.firstWhere(
-                                      (b) => b.name == pinnedTag.booruName && b.type == pinnedTag.booruType,
+                                      (b) =>
+                                          b.type == pinnedTag.booruType &&
+                                          (b.type?.isFavouritesOrDownloads == true || b.name == pinnedTag.booruName),
                                       orElse: Booru.unknown,
                                     ),
                                   ),
