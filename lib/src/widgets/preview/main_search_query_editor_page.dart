@@ -2185,25 +2185,25 @@ class _PopularTagsBlockState extends State<PopularTagsBlock> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: ActionChip(
-                        label: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              tag.tag.replaceAll('_', ' '),
-                              style: TextStyle(
-                                color: tagColor == Colors.transparent ? null : tagColor,
-                              ),
-                            ),
-                            if (tag.count > 0)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8),
-                                child: Text(
-                                  tag.count.toShortString(),
-                                  style: context.theme.textTheme.bodySmall,
+                        label: RichText(
+                          // richtext to align texts with different height
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: tag.tag.replaceAll('_', ' '),
+                                style: TextStyle(
+                                  color: tagColor == Colors.transparent ? null : tagColor,
                                 ),
                               ),
-                          ],
+                              if (tag.count > 0) ...[
+                                TextSpan(text: ' ' * 3),
+                                TextSpan(
+                                  text: tag.count.toShortString(),
+                                  style: context.theme.textTheme.bodySmall,
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
                         onPressed: () => widget.onTagTap(tag.tag),
                       ),
