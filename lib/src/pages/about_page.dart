@@ -17,9 +17,7 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.loc.appName),
-      ),
+      appBar: SettingsAppBar(title: context.loc.appName),
       body: Center(
         child: ListView(
           children: [

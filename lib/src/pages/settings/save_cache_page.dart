@@ -217,8 +217,8 @@ class _SaveCachePageState extends State<SaveCachePage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text(context.loc.settings.cache.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.cache.title,
         ),
         body: Center(
           child: ListView(

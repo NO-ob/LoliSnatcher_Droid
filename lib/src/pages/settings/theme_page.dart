@@ -252,9 +252,7 @@ class _ThemePageState extends State<ThemePage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text(themeLoc.title),
-        ),
+        appBar: SettingsAppBar(title: themeLoc.title),
         body: Center(
           child: ListView(
             children: [

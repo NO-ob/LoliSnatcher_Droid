@@ -131,8 +131,8 @@ class _PerformancePageState extends State<PerformancePage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text(context.loc.settings.performance.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.performance.title,
         ),
         body: Center(
           child: ListView(

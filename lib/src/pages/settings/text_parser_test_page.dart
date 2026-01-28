@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/utils/text_parser/comment_parser.dart';
 import 'package:lolisnatcher/src/widgets/common/parsed_text.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class TextParserTestPage extends StatefulWidget {
   const TextParserTestPage({super.key});
@@ -330,9 +331,7 @@ class _TextParserTestPageState extends State<TextParserTestPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Text Parser Test'),
-      ),
+      appBar: const SettingsAppBar(title: 'Text Parser Test'),
       body: ListView(
         controller: _scrollController,
         padding: const EdgeInsets.all(16),

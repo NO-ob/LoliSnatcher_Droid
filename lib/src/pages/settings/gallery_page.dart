@@ -135,8 +135,8 @@ class _GalleryPageState extends State<GalleryPage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text(context.loc.settings.viewer.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.viewer.title,
         ),
         body: Center(
           child: ListView(

@@ -50,9 +50,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.loc.snatcher.title),
-      ),
+      appBar: SettingsAppBar(title: context.loc.snatcher.title),
       resizeToAvoidBottomInset: true,
       body: Center(
         child: ListView(

@@ -81,8 +81,8 @@ class _NetworkPageState extends State<NetworkPage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text(context.loc.settings.network.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.network.title,
         ),
         body: Center(
           child: ListView(

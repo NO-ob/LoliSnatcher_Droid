@@ -133,8 +133,8 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text(context.loc.settings.language.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.language.title,
         ),
         body: Center(
           child: ListView(

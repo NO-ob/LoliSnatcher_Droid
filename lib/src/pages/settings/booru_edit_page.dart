@@ -125,10 +125,7 @@ class _BooruEditState extends State<BooruEdit> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text(booruEditorLoc.title),
-        actions: const [],
-      ),
+      appBar: SettingsAppBar(title: booruEditorLoc.title),
       body: Center(
         child: ListView(
           children: [

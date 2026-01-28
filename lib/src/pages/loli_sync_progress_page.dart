@@ -173,8 +173,8 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text(context.loc.loliSync.title),
+        appBar: SettingsAppBar(
+          title: context.loc.loliSync.title,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {

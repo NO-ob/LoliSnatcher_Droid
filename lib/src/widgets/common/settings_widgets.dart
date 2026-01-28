@@ -9,6 +9,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/html.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
+import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 
 const double borderWidth = 1;
@@ -1356,6 +1357,31 @@ class SettingsPageDialog extends StatelessWidget {
       body: SafeArea(
         child: content ?? const SizedBox.shrink(),
       ),
+    );
+  }
+}
+
+class SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const SettingsAppBar({
+    required this.title,
+    this.leading,
+    super.key,
+  });
+
+  final String title;
+  final Widget? leading;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: MarqueeText(
+        text: title,
+        isExpanded: false,
+      ),
+      leading: leading,
     );
   }
 }

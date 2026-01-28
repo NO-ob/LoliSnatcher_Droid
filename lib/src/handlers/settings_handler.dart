@@ -2147,10 +2147,9 @@ class SettingsHandler {
       SettingsPageOpen(
         context: ctx,
         page: (_) => Scaffold(
-          appBar: AppBar(
-            title: Text(
-              '${isDiffVersion ? loc.settings.checkForUpdates.updateAvailable : '${isAfterUpdate ? loc.settings.checkForUpdates.whatsNew : loc.settings.checkForUpdates.updateChangelog}:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
-            ),
+          appBar: SettingsAppBar(
+            title:
+                '${isDiffVersion ? loc.settings.checkForUpdates.updateAvailable : '${isAfterUpdate ? loc.settings.checkForUpdates.whatsNew : loc.settings.checkForUpdates.updateChangelog}:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
           ),
           body: SafeArea(
             child: Column(

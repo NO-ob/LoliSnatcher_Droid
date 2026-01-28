@@ -143,9 +143,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
         onPopInvokedWithResult: _onPopInvoked,
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            title: Text(backupLoc.title),
-          ),
+          appBar: SettingsAppBar(title: backupLoc.title),
           body: Center(
             child: ListView(
               children: [
@@ -166,9 +164,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text(backupLoc.title),
-        ),
+        appBar: SettingsAppBar(title: backupLoc.title),
         body: Center(
           child: Stack(
             children: [

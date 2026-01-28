@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class SettingsTemplate extends StatefulWidget {
   const SettingsTemplate({super.key});
@@ -36,8 +37,8 @@ class _SettingsTemplateState extends State<SettingsTemplate> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: const Text('Title'),
+        appBar: const SettingsAppBar(
+          title: 'Title',
         ),
         body: Center(
           child: ListView(

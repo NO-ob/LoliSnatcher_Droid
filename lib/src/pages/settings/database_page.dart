@@ -299,8 +299,8 @@ class _DatabasePageState extends State<DatabasePage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text(context.loc.settings.database.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.database.title,
         ),
         body: Center(
           child: ListView(

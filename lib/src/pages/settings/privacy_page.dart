@@ -56,8 +56,8 @@ class _PrivacyPageState extends State<PrivacyPage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text(context.loc.settings.privacy.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.privacy.title,
         ),
         body: Center(
           child: ListView(

@@ -630,8 +630,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text(context.loc.settings.sync.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.sync.title,
         ),
         body: Center(child: conditionalBuild()),
       ),

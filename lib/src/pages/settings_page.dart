@@ -68,8 +68,8 @@ class SettingsPage extends StatelessWidget {
       onPopInvokedWithResult: (didPop, result) async => _onPopInvoked(context, didPop, result),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text(context.loc.settings.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.title,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {

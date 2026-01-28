@@ -162,9 +162,7 @@ class _DirPickerState extends State<DirPicker> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text(title),
-        ),
+        appBar: SettingsAppBar(title: title),
         body: Center(
           child: FutureBuilder(
             future: getDirs(),

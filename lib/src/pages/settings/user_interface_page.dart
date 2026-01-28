@@ -96,8 +96,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text(context.loc.settings.interface.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.interface.title,
         ),
         body: Center(
           child: ListView(

@@ -443,8 +443,8 @@ class _BooruPageState extends State<BooruPage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text(booruLoc.title),
+        appBar: SettingsAppBar(
+          title: booruLoc.title,
         ),
         body: Center(
           child: ListView(

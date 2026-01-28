@@ -74,8 +74,8 @@ class _DebugPageState extends State<DebugPage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: Text(context.loc.settings.debug.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.debug.title,
         ),
         body: Center(
           child: ListView(

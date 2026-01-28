@@ -91,8 +91,8 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Text(context.loc.settings.video.title),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.video.title,
         ),
         body: Center(
           child: ListView(
