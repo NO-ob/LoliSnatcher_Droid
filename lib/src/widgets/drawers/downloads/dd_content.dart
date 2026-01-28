@@ -36,41 +36,34 @@ class DDContent extends StatelessWidget {
       final int cancelledLength = snatchHandler.cancelledItems.length;
       final int totalRetryableAmount = existsLength + failedLength + cancelledLength;
 
-      if (totalActiveAmount == 0 && totalRetryableAmount == 0) {
+      final int totalItems = totalActiveAmount + totalRetryableAmount;
+
+      if (totalItems == 0) {
         return const DDEmptyState();
       }
 
-      if (totalActiveAmount != 0) {
-        return DDActiveList(
-          controller: controller,
-          snatchHandler: snatchHandler,
-          activeLength: activeLength,
-          queuesLength: queuesLength,
-        );
-      }
-
-      if (totalRetryableAmount != 0) {
-        return DDRetryableList(
-          controller: controller,
-          snatchHandler: snatchHandler,
-          existsLength: existsLength,
-          failedLength: failedLength,
-          cancelledLength: cancelledLength,
-          totalRetryableAmount: totalRetryableAmount,
-        );
-      }
-
-      return const SizedBox.shrink();
+      return DDCombinedList(
+        controller: controller,
+        snatchHandler: snatchHandler,
+        activeLength: activeLength,
+        queuesLength: queuesLength,
+        existsLength: existsLength,
+        failedLength: failedLength,
+        cancelledLength: cancelledLength,
+      );
     });
   }
 }
 
-class DDActiveList extends StatelessWidget {
-  const DDActiveList({
+class DDCombinedList extends StatelessWidget {
+  const DDCombinedList({
     required this.controller,
     required this.snatchHandler,
     required this.activeLength,
     required this.queuesLength,
+    required this.existsLength,
+    required this.failedLength,
+    required this.cancelledLength,
     super.key,
   });
 
@@ -78,98 +71,93 @@ class DDActiveList extends StatelessWidget {
   final SnatchHandler snatchHandler;
   final int activeLength;
   final int queuesLength;
+  final int existsLength;
+  final int failedLength;
+  final int cancelledLength;
 
   @override
   Widget build(BuildContext context) {
     final totalActiveAmount = activeLength + queuesLength;
+    final totalRetryableAmount = existsLength + failedLength + cancelledLength;
+    final totalItems = totalActiveAmount + totalRetryableAmount;
 
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
       padding: const EdgeInsets.symmetric(vertical: 16),
-      itemCount: totalActiveAmount,
+      itemCount: totalItems,
       itemExtent: 200,
       itemBuilder: (BuildContext context, int index) {
+        // Active items (currently downloading)
         if (activeLength != 0 && index < activeLength) {
-          final item = snatchHandler.current.value!.booruItems[snatchHandler.queueProgress.value + index];
-          return DDActiveItem(
-            item: item,
-            handler: controller.getHandler(snatchHandler.current.value!.booru),
-            index: index,
-            isFirst: index == 0,
-            queueProgress: snatchHandler.queueProgress.value,
-            totalItems: snatchHandler.current.value!.booruItems.length,
-          );
-        } else {
-          final int queueIndex = lerpDouble(
-            0,
-            max(0, queuesLength - 1),
-            (index - activeLength) / (queuesLength - 1),
-          )!.toInt();
-          final queue = snatchHandler.queuedList[queueIndex];
-
-          return DDQueuedItem(
-            queue: queue,
-            queueIndex: queueIndex,
-            handler: controller.getHandler(queue.booru),
-          );
+          return _buildActiveItem(index);
         }
+
+        // Queued items
+        if (index < totalActiveAmount) {
+          return _buildQueuedItem(index - activeLength);
+        }
+
+        // Retryable items (exists, failed, cancelled)
+        final retryableIndex = index - totalActiveAmount;
+        return _buildRetryableItem(retryableIndex);
       },
     );
   }
-}
 
-class DDRetryableList extends StatelessWidget {
-  const DDRetryableList({
-    required this.controller,
-    required this.snatchHandler,
-    required this.existsLength,
-    required this.failedLength,
-    required this.cancelledLength,
-    required this.totalRetryableAmount,
-    super.key,
-  });
+  Widget _buildActiveItem(int index) {
+    final item = snatchHandler.current.value!.booruItems[snatchHandler.queueProgress.value + index];
+    return DDActiveItem(
+      item: item,
+      handler: controller.getHandler(snatchHandler.current.value!.booru),
+      index: index,
+      isFirst: index == 0,
+      queueProgress: snatchHandler.queueProgress.value,
+      totalItems: snatchHandler.current.value!.booruItems.length,
+    );
+  }
 
-  final DownloadsDrawerController controller;
-  final SnatchHandler snatchHandler;
-  final int existsLength;
-  final int failedLength;
-  final int cancelledLength;
-  final int totalRetryableAmount;
+  Widget _buildQueuedItem(int offsetIndex) {
+    final int queueIndex = queuesLength == 1
+        ? 0
+        : lerpDouble(
+            0,
+            max(0, queuesLength - 1),
+            offsetIndex / (queuesLength - 1),
+          )!.toInt();
+    final queue = snatchHandler.queuedList[queueIndex];
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      itemCount: totalRetryableAmount,
-      itemExtent: 200,
-      itemBuilder: (BuildContext context, int index) {
-        final bool isExists = index < existsLength;
-        final bool isFailed = index < existsLength + failedLength;
+    return DDQueuedItem(
+      queue: queue,
+      queueIndex: queueIndex,
+      handler: controller.getHandler(queue.booru),
+    );
+  }
 
-        final RetryableItemType type;
-        if (isExists) {
-          type = RetryableItemType.exists;
-        } else if (isFailed) {
-          type = RetryableItemType.failed;
-        } else {
-          type = RetryableItemType.cancelled;
-        }
+  Widget _buildRetryableItem(int retryableIndex) {
+    final bool isExists = retryableIndex < existsLength;
+    final bool isFailed = retryableIndex < existsLength + failedLength;
 
-        final record = isExists
-            ? snatchHandler.existsItems[index]
-            : isFailed
-                ? snatchHandler.failedItems[index - existsLength]
-                : snatchHandler.cancelledItems[index - existsLength - failedLength];
+    final RetryableItemType type;
+    if (isExists) {
+      type = RetryableItemType.exists;
+    } else if (isFailed) {
+      type = RetryableItemType.failed;
+    } else {
+      type = RetryableItemType.cancelled;
+    }
 
-        return DDRetryableItem(
-          record: record,
-          type: type,
-          handler: controller.getHandler(record.booru),
-          onRetry: (isLongTap) => controller.onRetryFailedItem(record, isExists, isLongTap),
-          onSkip: () => snatchHandler.onRemoveRetryItem(record),
-        );
-      },
+    final record = isExists
+        ? snatchHandler.existsItems[retryableIndex]
+        : isFailed
+            ? snatchHandler.failedItems[retryableIndex - existsLength]
+            : snatchHandler.cancelledItems[retryableIndex - existsLength - failedLength];
+
+    return DDRetryableItem(
+      record: record,
+      type: type,
+      handler: controller.getHandler(record.booru),
+      onRetry: (isLongTap) => controller.onRetryFailedItem(record, isExists, isLongTap),
+      onSkip: () => snatchHandler.onRemoveRetryItem(record),
     );
   }
 }
