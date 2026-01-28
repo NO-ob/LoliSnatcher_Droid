@@ -245,10 +245,10 @@ packages:
     dependency: "direct main"
     description:
       name: country_flags
-      sha256: "457c545369eaddcaa47dc351ea97f00dbe2ee74ee7b487a805b86c10d1dfd880"
+      sha256: f022d18337f3861f1f4e319b936cb53920de9259f38cb09e169eace9942e2b79
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.1"
+    version: "4.1.2"
   cronet_http:
     dependency: transitive
     description:
@@ -341,10 +341,10 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: d90ee57923d1828ac14e492ca49440f65477f4bb1263575900be731a3dac66a9
+      sha256: b9d46faecab38fc8cc286f80bc4d61a3bb5d4ac49e51ed877b4d6706efe57b25
       url: "https://pub.dev"
     source: hosted
-    version: "5.9.0"
+    version: "5.9.1"
   dio_http2_adapter:
     dependency: "direct main"
     description:
@@ -1221,10 +1221,10 @@ packages:
     dependency: "direct main"
     description:
       name: native_dio_adapter
-      sha256: "1c51bd42027861d27ccad462ba0903f5e3197461cc6d59a0bb8658cb5ad7bd01"
+      sha256: "9bbfa5221fd287eb063962bbe6534290e5f87933e576fac210149fb80253b89a"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.5.1"
   native_toolchain_c:
     dependency: transitive
     description:
@@ -1495,10 +1495,10 @@ packages:
     dependency: transitive
     description:
       name: safe_local_storage
-      sha256: e9a21b6fec7a8aa62cc2585ff4c1b127df42f3185adbd2aca66b47abe2e80236
+      sha256: "287ea1f667c0b93cdc127dccc707158e2d81ee59fba0459c31a0c7da4d09c755"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.1"
+    version: "2.0.3"
   scroll_to_index:
     dependency: "direct main"
     description:
@@ -1684,34 +1684,34 @@ packages:
     dependency: "direct main"
     description:
       name: talker
-      sha256: a9a76f677905bc5cf62ace21a6eea49303cf06ac187bcad52b2004f0b9623fd7
+      sha256: "4160d27f4da6d87f016212bbe6abfb15c8954b72726a0f154d72f77664c48b8c"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.12"
+    version: "5.1.13"
   talker_dio_logger:
     dependency: "direct main"
     description:
       name: talker_dio_logger
-      sha256: "51b0ca82c842abb787fd48d409e4e0299dca1cda010c17b42db74c8a81389b59"
+      sha256: c5769f4b1ee6fcc1a0670cdfc7f3253016a1090b583aeb70e3ccd73f479970a8
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.12"
+    version: "5.1.13"
   talker_flutter:
     dependency: "direct main"
     description:
       name: talker_flutter
-      sha256: "93a287fd7f5a898de6b4b02a5def9acd1cda73ff3f2aa9873877a0cefa943281"
+      sha256: "6a807972565dc7d5bacfb6a980efa0f766bfdbacac5660adf150aa386c440052"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.12"
+    version: "5.1.13"
   talker_logger:
     dependency: "direct main"
     description:
       name: talker_logger
-      sha256: da3d91c36bad10838cba5123b6bdf7d4310411f8f7500539ce364deda3550ac6
+      sha256: ed5f8434f17f3988548abc5f617b88e7a5d2d61d7a975e7c12eee75755848aa8
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.12"
+    version: "5.1.13"
   term_glyph:
     dependency: transitive
     description:
