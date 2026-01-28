@@ -44,7 +44,7 @@ import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  CustomWidgetsBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();

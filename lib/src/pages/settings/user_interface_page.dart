@@ -470,17 +470,21 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                   resetText: () => settingsHandler.map['mousewheelScrollSpeed']!['default']!.toString(),
                   numberButtons: true,
-                  numberStep: 0.5,
-                  numberMin: 0.1,
-                  numberMax: 20,
+                  numberStep: settingsHandler.map['mousewheelScrollSpeed']!['step']!.toDouble(),
+                  numberMin: settingsHandler.map['mousewheelScrollSpeed']!['lowerLimit']!.toDouble(),
+                  numberMax: settingsHandler.map['mousewheelScrollSpeed']!['upperLimit']!.toDouble(),
                   validator: (String? value) {
                     final double? parse = double.tryParse(value ?? '');
                     if (value == null || value.isEmpty) {
                       return context.loc.validationErrors.required;
                     } else if (parse == null) {
                       return context.loc.validationErrors.invalidNumericValue;
-                    } else if (parse > 20.0) {
-                      return context.loc.validationErrors.rangeError(min: 0.1, max: 20);
+                    } else if (parse > settingsHandler.map['mousewheelScrollSpeed']!['upperLimit']! ||
+                        parse < settingsHandler.map['mousewheelScrollSpeed']!['lowerLimit']!) {
+                      return context.loc.validationErrors.rangeError(
+                        min: settingsHandler.map['mousewheelScrollSpeed']!['lowerLimit']!,
+                        max: settingsHandler.map['mousewheelScrollSpeed']!['upperLimit']!,
+                      );
                     } else {
                       return null;
                     }

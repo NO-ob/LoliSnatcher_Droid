@@ -491,7 +491,7 @@ class SettingsHandler {
     'mousewheelScrollSpeed': {
       'type': 'double',
       'default': 10.0,
-      'upperLimit': 20.0,
+      'upperLimit': 100.0,
       'lowerLimit': 0.1,
       'step': 0.5,
     },
