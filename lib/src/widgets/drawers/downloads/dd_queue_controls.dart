@@ -55,7 +55,8 @@ class DDQueueControls extends StatelessWidget {
           () => AnimatedSize(
             duration: const Duration(milliseconds: 200),
             alignment: Alignment.bottomCenter,
-            child: snatchHandler.active.value ||
+            child:
+                snatchHandler.active.value ||
                     (snatchHandler.existsItems.isEmpty &&
                         snatchHandler.failedItems.isEmpty &&
                         snatchHandler.cancelledItems.isEmpty)
@@ -67,7 +68,8 @@ class DDQueueControls extends StatelessWidget {
                     onLongPress: () => controller.onRetryAllFailed(true),
                     icon: const Icon(Icons.refresh),
                     name: context.loc.mobileHome.retryAll(
-                      count: snatchHandler.existsItems.length +
+                      count:
+                          snatchHandler.existsItems.length +
                           snatchHandler.failedItems.length +
                           snatchHandler.cancelledItems.length,
                     ),
@@ -80,7 +82,8 @@ class DDQueueControls extends StatelessWidget {
           () => AnimatedSize(
             duration: const Duration(milliseconds: 200),
             alignment: Alignment.bottomCenter,
-            child: snatchHandler.active.value ||
+            child:
+                snatchHandler.active.value ||
                     (snatchHandler.existsItems.isEmpty &&
                         snatchHandler.failedItems.isEmpty &&
                         snatchHandler.cancelledItems.isEmpty)

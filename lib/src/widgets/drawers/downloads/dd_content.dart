@@ -148,9 +148,9 @@ class DDCombinedList extends StatelessWidget {
 
     final record = isExists
         ? snatchHandler.existsItems[retryableIndex]
-        : isFailed
-            ? snatchHandler.failedItems[retryableIndex - existsLength]
-            : snatchHandler.cancelledItems[retryableIndex - existsLength - failedLength];
+        : (isFailed
+              ? snatchHandler.failedItems[retryableIndex - existsLength]
+              : snatchHandler.cancelledItems[retryableIndex - existsLength - failedLength]);
 
     return DDRetryableItem(
       record: record,

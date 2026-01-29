@@ -133,8 +133,9 @@ class MainDrawer extends StatelessWidget {
                         name: context.loc.settings.webview.openWebview,
                         icon: const Icon(Icons.public),
                         action: () async {
-                          final Booru? selectedBooru =
-                              boorus.length == 1 ? boorus.first : await showSelectWebviewBooruDialog(boorus);
+                          final Booru? selectedBooru = boorus.length == 1
+                              ? boorus.first
+                              : await showSelectWebviewBooruDialog(boorus);
                           if (selectedBooru == null) return;
 
                           final String? url = selectedBooru.baseURL;

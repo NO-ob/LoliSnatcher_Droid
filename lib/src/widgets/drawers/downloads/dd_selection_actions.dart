@@ -59,8 +59,7 @@ class DDSelectionActions extends StatelessWidget {
               ),
             if (hasFavsSelected)
               SettingsButton(
-                name:
-                    '${context.loc.settings.downloads.unfavouriteSelected} (${favSelectedCount.toFormattedString()})',
+                name: '${context.loc.settings.downloads.unfavouriteSelected} (${favSelectedCount.toFormattedString()})',
                 icon: const Icon(Icons.favorite_border),
                 action: controller.unfavouriteSelected,
               ),

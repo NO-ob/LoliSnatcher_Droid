@@ -57,9 +57,7 @@ class DDRetryableItem extends StatelessWidget {
                   Text(
                     isExists
                         ? context.loc.mobileHome.fileAlreadyExists
-                        : isFailed
-                            ? context.loc.mobileHome.failedToDownload
-                            : context.loc.mobileHome.cancelledByUser,
+                        : (isFailed ? context.loc.mobileHome.failedToDownload : context.loc.mobileHome.cancelledByUser),
                   ),
                   if (isExists)
                     SaveAnywayButton(
