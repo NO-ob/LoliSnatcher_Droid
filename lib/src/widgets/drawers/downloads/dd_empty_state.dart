@@ -14,8 +14,8 @@ class DDEmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.max,
         children: [
           const Kaomoji(
-            type: KaomojiType.shrug,
-            style: TextStyle(fontSize: 40),
+            category: KaomojiCategory.indifference,
+            style: TextStyle(fontSize: 36),
           ),
           Text(
             context.loc.settings.downloads.noItemsQueued,

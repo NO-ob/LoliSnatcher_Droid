@@ -77,7 +77,7 @@ class DownloadsDrawerController {
           style: const TextStyle(fontSize: 20),
         ),
         overrideLeadingIconWidget: const Kaomoji(
-          type: KaomojiType.angryHandsUp,
+          category: KaomojiCategory.dissatisfaction,
           style: TextStyle(fontSize: 18),
         ),
       );

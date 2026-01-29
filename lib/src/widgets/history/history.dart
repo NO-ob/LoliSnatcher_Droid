@@ -451,8 +451,8 @@ class _HistoryListState extends State<HistoryList> {
                 const CircularProgressIndicator()
               else if (history.isEmpty) ...[
                 const Kaomoji(
-                  type: KaomojiType.shrug,
-                  style: TextStyle(fontSize: 40),
+                  category: KaomojiCategory.indifference,
+                  style: TextStyle(fontSize: 36),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -461,8 +461,8 @@ class _HistoryListState extends State<HistoryList> {
                 ),
               ] else if (filteredHistory.isEmpty) ...[
                 const Kaomoji(
-                  type: KaomojiType.shrug,
-                  style: TextStyle(fontSize: 40),
+                  category: KaomojiCategory.indifference,
+                  style: TextStyle(fontSize: 36),
                 ),
                 const SizedBox(height: 10),
                 Text(

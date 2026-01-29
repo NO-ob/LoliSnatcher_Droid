@@ -1300,8 +1300,8 @@ class _TabManagerPageState extends State<TabManagerPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Kaomoji(
-                          type: KaomojiType.shrug,
-                          style: TextStyle(fontSize: 40),
+                          category: KaomojiCategory.indifference,
+                          style: TextStyle(fontSize: 36),
                         ),
                         Text(
                           context.loc.tabs.noTabsFound,

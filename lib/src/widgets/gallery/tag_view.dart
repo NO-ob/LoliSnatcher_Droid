@@ -1033,8 +1033,8 @@ class _TagViewState extends State<TagView> {
                 ? Column(
                     children: [
                       const Kaomoji(
-                        type: KaomojiType.shrug,
-                        style: TextStyle(fontSize: 40),
+                        category: KaomojiCategory.indifference,
+                        style: TextStyle(fontSize: 36),
                       ),
                       Text(
                         context.loc.tagView.noTagsFound,
@@ -1977,7 +1977,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
                                               const Kaomoji(
-                                                type: KaomojiType.shrug,
+                                                category: KaomojiCategory.indifference,
                                                 style: TextStyle(fontSize: 24),
                                               ),
                                               Text(

@@ -434,8 +434,8 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     const Kaomoji(
-                                      type: KaomojiType.shrug,
-                                      style: TextStyle(fontSize: 40),
+                                      category: KaomojiCategory.indifference,
+                                      style: TextStyle(fontSize: 36),
                                     ),
                                     Text(
                                       context.loc.searchBar.noSuggestionsFound,

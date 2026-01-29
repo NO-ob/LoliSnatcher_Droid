@@ -107,8 +107,8 @@ class _CommentsDialogState extends State<CommentsDialog> {
               children: [
                 const SizedBox(height: 50),
                 const Kaomoji(
-                  type: KaomojiType.shrug,
-                  style: TextStyle(fontSize: 40),
+                  category: KaomojiCategory.indifference,
+                  style: TextStyle(fontSize: 36),
                 ),
                 Text(
                   context.loc.comments.noComments,
