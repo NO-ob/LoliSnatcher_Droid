@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -33,13 +35,19 @@ class _CommentsDialogState extends State<CommentsDialog> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   List<CommentItem> comments = [];
-  ScrollController scrollController = ScrollController();
+  late final AutoScrollController scrollController;
   bool isLoading = true, isCompleted = false, notSupported = false;
   int page = 0;
+  int? selectedIndex;
 
   @override
   void initState() {
     super.initState();
+
+    scrollController = AutoScrollController(
+      viewportBoundaryGetter: () => const Rect.fromLTRB(0, 16, 0, 16),
+    );
+
     getComments(initial: true);
   }
 
@@ -49,6 +57,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
       page = 0;
       isCompleted = false;
       notSupported = false;
+      selectedIndex = null;
       comments.clear();
     }
 
@@ -128,6 +137,37 @@ class _CommentsDialogState extends State<CommentsDialog> {
     return true;
   }
 
+  void navigateToComment(
+    bool forward, {
+    bool isHolding = false,
+  }) {
+    if (comments.isEmpty) return;
+
+    int newIndex;
+    if (selectedIndex == null) {
+      newIndex = forward ? 0 : comments.length - 1;
+    } else {
+      newIndex = selectedIndex! + (forward ? 1 : -1);
+      if (newIndex < 0) {
+        newIndex = isHolding ? 0 : comments.length - 1;
+      } else if (newIndex >= comments.length) {
+        newIndex = isHolding ? comments.length - 1 : 0;
+      }
+    }
+
+    setState(() => selectedIndex = newIndex);
+    WidgetsBinding.instance.addPostFrameCallback((_) => scrollToComment(newIndex));
+  }
+
+  void scrollToComment(int index) {
+    // +1 because index 0 is the header
+    scrollController.scrollToIndex(
+      index + 1,
+      duration: const Duration(milliseconds: 1),
+      preferPosition: AutoScrollPosition.begin,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool areThereErrors = (isLoading && comments.isEmpty) || notSupported || comments.isEmpty;
@@ -145,43 +185,116 @@ class _CommentsDialogState extends State<CommentsDialog> {
             ),
         ],
       ),
-      content: NotificationListener<ScrollUpdateNotification>(
-        onNotification: onScroll,
-        child: Scrollbar(
-          controller: scrollController,
-          interactive: true,
-          scrollbarOrientation: settingsHandler.handSide.value.isLeft
-              ? ScrollbarOrientation.left
-              : ScrollbarOrientation.right,
-          child: RefreshIndicator(
-            triggerMode: RefreshIndicatorTriggerMode.anywhere,
-            strokeWidth: 4,
-            color: Theme.of(context).colorScheme.secondary,
-            onRefresh: () async {
-              await getComments(initial: true);
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+      content: Stack(
+        children: [
+          NotificationListener<ScrollUpdateNotification>(
+            onNotification: onScroll,
+            child: Scrollbar(
               controller: scrollController,
-              itemCount: areThereErrors ? 2 : comments.length + 1,
-              scrollDirection: Axis.vertical,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _CommentsHeader(
-                    item: widget.item,
-                    handler: widget.handler,
-                  );
-                }
-
-                return areThereErrors //
-                    ? errorEntryBuild(context, index)
-                    : _CommentEntry(
-                        comment: comments[index - 1],
+              interactive: true,
+              scrollbarOrientation: settingsHandler.handSide.value.isLeft
+                  ? ScrollbarOrientation.left
+                  : ScrollbarOrientation.right,
+              child: RefreshIndicator(
+                triggerMode: RefreshIndicatorTriggerMode.anywhere,
+                strokeWidth: 4,
+                color: Theme.of(context).colorScheme.secondary,
+                onRefresh: () async {
+                  await getComments(initial: true);
+                },
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(top: 8, bottom: 100),
+                  controller: scrollController,
+                  itemCount: areThereErrors ? 2 : comments.length + 1,
+                  scrollDirection: Axis.vertical,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return AutoScrollTag(
+                        key: const ValueKey(0),
+                        controller: scrollController,
+                        index: 0,
+                        child: _CommentsHeader(
+                          item: widget.item,
+                          handler: widget.handler,
+                        ),
                       );
-              },
+                    }
+
+                    if (areThereErrors) {
+                      return errorEntryBuild(context, index);
+                    }
+
+                    final commentIndex = index - 1;
+                    return AutoScrollTag(
+                      key: ValueKey(index),
+                      controller: scrollController,
+                      index: index,
+                      child: _CommentEntry(
+                        comment: comments[commentIndex],
+                        isSelected: selectedIndex == commentIndex,
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
-        ),
+          if (comments.isNotEmpty)
+            Positioned(
+              bottom: 16,
+              left: settingsHandler.handSide.value.isLeft ? 16 : null,
+              right: settingsHandler.handSide.value.isLeft ? null : 16,
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      LongPressRepeater(
+                        onStart: () async => navigateToComment(false, isHolding: true),
+                        startDelay: 300,
+                        child: InkWell(
+                          borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                          onTap: () => navigateToComment(false),
+                          child: SizedBox(
+                            width: kMinInteractiveDimension,
+                            height: kMinInteractiveDimension,
+                            child: Icon(
+                              Icons.arrow_upward,
+                              size: 30,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      LongPressRepeater(
+                        onStart: () async => navigateToComment(true, isHolding: true),
+                        startDelay: 300,
+                        child: InkWell(
+                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
+                          onTap: () => navigateToComment(true),
+                          child: SizedBox(
+                            width: kMinInteractiveDimension,
+                            height: kMinInteractiveDimension,
+                            child: Icon(
+                              Icons.arrow_downward,
+                              size: 30,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
       actions: [
         if (isLoading && comments.isNotEmpty)
@@ -212,11 +325,14 @@ class _CommentsDialogState extends State<CommentsDialog> {
 class _CommentEntry extends StatelessWidget {
   const _CommentEntry({
     required this.comment,
+    // ignore: unused_element_parameter
     this.onTagTap,
+    this.isSelected = false,
   });
 
   final CommentItem comment;
   final OnTagTap? onTagTap;
+  final bool isSelected;
 
   Widget scoreText(int? score) {
     if (score == null) {
@@ -333,99 +449,118 @@ class _CommentEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final double borderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
+      padding: const EdgeInsets.only(
+        bottom: 16,
+        right: 16,
+        left: 16,
+      ),
       child: Material(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () {},
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: comment.avatarUrl != null
-                          ? () => _showAvatarDialog(context, comment.avatarUrl!, comment.authorName)
-                          : null,
-                      child: Container(
-                        width: comment.avatarUrl != null ? 60 : 40,
-                        height: comment.avatarUrl != null ? 60 : 40,
-                        margin: const EdgeInsets.only(right: 10),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(comment.avatarUrl != null ? 10 : 20),
-                          child: comment.avatarUrl != null
-                              ? Image.network(
-                                  comment.avatarUrl!,
-                                  fit: BoxFit.cover,
-                                  filterQuality: FilterQuality.medium,
-                                  errorBuilder: (context, url, error) {
-                                    return Center(child: Text(comment.authorName?.substring(0, 2) ?? '?'));
-                                  },
-                                )
-                              : Center(child: Text(comment.authorName?.substring(0, 2) ?? '?')),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            border: isSelected
+                ? Border.all(
+                    color: theme.colorScheme.secondary,
+                    width: borderWidth,
+                  )
+                : null,
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () {},
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 8 - (isSelected ? borderWidth : 0),
+                vertical: 16 - (isSelected ? borderWidth : 0),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: comment.avatarUrl != null
+                            ? () => _showAvatarDialog(context, comment.avatarUrl!, comment.authorName)
+                            : null,
+                        child: Container(
+                          width: comment.avatarUrl != null ? 60 : 40,
+                          height: comment.avatarUrl != null ? 60 : 40,
+                          margin: const EdgeInsets.only(right: 10),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(comment.avatarUrl != null ? 10 : 20),
+                            child: comment.avatarUrl != null
+                                ? Image.network(
+                                    comment.avatarUrl!,
+                                    fit: BoxFit.cover,
+                                    filterQuality: FilterQuality.medium,
+                                    errorBuilder: (context, url, error) {
+                                      return Center(child: Text(comment.authorName?.substring(0, 2) ?? '?'));
+                                    },
+                                  )
+                                : Center(child: Text(comment.authorName?.substring(0, 2) ?? '?')),
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (comment.authorName?.isNotEmpty == true)
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (comment.authorName?.isNotEmpty == true)
+                              Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: SelectableText(
+                                  comment.authorName!,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             Padding(
                               padding: const EdgeInsets.all(4),
-                              child: SelectableText(
-                                comment.authorName!,
-                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              child: Row(
+                                children: [
+                                  if (comment.title?.isNotEmpty == true)
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 5),
+                                      child: SelectableText(
+                                        comment.title!,
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  if (comment.createDate?.isNotEmpty == true)
+                                    Text(
+                                      formatDate(comment.createDate!, comment.createDateFormat!),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 15),
+                                  scoreText(comment.score),
+                                ],
                               ),
                             ),
-                          Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Row(
-                              children: [
-                                if (comment.title?.isNotEmpty == true)
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 5),
-                                    child: SelectableText(
-                                      comment.title!,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                if (comment.createDate?.isNotEmpty == true)
-                                  Text(
-                                    formatDate(comment.createDate!, comment.createDateFormat!),
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                                    ),
-                                  ),
-                                const SizedBox(width: 15),
-                                scoreText(comment.score),
-                              ],
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  width: double.maxFinite,
-                  child: ParsedText(
-                    text: _normalizeContent(comment.content),
-                    style: const TextStyle(fontSize: 16),
-                    onTagTap: onTagTap,
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    width: double.maxFinite,
+                    child: ParsedText(
+                      text: _normalizeContent(comment.content),
+                      style: const TextStyle(fontSize: 16),
+                      onTagTap: onTagTap,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
