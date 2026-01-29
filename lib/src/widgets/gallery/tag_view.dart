@@ -112,7 +112,7 @@ class _TagViewState extends State<TagView> {
     hasLoadItemSupport = handler.hasLoadItemSupport;
     canLoadItemOnStart = handler.shouldUpdateIteminTagView;
     checkForPossibleBooruHandler();
-    tags = [...item.tagsList];
+    tags = [...Set.from(item.tagsList)];
     filteredTags = [...tags];
     WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
     searchHandler.searchTextController.addListener(parseSortGroupTagsWithoutCache);
@@ -182,7 +182,7 @@ class _TagViewState extends State<TagView> {
     if (widget.item != item) {
       item = widget.item;
       checkForPossibleBooruHandler();
-      tags = [...item.tagsList];
+      tags = [...Set.from(item.tagsList)];
       filteredTags = [...tags];
 
       // debounce to avoid getting rate limited due to going too fast by using buttons on left side of tag view
@@ -282,7 +282,7 @@ class _TagViewState extends State<TagView> {
 
   void sortAndGroupTagsList() {
     if (sortTags == null) {
-      tags = [...item.tagsList];
+      tags = [...Set.from(item.tagsList)];
       groupTagsList();
     } else {
       tags.sort(
@@ -690,6 +690,7 @@ class _TagViewState extends State<TagView> {
       final tag = tagHandler.getTag(currentTag);
 
       return ColoredBox(
+        key: ValueKey('tag-$currentTag'),
         color: tag.getColour() == null
             ? Colors.transparent
             : Color.lerp(
@@ -727,17 +728,22 @@ class _TagViewState extends State<TagView> {
                             tag: tag,
                             filterText: searchController.text,
                           ),
-                          if (tagCount > 0)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 2),
-                              child: Text(
-                                tagCount.toFormattedString(),
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  fontSize: 10,
-                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                                ),
-                              ),
-                            ),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 200),
+                            alignment: Alignment.centerLeft,
+                            child: tagCount <= 0
+                                ? const SizedBox(width: double.infinity)
+                                : Padding(
+                                    padding: const EdgeInsets.only(top: 2),
+                                    child: Text(
+                                      tagCount.toFormattedString(),
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                        fontSize: 10,
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                      ),
+                                    ),
+                                  ),
+                          ),
                         ],
                       ),
                     ),
