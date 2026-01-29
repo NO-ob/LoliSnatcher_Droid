@@ -28,10 +28,8 @@
             android:exported="true"
             android:windowSoftInputMode="stateVisible">
             <!-- android:launchMode="singleTop" - allows multiple instances of the app (i.e. - opened from a config link) -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+            <!-- LAUNCHER intent is on activity-aliases for dynamic app name in release -->
+            <!-- Debug manifest adds LAUNCHER directly to MainActivity -->
 
             <intent-filter>
               <action android:name="android.intent.action.VIEW" />
@@ -41,6 +39,98 @@
               <data android:host="www.loli.snatcher" />
             </intent-filter>
         </activity>
+
+        <!-- Activity aliases for changing app display name in launcher -->
+        <activity-alias
+            android:name=".MainActivityAlias_LoliSnatcher"
+            android:targetActivity=".MainActivity"
+            android:label="LoliSnatcher"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_LoliSnatcherSpaced"
+            android:targetActivity=".MainActivity"
+            android:label="Loli Snatcher"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_LoSn"
+            android:targetActivity=".MainActivity"
+            android:label="LoSn"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_LS"
+            android:targetActivity=".MainActivity"
+            android:label="LS"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_BooruSnatcher"
+            android:targetActivity=".MainActivity"
+            android:label="BooruSnatcher"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_BooruSnatcherSpaced"
+            android:targetActivity=".MainActivity"
+            android:label="Booru Snatcher"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_Booru"
+            android:targetActivity=".MainActivity"
+            android:label="Booru"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
 
         <provider
           android:name="androidx.core.content.FileProvider"

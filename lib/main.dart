@@ -203,7 +203,7 @@ class _MainAppState extends State<MainApp> {
                 valueListenable: settingsHandler.showPerf,
                 builder: (context, showPerf, _) {
                   return MaterialApp(
-                    title: loc.appName,
+                    title: settingsHandler.appAlias.locName(context),
                     debugShowCheckedModeBanner: false,
                     showPerformanceOverlay: showPerf,
                     scrollBehavior: const CustomScrollBehavior(),

@@ -1,9 +1,6 @@
 import 'package:lolisnatcher/src/data/update_info.dart';
 
 class Constants {
-  static const String appName = 'LoliSnatcher';
-  //
-
   static const int defaultItemLimit = 20;
 
   static const int tagStaleTime = 3 * 24 * 60 * 60 * 1000; // 3 days

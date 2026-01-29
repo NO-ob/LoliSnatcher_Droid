@@ -17,7 +17,7 @@ class _InitHomePageState extends State<InitHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: SettingsAppBar(
-        title: context.loc.appName,
+        title: settingsHandler.appAlias.locName(context),
         leading: const Icon(null),
       ),
       body: Center(

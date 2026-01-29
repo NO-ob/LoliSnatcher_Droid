@@ -788,7 +788,13 @@
             "bluronLeave": "{Blur screen when leaving the app}",
             "bluronLeaveMsg": "{May not work on some devices due to system limitations}",
             "incognitoKeyboard": "{Incognito keyboard}",
-            "incognitoKeyboardMsg": "{Tells system keyboard to not save your typing history and disable learning based on your input.\nWill be applied to most of text inputs}"
+            "incognitoKeyboardMsg": "{Tells system keyboard to not save your typing history and disable learning based on your input.\nWill be applied to most of text inputs}",
+            "appDisplayName": "{App display name}",
+            "appDisplayNameDescription": "{Change how the app name appears in your launcher}",
+            "appAliasChanged": "{App name changed}",
+            "appAliasRestartHint": "{The app name change will take effect after restarting the app. Some launchers may need additional time or system reboot to update.}",
+            "appAliasChangeFailed": "{Failed to change app name. Please try again.}",
+            "restartNow": "{Restart now}"
         },
         "performance": {
             "title": "{Performance}",

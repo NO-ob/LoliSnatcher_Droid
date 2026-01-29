@@ -18,6 +18,7 @@ import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/data/settings/app_alias.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 import 'package:lolisnatcher/src/data/settings/button_position.dart';
 import 'package:lolisnatcher/src/data/settings/gallery_button.dart';
@@ -98,6 +99,7 @@ class SettingsHandler {
   ////////////////////////////////////////////////////
 
   // saveable settings vars
+  AppAlias appAlias = AppAlias.defaultValue;
   String defTags = 'rating:safe';
   PreviewQuality previewMode = PreviewQuality.defaultValue;
   VideoCacheMode videoCacheMode = VideoCacheMode.defaultValue;
@@ -271,6 +273,7 @@ class SettingsHandler {
     'isDebug',
     'desktopListsDrag',
     'incognitoKeyboard',
+    'appAlias',
     'showBottomSearchbar',
     'useTopSearchbarInput',
     'showSearchbarQuickActions',
@@ -620,6 +623,11 @@ class SettingsHandler {
       'type': 'bool',
       'default': false,
     },
+    'appAlias': {
+      'type': 'appAlias',
+      'default': AppAlias.defaultValue,
+      'options': AppAlias.values,
+    },
     'hideNotes': {
       'type': 'bool',
       'default': false,
@@ -639,10 +647,6 @@ class SettingsHandler {
     'disableVibration': {
       'type': 'bool',
       'default': false,
-    },
-    'useAltVideoPlayer': {
-      'type': 'bool',
-      'default': isDesktopPlatform,
     },
     'altVideoPlayerHwAccel': {
       'type': 'bool',
@@ -1163,6 +1167,8 @@ class SettingsHandler {
         return disableCustomPageTransitions;
       case 'incognitoKeyboard':
         return incognitoKeyboard;
+      case 'appAlias':
+        return appAlias;
       case 'hideNotes':
         return hideNotes;
       case 'startVideosMuted':
@@ -1412,6 +1418,9 @@ class SettingsHandler {
         break;
       case 'incognitoKeyboard':
         incognitoKeyboard = validatedValue;
+        break;
+      case 'appAlias':
+        appAlias = validatedValue;
         break;
       case 'hideNotes':
         hideNotes = validatedValue;
@@ -1699,17 +1708,11 @@ class SettingsHandler {
     }
 
     try {
-      final List<String> legacyKeys = [
-        'useAltVideoPlayer',
-      ];
+      final List<String> legacyKeys = [];
       for (final String key in legacyKeys) {
         if (json.keys.contains(key)) {
           switch (key) {
-            case 'useAltVideoPlayer':
-              setByString(
-                'videoBackendMode',
-                (json[key] is bool && json[key]) ? VideoBackendMode.mpv.name : videoBackendMode.name,
-              );
+            default:
               break;
           }
         }

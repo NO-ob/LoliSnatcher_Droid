@@ -3533,6 +3533,29 @@ class TranslationsSettingsPrivacyEn {
   String get incognitoKeyboardMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
       'Tells system keyboard to not save your typing history and disable learning based on your input.\nWill be applied to most of text inputs';
+
+  /// en: 'App display name'
+  String get appDisplayName => TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'App display name';
+
+  /// en: 'Change how the app name appears in your launcher'
+  String get appDisplayNameDescription =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayNameDescription', {}) ??
+      'Change how the app name appears in your launcher';
+
+  /// en: 'App name changed'
+  String get appAliasChanged => TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChanged', {}) ?? 'App name changed';
+
+  /// en: 'The app name change will take effect after restarting the app. Some launchers may need additional time or system reboot to update.'
+  String get appAliasRestartHint =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasRestartHint', {}) ??
+      'The app name change will take effect after restarting the app. Some launchers may need additional time or system reboot to update.';
+
+  /// en: 'Failed to change app name. Please try again.'
+  String get appAliasChangeFailed =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChangeFailed', {}) ?? 'Failed to change app name. Please try again.';
+
+  /// en: 'Restart now'
+  String get restartNow => TranslationOverrides.string(_root.$meta, 'settings.privacy.restartNow', {}) ?? 'Restart now';
 }
 
 // Path: settings.performance
@@ -6219,6 +6242,18 @@ extension on Translations {
           'settings.privacy.incognitoKeyboardMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
                 'Tells system keyboard to not save your typing history and disable learning based on your input.\nWill be applied to most of text inputs',
+          'settings.privacy.appDisplayName' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'App display name',
+          'settings.privacy.appDisplayNameDescription' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayNameDescription', {}) ??
+                'Change how the app name appears in your launcher',
+          'settings.privacy.appAliasChanged' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChanged', {}) ?? 'App name changed',
+          'settings.privacy.appAliasRestartHint' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasRestartHint', {}) ??
+                'The app name change will take effect after restarting the app. Some launchers may need additional time or system reboot to update.',
+          'settings.privacy.appAliasChangeFailed' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChangeFailed', {}) ?? 'Failed to change app name. Please try again.',
+          'settings.privacy.restartNow' => TranslationOverrides.string(_root.$meta, 'settings.privacy.restartNow', {}) ?? 'Restart now',
           'settings.performance.title' => TranslationOverrides.string(_root.$meta, 'settings.performance.title', {}) ?? 'Performance',
           'settings.performance.lowPerformanceMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceMode', {}) ?? 'Low performance mode',
@@ -6835,6 +6870,9 @@ extension on Translations {
           'searchBar.free' => TranslationOverrides.string(_root.$meta, 'searchBar.free', {}) ?? 'Free',
           'searchBar.single' => TranslationOverrides.string(_root.$meta, 'searchBar.single', {}) ?? 'Single',
           'searchBar.range' => TranslationOverrides.string(_root.$meta, 'searchBar.range', {}) ?? 'Range',
+          _ => null,
+        } ??
+        switch (path) {
           'searchBar.popular' => TranslationOverrides.string(_root.$meta, 'searchBar.popular', {}) ?? 'Popular',
           'searchBar.favourites' => TranslationOverrides.string(_root.$meta, 'searchBar.favourites', {}) ?? 'Favourties',
           'searchBar.all' => TranslationOverrides.string(_root.$meta, 'searchBar.all', {}) ?? '[All]',
@@ -6842,9 +6880,6 @@ extension on Translations {
           'searchBar.selectDatesRange' => TranslationOverrides.string(_root.$meta, 'searchBar.selectDatesRange', {}) ?? 'Select dates range',
           'searchBar.lastSearch' =>
             ({required String date}) => TranslationOverrides.string(_root.$meta, 'searchBar.lastSearch', {'date': date}) ?? 'Last search: ${date}',
-          _ => null,
-        } ??
-        switch (path) {
           'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? 'Unknown Booru type!',
           'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? 'History',
           'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '...',

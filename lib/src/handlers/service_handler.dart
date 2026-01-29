@@ -515,4 +515,40 @@ class ServiceHandler {
       await platform.invokeMethod('openLinkDefaults');
     }
   }
+
+  /// Sets the app launcher alias (Android only)
+  /// Returns true if successful
+  static Future<bool> setAppAlias(String alias) async {
+    if (!Platform.isAndroid) return false;
+    try {
+      final result = await platform.invokeMethod('setAppAlias', {'alias': alias});
+      return result == true;
+    } catch (e) {
+      log(e);
+      return false;
+    }
+  }
+
+  /// Gets the currently active app alias (Android only)
+  static Future<String> getCurrentAlias() async {
+    if (!Platform.isAndroid) return 'loli_snatcher';
+    try {
+      return await platform.invokeMethod('getCurrentAlias') ?? 'loli_snatcher';
+    } catch (e) {
+      log(e);
+      return 'loli_snatcher';
+    }
+  }
+
+  /// Gets list of available aliases (Android only)
+  static Future<List<String>> getAvailableAliases() async {
+    if (!Platform.isAndroid) return ['loli_snatcher'];
+    try {
+      final result = await platform.invokeMethod('getAvailableAliases');
+      return List<String>.from(result ?? ['loli_snatcher']);
+    } catch (e) {
+      log(e);
+      return ['loli_snatcher'];
+    }
+  }
 }

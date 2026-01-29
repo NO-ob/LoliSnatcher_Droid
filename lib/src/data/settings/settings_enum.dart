@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import 'package:lolisnatcher/src/data/settings/app_alias.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 import 'package:lolisnatcher/src/data/settings/button_position.dart';
 import 'package:lolisnatcher/src/data/settings/hand_side.dart';
@@ -141,6 +142,10 @@ void initSettingsEnumRegistry() {
   SettingsEnumRegistry.register<ProxyType>(
     typeName: 'proxyType',
     fromString: ProxyType.fromString,
+  );
+  SettingsEnumRegistry.register<AppAlias>(
+    typeName: 'appAlias',
+    fromString: AppAlias.fromString,
   );
 }
 

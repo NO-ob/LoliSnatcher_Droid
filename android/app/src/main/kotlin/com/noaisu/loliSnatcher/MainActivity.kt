@@ -2,6 +2,7 @@ package com.noaisu.loliSnatcher
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
@@ -339,6 +340,21 @@ class MainActivity: FlutterFragmentActivity() {
                     "restartApp" -> {
                         restartApp()
                         result.success("ok")
+                    }
+                    "setAppAlias" -> {
+                        val alias = call.argument<String>("alias")
+                        if (alias != null) {
+                            val success = setAppAlias(alias)
+                            result.success(success)
+                        } else {
+                            result.error("INVALID_ARGUMENT", "Alias is null", null)
+                        }
+                    }
+                    "getCurrentAlias" -> {
+                        result.success(getCurrentAlias())
+                    }
+                    "getAvailableAliases" -> {
+                        result.success(getAvailableAliases())
                     }
                     else -> result.notImplemented()
                 }
@@ -743,5 +759,63 @@ class MainActivity: FlutterFragmentActivity() {
         } catch (e: Exception) {
             e.toString()
         }
+    }
+
+    // App alias mapping for changing launcher display name
+    private val aliasMap = mapOf(
+        "loli_snatcher" to ".MainActivityAlias_LoliSnatcher",
+        "loli_snatcher_spaced" to ".MainActivityAlias_LoliSnatcherSpaced",
+        "losn" to ".MainActivityAlias_LoSn",
+        "ls" to ".MainActivityAlias_LS",
+        "booru_snatcher" to ".MainActivityAlias_BooruSnatcher",
+        "booru_snatcher_spaced" to ".MainActivityAlias_BooruSnatcherSpaced",
+        "booru" to ".MainActivityAlias_Booru"
+    )
+
+    private fun setAppAlias(alias: String): Boolean {
+        val targetAlias = aliasMap[alias] ?: return false
+        val pm = packageManager
+
+        try {
+            // Disable all aliases first
+            for ((_, aliasComponent) in aliasMap) {
+                val component = ComponentName(packageName, "$packageName$aliasComponent")
+                pm.setComponentEnabledSetting(
+                    component,
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP
+                )
+            }
+
+            // Enable the selected alias
+            val component = ComponentName(packageName, "$packageName$targetAlias")
+            pm.setComponentEnabledSetting(
+                component,
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                PackageManager.DONT_KILL_APP
+            )
+
+            return true
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error setting app alias", e)
+            return false
+        }
+    }
+
+    private fun getCurrentAlias(): String {
+        val pm = packageManager
+        for ((key, alias) in aliasMap) {
+            val component = ComponentName(packageName, "$packageName$alias")
+            val state = pm.getComponentEnabledSetting(component)
+            if (state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED ||
+                (state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT && key == "loli_snatcher")) {
+                return key
+            }
+        }
+        return "loli_snatcher" // Default
+    }
+
+    private fun getAvailableAliases(): List<String> {
+        return aliasMap.keys.toList()
     }
 }

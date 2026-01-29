@@ -2828,6 +2828,24 @@ class _TranslationsSettingsPrivacyRu extends TranslationsSettingsPrivacyEn {
   String get incognitoKeyboardMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
       'Сообщает системной клавиатуре не сохранять историю ввода и отключить обучение на основе твоего ввода.\nБудет применено к большинству полей ввода';
+  @override
+  String get appDisplayName => TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'Название приложения';
+  @override
+  String get appDisplayNameDescription =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayNameDescription', {}) ??
+      'Изменит название приложения в системном лаунчере';
+  @override
+  String get appAliasChanged => TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChanged', {}) ?? 'Название приложения изменено';
+  @override
+  String get appAliasRestartHint =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasRestartHint', {}) ??
+      'Изменение названия приложения вступит в силу после перезапуска приложения. Некоторым лаунчерам может потребоваться некоторое время или перезапуск системы для обновления.';
+  @override
+  String get appAliasChangeFailed =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChangeFailed', {}) ??
+      'Не удалось изменить название приложения. Пожалуйста, попробуй снова.';
+  @override
+  String get restartNow => TranslationOverrides.string(_root.$meta, 'settings.privacy.restartNow', {}) ?? 'Перезапустить сейчас';
 }
 
 // Path: settings.performance
@@ -5269,6 +5287,20 @@ extension on TranslationsRu {
           'settings.privacy.incognitoKeyboardMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
                 'Сообщает системной клавиатуре не сохранять историю ввода и отключить обучение на основе твоего ввода.\nБудет применено к большинству полей ввода',
+          'settings.privacy.appDisplayName' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'Название приложения',
+          'settings.privacy.appDisplayNameDescription' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayNameDescription', {}) ??
+                'Изменит название приложения в системном лаунчере',
+          'settings.privacy.appAliasChanged' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChanged', {}) ?? 'Название приложения изменено',
+          'settings.privacy.appAliasRestartHint' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasRestartHint', {}) ??
+                'Изменение названия приложения вступит в силу после перезапуска приложения. Некоторым лаунчерам может потребоваться некоторое время или перезапуск системы для обновления.',
+          'settings.privacy.appAliasChangeFailed' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChangeFailed', {}) ??
+                'Не удалось изменить название приложения. Пожалуйста, попробуй снова.',
+          'settings.privacy.restartNow' => TranslationOverrides.string(_root.$meta, 'settings.privacy.restartNow', {}) ?? 'Перезапустить сейчас',
           'settings.performance.title' => TranslationOverrides.string(_root.$meta, 'settings.performance.title', {}) ?? 'Производительность',
           'settings.performance.lowPerformanceMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceMode', {}) ?? 'Режим низкой производительности',
@@ -5903,6 +5935,9 @@ extension on TranslationsRu {
           'searchBar.free' => TranslationOverrides.string(_root.$meta, 'searchBar.free', {}) ?? 'Бесплатно',
           'searchBar.single' => TranslationOverrides.string(_root.$meta, 'searchBar.single', {}) ?? 'Одиночный',
           'searchBar.range' => TranslationOverrides.string(_root.$meta, 'searchBar.range', {}) ?? 'Диапазон',
+          _ => null,
+        } ??
+        switch (path) {
           'searchBar.popular' => TranslationOverrides.string(_root.$meta, 'searchBar.popular', {}) ?? 'Популярное',
           'searchBar.favourites' => TranslationOverrides.string(_root.$meta, 'searchBar.favourites', {}) ?? 'Избранное',
           'searchBar.all' => TranslationOverrides.string(_root.$meta, 'searchBar.all', {}) ?? '[Все]',
@@ -5911,9 +5946,6 @@ extension on TranslationsRu {
           'searchBar.lastSearch' =>
             ({required String date}) =>
                 TranslationOverrides.string(_root.$meta, 'searchBar.lastSearch', {'date': date}) ?? 'Последний поиск: ${date}',
-          _ => null,
-        } ??
-        switch (path) {
           'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? 'Неизвестный тип сайта!',
           'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? 'История',
           'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '...',
