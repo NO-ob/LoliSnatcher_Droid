@@ -39,6 +39,8 @@ class TabRow extends StatelessWidget {
 
         final bool hasItems = tab.booruHandler.filteredFetched.isNotEmpty;
 
+        final textColor = color ?? (tab.tags.isEmpty ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface;
+
         Widget marquee = MarqueeText(
           key: ValueKey(tagText),
           text: tagText,
@@ -47,7 +49,7 @@ class TabRow extends StatelessWidget {
             fontSize: 16,
             fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
             fontWeight: fontWeight ?? FontWeight.normal,
-            color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
+            color: textColor,
           ),
         );
 
@@ -61,7 +63,7 @@ class TabRow extends StatelessWidget {
                 fontSize: 16,
                 fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
                 fontWeight: fontWeight ?? FontWeight.normal,
-                color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
+                color: textColor,
               );
 
               spans.add(
@@ -94,7 +96,7 @@ class TabRow extends StatelessWidget {
                 fontSize: 16,
                 fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
                 fontWeight: fontWeight ?? FontWeight.normal,
-                color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
+                color: textColor,
               ),
             );
           } else if (withColoredTags) {
@@ -122,10 +124,7 @@ class TabRow extends StatelessWidget {
               final bool isColored = !tagData.tagType.isNone || isMetaTag;
 
               final Color usedColor =
-                  (isColored ? (isMetaTag ? Colors.pink : tagData.tagType.getColour()) : null) ??
-                  color ??
-                  (tab.tags == '' ? Colors.grey : null) ??
-                  Theme.of(context).colorScheme.onSurface;
+                  (isColored ? (isMetaTag ? Colors.pink : tagData.tagType.getColour()) : null) ?? textColor;
 
               final spanStyle = TextStyle(
                 fontSize: 16,
@@ -190,7 +189,7 @@ class TabRow extends StatelessWidget {
                 fontSize: 16,
                 fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
                 fontWeight: fontWeight ?? FontWeight.normal,
-                color: color ?? (tab.tags == '' ? Colors.grey : null),
+                color: textColor,
               ),
             );
           }
