@@ -63,7 +63,7 @@ class MergebooruHandler extends BooruHandler {
             RegExp(
               '(?!'
               '${i + 1}'
-              r')\d+#[A-Za-z0-9\_\-~:]*',
+              r')\d+#\S*',
             ),
             '',
           )
@@ -260,7 +260,7 @@ class MergebooruHandler extends BooruHandler {
             RegExp(
               '(?!'
               '${i + 1}'
-              r')\d+#[A-Za-z0-9\_\-~:]*',
+              r')\d+#\S*',
             ),
             '',
           )
