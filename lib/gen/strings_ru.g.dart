@@ -345,14 +345,13 @@ class _TranslationsPermissionsRu extends TranslationsPermissionsEn {
   String get setDirectory => TranslationOverrides.string(_root.$meta, 'permissions.setDirectory', {}) ?? 'Назначить папку';
   @override
   String get currentlyNotAvailableForThisPlatform =>
-      TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ??
-      'В данный момент недоступно для этой платформы';
+      TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ?? 'Недоступно на этой платформе';
   @override
   String get resetDirectory => TranslationOverrides.string(_root.$meta, 'permissions.resetDirectory', {}) ?? 'Сбросить папку';
   @override
   String get afterResetFilesWillBeSavedToDefaultDirectory =>
       TranslationOverrides.string(_root.$meta, 'permissions.afterResetFilesWillBeSavedToDefaultDirectory', {}) ??
-      'После сброса файлы будут сохраняться в системную папку по умолчанию';
+      'Файлы будут сохраняться в папку по умолчанию после сброса';
 }
 
 // Path: authentication
@@ -387,7 +386,7 @@ class _TranslationsSearchHandlerRu extends TranslationsSearchHandlerEn {
   String get removedLastTab => TranslationOverrides.string(_root.$meta, 'searchHandler.removedLastTab', {}) ?? 'Последняя вкладка удалена';
   @override
   String get resettingSearchToDefaultTags =>
-      TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Сброс поиска к тегам по умолчанию';
+      TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Сброс к тегам по умолчанию';
   @override
   String get uoh => TranslationOverrides.string(_root.$meta, 'searchHandler.uoh', {}) ?? 'UOOOOOOOHHH';
   @override
@@ -399,7 +398,7 @@ class _TranslationsSearchHandlerRu extends TranslationsSearchHandlerEn {
   @override
   String get appFixedRatingAutomatically =>
       TranslationOverrides.string(_root.$meta, 'searchHandler.appFixedRatingAutomatically', {}) ??
-      'Приложение автоматически исправило рейтинг, учти это в будущих запросах, чтобы избежать этой ошибки';
+      'Рейтинг исправлен автоматически. В будущих запросах используй правильный рейтинг';
   @override
   String get tabsRestored => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsRestored', {}) ?? 'Вкладки восстановлены';
   @override
@@ -556,8 +555,7 @@ class _TranslationsMultibooruRu extends TranslationsMultibooruEn {
   String get multibooruMode => TranslationOverrides.string(_root.$meta, 'multibooru.multibooruMode', {}) ?? 'Режим мультисайта';
   @override
   String get multibooruRequiresAtLeastTwoBoorus =>
-      TranslationOverrides.string(_root.$meta, 'multibooru.multibooruRequiresAtLeastTwoBoorus', {}) ??
-      'Режим мультисайта требует не менее двух настроенных конфигов сайтов';
+      TranslationOverrides.string(_root.$meta, 'multibooru.multibooruRequiresAtLeastTwoBoorus', {}) ?? 'Требует как минимум 2 настроенных сайта';
   @override
   String get selectSecondaryBoorus =>
       TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? 'Выбери второстепенные конфиги:';
@@ -661,7 +659,7 @@ class _TranslationsTabsRu extends TranslationsTabsEn {
   String get scrollToBottom => TranslationOverrides.string(_root.$meta, 'tabs.scrollToBottom', {}) ?? 'Прокрутить вниз';
   @override
   String get filterTabsByBooru =>
-      TranslationOverrides.string(_root.$meta, 'tabs.filterTabsByBooru', {}) ?? 'Фильтровать вкладки по сайту, статусу загрузки, дубликатам и т.д.';
+      TranslationOverrides.string(_root.$meta, 'tabs.filterTabsByBooru', {}) ?? 'Фильтровать по сайту, состоянию, дубликатам...';
   @override
   String get scrolling => TranslationOverrides.string(_root.$meta, 'tabs.scrolling', {}) ?? 'Прокрутка:';
   @override
@@ -681,8 +679,7 @@ class _TranslationsTabsRu extends TranslationsTabsEn {
       TranslationOverrides.string(_root.$meta, 'tabs.sortByBooruNameReversed', {}) ?? 'Сортировать по имени сайта в обратном алфавитном порядке';
   @override
   String get longPressSortToSave =>
-      TranslationOverrides.string(_root.$meta, 'tabs.longPressSortToSave', {}) ??
-      'Длительное нажатие на кнопку сортировки, чтобы сохранить вкладки в текущем порядке';
+      TranslationOverrides.string(_root.$meta, 'tabs.longPressSortToSave', {}) ?? 'Зажми кнопку сортировки для сохранения порядка вкладок';
   @override
   String get select => TranslationOverrides.string(_root.$meta, 'tabs.select', {}) ?? 'Выбрать:';
   @override
@@ -774,12 +771,10 @@ class _TranslationsHistoryRu extends TranslationsHistoryEn {
   @override
   String get searchHistoryIsEmpty => TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsEmpty', {}) ?? 'История поиска пуста';
   @override
-  String get searchHistoryIsDisabled =>
-      TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsDisabled', {}) ?? 'История поиска отключена.';
+  String get searchHistoryIsDisabled => TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsDisabled', {}) ?? 'История поиска отключена';
   @override
   String get searchHistoryRequiresDatabase =>
-      TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ??
-      'История поиска требует включения базы данных в настройках.';
+      TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ?? 'История поиска требует включения базы данных';
   @override
   String get filterSearchHistory => TranslationOverrides.string(_root.$meta, 'history.filterSearchHistory', {}) ?? 'Фильтровать историю поиска';
   @override
@@ -1315,12 +1310,12 @@ class _TranslationsSearchBarRu extends TranslationsSearchBarEn {
   @override
   String failedToLoadSuggestions({required String msg}) =>
       TranslationOverrides.string(_root.$meta, 'searchBar.failedToLoadSuggestions', {'msg': msg}) ??
-      'Не удалось загрузить подсказки, нажми для повтора${msg}';
+      'Не удалось загрузить предложения. Нажми для повтора${msg}';
   @override
   String get noSuggestionsFound => TranslationOverrides.string(_root.$meta, 'searchBar.noSuggestionsFound', {}) ?? 'Подсказки не найдены';
   @override
   String get tagSuggestionsNotAvailable =>
-      TranslationOverrides.string(_root.$meta, 'searchBar.tagSuggestionsNotAvailable', {}) ?? 'Подсказки тегов недоступны для этого сайта';
+      TranslationOverrides.string(_root.$meta, 'searchBar.tagSuggestionsNotAvailable', {}) ?? 'Предложения тегов недоступны для этого сайта';
   @override
   String copiedTagToClipboard({required String tag}) =>
       TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? '"${tag}": скопировано в буфер обмена';
@@ -1773,13 +1768,13 @@ class _TranslationsSettingsBooruRu extends TranslationsSettingsBooruEn {
   @override
   String get shareBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooru', {}) ?? 'Поделиться конфигом сайта';
   @override
-  String shareBooruDialogMsgMobile({required Object booruName}) =>
+  String shareBooruDialogMsgMobile({required String booruName}) =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgMobile', {'booruName': booruName}) ??
-      'Конфиг сайта ${booruName} будет превращен в ссылку, которой затем можно поделиться в других приложениях\n\nВключить ли данные логина/ключа api?';
+      'Поделиться конфигом ${booruName} как ссылкой.\n\nВключить ли в нее логин/API ключ?';
   @override
-  String shareBooruDialogMsgDesktop({required Object booruName}) =>
+  String shareBooruDialogMsgDesktop({required String booruName}) =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgDesktop', {'booruName': booruName}) ??
-      'Конфиг сайта ${booruName} будет превращен в ссылку, которая будет скопирована в буфер обмена\n\nВключить ли данные логина/ключа api?';
+      'Скопировать ссылку конфига ${booruName} в буфер обмена.\n\nВключить ли в нее логин/API ключ?';
   @override
   String get booruSharing => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Поделиться конфигом сайта';
   @override
@@ -1805,7 +1800,7 @@ class _TranslationsSettingsBooruRu extends TranslationsSettingsBooruEn {
   @override
   String get booruDropdownInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.booruDropdownInfo', {}) ??
-      'Сайт выбранный здесь будет назначен сайтом по умолчанию после сохранения.\n\nСайт по умолчанию будет появляться в топе выпадающих списков';
+      'Выбранный сайт будет использоваться по умолчанию после сохранения.\n\nСайт по умолчанию будет первым в выпадающих списках';
   @override
   String get changeDefaultBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.changeDefaultBooru', {}) ?? 'Сменить сайт по умолчанию?';
   @override
@@ -1946,7 +1941,7 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
   @override
   String get appUIModeWarning =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeWarning', {}) ??
-      'Ты уверен, что хочешь использовать Компьютерный режим? Это может вызвать проблемы на мобильных устройствах и считается УСТАРЕВШИМ.';
+      'Использовать Компьютерный режим? Может привести к проблемам на мобильных устройствах. УСТАРЕВШЕЕ.';
   @override
   String get appUIModeHelpMobile =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpMobile', {}) ?? '- Мобильный - Обычный мобильный интерфейс';
@@ -1993,8 +1988,7 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
   String get previewQuality => TranslationOverrides.string(_root.$meta, 'settings.interface.previewQuality', {}) ?? 'Качество превью';
   @override
   String get previewQualityHelp =>
-      TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelp', {}) ??
-      'Эта настройка изменяет разрешение изображений в сетке превью';
+      TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelp', {}) ?? 'Изменяет разрешение изображений в сетке превью';
   @override
   String get previewQualityHelpSample =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpSample', {}) ??
@@ -2019,8 +2013,7 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
   String get dontScaleImages => TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImages', {}) ?? 'Не масштабировать изображения';
   @override
   String get dontScaleImagesSubtitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImagesSubtitle', {}) ??
-      'Отключает масштабирование изображений, которое используется для улучшения производительности';
+      TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImagesSubtitle', {}) ?? 'Может снизить производительность';
   @override
   String get dontScaleImagesWarningTitle =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImagesWarningTitle', {}) ?? 'Предупреждение';
@@ -2255,7 +2248,7 @@ class _TranslationsSettingsViewerRu extends TranslationsSettingsViewerEn {
   @override
   String get volumeButtonsScrollingHelp =>
       TranslationOverrides.string(_root.$meta, 'settings.viewer.volumeButtonsScrollingHelp', {}) ??
-      'Позволяет прокручивать сетку превью и элементы просмотрщика с помощью кнопок громкости';
+      'Используй кнопки громкости для прокрутки превью и просмотрщика';
   @override
   String get volumeButtonsVolumeDown =>
       TranslationOverrides.string(_root.$meta, 'settings.viewer.volumeButtonsVolumeDown', {}) ?? ' - Громкость вниз - следующий элемент';
@@ -2282,8 +2275,7 @@ class _TranslationsSettingsViewerRu extends TranslationsSettingsViewerEn {
   String get slideshow => TranslationOverrides.string(_root.$meta, 'settings.viewer.slideshow', {}) ?? 'Слайдшоу';
   @override
   String get slideshowWIPNote =>
-      TranslationOverrides.string(_root.$meta, 'settings.viewer.slideshowWIPNote', {}) ??
-      '[В разработке] Видео и гифки должны быть проскроллены вручную пока что.';
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.slideshowWIPNote', {}) ?? '[WIP] Видео/гифки: только прокрутка вручную';
   @override
   String get preventDeviceFromSleeping =>
       TranslationOverrides.string(_root.$meta, 'settings.viewer.preventDeviceFromSleeping', {}) ?? 'Предотвратить переход устройства в спящий режим';
@@ -2462,15 +2454,14 @@ class _TranslationsSettingsDatabaseRu extends TranslationsSettingsDatabaseEn {
   String get indexesBeingChanged => TranslationOverrides.string(_root.$meta, 'settings.database.indexesBeingChanged', {}) ?? 'Индексы изменяются';
   @override
   String get databaseInfo =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ??
-      'База данных будет отслеживать избранное и был ли скачан элемент';
+      TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ?? 'Хранит избранные и скачанные элементы';
   @override
   String get databaseInfoSnatch =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ?? 'Если элемент был скачан, он не будет скачан снова';
+      TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ?? 'Уже скачанные элементы не будут скачаны заново';
   @override
   String get indexingInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.database.indexingInfo', {}) ??
-      'Индексация помогает ускорить поиск в базе данных, но занимает больше места на диске (возможно, удваивая размер твоей базы данных).\nНе покидай страницу и не закрывай приложение во время индексации, чтобы избежать повреждения базы данных.';
+      'Ускоряет поиск по базе данных, но занимает больше места на диске (до 2 раз).\n\nНе закрывай приложение или этот экран, пока идет индексация.';
   @override
   String get createIndexesDebug =>
       TranslationOverrides.string(_root.$meta, 'settings.database.createIndexesDebug', {}) ?? 'Создать индексы [Отладка]';
@@ -2481,22 +2472,22 @@ class _TranslationsSettingsDatabaseRu extends TranslationsSettingsDatabaseEn {
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryInfo', {}) ?? 'Требует включения базы данных.';
   @override
   String searchHistoryRecords({required int limit}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryRecords', {'limit': limit}) ??
-      'Записывает последние ${limit} поисковых запросов.';
+      TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryRecords', {'limit': limit}) ?? 'Сохраняет последние ${limit} поисков.';
   @override
   String get searchHistoryTapInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ??
-      'Нажми на любую запись истории для дополнительных действий (Удалить, Добавить в избранное...)';
+      'Нажми на элемент для действий (Удалить, В избранное...)';
   @override
   String get searchHistoryFavouritesInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ??
       'Избранные запросы закреплены вверху списка и не будут учитываться в лимите.';
   @override
   String get tagTypeFetchingInfo =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ?? 'Будет искать типы тегов на поддерживаемых сайтах';
+      TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ??
+      'Подтягивает информацию о типах тегов с поддерживаемых сайтов';
   @override
   String get tagTypeFetchingWarning =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'Это может привести к ограничению запросов';
+      TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'Может привести к ограничению запросов';
   @override
   String get deleteDatabase => TranslationOverrides.string(_root.$meta, 'settings.database.deleteDatabase', {}) ?? 'Удалить базу данных';
   @override
@@ -2629,8 +2620,7 @@ class _TranslationsSettingsBackupAndRestoreRu extends TranslationsSettingsBackup
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.noBackupDirSelected', {}) ?? 'Нет выбранной папки бэкапов';
   @override
   String get restoreInfoMsg =>
-      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreInfoMsg', {}) ??
-      'Восстановление будет работать только если файлы расположены в корне папки.';
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreInfoMsg', {}) ?? 'Файлы должны быть в корне папки';
   @override
   String get backupSettings => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupSettings', {}) ?? 'Бэкап настроек';
   @override
@@ -2761,10 +2751,10 @@ class _TranslationsSettingsNetworkRu extends TranslationsSettingsNetworkEn {
   @override
   String get userAgentUsedOnRequests =>
       TranslationOverrides.string(_root.$meta, 'settings.network.userAgentUsedOnRequests', {}) ??
-      'Будет использоваться в запросах для большинства сайтов и в вебвью';
+      'Используется для большинства запросов к сайтам и вебвью';
   @override
   String get valueSavedAfterLeaving =>
-      TranslationOverrides.string(_root.$meta, 'settings.network.valueSavedAfterLeaving', {}) ?? 'Значение сохраняется после выхода с этой страницы';
+      TranslationOverrides.string(_root.$meta, 'settings.network.valueSavedAfterLeaving', {}) ?? 'Сохраняется при закрытии страницы';
   @override
   String get setBrowserUserAgent =>
       TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
@@ -2810,7 +2800,7 @@ class _TranslationsSettingsPrivacyRu extends TranslationsSettingsPrivacyEn {
   @override
   String get appLockMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.privacy.appLockMsg', {}) ??
-      'Позволяет заблокировать приложение вручную или если оставлено слишком долго. Требует системной блокировки с PIN или биометрией';
+      'Заблокировать приложение вручную или после бездействия. Требует ПИН-код/биометрию';
   @override
   String get autoLockAfter => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'Автоблокировка после';
   @override
@@ -2827,7 +2817,7 @@ class _TranslationsSettingsPrivacyRu extends TranslationsSettingsPrivacyEn {
   @override
   String get incognitoKeyboardMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
-      'Сообщает системной клавиатуре не сохранять историю ввода и отключить обучение на основе твоего ввода.\nБудет применено к большинству полей ввода';
+      'Запрещает клавиатуре сохранять историю ввода.\nПрименяется к большинству текстовых полей ввода';
   @override
   String get appDisplayName => TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'Название приложения';
   @override
@@ -2982,7 +2972,7 @@ class _TranslationsSettingsCacheRu extends TranslationsSettingsCacheEn {
       TranslationOverrides.string(_root.$meta, 'settings.cache.writeImageDataOnSave', {}) ?? 'Записывать данные в JSON при сохранении';
   @override
   String get requiresCustomStorageDirectory =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.requiresCustomStorageDirectory', {}) ?? 'Требует пользовательскую папку хранилища';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.requiresCustomStorageDirectory', {}) ?? 'Необходимо настроить пользовательскую папку';
   @override
   String get setStorageDirectory => TranslationOverrides.string(_root.$meta, 'settings.cache.setStorageDirectory', {}) ?? 'Назначить папку хранилища';
   @override
@@ -3144,7 +3134,7 @@ class _TranslationsSettingsSyncRu extends TranslationsSettingsSyncEn {
   @override
   String get senderInstructions =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.senderInstructions', {}) ??
-      'Запусти сервер на другом устройстве, он покажет IP и порт, введи их и нажми начать синхронизацию для отправки данных с этого устройства на другое';
+      'Запусти сервер на другом устройстве, введи его IP/порт, затем нажми Начать синхронизацию';
   @override
   String get ipAddress => TranslationOverrides.string(_root.$meta, 'settings.sync.ipAddress', {}) ?? 'IP адрес';
   @override
@@ -3251,11 +3241,10 @@ class _TranslationsSettingsSyncRu extends TranslationsSettingsSyncEn {
   String get testConnection => TranslationOverrides.string(_root.$meta, 'settings.sync.testConnection', {}) ?? 'Проверить соединение';
   @override
   String get testConnectionHelpText1 =>
-      TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText1', {}) ?? 'Это отправит тестовый запрос на другое устройство.';
+      TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText1', {}) ?? 'Отправляет тестовый запрос на другое устройство.';
   @override
   String get testConnectionHelpText2 =>
-      TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText2', {}) ??
-      'Будет уведомление о том, был ли запрос успешным или нет.';
+      TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText2', {}) ?? 'Показывает успех/провал уведомлением.';
   @override
   String get startSync => TranslationOverrides.string(_root.$meta, 'settings.sync.startSync', {}) ?? 'Начать синхронизацию';
   @override
@@ -3269,7 +3258,7 @@ class _TranslationsSettingsSyncRu extends TranslationsSettingsSyncEn {
   @override
   String get receiverInstructions =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.receiverInstructions', {}) ??
-      'Запусти сервер, если хочешь получить данные с другого устройства, не используй это в публичном WiFi, так как тебя могут взломать';
+      'Запусти сервер для получения данных. Избегай публичных сетей в целях безопасности';
   @override
   String get availableNetworkInterfaces =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.availableNetworkInterfaces', {}) ?? 'Доступные сетевые интерфейсы';
@@ -3681,7 +3670,7 @@ class _TranslationsMediaLoadingRu extends TranslationsMediaLoadingEn {
   @override
   String get tryChangingVideoBackend =>
       TranslationOverrides.string(_root.$meta, 'media.loading.tryChangingVideoBackend', {}) ??
-      'Попробуй изменить "Движок видеоплеера" в Настройках->Видео, если у тебя часто возникают проблемы с воспроизведением видео';
+      'Частые проблемы с воспроизведением? Попробуй изменить [Настройки > Видео > Движок видеоплеера]';
 }
 
 // Path: media.video
@@ -3729,7 +3718,7 @@ class _TranslationsPreviewErrorRu extends TranslationsPreviewErrorEn {
   String get noResults => TranslationOverrides.string(_root.$meta, 'preview.error.noResults', {}) ?? 'Нет результатов';
   @override
   String get noResultsSubtitle =>
-      TranslationOverrides.string(_root.$meta, 'preview.error.noResultsSubtitle', {}) ?? 'Попробуй изменить свой запрос или нажми здесь для повтора';
+      TranslationOverrides.string(_root.$meta, 'preview.error.noResultsSubtitle', {}) ?? 'Измени поисковый запрос или нажми чтобы попробовать снова';
   @override
   String get reachedEnd => TranslationOverrides.string(_root.$meta, 'preview.error.reachedEnd', {}) ?? 'Ты достиг конца';
   @override
@@ -3752,7 +3741,7 @@ class _TranslationsPreviewErrorRu extends TranslationsPreviewErrorEn {
   @override
   String get tapToRetryIfStuck =>
       TranslationOverrides.string(_root.$meta, 'preview.error.tapToRetryIfStuck', {}) ??
-      'Нажми здесь для повтора, если поиск занимает слишком много времени или кажется зависшим';
+      'Нажми чтобы попробовать снова, если запрос застрял или идет слишком долго';
   @override
   String errorLoadingPage({required int pageNum}) =>
       TranslationOverrides.string(_root.$meta, 'preview.error.errorLoadingPage', {'pageNum': pageNum}) ?? 'Ошибка при загрузке страницы №${pageNum}';
@@ -4105,12 +4094,11 @@ extension on TranslationsRu {
                 TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Текущий путь: ${path}',
           'permissions.setDirectory' => TranslationOverrides.string(_root.$meta, 'permissions.setDirectory', {}) ?? 'Назначить папку',
           'permissions.currentlyNotAvailableForThisPlatform' =>
-            TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ??
-                'В данный момент недоступно для этой платформы',
+            TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ?? 'Недоступно на этой платформе',
           'permissions.resetDirectory' => TranslationOverrides.string(_root.$meta, 'permissions.resetDirectory', {}) ?? 'Сбросить папку',
           'permissions.afterResetFilesWillBeSavedToDefaultDirectory' =>
             TranslationOverrides.string(_root.$meta, 'permissions.afterResetFilesWillBeSavedToDefaultDirectory', {}) ??
-                'После сброса файлы будут сохраняться в системную папку по умолчанию',
+                'Файлы будут сохраняться в папку по умолчанию после сброса',
           'authentication.pleaseAuthenticateToUseTheApp' =>
             TranslationOverrides.string(_root.$meta, 'authentication.pleaseAuthenticateToUseTheApp', {}) ??
                 'Пожалуйста, пройди аутентификацию для использования приложения',
@@ -4124,7 +4112,7 @@ extension on TranslationsRu {
           'searchHandler.removedLastTab' =>
             TranslationOverrides.string(_root.$meta, 'searchHandler.removedLastTab', {}) ?? 'Последняя вкладка удалена',
           'searchHandler.resettingSearchToDefaultTags' =>
-            TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Сброс поиска к тегам по умолчанию',
+            TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Сброс к тегам по умолчанию',
           'searchHandler.uoh' => TranslationOverrides.string(_root.$meta, 'searchHandler.uoh', {}) ?? 'UOOOOOOOHHH',
           'searchHandler.ratingsChanged' => TranslationOverrides.string(_root.$meta, 'searchHandler.ratingsChanged', {}) ?? 'Рейтинги изменились',
           'searchHandler.ratingsChangedMessage' =>
@@ -4133,7 +4121,7 @@ extension on TranslationsRu {
                 'На ${booruType} [rating:safe] теперь заменён на [rating:general] и [rating:sensitive]',
           'searchHandler.appFixedRatingAutomatically' =>
             TranslationOverrides.string(_root.$meta, 'searchHandler.appFixedRatingAutomatically', {}) ??
-                'Приложение автоматически исправило рейтинг, учти это в будущих запросах, чтобы избежать этой ошибки',
+                'Рейтинг исправлен автоматически. В будущих запросах используй правильный рейтинг',
           'searchHandler.tabsRestored' => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsRestored', {}) ?? 'Вкладки восстановлены',
           'searchHandler.restoredTabsCount' =>
             ({required num count}) =>
@@ -4251,7 +4239,7 @@ extension on TranslationsRu {
           'multibooru.multibooruMode' => TranslationOverrides.string(_root.$meta, 'multibooru.multibooruMode', {}) ?? 'Режим мультисайта',
           'multibooru.multibooruRequiresAtLeastTwoBoorus' =>
             TranslationOverrides.string(_root.$meta, 'multibooru.multibooruRequiresAtLeastTwoBoorus', {}) ??
-                'Режим мультисайта требует не менее двух настроенных конфигов сайтов',
+                'Требует как минимум 2 настроенных сайта',
           'multibooru.selectSecondaryBoorus' =>
             TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? 'Выбери второстепенные конфиги:',
           'multibooru.akaMultibooruMode' => TranslationOverrides.string(_root.$meta, 'multibooru.akaMultibooruMode', {}) ?? 'режим Мультисайта',
@@ -4297,8 +4285,7 @@ extension on TranslationsRu {
           'tabs.scrollToTop' => TranslationOverrides.string(_root.$meta, 'tabs.scrollToTop', {}) ?? 'Прокрутить вверх',
           'tabs.scrollToBottom' => TranslationOverrides.string(_root.$meta, 'tabs.scrollToBottom', {}) ?? 'Прокрутить вниз',
           'tabs.filterTabsByBooru' =>
-            TranslationOverrides.string(_root.$meta, 'tabs.filterTabsByBooru', {}) ??
-                'Фильтровать вкладки по сайту, статусу загрузки, дубликатам и т.д.',
+            TranslationOverrides.string(_root.$meta, 'tabs.filterTabsByBooru', {}) ?? 'Фильтровать по сайту, состоянию, дубликатам...',
           'tabs.scrolling' => TranslationOverrides.string(_root.$meta, 'tabs.scrolling', {}) ?? 'Прокрутка:',
           'tabs.sorting' => TranslationOverrides.string(_root.$meta, 'tabs.sorting', {}) ?? 'Сортировка:',
           'tabs.defaultTabsOrder' => TranslationOverrides.string(_root.$meta, 'tabs.defaultTabsOrder', {}) ?? 'Порядок вкладок по умолчанию',
@@ -4311,8 +4298,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'tabs.sortByBooruNameReversed', {}) ??
                 'Сортировать по имени сайта в обратном алфавитном порядке',
           'tabs.longPressSortToSave' =>
-            TranslationOverrides.string(_root.$meta, 'tabs.longPressSortToSave', {}) ??
-                'Длительное нажатие на кнопку сортировки, чтобы сохранить вкладки в текущем порядке',
+            TranslationOverrides.string(_root.$meta, 'tabs.longPressSortToSave', {}) ?? 'Зажми кнопку сортировки для сохранения порядка вкладок',
           'tabs.select' => TranslationOverrides.string(_root.$meta, 'tabs.select', {}) ?? 'Выбрать:',
           'tabs.toggleSelectMode' => TranslationOverrides.string(_root.$meta, 'tabs.toggleSelectMode', {}) ?? 'Переключить режим выбора',
           'tabs.onTheBottomOfPage' => TranslationOverrides.string(_root.$meta, 'tabs.onTheBottomOfPage', {}) ?? 'Внизу страницы: ',
@@ -4397,10 +4383,9 @@ extension on TranslationsRu {
           'history.searchHistory' => TranslationOverrides.string(_root.$meta, 'history.searchHistory', {}) ?? 'История поиска',
           'history.searchHistoryIsEmpty' => TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsEmpty', {}) ?? 'История поиска пуста',
           'history.searchHistoryIsDisabled' =>
-            TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsDisabled', {}) ?? 'История поиска отключена.',
+            TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsDisabled', {}) ?? 'История поиска отключена',
           'history.searchHistoryRequiresDatabase' =>
-            TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ??
-                'История поиска требует включения базы данных в настройках.',
+            TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ?? 'История поиска требует включения базы данных',
           'history.filterSearchHistory' =>
             TranslationOverrides.string(_root.$meta, 'history.filterSearchHistory', {}) ?? 'Фильтровать историю поиска',
           'history.lastSearch' =>
@@ -4491,13 +4476,13 @@ extension on TranslationsRu {
           'settings.booru.addBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.addBooru', {}) ?? 'Добавить конфиг сайта',
           'settings.booru.shareBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooru', {}) ?? 'Поделиться конфигом сайта',
           'settings.booru.shareBooruDialogMsgMobile' =>
-            ({required Object booruName}) =>
+            ({required String booruName}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgMobile', {'booruName': booruName}) ??
-                'Конфиг сайта ${booruName} будет превращен в ссылку, которой затем можно поделиться в других приложениях\n\nВключить ли данные логина/ключа api?',
+                'Поделиться конфигом ${booruName} как ссылкой.\n\nВключить ли в нее логин/API ключ?',
           'settings.booru.shareBooruDialogMsgDesktop' =>
-            ({required Object booruName}) =>
+            ({required String booruName}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgDesktop', {'booruName': booruName}) ??
-                'Конфиг сайта ${booruName} будет превращен в ссылку, которая будет скопирована в буфер обмена\n\nВключить ли данные логина/ключа api?',
+                'Скопировать ссылку конфига ${booruName} в буфер обмена.\n\nВключить ли в нее логин/API ключ?',
           'settings.booru.booruSharing' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Поделиться конфигом сайта',
           'settings.booru.booruSharingMsgAndroid' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
@@ -4515,7 +4500,7 @@ extension on TranslationsRu {
           'settings.booru.booruDeleted' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruDeleted', {}) ?? 'Конфиг удален!',
           'settings.booru.booruDropdownInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.booruDropdownInfo', {}) ??
-                'Сайт выбранный здесь будет назначен сайтом по умолчанию после сохранения.\n\nСайт по умолчанию будет появляться в топе выпадающих списков',
+                'Выбранный сайт будет использоваться по умолчанию после сохранения.\n\nСайт по умолчанию будет первым в выпадающих списках',
           'settings.booru.changeDefaultBooru' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.changeDefaultBooru', {}) ?? 'Сменить сайт по умолчанию?',
           'settings.booru.changeTo' => TranslationOverrides.string(_root.$meta, 'settings.booru.changeTo', {}) ?? 'Сменить на: ',
@@ -4611,7 +4596,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeWarningTitle', {}) ?? 'Режим интерфейса приложения',
           'settings.interface.appUIModeWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeWarning', {}) ??
-                'Ты уверен, что хочешь использовать Компьютерный режим? Это может вызвать проблемы на мобильных устройствах и считается УСТАРЕВШИМ.',
+                'Использовать Компьютерный режим? Может привести к проблемам на мобильных устройствах. УСТАРЕВШЕЕ.',
           'settings.interface.appUIModeHelpMobile' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpMobile', {}) ?? '- Мобильный - Обычный мобильный интерфейс',
           'settings.interface.appUIModeHelpDesktop' =>
@@ -4647,8 +4632,7 @@ extension on TranslationsRu {
           'settings.interface.previewQuality' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQuality', {}) ?? 'Качество превью',
           'settings.interface.previewQualityHelp' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelp', {}) ??
-                'Эта настройка изменяет разрешение изображений в сетке превью',
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelp', {}) ?? 'Изменяет разрешение изображений в сетке превью',
           'settings.interface.previewQualityHelpSample' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpSample', {}) ??
                 ' - Семплы - Среднее разрешение, приложение также загрузит качество Миниатюры в качестве заполнителя, пока загружается более высокое качество',
@@ -4667,8 +4651,7 @@ extension on TranslationsRu {
           'settings.interface.dontScaleImages' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImages', {}) ?? 'Не масштабировать изображения',
           'settings.interface.dontScaleImagesSubtitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImagesSubtitle', {}) ??
-                'Отключает масштабирование изображений, которое используется для улучшения производительности',
+            TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImagesSubtitle', {}) ?? 'Может снизить производительность',
           'settings.interface.dontScaleImagesWarningTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImagesWarningTitle', {}) ?? 'Предупреждение',
           'settings.interface.dontScaleImagesWarning' =>
@@ -4827,7 +4810,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.viewer.volumeButtonsScrolling', {}) ?? 'Прокрутка кнопками громкости',
           'settings.viewer.volumeButtonsScrollingHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.volumeButtonsScrollingHelp', {}) ??
-                'Позволяет прокручивать сетку превью и элементы просмотрщика с помощью кнопок громкости',
+                'Используй кнопки громкости для прокрутки превью и просмотрщика',
           'settings.viewer.volumeButtonsVolumeDown' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.volumeButtonsVolumeDown', {}) ?? ' - Громкость вниз - следующий элемент',
           'settings.viewer.volumeButtonsVolumeUp' =>
@@ -4846,8 +4829,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.viewer.slideshowDurationInMs', {}) ?? 'Длительность слайдшоу (в мс)',
           'settings.viewer.slideshow' => TranslationOverrides.string(_root.$meta, 'settings.viewer.slideshow', {}) ?? 'Слайдшоу',
           'settings.viewer.slideshowWIPNote' =>
-            TranslationOverrides.string(_root.$meta, 'settings.viewer.slideshowWIPNote', {}) ??
-                '[В разработке] Видео и гифки должны быть проскроллены вручную пока что.',
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.slideshowWIPNote', {}) ?? '[WIP] Видео/гифки: только прокрутка вручную',
           'settings.viewer.preventDeviceFromSleeping' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.preventDeviceFromSleeping', {}) ??
                 'Предотвратить переход устройства в спящий режим',
@@ -5015,14 +4997,12 @@ extension on TranslationsRu {
           'settings.database.indexesBeingChanged' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.indexesBeingChanged', {}) ?? 'Индексы изменяются',
           'settings.database.databaseInfo' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ??
-                'База данных будет отслеживать избранное и был ли скачан элемент',
+            TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ?? 'Хранит избранные и скачанные элементы',
           'settings.database.databaseInfoSnatch' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ??
-                'Если элемент был скачан, он не будет скачан снова',
+            TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ?? 'Уже скачанные элементы не будут скачаны заново',
           'settings.database.indexingInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.indexingInfo', {}) ??
-                'Индексация помогает ускорить поиск в базе данных, но занимает больше места на диске (возможно, удваивая размер твоей базы данных).\nНе покидай страницу и не закрывай приложение во время индексации, чтобы избежать повреждения базы данных.',
+                'Ускоряет поиск по базе данных, но занимает больше места на диске (до 2 раз).\n\nНе закрывай приложение или этот экран, пока идет индексация.',
           'settings.database.createIndexesDebug' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.createIndexesDebug', {}) ?? 'Создать индексы [Отладка]',
           'settings.database.dropIndexesDebug' =>
@@ -5032,18 +5012,18 @@ extension on TranslationsRu {
           'settings.database.searchHistoryRecords' =>
             ({required int limit}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryRecords', {'limit': limit}) ??
-                'Записывает последние ${limit} поисковых запросов.',
+                'Сохраняет последние ${limit} поисков.',
           'settings.database.searchHistoryTapInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ??
-                'Нажми на любую запись истории для дополнительных действий (Удалить, Добавить в избранное...)',
+                'Нажми на элемент для действий (Удалить, В избранное...)',
           'settings.database.searchHistoryFavouritesInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ??
                 'Избранные запросы закреплены вверху списка и не будут учитываться в лимите.',
           'settings.database.tagTypeFetchingInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ??
-                'Будет искать типы тегов на поддерживаемых сайтах',
+                'Подтягивает информацию о типах тегов с поддерживаемых сайтов',
           'settings.database.tagTypeFetchingWarning' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'Это может привести к ограничению запросов',
+            TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'Может привести к ограничению запросов',
           'settings.database.deleteDatabase' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.deleteDatabase', {}) ?? 'Удалить базу данных',
           'settings.database.deleteDatabaseConfirm' =>
@@ -5145,8 +5125,7 @@ extension on TranslationsRu {
           'settings.backupAndRestore.noBackupDirSelected' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.noBackupDirSelected', {}) ?? 'Нет выбранной папки бэкапов',
           'settings.backupAndRestore.restoreInfoMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreInfoMsg', {}) ??
-                'Восстановление будет работать только если файлы расположены в корне папки.',
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreInfoMsg', {}) ?? 'Файлы должны быть в корне папки',
           'settings.backupAndRestore.backupSettings' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupSettings', {}) ?? 'Бэкап настроек',
           'settings.backupAndRestore.restoreSettings' =>
@@ -5238,10 +5217,9 @@ extension on TranslationsRu {
                 TranslationOverrides.string(_root.$meta, 'settings.network.defaultUserAgent', {'agent': agent}) ?? 'По умолчанию: ${agent}',
           'settings.network.userAgentUsedOnRequests' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.userAgentUsedOnRequests', {}) ??
-                'Будет использоваться в запросах для большинства сайтов и в вебвью',
+                'Используется для большинства запросов к сайтам и вебвью',
           'settings.network.valueSavedAfterLeaving' =>
-            TranslationOverrides.string(_root.$meta, 'settings.network.valueSavedAfterLeaving', {}) ??
-                'Значение сохраняется после выхода с этой страницы',
+            TranslationOverrides.string(_root.$meta, 'settings.network.valueSavedAfterLeaving', {}) ?? 'Сохраняется при закрытии страницы',
           'settings.network.setBrowserUserAgent' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
                 'Нажми здесь, чтобы установить рекомендуемый user agent браузера (рекомендуется только когда сайты, которые ты используешь, банят небраузерные user agent):',
@@ -5272,7 +5250,7 @@ extension on TranslationsRu {
           'settings.privacy.appLock' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'Блокировка приложения',
           'settings.privacy.appLockMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.appLockMsg', {}) ??
-                'Позволяет заблокировать приложение вручную или если оставлено слишком долго. Требует системной блокировки с PIN или биометрией',
+                'Заблокировать приложение вручную или после бездействия. Требует ПИН-код/биометрию',
           'settings.privacy.autoLockAfter' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'Автоблокировка после',
           'settings.privacy.autoLockAfterTip' =>
@@ -5286,7 +5264,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboard', {}) ?? 'Режим инкогнито клавиатуры',
           'settings.privacy.incognitoKeyboardMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
-                'Сообщает системной клавиатуре не сохранять историю ввода и отключить обучение на основе твоего ввода.\nБудет применено к большинству полей ввода',
+                'Запрещает клавиатуре сохранять историю ввода.\nПрименяется к большинству текстовых полей ввода',
           'settings.privacy.appDisplayName' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'Название приложения',
           'settings.privacy.appDisplayNameDescription' =>
@@ -5389,7 +5367,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.cache.writeImageDataOnSave', {}) ?? 'Записывать данные в JSON при сохранении',
           'settings.cache.requiresCustomStorageDirectory' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.requiresCustomStorageDirectory', {}) ??
-                'Требует пользовательскую папку хранилища',
+                'Необходимо настроить пользовательскую папку',
           'settings.cache.setStorageDirectory' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.setStorageDirectory', {}) ?? 'Назначить папку хранилища',
           'settings.cache.currentPath' =>
@@ -5495,7 +5473,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.sync.receiveDataFromDevice', {}) ?? 'ПОЛУЧИТЬ данные С другого устройства',
           'settings.sync.senderInstructions' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.senderInstructions', {}) ??
-                'Запусти сервер на другом устройстве, он покажет IP и порт, введи их и нажми начать синхронизацию для отправки данных с этого устройства на другое',
+                'Запусти сервер на другом устройстве, введи его IP/порт, затем нажми Начать синхронизацию',
           'settings.sync.ipAddress' => TranslationOverrides.string(_root.$meta, 'settings.sync.ipAddress', {}) ?? 'IP адрес',
           'settings.sync.ipAddressPlaceholder' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.ipAddressPlaceholder', {}) ?? 'IP адрес хоста (например 192.168.1.1)',
@@ -5574,10 +5552,9 @@ extension on TranslationsRu {
           'settings.sync.testConnection' => TranslationOverrides.string(_root.$meta, 'settings.sync.testConnection', {}) ?? 'Проверить соединение',
           'settings.sync.testConnectionHelpText1' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText1', {}) ??
-                'Это отправит тестовый запрос на другое устройство.',
+                'Отправляет тестовый запрос на другое устройство.',
           'settings.sync.testConnectionHelpText2' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText2', {}) ??
-                'Будет уведомление о том, был ли запрос успешным или нет.',
+            TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText2', {}) ?? 'Показывает успех/провал уведомлением.',
           'settings.sync.startSync' => TranslationOverrides.string(_root.$meta, 'settings.sync.startSync', {}) ?? 'Начать синхронизацию',
           'settings.sync.portAndIPCannotBeEmpty' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.portAndIPCannotBeEmpty', {}) ?? 'Поля Порт и IP не могут быть пустыми!',
@@ -5587,7 +5564,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.sync.statsOfThisDevice', {}) ?? 'Статистика этого устройства:',
           'settings.sync.receiverInstructions' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.receiverInstructions', {}) ??
-                'Запусти сервер, если хочешь получить данные с другого устройства, не используй это в публичном WiFi, так как тебя могут взломать',
+                'Запусти сервер для получения данных. Избегай публичных сетей в целях безопасности',
           'settings.sync.availableNetworkInterfaces' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.availableNetworkInterfaces', {}) ?? 'Доступные сетевые интерфейсы',
           'settings.sync.selectedInterfaceIP' =>
@@ -5917,10 +5894,10 @@ extension on TranslationsRu {
           'searchBar.failedToLoadSuggestions' =>
             ({required String msg}) =>
                 TranslationOverrides.string(_root.$meta, 'searchBar.failedToLoadSuggestions', {'msg': msg}) ??
-                'Не удалось загрузить подсказки, нажми для повтора${msg}',
+                'Не удалось загрузить предложения. Нажми для повтора${msg}',
           'searchBar.noSuggestionsFound' => TranslationOverrides.string(_root.$meta, 'searchBar.noSuggestionsFound', {}) ?? 'Подсказки не найдены',
           'searchBar.tagSuggestionsNotAvailable' =>
-            TranslationOverrides.string(_root.$meta, 'searchBar.tagSuggestionsNotAvailable', {}) ?? 'Подсказки тегов недоступны для этого сайта',
+            TranslationOverrides.string(_root.$meta, 'searchBar.tagSuggestionsNotAvailable', {}) ?? 'Предложения тегов недоступны для этого сайта',
           'searchBar.copiedTagToClipboard' =>
             ({required String tag}) =>
                 TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? '"${tag}": скопировано в буфер обмена',
@@ -6102,7 +6079,7 @@ extension on TranslationsRu {
             ({required String limit}) => TranslationOverrides.string(_root.$meta, 'media.loading.sizeLimit', {'limit': limit}) ?? 'Лимит: ${limit}',
           'media.loading.tryChangingVideoBackend' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.tryChangingVideoBackend', {}) ??
-                'Попробуй изменить "Движок видеоплеера" в Настройках->Видео, если у тебя часто возникают проблемы с воспроизведением видео',
+                'Частые проблемы с воспроизведением? Попробуй изменить [Настройки > Видео > Движок видеоплеера]',
           'media.video.videosDisabledOrNotSupported' =>
             TranslationOverrides.string(_root.$meta, 'media.video.videosDisabledOrNotSupported', {}) ?? 'Видео отключены или не поддерживаются',
           'media.video.openVideoInExternalPlayer' =>
@@ -6137,7 +6114,7 @@ extension on TranslationsRu {
           'preview.error.noResults' => TranslationOverrides.string(_root.$meta, 'preview.error.noResults', {}) ?? 'Нет результатов',
           'preview.error.noResultsSubtitle' =>
             TranslationOverrides.string(_root.$meta, 'preview.error.noResultsSubtitle', {}) ??
-                'Попробуй изменить свой запрос или нажми здесь для повтора',
+                'Измени поисковый запрос или нажми чтобы попробовать снова',
           'preview.error.reachedEnd' => TranslationOverrides.string(_root.$meta, 'preview.error.reachedEnd', {}) ?? 'Ты достиг конца',
           'preview.error.reachedEndSubtitle' =>
             ({required int pageNum}) =>
@@ -6158,7 +6135,7 @@ extension on TranslationsRu {
                 ),
           'preview.error.tapToRetryIfStuck' =>
             TranslationOverrides.string(_root.$meta, 'preview.error.tapToRetryIfStuck', {}) ??
-                'Нажми здесь для повтора, если поиск занимает слишком много времени или кажется зависшим',
+                'Нажми чтобы попробовать снова, если запрос застрял или идет слишком долго',
           'preview.error.errorLoadingPage' =>
             ({required int pageNum}) =>
                 TranslationOverrides.string(_root.$meta, 'preview.error.errorLoadingPage', {'pageNum': pageNum}) ??
