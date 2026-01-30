@@ -1,3 +1,4 @@
+import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.util.Base64
@@ -106,18 +107,17 @@ android {
         }
     }
 
+    applicationVariants.all {
+        outputs.all {
+            val output = this as? ApkVariantOutputImpl
+            // Override the version code to be the 'flutterVersionCode'
+            // ignoring the ABI-specific logic added by Flutter
+            output?.versionCodeOverride = flutterVersionCode.toInt()
+        }
+    }
+
     buildFeatures {
         buildConfig = true
-    }
-}
-
-androidComponents {
-    onVariants { variant ->
-        variant.outputs.forEach { output ->
-            // When building split apks, gradle adds (n * 1000) to each arch type to avoid having same build number
-            // This disables that behaviour and uses same build number for all arch variants
-            (output as com.android.build.api.variant.impl.VariantOutputImpl).versionCode.set(variant.outputs.first().versionCode.get())
-        }
     }
 }
 
