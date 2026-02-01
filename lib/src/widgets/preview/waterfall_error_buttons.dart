@@ -174,7 +174,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           alignment: Alignment.bottomCenter,
           children: <Widget>[
             ...previousChildren,
-            if (currentChild != null) currentChild,
+            ?currentChild,
           ],
         ),
         child: isCollapsed

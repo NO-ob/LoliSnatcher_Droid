@@ -1255,7 +1255,9 @@ class SettingsBottomSheet extends StatelessWidget {
                           ),
                       ],
                     ),
-                    if (content != null) content!,
+                    //
+                    ?content,
+                    //
                     if (contentItems != null)
                       Flexible(
                         child: Padding(

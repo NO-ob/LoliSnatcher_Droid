@@ -26,13 +26,13 @@ class ToolbarAction extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            if (stackWidget != null) stackWidget!,
+            ?stackWidget,
             IconButton(
               icon: icon,
               color: onTap != null ? Colors.white : Theme.of(context).colorScheme.onSurface,
               onPressed: onTap,
             ),
-            if (subIcon != null) subIcon!,
+            ?subIcon,
           ],
         ),
       ),

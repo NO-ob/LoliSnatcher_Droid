@@ -372,7 +372,7 @@ class ServiceHandler {
         {
           'path': filePath,
           'mimeType': mimeType,
-          if (text != null) 'text': text,
+          'text': ?text,
         },
       );
       return;

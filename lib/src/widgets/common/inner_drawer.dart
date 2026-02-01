@@ -506,8 +506,8 @@ class InnerDrawerState extends State<InnerDrawer> with SingleTickerProviderState
 
                                   final Widget scaffoldChild = Stack(
                                     children: [
-                                      if (child != null) child,
-                                      if (invisibleCover != null) invisibleCover,
+                                      ?child,
+                                      ?invisibleCover,
                                     ],
                                   );
 
