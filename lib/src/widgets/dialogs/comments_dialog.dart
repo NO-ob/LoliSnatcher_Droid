@@ -231,6 +231,13 @@ class _CommentsDialogState extends State<CommentsDialog> {
                       index: index,
                       child: _CommentEntry(
                         comment: comments[commentIndex],
+                        onTap: () => setState(() {
+                          if (selectedIndex == commentIndex) {
+                            selectedIndex = null;
+                          } else {
+                            selectedIndex = commentIndex;
+                          }
+                        }),
                         isSelected: selectedIndex == commentIndex,
                       ),
                     );
@@ -325,13 +332,12 @@ class _CommentsDialogState extends State<CommentsDialog> {
 class _CommentEntry extends StatelessWidget {
   const _CommentEntry({
     required this.comment,
-    // ignore: unused_element_parameter
-    this.onTagTap,
+    this.onTap,
     this.isSelected = false,
   });
 
   final CommentItem comment;
-  final OnTagTap? onTagTap;
+  final VoidCallback? onTap;
   final bool isSelected;
 
   Widget scoreText(int? score) {
@@ -472,7 +478,7 @@ class _CommentEntry extends StatelessWidget {
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
-            onTap: () {},
+            onTap: onTap,
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: 8 - (isSelected ? borderWidth : 0),
@@ -556,7 +562,6 @@ class _CommentEntry extends StatelessWidget {
                     child: ParsedText(
                       text: _normalizeContent(comment.content),
                       style: const TextStyle(fontSize: 16),
-                      onTagTap: onTagTap,
                     ),
                   ),
                 ],
