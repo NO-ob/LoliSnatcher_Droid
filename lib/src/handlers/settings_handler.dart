@@ -161,7 +161,7 @@ class SettingsHandler {
   bool autoPlayEnabled = true;
   bool loadingGif = false;
   bool thumbnailCache = true;
-  bool mediaCache = false;
+  bool mediaCache = true;
   bool autoHideImageBar = false;
   bool dbEnabled = true;
   bool indexesEnabled = false;
@@ -533,7 +533,7 @@ class SettingsHandler {
     },
     'mediaCache': {
       'type': 'bool',
-      'default': false,
+      'default': true,
     },
     'autoHideImageBar': {
       'type': 'bool',
