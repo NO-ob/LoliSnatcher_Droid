@@ -1389,34 +1389,42 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isReverse = SettingsHandler.instance.useTopSearchbarInput;
+
+    List<Widget> blocks = [
+      // blocks have a small delay to force order of requests, from fast to slow (i.e. favs popular search will lock db for too long and history and pinned won't load until it's done)
+      PopularTagsBlock(
+        onTagTap: widget.onTagTap,
+        delay: const Duration(milliseconds: 20),
+      ),
+      //
+      if (!widget.hideHistory)
+        HistoryBlock(
+          delay: const Duration(milliseconds: 10),
+          onTagApply: widget.onTagTap,
+        ),
+      //
+      MetatagsBlock(onSelect: widget.onMetatagSelect),
+      //
+      PinnedTagsBlock(
+        key: _pinnedTagsKey,
+        onTagTap: widget.onTagTap,
+        onTagLongTap: (tagName, pinnedTag) async {
+          await showUnpinTagDialog(context, tagName, pinnedTag);
+          await _pinnedTagsKey.currentState?.init();
+        },
+      ),
+      //
+      const SizedBox(height: 16),
+    ];
+
+    if (isReverse) {
+      blocks = blocks.reversed.toList();
+    }
+
     return Column(
       spacing: 16,
-      children: [
-        // blocks have a small delay to force order of requests, from fast to slow (i.e. favs popular search will lock db for too long and history and pinned won't load until it's done)
-        PopularTagsBlock(
-          onTagTap: widget.onTagTap,
-          delay: const Duration(milliseconds: 20),
-        ),
-        //
-        if (!widget.hideHistory)
-          HistoryBlock(
-            delay: const Duration(milliseconds: 10),
-            onTagApply: widget.onTagTap,
-          ),
-        //
-        MetatagsBlock(onSelect: widget.onMetatagSelect),
-        //
-        PinnedTagsBlock(
-          key: _pinnedTagsKey,
-          onTagTap: widget.onTagTap,
-          onTagLongTap: (tagName, pinnedTag) async {
-            await showUnpinTagDialog(context, tagName, pinnedTag);
-            await _pinnedTagsKey.currentState?.init();
-          },
-        ),
-        //
-        const SizedBox(height: 16),
-      ],
+      children: blocks,
     );
   }
 }
