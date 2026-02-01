@@ -863,12 +863,12 @@ class TranslationsTabsEn {
   /// en: 'Special filters:'
   String get specialFilters => TranslationOverrides.string(_root.$meta, 'tabs.specialFilters', {}) ?? 'Special filters:';
 
-  /// en: '"Loaded" - show tabs which have loaded items'
-  String get loadedFilter => TranslationOverrides.string(_root.$meta, 'tabs.loadedFilter', {}) ?? '"Loaded" - show tabs which have loaded items';
+  /// en: '«Loaded» - show tabs which have loaded items'
+  String get loadedFilter => TranslationOverrides.string(_root.$meta, 'tabs.loadedFilter', {}) ?? '«Loaded» - show tabs which have loaded items';
 
-  /// en: '"Not loaded" - show tabs which are not loaded and/or have zero items'
+  /// en: '«Not loaded» - show tabs which are not loaded and/or have zero items'
   String get notLoadedFilter =>
-      TranslationOverrides.string(_root.$meta, 'tabs.notLoadedFilter', {}) ?? '"Not loaded" - show tabs which are not loaded and/or have zero items';
+      TranslationOverrides.string(_root.$meta, 'tabs.notLoadedFilter', {}) ?? '«Not loaded» - show tabs which are not loaded and/or have zero items';
 
   /// en: 'Not loaded tabs have italic text'
   String get notLoadedItalic => TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? 'Not loaded tabs have italic text';
@@ -1423,10 +1423,10 @@ class TranslationsTagViewEn {
       TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText1', {}) ??
       'The text in source field can\'t be opened as a link, either because it\'s not a link or there are multiple URLs in a single string.';
 
-  /// en: 'You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:'
+  /// en: 'You can select any text below by long tapping it and then press «Open selected» to try opening it as a link:'
   String get sourceDialogText2 =>
       TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText2', {}) ??
-      'You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:';
+      'You can select any text below by long tapping it and then press «Open selected» to try opening it as a link:';
 
   /// en: '[No text selected]'
   String get noTextSelected => TranslationOverrides.string(_root.$meta, 'tagView.noTextSelected', {}) ?? '[No text selected]';
@@ -1504,13 +1504,13 @@ class TranslationsPinnedTagsEn {
   /// en: 'Unpin'
   String get unpin => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpin', {}) ?? 'Unpin';
 
-  /// en: 'Pin "${tag: String}" to quick access?'
+  /// en: 'Pin «${tag: String}» to quick access?'
   String pinQuestion({required String tag}) =>
-      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Pin "${tag}" to quick access?';
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Pin «${tag}» to quick access?';
 
-  /// en: 'Remove "${tag: String}" from pinned tags?'
+  /// en: 'Remove «${tag: String}» from pinned tags?'
   String unpinQuestion({required String tag}) =>
-      TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Remove "${tag}" from pinned tags?';
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Remove «${tag}» from pinned tags?';
 
   /// en: 'Only for ${name: String}'
   String onlyForBooru({required String name}) =>
@@ -1605,9 +1605,9 @@ class TranslationsSearchBarEn {
   String get tagSuggestionsNotAvailable =>
       TranslationOverrides.string(_root.$meta, 'searchBar.tagSuggestionsNotAvailable', {}) ?? 'Tag suggestions unavailable for this booru';
 
-  /// en: 'Copied "${tag: String}" to clipboard'
+  /// en: 'Copied «${tag: String}» to clipboard'
   String copiedTagToClipboard({required String tag}) =>
-      TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? 'Copied "${tag}" to clipboard';
+      TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? 'Copied «${tag}» to clipboard';
 
   /// en: 'Prefix'
   String get prefix => TranslationOverrides.string(_root.$meta, 'searchBar.prefix', {}) ?? 'Prefix';
@@ -2118,10 +2118,10 @@ class TranslationsSettingsLanguageEn {
   /// en: 'Help us translate'
   String get helpUsTranslate => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help us translate';
 
-  /// en: 'Visit <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> for details or tap on the image below to go to Weblate'
+  /// en: 'Visit <a href='https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization'>github</a> for details or tap on the image below to go to Weblate'
   String get visitForDetails =>
       TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-      'Visit <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> for details or tap on the image below to go to Weblate';
+      'Visit <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> for details or tap on the image below to go to Weblate';
 }
 
 // Path: settings.booru
@@ -2169,10 +2169,10 @@ class TranslationsSettingsBooruEn {
   /// en: 'Booru sharing'
   String get booruSharing => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Booru sharing';
 
-  /// en: 'How to automatically open Booru config links in the app on Android 12 and higher: 1) Tap button below to open system app link defaults settings 2) Tap on "Add link" and select all available options'
+  /// en: 'How to automatically open Booru config links in the app on Android 12 and higher: 1) Tap button below to open system app link defaults settings 2) Tap on «Add link» and select all available options'
   String get booruSharingMsgAndroid =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-      'How to automatically open Booru config links in the app on Android 12 and higher:\n1) Tap button below to open system app link defaults settings\n2) Tap on "Add link" and select all available options';
+      'How to automatically open Booru config links in the app on Android 12 and higher:\n1) Tap button below to open system app link defaults settings\n2) Tap on «Add link» and select all available options';
 
   /// en: 'Added Boorus'
   String get addedBoorus => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Added Boorus';
@@ -2490,9 +2490,9 @@ class TranslationsSettingsInterfaceEn {
   /// en: 'GIF thumbnails'
   String get gifThumbnails => TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnails', {}) ?? 'GIF thumbnails';
 
-  /// en: 'Requires "Don't scale images"'
+  /// en: 'Requires «Don't scale images»'
   String get gifThumbnailsRequires =>
-      TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnailsRequires', {}) ?? 'Requires "Don\'t scale images"';
+      TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnailsRequires', {}) ?? 'Requires «Don\'t scale images»';
 
   /// en: 'Scroll previews buttons position'
   String get scrollPreviewsButtonsPosition =>
@@ -3440,9 +3440,9 @@ class TranslationsSettingsNetworkEn {
   String cookiesFor({required String booruName}) =>
       TranslationOverrides.string(_root.$meta, 'settings.network.cookiesFor', {'booruName': booruName}) ?? 'Cookies for ${booruName}:';
 
-  /// en: '"${cookieName: String}" cookie deleted'
+  /// en: '«${cookieName: String}» cookie deleted'
   String cookieDeleted({required String cookieName}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.network.cookieDeleted', {'cookieName': cookieName}) ?? '"${cookieName}" cookie deleted';
+      TranslationOverrides.string(_root.$meta, 'settings.network.cookieDeleted', {'cookieName': cookieName}) ?? '«${cookieName}» cookie deleted';
 
   /// en: 'Clear cookies'
   String get clearCookies => TranslationOverrides.string(_root.$meta, 'settings.network.clearCookies', {}) ?? 'Clear cookies';
@@ -5205,10 +5205,10 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'tabs.secondNumberTabIndex', {}) ??
                 'Second number - tab index in current list order, appears when filtering/sorting is active',
           'tabs.specialFilters' => TranslationOverrides.string(_root.$meta, 'tabs.specialFilters', {}) ?? 'Special filters:',
-          'tabs.loadedFilter' => TranslationOverrides.string(_root.$meta, 'tabs.loadedFilter', {}) ?? '"Loaded" - show tabs which have loaded items',
+          'tabs.loadedFilter' => TranslationOverrides.string(_root.$meta, 'tabs.loadedFilter', {}) ?? '«Loaded» - show tabs which have loaded items',
           'tabs.notLoadedFilter' =>
             TranslationOverrides.string(_root.$meta, 'tabs.notLoadedFilter', {}) ??
-                '"Not loaded" - show tabs which are not loaded and/or have zero items',
+                '«Not loaded» - show tabs which are not loaded and/or have zero items',
           'tabs.notLoadedItalic' => TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? 'Not loaded tabs have italic text',
           'tabs.noTabsFound' => TranslationOverrides.string(_root.$meta, 'tabs.noTabsFound', {}) ?? 'No tabs found',
           'tabs.copy' => TranslationOverrides.string(_root.$meta, 'tabs.copy', {}) ?? 'Copy',
@@ -5345,7 +5345,7 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help us translate',
           'settings.language.visitForDetails' =>
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-                'Visit <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> for details or tap on the image below to go to Weblate',
+                'Visit <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> for details or tap on the image below to go to Weblate',
           'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus & Search',
           'settings.booru.dropdown' => TranslationOverrides.string(_root.$meta, 'settings.booru.dropdown', {}) ?? 'Booru',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Default tags',
@@ -5367,7 +5367,7 @@ extension on Translations {
           'settings.booru.booruSharing' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Booru sharing',
           'settings.booru.booruSharingMsgAndroid' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-                'How to automatically open Booru config links in the app on Android 12 and higher:\n1) Tap button below to open system app link defaults settings\n2) Tap on "Add link" and select all available options',
+                'How to automatically open Booru config links in the app on Android 12 and higher:\n1) Tap button below to open system app link defaults settings\n2) Tap on «Add link» and select all available options',
           'settings.booru.addedBoorus' => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Added Boorus',
           'settings.booru.editBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.editBooru', {}) ?? 'Edit Booru config',
           'settings.booru.importBooru' =>
@@ -5537,7 +5537,7 @@ extension on Translations {
                 'This can negatively impact the performance, especially on older devices',
           'settings.interface.gifThumbnails' => TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnails', {}) ?? 'GIF thumbnails',
           'settings.interface.gifThumbnailsRequires' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnailsRequires', {}) ?? 'Requires "Don\'t scale images"',
+            TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnailsRequires', {}) ?? 'Requires «Don\'t scale images»',
           'settings.interface.scrollPreviewsButtonsPosition' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.scrollPreviewsButtonsPosition', {}) ?? 'Scroll previews buttons position',
           'settings.interface.mouseWheelScrollModifier' =>
@@ -6077,7 +6077,7 @@ extension on Translations {
           'settings.network.cookieDeleted' =>
             ({required String cookieName}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.network.cookieDeleted', {'cookieName': cookieName}) ??
-                '"${cookieName}" cookie deleted',
+                '«${cookieName}» cookie deleted',
           'settings.network.clearCookies' => TranslationOverrides.string(_root.$meta, 'settings.network.clearCookies', {}) ?? 'Clear cookies',
           'settings.network.clearCookiesFor' =>
             ({required String booruName}) =>
@@ -6591,7 +6591,7 @@ extension on Translations {
                 'The text in source field can\'t be opened as a link, either because it\'s not a link or there are multiple URLs in a single string.',
           'tagView.sourceDialogText2' =>
             TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText2', {}) ??
-                'You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:',
+                'You can select any text below by long tapping it and then press «Open selected» to try opening it as a link:',
           'tagView.noTextSelected' => TranslationOverrides.string(_root.$meta, 'tagView.noTextSelected', {}) ?? '[No text selected]',
           'tagView.copySelected' =>
             ({required String type}) => TranslationOverrides.string(_root.$meta, 'tagView.copySelected', {'type': type}) ?? 'Copy ${type}',
@@ -6619,10 +6619,10 @@ extension on Translations {
           'pinnedTags.unpin' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpin', {}) ?? 'Unpin',
           'pinnedTags.pinQuestion' =>
             ({required String tag}) =>
-                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Pin "${tag}" to quick access?',
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Pin «${tag}» to quick access?',
           'pinnedTags.unpinQuestion' =>
             ({required String tag}) =>
-                TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Remove "${tag}" from pinned tags?',
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Remove «${tag}» from pinned tags?',
           'pinnedTags.onlyForBooru' =>
             ({required String name}) => TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Only for ${name}',
           'pinnedTags.labelsOptional' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? 'Labels (optional)',
@@ -6665,7 +6665,7 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'searchBar.tagSuggestionsNotAvailable', {}) ?? 'Tag suggestions unavailable for this booru',
           'searchBar.copiedTagToClipboard' =>
             ({required String tag}) =>
-                TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? 'Copied "${tag}" to clipboard',
+                TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? 'Copied «${tag}» to clipboard',
           'searchBar.prefix' => TranslationOverrides.string(_root.$meta, 'searchBar.prefix', {}) ?? 'Prefix',
           'searchBar.exclude' => TranslationOverrides.string(_root.$meta, 'searchBar.exclude', {}) ?? 'Exclude (—)',
           'searchBar.booruNumberPrefix' => TranslationOverrides.string(_root.$meta, 'searchBar.booruNumberPrefix', {}) ?? 'Booru (N#)',

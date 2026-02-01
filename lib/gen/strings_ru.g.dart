@@ -707,11 +707,11 @@ class _TranslationsTabsRu extends TranslationsTabsEn {
   String get specialFilters => TranslationOverrides.string(_root.$meta, 'tabs.specialFilters', {}) ?? 'Специальные фильтры:';
   @override
   String get loadedFilter =>
-      TranslationOverrides.string(_root.$meta, 'tabs.loadedFilter', {}) ?? '"Загружено" - показать вкладки с загруженными элементами';
+      TranslationOverrides.string(_root.$meta, 'tabs.loadedFilter', {}) ?? '«Загружено» - показать вкладки с загруженными элементами';
   @override
   String get notLoadedFilter =>
       TranslationOverrides.string(_root.$meta, 'tabs.notLoadedFilter', {}) ??
-      '"Не загружено" - показать вкладки, которые не загружены и/или имеют ноль элементов';
+      '«Не загружено» - показать вкладки, которые не загружены и/или имеют ноль элементов';
   @override
   String get notLoadedItalic => TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? 'Незагруженные вкладки имеют курсивный текст';
   @override
@@ -1172,7 +1172,7 @@ class _TranslationsTagViewRu extends TranslationsTagViewEn {
   @override
   String get sourceDialogText2 =>
       TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText2', {}) ??
-      'Ты можешь выбрать любой текст ниже длительным нажатием, затем нажми "Открыть выбранное", чтобы попытаться открыть его как ссылку:';
+      'Ты можешь выбрать любой текст ниже длительным нажатием, затем нажми «Открыть выбранное», чтобы попытаться открыть его как ссылку:';
   @override
   String get noTextSelected => TranslationOverrides.string(_root.$meta, 'tagView.noTextSelected', {}) ?? '[Текст не выбран]';
   @override
@@ -1232,10 +1232,10 @@ class _TranslationsPinnedTagsRu extends TranslationsPinnedTagsEn {
   String get unpin => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpin', {}) ?? 'Открепить';
   @override
   String pinQuestion({required String tag}) =>
-      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Закрепить "${tag}" для быстрого доступа?';
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Закрепить «${tag}» для быстрого доступа?';
   @override
   String unpinQuestion({required String tag}) =>
-      TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Убрать "${tag}" из закрепленных тегов?';
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Убрать «${tag}» из закрепленных тегов?';
   @override
   String onlyForBooru({required String name}) =>
       TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Только для ${name}';
@@ -1307,7 +1307,7 @@ class _TranslationsSearchBarRu extends TranslationsSearchBarEn {
       TranslationOverrides.string(_root.$meta, 'searchBar.tagSuggestionsNotAvailable', {}) ?? 'Предложения тегов недоступны для этого сайта';
   @override
   String copiedTagToClipboard({required String tag}) =>
-      TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? '"${tag}": скопировано в буфер обмена';
+      TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? '«${tag}»: скопировано в буфер обмена';
   @override
   String get prefix => TranslationOverrides.string(_root.$meta, 'searchBar.prefix', {}) ?? 'Префикс';
   @override
@@ -1720,7 +1720,7 @@ class _TranslationsSettingsLanguageRu extends TranslationsSettingsLanguageEn {
   @override
   String get visitForDetails =>
       TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-      'Посети <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate';
+      'Посети <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate';
 }
 
 // Path: settings.booru
@@ -1760,7 +1760,7 @@ class _TranslationsSettingsBooruRu extends TranslationsSettingsBooruEn {
   @override
   String get booruSharingMsgAndroid =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-      'Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на "Добавить ссылку" и выбери все доступные опции';
+      'Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на «Добавить ссылку» и выбери все доступные опции';
   @override
   String get addedBoorus => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Добавленные сайты';
   @override
@@ -1979,7 +1979,7 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
   @override
   String get previewQualityHelpNote =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpNote', {}) ??
-      '[Примечание]: Качество "Семплы" может заметно снизить производительность, особенно если у тебя слишком много столбцов в сетке превью';
+      '[Примечание]: Качество «Семплы» может заметно снизить производительность, особенно если у тебя слишком много столбцов в сетке превью';
   @override
   String get previewDisplay => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplay', {}) ?? 'Отображение превью';
   @override
@@ -2009,7 +2009,7 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
   String get gifThumbnails => TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnails', {}) ?? 'GIF превью';
   @override
   String get gifThumbnailsRequires =>
-      TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnailsRequires', {}) ?? 'Требует "Не масштабировать изображения"';
+      TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnailsRequires', {}) ?? 'Требует «Не масштабировать изображения»';
   @override
   String get scrollPreviewsButtonsPosition =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.scrollPreviewsButtonsPosition', {}) ?? 'Позиция кнопок прокрутки превью';
@@ -2192,7 +2192,7 @@ class _TranslationsSettingsViewerRu extends TranslationsSettingsViewerEn {
       TranslationOverrides.string(_root.$meta, 'settings.viewer.thisButtonCannotBeDisabled', {}) ?? 'Эта кнопка не может быть отключена';
   @override
   String get defaultShareAction =>
-      TranslationOverrides.string(_root.$meta, 'settings.viewer.defaultShareAction', {}) ?? 'Действие при "Поделиться" по умолчанию';
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.defaultShareAction', {}) ?? 'Действие при «Поделиться» по умолчанию';
   @override
   String get shareActions => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActions', {}) ?? 'Поделиться';
   @override
@@ -2756,7 +2756,7 @@ class _TranslationsSettingsNetworkRu extends TranslationsSettingsNetworkEn {
       TranslationOverrides.string(_root.$meta, 'settings.network.cookiesFor', {'booruName': booruName}) ?? 'Куки для ${booruName}:';
   @override
   String cookieDeleted({required String cookieName}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.network.cookieDeleted', {'cookieName': cookieName}) ?? 'Куки "${cookieName}" удалено';
+      TranslationOverrides.string(_root.$meta, 'settings.network.cookieDeleted', {'cookieName': cookieName}) ?? 'Куки «${cookieName}» удалено';
   @override
   String get clearCookies => TranslationOverrides.string(_root.$meta, 'settings.network.clearCookies', {}) ?? 'Очистить куки';
   @override
@@ -4230,10 +4230,10 @@ extension on TranslationsRu {
                 'Второе число - индекс вкладки в текущем списке, появляется при активной фильтрации/сортировке',
           'tabs.specialFilters' => TranslationOverrides.string(_root.$meta, 'tabs.specialFilters', {}) ?? 'Специальные фильтры:',
           'tabs.loadedFilter' =>
-            TranslationOverrides.string(_root.$meta, 'tabs.loadedFilter', {}) ?? '"Загружено" - показать вкладки с загруженными элементами',
+            TranslationOverrides.string(_root.$meta, 'tabs.loadedFilter', {}) ?? '«Загружено» - показать вкладки с загруженными элементами',
           'tabs.notLoadedFilter' =>
             TranslationOverrides.string(_root.$meta, 'tabs.notLoadedFilter', {}) ??
-                '"Не загружено" - показать вкладки, которые не загружены и/или имеют ноль элементов',
+                '«Не загружено» - показать вкладки, которые не загружены и/или имеют ноль элементов',
           'tabs.notLoadedItalic' =>
             TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? 'Незагруженные вкладки имеют курсивный текст',
           'tabs.noTabsFound' => TranslationOverrides.string(_root.$meta, 'tabs.noTabsFound', {}) ?? 'Вкладки не найдены',
@@ -4373,7 +4373,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Помоги нам с переводом',
           'settings.language.visitForDetails' =>
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-                'Посети <a href="https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization">github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate',
+                'Посети <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate',
           'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Сайты и Поиск',
           'settings.booru.dropdown' => TranslationOverrides.string(_root.$meta, 'settings.booru.dropdown', {}) ?? 'Сайт',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Теги по умолчанию',
@@ -4395,7 +4395,7 @@ extension on TranslationsRu {
           'settings.booru.booruSharing' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Поделиться конфигом сайта',
           'settings.booru.booruSharingMsgAndroid' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-                'Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на "Добавить ссылку" и выбери все доступные опции',
+                'Как автоматически открывать ссылки с конфигами сайта в приложении на Android 12 и выше:\n1) Нажми на кнопку снизу чтобы открыть системные настройки ссылок по умолчанию\n2) Нажми на «Добавить ссылку» и выбери все доступные опции',
           'settings.booru.addedBoorus' => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Добавленные сайты',
           'settings.booru.editBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.editBooru', {}) ?? 'Редактировать конфиг',
           'settings.booru.importBooru' =>
@@ -4549,7 +4549,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpThumbnail', {}) ?? ' - Миниатюра - Низкое разрешение',
           'settings.interface.previewQualityHelpNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpNote', {}) ??
-                '[Примечание]: Качество "Семплы" может заметно снизить производительность, особенно если у тебя слишком много столбцов в сетке превью',
+                '[Примечание]: Качество «Семплы» может заметно снизить производительность, особенно если у тебя слишком много столбцов в сетке превью',
           'settings.interface.previewDisplay' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplay', {}) ?? 'Отображение превью',
           'settings.interface.previewDisplayFallback' =>
@@ -4571,7 +4571,7 @@ extension on TranslationsRu {
                 'Это может негативно повлиять на производительность, особенно на старых устройствах',
           'settings.interface.gifThumbnails' => TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnails', {}) ?? 'GIF превью',
           'settings.interface.gifThumbnailsRequires' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnailsRequires', {}) ?? 'Требует "Не масштабировать изображения"',
+            TranslationOverrides.string(_root.$meta, 'settings.interface.gifThumbnailsRequires', {}) ?? 'Требует «Не масштабировать изображения»',
           'settings.interface.scrollPreviewsButtonsPosition' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.scrollPreviewsButtonsPosition', {}) ?? 'Позиция кнопок прокрутки превью',
           'settings.interface.mouseWheelScrollModifier' =>
@@ -4691,7 +4691,7 @@ extension on TranslationsRu {
           'settings.viewer.thisButtonCannotBeDisabled' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.thisButtonCannotBeDisabled', {}) ?? 'Эта кнопка не может быть отключена',
           'settings.viewer.defaultShareAction' =>
-            TranslationOverrides.string(_root.$meta, 'settings.viewer.defaultShareAction', {}) ?? 'Действие при "Поделиться" по умолчанию',
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.defaultShareAction', {}) ?? 'Действие при «Поделиться» по умолчанию',
           'settings.viewer.shareActions' => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActions', {}) ?? 'Поделиться',
           'settings.viewer.shareActionsAsk' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionsAsk', {}) ?? '- Спросить - всегда спрашивать, как поделиться',
@@ -5146,7 +5146,7 @@ extension on TranslationsRu {
           'settings.network.cookieDeleted' =>
             ({required String cookieName}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.network.cookieDeleted', {'cookieName': cookieName}) ??
-                'Куки "${cookieName}" удалено',
+                'Куки «${cookieName}» удалено',
           'settings.network.clearCookies' => TranslationOverrides.string(_root.$meta, 'settings.network.clearCookies', {}) ?? 'Очистить куки',
           'settings.network.clearCookiesFor' =>
             ({required String booruName}) =>
@@ -5678,7 +5678,7 @@ extension on TranslationsRu {
                 'Текст в поле источника не может быть открыт как ссылка, либо потому что это не ссылка, либо потому что несколько ссылок в одной строке.',
           'tagView.sourceDialogText2' =>
             TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText2', {}) ??
-                'Ты можешь выбрать любой текст ниже длительным нажатием, затем нажми "Открыть выбранное", чтобы попытаться открыть его как ссылку:',
+                'Ты можешь выбрать любой текст ниже длительным нажатием, затем нажми «Открыть выбранное», чтобы попытаться открыть его как ссылку:',
           'tagView.noTextSelected' => TranslationOverrides.string(_root.$meta, 'tagView.noTextSelected', {}) ?? '[Текст не выбран]',
           'tagView.copySelected' =>
             ({required String type}) => TranslationOverrides.string(_root.$meta, 'tagView.copySelected', {'type': type}) ?? 'Копировать ${type}',
@@ -5708,10 +5708,10 @@ extension on TranslationsRu {
           'pinnedTags.unpin' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpin', {}) ?? 'Открепить',
           'pinnedTags.pinQuestion' =>
             ({required String tag}) =>
-                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Закрепить "${tag}" для быстрого доступа?',
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? 'Закрепить «${tag}» для быстрого доступа?',
           'pinnedTags.unpinQuestion' =>
             ({required String tag}) =>
-                TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Убрать "${tag}" из закрепленных тегов?',
+                TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ?? 'Убрать «${tag}» из закрепленных тегов?',
           'pinnedTags.onlyForBooru' =>
             ({required String name}) => TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Только для ${name}',
           'pinnedTags.labelsOptional' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? 'Метки (необязательно)',
@@ -5755,7 +5755,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'searchBar.tagSuggestionsNotAvailable', {}) ?? 'Предложения тегов недоступны для этого сайта',
           'searchBar.copiedTagToClipboard' =>
             ({required String tag}) =>
-                TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? '"${tag}": скопировано в буфер обмена',
+                TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? '«${tag}»: скопировано в буфер обмена',
           'searchBar.prefix' => TranslationOverrides.string(_root.$meta, 'searchBar.prefix', {}) ?? 'Префикс',
           'searchBar.exclude' => TranslationOverrides.string(_root.$meta, 'searchBar.exclude', {}) ?? 'Исключить (—)',
           'searchBar.booruNumberPrefix' => TranslationOverrides.string(_root.$meta, 'searchBar.booruNumberPrefix', {}) ?? 'Сайт (N#)',
