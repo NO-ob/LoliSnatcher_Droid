@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:image/image.dart' as img;
 
@@ -257,7 +258,7 @@ class ImageViewerState extends State<ImageViewer> {
     imageListener = ImageStreamListener(
       (imageInfo, syncCall) async {
         if (imageInfo.image.height >= settingsHandler.preloadHeight) {
-          await _checkAndPrepareTiles();
+          await checkAndPrepareTiles();
         }
 
         final prevIsLoaded = isLoaded.value;
@@ -556,7 +557,7 @@ class ImageViewerState extends State<ImageViewer> {
     stopLoading(reason: .user);
   }
 
-  Future<void> _checkAndPrepareTiles() async {
+  Future<void> checkAndPrepareTiles() async {
     if (isTiled || isTilingProcessing == true) return;
 
     final String url = useFullImage ? widget.booruItem.fileURL : widget.booruItem.sampleURL;
@@ -603,10 +604,13 @@ class ImageViewerState extends State<ImageViewer> {
           });
         }
 
-        final List<Uint8List> slices = await compute(_sliceImageOnIsolate, {
-          'path': cachePath,
-          'sliceHeight': kMaxTextureHeight,
-        });
+        final List<Uint8List> slices = await compute(
+          sliceImageOnIsolate,
+          {
+            'path': cachePath,
+            'sliceHeight': kMaxTextureHeight,
+          },
+        );
 
         if (mounted) {
           setState(() {
@@ -629,7 +633,7 @@ class ImageViewerState extends State<ImageViewer> {
                 return MemoryImage(s);
               }
             }).toList();
-            final double maxWidth = min(size.width, widthLimit!.toDouble());
+            final double maxWidth = min(size.width, widthLimit?.toDouble() ?? size.height);
             tiledSize = shouldResize ? Size(maxWidth, maxWidth / size.aspectRatio) : size;
             isTiled = true;
             isTilingProcessing = false;
@@ -645,7 +649,14 @@ class ImageViewerState extends State<ImageViewer> {
       }
       descriptor.dispose();
       buffer.dispose();
-    } catch (e) {
+    } catch (e, s) {
+      Logger.Inst().log(
+        e,
+        'ImageViewer',
+        'checkAndPrepareTiles',
+        LogTypes.exception,
+        s: s,
+      );
       if (mounted) {
         setState(() {
           isTilingProcessing = false;
@@ -654,7 +665,7 @@ class ImageViewerState extends State<ImageViewer> {
     }
   }
 
-  static Future<List<Uint8List>> _sliceImageOnIsolate(Map<String, dynamic> params) async {
+  static Future<List<Uint8List>> sliceImageOnIsolate(Map<String, dynamic> params) async {
     final String path = params['path'];
     final int sliceHeight = params['sliceHeight'];
 
