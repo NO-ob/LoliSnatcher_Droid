@@ -535,7 +535,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
       // Tags bar (for multiple tags mode)
       if (hasMultipleTags)
         Container(
-          height: 60,
+          height: 44,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(
             border: Border(
