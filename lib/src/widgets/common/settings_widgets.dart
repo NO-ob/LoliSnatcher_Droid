@@ -233,10 +233,7 @@ class SettingsToggle extends StatelessWidget {
                 child: leadingIcon,
               ),
             Expanded(
-              child: Text(
-                title,
-                style: DefaultTextStyle.of(context).style,
-              ),
+              child: Text(title),
             ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
@@ -326,10 +323,7 @@ class SettingsToggleTristate extends StatelessWidget {
                 child: leadingIcon,
               ),
             Expanded(
-              child: Text(
-                title,
-                style: DefaultTextStyle.of(context).style,
-              ),
+              child: Text(title),
             ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
@@ -404,10 +398,7 @@ class SettingsSegmentedButton<T> extends StatelessWidget {
                 child: leadingIcon,
               ),
             Expanded(
-              child: Text(
-                title,
-                style: DefaultTextStyle.of(context).style,
-              ),
+              child: Text(title),
             ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
@@ -423,36 +414,57 @@ class SettingsSegmentedButton<T> extends StatelessWidget {
             trailingIcon ?? const SizedBox(width: 8),
           ],
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SegmentedButton(
-              onSelectionChanged: (value) => onChanged(value.first),
-              emptySelectionAllowed: false,
-              multiSelectionEnabled: false,
-              style: ButtonStyle(
-                padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-                  const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SegmentedButton(
+                onSelectionChanged: (value) => onChanged(value.first),
+                emptySelectionAllowed: false,
+                multiSelectionEnabled: false,
+                style: ButtonStyle(
+                  padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+                    const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
                   ),
                 ),
+                direction: Axis.horizontal,
+                segments: [
+                  for (final T v in values)
+                    ButtonSegment(
+                      value: v,
+                      icon: const Icon(null),
+                      label: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 2,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                itemTitleBuilder(v),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const Icon(null),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+                selected: {value},
               ),
-              segments: [
-                for (final T v in values)
-                  ButtonSegment(
-                    value: v,
-                    label: Text(itemTitleBuilder(v)),
-                  ),
-              ],
-              selected: {value},
-            ),
-            if (subtitle != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: subtitle,
-              ),
-          ],
+              if (subtitle != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: subtitle,
+                ),
+            ],
+          ),
         ),
         shape: Border(
           // draw top border when item is in the middle of other items, but they are not listtile
@@ -557,30 +569,39 @@ class SettingsDropdown<T> extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: ListTile(
-        title: LoliDropdown(
-          value: value,
-          onChanged: onChanged ?? (item) {},
-          items: items.where((item) => itemFilter?.call(item) ?? true).toList(),
-          clearable: clearable,
-          expandableByScroll: expendableByScroll,
-          itemExtent: itemExtent,
-          itemBuilder: (item) {
-            final bool isCurrent = value == item;
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title),
+            const SizedBox(height: 8),
+            LoliDropdown(
+              value: value,
+              onChanged: onChanged ?? (item) {},
+              items: items.where((item) => itemFilter?.call(item) ?? true).toList(),
+              clearable: clearable,
+              expandableByScroll: expendableByScroll,
+              itemExtent: itemExtent,
+              itemBuilder: (item) {
+                final bool isCurrent = value == item;
 
-            return Container(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
-              alignment: Alignment.centerLeft,
-              decoration: isCurrent
-                  ? BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                    )
-                  : null,
-              child: getItemWidget(item),
-            );
-          },
-          selectedItemBuilder: getSelectedItemWidget,
-          labelText: title,
+                return Container(
+                  padding: const EdgeInsets.only(left: 16, right: 16),
+                  constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+                  alignment: Alignment.centerLeft,
+                  decoration: isCurrent
+                      ? BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                        )
+                      : null,
+                  child: getItemWidget(item),
+                );
+              },
+              selectedItemBuilder: getSelectedItemWidget,
+              labelBuilder: () => const SizedBox.shrink(),
+              labelText: title,
+            ),
+          ],
         ),
         subtitle: subtitle,
         trailing:
@@ -1094,8 +1115,8 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         scrollPadding: const EdgeInsets.all(kToolbarHeight),
         contextMenuBuilder: widget.contextMenuBuilder,
         decoration: InputDecoration(
-          labelText: widget.title,
           hintText: widget.hintText,
+          errorMaxLines: 3,
           errorText: widget.validator?.call(widget.controller.text),
           contentPadding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
           prefixIcon: widget.prefixIcon,
@@ -1110,13 +1131,28 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
     // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
     if (widget.onlyInput) {
-      return field;
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(widget.title),
+          field,
+          ?widget.subtitle,
+        ],
+      );
     }
 
     return Material(
       color: Colors.transparent,
       child: ListTile(
-        title: field,
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.title),
+            field,
+          ],
+        ),
         subtitle: widget.subtitle,
         trailing: widget.trailingIcon,
         dense: false,

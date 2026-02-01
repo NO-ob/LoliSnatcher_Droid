@@ -111,10 +111,16 @@ extension BoolExtras on bool {
 }
 
 String formatNumber(num number) {
-  final formatter = NumberFormat.decimalPattern(
-    SettingsHandler.instance.locale.value?.languageCode ?? PlatformDispatcher.instance.locale.languageCode,
-  );
-  return formatter.format(number);
+  try {
+    final formatter = NumberFormat.decimalPattern(
+      SettingsHandler.instance.locale.value?.languageCode ?? PlatformDispatcher.instance.locale.languageCode,
+    );
+    return formatter.format(number);
+  } catch (_) {
+    // workaround for dev locale
+    final formatter = NumberFormat.decimalPattern('en');
+    return formatter.format(number);
+  }
 }
 
 String formatNumberShort(num number) {

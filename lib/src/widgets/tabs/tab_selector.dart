@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:auto_size_text_plus/auto_size_text_plus.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
@@ -148,8 +148,16 @@ class TabSelector extends StatelessWidget {
                       label: Obx(() {
                         final totalCount = currentTab.booruHandler.totalCount.value;
 
-                        return RichText(
-                          text: TextSpan(
+                        return MarqueeText.rich(
+                          isExpanded: false,
+                          placeholderDimensions: const [
+                            PlaceholderDimensions(
+                              // will hide whe WidgetSpan when Marquee is active, for some reason icon won't render there
+                              size: Size.zero,
+                              alignment: PlaceholderAlignment.middle,
+                            ),
+                          ],
+                          textSpan: TextSpan(
                             style: inputDecoration.labelStyle?.copyWith(
                               color: color ?? inputDecoration.labelStyle?.color,
                             ),
@@ -171,14 +179,13 @@ class TabSelector extends StatelessWidget {
                                     ),
                                   ),
                                 ),
+                                //
                                 TextSpan(
                                   text: totalCount.toFormattedString(),
                                 ),
                               ],
                             ],
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         );
                       }),
                       labelStyle: inputDecoration.labelStyle?.copyWith(

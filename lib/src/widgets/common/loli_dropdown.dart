@@ -391,6 +391,7 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
     this.labelColor,
     this.labelStyle,
     this.labelBuilder,
+    this.hintText,
     this.withBorder = true,
     this.expandableByScroll = false,
     super.key,
@@ -405,6 +406,7 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
   final Color? labelColor;
   final TextStyle? labelStyle;
   final Widget Function()? labelBuilder;
+  final String? hintText;
   final bool withBorder;
   final bool expandableByScroll;
 
@@ -485,9 +487,7 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
                           color: labelColor ?? inputDecoration.labelStyle?.color,
                         ),
                     children: [
-                      TextSpan(
-                        text: labelText,
-                      ),
+                      TextSpan(text: labelText),
                     ],
                   ),
                 ),
@@ -496,6 +496,7 @@ class LoliMultiselectDropdown<T> extends StatelessWidget {
                 inputDecoration.labelStyle?.copyWith(
                   color: labelColor ?? inputDecoration.labelStyle?.color,
                 ),
+            hintText: hintText,
             contentPadding: contentPadding,
             border: inputDecoration.border?.copyWith(
               borderSide: BorderSide(

@@ -15,7 +15,10 @@ dependencies:
     sdk: flutter
   alice_lightweight: ^3.10.0
   app_links: ^7.0.0
-  auto_size_text_plus: ^3.0.2
+  auto_size_text: # ^3.0.0
+    git:
+      url: https://github.com/ChrisElliotUK/auto_size_text.git
+      ref: ae3b9df6d618166f94d5c131ffc468d73285c6a8 # patch-1
   calendar_date_picker2: ^2.0.1
   chewie: ^1.13.0
   collection: ^1.19.1

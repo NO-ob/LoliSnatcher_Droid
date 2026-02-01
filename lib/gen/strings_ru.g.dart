@@ -606,7 +606,7 @@ class _TranslationsTabsRu extends TranslationsTabsEn {
   String get selectABooruOrLeaveEmpty =>
       TranslationOverrides.string(_root.$meta, 'tabs.selectABooruOrLeaveEmpty', {}) ?? 'Выбери сайт или оставь пустым';
   @override
-  String get addPosition => TranslationOverrides.string(_root.$meta, 'tabs.addPosition', {}) ?? 'Позиция добавления:';
+  String get addPosition => TranslationOverrides.string(_root.$meta, 'tabs.addPosition', {}) ?? 'Позиция добавления';
   @override
   String get addModePrevTab => TranslationOverrides.string(_root.$meta, 'tabs.addModePrevTab', {}) ?? 'Предыдущая вкладка';
   @override
@@ -614,7 +614,7 @@ class _TranslationsTabsRu extends TranslationsTabsEn {
   @override
   String get addModeListEnd => TranslationOverrides.string(_root.$meta, 'tabs.addModeListEnd', {}) ?? 'Конец списка';
   @override
-  String get usedQuery => TranslationOverrides.string(_root.$meta, 'tabs.usedQuery', {}) ?? 'Используемый запрос:';
+  String get usedQuery => TranslationOverrides.string(_root.$meta, 'tabs.usedQuery', {}) ?? 'Используемый запрос';
   @override
   String get queryModeDefault => TranslationOverrides.string(_root.$meta, 'tabs.queryModeDefault', {}) ?? 'По умолчанию';
   @override
@@ -1661,9 +1661,9 @@ class _TranslationsWebviewNavigationRu extends TranslationsWebviewNavigationEn {
 
   // Translations
   @override
-  String get enterUrlLabel => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Введи ссылку';
+  String get enterUrlLabel => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Ввести ссылку';
   @override
-  String get enterCustomUrl => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Введи ссылку';
+  String get enterCustomUrl => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Ввести ссылку';
   @override
   String navigateTo({required String url}) =>
       TranslationOverrides.string(_root.$meta, 'webview.navigation.navigateTo', {'url': url}) ?? 'Перейти на ${url}';
@@ -2164,8 +2164,7 @@ class _TranslationsSettingsViewerRu extends TranslationsSettingsViewerEn {
   String get enableRotation => TranslationOverrides.string(_root.$meta, 'settings.viewer.enableRotation', {}) ?? 'Включить вращение';
   @override
   String get enableRotationSubtitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.viewer.enableRotationSubtitle', {}) ??
-      'Двойное нажатие для сброса (работает только на изображениях)';
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.enableRotationSubtitle', {}) ?? 'Двойное нажатие для сброса';
   @override
   String get toolbarButtonsOrder =>
       TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarButtonsOrder', {}) ?? 'Порядок кнопок панели инструментов';
@@ -3011,14 +3010,13 @@ class _TranslationsSettingsTagsFiltersRu extends TranslationsSettingsTagsFilters
   String get noFiltersAdded => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? 'Нет фильтров';
   @override
   String get removeHated =>
-      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? 'Скрывать элементы с ненавистными тегами';
+      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? 'Скрыть элементы с ненавистными тегами';
   @override
-  String get removeFavourited =>
-      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeFavourited', {}) ?? 'Скрывать избранные элементы';
+  String get removeFavourited => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeFavourited', {}) ?? 'Скрыть избранные элементы';
   @override
-  String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeSnatched', {}) ?? 'Скрывать скачанные элементы';
+  String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeSnatched', {}) ?? 'Скрыть скачанные элементы';
   @override
-  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeAI', {}) ?? 'Скрывать элементы с ИИ тегами';
+  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeAI', {}) ?? 'Скрыть элементы с ИИ тегами';
 }
 
 // Path: settings.sync
@@ -4174,11 +4172,11 @@ extension on TranslationsRu {
           'tabs.addNewTab' => TranslationOverrides.string(_root.$meta, 'tabs.addNewTab', {}) ?? 'Добавить новую вкладку',
           'tabs.selectABooruOrLeaveEmpty' =>
             TranslationOverrides.string(_root.$meta, 'tabs.selectABooruOrLeaveEmpty', {}) ?? 'Выбери сайт или оставь пустым',
-          'tabs.addPosition' => TranslationOverrides.string(_root.$meta, 'tabs.addPosition', {}) ?? 'Позиция добавления:',
+          'tabs.addPosition' => TranslationOverrides.string(_root.$meta, 'tabs.addPosition', {}) ?? 'Позиция добавления',
           'tabs.addModePrevTab' => TranslationOverrides.string(_root.$meta, 'tabs.addModePrevTab', {}) ?? 'Предыдущая вкладка',
           'tabs.addModeNextTab' => TranslationOverrides.string(_root.$meta, 'tabs.addModeNextTab', {}) ?? 'Следующая вкладка',
           'tabs.addModeListEnd' => TranslationOverrides.string(_root.$meta, 'tabs.addModeListEnd', {}) ?? 'Конец списка',
-          'tabs.usedQuery' => TranslationOverrides.string(_root.$meta, 'tabs.usedQuery', {}) ?? 'Используемый запрос:',
+          'tabs.usedQuery' => TranslationOverrides.string(_root.$meta, 'tabs.usedQuery', {}) ?? 'Используемый запрос',
           'tabs.queryModeDefault' => TranslationOverrides.string(_root.$meta, 'tabs.queryModeDefault', {}) ?? 'По умолчанию',
           'tabs.queryModeCurrent' => TranslationOverrides.string(_root.$meta, 'tabs.queryModeCurrent', {}) ?? 'Текущий',
           'tabs.queryModeCustom' => TranslationOverrides.string(_root.$meta, 'tabs.queryModeCustom', {}) ?? 'Пользовательский',
@@ -4342,8 +4340,8 @@ extension on TranslationsRu {
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Вебвью',
           'webview.notSupportedOnDevice' =>
             TranslationOverrides.string(_root.$meta, 'webview.notSupportedOnDevice', {}) ?? 'Не поддерживается на этом устройстве',
-          'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Введи ссылку',
-          'webview.navigation.enterCustomUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Введи ссылку',
+          'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Ввести ссылку',
+          'webview.navigation.enterCustomUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Ввести ссылку',
           'webview.navigation.navigateTo' =>
             ({required String url}) => TranslationOverrides.string(_root.$meta, 'webview.navigation.navigateTo', {'url': url}) ?? 'Перейти на ${url}',
           'webview.navigation.listCookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.listCookies', {}) ?? 'Список куки',
@@ -4674,8 +4672,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.viewer.hideTranslationNotesByDefault', {}) ?? 'Скрывать заметки перевода по умолчанию',
           'settings.viewer.enableRotation' => TranslationOverrides.string(_root.$meta, 'settings.viewer.enableRotation', {}) ?? 'Включить вращение',
           'settings.viewer.enableRotationSubtitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.viewer.enableRotationSubtitle', {}) ??
-                'Двойное нажатие для сброса (работает только на изображениях)',
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.enableRotationSubtitle', {}) ?? 'Двойное нажатие для сброса',
           'settings.viewer.toolbarButtonsOrder' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.toolbarButtonsOrder', {}) ?? 'Порядок кнопок панели инструментов',
           'settings.viewer.buttonsOrder' => TranslationOverrides.string(_root.$meta, 'settings.viewer.buttonsOrder', {}) ?? 'Порядок кнопок',
@@ -5313,13 +5310,13 @@ extension on TranslationsRu {
           'settings.tagsFilters.noFiltersAdded' =>
             TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? 'Нет фильтров',
           'settings.tagsFilters.removeHated' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? 'Скрывать элементы с ненавистными тегами',
+            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? 'Скрыть элементы с ненавистными тегами',
           'settings.tagsFilters.removeFavourited' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeFavourited', {}) ?? 'Скрывать избранные элементы',
+            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeFavourited', {}) ?? 'Скрыть избранные элементы',
           'settings.tagsFilters.removeSnatched' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeSnatched', {}) ?? 'Скрывать скачанные элементы',
+            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeSnatched', {}) ?? 'Скрыть скачанные элементы',
           'settings.tagsFilters.removeAI' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeAI', {}) ?? 'Скрывать элементы с ИИ тегами',
+            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeAI', {}) ?? 'Скрыть элементы с ИИ тегами',
           'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync',
           'settings.sync.dbError' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'База данных должна быть включена чтобы использовать LoliSync',

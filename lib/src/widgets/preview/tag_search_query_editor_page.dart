@@ -826,68 +826,77 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       child: InkWell(
         onTap: widget.enabled ? _openTagSearch : null,
         borderRadius: BorderRadius.circular(4),
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: widget.title,
-            hintText: widget.hintText ?? widget.title,
-            contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-            suffixIcon: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (widget.clearable && hasText)
-                  IconButton(
-                    icon: Icon(
-                      Icons.close_rounded,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    onPressed: _clear,
-                  ),
-                IconButton(
-                  icon: Icon(
-                    Icons.search,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                  onPressed: widget.enabled ? _openTagSearch : null,
-                ),
-              ],
-            ),
-            enabled: widget.enabled,
-          ),
-          child: hasText
-              ? widget.allowMultipleTags
-                    ? Wrap(
-                        spacing: 4,
-                        runSpacing: 4,
-                        children: _controller.text.split(' ').where((t) => t.isNotEmpty).map((tag) {
-                          final tagColor = tagHandler.getTag(tag).getColour();
-                          return Chip(
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            visualDensity: VisualDensity.compact,
-                            label: Text(
-                              tag.replaceAll('_', ' '),
-                              style: TextStyle(
-                                color: tagColor == Colors.transparent ? null : tagColor,
-                              ),
-                            ),
-                            padding: EdgeInsets.zero,
-                            labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-                          );
-                        }).toList(),
-                      )
-                    : Text(
-                        _controller.text.replaceAll('_', ' '),
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: tagHandler.getTag(_controller.text).getColour(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(widget.title),
+            const SizedBox(height: 8),
+            InputDecorator(
+              decoration: InputDecoration(
+                hintText: widget.hintText,
+                contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.clearable && hasText && widget.enabled)
+                      IconButton(
+                        icon: Icon(
+                          Icons.close_rounded,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      )
-              : Text(
-                  widget.hintText ?? widget.title,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).hintColor,
-                  ),
+                        onPressed: _clear,
+                      ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.search,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      onPressed: widget.enabled ? _openTagSearch : null,
+                    ),
+                  ],
                 ),
+                enabled: widget.enabled,
+              ),
+              child: hasText
+                  ? widget.allowMultipleTags
+                        ? Wrap(
+                            spacing: 4,
+                            runSpacing: 4,
+                            children: _controller.text.split(' ').where((t) => t.isNotEmpty).map((tag) {
+                              final tagColor = tagHandler.getTag(tag).getColour();
+                              return Chip(
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                visualDensity: VisualDensity.compact,
+                                label: Text(
+                                  tag.replaceAll('_', ' '),
+                                  style: TextStyle(
+                                    color: tagColor == Colors.transparent ? null : tagColor,
+                                  ),
+                                ),
+                                padding: EdgeInsets.zero,
+                                labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                              );
+                            }).toList(),
+                          )
+                        : Text(
+                            _controller.text.replaceAll('_', ' '),
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: tagHandler.getTag(_controller.text).getColour(),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                  : (widget.hintText != null
+                        ? Text(
+                            widget.hintText!,
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Theme.of(context).hintColor,
+                            ),
+                          )
+                        : null),
+            ),
+          ],
         ),
       ),
     );

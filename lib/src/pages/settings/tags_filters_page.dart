@@ -4,6 +4,7 @@ import 'package:lolisnatcher/src/data/tag.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_add_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_edit_dialog.dart';
@@ -184,25 +185,28 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
             unselectedLabelStyle: const TextStyle(fontSize: 16),
             tabs: [
               Tab(
-                text: context.loc.settings.tagsFilters.hated,
                 icon: const Icon(
                   CupertinoIcons.eye_slash,
                   color: Colors.red,
                 ),
+                height: 60,
+                child: MarqueeText(text: context.loc.settings.tagsFilters.hated),
               ),
               Tab(
-                text: context.loc.settings.tagsFilters.loved,
                 icon: const Icon(
                   Icons.star,
                   color: Colors.yellow,
                 ),
+                height: 60,
+                child: MarqueeText(text: context.loc.settings.tagsFilters.loved),
               ),
               Tab(
-                text: context.loc.settings.title,
                 icon: Icon(
                   Icons.settings,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
+                height: 60,
+                child: MarqueeText(text: context.loc.settings.title),
               ),
             ],
           ),

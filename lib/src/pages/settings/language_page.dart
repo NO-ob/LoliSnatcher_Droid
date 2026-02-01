@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:country_flags/country_flags.dart';
@@ -8,14 +9,43 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
-class LanguageSettingsPage extends StatefulWidget {
+class LanguageSettingsPage extends StatelessWidget {
   const LanguageSettingsPage({super.key});
 
   @override
-  State<LanguageSettingsPage> createState() => _LanguageSettingsPageState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: SettingsAppBar(
+        title: context.loc.settings.language.title,
+      ),
+      body: Center(
+        child: ListView(
+          children: [
+            const LanguageDropdown(),
+            SettingsButton(name: context.loc.settings.language.helpUsTranslate),
+            SettingsButton(
+              name: context.loc.settings.language.visitForDetails,
+              useHtml: true,
+              trailingIcon: const Icon(Icons.exit_to_app),
+            ),
+            // TODO Add weblate widget
+            const Placeholder(fallbackHeight: 300),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
+class LanguageDropdown extends StatefulWidget {
+  const LanguageDropdown({super.key});
+
+  @override
+  State<LanguageDropdown> createState() => _LanguageDropdownState();
+}
+
+class _LanguageDropdownState extends State<LanguageDropdown> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   AppLocale? locale;
@@ -29,23 +59,6 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
     });
 
     locale = settingsHandler.locale.value;
-  }
-
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
-    settingsHandler.locale.value = locale;
-    await settingsHandler.setLocale(locale);
-    // load boorus and force tab backup to avoid losing tabs from favs/dls
-    await settingsHandler.loadBoorus();
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    unawaited(SearchHandler.instance.backupTabs());
-
-    if (result) {
-      Navigator.of(context).pop();
-    }
   }
 
   Widget buildFlag(AppLocale? locale) {
@@ -128,66 +141,48 @@ class _LanguageSettingsPageState extends State<LanguageSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: _onPopInvoked,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: SettingsAppBar(
-          title: context.loc.settings.language.title,
-        ),
-        body: Center(
-          child: ListView(
-            children: [
-              SettingsDropdown(
-                value: locale,
-                items:
-                    const [
-                          null,
-                          ...AppLocale.values,
-                        ]
-                        .where(
-                          // don't show dev loc when not in debug (unless it's already selected)
-                          (e) => e?.name != 'dev' || settingsHandler.isDebug.value || locale?.name == e?.name,
-                        )
-                        .toList(),
-                onChanged: (newValue) async {
-                  locale = newValue;
-                  setState(() {});
-                  await settingsHandler.setLocale(locale);
-                  setState(() {});
-                },
-                title: context.loc.settings.language.title,
-                itemBuilder: (e) => Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: buildFlag(e),
-                    ),
-                    Text(
-                      e?.localeName ?? context.loc.settings.language.system,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SettingsButton(name: context.loc.settings.language.helpUsTranslate),
-              SettingsButton(
-                name: context.loc.settings.language.visitForDetails,
-                useHtml: true,
-                trailingIcon: const Icon(Icons.exit_to_app),
-              ),
-              // TODO Add weblate widget
-              const Placeholder(fallbackHeight: 300),
-            ],
+    return SettingsDropdown(
+      value: locale,
+      items:
+          const [
+                null,
+                ...AppLocale.values,
+              ]
+              .where(
+                // don't show dev loc when not in debug (unless it's already selected)
+                (e) => e?.name != 'dev' || settingsHandler.isDebug.value || locale?.name == e?.name,
+              )
+              .toList(),
+      onChanged: (newValue) async {
+        locale = newValue;
+        setState(() {});
+        settingsHandler.locale.value = locale;
+        await settingsHandler.setLocale(locale);
+        // load boorus and force tab backup to avoid losing tabs from favs/dls
+        await settingsHandler.loadBoorus();
+        await settingsHandler.saveSettings(restate: false);
+        unawaited(SearchHandler.instance.backupTabs());
+        setState(() {});
+      },
+      title: context.loc.settings.language.title,
+      itemBuilder: (e) => Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: buildFlag(e),
           ),
-        ),
+          Text(
+            e?.localeName ??
+                '${context.loc.settings.language.system} (${PlatformDispatcher.instance.locale.toLanguageTag()})',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
