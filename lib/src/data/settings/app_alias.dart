@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
 /// Enum representing available app display name aliases for the Android launcher.
@@ -83,7 +81,7 @@ enum AppAlias with SettingsEnum<AppAlias> {
   }
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     // App names are not localized - they are displayed as-is
     return displayName;
   }

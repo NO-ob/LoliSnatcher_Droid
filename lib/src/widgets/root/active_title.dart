@@ -15,9 +15,7 @@ class ActiveTitle extends StatelessWidget {
       valueListenable: searchHandler.tabs,
       builder: (context, tabs, child) {
         if (tabs.isEmpty) {
-          return Text(
-            SettingsHandler.instance.appAlias.locName(context),
-          );
+          return Text(SettingsHandler.instance.appAlias.locName);
         }
 
         return child!;

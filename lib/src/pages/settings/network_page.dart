@@ -107,7 +107,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 },
                 title: context.loc.settings.network.proxy,
                 subtitle: Text(context.loc.settings.network.proxySubtitle),
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               if (!proxyType.isDirect && !proxyType.isSystem) ...[
                 SettingsTextInput(

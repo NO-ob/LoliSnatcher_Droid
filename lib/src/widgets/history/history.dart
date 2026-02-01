@@ -410,7 +410,7 @@ class _HistoryListState extends State<HistoryList> {
               onChanged: (String? input) {
                 getHistory();
               },
-              title: context.loc.history.filterSearchHistory,
+              title: context.loc.search,
               inputType: TextInputType.text,
               clearable: true,
               pasteable: true,

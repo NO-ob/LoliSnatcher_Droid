@@ -859,8 +859,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                                         Padding(
                                           padding: const EdgeInsets.only(left: 12),
                                           child: Text(
-                                            // TODO locale
-                                            NumberFormat.compact(locale: 'en').format(tag.count),
+                                            tag.count.toShortString(),
                                             style: context.theme.textTheme.bodySmall?.copyWith(
                                               color: context.theme.colorScheme.onSurface.withValues(alpha: 0.66),
                                               height: 1,
@@ -1630,7 +1629,10 @@ class _HistoryBlockState extends State<HistoryBlock> {
             const SizedBox(width: double.maxFinite),
             Align(alignment: Alignment.center, child: row),
             const SizedBox(height: 10),
-            Text(context.loc.searchBar.lastSearch(date: formatDate(entry.timestamp)), textAlign: TextAlign.center),
+            Text(
+              context.loc.history.lastSearchWithDate(date: formatDate(entry.timestamp)),
+              textAlign: TextAlign.center,
+            ),
             //
             const SizedBox(height: 20),
             if (widget.onTagApply != null)
@@ -1654,7 +1656,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 } else {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: Text(context.loc.searchBar.unknownBooruType, style: const TextStyle(fontSize: 20)),
+                    title: Text(context.loc.history.unknownBooruType, style: const TextStyle(fontSize: 20)),
                     leadingIcon: Icons.warning_amber,
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
@@ -1681,7 +1683,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 } else {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: Text(context.loc.searchBar.unknownBooruType, style: const TextStyle(fontSize: 20)),
+                    title: Text(context.loc.history.unknownBooruType, style: const TextStyle(fontSize: 20)),
                     leadingIcon: Icons.warning_amber,
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
@@ -2617,7 +2619,7 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
                   ),
                 IconButton(
                   onPressed: () async {
-                    await showPinnedTagsManageDialog(
+                    await showPinnedTagsManagerDialog(
                       context,
                       currentBooru: searchHandler.currentBooru,
                       onTagTap: widget.onTagTap,
@@ -3060,7 +3062,7 @@ class _PinnedTagsReorderDialogState extends State<PinnedTagsReorderDialog> {
   }
 }
 
-Future<bool?> showPinnedTagsManageDialog(
+Future<bool?> showPinnedTagsManagerDialog(
   BuildContext context, {
   required Booru currentBooru,
   required void Function(String tag) onTagTap,
@@ -3069,12 +3071,15 @@ Future<bool?> showPinnedTagsManageDialog(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (_) => PinnedTagsManageDialog(currentBooru: currentBooru, onTagTap: onTagTap),
+    builder: (_) => PinnedTagsManagerDialog(
+      currentBooru: currentBooru,
+      onTagTap: onTagTap,
+    ),
   );
 }
 
-class PinnedTagsManageDialog extends StatefulWidget {
-  const PinnedTagsManageDialog({
+class PinnedTagsManagerDialog extends StatefulWidget {
+  const PinnedTagsManagerDialog({
     required this.currentBooru,
     required this.onTagTap,
     super.key,
@@ -3084,10 +3089,10 @@ class PinnedTagsManageDialog extends StatefulWidget {
   final void Function(String tag) onTagTap;
 
   @override
-  State<PinnedTagsManageDialog> createState() => _PinnedTagsManageDialogState();
+  State<PinnedTagsManagerDialog> createState() => _PinnedTagsManagerDialogState();
 }
 
-class _PinnedTagsManageDialogState extends State<PinnedTagsManageDialog> {
+class _PinnedTagsManagerDialogState extends State<PinnedTagsManagerDialog> {
   final settingsHandler = SettingsHandler.instance;
   final searchHandler = SearchHandler.instance;
   final tagHandler = TagHandler.instance;
@@ -3408,14 +3413,6 @@ class _PinnedTagsManageDialogState extends State<PinnedTagsManageDialog> {
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                IconButton(
-                                  icon: const Icon(Icons.add_rounded),
-                                  tooltip: context.loc.pinnedTags.addToSearch,
-                                  onPressed: () {
-                                    widget.onTagTap(pinnedTag.tagName);
-                                    Navigator.of(context).pop(hasChanges);
-                                  },
-                                ),
                                 IconButton(
                                   icon: Icon(
                                     pinnedTag.labels.isNotEmpty ? Icons.label : Icons.label_outline,

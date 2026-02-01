@@ -518,7 +518,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   String buttonText(GalleryButton button) {
-    final String defaultLabel = button.locName(context);
+    final String defaultLabel = button.locName;
     late String label;
 
     if (page.value == -1) {

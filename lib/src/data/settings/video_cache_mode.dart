@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
@@ -45,14 +43,14 @@ enum VideoCacheMode with SettingsEnum<VideoCacheMode> {
   bool get isStreamCache => this == VideoCacheMode.streamCache;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case VideoCacheMode.stream:
-        return context.loc.settings.video.cacheModeValues.stream;
+        return loc.settings.video.cacheModeValues.stream;
       case VideoCacheMode.cache:
-        return context.loc.settings.video.cacheModeValues.cache;
+        return loc.settings.video.cacheModeValues.cache;
       case VideoCacheMode.streamCache:
-        return context.loc.settings.video.cacheModeValues.streamCache;
+        return loc.settings.video.cacheModeValues.streamCache;
     }
   }
 }

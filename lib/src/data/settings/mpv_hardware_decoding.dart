@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
@@ -72,7 +70,7 @@ enum MpvHardwareDecoding with SettingsEnum<MpvHardwareDecoding> {
   bool get isVulkanCopy => this == MpvHardwareDecoding.vulkanCopy;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     return toJson();
   }
 }

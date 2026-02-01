@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/loli_sync_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/pages/loli_sync_page.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class LoliSyncProgressPage extends StatefulWidget {
@@ -21,13 +22,15 @@ class LoliSyncProgressPage extends StatefulWidget {
     this.settings = false,
     this.booru = false,
     this.tabs = false,
-    this.tabsMode = 'Merge',
+    this.tabsMode = TabsMode.merge,
     this.tags = false,
-    this.tagsMode = 'PreferTypeIfNone',
+    this.tagsMode = TagsMode.preferTypeIfNone,
     super.key,
   });
 
-  final String type, port, tabsMode, tagsMode;
+  final String type, port;
+  final TabsMode tabsMode;
+  final TagsMode tagsMode;
   final String? ip;
   final bool favourites, favouritesv2, snatched, settings, booru, tabs, tags;
   final int favSkip, snatchedSkip;

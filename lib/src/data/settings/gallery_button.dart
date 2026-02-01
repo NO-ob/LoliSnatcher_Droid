@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/gen/strings.g.dart';
 
 /// Enum representing the available gallery toolbar buttons.
@@ -81,30 +79,30 @@ enum GalleryButton {
   bool get isImageSearch => this == GalleryButton.imageSearch;
 
   /// Returns the localized display name for this button.
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case GalleryButton.snatch:
-        return context.loc.galleryButtons.snatch;
+        return loc.galleryButtons.snatch;
       case GalleryButton.favourite:
-        return context.loc.galleryButtons.favourite;
+        return loc.galleryButtons.favourite;
       case GalleryButton.info:
-        return context.loc.galleryButtons.info;
+        return loc.galleryButtons.info;
       case GalleryButton.share:
-        return context.loc.galleryButtons.share;
+        return loc.galleryButtons.share;
       case GalleryButton.select:
-        return context.loc.galleryButtons.select;
+        return loc.galleryButtons.select;
       case GalleryButton.open:
-        return context.loc.galleryButtons.open;
+        return loc.galleryButtons.open;
       case GalleryButton.autoscroll:
-        return context.loc.galleryButtons.slideshow;
+        return loc.galleryButtons.slideshow;
       case GalleryButton.reloadnoscale:
-        return context.loc.galleryButtons.reloadNoScale;
+        return loc.galleryButtons.reloadNoScale;
       case GalleryButton.toggleQuality:
-        return context.loc.galleryButtons.toggleQuality;
+        return loc.galleryButtons.toggleQuality;
       case GalleryButton.externalPlayer:
-        return context.loc.galleryButtons.externalPlayer;
+        return loc.galleryButtons.externalPlayer;
       case GalleryButton.imageSearch:
-        return context.loc.galleryButtons.imageSearch;
+        return loc.galleryButtons.imageSearch;
     }
   }
 }

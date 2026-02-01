@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
@@ -40,12 +38,12 @@ enum ImageQuality with SettingsEnum<ImageQuality> {
   bool get isFullRes => this == ImageQuality.fullRes;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case ImageQuality.sample:
-        return context.loc.settings.viewer.imageQualityValues.sample;
+        return loc.settings.viewer.imageQualityValues.sample;
       case ImageQuality.fullRes:
-        return context.loc.settings.viewer.imageQualityValues.fullRes;
+        return loc.settings.viewer.imageQualityValues.fullRes;
     }
   }
 }

@@ -689,9 +689,6 @@ class _TranslationsTabsDev extends TranslationsTabsEn {
   @override
   String get longPressToMove => TranslationOverrides.string(_root.$meta, 'tabs.longPressToMove', {}) ?? '{Long press on a tab to move it}';
   @override
-  String get resettingToDefaultTags =>
-      TranslationOverrides.string(_root.$meta, 'tabs.resettingToDefaultTags', {}) ?? '{Resetting search to default tags}';
-  @override
   String get numbersInBottomRight =>
       TranslationOverrides.string(_root.$meta, 'tabs.numbersInBottomRight', {}) ?? '{Numbers in the bottom right of the tab:}';
   @override
@@ -711,8 +708,6 @@ class _TranslationsTabsDev extends TranslationsTabsEn {
       '{"Not loaded" - show tabs which are not loaded and/or have zero items}';
   @override
   String get notLoadedItalic => TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? '{Not loaded tabs have italic text}';
-  @override
-  String get filterTabsInput => TranslationOverrides.string(_root.$meta, 'tabs.filterTabsInput', {}) ?? '{Filter tabs}';
   @override
   String get noTabsFound => TranslationOverrides.string(_root.$meta, 'tabs.noTabsFound', {}) ?? '{No tabs found}';
   @override
@@ -769,8 +764,6 @@ class _TranslationsHistoryDev extends TranslationsHistoryEn {
   @override
   String get searchHistoryRequiresDatabase =>
       TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ?? '{Enable database in settings for search history}';
-  @override
-  String get filterSearchHistory => TranslationOverrides.string(_root.$meta, 'history.filterSearchHistory', {}) ?? '{Filter search history}';
   @override
   String lastSearch({required String search}) =>
       TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? '{Last search: ${search}}';
@@ -1132,8 +1125,6 @@ class _TranslationsTagViewDev extends TranslationsTagViewEn {
   @override
   String get score => TranslationOverrides.string(_root.$meta, 'tagView.score', {}) ?? '{Score}';
   @override
-  String get searchTags => TranslationOverrides.string(_root.$meta, 'tagView.searchTags', {}) ?? '{Search tags}';
-  @override
   String get noTagsFound => TranslationOverrides.string(_root.$meta, 'tagView.noTagsFound', {}) ?? '{No tags found}';
   @override
   String get copy => TranslationOverrides.string(_root.$meta, 'tagView.copy', {}) ?? '{Copy}';
@@ -1271,8 +1262,6 @@ class _TranslationsPinnedTagsDev extends TranslationsPinnedTagsEn {
   @override
   String get noPinnedTagsYet => TranslationOverrides.string(_root.$meta, 'pinnedTags.noPinnedTagsYet', {}) ?? '{No pinned tags yet}';
   @override
-  String get addToSearch => TranslationOverrides.string(_root.$meta, 'pinnedTags.addToSearch', {}) ?? '{Add to search}';
-  @override
   String get editLabels => TranslationOverrides.string(_root.$meta, 'pinnedTags.editLabels', {}) ?? '{Edit labels}';
   @override
   String get labels => TranslationOverrides.string(_root.$meta, 'pinnedTags.labels', {}) ?? '{Labels}';
@@ -1331,18 +1320,9 @@ class _TranslationsSearchBarDev extends TranslationsSearchBarEn {
   @override
   String get popular => TranslationOverrides.string(_root.$meta, 'searchBar.popular', {}) ?? '{Popular}';
   @override
-  String get favourites => TranslationOverrides.string(_root.$meta, 'searchBar.favourites', {}) ?? '{Favourties}';
-  @override
-  String get all => TranslationOverrides.string(_root.$meta, 'searchBar.all', {}) ?? '{[All]}';
-  @override
   String get selectDate => TranslationOverrides.string(_root.$meta, 'searchBar.selectDate', {}) ?? '{Select date}';
   @override
   String get selectDatesRange => TranslationOverrides.string(_root.$meta, 'searchBar.selectDatesRange', {}) ?? '{Select dates range}';
-  @override
-  String lastSearch({required String date}) =>
-      TranslationOverrides.string(_root.$meta, 'searchBar.lastSearch', {'date': date}) ?? '{Last search: ${date}}';
-  @override
-  String get unknownBooruType => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? '{Unknown Booru type!}';
   @override
   String get history => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? '{History}';
   @override
@@ -3032,18 +3012,9 @@ class _TranslationsSettingsTagsFiltersDev extends TranslationsSettingsTagsFilter
       TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.alreadyInList', {'tag': tag, 'type': type}) ??
       '{\'${tag}\' is already in ${type} list}';
   @override
-  String searchFiltersCount({required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFiltersCount', {'count': count}) ?? '{Search filters (${count})}';
-  @override
-  String searchFiltersFilteredCount({required int filtered, required int total}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFiltersFilteredCount', {'filtered': filtered, 'total': total}) ??
-      '{Search filters (${filtered}/${total})}';
-  @override
   String get noFiltersFound => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersFound', {}) ?? '{No filters found}';
   @override
   String get noFiltersAdded => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? '{No filters added}';
-  @override
-  String get searchFilters => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFilters', {}) ?? '{Search filters}';
   @override
   String get removeHated => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? '{Remove items with Hated tags}';
   @override
@@ -3174,13 +3145,13 @@ class _TranslationsSettingsSyncDev extends TranslationsSettingsSyncEn {
   @override
   String get tagsSyncModePreferTypeIfNone =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModePreferTypeIfNone', {}) ??
-      '{PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn\'t on this device it will be skipped}';
+      '{Preserve type: If the tag exists with a tag type on the other device and it doesn\'t on this device it will be skipped}';
   @override
   String get tagsSyncModeOverwrite =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModeOverwrite', {}) ??
       '{Overwrite: All tags will be added, if a tag and tag type exists on the other device it will be overwritten}';
   @override
-  String get preferTypeIfNone => TranslationOverrides.string(_root.$meta, 'settings.sync.preferTypeIfNone', {}) ?? '{PreferTypeIfNone}';
+  String get preferTypeIfNone => TranslationOverrides.string(_root.$meta, 'settings.sync.preferTypeIfNone', {}) ?? '{Preserve type}';
   @override
   String get overwrite => TranslationOverrides.string(_root.$meta, 'settings.sync.overwrite', {}) ?? '{Overwrite}';
   @override
@@ -4237,8 +4208,6 @@ extension on TranslationsDev {
           'tabs.selectDeselectAll' => TranslationOverrides.string(_root.$meta, 'tabs.selectDeselectAll', {}) ?? '{Select/deselect all tabs}',
           'tabs.deleteSelectedTabs' => TranslationOverrides.string(_root.$meta, 'tabs.deleteSelectedTabs', {}) ?? '{Delete selected tabs}',
           'tabs.longPressToMove' => TranslationOverrides.string(_root.$meta, 'tabs.longPressToMove', {}) ?? '{Long press on a tab to move it}',
-          'tabs.resettingToDefaultTags' =>
-            TranslationOverrides.string(_root.$meta, 'tabs.resettingToDefaultTags', {}) ?? '{Resetting search to default tags}',
           'tabs.numbersInBottomRight' =>
             TranslationOverrides.string(_root.$meta, 'tabs.numbersInBottomRight', {}) ?? '{Numbers in the bottom right of the tab:}',
           'tabs.firstNumberTabIndex' =>
@@ -4253,7 +4222,6 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'tabs.notLoadedFilter', {}) ??
                 '{"Not loaded" - show tabs which are not loaded and/or have zero items}',
           'tabs.notLoadedItalic' => TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? '{Not loaded tabs have italic text}',
-          'tabs.filterTabsInput' => TranslationOverrides.string(_root.$meta, 'tabs.filterTabsInput', {}) ?? '{Filter tabs}',
           'tabs.noTabsFound' => TranslationOverrides.string(_root.$meta, 'tabs.noTabsFound', {}) ?? '{No tabs found}',
           'tabs.copy' => TranslationOverrides.string(_root.$meta, 'tabs.copy', {}) ?? '{Copy}',
           'tabs.moveAction' => TranslationOverrides.string(_root.$meta, 'tabs.moveAction', {}) ?? '{Move}',
@@ -4315,7 +4283,6 @@ extension on TranslationsDev {
           'history.searchHistoryRequiresDatabase' =>
             TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ??
                 '{Enable database in settings for search history}',
-          'history.filterSearchHistory' => TranslationOverrides.string(_root.$meta, 'history.filterSearchHistory', {}) ?? '{Filter search history}',
           'history.lastSearch' =>
             ({required String search}) =>
                 TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? '{Last search: ${search}}',
@@ -4839,9 +4806,6 @@ extension on TranslationsDev {
           'settings.video.cacheModes.streamCacheMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamCacheMode', {}) ??
                 '{- Stream+Cache - Mix of both, but currently leads to double download}',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '{[Note]: Videos will cache only if \'Cache Media\' is enabled.}',
@@ -4850,6 +4814,9 @@ extension on TranslationsDev {
                 '{[Warning]: On desktop Stream mode can work incorrectly for some Boorus.}',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? '{Stream}',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? '{Cache}',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? '{Stream+Cache}',
@@ -5339,20 +5306,10 @@ extension on TranslationsDev {
             ({required String tag, required String type}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.alreadyInList', {'tag': tag, 'type': type}) ??
                 '{\'${tag}\' is already in ${type} list}',
-          'settings.tagsFilters.searchFiltersCount' =>
-            ({required int count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFiltersCount', {'count': count}) ??
-                '{Search filters (${count})}',
-          'settings.tagsFilters.searchFiltersFilteredCount' =>
-            ({required int filtered, required int total}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFiltersFilteredCount', {'filtered': filtered, 'total': total}) ??
-                '{Search filters (${filtered}/${total})}',
           'settings.tagsFilters.noFiltersFound' =>
             TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersFound', {}) ?? '{No filters found}',
           'settings.tagsFilters.noFiltersAdded' =>
             TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? '{No filters added}',
-          'settings.tagsFilters.searchFilters' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFilters', {}) ?? '{Search filters}',
           'settings.tagsFilters.removeHated' =>
             TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? '{Remove items with Hated tags}',
           'settings.tagsFilters.removeFavourited' =>
@@ -5442,11 +5399,11 @@ extension on TranslationsDev {
           'settings.sync.tagsSyncMode' => TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncMode', {}) ?? '{Tags sync mode}',
           'settings.sync.tagsSyncModePreferTypeIfNone' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModePreferTypeIfNone', {}) ??
-                '{PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn\'t on this device it will be skipped}',
+                '{Preserve type: If the tag exists with a tag type on the other device and it doesn\'t on this device it will be skipped}',
           'settings.sync.tagsSyncModeOverwrite' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModeOverwrite', {}) ??
                 '{Overwrite: All tags will be added, if a tag and tag type exists on the other device it will be overwritten}',
-          'settings.sync.preferTypeIfNone' => TranslationOverrides.string(_root.$meta, 'settings.sync.preferTypeIfNone', {}) ?? '{PreferTypeIfNone}',
+          'settings.sync.preferTypeIfNone' => TranslationOverrides.string(_root.$meta, 'settings.sync.preferTypeIfNone', {}) ?? '{Preserve type}',
           'settings.sync.overwrite' => TranslationOverrides.string(_root.$meta, 'settings.sync.overwrite', {}) ?? '{Overwrite}',
           'settings.sync.testConnection' => TranslationOverrides.string(_root.$meta, 'settings.sync.testConnection', {}) ?? '{Test connection}',
           'settings.sync.testConnectionHelpText1' =>
@@ -5692,7 +5649,6 @@ extension on TranslationsDev {
           'tagView.md5' => TranslationOverrides.string(_root.$meta, 'tagView.md5', {}) ?? '{MD5}',
           'tagView.rating' => TranslationOverrides.string(_root.$meta, 'tagView.rating', {}) ?? '{Rating}',
           'tagView.score' => TranslationOverrides.string(_root.$meta, 'tagView.score', {}) ?? '{Score}',
-          'tagView.searchTags' => TranslationOverrides.string(_root.$meta, 'tagView.searchTags', {}) ?? '{Search tags}',
           'tagView.noTagsFound' => TranslationOverrides.string(_root.$meta, 'tagView.noTagsFound', {}) ?? '{No tags found}',
           'tagView.copy' => TranslationOverrides.string(_root.$meta, 'tagView.copy', {}) ?? '{Copy}',
           'tagView.removeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromSearch', {}) ?? '{Remove from Search}',
@@ -5774,7 +5730,6 @@ extension on TranslationsDev {
           'pinnedTags.noTagsMatchSearch' =>
             TranslationOverrides.string(_root.$meta, 'pinnedTags.noTagsMatchSearch', {}) ?? '{No tags match your search}',
           'pinnedTags.noPinnedTagsYet' => TranslationOverrides.string(_root.$meta, 'pinnedTags.noPinnedTagsYet', {}) ?? '{No pinned tags yet}',
-          'pinnedTags.addToSearch' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addToSearch', {}) ?? '{Add to search}',
           'pinnedTags.editLabels' => TranslationOverrides.string(_root.$meta, 'pinnedTags.editLabels', {}) ?? '{Edit labels}',
           'pinnedTags.labels' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labels', {}) ?? '{Labels}',
           'pinnedTags.addPinnedTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addPinnedTag', {}) ?? '{Add pinned tag}',
@@ -5804,23 +5759,18 @@ extension on TranslationsDev {
           'searchBar.free' => TranslationOverrides.string(_root.$meta, 'searchBar.free', {}) ?? '{Free}',
           'searchBar.single' => TranslationOverrides.string(_root.$meta, 'searchBar.single', {}) ?? '{Single}',
           'searchBar.range' => TranslationOverrides.string(_root.$meta, 'searchBar.range', {}) ?? '{Range}',
-          _ => null,
-        } ??
-        switch (path) {
           'searchBar.popular' => TranslationOverrides.string(_root.$meta, 'searchBar.popular', {}) ?? '{Popular}',
-          'searchBar.favourites' => TranslationOverrides.string(_root.$meta, 'searchBar.favourites', {}) ?? '{Favourties}',
-          'searchBar.all' => TranslationOverrides.string(_root.$meta, 'searchBar.all', {}) ?? '{[All]}',
           'searchBar.selectDate' => TranslationOverrides.string(_root.$meta, 'searchBar.selectDate', {}) ?? '{Select date}',
           'searchBar.selectDatesRange' => TranslationOverrides.string(_root.$meta, 'searchBar.selectDatesRange', {}) ?? '{Select dates range}',
-          'searchBar.lastSearch' =>
-            ({required String date}) => TranslationOverrides.string(_root.$meta, 'searchBar.lastSearch', {'date': date}) ?? '{Last search: ${date}}',
-          'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? '{Unknown Booru type!}',
           'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? '{History}',
           'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '{...}',
           'mobileHome.selectBooruForWebview' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.selectBooruForWebview', {}) ?? '{Select booru for webview}',
           'mobileHome.lockApp' => TranslationOverrides.string(_root.$meta, 'mobileHome.lockApp', {}) ?? '{Lock app}',
           'mobileHome.fileAlreadyExists' => TranslationOverrides.string(_root.$meta, 'mobileHome.fileAlreadyExists', {}) ?? '{File already exists}',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.failedToDownload' => TranslationOverrides.string(_root.$meta, 'mobileHome.failedToDownload', {}) ?? '{Failed to download}',
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? '{Cancelled by user}',
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? '{Save anyway}',

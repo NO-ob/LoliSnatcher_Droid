@@ -166,7 +166,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
       },
     );
     final String? folder = type.folder;
-    final String label = type.type.locName(context);
+    final String label = type.type.locName;
     final String size = Tools.formatBytes(stat['totalSize']!, 2);
     final int fileCount = stat['fileNum'] ?? 0;
     final bool isEmpty = stat['fileNum'] == 0 || stat['totalSize'] == 0;
@@ -232,7 +232,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   });
                 },
                 title: context.loc.settings.cache.snatchQuality,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               SettingsTextInput(
                 controller: snatchCooldownController,
@@ -401,7 +401,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   });
                 },
                 title: context.loc.settings.cache.videoCacheMode,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -514,20 +514,20 @@ enum _CacheTypeEnum {
   webView,
   ;
 
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case total:
-        return context.loc.settings.cache.cacheTypeTotal;
+        return loc.settings.cache.cacheTypeTotal;
       case favicons:
-        return context.loc.settings.cache.cacheTypeFavicons;
+        return loc.settings.cache.cacheTypeFavicons;
       case thumbnails:
-        return context.loc.settings.cache.cacheTypeThumbnails;
+        return loc.settings.cache.cacheTypeThumbnails;
       case samples:
-        return context.loc.settings.cache.cacheTypeSamples;
+        return loc.settings.cache.cacheTypeSamples;
       case media:
-        return context.loc.settings.cache.cacheTypeMedia;
+        return loc.settings.cache.cacheTypeMedia;
       case webView:
-        return context.loc.settings.cache.cacheTypeWebView;
+        return loc.settings.cache.cacheTypeWebView;
     }
   }
 }

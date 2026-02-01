@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 
@@ -54,7 +52,7 @@ enum ProxyType with SettingsEnum<ProxyType> {
   bool get isSocks4 => this == ProxyType.socks4;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     return toJson().capitalizeFirst;
   }
 }

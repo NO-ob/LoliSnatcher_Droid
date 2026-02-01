@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
@@ -51,14 +49,14 @@ enum ButtonPosition with SettingsEnum<ButtonPosition> {
   bool get isRight => this == ButtonPosition.right;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case ButtonPosition.disabled:
-        return context.loc.settings.viewer.buttonPositionValues.disabled;
+        return loc.settings.viewer.buttonPositionValues.disabled;
       case ButtonPosition.left:
-        return context.loc.settings.viewer.buttonPositionValues.left;
+        return loc.settings.viewer.buttonPositionValues.left;
       case ButtonPosition.right:
-        return context.loc.settings.viewer.buttonPositionValues.right;
+        return loc.settings.viewer.buttonPositionValues.right;
     }
   }
 }

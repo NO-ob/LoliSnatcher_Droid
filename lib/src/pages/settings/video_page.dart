@@ -219,7 +219,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                                 });
                               },
                               title: context.loc.settings.video.mpvVO,
-                              itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                              itemTitleBuilder: (e) => e?.locName ?? '',
                             ),
                             SettingsDropdown<MpvHardwareDecoding>(
                               value: altVideoPlayerHWDEC,
@@ -235,7 +235,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                                 });
                               },
                               title: context.loc.settings.video.mpvHWDEC,
-                              itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                              itemTitleBuilder: (e) => e?.locName ?? '',
                             ),
                           ],
                           SettingsOptionsList<VideoCacheMode>(
@@ -247,7 +247,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                               });
                             },
                             title: context.loc.settings.video.videoCacheMode,
-                            itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                            itemTitleBuilder: (e) => e?.locName ?? '',
                             subtitle: const Text(
                               '''Videos on some Boorus may not work correctly (i.e. endless loading) when using Stream video cache mode. In that case try using Cache mode. Otherwise player will retry with Cache mode automatically if video is in initial buffering state for 10+ seconds and video file size is less than 25mb''',
                             ),

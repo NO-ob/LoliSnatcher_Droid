@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
@@ -80,24 +78,24 @@ enum ShareAction with SettingsEnum<ShareAction> {
   bool get isHydrus => this == ShareAction.hydrus;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case ShareAction.ask:
-        return context.loc.settings.viewer.shareActionValues.ask;
+        return loc.settings.viewer.shareActionValues.ask;
       case ShareAction.postUrl:
-        return context.loc.settings.viewer.shareActionValues.postUrl;
+        return loc.settings.viewer.shareActionValues.postUrl;
       case ShareAction.postUrlWithTags:
-        return context.loc.settings.viewer.shareActionValues.postUrlWithTags;
+        return loc.settings.viewer.shareActionValues.postUrlWithTags;
       case ShareAction.fileUrl:
-        return context.loc.settings.viewer.shareActionValues.fileUrl;
+        return loc.settings.viewer.shareActionValues.fileUrl;
       case ShareAction.fileUrlWithTags:
-        return context.loc.settings.viewer.shareActionValues.fileUrlWithTags;
+        return loc.settings.viewer.shareActionValues.fileUrlWithTags;
       case ShareAction.file:
-        return context.loc.settings.viewer.shareActionValues.file;
+        return loc.settings.viewer.shareActionValues.file;
       case ShareAction.fileWithTags:
-        return context.loc.settings.viewer.shareActionValues.fileWithTags;
+        return loc.settings.viewer.shareActionValues.fileWithTags;
       case ShareAction.hydrus:
-        return context.loc.settings.viewer.shareActionValues.hydrus;
+        return loc.settings.viewer.shareActionValues.hydrus;
     }
   }
 }

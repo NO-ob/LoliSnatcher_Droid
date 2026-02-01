@@ -172,7 +172,7 @@ class _PerformancePageState extends State<PerformancePage> {
                   });
                 },
                 title: context.loc.settings.performance.previewQuality,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               SettingsOptionsList<ImageQuality>(
                 value: galleryMode,
@@ -183,7 +183,7 @@ class _PerformancePageState extends State<PerformancePage> {
                   });
                 },
                 title: context.loc.settings.performance.imageQuality,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               SettingsTextInput(
                 controller: columnsPortraitController,

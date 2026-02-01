@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
@@ -38,12 +36,12 @@ enum PreviewQuality with SettingsEnum<PreviewQuality> {
   bool get isSample => this == PreviewQuality.sample;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case PreviewQuality.thumbnail:
-        return context.loc.settings.interface.previewQualityValues.thumbnail;
+        return loc.settings.interface.previewQualityValues.thumbnail;
       case PreviewQuality.sample:
-        return context.loc.settings.interface.previewQualityValues.sample;
+        return loc.settings.interface.previewQualityValues.sample;
     }
   }
 }

@@ -694,9 +694,6 @@ class _TranslationsTabsRu extends TranslationsTabsEn {
   String get longPressToMove =>
       TranslationOverrides.string(_root.$meta, 'tabs.longPressToMove', {}) ?? 'Длительное нажатие на вкладку для её перемещения';
   @override
-  String get resettingToDefaultTags =>
-      TranslationOverrides.string(_root.$meta, 'tabs.resettingToDefaultTags', {}) ?? 'Сброс поиска к тегам по умолчанию';
-  @override
   String get numbersInBottomRight =>
       TranslationOverrides.string(_root.$meta, 'tabs.numbersInBottomRight', {}) ?? 'Числа в правом нижнем углу вкладки:';
   @override
@@ -717,8 +714,6 @@ class _TranslationsTabsRu extends TranslationsTabsEn {
       '"Не загружено" - показать вкладки, которые не загружены и/или имеют ноль элементов';
   @override
   String get notLoadedItalic => TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? 'Незагруженные вкладки имеют курсивный текст';
-  @override
-  String get filterTabsInput => TranslationOverrides.string(_root.$meta, 'tabs.filterTabsInput', {}) ?? 'Фильтровать вкладки';
   @override
   String get noTabsFound => TranslationOverrides.string(_root.$meta, 'tabs.noTabsFound', {}) ?? 'Вкладки не найдены';
   @override
@@ -775,8 +770,6 @@ class _TranslationsHistoryRu extends TranslationsHistoryEn {
   @override
   String get searchHistoryRequiresDatabase =>
       TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ?? 'История поиска требует включения базы данных';
-  @override
-  String get filterSearchHistory => TranslationOverrides.string(_root.$meta, 'history.filterSearchHistory', {}) ?? 'Фильтровать историю поиска';
   @override
   String lastSearch({required String search}) =>
       TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Последний поиск: ${search}';
@@ -1139,8 +1132,6 @@ class _TranslationsTagViewRu extends TranslationsTagViewEn {
   @override
   String get score => TranslationOverrides.string(_root.$meta, 'tagView.score', {}) ?? 'Оценка';
   @override
-  String get searchTags => TranslationOverrides.string(_root.$meta, 'tagView.searchTags', {}) ?? 'Искать теги';
-  @override
   String get noTagsFound => TranslationOverrides.string(_root.$meta, 'tagView.noTagsFound', {}) ?? 'Теги не найдены';
   @override
   String get copy => TranslationOverrides.string(_root.$meta, 'tagView.copy', {}) ?? 'Копировать';
@@ -1283,8 +1274,6 @@ class _TranslationsPinnedTagsRu extends TranslationsPinnedTagsEn {
   @override
   String get noPinnedTagsYet => TranslationOverrides.string(_root.$meta, 'pinnedTags.noPinnedTagsYet', {}) ?? 'Пока нет закрепленных тегов';
   @override
-  String get addToSearch => TranslationOverrides.string(_root.$meta, 'pinnedTags.addToSearch', {}) ?? 'Добавить в поиск';
-  @override
   String get editLabels => TranslationOverrides.string(_root.$meta, 'pinnedTags.editLabels', {}) ?? 'Редактировать метки';
   @override
   String get labels => TranslationOverrides.string(_root.$meta, 'pinnedTags.labels', {}) ?? 'Метки';
@@ -1342,18 +1331,9 @@ class _TranslationsSearchBarRu extends TranslationsSearchBarEn {
   @override
   String get popular => TranslationOverrides.string(_root.$meta, 'searchBar.popular', {}) ?? 'Популярное';
   @override
-  String get favourites => TranslationOverrides.string(_root.$meta, 'searchBar.favourites', {}) ?? 'Избранное';
-  @override
-  String get all => TranslationOverrides.string(_root.$meta, 'searchBar.all', {}) ?? '[Все]';
-  @override
   String get selectDate => TranslationOverrides.string(_root.$meta, 'searchBar.selectDate', {}) ?? 'Выбери дату';
   @override
   String get selectDatesRange => TranslationOverrides.string(_root.$meta, 'searchBar.selectDatesRange', {}) ?? 'Выбери диапазон дат';
-  @override
-  String lastSearch({required String date}) =>
-      TranslationOverrides.string(_root.$meta, 'searchBar.lastSearch', {'date': date}) ?? 'Последний поиск: ${date}';
-  @override
-  String get unknownBooruType => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? 'Неизвестный тип сайта!';
   @override
   String get history => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? 'История';
   @override
@@ -3081,18 +3061,9 @@ class _TranslationsSettingsTagsFiltersRu extends TranslationsSettingsTagsFilters
       TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.alreadyInList', {'tag': tag, 'type': type}) ??
       '\'${tag}\' уже есть в списке ${type}';
   @override
-  String searchFiltersCount({required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFiltersCount', {'count': count}) ?? 'Искать фильтры (${count})';
-  @override
-  String searchFiltersFilteredCount({required int filtered, required int total}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFiltersFilteredCount', {'filtered': filtered, 'total': total}) ??
-      'Искать фильтры (${filtered}/${total})';
-  @override
   String get noFiltersFound => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersFound', {}) ?? 'Фильтры не найдены';
   @override
   String get noFiltersAdded => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? 'Нет фильтров';
-  @override
-  String get searchFilters => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFilters', {}) ?? 'Искать фильтры';
   @override
   String get removeHated =>
       TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? 'Скрывать элементы с ненавистными тегами';
@@ -3228,13 +3199,13 @@ class _TranslationsSettingsSyncRu extends TranslationsSettingsSyncEn {
   @override
   String get tagsSyncModePreferTypeIfNone =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModePreferTypeIfNone', {}) ??
-      'ПредпочитатьТипЕслиНет: Если тег существует с типом тега на другом устройстве, а на этом устройстве нет, он будет пропущен';
+      'Сохранять тип: Если тег существует с типом тега на другом устройстве, а на этом устройстве нет, он будет пропущен';
   @override
   String get tagsSyncModeOverwrite =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModeOverwrite', {}) ??
       'Перезаписать: Все теги будут добавлены, если тег и тип тега существуют на другом устройстве, они будут перезаписаны';
   @override
-  String get preferTypeIfNone => TranslationOverrides.string(_root.$meta, 'settings.sync.preferTypeIfNone', {}) ?? 'ПредпочитатьТипЕслиНет';
+  String get preferTypeIfNone => TranslationOverrides.string(_root.$meta, 'settings.sync.preferTypeIfNone', {}) ?? 'Сохранять тип';
   @override
   String get overwrite => TranslationOverrides.string(_root.$meta, 'settings.sync.overwrite', {}) ?? 'Перезаписать';
   @override
@@ -4307,8 +4278,6 @@ extension on TranslationsRu {
           'tabs.deleteSelectedTabs' => TranslationOverrides.string(_root.$meta, 'tabs.deleteSelectedTabs', {}) ?? 'Удалить выбранные вкладки',
           'tabs.longPressToMove' =>
             TranslationOverrides.string(_root.$meta, 'tabs.longPressToMove', {}) ?? 'Длительное нажатие на вкладку для её перемещения',
-          'tabs.resettingToDefaultTags' =>
-            TranslationOverrides.string(_root.$meta, 'tabs.resettingToDefaultTags', {}) ?? 'Сброс поиска к тегам по умолчанию',
           'tabs.numbersInBottomRight' =>
             TranslationOverrides.string(_root.$meta, 'tabs.numbersInBottomRight', {}) ?? 'Числа в правом нижнем углу вкладки:',
           'tabs.firstNumberTabIndex' =>
@@ -4324,7 +4293,6 @@ extension on TranslationsRu {
                 '"Не загружено" - показать вкладки, которые не загружены и/или имеют ноль элементов',
           'tabs.notLoadedItalic' =>
             TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? 'Незагруженные вкладки имеют курсивный текст',
-          'tabs.filterTabsInput' => TranslationOverrides.string(_root.$meta, 'tabs.filterTabsInput', {}) ?? 'Фильтровать вкладки',
           'tabs.noTabsFound' => TranslationOverrides.string(_root.$meta, 'tabs.noTabsFound', {}) ?? 'Вкладки не найдены',
           'tabs.copy' => TranslationOverrides.string(_root.$meta, 'tabs.copy', {}) ?? 'Копировать',
           'tabs.moveAction' => TranslationOverrides.string(_root.$meta, 'tabs.moveAction', {}) ?? 'Переместить',
@@ -4386,8 +4354,6 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsDisabled', {}) ?? 'История поиска отключена',
           'history.searchHistoryRequiresDatabase' =>
             TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ?? 'История поиска требует включения базы данных',
-          'history.filterSearchHistory' =>
-            TranslationOverrides.string(_root.$meta, 'history.filterSearchHistory', {}) ?? 'Фильтровать историю поиска',
           'history.lastSearch' =>
             ({required String search}) =>
                 TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Последний поиск: ${search}',
@@ -4926,9 +4892,6 @@ extension on TranslationsRu {
           'settings.video.cacheModes.streamCacheMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamCacheMode', {}) ??
                 '- Потоковый+Кэш - Смешанный режим, но в данный момент приводит к двойной загрузке',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '[Примечание]: Видео будут кэшироваться только если включено \'Кэшировать медиа\'.',
@@ -4937,6 +4900,9 @@ extension on TranslationsRu {
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
@@ -5438,19 +5404,10 @@ extension on TranslationsRu {
             ({required String tag, required String type}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.alreadyInList', {'tag': tag, 'type': type}) ??
                 '\'${tag}\' уже есть в списке ${type}',
-          'settings.tagsFilters.searchFiltersCount' =>
-            ({required int count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFiltersCount', {'count': count}) ?? 'Искать фильтры (${count})',
-          'settings.tagsFilters.searchFiltersFilteredCount' =>
-            ({required int filtered, required int total}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFiltersFilteredCount', {'filtered': filtered, 'total': total}) ??
-                'Искать фильтры (${filtered}/${total})',
           'settings.tagsFilters.noFiltersFound' =>
             TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersFound', {}) ?? 'Фильтры не найдены',
           'settings.tagsFilters.noFiltersAdded' =>
             TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? 'Нет фильтров',
-          'settings.tagsFilters.searchFilters' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.searchFilters', {}) ?? 'Искать фильтры',
           'settings.tagsFilters.removeHated' =>
             TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? 'Скрывать элементы с ненавистными тегами',
           'settings.tagsFilters.removeFavourited' =>
@@ -5542,12 +5499,11 @@ extension on TranslationsRu {
           'settings.sync.tagsSyncMode' => TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncMode', {}) ?? 'Режим синхронизации тегов',
           'settings.sync.tagsSyncModePreferTypeIfNone' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModePreferTypeIfNone', {}) ??
-                'ПредпочитатьТипЕслиНет: Если тег существует с типом тега на другом устройстве, а на этом устройстве нет, он будет пропущен',
+                'Сохранять тип: Если тег существует с типом тега на другом устройстве, а на этом устройстве нет, он будет пропущен',
           'settings.sync.tagsSyncModeOverwrite' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModeOverwrite', {}) ??
                 'Перезаписать: Все теги будут добавлены, если тег и тип тега существуют на другом устройстве, они будут перезаписаны',
-          'settings.sync.preferTypeIfNone' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.preferTypeIfNone', {}) ?? 'ПредпочитатьТипЕслиНет',
+          'settings.sync.preferTypeIfNone' => TranslationOverrides.string(_root.$meta, 'settings.sync.preferTypeIfNone', {}) ?? 'Сохранять тип',
           'settings.sync.overwrite' => TranslationOverrides.string(_root.$meta, 'settings.sync.overwrite', {}) ?? 'Перезаписать',
           'settings.sync.testConnection' => TranslationOverrides.string(_root.$meta, 'settings.sync.testConnection', {}) ?? 'Проверить соединение',
           'settings.sync.testConnectionHelpText1' =>
@@ -5796,7 +5752,6 @@ extension on TranslationsRu {
           'tagView.md5' => TranslationOverrides.string(_root.$meta, 'tagView.md5', {}) ?? 'MD5',
           'tagView.rating' => TranslationOverrides.string(_root.$meta, 'tagView.rating', {}) ?? 'Рейтинг',
           'tagView.score' => TranslationOverrides.string(_root.$meta, 'tagView.score', {}) ?? 'Оценка',
-          'tagView.searchTags' => TranslationOverrides.string(_root.$meta, 'tagView.searchTags', {}) ?? 'Искать теги',
           'tagView.noTagsFound' => TranslationOverrides.string(_root.$meta, 'tagView.noTagsFound', {}) ?? 'Теги не найдены',
           'tagView.copy' => TranslationOverrides.string(_root.$meta, 'tagView.copy', {}) ?? 'Копировать',
           'tagView.removeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromSearch', {}) ?? 'Удалить из поиска',
@@ -5882,7 +5837,6 @@ extension on TranslationsRu {
           'pinnedTags.addTagManually' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? 'Добавить тег вручную',
           'pinnedTags.noTagsMatchSearch' => TranslationOverrides.string(_root.$meta, 'pinnedTags.noTagsMatchSearch', {}) ?? 'Нет подходящих тегов',
           'pinnedTags.noPinnedTagsYet' => TranslationOverrides.string(_root.$meta, 'pinnedTags.noPinnedTagsYet', {}) ?? 'Пока нет закрепленных тегов',
-          'pinnedTags.addToSearch' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addToSearch', {}) ?? 'Добавить в поиск',
           'pinnedTags.editLabels' => TranslationOverrides.string(_root.$meta, 'pinnedTags.editLabels', {}) ?? 'Редактировать метки',
           'pinnedTags.labels' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labels', {}) ?? 'Метки',
           'pinnedTags.addPinnedTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addPinnedTag', {}) ?? 'Добавить закрепленный тег',
@@ -5912,24 +5866,18 @@ extension on TranslationsRu {
           'searchBar.free' => TranslationOverrides.string(_root.$meta, 'searchBar.free', {}) ?? 'Бесплатно',
           'searchBar.single' => TranslationOverrides.string(_root.$meta, 'searchBar.single', {}) ?? 'Одиночный',
           'searchBar.range' => TranslationOverrides.string(_root.$meta, 'searchBar.range', {}) ?? 'Диапазон',
-          _ => null,
-        } ??
-        switch (path) {
           'searchBar.popular' => TranslationOverrides.string(_root.$meta, 'searchBar.popular', {}) ?? 'Популярное',
-          'searchBar.favourites' => TranslationOverrides.string(_root.$meta, 'searchBar.favourites', {}) ?? 'Избранное',
-          'searchBar.all' => TranslationOverrides.string(_root.$meta, 'searchBar.all', {}) ?? '[Все]',
           'searchBar.selectDate' => TranslationOverrides.string(_root.$meta, 'searchBar.selectDate', {}) ?? 'Выбери дату',
           'searchBar.selectDatesRange' => TranslationOverrides.string(_root.$meta, 'searchBar.selectDatesRange', {}) ?? 'Выбери диапазон дат',
-          'searchBar.lastSearch' =>
-            ({required String date}) =>
-                TranslationOverrides.string(_root.$meta, 'searchBar.lastSearch', {'date': date}) ?? 'Последний поиск: ${date}',
-          'searchBar.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'searchBar.unknownBooruType', {}) ?? 'Неизвестный тип сайта!',
           'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? 'История',
           'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '...',
           'mobileHome.selectBooruForWebview' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.selectBooruForWebview', {}) ?? 'Выбери сайт для вебвью',
           'mobileHome.lockApp' => TranslationOverrides.string(_root.$meta, 'mobileHome.lockApp', {}) ?? 'Заблокировать приложение',
           'mobileHome.fileAlreadyExists' => TranslationOverrides.string(_root.$meta, 'mobileHome.fileAlreadyExists', {}) ?? 'Файл уже существует',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.failedToDownload' => TranslationOverrides.string(_root.$meta, 'mobileHome.failedToDownload', {}) ?? 'Не удалось загрузить',
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Отменено пользователем',
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Сохранить в любом случае',

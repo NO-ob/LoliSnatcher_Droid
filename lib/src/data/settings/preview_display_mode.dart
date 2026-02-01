@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
@@ -45,14 +43,14 @@ enum PreviewDisplayMode with SettingsEnum<PreviewDisplayMode> {
   bool get isStaggered => this == PreviewDisplayMode.staggered;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case PreviewDisplayMode.square:
-        return context.loc.settings.interface.previewDisplayModeValues.square;
+        return loc.settings.interface.previewDisplayModeValues.square;
       case PreviewDisplayMode.rectangle:
-        return context.loc.settings.interface.previewDisplayModeValues.rectangle;
+        return loc.settings.interface.previewDisplayModeValues.rectangle;
       case PreviewDisplayMode.staggered:
-        return context.loc.settings.interface.previewDisplayModeValues.staggered;
+        return loc.settings.interface.previewDisplayModeValues.staggered;
     }
   }
 }

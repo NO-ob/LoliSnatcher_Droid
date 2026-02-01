@@ -666,7 +666,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
         children: [
           Expanded(
             child: SettingsTextInput(
-              title: context.loc.tabs.filterTabsInput,
+              title: context.loc.search,
               controller: filterTextController,
               inputType: TextInputType.text,
               clearable: true,

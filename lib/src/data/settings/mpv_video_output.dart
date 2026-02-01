@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
@@ -58,7 +56,7 @@ enum MpvVideoOutput with SettingsEnum<MpvVideoOutput> {
   bool get isSdl => this == MpvVideoOutput.sdl;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     return toJson();
   }
 }

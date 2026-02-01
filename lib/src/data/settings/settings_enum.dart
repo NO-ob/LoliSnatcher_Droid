@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/src/data/settings/app_alias.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 import 'package:lolisnatcher/src/data/settings/button_position.dart';
@@ -31,7 +29,7 @@ mixin SettingsEnum<T extends Enum> {
   String toJson();
 
   /// Returns the localized display name for this enum value.
-  String locName(BuildContext context);
+  String get locName;
 }
 
 /// Registry for settings enum types.

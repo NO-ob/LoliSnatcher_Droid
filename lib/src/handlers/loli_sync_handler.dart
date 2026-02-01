@@ -15,6 +15,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/pages/loli_sync_page.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
@@ -257,15 +258,18 @@ class LoliSync {
       try {
         Logger.Inst().log('request to update tabs recieved', 'LoliSync', 'storeTabs', LogTypes.loliSyncInfo);
         final String content = await utf8.decoder.bind(req).join(); /*2*/
-        final String mode = req.uri.queryParameters['mode']!;
+        final TabsMode mode = TabsMode.fromString(req.uri.queryParameters['mode']!);
         final String? tabsString = jsonDecode(content)?['tabs'];
         // print('tabsString: $tabsString');
         // print('mode: $mode');
         if (tabsString != null && tabsString.isNotEmpty) {
-          if (mode == 'Merge') {
-            searchHandler.mergeTabs(tabsString);
-          } else if (mode == 'Replace') {
-            searchHandler.replaceTabs(tabsString);
+          switch (mode) {
+            case TabsMode.merge:
+              searchHandler.mergeTabs(tabsString);
+              break;
+            case TabsMode.replace:
+              searchHandler.replaceTabs(tabsString);
+              break;
           }
         }
 
@@ -298,14 +302,17 @@ class LoliSync {
       try {
         Logger.Inst().log('request to update tags recieved', 'LoliSync', 'storeTags', LogTypes.loliSyncInfo);
         final String content = await utf8.decoder.bind(req).join(); /*2*/
-        final String mode = req.uri.queryParameters['mode']!;
+        final TagsMode mode = TagsMode.fromString(req.uri.queryParameters['mode']!);
         final List<dynamic> tags = jsonDecode(content);
         Logger.Inst().log('Received ${tags.length} tags', 'LoliSync', 'storeTags', LogTypes.loliSyncInfo);
         if (tags.isNotEmpty) {
-          if (mode == 'Overwrite') {
-            unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: false));
-          } else if (mode == 'PreferTypeIfNone') {
-            unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: true));
+          switch (mode) {
+            case TagsMode.overwrite:
+              unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: false));
+              break;
+            case TagsMode.preferTypeIfNone:
+              unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: true));
+              break;
           }
         }
 
@@ -501,8 +508,8 @@ class LoliSync {
     List<String> toSync,
     int favSkip,
     int snatchedSkip,
-    String tabsMode,
-    String tagsMode,
+    TabsMode tabsMode,
+    TagsMode tagsMode,
   ) async* {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
@@ -650,7 +657,7 @@ class LoliSync {
         case 'Tabs':
           yield 'Sync Starting $address';
           yield 'Preparing tabs data';
-          final String resp = await sendTabs(searchHandler.generateBackupJson(), tabsMode);
+          final String resp = await sendTabs(searchHandler.generateBackupJson(), tabsMode.value);
           yield resp;
           break;
         case 'Test':
@@ -662,7 +669,7 @@ class LoliSync {
         case 'Tags':
           yield 'Sync Starting $address';
           yield 'Preparing tag data';
-          final String resp = await sendTags(tagHandler.toList(), tagsMode);
+          final String resp = await sendTags(tagHandler.toList(), tagsMode.value);
           yield resp;
           break;
       }

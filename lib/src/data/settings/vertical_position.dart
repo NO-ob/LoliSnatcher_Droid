@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
@@ -38,12 +36,12 @@ enum VerticalPosition with SettingsEnum<VerticalPosition> {
   bool get isBottom => this == VerticalPosition.bottom;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case VerticalPosition.top:
-        return context.loc.settings.viewer.toolbarPositionValues.top;
+        return loc.settings.viewer.toolbarPositionValues.top;
       case VerticalPosition.bottom:
-        return context.loc.settings.viewer.toolbarPositionValues.bottom;
+        return loc.settings.viewer.toolbarPositionValues.bottom;
     }
   }
 }

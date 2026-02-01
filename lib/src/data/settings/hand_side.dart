@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
@@ -40,12 +38,12 @@ enum HandSide with SettingsEnum<HandSide> {
   bool get isRight => this == HandSide.right;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case HandSide.left:
-        return context.loc.settings.interface.handSideValues.left;
+        return loc.settings.interface.handSideValues.left;
       case HandSide.right:
-        return context.loc.settings.interface.handSideValues.right;
+        return loc.settings.interface.handSideValues.right;
     }
   }
 }

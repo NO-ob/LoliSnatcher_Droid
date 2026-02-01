@@ -1,7 +1,5 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
@@ -43,12 +41,12 @@ enum AppMode with SettingsEnum<AppMode> {
   }
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case AppMode.Desktop:
-        return context.loc.settings.interface.appModeValues.desktop;
+        return loc.settings.interface.appModeValues.desktop;
       case AppMode.Mobile:
-        return context.loc.settings.interface.appModeValues.mobile;
+        return loc.settings.interface.appModeValues.mobile;
     }
   }
 }

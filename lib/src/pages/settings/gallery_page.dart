@@ -202,7 +202,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: context.loc.settings.viewer.imageQuality,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               SettingsOptionsList<ScrollDirection>(
                 value: galleryScrollDirection,
@@ -213,7 +213,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: context.loc.settings.viewer.viewerScrollDirection,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               SettingsOptionsList<VerticalPosition>(
                 value: galleryBarPosition,
@@ -224,7 +224,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: context.loc.settings.viewer.viewerToolbarPosition,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               SettingsOptionsList<ButtonPosition>(
                 value: zoomButtonPosition,
@@ -235,7 +235,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: context.loc.settings.viewer.zoomButtonPosition,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               SettingsOptionsList<ButtonPosition>(
                 value: changePageButtonsPosition,
@@ -246,7 +246,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: context.loc.settings.viewer.changePageButtonsPosition,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               SettingsToggle(
                 value: autoHideImageBar,
@@ -356,7 +356,7 @@ class _GalleryPageState extends State<GalleryPage> {
                             child: Builder(
                               builder: (context) {
                                 final button = buttonOrder[index];
-                                final title = button.locName(context);
+                                final title = button.locName;
 
                                 final bool isInfo = button.isInfo;
 
@@ -478,7 +478,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: context.loc.settings.viewer.defaultShareAction,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {

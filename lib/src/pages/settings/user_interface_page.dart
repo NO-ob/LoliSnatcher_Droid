@@ -182,7 +182,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: context.loc.settings.interface.handSide,
-                itemTitleBuilder: (item) => item?.locName(context) ?? '?',
+                itemTitleBuilder: (item) => item?.locName ?? '?',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.back_hand_outlined),
                   onPressed: () {
@@ -304,7 +304,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: context.loc.settings.interface.previewQuality,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -334,9 +334,9 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 value: previewDisplay,
                 items: PreviewDisplayMode.values,
                 itemTitleBuilder: (item) => switch (item) {
-                  .square => '${item!.locName(context)} (1:1)',
-                  .rectangle => '${item!.locName(context)} (9:16)',
-                  .staggered => item!.locName(context),
+                  .square => '${item!.locName} (1:1)',
+                  .rectangle => '${item!.locName} (9:16)',
+                  .staggered => item!.locName,
                   _ => '?',
                 },
                 itemLeadingBuilder: (item) {
@@ -364,8 +364,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                         value: previewDisplayFallback,
                         items: PreviewDisplayMode.values.where((e) => !e.isStaggered).toList(),
                         itemTitleBuilder: (item) => switch (item) {
-                          .square => '${item!.locName(context)} (1:1)',
-                          .rectangle => '${item!.locName(context)} (9:16)',
+                          .square => '${item!.locName} (1:1)',
+                          .rectangle => '${item!.locName} (9:16)',
                           _ => '?',
                         },
                         itemLeadingBuilder: (item) {
@@ -459,7 +459,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: context.loc.settings.interface.scrollPreviewsButtonsPosition,
-                itemTitleBuilder: (e) => e?.locName(context) ?? '',
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               if (SettingsHandler.isDesktopPlatform)
                 SettingsTextInput(

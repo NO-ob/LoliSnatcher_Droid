@@ -1,5 +1,3 @@
-import 'package:flutter/widgets.dart';
-
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 
@@ -38,12 +36,12 @@ enum ScrollDirection with SettingsEnum<ScrollDirection> {
   bool get isVertical => this == ScrollDirection.vertical;
 
   @override
-  String locName(BuildContext context) {
+  String get locName {
     switch (this) {
       case ScrollDirection.horizontal:
-        return context.loc.settings.viewer.scrollDirectionValues.horizontal;
+        return loc.settings.viewer.scrollDirectionValues.horizontal;
       case ScrollDirection.vertical:
-        return context.loc.settings.viewer.scrollDirectionValues.vertical;
+        return loc.settings.viewer.scrollDirectionValues.vertical;
     }
   }
 }

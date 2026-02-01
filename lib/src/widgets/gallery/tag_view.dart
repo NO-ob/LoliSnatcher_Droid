@@ -1013,7 +1013,7 @@ class _TagViewState extends State<TagView> {
                         key: searchKey,
                         controller: searchController,
                         focusNode: searchFocusNode,
-                        title: context.loc.tagView.searchTags,
+                        title: context.loc.search,
                         onlyInput: true,
                         clearable: true,
                         pasteable: true,
