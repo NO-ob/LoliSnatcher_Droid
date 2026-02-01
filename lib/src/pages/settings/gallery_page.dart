@@ -42,6 +42,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
   final TextEditingController preloadAmountController = TextEditingController();
   final TextEditingController preloadSizeController = TextEditingController();
+  final TextEditingController preloadHeightController = TextEditingController();
   final TextEditingController scrollSpeedController = TextEditingController();
   final TextEditingController galleryAutoScrollController = TextEditingController();
 
@@ -70,6 +71,7 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
     preloadAmountController.text = settingsHandler.preloadCount.toString();
     preloadSizeController.text = settingsHandler.preloadSizeLimit.toString();
+    preloadHeightController.text = settingsHandler.preloadHeight.toString();
     loadingGif = settingsHandler.loadingGif;
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
     enableHeroTransitions = settingsHandler.enableHeroTransitions;
@@ -81,6 +83,7 @@ class _GalleryPageState extends State<GalleryPage> {
   void dispose() {
     preloadAmountController.dispose();
     preloadSizeController.dispose();
+    preloadHeightController.dispose();
     scrollSpeedController.dispose();
     galleryAutoScrollController.dispose();
     super.dispose();
@@ -113,8 +116,9 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.volumeButtonsScrollSpeed = (int.tryParse(scrollSpeedController.text) ?? 200).clamp(0, 1_000_000);
     settingsHandler.galleryAutoScrollTime = (int.tryParse(galleryAutoScrollController.text) ?? 4000).clamp(100, 10000);
 
-    settingsHandler.preloadCount = (int.tryParse(preloadAmountController.text) ?? 1).clamp(0, 3);
-    settingsHandler.preloadSizeLimit = (double.tryParse(preloadSizeController.text) ?? 0).clamp(0, double.infinity);
+    settingsHandler.preloadCount = (int.tryParse(preloadAmountController.text) ?? 1).clamp(0, 4);
+    settingsHandler.preloadSizeLimit = (double.tryParse(preloadSizeController.text) ?? 0.2).clamp(0, double.infinity);
+    settingsHandler.preloadHeight = (int.tryParse(preloadHeightController.text) ?? (4096 * 4)).clamp(0, 2_000_000_000);
 
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (result) {
@@ -148,18 +152,18 @@ class _GalleryPageState extends State<GalleryPage> {
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['preloadCount']!['default']!.toString(),
                 numberButtons: true,
-                numberStep: 1,
-                numberMin: 0,
-                numberMax: 5,
+                numberStep: (settingsHandler.map['preloadCount']!['step']!).toDouble(),
+                numberMin: settingsHandler.map['preloadCount']!['lowerLimit']!.toDouble(),
+                numberMax: settingsHandler.map['preloadCount']!['upperLimit']!.toDouble(),
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
                     return context.loc.validationErrors.required;
                   } else if (parse == null) {
                     return context.loc.validationErrors.invalidNumericValue;
-                  } else if (parse < 0) {
+                  } else if (parse < settingsHandler.map['preloadCount']!['lowerLimit']!.toDouble()) {
                     return context.loc.validationErrors.greaterThanOrEqualZero;
-                  } else if (parse > 3) {
+                  } else if (parse > settingsHandler.map['preloadCount']!['upperLimit']!.toDouble()) {
                     return context.loc.validationErrors.lessThan4;
                   } else {
                     return null;
@@ -187,6 +191,34 @@ class _GalleryPageState extends State<GalleryPage> {
                     return context.loc.validationErrors.rangeError(
                       min: settingsHandler.map['preloadSizeLimit']!['lowerLimit']!,
                       max: settingsHandler.map['preloadSizeLimit']!['upperLimit']!,
+                    );
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              SettingsTextInput(
+                controller: preloadHeightController,
+                title: context.loc.settings.viewer.preloadHeightLimit,
+                subtitle: Text(context.loc.settings.viewer.preloadHeightLimitSubtitle),
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                resetText: () => settingsHandler.map['preloadHeight']!['default']!.toString(),
+                numberButtons: true,
+                numberStep: settingsHandler.map['preloadHeight']!['step']!.toDouble(),
+                numberMin: settingsHandler.map['preloadHeight']!['lowerLimit']!.toDouble(),
+                numberMax: settingsHandler.map['preloadHeight']!['upperLimit']!.toDouble(),
+                validator: (String? value) {
+                  final int? parse = int.tryParse(value ?? '');
+                  if (value == null || value.isEmpty) {
+                    return context.loc.validationErrors.required;
+                  } else if (parse == null) {
+                    return context.loc.validationErrors.invalidNumericValue;
+                  } else if (parse < settingsHandler.map['preloadHeight']!['lowerLimit']!.toDouble() ||
+                      parse > settingsHandler.map['preloadHeight']!['upperLimit']!.toDouble()) {
+                    return context.loc.validationErrors.rangeError(
+                      min: settingsHandler.map['preloadHeight']!['lowerLimit']!.toDouble(),
+                      max: settingsHandler.map['preloadHeight']!['upperLimit']!.toDouble(),
                     );
                   } else {
                     return null;

@@ -344,7 +344,7 @@ class _MediaLoadingState extends State<MediaLoading> {
         : '';
 
     final int sinceStartSeconds = (sinceStart / 1000).floor();
-    final String sinceStartText = (!widget.isDone && percentDone < 1)
+    final String sinceStartText = (!widget.isDone && (percentDone < 1 || widget.isFromCache))
         ? context.loc.media.loading.startedSecondsAgo(seconds: sinceStartSeconds)
         : '';
 

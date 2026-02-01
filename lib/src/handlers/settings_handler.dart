@@ -138,6 +138,7 @@ class SettingsHandler {
   int portraitColumns = 2;
   int landscapeColumns = 4;
   int preloadCount = 1;
+  int preloadHeight = 4096 * 4;
   int snatchCooldown = 250;
   int volumeButtonsScrollSpeed = 200;
   int galleryAutoScrollTime = 4000;
@@ -451,7 +452,14 @@ class SettingsHandler {
       'type': 'int',
       'default': 1,
       'step': 1,
-      'upperLimit': 3,
+      'upperLimit': 4,
+      'lowerLimit': 0,
+    },
+    'preloadHeight': {
+      'type': 'int',
+      'default': 4096 * 4,
+      'step': 1024,
+      'upperLimit': 2_000_000_000,
       'lowerLimit': 0,
     },
     'snatchCooldown': {
@@ -1038,6 +1046,8 @@ class SettingsHandler {
         return landscapeColumns;
       case 'preloadCount':
         return preloadCount;
+      case 'preloadHeight':
+        return preloadHeight;
       case 'snatchCooldown':
         return snatchCooldown;
       case 'galleryBarPosition':
@@ -1252,6 +1262,9 @@ class SettingsHandler {
         break;
       case 'preloadCount':
         preloadCount = validatedValue;
+        break;
+      case 'preloadHeight':
+        preloadHeight = validatedValue;
         break;
       case 'snatchCooldown':
         snatchCooldown = validatedValue;

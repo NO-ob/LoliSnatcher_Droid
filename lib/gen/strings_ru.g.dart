@@ -2130,7 +2130,12 @@ class _TranslationsSettingsViewerRu extends TranslationsSettingsViewerEn {
   String get preloadSizeLimit => TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadSizeLimit', {}) ?? 'Лимит размера предзагрузки';
   @override
   String get preloadSizeLimitSubtitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadSizeLimitSubtitle', {}) ?? 'в ГБ, 0 для отключения лимита';
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadSizeLimitSubtitle', {}) ?? 'в ГБ, 0 для отключения';
+  @override
+  String get preloadHeightLimit => TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadHeightLimit', {}) ?? 'Лимит высоты предзагрузки';
+  @override
+  String get preloadHeightLimitSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadHeightLimitSubtitle', {}) ?? 'в пикселях, 0 для отключения';
   @override
   String get imageQuality => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQuality', {}) ?? 'Качество изображения';
   @override
@@ -2848,67 +2853,7 @@ class _TranslationsSettingsPerformanceRu extends TranslationsSettingsPerformance
   @override
   String get lowPerformanceModeDialogSetsOptimal =>
       TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
-      '- Устанавливает оптимальные настройки для этих опций (ты можешь потом изменить их отдельно):';
-  @override
-  String get lowPerformanceModeDialogPreviewQuality =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreviewQuality', {}) ??
-      '   - Качество предпросмотра [Миниатюра]';
-  @override
-  String get lowPerformanceModeDialogImageQuality =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogImageQuality', {}) ??
-      '   - Качество изображения [Семпл]';
-  @override
-  String get lowPerformanceModeDialogPreviewColumns =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreviewColumns', {}) ??
-      '   - Столбцы превью [2 - портрет, 4 - ландшафт]';
-  @override
-  String get lowPerformanceModeDialogPreloadAmount =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreloadAmount', {}) ??
-      '   - Количество и лимит предзагрузки [0, 0.2]';
-  @override
-  String get lowPerformanceModeDialogVideoAutoplay =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogVideoAutoplay', {}) ??
-      '   - Автовоспроизведение видео [отключено]';
-  @override
-  String get lowPerformanceModeDialogDontScaleImages =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDontScaleImages', {}) ??
-      '   - Не масштабировать изображения [отключено]';
-  @override
-  String get previewQuality => TranslationOverrides.string(_root.$meta, 'settings.performance.previewQuality', {}) ?? 'Качество превью';
-  @override
-  String get imageQuality => TranslationOverrides.string(_root.$meta, 'settings.performance.imageQuality', {}) ?? 'Качество изображения';
-  @override
-  String get previewColumnsPortrait =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.previewColumnsPortrait', {}) ?? 'Столбцы превью (портрет)';
-  @override
-  String get previewColumnsLandscape =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.previewColumnsLandscape', {}) ?? 'Столбцы превью (ландшафт)';
-  @override
-  String get preloadAmount => TranslationOverrides.string(_root.$meta, 'settings.performance.preloadAmount', {}) ?? 'Количество предзагрузки';
-  @override
-  String get preloadSizeLimit =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.preloadSizeLimit', {}) ?? 'Лимит размера предзагрузки';
-  @override
-  String get preloadSizeLimitSubtitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.preloadSizeLimitSubtitle', {}) ?? 'в ГБ, 0 чтобы убрать лимит';
-  @override
-  String get dontScaleImages =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImages', {}) ?? 'Не масштабировать изображения';
-  @override
-  String get dontScaleImagesSubtitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesSubtitle', {}) ??
-      'Отключает масштабирование изображений, которое используется для улучшения производительности';
-  @override
-  String get dontScaleImagesWarningTitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningTitle', {}) ?? 'Предупреждение';
-  @override
-  String get dontScaleImagesWarningMsg =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningMsg', {}) ??
-      'Ты уверен, что хочешь отключить масштабирование изображений?';
-  @override
-  String get dontScaleImagesWarningPerformance =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningPerformance', {}) ??
-      'Это может негативно повлиять на производительность, особенно на старых устройствах';
+      'Устанавливает оптимальные настройки для этих опций (ты можешь потом изменить их отдельно):';
   @override
   String get autoplayVideos => TranslationOverrides.string(_root.$meta, 'settings.performance.autoplayVideos', {}) ?? 'Автовоспроизведение видео';
   @override
@@ -4706,7 +4651,11 @@ extension on TranslationsRu {
           'settings.viewer.preloadSizeLimit' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadSizeLimit', {}) ?? 'Лимит размера предзагрузки',
           'settings.viewer.preloadSizeLimitSubtitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadSizeLimitSubtitle', {}) ?? 'в ГБ, 0 для отключения лимита',
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadSizeLimitSubtitle', {}) ?? 'в ГБ, 0 для отключения',
+          'settings.viewer.preloadHeightLimit' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadHeightLimit', {}) ?? 'Лимит высоты предзагрузки',
+          'settings.viewer.preloadHeightLimitSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadHeightLimitSubtitle', {}) ?? 'в пикселях, 0 для отключения',
           'settings.viewer.imageQuality' => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQuality', {}) ?? 'Качество изображения',
           'settings.viewer.viewerScrollDirection' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.viewerScrollDirection', {}) ?? 'Направление прокрутки просмотрщика',
@@ -4895,14 +4844,14 @@ extension on TranslationsRu {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '[Примечание]: Видео будут кэшироваться только если включено \'Кэшировать медиа\'.',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
@@ -5261,52 +5210,7 @@ extension on TranslationsRu {
                 '- Отключает ресурсоёмкие элементы (размытие, анимированная прозрачность, некоторые анимации...)',
           'settings.performance.lowPerformanceModeDialogSetsOptimal' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
-                '- Устанавливает оптимальные настройки для этих опций (ты можешь потом изменить их отдельно):',
-          'settings.performance.lowPerformanceModeDialogPreviewQuality' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreviewQuality', {}) ??
-                '   - Качество предпросмотра [Миниатюра]',
-          'settings.performance.lowPerformanceModeDialogImageQuality' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogImageQuality', {}) ??
-                '   - Качество изображения [Семпл]',
-          'settings.performance.lowPerformanceModeDialogPreviewColumns' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreviewColumns', {}) ??
-                '   - Столбцы превью [2 - портрет, 4 - ландшафт]',
-          'settings.performance.lowPerformanceModeDialogPreloadAmount' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreloadAmount', {}) ??
-                '   - Количество и лимит предзагрузки [0, 0.2]',
-          'settings.performance.lowPerformanceModeDialogVideoAutoplay' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogVideoAutoplay', {}) ??
-                '   - Автовоспроизведение видео [отключено]',
-          'settings.performance.lowPerformanceModeDialogDontScaleImages' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDontScaleImages', {}) ??
-                '   - Не масштабировать изображения [отключено]',
-          'settings.performance.previewQuality' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.previewQuality', {}) ?? 'Качество превью',
-          'settings.performance.imageQuality' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.imageQuality', {}) ?? 'Качество изображения',
-          'settings.performance.previewColumnsPortrait' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.previewColumnsPortrait', {}) ?? 'Столбцы превью (портрет)',
-          'settings.performance.previewColumnsLandscape' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.previewColumnsLandscape', {}) ?? 'Столбцы превью (ландшафт)',
-          'settings.performance.preloadAmount' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.preloadAmount', {}) ?? 'Количество предзагрузки',
-          'settings.performance.preloadSizeLimit' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.preloadSizeLimit', {}) ?? 'Лимит размера предзагрузки',
-          'settings.performance.preloadSizeLimitSubtitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.preloadSizeLimitSubtitle', {}) ?? 'в ГБ, 0 чтобы убрать лимит',
-          'settings.performance.dontScaleImages' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImages', {}) ?? 'Не масштабировать изображения',
-          'settings.performance.dontScaleImagesSubtitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesSubtitle', {}) ??
-                'Отключает масштабирование изображений, которое используется для улучшения производительности',
-          'settings.performance.dontScaleImagesWarningTitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningTitle', {}) ?? 'Предупреждение',
-          'settings.performance.dontScaleImagesWarningMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningMsg', {}) ??
-                'Ты уверен, что хочешь отключить масштабирование изображений?',
-          'settings.performance.dontScaleImagesWarningPerformance' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningPerformance', {}) ??
-                'Это может негативно повлиять на производительность, особенно на старых устройствах',
+                'Устанавливает оптимальные настройки для этих опций (ты можешь потом изменить их отдельно):',
           'settings.performance.autoplayVideos' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.autoplayVideos', {}) ?? 'Автовоспроизведение видео',
           'settings.performance.disableVideos' =>
@@ -5875,9 +5779,6 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'mobileHome.selectBooruForWebview', {}) ?? 'Выбери сайт для вебвью',
           'mobileHome.lockApp' => TranslationOverrides.string(_root.$meta, 'mobileHome.lockApp', {}) ?? 'Заблокировать приложение',
           'mobileHome.fileAlreadyExists' => TranslationOverrides.string(_root.$meta, 'mobileHome.fileAlreadyExists', {}) ?? 'Файл уже существует',
-          _ => null,
-        } ??
-        switch (path) {
           'mobileHome.failedToDownload' => TranslationOverrides.string(_root.$meta, 'mobileHome.failedToDownload', {}) ?? 'Не удалось загрузить',
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Отменено пользователем',
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Сохранить в любом случае',
@@ -5900,6 +5801,9 @@ extension on TranslationsRu {
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Закрыть',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'Конфигурации сайтов не найдены',
+          _ => null,
+        } ??
+        switch (path) {
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Добавить новый сайт',
           'mediaPreviews.help' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.help', {}) ?? 'Помощь',
           'mediaPreviews.settings' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? 'Настройки',

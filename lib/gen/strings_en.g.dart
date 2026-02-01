@@ -2651,6 +2651,13 @@ class TranslationsSettingsViewerEn {
   String get preloadSizeLimitSubtitle =>
       TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadSizeLimitSubtitle', {}) ?? 'in GB, 0 for no limit';
 
+  /// en: 'Preload height limit'
+  String get preloadHeightLimit => TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadHeightLimit', {}) ?? 'Preload height limit';
+
+  /// en: 'in pixels, 0 for no limit'
+  String get preloadHeightLimitSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadHeightLimitSubtitle', {}) ?? 'in pixels, 0 for no limit';
+
   /// en: 'Image quality'
   String get imageQuality => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQuality', {}) ?? 'Image quality';
 
@@ -3550,84 +3557,10 @@ class TranslationsSettingsPerformanceEn {
       TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDisablesResourceIntensive', {}) ??
       '- Disables resource-intensive elements (blurs, animated opacity, some animations...)';
 
-  /// en: '- Sets optimal settings for these options (you can change them separately later):'
+  /// en: 'Sets optimal settings for these options (you can change them separately later):'
   String get lowPerformanceModeDialogSetsOptimal =>
       TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
-      '- Sets optimal settings for these options (you can change them separately later):';
-
-  /// en: ' - Preview quality [Thumbnail]'
-  String get lowPerformanceModeDialogPreviewQuality =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreviewQuality', {}) ??
-      '   - Preview quality [Thumbnail]';
-
-  /// en: ' - Image quality [Sample]'
-  String get lowPerformanceModeDialogImageQuality =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogImageQuality', {}) ?? '   - Image quality [Sample]';
-
-  /// en: ' - Preview columns [2 - portrait, 4 - landscape]'
-  String get lowPerformanceModeDialogPreviewColumns =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreviewColumns', {}) ??
-      '   - Preview columns [2 - portrait, 4 - landscape]';
-
-  /// en: ' - Preload amount and size [0, 0.2]'
-  String get lowPerformanceModeDialogPreloadAmount =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreloadAmount', {}) ??
-      '   - Preload amount and size [0, 0.2]';
-
-  /// en: ' - Video autoplay [false]'
-  String get lowPerformanceModeDialogVideoAutoplay =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogVideoAutoplay', {}) ?? '   - Video autoplay [false]';
-
-  /// en: ' - Don't scale images [false]'
-  String get lowPerformanceModeDialogDontScaleImages =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDontScaleImages', {}) ??
-      '   - Don\'t scale images [false]';
-
-  /// en: 'Preview quality'
-  String get previewQuality => TranslationOverrides.string(_root.$meta, 'settings.performance.previewQuality', {}) ?? 'Preview quality';
-
-  /// en: 'Image quality'
-  String get imageQuality => TranslationOverrides.string(_root.$meta, 'settings.performance.imageQuality', {}) ?? 'Image quality';
-
-  /// en: 'Preview columns (portrait)'
-  String get previewColumnsPortrait =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.previewColumnsPortrait', {}) ?? 'Preview columns (portrait)';
-
-  /// en: 'Preview columns (landscape)'
-  String get previewColumnsLandscape =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.previewColumnsLandscape', {}) ?? 'Preview columns (landscape)';
-
-  /// en: 'Preload amount'
-  String get preloadAmount => TranslationOverrides.string(_root.$meta, 'settings.performance.preloadAmount', {}) ?? 'Preload amount';
-
-  /// en: 'Preload size limit'
-  String get preloadSizeLimit => TranslationOverrides.string(_root.$meta, 'settings.performance.preloadSizeLimit', {}) ?? 'Preload size limit';
-
-  /// en: 'in GB, 0 for no limit'
-  String get preloadSizeLimitSubtitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.preloadSizeLimitSubtitle', {}) ?? 'in GB, 0 for no limit';
-
-  /// en: 'Don't scale images'
-  String get dontScaleImages => TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImages', {}) ?? 'Don\'t scale images';
-
-  /// en: 'Disables image scaling which is used to improve performance'
-  String get dontScaleImagesSubtitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesSubtitle', {}) ??
-      'Disables image scaling which is used to improve performance';
-
-  /// en: 'Warning'
-  String get dontScaleImagesWarningTitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningTitle', {}) ?? 'Warning';
-
-  /// en: 'Are you sure you want to disable image scaling?'
-  String get dontScaleImagesWarningMsg =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningMsg', {}) ??
-      'Are you sure you want to disable image scaling?';
-
-  /// en: 'This can negatively impact the performance, especially on older devices'
-  String get dontScaleImagesWarningPerformance =>
-      TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningPerformance', {}) ??
-      'This can negatively impact the performance, especially on older devices';
+      'Sets optimal settings for these options (you can change them separately later):';
 
   /// en: 'Autoplay videos'
   String get autoplayVideos => TranslationOverrides.string(_root.$meta, 'settings.performance.autoplayVideos', {}) ?? 'Autoplay videos';
@@ -5678,6 +5611,10 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadSizeLimit', {}) ?? 'Preload size limit',
           'settings.viewer.preloadSizeLimitSubtitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadSizeLimitSubtitle', {}) ?? 'in GB, 0 for no limit',
+          'settings.viewer.preloadHeightLimit' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadHeightLimit', {}) ?? 'Preload height limit',
+          'settings.viewer.preloadHeightLimitSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.preloadHeightLimitSubtitle', {}) ?? 'in pixels, 0 for no limit',
           'settings.viewer.imageQuality' => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQuality', {}) ?? 'Image quality',
           'settings.viewer.viewerScrollDirection' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.viewerScrollDirection', {}) ?? 'Viewer scroll direction',
@@ -5854,14 +5791,14 @@ extension on Translations {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '[Note]: Videos will cache only if \'Cache Media\' is enabled.',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Stream',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache',
@@ -6198,51 +6135,7 @@ extension on Translations {
                 '- Disables resource-intensive elements (blurs, animated opacity, some animations...)',
           'settings.performance.lowPerformanceModeDialogSetsOptimal' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
-                '- Sets optimal settings for these options (you can change them separately later):',
-          'settings.performance.lowPerformanceModeDialogPreviewQuality' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreviewQuality', {}) ??
-                '   - Preview quality [Thumbnail]',
-          'settings.performance.lowPerformanceModeDialogImageQuality' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogImageQuality', {}) ??
-                '   - Image quality [Sample]',
-          'settings.performance.lowPerformanceModeDialogPreviewColumns' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreviewColumns', {}) ??
-                '   - Preview columns [2 - portrait, 4 - landscape]',
-          'settings.performance.lowPerformanceModeDialogPreloadAmount' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogPreloadAmount', {}) ??
-                '   - Preload amount and size [0, 0.2]',
-          'settings.performance.lowPerformanceModeDialogVideoAutoplay' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogVideoAutoplay', {}) ??
-                '   - Video autoplay [false]',
-          'settings.performance.lowPerformanceModeDialogDontScaleImages' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDontScaleImages', {}) ??
-                '   - Don\'t scale images [false]',
-          'settings.performance.previewQuality' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.previewQuality', {}) ?? 'Preview quality',
-          'settings.performance.imageQuality' => TranslationOverrides.string(_root.$meta, 'settings.performance.imageQuality', {}) ?? 'Image quality',
-          'settings.performance.previewColumnsPortrait' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.previewColumnsPortrait', {}) ?? 'Preview columns (portrait)',
-          'settings.performance.previewColumnsLandscape' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.previewColumnsLandscape', {}) ?? 'Preview columns (landscape)',
-          'settings.performance.preloadAmount' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.preloadAmount', {}) ?? 'Preload amount',
-          'settings.performance.preloadSizeLimit' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.preloadSizeLimit', {}) ?? 'Preload size limit',
-          'settings.performance.preloadSizeLimitSubtitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.preloadSizeLimitSubtitle', {}) ?? 'in GB, 0 for no limit',
-          'settings.performance.dontScaleImages' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImages', {}) ?? 'Don\'t scale images',
-          'settings.performance.dontScaleImagesSubtitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesSubtitle', {}) ??
-                'Disables image scaling which is used to improve performance',
-          'settings.performance.dontScaleImagesWarningTitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningTitle', {}) ?? 'Warning',
-          'settings.performance.dontScaleImagesWarningMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningMsg', {}) ??
-                'Are you sure you want to disable image scaling?',
-          'settings.performance.dontScaleImagesWarningPerformance' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.dontScaleImagesWarningPerformance', {}) ??
-                'This can negatively impact the performance, especially on older devices',
+                'Sets optimal settings for these options (you can change them separately later):',
           'settings.performance.autoplayVideos' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.autoplayVideos', {}) ?? 'Autoplay videos',
           'settings.performance.disableVideos' =>
@@ -6793,9 +6686,6 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'mobileHome.selectBooruForWebview', {}) ?? 'Select booru for webview',
           'mobileHome.lockApp' => TranslationOverrides.string(_root.$meta, 'mobileHome.lockApp', {}) ?? 'Lock app',
           'mobileHome.fileAlreadyExists' => TranslationOverrides.string(_root.$meta, 'mobileHome.fileAlreadyExists', {}) ?? 'File already exists',
-          _ => null,
-        } ??
-        switch (path) {
           'mobileHome.failedToDownload' => TranslationOverrides.string(_root.$meta, 'mobileHome.failedToDownload', {}) ?? 'Failed to download',
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Cancelled by user',
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Save anyway',
@@ -6817,6 +6707,9 @@ extension on Translations {
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Close',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'No booru configs found',
+          _ => null,
+        } ??
+        switch (path) {
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Add new Booru',
           'mediaPreviews.help' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.help', {}) ?? 'Help',
           'mediaPreviews.settings' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? 'Settings',
