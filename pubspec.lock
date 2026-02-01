@@ -261,10 +261,10 @@ packages:
     dependency: transitive
     description:
       name: cross_file
-      sha256: "701dcfc06da0882883a2657c445103380e53e647060ad8d9dfb710c100996608"
+      sha256: "28bb3ae56f117b5aec029d702a90f57d285cd975c3c5c281eaca38dbc47c5937"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.5+1"
+    version: "0.3.5+2"
   crypto:
     dependency: "direct main"
     description:
@@ -1061,10 +1061,10 @@ packages:
     dependency: transitive
     description:
       name: lints
-      sha256: a5e2b223cb7c9c8efdc663ef484fdd95bb243bff242ef5b13e26883547fce9a0
+      sha256: "12f842a479589fea194fe5c5a3095abc7be0c1f2ddfa9a0e76aed1dbd26a87df"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0"
+    version: "6.1.0"
   list_counter:
     dependency: transitive
     description:
@@ -1556,18 +1556,18 @@ packages:
     dependency: "direct main"
     description:
       name: slang
-      sha256: "13e3b6f07adc51ab751e7889647774d294cbce7a3382f81d9e5029acfe9c37b2"
+      sha256: "81e277dc5e2305f53412b92afeb803620453259afe147d5cd6417700f998a7a6"
       url: "https://pub.dev"
     source: hosted
-    version: "4.12.0"
+    version: "4.12.1"
   slang_flutter:
     dependency: "direct main"
     description:
       name: slang_flutter
-      sha256: "0a4545cca5404d6b7487cf61cf1fe56c52daeb08de56a7574ee8381fbad035a0"
+      sha256: "0f0276c400660c8b67150005aa4df57643b86ce6ae9c824abee8e25f345d9abc"
       url: "https://pub.dev"
     source: hosted
-    version: "4.12.0"
+    version: "4.12.1"
   source_span:
     dependency: transitive
     description:
@@ -1993,5 +1993,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.10.7 <4.0.0"
-  flutter: ">=3.38.7 <4.0.0"
+  dart: ">=3.10.8 <4.0.0"
+  flutter: "3.38.9"
