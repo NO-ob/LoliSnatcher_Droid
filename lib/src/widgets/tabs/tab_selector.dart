@@ -51,11 +51,13 @@ enum TabSortingMode {
 class TabSelector extends StatelessWidget {
   const TabSelector({
     this.withBorder = true,
+    this.countOnTop = false,
     this.color,
     super.key,
   });
 
   final bool withBorder;
+  final bool countOnTop;
   final Color? color;
 
   @override
@@ -150,11 +152,39 @@ class TabSelector extends StatelessWidget {
                       InputDecorator(
                         decoration: InputDecoration(
                           label: Obx(() {
-                            return Text(
-                              '${context.loc.tabs.tab} | ${(currentTabIndex + 1).toFormattedString()}/${totalTabs.toFormattedString()}',
-                              style: inputDecoration.labelStyle?.copyWith(
-                                color: color ?? inputDecoration.labelStyle?.color,
+                            final totalCount = currentTab.booruHandler.totalCount.value;
+
+                            return RichText(
+                              text: TextSpan(
+                                style: inputDecoration.labelStyle?.copyWith(
+                                  color: color ?? inputDecoration.labelStyle?.color,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text:
+                                        '${context.loc.tabs.tab} | ${(currentTabIndex + 1).toFormattedString()}/${totalTabs.toFormattedString()}',
+                                  ),
+                                  if (totalCount > 0 && countOnTop) ...[
+                                    const TextSpan(text: ' | '),
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                                        child: Icon(
+                                          Icons.image,
+                                          size: inputDecoration.labelStyle?.fontSize ?? 12,
+                                          color: color ?? inputDecoration.labelStyle?.color,
+                                        ),
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: totalCount.toFormattedString(),
+                                    ),
+                                  ],
+                                ],
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             );
                           }),
                           labelStyle: inputDecoration.labelStyle?.copyWith(
@@ -189,40 +219,41 @@ class TabSelector extends StatelessWidget {
                         child: const SizedBox.expand(),
                       ),
                       //
-                      Positioned(
-                        bottom: -8,
-                        left: 16,
-                        child: Obx(() {
-                          final totalCount = currentTab.booruHandler.totalCount.value;
-                          if (totalCount > 0) {
-                            final usedColor = (color ?? inputDecoration.labelStyle?.color)?.darken(0.2);
-                            return IgnorePointer(
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                                    child: Icon(
-                                      Icons.image,
-                                      size: 14,
-                                      color: usedColor,
+                      if (!countOnTop)
+                        Positioned(
+                          bottom: -8,
+                          left: 16,
+                          child: Obx(() {
+                            final totalCount = currentTab.booruHandler.totalCount.value;
+                            if (totalCount > 0) {
+                              final usedColor = (color ?? inputDecoration.labelStyle?.color)?.darken(0.2);
+                              return IgnorePointer(
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                                      child: Icon(
+                                        Icons.image,
+                                        size: 14,
+                                        color: usedColor,
+                                      ),
                                     ),
-                                  ),
-                                  //
-                                  Text(
-                                    totalCount.toFormattedString(),
-                                    style: inputDecoration.labelStyle?.copyWith(
-                                      fontSize: 12,
-                                      color: usedColor,
+                                    //
+                                    Text(
+                                      totalCount.toFormattedString(),
+                                      style: inputDecoration.labelStyle?.copyWith(
+                                        fontSize: 12,
+                                        color: usedColor,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }
+                                  ],
+                                ),
+                              );
+                            }
 
-                          return const SizedBox.shrink();
-                        }),
-                      ),
+                            return const SizedBox.shrink();
+                          }),
+                        ),
                     ],
                   ),
                 ),

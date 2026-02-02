@@ -26,6 +26,7 @@ class ActiveTitle extends StatelessWidget {
         ),
         child: TabSelector(
           withBorder: false,
+          countOnTop: true,
           color: Theme.of(context).appBarTheme.foregroundColor,
         ),
       ),
