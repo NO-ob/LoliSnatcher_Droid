@@ -48,6 +48,7 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
       contentItems: [
         SettingsTextInput(
           title: context.loc.pageChanger.pageLabel,
+          titleAsLabel: true,
           hintText: context.loc.pageChanger.pageLabel,
           onlyInput: true,
           controller: pageNumberController,
@@ -68,6 +69,7 @@ class _PageNumberDialogState extends State<PageNumberDialog> {
         ),
         SettingsTextInput(
           title: context.loc.pageChanger.delayBetweenLoadings,
+          titleAsLabel: true,
           hintText: context.loc.pageChanger.delayInMs,
           onlyInput: true,
           controller: delayController,

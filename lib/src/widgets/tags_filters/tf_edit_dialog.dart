@@ -80,7 +80,7 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
           margin: const EdgeInsets.symmetric(vertical: 20),
           child: SettingsTextInput(
             title: context.loc.tagsFiltersDialogs.editFilter,
-            hintText: context.loc.tagsFiltersDialogs.editFilter,
+            titleAsLabel: true,
             onlyInput: true,
             controller: _controller,
             autofocus: false,

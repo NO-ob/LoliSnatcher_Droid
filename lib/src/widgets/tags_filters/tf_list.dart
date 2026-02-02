@@ -46,7 +46,7 @@ class TagsFiltersList extends StatelessWidget {
             controller: tagSearchController,
             title:
                 '${context.loc.search} (${isSearchActive ? '${filteredCount.toFormattedString()}/${originalCount.toFormattedString()}' : originalCount.toFormattedString()})',
-            floatingLabelBehavior: FloatingLabelBehavior.always,
+            titleAsLabel: true,
             clearable: true,
             pasteable: true,
             onChanged: onSearchTextChanged,

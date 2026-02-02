@@ -31,6 +31,7 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
         SettingsTextInput(
           controller: _controller,
           title: context.loc.tagsManager.name,
+          titleAsLabel: true,
           drawBottomBorder: false,
           pasteable: true,
           enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
@@ -44,6 +45,7 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
             });
           },
           title: context.loc.tagsManager.type,
+          titleAsLabel: true,
           drawBottomBorder: false,
         ),
       ],

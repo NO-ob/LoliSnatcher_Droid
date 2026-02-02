@@ -183,30 +183,46 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
             unselectedLabelColor: Theme.of(context).appBarTheme.foregroundColor,
             labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             unselectedLabelStyle: const TextStyle(fontSize: 16),
+            isScrollable: true,
+            tabAlignment: TabAlignment.start,
             tabs: [
               Tab(
                 icon: const Icon(
                   CupertinoIcons.eye_slash,
+                  size: 24,
                   color: Colors.red,
                 ),
                 height: 60,
-                child: MarqueeText(text: context.loc.settings.tagsFilters.hated),
+                child: Center(
+                  child: MarqueeText(
+                    text: context.loc.settings.tagsFilters.hated,
+                    isExpanded: false,
+                  ),
+                ),
               ),
               Tab(
                 icon: const Icon(
                   Icons.star,
+                  size: 24,
                   color: Colors.yellow,
                 ),
                 height: 60,
-                child: MarqueeText(text: context.loc.settings.tagsFilters.loved),
+                child: MarqueeText(
+                  text: context.loc.settings.tagsFilters.loved,
+                  isExpanded: false,
+                ),
               ),
               Tab(
                 icon: Icon(
                   Icons.settings,
+                  size: 24,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
                 height: 60,
-                child: MarqueeText(text: context.loc.settings.title),
+                child: MarqueeText(
+                  text: context.loc.settings.title,
+                  isExpanded: false,
+                ),
               ),
             ],
           ),

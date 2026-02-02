@@ -411,6 +411,7 @@ class _HistoryListState extends State<HistoryList> {
                 getHistory();
               },
               title: context.loc.search,
+              titleAsLabel: true,
               inputType: TextInputType.text,
               clearable: true,
               pasteable: true,

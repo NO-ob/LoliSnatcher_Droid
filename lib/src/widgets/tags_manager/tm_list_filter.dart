@@ -29,7 +29,7 @@ class TagsManagerListFilter extends StatelessWidget {
               controller: controller,
               onChanged: onChanged,
               title: title,
-              hintText: title,
+              titleAsLabel: true,
               inputType: TextInputType.text,
               clearable: true,
               pasteable: true,

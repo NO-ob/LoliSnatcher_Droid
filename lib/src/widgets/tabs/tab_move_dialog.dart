@@ -81,6 +81,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
         const SizedBox(height: 30),
         SettingsTextInput(
           title: context.loc.tabs.move.tabNumber,
+          titleAsLabel: true,
           hintText: context.loc.tabs.move.tabNumber,
           onlyInput: true,
           controller: indexController,

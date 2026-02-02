@@ -500,6 +500,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.itemExtent,
     this.expendableByScroll = false,
     this.placeholder,
+    this.titleAsLabel = false,
     super.key,
   });
 
@@ -522,6 +523,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final double? itemExtent;
   final bool expendableByScroll;
   final String? placeholder;
+  final bool titleAsLabel;
 
   String getTitle(T? value) {
     return itemTitleBuilder?.call(value) ?? value?.toString() ?? placeholder ?? '';
@@ -573,8 +575,11 @@ class SettingsDropdown<T> extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title),
-            const SizedBox(height: 8),
+            if (!titleAsLabel)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(title),
+              ),
             LoliDropdown(
               value: value,
               onChanged: onChanged ?? (item) {},
@@ -598,7 +603,7 @@ class SettingsDropdown<T> extends StatelessWidget {
                 );
               },
               selectedItemBuilder: getSelectedItemWidget,
-              labelBuilder: () => const SizedBox.shrink(),
+              labelBuilder: titleAsLabel ? null : () => const SizedBox.shrink(),
               labelText: title,
             ),
           ],
@@ -837,7 +842,7 @@ class SettingsTextInput extends StatefulWidget {
     this.inputType = TextInputType.text,
     this.inputFormatters,
     this.validator,
-    this.hintText = '',
+    this.hintText,
     this.subtitle,
     this.autofocus = false,
     this.onChanged,
@@ -866,6 +871,7 @@ class SettingsTextInput extends StatefulWidget {
     this.enableIMEPersonalizedLearning = true,
     this.submitIcon,
     this.showSubmitButton,
+    this.titleAsLabel = false,
     this.prefixIcon,
     this.contextMenuBuilder,
     super.key,
@@ -877,7 +883,7 @@ class SettingsTextInput extends StatefulWidget {
   final TextInputType inputType;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
-  final String hintText;
+  final String? hintText;
   final Widget? subtitle;
   final bool autofocus;
   final ValueChanged<String>? onChanged;
@@ -906,6 +912,7 @@ class SettingsTextInput extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
   final IconData? submitIcon;
   final bool Function(String)? showSubmitButton;
+  final bool titleAsLabel;
   final Widget? prefixIcon;
   final Widget Function(BuildContext, EditableTextState)? contextMenuBuilder;
 
@@ -1115,6 +1122,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         scrollPadding: const EdgeInsets.all(kToolbarHeight),
         contextMenuBuilder: widget.contextMenuBuilder,
         decoration: InputDecoration(
+          labelText: widget.titleAsLabel ? widget.title : null,
           hintText: widget.hintText,
           errorMaxLines: 3,
           errorText: widget.validator?.call(widget.controller.text),
@@ -1135,15 +1143,16 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Text(
-              widget.title,
-              style: Theme.of(context).inputDecorationTheme.labelStyle?.copyWith(
-                fontSize: 16,
+          if (!widget.titleAsLabel)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Text(
+                widget.title,
+                style: Theme.of(context).inputDecorationTheme.labelStyle?.copyWith(
+                  fontSize: 16,
+                ),
               ),
             ),
-          ),
           //
           field,
           //
@@ -1163,7 +1172,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.title),
+            if (!widget.titleAsLabel) Text(widget.title),
             field,
           ],
         ),

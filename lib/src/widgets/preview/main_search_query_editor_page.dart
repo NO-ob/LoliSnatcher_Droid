@@ -855,6 +855,19 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                                         ),
                                       ),
                                       //
+                                      FutureBuilder<PinnedTag?>(
+                                        future: settingsHandler.dbHandler.getPinnedTag(
+                                          tag.tag,
+                                          booruType: searchHandler.currentBooru.type?.name,
+                                          booruName: searchHandler.currentBooru.name,
+                                        ),
+                                        builder: (context, snapshot) {
+                                          final isPinned = snapshot.data != null;
+                                          if (isPinned) return const Icon(Icons.push_pin, size: 16);
+
+                                          return const SizedBox.shrink();
+                                        },
+                                      ),
                                       if (tag.count > 0)
                                         Padding(
                                           padding: const EdgeInsets.only(left: 12),
@@ -933,6 +946,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                   controller: suggestionTextController,
                   focusNode: suggestionTextFocusNode,
                   title: context.loc.searchBar.searchForTags,
+                  titleAsLabel: true,
                   hintText: context.loc.searchBar.searchForTags,
                   clearable: true,
                   onSubmitted: onSuggestionTextSubmitted,
@@ -2774,44 +2788,35 @@ class _PinTagDialogState extends State<PinTagDialog> {
             contentPadding: EdgeInsets.zero,
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: labelController,
-                  decoration: InputDecoration(
-                    labelText: context.loc.pinnedTags.labelsOptional,
-                    hintText: context.loc.pinnedTags.typeAndEnterToAdd,
-                    border: const OutlineInputBorder(),
-                    isDense: true,
-                    suffixIcon: labelController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.add, size: 18),
-                            onPressed: () => _addLabel(labelController.text),
-                          )
-                        : null,
-                  ),
-                  onSubmitted: _addLabel,
-                ),
-              ),
-              if (widget.existingLabels.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.arrow_drop_down),
-                  tooltip: context.loc.pinnedTags.selectExistingLabel,
-                  onSelected: _addLabel,
-                  itemBuilder: (context) => widget.existingLabels
-                      .where((l) => !selectedLabels.contains(l))
-                      .map(
-                        (label) => PopupMenuItem(
-                          value: label,
-                          child: Text(label),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ],
-            ],
+          SettingsTextInput(
+            controller: labelController,
+            title: context.loc.pinnedTags.labelsOptional,
+            titleAsLabel: true,
+            subtitle: Text(context.loc.pinnedTags.typeAndEnterToAdd),
+            onlyInput: true,
+            prefixIcon: widget.existingLabels.isNotEmpty
+                ? PopupMenuButton<String>(
+                    icon: const Icon(Icons.arrow_drop_down),
+                    tooltip: context.loc.pinnedTags.selectExistingLabel,
+                    onSelected: _addLabel,
+                    itemBuilder: (context) => widget.existingLabels
+                        .where((l) => !selectedLabels.contains(l))
+                        .map(
+                          (label) => PopupMenuItem(
+                            value: label,
+                            child: Text(label),
+                          ),
+                        )
+                        .toList(),
+                  )
+                : null,
+            trailingIcon: labelController.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.add, size: 18),
+                    onPressed: () => _addLabel(labelController.text),
+                  )
+                : null,
+            onSubmitted: _addLabel,
           ),
           if (selectedLabels.isNotEmpty) ...[
             const SizedBox(height: 8),
