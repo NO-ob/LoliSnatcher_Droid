@@ -729,6 +729,7 @@
       "settingsRestored": "Настроики восстановлены из бэкапа!",
       "backupSettingsError": "Не удалось сохранить настроики!",
       "restoreSettingsError": "Не удалось восстановить настроики!",
+      "resetBackupDir": "Сбросить папку бэкапов",
       "backupBoorus": "Бэкап конфигов сайтов",
       "restoreBoorus": "Восстановление конфигов сайтов",
       "boorusBackedUp": "Конфиги сохранены в boorus.json",

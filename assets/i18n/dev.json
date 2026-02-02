@@ -729,6 +729,7 @@
             "settingsRestored": "{Settings restored from backup}",
             "backupSettingsError": "{Failed to backup settings}",
             "restoreSettingsError": "{Failed to restore settings}",
+            "resetBackupDir": "{Reset backup directory}",
             "backupBoorus": "{Backup boorus}",
             "restoreBoorus": "{Restore boorus}",
             "boorusBackedUp": "{Boorus backed up to boorus.json}",

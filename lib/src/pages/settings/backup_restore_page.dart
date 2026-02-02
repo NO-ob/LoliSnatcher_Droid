@@ -202,7 +202,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                   //
                   if (backupPath.isNotEmpty) ...[
                     SettingsButton(
-                      name: 'Reset backup directory',
+                      name: backupLoc.resetBackupDir,
                       icon: const Icon(Icons.refresh_rounded),
                       action: () async {
                         setState(() {
@@ -316,7 +316,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     ),
                     const SettingsButton(name: '', enabled: false),
                     SettingsButton(
-                      name: 'Backup boorus',
+                      name: backupLoc.backupBoorus,
                       icon: const Icon(Icons.image_search),
                       action: () async {
                         inProgress = true;
