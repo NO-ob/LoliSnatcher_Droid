@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
@@ -143,81 +143,87 @@ class TabSelector extends StatelessWidget {
               alignment: Alignment.centerLeft,
               children: [
                 Positioned.fill(
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      label: Obx(() {
-                        final totalCount = currentTab.booruHandler.totalCount.value;
-
-                        return MarqueeText.rich(
-                          isExpanded: false,
-                          placeholderDimensions: const [
-                            PlaceholderDimensions(
-                              // will hide whe WidgetSpan when Marquee is active, for some reason icon won't render there
-                              size: Size.zero,
-                              alignment: PlaceholderAlignment.middle,
-                            ),
-                          ],
-                          textSpan: TextSpan(
-                            style: inputDecoration.labelStyle?.copyWith(
-                              color: color ?? inputDecoration.labelStyle?.color,
-                            ),
-                            children: [
-                              TextSpan(
-                                text:
-                                    '${context.loc.tabs.tab} | ${(currentTabIndex + 1).toFormattedString()}/${totalTabs.toFormattedString()}',
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      InputDecorator(
+                        decoration: InputDecoration(
+                          label: Obx(() {
+                            return Text(
+                              '${context.loc.tabs.tab} | ${(currentTabIndex + 1).toFormattedString()}/${totalTabs.toFormattedString()}',
+                              style: inputDecoration.labelStyle?.copyWith(
+                                color: color ?? inputDecoration.labelStyle?.color,
                               ),
-                              if (totalCount > 0) ...[
-                                const TextSpan(text: ' | '),
-                                WidgetSpan(
-                                  alignment: PlaceholderAlignment.middle,
-                                  child: Padding(
+                            );
+                          }),
+                          labelStyle: inputDecoration.labelStyle?.copyWith(
+                            color: color ?? inputDecoration.labelStyle?.color,
+                          ),
+                          contentPadding: contentPadding,
+                          border: inputDecoration.border?.copyWith(
+                            borderSide: BorderSide(
+                              color: withBorder
+                                  ? (inputDecoration.border?.borderSide.color ?? Colors.transparent)
+                                  : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          enabledBorder: inputDecoration.enabledBorder?.copyWith(
+                            borderSide: BorderSide(
+                              color: withBorder
+                                  ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent)
+                                  : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: inputDecoration.focusedBorder?.copyWith(
+                            borderSide: BorderSide(
+                              color: withBorder
+                                  ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent)
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        child: const SizedBox.expand(),
+                      ),
+                      //
+                      Positioned(
+                        bottom: -8,
+                        left: 16,
+                        child: Obx(() {
+                          final totalCount = currentTab.booruHandler.totalCount.value;
+                          if (totalCount > 0) {
+                            final usedColor = (color ?? inputDecoration.labelStyle?.color)?.darken(0.2);
+                            return IgnorePointer(
+                              child: Row(
+                                children: [
+                                  Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 2),
                                     child: Icon(
                                       Icons.image,
-                                      size: inputDecoration.labelStyle?.fontSize ?? 12,
-                                      color: color ?? inputDecoration.labelStyle?.color,
+                                      size: 14,
+                                      color: usedColor,
                                     ),
                                   ),
-                                ),
-                                //
-                                TextSpan(
-                                  text: totalCount.toFormattedString(),
-                                ),
-                              ],
-                            ],
-                          ),
-                        );
-                      }),
-                      labelStyle: inputDecoration.labelStyle?.copyWith(
-                        color: color ?? inputDecoration.labelStyle?.color,
+                                  //
+                                  Text(
+                                    totalCount.toFormattedString(),
+                                    style: inputDecoration.labelStyle?.copyWith(
+                                      fontSize: 12,
+                                      color: usedColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          return const SizedBox.shrink();
+                        }),
                       ),
-                      contentPadding: contentPadding,
-                      border: inputDecoration.border?.copyWith(
-                        borderSide: BorderSide(
-                          color: withBorder
-                              ? (inputDecoration.border?.borderSide.color ?? Colors.transparent)
-                              : Colors.transparent,
-                          width: 1,
-                        ),
-                      ),
-                      enabledBorder: inputDecoration.enabledBorder?.copyWith(
-                        borderSide: BorderSide(
-                          color: withBorder
-                              ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent)
-                              : Colors.transparent,
-                          width: 1,
-                        ),
-                      ),
-                      focusedBorder: inputDecoration.focusedBorder?.copyWith(
-                        borderSide: BorderSide(
-                          color: withBorder
-                              ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent)
-                              : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: const SizedBox.expand(),
+                    ],
                   ),
                 ),
                 //

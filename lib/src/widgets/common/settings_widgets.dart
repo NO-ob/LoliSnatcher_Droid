@@ -1135,9 +1135,23 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.title),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Text(
+              widget.title,
+              style: Theme.of(context).inputDecorationTheme.labelStyle?.copyWith(
+                fontSize: 16,
+              ),
+            ),
+          ),
+          //
           field,
-          ?widget.subtitle,
+          //
+          if (widget.subtitle != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: widget.subtitle,
+            ),
         ],
       );
     }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:fast_marquee/fast_marquee.dart';
 
 // Based on code from: https://github.com/nt4f04uNd/nt4f04unds_widgets/blob/f14e448d23d347f17c05549972e638d61cf300b4/lib/src/widgets/marquee.dart
@@ -21,8 +21,7 @@ class MarqueeText extends StatelessWidget {
     this.fadingEdgeStartFraction = 0,
     this.fadingEdgeEndFraction = 0.15,
     super.key,
-  }) : textSpan = null,
-       placeholderDimensions = const [];
+  }) : textSpan = null;
 
   const MarqueeText.rich({
     required this.textSpan,
@@ -38,9 +37,6 @@ class MarqueeText extends StatelessWidget {
     this.allowDownscale = true,
     this.fadingEdgeStartFraction = 0,
     this.fadingEdgeEndFraction = 0.15,
-    this.placeholderDimensions = const [
-      PlaceholderDimensions(size: Size.square(20), alignment: PlaceholderAlignment.middle),
-    ],
     super.key,
   }) : text = null;
 
@@ -58,7 +54,6 @@ class MarqueeText extends StatelessWidget {
   final bool allowDownscale;
   final double fadingEdgeStartFraction;
   final double fadingEdgeEndFraction;
-  final List<PlaceholderDimensions> placeholderDimensions;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +89,6 @@ class MarqueeText extends StatelessWidget {
           maxLines: 1,
           stepGranularity: stepGranularity,
           style: usedStyle,
-          placeholderDimensions: placeholderDimensions,
           overflowReplacement: Marquee.rich(
             textSpan: textSpan,
             blankSpace: blankSpace,
@@ -107,7 +101,6 @@ class MarqueeText extends StatelessWidget {
             showFadingOnlyWhenScrolling: false,
             startAfter: startAfter,
             pauseAfterRound: pauseAfterRound,
-            placeholderDimensions: placeholderDimensions,
           ),
         ),
       );

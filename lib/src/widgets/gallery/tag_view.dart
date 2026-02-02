@@ -1774,7 +1774,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                     ? null
                     : SizedBox(
                         width: context.mediaSize.width,
-                        height: kMinInteractiveDimension,
+                        height: 80,
                         child: SettingsBooruDropdown(
                           title: context.loc.tagView.booru,
                           placeholder: context.loc.tagView.selectBooruToLoad,
@@ -1818,24 +1818,24 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                           children: [
                             const Icon(Icons.search),
                             const SizedBox(width: 8),
-                            Text(
-                              context.loc.tagView.preview,
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
                             Obx(() {
-                              final bool hasCount = tab!.booruHandler.totalCount > 0;
-
+                              final int count = tab!.booruHandler.totalCount.value;
                               return AnimatedSize(
                                 duration: const Duration(milliseconds: 200),
-                                child: hasCount
-                                    ? Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                                        child: Text(
-                                          '(${tab!.booruHandler.totalCount})',
+                                alignment: Alignment.centerLeft,
+                                child: RichText(
+                                  text: TextSpan(
+                                    style: Theme.of(context).textTheme.bodyLarge,
+                                    children: [
+                                      TextSpan(text: context.loc.tagView.preview),
+                                      if (count > 0)
+                                        TextSpan(
+                                          text: ' ($count)',
                                           style: Theme.of(context).textTheme.bodySmall,
                                         ),
-                                      )
-                                    : const SizedBox.shrink(),
+                                    ],
+                                  ),
+                                ),
                               );
                             }),
                             const SizedBox(width: 8),
@@ -1916,7 +1916,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                         const SizedBox(height: 8),
                         SizedBox(
                           width: context.mediaSize.width,
-                          height: kMinInteractiveDimension,
+                          height: 80,
                           child: SettingsBooruDropdown(
                             title: context.loc.tagView.booru,
                             placeholder: context.loc.tagView.selectBooruToLoad,

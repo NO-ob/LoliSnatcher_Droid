@@ -97,15 +97,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
-  auto_size_text:
+  auto_size_text_plus:
     dependency: "direct main"
     description:
-      path: "."
-      ref: ae3b9df6d618166f94d5c131ffc468d73285c6a8
-      resolved-ref: ae3b9df6d618166f94d5c131ffc468d73285c6a8
-      url: "https://github.com/ChrisElliotUK/auto_size_text.git"
-    source: git
-    version: "3.0.0"
+      name: auto_size_text_plus
+      sha256: "21c522949ad4eadf16f5a525f348200783ebbefc02242d90624fc30279c53216"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
   boolean_selector:
     dependency: transitive
     description:
