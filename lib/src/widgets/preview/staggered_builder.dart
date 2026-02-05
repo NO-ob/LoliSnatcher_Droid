@@ -48,6 +48,7 @@ class StaggeredBuilder extends StatelessWidget {
         ),
         delegate: SliverChildBuilderDelegate(
           addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false, // ThumbnailCardBuild has its own RepaintBoundary
           childCount: currentFetched.length,
           (context, index) => LayoutBuilder(
             builder: (context, constraints) {

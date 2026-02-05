@@ -4576,10 +4576,10 @@ class TranslationsPreviewErrorEn {
   /// en: 'You reached the end'
   String get reachedEnd => TranslationOverrides.string(_root.$meta, 'preview.error.reachedEnd', {}) ?? 'You reached the end';
 
-  /// en: 'Loaded ${pageNum: int} pages Tap here to reload last page'
+  /// en: 'Loaded pages: ${pageNum: int} Tap here to reload last page'
   String reachedEndSubtitle({required int pageNum}) =>
       TranslationOverrides.string(_root.$meta, 'preview.error.reachedEndSubtitle', {'pageNum': pageNum}) ??
-      'Loaded ${pageNum} pages\nTap here to reload last page';
+      'Loaded pages: ${pageNum}\nTap here to reload last page';
 
   /// en: 'Loading page #${pageNum: int}...'
   String loadingPage({required int pageNum}) =>
@@ -6872,7 +6872,7 @@ extension on Translations {
           'preview.error.reachedEndSubtitle' =>
             ({required int pageNum}) =>
                 TranslationOverrides.string(_root.$meta, 'preview.error.reachedEndSubtitle', {'pageNum': pageNum}) ??
-                'Loaded ${pageNum} pages\nTap here to reload last page',
+                'Loaded pages: ${pageNum}\nTap here to reload last page',
           'preview.error.loadingPage' =>
             ({required int pageNum}) =>
                 TranslationOverrides.string(_root.$meta, 'preview.error.loadingPage', {'pageNum': pageNum}) ?? 'Loading page #${pageNum}...',

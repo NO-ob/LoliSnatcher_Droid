@@ -1309,9 +1309,14 @@ class _HideableAppBarState extends State<HideableAppBar> {
           color: Colors.transparent,
           height: viewerHandler.displayAppbar.value ? (isOnTop ? null : (widget.defaultHeight + extraPadding)) : 0,
           padding: isOnTop ? null : EdgeInsets.only(bottom: extraPadding),
-          child: ValueListenableBuilder(
-            valueListenable: page,
-            builder: (context, page, _) {
+          child: ListenableBuilder(
+            listenable: Listenable.merge([page, widget.tab.booruHandler.filteredFetched]),
+            builder: (context, _) {
+              final pageVal = page.value;
+              final fetched = widget.tab.booruHandler.filteredFetched.value;
+              final String formattedViewedIndex = (pageVal + 1).toString();
+              final String formattedTotal = fetched.length.toString();
+
               return AppBar(
                 // toolbarHeight: widget.defaultHeight,
                 elevation: 0,
@@ -1326,16 +1331,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
                 ),
                 title: FittedBox(
                   fit: BoxFit.fitWidth,
-                  child: ValueListenableBuilder(
-                    valueListenable: widget.tab.booruHandler.filteredFetched,
-                    builder: (_, fetched, _) {
-                      final String formattedViewedIndex = (page + 1).toString();
-                      final String formattedTotal = fetched.length.toString();
-                      return Text(
-                        '$formattedViewedIndex/$formattedTotal',
-                        style: const TextStyle(color: Colors.white),
-                      );
-                    },
+                  child: Text(
+                    '$formattedViewedIndex/$formattedTotal',
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ),
                 actions: getActions(),

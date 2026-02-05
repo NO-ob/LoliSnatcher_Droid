@@ -95,22 +95,25 @@ class MainDrawer extends StatelessWidget {
                   const TabButtons(true, WrapAlignment.spaceEvenly),
                   const SizedBox(height: 12),
                   const MergeBooruToggleAndSelector(),
-                  ValueListenableBuilder(
-                    valueListenable: LocalAuthHandler.instance.deviceSupportsBiometrics,
-                    builder: (_, deviceSupportsBiometrics, _) => ValueListenableBuilder(
-                      valueListenable: SettingsHandler.instance.useLockscreen,
-                      builder: (_, useLockscreen, child) {
-                        if (deviceSupportsBiometrics && useLockscreen) {
-                          return child!;
-                        }
+                  ListenableBuilder(
+                    listenable: Listenable.merge([
+                      LocalAuthHandler.instance.deviceSupportsBiometrics,
+                      SettingsHandler.instance.useLockscreen,
+                    ]),
+                    builder: (_, child) {
+                      final deviceSupportsBiometrics = LocalAuthHandler.instance.deviceSupportsBiometrics.value;
+                      final useLockscreen = SettingsHandler.instance.useLockscreen.value;
 
-                        return const SizedBox.shrink();
-                      },
-                      child: SettingsButton(
-                        name: context.loc.mobileHome.lockApp,
-                        icon: const Icon(Icons.lock),
-                        action: () => LocalAuthHandler.instance.lock(manually: true),
-                      ),
+                      if (deviceSupportsBiometrics && useLockscreen) {
+                        return child!;
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                    child: SettingsButton(
+                      name: context.loc.mobileHome.lockApp,
+                      icon: const Icon(Icons.lock),
+                      action: () => LocalAuthHandler.instance.lock(manually: true),
                     ),
                   ),
                   SettingsButton(

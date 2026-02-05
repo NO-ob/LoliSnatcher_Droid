@@ -57,70 +57,74 @@ class _MediaPreviewsState extends State<MediaPreviews> {
   Widget build(BuildContext context) {
     // print('image previews build $booruListFilled $tabListFilled');
 
-    return ValueListenableBuilder(
-      valueListenable: booruListFilled,
-      builder: (_, booruListFilled, _) =>
-          // no booru configs
-          !booruListFilled
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  SettingsButton(
-                    name: context.loc.mediaPreviews.noBooruConfigsFound,
-                    icon: const Icon(null),
-                  ),
-                  SettingsButton(
-                    name: context.loc.mediaPreviews.addNewBooru,
-                    icon: const Icon(Icons.settings),
-                    page: () => BooruEdit(Booru('New', null, '', '', '')),
-                  ),
-                  SettingsButton(
-                    name: context.loc.mediaPreviews.help,
-                    icon: const Icon(Icons.help_center_outlined),
-                    action: () {
-                      launchUrlString(
-                        'https://github.com/NO-ob/LoliSnatcher_Droid/wiki',
-                        mode: LaunchMode.externalApplication,
-                      );
-                    },
-                    trailingIcon: const Icon(Icons.exit_to_app),
-                  ),
-                  SettingsButton(
-                    name: context.loc.mediaPreviews.settings,
-                    icon: const Icon(Icons.settings),
-                    page: () => const SettingsPage(),
-                  ),
-                ],
-              ),
-            )
-          : ValueListenableBuilder(
-              valueListenable: tabListFilled,
-              builder: (_, tabListFilled, _) =>
-                  // temp message while restoring tabs (or for some reason initial tab was not created)
-                  !tabListFilled
-                  ? Center(
-                      child: Column(
-                        children: [
-                          const CircularProgressIndicator(),
-                          ValueListenableBuilder(
-                            valueListenable: searchHandler.isRestored,
-                            builder: (context, isRestored, child) {
-                              if (searchHandler.isRestored.value) {
-                                return const SizedBox.shrink();
-                              }
+    return ListenableBuilder(
+      listenable: Listenable.merge([booruListFilled, tabListFilled]),
+      builder: (context, _) {
+        final booruListFilledVal = booruListFilled.value;
+        final tabListFilledVal = tabListFilled.value;
 
-                              return child!;
-                            },
-                            child: Text(context.loc.mediaPreviews.restoringPreviousSession),
-                          ),
-                        ],
-                      ),
-                      // render thumbnails grid
-                    )
-                  : const WaterfallView(),
+        // no booru configs
+        if (!booruListFilledVal) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                SettingsButton(
+                  name: context.loc.mediaPreviews.noBooruConfigsFound,
+                  icon: const Icon(null),
+                ),
+                SettingsButton(
+                  name: context.loc.mediaPreviews.addNewBooru,
+                  icon: const Icon(Icons.settings),
+                  page: () => BooruEdit(Booru('New', null, '', '', '')),
+                ),
+                SettingsButton(
+                  name: context.loc.mediaPreviews.help,
+                  icon: const Icon(Icons.help_center_outlined),
+                  action: () {
+                    launchUrlString(
+                      'https://github.com/NO-ob/LoliSnatcher_Droid/wiki',
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                  trailingIcon: const Icon(Icons.exit_to_app),
+                ),
+                SettingsButton(
+                  name: context.loc.mediaPreviews.settings,
+                  icon: const Icon(Icons.settings),
+                  page: () => const SettingsPage(),
+                ),
+              ],
             ),
+          );
+        }
+
+        // temp message while restoring tabs (or for some reason initial tab was not created)
+        if (!tabListFilledVal) {
+          return Center(
+            child: Column(
+              children: [
+                const CircularProgressIndicator(),
+                ValueListenableBuilder(
+                  valueListenable: searchHandler.isRestored,
+                  builder: (context, isRestored, child) {
+                    if (searchHandler.isRestored.value) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return child!;
+                  },
+                  child: Text(context.loc.mediaPreviews.restoringPreviousSession),
+                ),
+              ],
+            ),
+          );
+        }
+
+        // render thumbnails grid
+        return const WaterfallView();
+      },
     );
   }
 }

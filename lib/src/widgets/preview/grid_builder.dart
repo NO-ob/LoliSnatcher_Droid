@@ -43,6 +43,7 @@ class GridBuilder extends StatelessWidget {
       valueListenable: tab.booruHandler.filteredFetched,
       builder: (context, currentFetched, child) => SliverGrid.builder(
         addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false, // ThumbnailCardBuild has its own RepaintBoundary
         itemCount: currentFetched.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columnCount,

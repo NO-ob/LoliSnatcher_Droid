@@ -3584,7 +3584,7 @@ class _TranslationsPreviewErrorDev extends TranslationsPreviewErrorEn {
   @override
   String reachedEndSubtitle({required int pageNum}) =>
       TranslationOverrides.string(_root.$meta, 'preview.error.reachedEndSubtitle', {'pageNum': pageNum}) ??
-      '{Loaded ${pageNum} pages\nTap here to reload last page}';
+      '{Loaded pages: ${pageNum}\nTap here to reload last page}';
   @override
   String loadingPage({required int pageNum}) =>
       TranslationOverrides.string(_root.$meta, 'preview.error.loadingPage', {'pageNum': pageNum}) ?? '{Loading page #${pageNum}...}';
@@ -5863,7 +5863,7 @@ extension on TranslationsDev {
           'preview.error.reachedEndSubtitle' =>
             ({required int pageNum}) =>
                 TranslationOverrides.string(_root.$meta, 'preview.error.reachedEndSubtitle', {'pageNum': pageNum}) ??
-                '{Loaded ${pageNum} pages\nTap here to reload last page}',
+                '{Loaded pages: ${pageNum}\nTap here to reload last page}',
           'preview.error.loadingPage' =>
             ({required int pageNum}) =>
                 TranslationOverrides.string(_root.$meta, 'preview.error.loadingPage', {'pageNum': pageNum}) ?? '{Loading page #${pageNum}...}',

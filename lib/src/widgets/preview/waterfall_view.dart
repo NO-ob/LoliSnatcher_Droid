@@ -398,7 +398,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                         controller: searchHandler.gridScrollController,
                         physics: isLoadingAndNoItems ? const NeverScrollableScrollPhysics() : null,
                         shrinkWrap: false,
-                        cacheExtent: 200,
+                        cacheExtent: 300 * MediaQuery.devicePixelRatioOf(context),
                         slivers: [
                           const MainAppBar(),
                           SliverPadding(

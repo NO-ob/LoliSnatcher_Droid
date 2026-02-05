@@ -1342,7 +1342,7 @@
             "noResults": "{No results}",
             "noResultsSubtitle": "{Change search query or tap to retry}",
             "reachedEnd": "{You reached the end}",
-            "reachedEndSubtitle(param=pageNum)": "{Loaded ${pageNum: int} pages\nTap here to reload last page}",
+            "reachedEndSubtitle(param=pageNum)": "{Loaded pages: ${pageNum: int}\nTap here to reload last page}",
             "loadingPage(param=pageNum)": "{Loading page #${pageNum: int}...}",
             "startedAgo(param=seconds)": {
                 "one": "{Started ${seconds} second ago}",

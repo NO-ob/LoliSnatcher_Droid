@@ -354,16 +354,23 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         other.withCache == withCache &&
         other.cacheFolder == cacheFolder &&
         other.fileNameExtras == fileNameExtras &&
-        other.onCacheDetected == onCacheDetected &&
-        other.onError == onError &&
         other.sendTimeout == sendTimeout &&
         other.receiveTimeout == receiveTimeout &&
-        other.withCaptchaCheck == withCaptchaCheck &&
-        other.cancelToken == cancelToken;
+        other.withCaptchaCheck == withCaptchaCheck;
   }
 
   @override
-  int get hashCode => Object.hash(url, scale);
+  int get hashCode => Object.hash(
+    url,
+    scale,
+    headers,
+    withCache,
+    cacheFolder,
+    fileNameExtras,
+    sendTimeout,
+    receiveTimeout,
+    withCaptchaCheck,
+  );
 
   @override
   String toString() => '${objectRuntimeType(this, 'CustomNetworkImage')}("$url", scale: $scale)';
@@ -495,16 +502,23 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
         other.withCache == withCache &&
         other.cacheFolder == cacheFolder &&
         other.fileNameExtras == fileNameExtras &&
-        other.onCacheDetected == onCacheDetected &&
-        other.onError == onError &&
         other.sendTimeout == sendTimeout &&
         other.receiveTimeout == receiveTimeout &&
-        other.withCaptchaCheck == withCaptchaCheck &&
-        other.cancelToken == cancelToken;
+        other.withCaptchaCheck == withCaptchaCheck;
   }
 
   @override
-  int get hashCode => Object.hash(url, scale);
+  int get hashCode => Object.hash(
+    url,
+    scale,
+    headers,
+    withCache,
+    cacheFolder,
+    fileNameExtras,
+    sendTimeout,
+    receiveTimeout,
+    withCaptchaCheck,
+  );
 
   @override
   String toString() => '${objectRuntimeType(this, 'CustomNetworkAvifImage')}("$url", scale: $scale)';

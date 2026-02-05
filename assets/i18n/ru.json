@@ -1342,7 +1342,7 @@
       "noResults": "Нет результатов",
       "noResultsSubtitle": "Измени поисковый запрос или нажми чтобы попробовать снова",
       "reachedEnd": "Ты достиг конца",
-      "reachedEndSubtitle(param=pageNum)": "Загружено ${pageNum: int} страниц\nНажми здесь, чтобы перезагрузить последнюю страницу",
+      "reachedEndSubtitle(param=pageNum)": "Загружено страниц: ${pageNum: int}\nНажми здесь, чтобы перезагрузить последнюю страницу",
       "loadingPage(param=pageNum)": "Загрузка страницы №${pageNum: int}...",
       "startedAgo(param=seconds)": {
         "one": "Начато ${seconds} секунду назад",

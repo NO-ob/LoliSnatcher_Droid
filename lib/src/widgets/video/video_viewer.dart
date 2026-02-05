@@ -53,8 +53,8 @@ class VideoViewerState extends State<VideoViewer> {
   final ViewerHandler viewerHandler = ViewerHandler.instance;
   final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
 
-  PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
-  PhotoViewController viewController = PhotoViewController();
+  final PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
+  final PhotoViewController viewController = PhotoViewController();
   final ValueNotifier<VideoPlayerController?> videoController = ValueNotifier(null);
   final ValueNotifier<ChewieController?> chewieController = ValueNotifier(null);
 
@@ -75,6 +75,7 @@ class VideoViewerState extends State<VideoViewer> {
   CancelToken? loadItemCancelToken;
   DioDownloader? client, sizeClient;
   File? video;
+  StreamSubscription? viewStateSubscription, scaleStateSubscription;
 
   bool get isVideoInited => videoController.value?.value.isInitialized ?? false;
 
@@ -247,8 +248,8 @@ class VideoViewerState extends State<VideoViewer> {
 
     viewerHandler.addViewed(widget.key);
 
-    viewController.outputStateStream.listen(onViewStateChanged);
-    scaleController.outputScaleStateStream.listen(onScaleStateChanged);
+    viewStateSubscription = viewController.outputStateStream.listen(onViewStateChanged);
+    scaleStateSubscription = scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
     initVideo(false);
   }
@@ -337,6 +338,12 @@ class VideoViewerState extends State<VideoViewer> {
   void dispose() {
     disposables();
 
+    viewStateSubscription?.cancel();
+    scaleStateSubscription?.cancel();
+
+    scaleController.dispose();
+    viewController.dispose();
+
     bufferingTimer?.cancel();
     pauseCheckTimer?.cancel();
 
@@ -361,12 +368,12 @@ class VideoViewerState extends State<VideoViewer> {
     videoController.value = null;
     chewieController.value = null;
 
-    if (!(cancelToken != null && cancelToken!.isCancelled)) {
+    if (!(cancelToken?.isCancelled ?? true)) {
       cancelToken?.cancel();
     }
     cancelToken = null;
 
-    if (!(sizeCancelToken != null && sizeCancelToken!.isCancelled)) {
+    if (!(sizeCancelToken?.isCancelled ?? true)) {
       sizeCancelToken?.cancel();
     }
     sizeCancelToken = null;
@@ -739,52 +746,37 @@ class VideoViewerState extends State<VideoViewer> {
           //
           ValueListenableBuilder(
             valueListenable: showControls,
-            builder: (context, showControls, child) {
+            builder: (context, showControlsVal, child) {
               return AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                child: (isVideoInited || !showControls) ? const SizedBox.shrink() : child,
+                child: (isVideoInited || !showControlsVal) ? const SizedBox.shrink() : child,
               );
             },
-            child: ValueListenableBuilder(
-              valueListenable: isViewed,
-              builder: (context, isViewed, _) {
-                return ValueListenableBuilder(
-                  valueListenable: isStopped,
-                  builder: (context, isStopped, _) {
-                    return ValueListenableBuilder(
-                      valueListenable: isFromCache,
-                      builder: (context, isFromCache, _) {
-                        return ValueListenableBuilder(
-                          valueListenable: stopReason,
-                          builder: (context, stopReason, _) {
-                            return ValueListenableBuilder(
-                              valueListenable: stopDetails,
-                              builder: (context, stopDetails, _) {
-                                return MediaLoading(
-                                  item: widget.booruItem,
-                                  hasProgress:
-                                      settingsHandler.mediaCache &&
-                                      (forceCache.value || !settingsHandler.videoCacheMode.isStream),
-                                  isFromCache: isFromCache,
-                                  isDone: isVideoInited,
-                                  isTooBig: blockPreloadState.isTooBig,
-                                  isStopped: isStopped,
-                                  stopReason: stopReason,
-                                  stopDetails: stopDetails,
-                                  isViewed: isViewed,
-                                  total: total,
-                                  received: received,
-                                  startedAt: startedAt,
-                                  onRestart: onManualRestart,
-                                  onStop: onManualStop,
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
+            child: ListenableBuilder(
+              listenable: Listenable.merge([
+                isViewed,
+                isStopped,
+                isFromCache,
+                stopReason,
+                stopDetails,
+              ]),
+              builder: (context, _) {
+                return MediaLoading(
+                  item: widget.booruItem,
+                  hasProgress:
+                      settingsHandler.mediaCache && (forceCache.value || !settingsHandler.videoCacheMode.isStream),
+                  isFromCache: isFromCache.value,
+                  isDone: isVideoInited,
+                  isTooBig: blockPreloadState.isTooBig,
+                  isStopped: isStopped.value,
+                  stopReason: stopReason.value,
+                  stopDetails: stopDetails.value,
+                  isViewed: isViewed.value,
+                  total: total,
+                  received: received,
+                  startedAt: startedAt,
+                  onRestart: onManualRestart,
+                  onStop: onManualStop,
                 );
               },
             ),
@@ -848,48 +840,32 @@ class VideoViewerState extends State<VideoViewer> {
                             child: TransparentPointer(
                               child: SafeArea(
                                 top: false,
-                                child: ValueListenableBuilder(
-                                  valueListenable: isViewed,
-                                  builder: (context, isViewed, child) {
-                                    return ValueListenableBuilder(
-                                      valueListenable: localAuthHandler.isAuthenticated,
-                                      builder: (context, isAuthenticated, _) {
-                                        return AnimatedSwitcher(
-                                          duration: const Duration(milliseconds: 200),
-                                          child: (isViewed && isAuthenticated != false)
-                                              ? child
-                                              : const SizedBox.shrink(),
-                                        );
-                                      },
+                                child: ListenableBuilder(
+                                  listenable: Listenable.merge([
+                                    isViewed,
+                                    localAuthHandler.isAuthenticated,
+                                    showControls,
+                                    viewerHandler.isFullscreen,
+                                  ]),
+                                  builder: (context, child) {
+                                    final bool shouldShow =
+                                        isViewed.value &&
+                                        localAuthHandler.isAuthenticated.value != false &&
+                                        showControls.value &&
+                                        !viewerHandler.isFullscreen.value;
+
+                                    return AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 200),
+                                      child: shouldShow ? child : const SizedBox.shrink(),
                                     );
                                   },
                                   child: ValueListenableBuilder(
-                                    valueListenable: showControls,
-                                    builder: (context, showControls, child) {
-                                      return AnimatedSwitcher(
-                                        duration: const Duration(milliseconds: 200),
-                                        child: showControls ? child : const SizedBox.shrink(),
+                                    valueListenable: isZoomed,
+                                    builder: (context, isZoomedVal, _) {
+                                      return LoliControls(
+                                        useLongTapFastForward: !isZoomedVal && settingsHandler.longTapFastForwardVideo,
                                       );
                                     },
-                                    child: ValueListenableBuilder(
-                                      // without this there will be two instances of LoliControls
-                                      // which will cancel each other's actions (i.e. long tap to fast forward)
-                                      valueListenable: viewerHandler.isFullscreen,
-                                      builder: (context, isFullscreen, child) {
-                                        return AnimatedSwitcher(
-                                          duration: const Duration(milliseconds: 200),
-                                          child: isFullscreen ? const SizedBox.shrink() : child,
-                                        );
-                                      },
-                                      child: ValueListenableBuilder(
-                                        valueListenable: isZoomed,
-                                        builder: (context, isZoomed, _) {
-                                          return LoliControls(
-                                            useLongTapFastForward: !isZoomed && settingsHandler.longTapFastForwardVideo,
-                                          );
-                                        },
-                                      ),
-                                    ),
                                   ),
                                 ),
                               ),

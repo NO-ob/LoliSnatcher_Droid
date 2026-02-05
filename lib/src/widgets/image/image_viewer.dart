@@ -686,93 +686,60 @@ class ImageViewerState extends State<ImageViewer> {
         alignment: Alignment.center,
         fit: StackFit.expand,
         children: [
-          ValueListenableBuilder(
-            valueListenable: isTilingProcessing,
-            builder: (context, _, child) {
-              return ValueListenableBuilder(
-                valueListenable: isLoaded,
-                builder: (context, isLoaded, _) {
-                  return AnimatedOpacity(
-                    duration: const Duration(milliseconds: 300),
-                    opacity: (isLoaded && isProviderLoaded) ? 0 : 1,
-                    child: child,
-                  );
-                },
+          ListenableBuilder(
+            listenable: Listenable.merge([isTilingProcessing, isLoaded, isViewed]),
+            builder: (context, child) {
+              return AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: (isLoaded.value && isProviderLoaded) ? 0 : 1,
+                child: Hero(
+                  tag: 'imageHero${isViewed.value ? '' : '-ignore-'}${widget.booruItem.hashCode}',
+                  child: child!,
+                ),
               );
             },
-            child: ValueListenableBuilder(
-              valueListenable: isViewed,
-              builder: (context, isViewed, child) {
-                return Hero(
-                  tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
-                  child: child!,
-                );
-              },
-              child: Thumbnail(
-                item: widget.booruItem,
-                booru: widget.booru,
-                isStandalone: false,
-                useHero: false,
-              ),
+            child: Thumbnail(
+              item: widget.booruItem,
+              booru: widget.booru,
+              isStandalone: false,
+              useHero: false,
             ),
           ),
           //
           ValueListenableBuilder(
             valueListenable: showLoading,
-            builder: (context, showLoading, child) {
+            builder: (context, showLoadingVal, child) {
               return AnimatedSwitcher(
                 duration: const Duration(milliseconds: 200),
-                child: showLoading ? child : const SizedBox.shrink(),
+                child: showLoadingVal ? child : const SizedBox.shrink(),
               );
             },
-            child: ValueListenableBuilder(
-              valueListenable: isTilingProcessing,
-              builder: (_, _, _) {
-                return ValueListenableBuilder(
-                  valueListenable: isLoaded,
-                  builder: (_, isLoaded, _) {
-                    return ValueListenableBuilder(
-                      valueListenable: isViewed,
-                      builder: (_, isViewed, _) {
-                        return ValueListenableBuilder(
-                          valueListenable: isStopped,
-                          builder: (_, isStopped, _) {
-                            return ValueListenableBuilder(
-                              valueListenable: isFromCache,
-                              builder: (_, isFromCache, _) {
-                                return ValueListenableBuilder(
-                                  valueListenable: stopReason,
-                                  builder: (_, stopReason, _) {
-                                    return ValueListenableBuilder(
-                                      valueListenable: stopDetails,
-                                      builder: (_, stopDetails, _) {
-                                        return MediaLoading(
-                                          item: widget.booruItem,
-                                          hasProgress: true,
-                                          isFromCache: isFromCache,
-                                          isDone: isLoaded && isProviderLoaded,
-                                          isTooBig: blockPreloadState.isTooBig,
-                                          isStopped: isStopped,
-                                          stopReason: stopReason,
-                                          stopDetails: stopDetails,
-                                          isViewed: isViewed,
-                                          total: total,
-                                          received: received,
-                                          startedAt: startedAt,
-                                          onRestart: onManualRestart,
-                                          onStop: onManualStop,
-                                        );
-                                      },
-                                    );
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
+            child: ListenableBuilder(
+              listenable: Listenable.merge([
+                isTilingProcessing,
+                isLoaded,
+                isViewed,
+                isStopped,
+                isFromCache,
+                stopReason,
+                stopDetails,
+              ]),
+              builder: (context, _) {
+                return MediaLoading(
+                  item: widget.booruItem,
+                  hasProgress: true,
+                  isFromCache: isFromCache.value,
+                  isDone: isLoaded.value && isProviderLoaded,
+                  isTooBig: blockPreloadState.isTooBig,
+                  isStopped: isStopped.value,
+                  stopReason: stopReason.value,
+                  stopDetails: stopDetails.value,
+                  isViewed: isViewed.value,
+                  total: total,
+                  received: received,
+                  startedAt: startedAt,
+                  onRestart: onManualRestart,
+                  onStop: onManualStop,
                 );
               },
             ),
@@ -794,87 +761,74 @@ class ImageViewerState extends State<ImageViewer> {
                 sigmaY: 30,
                 tileMode: TileMode.decal,
               ),
-              child: ValueListenableBuilder(
-                valueListenable: isLoaded,
-                builder: (context, isLoaded, child) {
+              child: ListenableBuilder(
+                listenable: Listenable.merge([isLoaded, isTilingProcessing, mainProvider]),
+                builder: (context, _) {
                   return AnimatedOpacity(
-                    opacity: (settingsHandler.shitDevice || isLoaded) ? 1 : 0,
+                    opacity: (settingsHandler.shitDevice || isLoaded.value) ? 1 : 0,
                     duration: Duration(
                       milliseconds: (settingsHandler.appMode.value.isDesktop || isViewed.value) ? 50 : 300,
                     ),
-                    child: child,
+                    child: AnimatedSwitcher(
+                      duration: Duration(
+                        milliseconds: (settingsHandler.appMode.value.isDesktop || isViewed.value) ? 50 : 300,
+                      ),
+                      child: !isProviderLoaded
+                          ? const SizedBox.shrink()
+                          : ((isTiled && tiledProviders != null)
+                                ? PhotoView.customChild(
+                                    childSize: tiledSize,
+                                    backgroundDecoration: const BoxDecoration(color: Colors.transparent),
+                                    customSize: MediaQuery.sizeOf(context),
+                                    minScale: PhotoViewComputedScale.contained,
+                                    maxScale: PhotoViewComputedScale.covered * 8,
+                                    initialScale: PhotoViewComputedScale.contained,
+                                    enableRotation: settingsHandler.allowRotation,
+                                    basePosition: Alignment.center,
+                                    controller: viewController,
+                                    scaleStateController: scaleController,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: tiledProviders!
+                                          .map(
+                                            (provider) => Image(
+                                              image: provider,
+                                              gaplessPlayback: true,
+                                              fit: BoxFit.fitWidth,
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                                  )
+                                : PhotoView(
+                                    imageProvider: mainProvider.value,
+                                    gaplessPlayback: true,
+                                    loadingBuilder: (context, event) {
+                                      return const SizedBox.shrink();
+                                    },
+                                    errorBuilder: (_, error, _) {
+                                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                                        onError(error);
+                                      });
+                                      return const SizedBox.shrink();
+                                    },
+                                    backgroundDecoration: const BoxDecoration(color: Colors.transparent),
+                                    // to avoid flickering during hero transition
+                                    // TODO will cause scaling issues on desktop, fix when we'll get back to it
+                                    customSize: MediaQuery.sizeOf(context),
+                                    // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                                    filterQuality: FilterQuality.medium,
+                                    minScale: PhotoViewComputedScale.contained,
+                                    maxScale: PhotoViewComputedScale.covered * 8,
+                                    initialScale: PhotoViewComputedScale.contained,
+                                    enableRotation: settingsHandler.allowRotation,
+                                    basePosition: Alignment.center,
+                                    controller: viewController,
+                                    scaleStateController: scaleController,
+                                  )),
+                    ),
                   );
                 },
-                child: ValueListenableBuilder(
-                  valueListenable: isTilingProcessing,
-                  builder: (_, _, _) {
-                    return ValueListenableBuilder(
-                      valueListenable: mainProvider,
-                      builder: (context, mainProvider, _) {
-                        return AnimatedSwitcher(
-                          duration: Duration(
-                            milliseconds: (settingsHandler.appMode.value.isDesktop || isViewed.value) ? 50 : 300,
-                          ),
-                          child: !isProviderLoaded
-                              ? const SizedBox.shrink()
-                              : ((isTiled && tiledProviders != null)
-                                    ? PhotoView.customChild(
-                                        childSize: tiledSize,
-                                        backgroundDecoration: const BoxDecoration(color: Colors.transparent),
-                                        customSize: MediaQuery.sizeOf(context),
-                                        minScale: PhotoViewComputedScale.contained,
-                                        maxScale: PhotoViewComputedScale.covered * 8,
-                                        initialScale: PhotoViewComputedScale.contained,
-                                        enableRotation: settingsHandler.allowRotation,
-                                        basePosition: Alignment.center,
-                                        controller: viewController,
-                                        scaleStateController: scaleController,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: tiledProviders!
-                                              .map(
-                                                (provider) => Image(
-                                                  image: provider,
-                                                  gaplessPlayback: true,
-                                                  fit: BoxFit.fitWidth,
-                                                ),
-                                              )
-                                              .toList(),
-                                        ),
-                                      )
-                                    : PhotoView(
-                                        imageProvider: mainProvider,
-                                        gaplessPlayback: true,
-                                        loadingBuilder: (context, event) {
-                                          return const SizedBox.shrink();
-                                        },
-                                        errorBuilder: (_, error, _) {
-                                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                                            onError(error);
-                                          });
-                                          return const SizedBox.shrink();
-                                        },
-                                        backgroundDecoration: const BoxDecoration(color: Colors.transparent),
-                                        // to avoid flickering during hero transition
-                                        // TODO will cause scaling issues on desktop, fix when we'll get back to it
-                                        customSize: MediaQuery.sizeOf(context),
-                                        // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                                        filterQuality: widget.booruItem.isLong
-                                            ? FilterQuality.medium
-                                            : FilterQuality.medium,
-                                        minScale: PhotoViewComputedScale.contained,
-                                        maxScale: PhotoViewComputedScale.covered * 8,
-                                        initialScale: PhotoViewComputedScale.contained,
-                                        enableRotation: settingsHandler.allowRotation,
-                                        basePosition: Alignment.center,
-                                        controller: viewController,
-                                        scaleStateController: scaleController,
-                                      )),
-                        );
-                      },
-                    );
-                  },
-                ),
               ),
             ),
           ),

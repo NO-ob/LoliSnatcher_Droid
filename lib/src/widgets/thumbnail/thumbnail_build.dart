@@ -49,11 +49,13 @@ class ThumbnailBuild extends StatelessWidget {
       child: Stack(
         alignment: settingsHandler.previewDisplay.isSquare ? .center : .bottomCenter,
         children: [
-          Thumbnail(
-            item: item,
-            booru: handler.booru,
-            isStandalone: true,
-            useHero: selectable,
+          RepaintBoundary(
+            child: Thumbnail(
+              item: item,
+              booru: handler.booru,
+              isStandalone: true,
+              useHero: selectable,
+            ),
           ),
 
           // Image(

@@ -583,25 +583,15 @@ class _ThumbnailState extends State<Thumbnail> {
             ),
             //
             if (widget.isStandalone && !settingsHandler.shitDevice)
-              ValueListenableBuilder(
-                valueListenable: isLoaded,
-                builder: (context, isLoaded, _) {
-                  return ValueListenableBuilder(
-                    valueListenable: isLoadedExtra,
-                    builder: (context, isLoadedExtra, _) {
-                      return ValueListenableBuilder(
-                        valueListenable: isFailed,
-                        builder: (context, isFailed, _) {
-                          final bool isAnyLoaded = isLoaded || isLoadedExtra;
-                          final bool showShimmer = !isAnyLoaded && !isFailed;
+              ListenableBuilder(
+                listenable: Listenable.merge([isLoaded, isLoadedExtra, isFailed]),
+                builder: (context, _) {
+                  final bool isAnyLoaded = isLoaded.value || isLoadedExtra.value;
+                  final bool showShimmer = !isAnyLoaded && !isFailed.value;
 
-                          return AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            child: showShimmer ? const ShimmerCard() : const SizedBox.shrink(),
-                          );
-                        },
-                      );
-                    },
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: showShimmer ? const ShimmerCard() : const SizedBox.shrink(),
                   );
                 },
               ),
@@ -623,67 +613,52 @@ class _ThumbnailState extends State<Thumbnail> {
             if (widget.isStandalone)
               ValueListenableBuilder(
                 valueListenable: isLoaded,
-                builder: (context, isLoaded, child) {
+                builder: (context, isLoadedVal, child) {
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
-                    child: isLoaded ? const SizedBox.shrink() : child,
+                    child: isLoadedVal ? const SizedBox.shrink() : child,
                   );
                 },
-                child: ValueListenableBuilder(
-                  valueListenable: isLoaded,
-                  builder: (context, isLoaded, child) {
-                    return ValueListenableBuilder(
-                      valueListenable: isFromCache,
-                      builder: (context, isFromCache, child) {
-                        return ValueListenableBuilder(
-                          valueListenable: isFailed,
-                          builder: (context, isFailed, child) {
-                            return ValueListenableBuilder(
-                              valueListenable: errorCode,
-                              builder: (context, errorCode, child) {
-                                final bool isFavOrDlsOrHasLoad =
-                                    widget.booru.type?.isFavouritesOrDownloads == true ||
-                                    BooruHandlerFactory()
-                                        .getBooruHandler([widget.booru], null)
-                                        .booruHandler
-                                        .hasLoadItemSupport;
+                child: ListenableBuilder(
+                  listenable: Listenable.merge([isLoaded, isFromCache, isFailed, errorCode]),
+                  builder: (context, child) {
+                    final bool isFavOrDlsOrHasLoad =
+                        widget.booru.type?.isFavouritesOrDownloads == true ||
+                        BooruHandlerFactory()
+                            .getBooruHandler([widget.booru], null)
+                            .booruHandler
+                            .hasLoadItemSupport;
 
-                                return ThumbnailLoading(
-                                  item: widget.item,
-                                  hasProgress: true,
-                                  isFromCache: isFromCache,
-                                  isDone: isLoaded && !isFailed,
-                                  isFailed: isFailed,
-                                  total: total,
-                                  received: received,
-                                  startedAt: startedAt,
-                                  retryText: isFavOrDlsOrHasLoad ? 'Tap to update or retry' : null,
-                                  retryIcon: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    spacing: 4,
-                                    children: isFavOrDlsOrHasLoad
-                                        ? const [
-                                            Icon(Icons.download),
-                                            Text('/', style: TextStyle(fontSize: 20)),
-                                            Icon(Icons.refresh),
-                                          ]
-                                        : const [
-                                            Icon(Icons.refresh),
-                                          ],
-                                  ),
-                                  restartAction: () async {
-                                    restartedCount = 0;
+                    return ThumbnailLoading(
+                      item: widget.item,
+                      hasProgress: true,
+                      isFromCache: isFromCache.value,
+                      isDone: isLoaded.value && !isFailed.value,
+                      isFailed: isFailed.value,
+                      total: total,
+                      received: received,
+                      startedAt: startedAt,
+                      retryText: isFavOrDlsOrHasLoad ? 'Tap to update or retry' : null,
+                      retryIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 4,
+                        children: isFavOrDlsOrHasLoad
+                            ? const [
+                                Icon(Icons.download),
+                                Text('/', style: TextStyle(fontSize: 20)),
+                                Icon(Icons.refresh),
+                              ]
+                            : const [
+                                Icon(Icons.refresh),
+                              ],
+                      ),
+                      restartAction: () async {
+                        restartedCount = 0;
 
-                                    await restartLoading(withItemLoad: isFavOrDlsOrHasLoad);
-                                  },
-                                  errorCode: errorCode,
-                                );
-                              },
-                            );
-                          },
-                        );
+                        await restartLoading(withItemLoad: isFavOrDlsOrHasLoad);
                       },
+                      errorCode: errorCode.value,
                     );
                   },
                 ),
