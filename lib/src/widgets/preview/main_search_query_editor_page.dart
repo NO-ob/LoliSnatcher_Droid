@@ -2771,6 +2771,7 @@ class _PinTagDialogState extends State<PinTagDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(context.loc.pinnedTags.pinTag),
+      insetPadding: const EdgeInsets.all(8),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2995,66 +2996,70 @@ class _PinnedTagsReorderDialogState extends State<PinnedTagsReorderDialog> {
     return AlertDialog(
       title: Text(context.loc.pinnedTags.reorderPinnedTags),
       contentPadding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-      content: SizedBox(
-        width: double.maxFinite,
-        height: min(tags.length * 56.0 + 16, MediaQuery.sizeOf(context).height * 0.5),
-        child: ReorderableListView.builder(
-          shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          itemCount: tags.length,
-          onReorder: (oldIndex, newIndex) {
-            setState(() {
-              if (newIndex > oldIndex) newIndex--;
-              final item = tags.removeAt(oldIndex);
-              tags.insert(newIndex, item);
-            });
-          },
-          itemBuilder: (context, index) {
-            final pinnedTag = tags[index];
-            final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
+      insetPadding: const EdgeInsets.all(8),
+      content: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: SizedBox(
+          width: double.maxFinite,
+          height: min(tags.length * 56.0 + 16, MediaQuery.sizeOf(context).height * 0.5),
+          child: ReorderableListView.builder(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            itemCount: tags.length,
+            onReorder: (oldIndex, newIndex) {
+              setState(() {
+                if (newIndex > oldIndex) newIndex--;
+                final item = tags.removeAt(oldIndex);
+                tags.insert(newIndex, item);
+              });
+            },
+            itemBuilder: (context, index) {
+              final pinnedTag = tags[index];
+              final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
 
-            return ListTile(
-              key: ValueKey(pinnedTag.id),
-              leading: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ReorderableDragStartListener(
-                    index: index,
-                    child: const Icon(Icons.drag_handle),
-                  ),
-                  const SizedBox(width: 8),
-                  if (pinnedTag.isGlobal)
-                    const Icon(Icons.public, size: 20)
-                  else
-                    BooruFavicon(
-                      settingsHandler.booruList.value.firstWhere(
-                        (b) =>
-                            b.type == pinnedTag.booruType &&
-                            (b.type?.isFavouritesOrDownloads == true || b.name == pinnedTag.booruName),
-                        orElse: Booru.unknown,
-                      ),
+              return ListTile(
+                key: ValueKey(pinnedTag.id),
+                leading: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: const Icon(Icons.drag_handle),
                     ),
-                ],
-              ),
-              title: Text(
-                pinnedTag.tagName.replaceAll('_', ' '),
-                style: TextStyle(color: tagColor),
-              ),
-              subtitle: pinnedTag.isGlobal ? const Text('Global') : Text(pinnedTag.booruName ?? ''),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () async {
-                  await settingsHandler.dbHandler.removePinnedTag(pinnedTag.id);
-                  setState(() {
-                    tags.removeAt(index);
-                  });
-                  if (tags.isEmpty && mounted) {
-                    Navigator.of(context).pop(true);
-                  }
-                },
-              ),
-            );
-          },
+                    const SizedBox(width: 8),
+                    if (pinnedTag.isGlobal)
+                      const Icon(Icons.public, size: 20)
+                    else
+                      BooruFavicon(
+                        settingsHandler.booruList.value.firstWhere(
+                          (b) =>
+                              b.type == pinnedTag.booruType &&
+                              (b.type?.isFavouritesOrDownloads == true || b.name == pinnedTag.booruName),
+                          orElse: Booru.unknown,
+                        ),
+                      ),
+                  ],
+                ),
+                title: Text(
+                  pinnedTag.tagName.replaceAll('_', ' '),
+                  style: TextStyle(color: tagColor),
+                ),
+                subtitle: pinnedTag.isGlobal ? const Text('Global') : Text(pinnedTag.booruName ?? ''),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  onPressed: () async {
+                    await settingsHandler.dbHandler.removePinnedTag(pinnedTag.id);
+                    setState(() {
+                      tags.removeAt(index);
+                    });
+                    if (tags.isEmpty && mounted) {
+                      Navigator.of(context).pop(true);
+                    }
+                  },
+                ),
+              );
+            },
+          ),
         ),
       ),
       actions: [
@@ -3507,6 +3512,7 @@ class _EditLabelsDialogState extends State<EditLabelsDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(context.loc.pinnedTags.editLabels),
+      insetPadding: const EdgeInsets.all(8),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -3641,6 +3647,7 @@ class _ManualPinTagDialogState extends State<ManualPinTagDialog> {
 
     return AlertDialog(
       title: Text(context.loc.pinnedTags.addPinnedTag),
+      insetPadding: const EdgeInsets.all(8),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
