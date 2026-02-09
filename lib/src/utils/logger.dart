@@ -47,7 +47,13 @@ class Logger {
         }
         FlutterError.presentError(details);
 
-        Logger.Inst().log('$details', 'FlutterError', 'onError', LogTypes.exception);
+        Logger.Inst().log(
+          '$details',
+          'FlutterError',
+          'onError',
+          LogTypes.exception,
+          s: details.stack,
+        );
       };
 
       // Set custom compact ErrorWidget builder to prevent layout breakage
@@ -59,6 +65,7 @@ class Logger {
           'PlatformDispatcherError',
           'onError',
           LogTypes.exception,
+          s: stack,
         );
         return true;
       };
