@@ -63,7 +63,7 @@ class _MediaLoadingState extends State<MediaLoading> {
       ViewerStopReason.user => context.loc.media.loading.stopReasons.stoppedByUser,
       ViewerStopReason.error => context.loc.media.loading.stopReasons.loadingError,
       ViewerStopReason.tooBig => context.loc.media.loading.stopReasons.fileIsTooBig,
-      ViewerStopReason.hated => context.loc.media.loading.stopReasons.containsHatedTags,
+      ViewerStopReason.hidden => context.loc.media.loading.stopReasons.hiddenByFilters,
       ViewerStopReason.videoError => context.loc.media.loading.stopReasons.videoError,
       ViewerStopReason.reset => '',
     };
@@ -220,7 +220,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                       fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
                     ),
                     label: LoadingText(
-                      text: (widget.isTooBig || widget.item.isHated)
+                      text: (widget.isTooBig || widget.item.isHidden)
                           ? context.loc.media.loading.loadAnyway
                           : context.loc.media.loading.restartLoading,
                       fontSize: 16,
@@ -348,7 +348,7 @@ class _MediaLoadingState extends State<MediaLoading> {
         ? context.loc.media.loading.startedSecondsAgo(seconds: sinceStartSeconds)
         : '';
 
-    final bool isMovedBelow = settingsHandler.previewMode.isSample && !widget.item.isHated;
+    final bool isMovedBelow = settingsHandler.previewMode.isSample && !widget.item.isHidden;
 
     // print('$percentDone | $percentDoneText');
 
@@ -382,7 +382,7 @@ class _MediaLoadingState extends State<MediaLoading> {
             fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
           ),
           label: LoadingText(
-            text: (widget.isTooBig || widget.item.isHated)
+            text: (widget.isTooBig || widget.item.isHidden)
                 ? context.loc.media.loading.loadAnyway
                 : context.loc.media.loading.restartLoading,
             fontSize: 16,
@@ -478,7 +478,7 @@ class _MediaLoadingState extends State<MediaLoading> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
               child: Column(
-                // move loading info lower if preview is of sample quality (except when item is hated)
+                // move loading info lower if preview is of sample quality (except when item is hidden)
                 mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
                 children: children,
               ),

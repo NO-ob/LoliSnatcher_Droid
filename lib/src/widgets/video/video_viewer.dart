@@ -292,11 +292,11 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   Future<void> initVideo(bool ignoreTagsCheck) async {
-    if (widget.booruItem.isHated && !ignoreTagsCheck) {
+    if (widget.booruItem.isHidden && !ignoreTagsCheck) {
       final tagsData = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       stopLoading(
-        reason: ViewerStopReason.hated,
-        details: tagsData.hatedTags.join('\n'),
+        reason: ViewerStopReason.hidden,
+        details: tagsData.hiddenTags.join('\n'),
       );
     } else {
       await downloadVideo();

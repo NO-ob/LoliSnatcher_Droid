@@ -31,7 +31,7 @@ enum ViewerStopReason {
   user,
   error,
   tooBig,
-  hated,
+  hidden,
   videoError,
   reset,
   ;
@@ -39,7 +39,7 @@ enum ViewerStopReason {
   bool get isUser => this == user;
   bool get isError => this == error;
   bool get isTooBig => this == tooBig;
-  bool get isHated => this == hated;
+  bool get isHidden => this == hidden;
   bool get isVideoError => this == videoError;
   bool get isReset => this == reset;
 }
@@ -223,16 +223,16 @@ class ImageViewerState extends State<ImageViewer> {
 
     widget.booruItem.toggleQuality.addListener(toggleQualityListener);
 
-    if (widget.booruItem.isHated && !ignoreTagsCheck) {
-      if (widget.booruItem.isHated) {
+    if (widget.booruItem.isHidden && !ignoreTagsCheck) {
+      if (widget.booruItem.isHidden) {
         stopLoading(
-          reason: .hated,
+          reason: .hidden,
           details: settingsHandler
               .parseTagsList(
                 widget.booruItem.tagsList,
                 isCapped: true,
               )
-              .hatedTags
+              .hiddenTags
               .join('\n'),
         );
         return;

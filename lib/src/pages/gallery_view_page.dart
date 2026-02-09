@@ -128,7 +128,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
       final item = widget.tab.booruHandler.filteredFetched[page.value];
       viewerHandler.setCurrent(item);
     } catch (_) {
-      // attempt to recover from broken out of array bounds state (i.e. when adding tag to hated removes all items from the tab)
+      // attempt to recover from broken out of array bounds state (i.e. when adding tag to hidden removes all items from the tab)
       if (widget.tab.booruHandler.filteredFetched.isEmpty) {
         page.value = 0;
         controller.jumpToPage(page.value);
@@ -509,7 +509,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                 final item = widget.tab.booruHandler.filteredFetched[index];
                                 viewerHandler.setCurrent(item);
                               } catch (e) {
-                                // attempt to recover from broken out of array bounds state (i.e. when adding tag to hated removes all items from the tab)
+                                // attempt to recover from broken out of array bounds state (i.e. when adding tag to hidden removes all items from the tab)
                                 if (widget.tab.booruHandler.filteredFetched.isEmpty) {
                                   page.value = 0;
                                   controller.jumpToPage(page.value);

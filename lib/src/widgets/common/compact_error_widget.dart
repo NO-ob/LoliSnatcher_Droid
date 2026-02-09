@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -40,7 +39,7 @@ class CompactErrorWidget extends StatelessWidget {
       onErrorColor = Colors.white;
     }
 
-    final Widget content = Container(
+    return Container(
       constraints: const BoxConstraints(maxWidth: 200, maxHeight: 100),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -106,16 +105,5 @@ class CompactErrorWidget extends StatelessWidget {
         ],
       ),
     );
-
-    if (kDebugMode) {
-      return Tooltip(
-        message: details.exceptionAsString().length > 200
-            ? '${details.exceptionAsString().substring(0, 200)}...'
-            : details.exceptionAsString(),
-        child: content,
-      );
-    }
-
-    return content;
   }
 }

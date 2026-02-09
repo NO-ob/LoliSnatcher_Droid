@@ -866,7 +866,7 @@ class _TranslationsSettingsDev extends TranslationsSettingsEn {
   @override
   late final _TranslationsSettingsCacheDev cache = _TranslationsSettingsCacheDev._(_root);
   @override
-  late final _TranslationsSettingsTagsFiltersDev tagsFilters = _TranslationsSettingsTagsFiltersDev._(_root);
+  late final _TranslationsSettingsItemFiltersDev itemFilters = _TranslationsSettingsItemFiltersDev._(_root);
   @override
   late final _TranslationsSettingsSyncDev sync = _TranslationsSettingsSyncDev._(_root);
   @override
@@ -1140,13 +1140,13 @@ class _TranslationsTagViewDev extends TranslationsTagViewEn {
   String get addedToSearchBarExclude =>
       TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? '{Added to search bar (Exclude):}';
   @override
-  String get addToLoved => TranslationOverrides.string(_root.$meta, 'tagView.addToLoved', {}) ?? '{Add to Loved}';
+  String get addToMarked => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? '{Add to Marked}';
   @override
-  String get addToHated => TranslationOverrides.string(_root.$meta, 'tagView.addToHated', {}) ?? '{Add to Hated}';
+  String get addToHidden => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? '{Add to Hidden}';
   @override
-  String get removeFromLoved => TranslationOverrides.string(_root.$meta, 'tagView.removeFromLoved', {}) ?? '{Remove from Loved}';
+  String get removeFromMarked => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? '{Remove from Marked}';
   @override
-  String get removeFromHated => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHated', {}) ?? '{Remove from Hated}';
+  String get removeFromHidden => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHidden', {}) ?? '{Remove from Hidden}';
   @override
   String get editTag => TranslationOverrides.string(_root.$meta, 'tagView.editTag', {}) ?? '{Edit tag}';
   @override
@@ -2943,37 +2943,38 @@ class _TranslationsSettingsCacheDev extends TranslationsSettingsCacheEn {
       TranslationOverrides.string(_root.$meta, 'settings.cache.notAvailableForPlatform', {}) ?? '{Currently not available for this platform}';
 }
 
-// Path: settings.tagsFilters
-class _TranslationsSettingsTagsFiltersDev extends TranslationsSettingsTagsFiltersEn {
-  _TranslationsSettingsTagsFiltersDev._(TranslationsDev root) : this._root = root, super.internal(root);
+// Path: settings.itemFilters
+class _TranslationsSettingsItemFiltersDev extends TranslationsSettingsItemFiltersEn {
+  _TranslationsSettingsItemFiltersDev._(TranslationsDev root) : this._root = root, super.internal(root);
 
   final TranslationsDev _root; // ignore: unused_field
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.title', {}) ?? '{Tag filters}';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.title', {}) ?? '{Filters}';
   @override
-  String get hated => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.hated', {}) ?? '{Hated}';
+  String get hidden => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.hidden', {}) ?? '{Hidden}';
   @override
-  String get loved => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.loved', {}) ?? '{Loved}';
+  String get marked => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.marked', {}) ?? '{Marked}';
   @override
-  String get duplicateTag => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.duplicateTag', {}) ?? '{Duplicate tag}';
+  String get duplicateFilter => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.duplicateFilter', {}) ?? '{Duplicate filter}';
   @override
   String alreadyInList({required String tag, required String type}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.alreadyInList', {'tag': tag, 'type': type}) ??
+      TranslationOverrides.string(_root.$meta, 'settings.itemFilters.alreadyInList', {'tag': tag, 'type': type}) ??
       '{\'${tag}\' is already in ${type} list}';
   @override
-  String get noFiltersFound => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersFound', {}) ?? '{No filters found}';
+  String get noFiltersFound => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersFound', {}) ?? '{No filters found}';
   @override
-  String get noFiltersAdded => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? '{No filters added}';
+  String get noFiltersAdded => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersAdded', {}) ?? '{No filters added}';
   @override
-  String get removeHated => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? '{Remove items with Hated tags}';
+  String get removeHidden =>
+      TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeHidden', {}) ?? '{Completely hide items which match Hidden filters}';
   @override
-  String get removeFavourited => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeFavourited', {}) ?? '{Remove favourited items}';
+  String get removeFavourited => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? '{Remove favourited items}';
   @override
-  String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeSnatched', {}) ?? '{Remove snatched items}';
+  String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? '{Remove snatched items}';
   @override
-  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeAI', {}) ?? '{Remove AI items}';
+  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? '{Remove AI items}';
 }
 
 // Path: settings.sync
@@ -3823,8 +3824,7 @@ class _TranslationsMediaLoadingStopReasonsDev extends TranslationsMediaLoadingSt
   @override
   String get fileIsTooBig => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.fileIsTooBig', {}) ?? '{File is too big}';
   @override
-  String get containsHatedTags =>
-      TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.containsHatedTags', {}) ?? '{Contains hated tags}';
+  String get hiddenByFilters => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.hiddenByFilters', {}) ?? '{Hidden by filters:}';
   @override
   String get videoError => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.videoError', {}) ?? '{Video error}';
 }
@@ -5209,26 +5209,26 @@ extension on TranslationsDev {
           'settings.cache.errorExclamation' => TranslationOverrides.string(_root.$meta, 'settings.cache.errorExclamation', {}) ?? '{Error!}',
           'settings.cache.notAvailableForPlatform' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.notAvailableForPlatform', {}) ?? '{Currently not available for this platform}',
-          'settings.tagsFilters.title' => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.title', {}) ?? '{Tag filters}',
-          'settings.tagsFilters.hated' => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.hated', {}) ?? '{Hated}',
-          'settings.tagsFilters.loved' => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.loved', {}) ?? '{Loved}',
-          'settings.tagsFilters.duplicateTag' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.duplicateTag', {}) ?? '{Duplicate tag}',
-          'settings.tagsFilters.alreadyInList' =>
+          'settings.itemFilters.title' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.title', {}) ?? '{Filters}',
+          'settings.itemFilters.hidden' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.hidden', {}) ?? '{Hidden}',
+          'settings.itemFilters.marked' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.marked', {}) ?? '{Marked}',
+          'settings.itemFilters.duplicateFilter' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.duplicateFilter', {}) ?? '{Duplicate filter}',
+          'settings.itemFilters.alreadyInList' =>
             ({required String tag, required String type}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.alreadyInList', {'tag': tag, 'type': type}) ??
+                TranslationOverrides.string(_root.$meta, 'settings.itemFilters.alreadyInList', {'tag': tag, 'type': type}) ??
                 '{\'${tag}\' is already in ${type} list}',
-          'settings.tagsFilters.noFiltersFound' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersFound', {}) ?? '{No filters found}',
-          'settings.tagsFilters.noFiltersAdded' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? '{No filters added}',
-          'settings.tagsFilters.removeHated' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? '{Remove items with Hated tags}',
-          'settings.tagsFilters.removeFavourited' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeFavourited', {}) ?? '{Remove favourited items}',
-          'settings.tagsFilters.removeSnatched' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeSnatched', {}) ?? '{Remove snatched items}',
-          'settings.tagsFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeAI', {}) ?? '{Remove AI items}',
+          'settings.itemFilters.noFiltersFound' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersFound', {}) ?? '{No filters found}',
+          'settings.itemFilters.noFiltersAdded' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersAdded', {}) ?? '{No filters added}',
+          'settings.itemFilters.removeHidden' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeHidden', {}) ?? '{Completely hide items which match Hidden filters}',
+          'settings.itemFilters.removeFavourited' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? '{Remove favourited items}',
+          'settings.itemFilters.removeSnatched' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? '{Remove snatched items}',
+          'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? '{Remove AI items}',
           'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? '{LoliSync}',
           'settings.sync.dbError' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '{Database must be enabled to use LoliSync}',
@@ -5569,10 +5569,10 @@ extension on TranslationsDev {
           'tagView.addToSearchExclude' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? '{Add to Search (Exclude)}',
           'tagView.addedToSearchBarExclude' =>
             TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? '{Added to search bar (Exclude):}',
-          'tagView.addToLoved' => TranslationOverrides.string(_root.$meta, 'tagView.addToLoved', {}) ?? '{Add to Loved}',
-          'tagView.addToHated' => TranslationOverrides.string(_root.$meta, 'tagView.addToHated', {}) ?? '{Add to Hated}',
-          'tagView.removeFromLoved' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromLoved', {}) ?? '{Remove from Loved}',
-          'tagView.removeFromHated' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHated', {}) ?? '{Remove from Hated}',
+          'tagView.addToMarked' => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? '{Add to Marked}',
+          'tagView.addToHidden' => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? '{Add to Hidden}',
+          'tagView.removeFromMarked' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? '{Remove from Marked}',
+          'tagView.removeFromHidden' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHidden', {}) ?? '{Remove from Hidden}',
           'tagView.editTag' => TranslationOverrides.string(_root.$meta, 'tagView.editTag', {}) ?? '{Edit tag}',
           'tagView.copiedSelected' =>
             ({required String type}) =>
@@ -5816,8 +5816,8 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.loadingError', {}) ?? '{Loading error}',
           'media.loading.stopReasons.fileIsTooBig' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.fileIsTooBig', {}) ?? '{File is too big}',
-          'media.loading.stopReasons.containsHatedTags' =>
-            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.containsHatedTags', {}) ?? '{Contains hated tags}',
+          'media.loading.stopReasons.hiddenByFilters' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.hiddenByFilters', {}) ?? '{Hidden by filters:}',
           'media.loading.stopReasons.videoError' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.videoError', {}) ?? '{Video error}',
           'media.loading.fileIsZeroBytes' => TranslationOverrides.string(_root.$meta, 'media.loading.fileIsZeroBytes', {}) ?? '{File is zero bytes}',

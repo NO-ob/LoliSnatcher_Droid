@@ -873,7 +873,7 @@ class _TranslationsSettingsRu extends TranslationsSettingsEn {
   @override
   late final _TranslationsSettingsCacheRu cache = _TranslationsSettingsCacheRu._(_root);
   @override
-  late final _TranslationsSettingsTagsFiltersRu tagsFilters = _TranslationsSettingsTagsFiltersRu._(_root);
+  late final _TranslationsSettingsItemFiltersRu itemFilters = _TranslationsSettingsItemFiltersRu._(_root);
   @override
   late final _TranslationsSettingsSyncRu sync = _TranslationsSettingsSyncRu._(_root);
   @override
@@ -1147,13 +1147,13 @@ class _TranslationsTagViewRu extends TranslationsTagViewEn {
   String get addedToSearchBarExclude =>
       TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? 'Добавлено в строку поиска (Исключить):';
   @override
-  String get addToLoved => TranslationOverrides.string(_root.$meta, 'tagView.addToLoved', {}) ?? 'Добавить в любимые';
+  String get addToMarked => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'Добавить в Отмеченные';
   @override
-  String get addToHated => TranslationOverrides.string(_root.$meta, 'tagView.addToHated', {}) ?? 'Добавить в ненавистные';
+  String get addToHidden => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? 'Добавить в Скрытые';
   @override
-  String get removeFromLoved => TranslationOverrides.string(_root.$meta, 'tagView.removeFromLoved', {}) ?? 'Удалить из любимых';
+  String get removeFromMarked => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? 'Убрать из Отмеченных';
   @override
-  String get removeFromHated => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHated', {}) ?? 'Удалить из ненавистных';
+  String get removeFromHidden => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHidden', {}) ?? 'Убрать из Скрытых';
   @override
   String get editTag => TranslationOverrides.string(_root.$meta, 'tagView.editTag', {}) ?? 'Редактировать тег';
   @override
@@ -2987,38 +2987,39 @@ class _TranslationsSettingsCacheRu extends TranslationsSettingsCacheEn {
       TranslationOverrides.string(_root.$meta, 'settings.cache.notAvailableForPlatform', {}) ?? 'В данный момент недоступно для этой платформы';
 }
 
-// Path: settings.tagsFilters
-class _TranslationsSettingsTagsFiltersRu extends TranslationsSettingsTagsFiltersEn {
-  _TranslationsSettingsTagsFiltersRu._(TranslationsRu root) : this._root = root, super.internal(root);
+// Path: settings.itemFilters
+class _TranslationsSettingsItemFiltersRu extends TranslationsSettingsItemFiltersEn {
+  _TranslationsSettingsItemFiltersRu._(TranslationsRu root) : this._root = root, super.internal(root);
 
   final TranslationsRu _root; // ignore: unused_field
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.title', {}) ?? 'Фильтры тегов';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.title', {}) ?? 'Фильтры тегов';
   @override
-  String get hated => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.hated', {}) ?? 'Ненавистные';
+  String get hidden => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.hidden', {}) ?? 'Скрытые';
   @override
-  String get loved => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.loved', {}) ?? 'Любимые';
+  String get marked => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.marked', {}) ?? 'Отмеченные';
   @override
-  String get duplicateTag => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.duplicateTag', {}) ?? 'Дублирующийся тег';
+  String get duplicateFilter => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.duplicateFilter', {}) ?? 'Дублирующийся фильтр';
   @override
   String alreadyInList({required String tag, required String type}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.alreadyInList', {'tag': tag, 'type': type}) ??
+      TranslationOverrides.string(_root.$meta, 'settings.itemFilters.alreadyInList', {'tag': tag, 'type': type}) ??
       '\'${tag}\' уже есть в списке ${type}';
   @override
-  String get noFiltersFound => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersFound', {}) ?? 'Фильтры не найдены';
+  String get noFiltersFound => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersFound', {}) ?? 'Фильтры не найдены';
   @override
-  String get noFiltersAdded => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? 'Нет фильтров';
+  String get noFiltersAdded => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersAdded', {}) ?? 'Нет фильтров';
   @override
-  String get removeHated =>
-      TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? 'Скрыть элементы с ненавистными тегами';
+  String get removeHidden =>
+      TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeHidden', {}) ??
+      'Полностью скрыть элементы, подпадающие под фильтры типа Скрытые';
   @override
-  String get removeFavourited => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeFavourited', {}) ?? 'Скрыть избранные элементы';
+  String get removeFavourited => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? 'Скрыть избранные элементы';
   @override
-  String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeSnatched', {}) ?? 'Скрыть скачанные элементы';
+  String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'Скрыть скачанные элементы';
   @override
-  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeAI', {}) ?? 'Скрыть элементы с ИИ тегами';
+  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Скрыть элементы с ИИ тегами';
 }
 
 // Path: settings.sync
@@ -3880,8 +3881,7 @@ class _TranslationsMediaLoadingStopReasonsRu extends TranslationsMediaLoadingSto
   @override
   String get fileIsTooBig => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.fileIsTooBig', {}) ?? 'Файл слишком большой';
   @override
-  String get containsHatedTags =>
-      TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.containsHatedTags', {}) ?? 'Содержит ненавистные теги';
+  String get hiddenByFilters => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.hiddenByFilters', {}) ?? 'Скрыто фильтрами:';
   @override
   String get videoError => TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.videoError', {}) ?? 'Ошибка видео';
 }
@@ -5300,27 +5300,28 @@ extension on TranslationsRu {
           'settings.cache.errorExclamation' => TranslationOverrides.string(_root.$meta, 'settings.cache.errorExclamation', {}) ?? 'Ошибка!',
           'settings.cache.notAvailableForPlatform' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.notAvailableForPlatform', {}) ?? 'В данный момент недоступно для этой платформы',
-          'settings.tagsFilters.title' => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.title', {}) ?? 'Фильтры тегов',
-          'settings.tagsFilters.hated' => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.hated', {}) ?? 'Ненавистные',
-          'settings.tagsFilters.loved' => TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.loved', {}) ?? 'Любимые',
-          'settings.tagsFilters.duplicateTag' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.duplicateTag', {}) ?? 'Дублирующийся тег',
-          'settings.tagsFilters.alreadyInList' =>
+          'settings.itemFilters.title' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.title', {}) ?? 'Фильтры тегов',
+          'settings.itemFilters.hidden' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.hidden', {}) ?? 'Скрытые',
+          'settings.itemFilters.marked' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.marked', {}) ?? 'Отмеченные',
+          'settings.itemFilters.duplicateFilter' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.duplicateFilter', {}) ?? 'Дублирующийся фильтр',
+          'settings.itemFilters.alreadyInList' =>
             ({required String tag, required String type}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.alreadyInList', {'tag': tag, 'type': type}) ??
+                TranslationOverrides.string(_root.$meta, 'settings.itemFilters.alreadyInList', {'tag': tag, 'type': type}) ??
                 '\'${tag}\' уже есть в списке ${type}',
-          'settings.tagsFilters.noFiltersFound' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersFound', {}) ?? 'Фильтры не найдены',
-          'settings.tagsFilters.noFiltersAdded' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.noFiltersAdded', {}) ?? 'Нет фильтров',
-          'settings.tagsFilters.removeHated' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeHated', {}) ?? 'Скрыть элементы с ненавистными тегами',
-          'settings.tagsFilters.removeFavourited' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeFavourited', {}) ?? 'Скрыть избранные элементы',
-          'settings.tagsFilters.removeSnatched' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeSnatched', {}) ?? 'Скрыть скачанные элементы',
-          'settings.tagsFilters.removeAI' =>
-            TranslationOverrides.string(_root.$meta, 'settings.tagsFilters.removeAI', {}) ?? 'Скрыть элементы с ИИ тегами',
+          'settings.itemFilters.noFiltersFound' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersFound', {}) ?? 'Фильтры не найдены',
+          'settings.itemFilters.noFiltersAdded' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersAdded', {}) ?? 'Нет фильтров',
+          'settings.itemFilters.removeHidden' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeHidden', {}) ??
+                'Полностью скрыть элементы, подпадающие под фильтры типа Скрытые',
+          'settings.itemFilters.removeFavourited' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? 'Скрыть избранные элементы',
+          'settings.itemFilters.removeSnatched' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'Скрыть скачанные элементы',
+          'settings.itemFilters.removeAI' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Скрыть элементы с ИИ тегами',
           'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync',
           'settings.sync.dbError' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'База данных должна быть включена чтобы использовать LoliSync',
@@ -5666,10 +5667,10 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? 'Добавить в поиск (Исключить)',
           'tagView.addedToSearchBarExclude' =>
             TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? 'Добавлено в строку поиска (Исключить):',
-          'tagView.addToLoved' => TranslationOverrides.string(_root.$meta, 'tagView.addToLoved', {}) ?? 'Добавить в любимые',
-          'tagView.addToHated' => TranslationOverrides.string(_root.$meta, 'tagView.addToHated', {}) ?? 'Добавить в ненавистные',
-          'tagView.removeFromLoved' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromLoved', {}) ?? 'Удалить из любимых',
-          'tagView.removeFromHated' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHated', {}) ?? 'Удалить из ненавистных',
+          'tagView.addToMarked' => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'Добавить в Отмеченные',
+          'tagView.addToHidden' => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? 'Добавить в Скрытые',
+          'tagView.removeFromMarked' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? 'Убрать из Отмеченных',
+          'tagView.removeFromHidden' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHidden', {}) ?? 'Убрать из Скрытых',
           'tagView.editTag' => TranslationOverrides.string(_root.$meta, 'tagView.editTag', {}) ?? 'Редактировать тег',
           'tagView.copiedSelected' =>
             ({required String type}) =>
@@ -5921,8 +5922,8 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.loadingError', {}) ?? 'Ошибка загрузки',
           'media.loading.stopReasons.fileIsTooBig' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.fileIsTooBig', {}) ?? 'Файл слишком большой',
-          'media.loading.stopReasons.containsHatedTags' =>
-            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.containsHatedTags', {}) ?? 'Содержит ненавистные теги',
+          'media.loading.stopReasons.hiddenByFilters' =>
+            TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.hiddenByFilters', {}) ?? 'Скрыто фильтрами:',
           'media.loading.stopReasons.videoError' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.videoError', {}) ?? 'Ошибка видео',
           'media.loading.fileIsZeroBytes' => TranslationOverrides.string(_root.$meta, 'media.loading.fileIsZeroBytes', {}) ?? 'Пустой файл',

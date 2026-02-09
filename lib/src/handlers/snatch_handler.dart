@@ -408,7 +408,7 @@ class SnatchHandler {
 
     while (count < int.parse(amount) && !booruHandler.locked) {
       booruItems = await booruHandler.search(tags, null) ?? [];
-      booruItems = booruItems.where((e) => !e.isHated).toList();
+      booruItems = booruItems.where((e) => !e.isHidden).toList();
       booruHandler.pageNum++;
       count = booruItems.length;
       // TODO error handling?

@@ -658,8 +658,8 @@ class _TagViewState extends State<TagView> {
     final String currentTag = tag.fullString;
     final int tagCount = tag.count;
 
-    final bool isHated = tagsData.hatedTags.contains(currentTag);
-    final bool isLoved = tagsData.lovedTags.contains(currentTag);
+    final bool isHidden = tagsData.hiddenTags.contains(currentTag);
+    final bool isMarked = tagsData.markedTags.contains(currentTag);
     final bool isSound = tagsData.soundTags.contains(currentTag);
     final bool isAi = tagsData.aiTags.contains(currentTag);
     final bool isInSearch =
@@ -679,10 +679,10 @@ class _TagViewState extends State<TagView> {
     if (isSound) {
       tagIconAndColor.add(_TagInfoIcon(Icons.volume_up_rounded, Theme.of(context).colorScheme.onSurface));
     }
-    if (isHated) {
+    if (isHidden) {
       tagIconAndColor.add(_TagInfoIcon(CupertinoIcons.eye_slash, Colors.red));
     }
-    if (isLoved) {
+    if (isMarked) {
       tagIconAndColor.add(_TagInfoIcon(Icons.star, Colors.yellow));
     }
 
@@ -706,8 +706,8 @@ class _TagViewState extends State<TagView> {
                   context: context,
                   tag: currentTag,
                   handler: handler,
-                  isHated: isHated,
-                  isLoved: isLoved,
+                  isHidden: isHidden,
+                  isMarked: isMarked,
                   isInSearch: isInSearch,
                   onUpdate: parseSortGroupTagsWithoutCache,
                 );
@@ -1131,8 +1131,8 @@ Future<void> showTagDialog({
   required BuildContext context,
   required String tag,
   required BooruHandler handler,
-  required bool isHated,
-  required bool isLoved,
+  required bool isHidden,
+  required bool isMarked,
   required bool isInSearch,
   required VoidCallback onUpdate,
 }) async {
@@ -1283,52 +1283,52 @@ Future<void> showTagDialog({
             ),
           ],
           //
-          if (!isHated && !isLoved)
+          if (!isHidden && !isMarked)
             ListTile(
               leading: const Icon(Icons.star, color: Colors.yellow),
-              title: Text(context.loc.tagView.addToLoved),
+              title: Text(context.loc.tagView.addToMarked),
               onTap: () {
-                settingsHandler.addTagToList('loved', tag);
+                settingsHandler.addTagToList('marked', tag);
                 searchHandler.filterCurrentFetched();
                 handler.filterFetched();
                 onUpdate();
                 Navigator.of(context).pop(true);
               },
             ),
-          if (!isHated && !isLoved)
+          if (!isHidden && !isMarked)
             ListTile(
               leading: const Icon(CupertinoIcons.eye_slash, color: Colors.red),
-              title: Text(context.loc.tagView.addToHated),
+              title: Text(context.loc.tagView.addToHidden),
               onTap: () {
-                settingsHandler.addTagToList('hated', tag);
+                settingsHandler.addTagToList('hidden', tag);
                 searchHandler.filterCurrentFetched();
                 handler.filterFetched();
                 onUpdate();
                 Navigator.of(context).pop();
               },
             ),
-          if (isLoved)
+          if (isMarked)
             ListTile(
               leading: Icon(
                 Icons.star_border,
                 color: Theme.of(context).iconTheme.color,
               ),
-              title: Text(context.loc.tagView.removeFromLoved),
+              title: Text(context.loc.tagView.removeFromMarked),
               onTap: () {
-                settingsHandler.removeTagFromList('loved', tag);
+                settingsHandler.removeTagFromList('marked', tag);
                 onUpdate();
                 Navigator.of(context).pop();
               },
             ),
-          if (isHated)
+          if (isHidden)
             ListTile(
               leading: Icon(
                 CupertinoIcons.eye_slash,
                 color: Theme.of(context).iconTheme.color,
               ),
-              title: Text(context.loc.tagView.removeFromHated),
+              title: Text(context.loc.tagView.removeFromHidden),
               onTap: () {
-                settingsHandler.removeTagFromList('hated', tag);
+                settingsHandler.removeTagFromList('hidden', tag);
                 onUpdate();
                 Navigator.of(context).pop();
               },
@@ -2177,8 +2177,8 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                               context: context,
                                               tag: tag,
                                               handler: searchHandler.currentBooruHandler,
-                                              isHated: settingsHandler.hatedTags.contains(tag),
-                                              isLoved: settingsHandler.lovedTags.contains(tag),
+                                              isHidden: settingsHandler.hiddenTags.contains(tag),
+                                              isMarked: settingsHandler.markedTags.contains(tag),
                                               isInSearch:
                                                   searchHandler.searchTextController.text
                                                       .toLowerCase()
@@ -2233,8 +2233,8 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                                       context: context,
                                                       tag: tag,
                                                       handler: searchHandler.currentBooruHandler,
-                                                      isHated: settingsHandler.hatedTags.contains(tag),
-                                                      isLoved: settingsHandler.lovedTags.contains(tag),
+                                                      isHidden: settingsHandler.hiddenTags.contains(tag),
+                                                      isMarked: settingsHandler.markedTags.contains(tag),
                                                       isInSearch:
                                                           searchHandler.searchTextController.text
                                                               .toLowerCase()

@@ -56,7 +56,7 @@ abstract class BooruHandler {
 
     final List<BooruItem> filteredItems = [];
     for (final item in fetched) {
-      if (settingsHandler.filterHated && item.isHated) {
+      if (settingsHandler.filterHated && item.isHidden) {
         continue;
       }
 

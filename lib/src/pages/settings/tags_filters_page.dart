@@ -25,17 +25,20 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   final ScrollController scrollController = ScrollController();
   final TextEditingController tagSearchController = TextEditingController();
 
-  List<String> hatedList = [];
-  List<String> lovedList = [];
+  List<String> hiddenList = [];
+  List<String> markedList = [];
   bool filterHated = false, filterFavourites = false, filterSnatched = false, filterAi = false;
 
   @override
   void initState() {
     super.initState();
-    hatedList = settingsHandler.hatedTags;
-    hatedList.sort(sortTags);
-    lovedList = settingsHandler.lovedTags;
-    lovedList.sort(sortTags);
+
+    hiddenList = settingsHandler.hiddenTags;
+    hiddenList.sort(sortTags);
+
+    markedList = settingsHandler.markedTags;
+    markedList.sort(sortTags);
+
     filterHated = settingsHandler.filterHated;
     filterFavourites = settingsHandler.filterFavourites;
     filterSnatched = settingsHandler.filterSnatched;
@@ -63,8 +66,8 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
       return;
     }
 
-    settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList.map(Tag.new).toList());
-    settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList.map(Tag.new).toList());
+    settingsHandler.hiddenTags = settingsHandler.cleanTagsList(hiddenList.map(Tag.new).toList());
+    settingsHandler.markedTags = settingsHandler.cleanTagsList(markedList.map(Tag.new).toList());
     settingsHandler.filterHated = filterHated;
     settingsHandler.filterFavourites = filterFavourites;
     settingsHandler.filterSnatched = filterSnatched;
@@ -77,10 +80,10 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
 
   List<String> getTagsList(String type) {
     List<String> tagsList = [];
-    if (type == 'Hated') {
-      tagsList = hatedList;
-    } else if (type == 'Loved') {
-      tagsList = lovedList;
+    if (type == 'Hidden') {
+      tagsList = hiddenList;
+    } else if (type == 'Marked') {
+      tagsList = markedList;
     }
     return tagsList;
   }
@@ -130,9 +133,9 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   void duplicateMessage(String tag, String type) {
     FlashElements.showSnackbar(
       context: context,
-      title: Text(context.loc.settings.tagsFilters.duplicateTag, style: const TextStyle(fontSize: 20)),
+      title: Text(context.loc.settings.itemFilters.duplicateFilter, style: const TextStyle(fontSize: 20)),
       content: Text(
-        context.loc.settings.tagsFilters.alreadyInList(tag: tag, type: type),
+        context.loc.settings.itemFilters.alreadyInList(tag: tag, type: type),
         style: const TextStyle(fontSize: 16),
       ),
       leadingIcon: Icons.warning_amber,
@@ -172,7 +175,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text(context.loc.settings.tagsFilters.title),
+          title: Text(context.loc.settings.itemFilters.title),
           bottom: TabBar(
             controller: tabController,
             indicatorColor: Theme.of(context).colorScheme.secondary,
@@ -195,7 +198,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
                 height: 60,
                 child: Center(
                   child: MarqueeText(
-                    text: context.loc.settings.tagsFilters.hated,
+                    text: context.loc.settings.itemFilters.hidden,
                     isExpanded: false,
                   ),
                 ),
@@ -208,7 +211,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
                 ),
                 height: 60,
                 child: MarqueeText(
-                  text: context.loc.settings.tagsFilters.loved,
+                  text: context.loc.settings.itemFilters.marked,
                   isExpanded: false,
                 ),
               ),
@@ -230,7 +233,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
         floatingActionButton: tabController.index < 2
             ? FloatingActionButton(
                 onPressed: () {
-                  openAddDialog(tabController.index == 0 ? 'Hated' : 'Loved');
+                  openAddDialog(tabController.index == 0 ? 'Hidden' : 'Marked');
                 },
                 child: const Icon(Icons.add),
               )
@@ -239,30 +242,30 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
           controller: tabController,
           children: [
             TagsFiltersList(
-              tagsList: hatedList,
-              filterTagsType: 'Hated',
+              tagsList: hiddenList,
+              filterTagsType: 'Hidden',
               onTagSelected: (String tag) {
-                openEditDialog(tag, 'Hated');
+                openEditDialog(tag, 'Hidden');
               },
               onSearchTextChanged: (String newText) {
                 updateState();
               },
               scrollController: scrollController,
               tagSearchController: tagSearchController,
-              openAddDialog: () => openAddDialog('Hated'),
+              openAddDialog: () => openAddDialog('Hidden'),
             ),
             TagsFiltersList(
-              tagsList: lovedList,
-              filterTagsType: 'Loved',
+              tagsList: markedList,
+              filterTagsType: 'Marked',
               onTagSelected: (String tag) {
-                openEditDialog(tag, 'Loved');
+                openEditDialog(tag, 'Marked');
               },
               onSearchTextChanged: (String newText) {
                 updateState();
               },
               scrollController: scrollController,
               tagSearchController: tagSearchController,
-              openAddDialog: () => openAddDialog('Loved'),
+              openAddDialog: () => openAddDialog('Marked'),
             ),
             TagsFiltersSettingsList(
               scrollController: scrollController,

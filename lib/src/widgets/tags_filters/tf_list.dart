@@ -56,8 +56,8 @@ class TagsFiltersList extends StatelessWidget {
           if (filteredTagsList.isEmpty)
             SettingsButton(
               name: isSearchActive
-                  ? context.loc.settings.tagsFilters.noFiltersFound
-                  : context.loc.settings.tagsFilters.noFiltersAdded,
+                  ? context.loc.settings.itemFilters.noFiltersFound
+                  : context.loc.settings.itemFilters.noFiltersAdded,
               action: () {
                 if (!isSearchActive) {
                   openAddDialog();

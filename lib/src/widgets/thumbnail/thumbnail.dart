@@ -147,12 +147,12 @@ class _ThumbnailState extends State<Thumbnail> {
 
     // on desktop devicePixelRatio is not working?
     final bool shouldResize = (thumbWidth != null || thumbHeight != null) && !SettingsHandler.isDesktopPlatform;
-    final bool shouldPixelate = widget.item.isHated && settingsHandler.shitDevice;
+    final bool shouldPixelate = widget.item.isHidden && settingsHandler.shitDevice;
 
     if (shouldResize || shouldPixelate) {
       return ResizeImage(
         provider,
-        // when in low performance mode - resize hated images to 10px to simulate blur effect
+        // when in low performance mode - resize hidden images to 10px to simulate blur effect
         width: shouldPixelate ? 10 : thumbWidth?.round(),
         height: shouldPixelate ? 10 : thumbHeight?.round(),
         policy: ResizeImagePolicy.fit,
@@ -245,11 +245,11 @@ class _ThumbnailState extends State<Thumbnail> {
   }) {
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
-    // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
+    // if scaling is disabled - allow gifs as thumbnails, but only if they are not hidden (resize image doesnt work with gifs)
     final bool isSampleGif = widget.item.sampleURL.contains('.gif');
     final bool isGifSampleNotAllowed =
         widget.item.mediaType.value.isAnimation &&
-        ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated : true);
+        ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHidden : true);
 
     isThumbQuality =
         settingsHandler.previewMode.isThumbnail ||
@@ -274,7 +274,7 @@ class _ThumbnailState extends State<Thumbnail> {
   Future<void> startDownloading({
     bool withCaptchaCheck = false,
   }) async {
-    final bool useExtra = isThumbQuality == false && !widget.item.isHated && !settingsHandler.shitDevice;
+    final bool useExtra = isThumbQuality == false && !widget.item.isHidden && !settingsHandler.shitDevice;
 
     mainProvider.value = await getImageProvider(
       true,
@@ -446,11 +446,11 @@ class _ThumbnailState extends State<Thumbnail> {
           }
         });
 
-        // take smallest dimension for hated icon container
+        // take smallest dimension for hidden icon container
         final double iconSize =
             (constraints.maxHeight < constraints.maxWidth ? constraints.maxHeight : constraints.maxWidth) * 0.75;
 
-        final bool useExtra = isThumbQuality == false && !widget.item.isHated && !settingsHandler.shitDevice;
+        final bool useExtra = isThumbQuality == false && !widget.item.isHidden && !settingsHandler.shitDevice;
 
         return Stack(
           alignment: Alignment.center,
@@ -478,7 +478,7 @@ class _ThumbnailState extends State<Thumbnail> {
                   );
                 },
                 child: ImageFiltered(
-                  enabled: settingsHandler.blurImages || widget.item.isHated,
+                  enabled: settingsHandler.blurImages || widget.item.isHidden,
                   imageFilter: ImageFilter.blur(
                     sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
                     sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
@@ -533,13 +533,14 @@ class _ThumbnailState extends State<Thumbnail> {
               child: GestureDetector(
                 // TODO reenable after filters rework (when blur/hide will be separate for each filter)
                 // ignore: dead_code
-                onTap: false && (widget.item.isHated && !settingsHandler.shitDevice && widget.isStandalone)
+                onTap: false && (widget.item.isHidden && !settingsHandler.shitDevice && widget.isStandalone)
                     // ignore: dead_code
                     ? () => setState(() => isBlurred = !isBlurred)
                     : null,
                 child: ImageFiltered(
                   enabled:
-                      isBlurred && (settingsHandler.blurImages || (widget.item.isHated && !settingsHandler.shitDevice)),
+                      isBlurred &&
+                      (settingsHandler.blurImages || (widget.item.isHidden && !settingsHandler.shitDevice)),
                   imageFilter: ImageFilter.blur(
                     sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
                     sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
@@ -596,7 +597,7 @@ class _ThumbnailState extends State<Thumbnail> {
                 },
               ),
             //
-            if (widget.isStandalone && widget.item.isHated)
+            if (widget.isStandalone && widget.item.isHidden)
               Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -624,10 +625,7 @@ class _ThumbnailState extends State<Thumbnail> {
                   builder: (context, child) {
                     final bool isFavOrDlsOrHasLoad =
                         widget.booru.type?.isFavouritesOrDownloads == true ||
-                        BooruHandlerFactory()
-                            .getBooruHandler([widget.booru], null)
-                            .booruHandler
-                            .hasLoadItemSupport;
+                        BooruHandlerFactory().getBooruHandler([widget.booru], null).booruHandler.hasLoadItemSupport;
 
                     return ThumbnailLoading(
                       item: widget.item,

@@ -100,12 +100,12 @@ class BooruItem extends Equatable {
     return fileAspectRatio != null && fileAspectRatio! < 0.3;
   }
 
-  bool get isHated {
-    return SettingsHandler.instance.containsHated(tagsList.map((t) => t.fullString).toList());
+  bool get isHidden {
+    return SettingsHandler.instance.containsHidden(tagsList.map((t) => t.fullString).toList());
   }
 
-  bool get isLoved {
-    return SettingsHandler.instance.containsLoved(tagsList.map((t) => t.fullString).toList());
+  bool get isMarked {
+    return SettingsHandler.instance.containsMarked(tagsList.map((t) => t.fullString).toList());
   }
 
   bool get isSound {
