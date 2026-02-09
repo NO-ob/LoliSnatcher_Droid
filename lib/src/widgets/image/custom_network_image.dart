@@ -17,27 +17,47 @@ import 'package:lolisnatcher/src/widgets/image/abstract_custom_network_image.dar
 
 /// Shared logic for downloading, caching, and atomic writing of images.
 mixin _NetworkImageLoaderMixin {
-  /// Helper to rename a file with retries to handle file locks
-  Future<void> _safeRename(File source, String destPath) async {
-    const int maxRetries = 5;
+  Future<void> _commitCacheFile(File tempFile, String destPath) async {
+    final dest = File(destPath);
+    try {
+      await tempFile.rename(destPath);
+      return;
+    } catch (_) {}
 
-    for (int i = 0; i < maxRetries; i++) {
+    if (await dest.exists()) {
       try {
-        final dest = File(destPath);
-        if (await dest.exists()) {
+        final len = await dest.length();
+        if (len > 0) {
           try {
-            await dest.delete();
-          } catch (_) {
-            throw FileSystemException('Cannot delete existing file', destPath);
-          }
+            await tempFile.delete();
+          } catch (_) {}
+          return;
         }
-        await source.rename(destPath);
-        return;
+        await dest.delete();
       } catch (e) {
-        if (i == maxRetries - 1) rethrow;
+        try {
+          await tempFile.delete();
+        } catch (_) {}
+        return;
+      }
+    }
+    for (int i = 0; i < 3; i++) {
+      try {
+        await tempFile.rename(destPath);
+        return;
+      } catch (_) {
         await Future.delayed(Duration(milliseconds: 50 * (i + 1)));
       }
     }
+
+    if (await dest.exists()) {
+      try {
+        await tempFile.delete();
+      } catch (_) {}
+      return;
+    }
+
+    throw FileSystemException('Failed to commit cache file after retries', destPath);
   }
 
   Future<Uint8List> downloadAndCache({
@@ -61,7 +81,7 @@ mixin _NetworkImageLoaderMixin {
       fileNameExtras: fileNameExtras,
     );
 
-    final String tempFilePath = '$cacheFilePath.temp';
+    final String tempFilePath = '$cacheFilePath.temp_${DateTime.now().microsecondsSinceEpoch}';
 
     File? cacheFile;
 
@@ -70,7 +90,7 @@ mixin _NetworkImageLoaderMixin {
       cacheFile = File(cacheFilePath);
       if (await cacheFile.exists()) {
         final int fileSize = await cacheFile.length();
-        if (fileSize == 0) {
+        if (fileSize < 10) {
           try {
             await cacheFile.delete();
           } catch (_) {}
@@ -92,7 +112,6 @@ mixin _NetworkImageLoaderMixin {
       onCacheDetected(cacheFile != null);
     }
 
-    // Return cached bytes if available
     if (cacheFile != null) {
       try {
         return await cacheFile.readAsBytes();
@@ -152,7 +171,6 @@ mixin _NetworkImageLoaderMixin {
     } catch (e) {
       try {
         await File(tempFilePath).delete();
-        await File(cacheFilePath).delete();
       } catch (_) {}
       rethrow;
     } finally {
@@ -162,7 +180,6 @@ mixin _NetworkImageLoaderMixin {
     if (!Tools.isGoodResponse(response)) {
       try {
         await File(tempFilePath).delete();
-        await File(cacheFilePath).delete();
       } catch (_) {}
 
       throw NetworkImageLoadException(
@@ -174,11 +191,39 @@ mixin _NetworkImageLoaderMixin {
     if (withCache) {
       final tempFile = File(tempFilePath);
       if (await tempFile.exists()) {
+        final actualLen = await tempFile.length();
+
+        // Validate Content-Length
+        final headerLen = int.tryParse(response.headers.value(HttpHeaders.contentLengthHeader) ?? '');
+        if (headerLen != null && headerLen > 0 && actualLen != headerLen) {
+          await tempFile.delete();
+          throw Exception('Download incomplete: Expected $headerLen bytes, got $actualLen');
+        }
+
+        // Validate JPEG EOI (End of Image)
+        if (actualLen > 2 && (url.toLowerCase().endsWith('.jpg') || url.toLowerCase().endsWith('.jpeg'))) {
+          final handle = await tempFile.open();
+          try {
+            await handle.setPosition(actualLen - 2);
+            final endBytes = await handle.read(2);
+            if (endBytes.length == 2 && (endBytes[0] != 0xFF || endBytes[1] != 0xD9)) {
+              throw Exception('Image file is truncated (missing JPEG EOI marker)');
+            }
+          } catch (e) {
+            await tempFile.delete();
+            rethrow;
+          } finally {
+            await handle.close();
+          }
+        }
+
         try {
-          await _safeRename(tempFile, cacheFilePath);
+          await _commitCacheFile(tempFile, cacheFilePath);
           return File(cacheFilePath).readAsBytes();
         } catch (_) {
-          // if rename fails - loading fails too since dio.download() doesn't give bytes in response
+          try {
+            await tempFile.delete();
+          } catch (_) {}
           rethrow;
         }
       }
@@ -188,30 +233,22 @@ mixin _NetworkImageLoaderMixin {
   }
 
   Future<Uint8List> tryFixGifSpeed(String url, Uint8List image) async {
-    if (!url.endsWith('.gif') && !url.contains('.gif')) {
+    if (!url.toLowerCase().endsWith('.gif') && !url.toLowerCase().contains('.gif')) {
       return image;
     }
 
     try {
-      // 0x21, 0xF9, 0x04 signature
       final int len = image.length - 6;
       for (int i = 0; i < len; i++) {
-        // Direct index access avoids allocating millions of sublists
         if (image[i] == 0x21 && image[i + 1] == 0xF9 && image[i + 2] == 0x04) {
-          final int delay1 = image[i + 4];
-          final int delay2 = image[i + 5];
-          final int delay = delay1 | (delay2 << 8);
-
-          // min 100ms
+          final int delay = image[i + 4] | (image[i + 5] << 8);
           if (delay < 10) {
             image[i + 4] = 0x0A;
           }
-          i += 5; // Skip ahead
+          i += 5;
         }
       }
-    } catch (_) {
-      // Ignore errors
-    }
+    } catch (_) {}
     return image;
   }
 
@@ -228,9 +265,12 @@ mixin _NetworkImageLoaderMixin {
       if (await cacheFile.exists()) {
         await cacheFile.delete();
       }
-      final tempFile = File('$cacheFilePath.temp');
-      if (await tempFile.exists()) {
-        await tempFile.delete();
+      // Note: We can't easily delete unique temp files here as their names are random.
+      // But they are cleaned up in the try/catch blocks of downloadAndCache.
+      // We can try deleting the legacy fixed temp file just in case.
+      final legacyTemp = File('$cacheFilePath.temp');
+      if (await legacyTemp.exists()) {
+        await legacyTemp.delete();
       }
     } catch (e) {
       print('NetworkImage Exception :: delete cache file :: $e');
@@ -334,7 +374,9 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
       final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(fixedBytes);
       return decode(buffer);
     } catch (e) {
-      onError?.call(e);
+      if (onError != null) {
+        onError?.call(e);
+      }
       scheduleMicrotask(() {
         PaintingBinding.instance.imageCache.evict(key);
       });
@@ -482,7 +524,9 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
       await codec.ready();
       return codec;
     } catch (e) {
-      onError?.call(e);
+      if (onError != null) {
+        onError?.call(e);
+      }
       scheduleMicrotask(() {
         PaintingBinding.instance.imageCache.evict(key);
       });
