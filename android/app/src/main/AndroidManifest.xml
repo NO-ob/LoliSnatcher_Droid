@@ -25,11 +25,17 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
+            android:enabled="true"
             android:exported="true"
             android:windowSoftInputMode="stateVisible">
             <!-- android:launchMode="singleTop" - allows multiple instances of the app (i.e. - opened from a config link) -->
             <!-- LAUNCHER intent is on activity-aliases for dynamic app name in release -->
             <!-- Debug manifest adds LAUNCHER directly to MainActivity -->
+
+            <!-- <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter> -->
 
             <intent-filter>
               <action android:name="android.intent.action.VIEW" />
