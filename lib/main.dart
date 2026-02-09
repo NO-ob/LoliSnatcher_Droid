@@ -18,6 +18,7 @@ import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/handlers/connectivity_handler.dart';
 import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/notify_handler.dart';
@@ -74,6 +75,9 @@ void main() async {
   initSettingsEnumRegistry();
   await SettingsHandler.register().initialize();
   LocalAuthHandler.register();
+
+  ConnectivityHandler.register();
+  await ConnectivityHandler.instance.initialize();
 
   await ServiceHandler.setSystemUiVisibility(true);
 
@@ -151,6 +155,7 @@ class _MainAppState extends State<MainApp> {
   @override
   void dispose() {
     settingsHandler.isDebug.removeListener(devOverlayListener);
+    ConnectivityHandler.instance.dispose();
     NotifyHandler.unregister();
     NavigationHandler.unregister();
     ViewerHandler.unregister();

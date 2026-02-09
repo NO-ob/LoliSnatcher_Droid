@@ -785,7 +785,8 @@
             "clearCookies": "Clear cookies",
             "clearCookiesFor(param=booruName)": "Clear cookies for ${booruName: String}",
             "cookiesForBooruDeleted(param=booruName)": "Cookies for ${booruName: String} deleted",
-            "allCookiesDeleted": "All cookies deleted"
+            "allCookiesDeleted": "All cookies deleted",
+            "noConnection": "No connection"
         },
         "privacy": {
             "title": "Privacy",

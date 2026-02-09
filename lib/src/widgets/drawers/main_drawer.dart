@@ -15,6 +15,7 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
 import 'package:lolisnatcher/src/widgets/common/multibooru_toggle.dart';
+import 'package:lolisnatcher/src/widgets/common/network_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/preview/main_search_bar.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
@@ -197,6 +198,9 @@ class MainDrawer extends StatelessWidget {
 
                     return const SizedBox.shrink();
                   }),
+                  //
+                  const NetworkIndicator(),
+                  //
                   if (SettingsHandler.isDesktopPlatform)
                     SettingsButton(
                       name: context.loc.closeTheApp,

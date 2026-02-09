@@ -777,7 +777,8 @@
       "clearCookies": "Очистить куки",
       "clearCookiesFor(param=booruName)": "Очистить куки для ${booruName: String}",
       "cookiesForBooruDeleted(param=booruName)": "Куки для ${booruName: String} удалены",
-      "allCookiesDeleted": "Все куки удалены"
+      "allCookiesDeleted": "Все куки удалены",
+      "noConnection": "Нет соединения"
     },
     "privacy": {
       "title": "Приватность",

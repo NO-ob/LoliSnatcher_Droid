@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/handlers/connectivity_handler.dart';
 
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -58,14 +59,42 @@ class _MainAppBarState extends State<MainAppBar> {
         return GestureDetector(
           onLongPress: _onMenuLongTap,
           onSecondaryTap: _onMenuLongTap,
-          child: IconButton(
-            icon: Icon(
-              Icons.menu,
-              color: Theme.of(context).appBarTheme.iconTheme?.color,
-            ),
-            onPressed: () {
-              _toggleDrawer(direction);
-            },
+          child: Stack(
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  color: Theme.of(context).appBarTheme.iconTheme?.color,
+                ),
+                onPressed: () {
+                  _toggleDrawer(direction);
+                },
+              ),
+              Positioned(
+                right: 0,
+                top: 0,
+                child: Obx(() {
+                  if (ConnectivityHandler.instance.isOnline.value) return const SizedBox.shrink();
+
+                  return IgnorePointer(
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      padding: const EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Icon(
+                        Icons.wifi_off,
+                        color: Theme.of(context).colorScheme.onError,
+                        size: 12,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
         );
       },

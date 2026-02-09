@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  connectivity_plus
   dynamic_color
   flutter_avif_windows
   flutter_inappwebview_windows

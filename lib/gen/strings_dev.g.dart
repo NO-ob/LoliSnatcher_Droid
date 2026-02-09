@@ -2731,6 +2731,8 @@ class _TranslationsSettingsNetworkDev extends TranslationsSettingsNetworkEn {
       '{Cookies for ${booruName} deleted}';
   @override
   String get allCookiesDeleted => TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? '{All cookies deleted}';
+  @override
+  String get noConnection => TranslationOverrides.string(_root.$meta, 'settings.network.noConnection', {}) ?? '{No connection}';
 }
 
 // Path: settings.privacy
@@ -5074,6 +5076,7 @@ extension on TranslationsDev {
                 '{Cookies for ${booruName} deleted}',
           'settings.network.allCookiesDeleted' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? '{All cookies deleted}',
+          'settings.network.noConnection' => TranslationOverrides.string(_root.$meta, 'settings.network.noConnection', {}) ?? '{No connection}',
           'settings.privacy.title' => TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? '{Privacy}',
           'settings.privacy.appLock' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? '{App lock}',
           'settings.privacy.appLockMsg' =>
@@ -5698,10 +5701,10 @@ extension on TranslationsDev {
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? '{No items selected}',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? '{No items}',
           'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? '{No item selected}',
-          'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? '{Close}',
           _ => null,
         } ??
         switch (path) {
+          'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? '{Close}',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? '{No booru configs found}',
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? '{Add new Booru}',

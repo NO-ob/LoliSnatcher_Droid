@@ -19,6 +19,7 @@ dependencies:
   calendar_date_picker2: ^2.0.1
   chewie: ^1.13.0
   collection: ^1.19.1
+  connectivity_plus: ^7.0.0
   country_flags: ^4.1.2
   crypto: ^3.0.7
   dio: ^5.9.1

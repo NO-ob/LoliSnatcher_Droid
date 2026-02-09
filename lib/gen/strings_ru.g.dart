@@ -2770,6 +2770,8 @@ class _TranslationsSettingsNetworkRu extends TranslationsSettingsNetworkEn {
       'Куки для ${booruName} удалены';
   @override
   String get allCookiesDeleted => TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? 'Все куки удалены';
+  @override
+  String get noConnection => TranslationOverrides.string(_root.$meta, 'settings.network.noConnection', {}) ?? 'Нет соединения';
 }
 
 // Path: settings.privacy
@@ -5162,6 +5164,7 @@ extension on TranslationsRu {
                 'Куки для ${booruName} удалены',
           'settings.network.allCookiesDeleted' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? 'Все куки удалены',
+          'settings.network.noConnection' => TranslationOverrides.string(_root.$meta, 'settings.network.noConnection', {}) ?? 'Нет соединения',
           'settings.privacy.title' => TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? 'Приватность',
           'settings.privacy.appLock' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'Блокировка приложения',
           'settings.privacy.appLockMsg' =>
@@ -5800,10 +5803,10 @@ extension on TranslationsRu {
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? 'Ничего не выбрано',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'Нет элементов',
           'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
-          'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Закрыть',
           _ => null,
         } ??
         switch (path) {
+          'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Закрыть',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'Конфигурации сайтов не найдены',
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Добавить новый сайт',
