@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
+import 'package:lolisnatcher/src/services/saf_file_cache.dart';
 import 'package:lolisnatcher/src/widgets/common/pulse_widget.dart';
 
 class SnatchedStatusIcon extends StatefulWidget {
@@ -42,7 +42,7 @@ class _SnatchedStatusIconState extends State<SnatchedStatusIcon> {
 
     final String extPath = SettingsHandler.instance.extPathOverride;
     if (extPath.isNotEmpty) {
-      fileExists = await ServiceHandler.existsFileFromSAFDirectory(
+      fileExists = await SAFFileCache.instance.existsFile(
         extPath,
         ImageWriter().getFilename(widget.item, widget.booru),
       );

@@ -11,6 +11,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/services/saf_file_cache.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -133,6 +134,7 @@ class ImageWriter {
       }
 
       print('Image written: $path$fileName');
+      SAFFileCache.instance.onFileCreated(fileName);
       item.isSnatched.value = true;
       if (settingsHandler.dbEnabled) {
         await settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);

@@ -43,6 +43,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/services/saf_file_cache.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -1393,6 +1394,7 @@ class SettingsHandler {
         break;
       case 'extPathOverride':
         extPathOverride = validatedValue;
+        SAFFileCache.instance.invalidate();
         break;
       case 'backupPath':
         backupPath = validatedValue;
@@ -2336,6 +2338,10 @@ class SettingsHandler {
             }
           : null,
     );
+
+    if (Platform.isAndroid && extPathOverride.isNotEmpty) {
+      unawaited(SAFFileCache.instance.populate(extPathOverride));
+    }
 
     isInit.value = true;
     return;

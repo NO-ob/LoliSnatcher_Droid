@@ -15,6 +15,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.KeyEvent
@@ -183,7 +184,12 @@ class MainActivity: FlutterFragmentActivity() {
                         val uri = call.argument<String>("uri")
                         val fileName = call.argument<String>("fileName")
                         if (fileName != null && uri != null) {
-                            result.success(getFileByName(uri, fileName))
+                            Executors.newSingleThreadExecutor().execute {
+                                val fileBytes = getFileByName(uri, fileName)
+                                runOnUiThread {
+                                    result.success(fileBytes)
+                                }
+                            }
                         } else {
                             result.error("INVALID_ARGUMENT", "URI or fileName is null", null)
                         }
@@ -198,6 +204,29 @@ class MainActivity: FlutterFragmentActivity() {
                             }
                         } else {
                             result.error("INVALID_ARGUMENT", "URI or fileName is null", null)
+                        }
+                    }
+                    "existsFileByNameFast" -> {
+                        val uri = call.argument<String>("uri")
+                        val fileName = call.argument<String>("fileName")
+                        if (fileName != null && uri != null) {
+                            Executors.newSingleThreadExecutor().execute {
+                                val exists = existsByNameFast(uri, fileName)
+                                result.success(exists)
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI or fileName is null", null)
+                        }
+                    }
+                    "listFileNames" -> {
+                        val uri = call.argument<String>("uri")
+                        if (uri != null) {
+                            Executors.newSingleThreadExecutor().execute {
+                                val names = listFileNames(uri)
+                                result.success(names)
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENT", "URI is null", null)
                         }
                     }
                     "deleteFileByName" -> {
@@ -496,6 +525,59 @@ class MainActivity: FlutterFragmentActivity() {
 
         val documentTree = DocumentFile.fromTreeUri(applicationContext, uri)
         return documentTree?.findFile(fileName)?.exists() ?: false
+    }
+
+    private fun findFileUri(uriString: String, fileName: String): Uri? {
+        val treeUri = Uri.parse(uriString)
+        if (treeUri == Uri.EMPTY) return null
+
+        val docId = DocumentsContract.getTreeDocumentId(treeUri)
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, docId)
+
+        val cursor = contentResolver.query(
+            childrenUri,
+            arrayOf(
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_DISPLAY_NAME
+            ),
+            "${DocumentsContract.Document.COLUMN_DISPLAY_NAME} = ?",
+            arrayOf(fileName),
+            null
+        ) ?: return null
+
+        return cursor.use {
+            while (it.moveToNext()) {
+                if (it.getString(1) == fileName) {
+                    val foundDocId = it.getString(0)
+                    return@use DocumentsContract.buildDocumentUriUsingTree(treeUri, foundDocId)
+                }
+            }
+            null
+        }
+    }
+
+    private fun existsByNameFast(uriString: String, fileName: String): Boolean {
+        return findFileUri(uriString, fileName) != null
+    }
+
+    private fun listFileNames(uriString: String): List<String> {
+        val treeUri = Uri.parse(uriString)
+        if (treeUri == Uri.EMPTY) return emptyList()
+
+        val docId = DocumentsContract.getTreeDocumentId(treeUri)
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, docId)
+
+        val names = mutableListOf<String>()
+        contentResolver.query(
+            childrenUri,
+            arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME),
+            null, null, null
+        )?.use { cursor ->
+            while (cursor.moveToNext()) {
+                names.add(cursor.getString(0))
+            }
+        }
+        return names
     }
 
     private fun removeByName(uriString: String, fileName: String): Boolean {
