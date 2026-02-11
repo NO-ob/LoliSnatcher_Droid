@@ -5,8 +5,8 @@ publish_to: none
 version: 2.4.5+5206 # remember to update the values in constants.dart->updateInfo after changing them here
 
 environment:
-  sdk: ">=3.10.8 <4.0.0"
-  flutter: 3.38.9
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: 3.41.0
 
 dependencies:
   flutter:
@@ -88,14 +88,14 @@ dependencies:
   slang: ^4.12.1
   sqflite_common_ffi: ^2.4.0+2
   sqflite: ^2.4.2
-  sqlite3: ^3.1.4
+  sqlite3: ^3.1.5
   talker_dio_logger: ^5.1.13
   talker_flutter: ^5.1.13
   talker_logger: ^5.1.13
   talker: ^5.1.13
   url_launcher: ^6.3.2
   uuid: ^4.5.2
-  vibration: ^3.1.5
+  vibration: ^3.1.6
   video_player: ^2.10.1
   waterfall_flow: ^3.1.1
   xml: ^6.6.1
@@ -112,7 +112,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^2.11.0
+  build_runner: ^2.11.1
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
 

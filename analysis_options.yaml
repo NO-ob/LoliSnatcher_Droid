@@ -39,7 +39,6 @@ linter:
     avoid_function_literals_in_foreach_calls: true
     avoid_init_to_null: true
     avoid_js_rounded_ints: true
-    avoid_null_checks_in_equality_operators: true
     avoid_print: false
     avoid_private_typedef_functions: true
     avoid_relative_lib_imports: true
