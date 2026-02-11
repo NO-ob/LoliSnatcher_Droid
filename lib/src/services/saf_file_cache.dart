@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/services/get_perms.dart';
 
 class SAFFileCache {
   SAFFileCache._();
@@ -26,7 +27,8 @@ class SAFFileCache {
   }
 
   Future<void> populate(String safUri) async {
-    if (_isPopulating) {
+    // skip if can't get access to saf folder for some reason
+    if (_isPopulating || !await checkStorageAvailability()) {
       await _populateCompleter?.future;
       return;
     }

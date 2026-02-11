@@ -5,8 +5,8 @@ publish_to: none
 version: 2.4.5+5206 # remember to update the values in constants.dart->updateInfo after changing them here
 
 environment:
-  sdk: ">=3.10.8 <4.0.0"
-  flutter: 3.38.9
+  sdk: ">=3.11.0 <4.0.0"
+  flutter: 3.41.0
 
 dependencies:
   flutter:

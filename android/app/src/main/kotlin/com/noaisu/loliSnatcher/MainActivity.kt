@@ -512,8 +512,12 @@ class MainActivity: FlutterFragmentActivity() {
         val uri = Uri.parse(uriString)
         val documentTree = DocumentFile.fromTreeUri(applicationContext, uri) ?: return null
         val file = documentTree.findFile(fileName) ?: return null
-        val inputStream = contentResolver.openInputStream(file.uri) ?: return null
-        return inputStream.use { it.readBytes() }
+        return try {
+            contentResolver.openInputStream(file.uri)?.use { it.readBytes() }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error reading SAF file: $fileName", e)
+            null
+        }
     }
 
     private fun existsByName(uriString: String, fileName: String): Boolean {
@@ -531,27 +535,32 @@ class MainActivity: FlutterFragmentActivity() {
         val treeUri = Uri.parse(uriString)
         if (treeUri == Uri.EMPTY) return null
 
-        val docId = DocumentsContract.getTreeDocumentId(treeUri)
-        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, docId)
+        return try {
+            val docId = DocumentsContract.getTreeDocumentId(treeUri)
+            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, docId)
 
-        val cursor = contentResolver.query(
-            childrenUri,
-            arrayOf(
-                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                DocumentsContract.Document.COLUMN_DISPLAY_NAME
-            ),
-            "${DocumentsContract.Document.COLUMN_DISPLAY_NAME} = ?",
-            arrayOf(fileName),
-            null
-        ) ?: return null
+            val cursor = contentResolver.query(
+                childrenUri,
+                arrayOf(
+                    DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                    DocumentsContract.Document.COLUMN_DISPLAY_NAME
+                ),
+                "${DocumentsContract.Document.COLUMN_DISPLAY_NAME} = ?",
+                arrayOf(fileName),
+                null
+            ) ?: return null
 
-        return cursor.use {
-            while (it.moveToNext()) {
-                if (it.getString(1) == fileName) {
-                    val foundDocId = it.getString(0)
-                    return@use DocumentsContract.buildDocumentUriUsingTree(treeUri, foundDocId)
+            cursor.use {
+                while (it.moveToNext()) {
+                    if (it.getString(1) == fileName) {
+                        val foundDocId = it.getString(0)
+                        return@use DocumentsContract.buildDocumentUriUsingTree(treeUri, foundDocId)
+                    }
                 }
+                null
             }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error finding file URI: $uriString / $fileName", e)
             null
         }
     }
@@ -564,20 +573,25 @@ class MainActivity: FlutterFragmentActivity() {
         val treeUri = Uri.parse(uriString)
         if (treeUri == Uri.EMPTY) return emptyList()
 
-        val docId = DocumentsContract.getTreeDocumentId(treeUri)
-        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, docId)
+        return try {
+            val docId = DocumentsContract.getTreeDocumentId(treeUri)
+            val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, docId)
 
-        val names = mutableListOf<String>()
-        contentResolver.query(
-            childrenUri,
-            arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME),
-            null, null, null
-        )?.use { cursor ->
-            while (cursor.moveToNext()) {
-                names.add(cursor.getString(0))
+            val names = mutableListOf<String>()
+            contentResolver.query(
+                childrenUri,
+                arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME),
+                null, null, null
+            )?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    names.add(cursor.getString(0))
+                }
             }
+            names
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error listing SAF files: $uriString", e)
+            emptyList()
         }
-        return names
     }
 
     private fun removeByName(uriString: String, fileName: String): Boolean {
@@ -657,9 +671,14 @@ class MainActivity: FlutterFragmentActivity() {
         } else null
 
         if (doc != null && doc.canWrite()) {
-            val uri = doc.createFile("$thisMediaType/$fileExt", "$fileName.$fileExt")?.uri
-            uri?.let {
-                activeFiles[it] = contentResolver.openOutputStream(it)
+            val newFile = doc.createFile("$thisMediaType/$fileExt", "$fileName.$fileExt") ?: return null
+            val uri = newFile.uri
+            try {
+                activeFiles[uri] = contentResolver.openOutputStream(uri)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error opening output stream for SAF file", e)
+                newFile.delete()
+                return null
             }
             return uri
         }
@@ -681,12 +700,19 @@ class MainActivity: FlutterFragmentActivity() {
             return false
         }
 
-        if (document.delete()) {
+        try {
+            if (document.delete()) {
+                activeFiles[uri]?.close()
+                activeFiles.remove(uri)
+                return true
+            } else {
+                Log.e("MainActivity", "Failed to delete document for URI: $uriString")
+                return false
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error deleting SAF document: $uriString", e)
             activeFiles[uri]?.close()
             activeFiles.remove(uri)
-            return true
-        } else {
-            Log.e("MainActivity", "Failed to delete document for URI: $uriString")
             return false
         }
     }
@@ -746,12 +772,26 @@ class MainActivity: FlutterFragmentActivity() {
         val uri = Uri.parse(uriString) ?: return false
         val documentTree = DocumentFile.fromTreeUri(applicationContext, uri) ?: return false
         val file = documentTree.findFile(fileName) ?: return false
-        val inputStream = contentResolver.openInputStream(file.uri) ?: return false
-        val outputStream = FileOutputStream(File(targetPath, fileName))
-        inputStream.copyTo(outputStream)
-        inputStream.close()
-        outputStream.close()
-        return true
+        val inputStream = try {
+            contentResolver.openInputStream(file.uri) ?: return false
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error opening SAF input stream: ${file.uri}", e)
+            return false
+        }
+        return try {
+            val outputStream = FileOutputStream(File(targetPath, fileName))
+            try {
+                inputStream.copyTo(outputStream)
+            } finally {
+                outputStream.close()
+            }
+            true
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error copying SAF file to $targetPath/$fileName", e)
+            false
+        } finally {
+            inputStream.close()
+        }
     }
 
     @Throws(IOException::class)
@@ -766,12 +806,24 @@ class MainActivity: FlutterFragmentActivity() {
         }
         val documentTree = DocumentFile.fromTreeUri(applicationContext, uri) ?: return false
         val targetFile = documentTree.createFile(mime, fileName) ?: return false
-        val outputStream = contentResolver.openOutputStream(targetFile.uri) ?: return false
+        val outputStream = try {
+            contentResolver.openOutputStream(targetFile.uri) ?: return false
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error opening SAF output stream for: $fileName", e)
+            targetFile.delete()
+            return false
+        }
         val inputStream = FileInputStream(file)
-        inputStream.copyTo(outputStream)
-        inputStream.close()
-        outputStream.close()
-        return true
+        return try {
+            inputStream.copyTo(outputStream)
+            true
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error copying file to SAF dir: $fileName", e)
+            false
+        } finally {
+            inputStream.close()
+            outputStream.close()
+        }
     }
 
     @Throws(IOException::class)
@@ -785,37 +837,35 @@ class MainActivity: FlutterFragmentActivity() {
             thisMediaType = "image"
         }
 
-        if (!extPathOverride.isNullOrEmpty()) {
-            val doc = DocumentFile.fromTreeUri(applicationContext, Uri.parse(extPathOverride))
-            if (doc != null && doc.canWrite()) {
-                val file = doc.createFile("$thisMediaType/$fileExt", "$name.$fileExt")
-                if (file != null) {
-                    fos = contentResolver.openOutputStream(file.uri)
+        try {
+            if (!extPathOverride.isNullOrEmpty()) {
+                val doc = DocumentFile.fromTreeUri(applicationContext, Uri.parse(extPathOverride))
+                if (doc != null && doc.canWrite()) {
+                    val file = doc.createFile("$thisMediaType/$fileExt", "$name.$fileExt")
+                    if (file != null) {
+                        fos = contentResolver.openOutputStream(file.uri)
+                    }
+                }
+            } else {
+                if (thisMediaType == "image") {
+                    contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.$fileExt")
+                    contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$thisMediaType/$fileExt")
+                    contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LoliSnatcher/")
+                    imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                } else {
+                    contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, "$name.$fileExt")
+                    contentValues.put(MediaStore.Video.Media.MIME_TYPE, "$thisMediaType/$fileExt")
+                    contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/LoliSnatcher/")
+                    imageUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+                }
+                if (imageUri != null) {
+                    fos = resolver.openOutputStream(imageUri)
                 }
             }
-        } else {
-            if (thisMediaType == "image") {
-                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.$fileExt")
-                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$thisMediaType/$fileExt")
-                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LoliSnatcher/")
-                imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-            } else {
-                contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, "$name.$fileExt")
-                contentValues.put(MediaStore.Video.Media.MIME_TYPE, "$thisMediaType/$fileExt")
-                contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/LoliSnatcher/")
-                imageUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
-            }
-            if (imageUri != null) {
-                fos = resolver.openOutputStream(imageUri)
-            }
-        }
 
-        if (fos != null) {
-            try {
-                fos.write(fileBytes)
-            } finally {
-                fos.close()
-            }
+            fos?.write(fileBytes)
+        } finally {
+            fos?.close()
         }
     }
 
