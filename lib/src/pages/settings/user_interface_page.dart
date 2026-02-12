@@ -32,7 +32,12 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   late PreviewQuality previewMode;
   late PreviewDisplayMode previewDisplay, previewDisplayFallback;
   late ButtonPosition scrollGridButtonsPosition;
-  late bool showBottomSearchbar, useTopSearchbarInput, showSearchbarQuickActions, autofocusSearchbar, disableVibration;
+  late bool showBottomSearchbar,
+      useTopSearchbarInput,
+      showSearchbarQuickActions,
+      autofocusSearchbar,
+      disableVibration,
+      usePredictiveBack;
   late AppMode appMode;
   late HandSide handSide;
 
@@ -48,6 +53,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     showSearchbarQuickActions = settingsHandler.showSearchbarQuickActions;
     autofocusSearchbar = settingsHandler.autofocusSearchbar;
     disableVibration = settingsHandler.disableVibration;
+    usePredictiveBack = settingsHandler.usePredictiveBack;
     previewDisplay = settingsHandler.previewDisplay;
     previewDisplayFallback = settingsHandler.previewDisplayFallback;
     previewMode = settingsHandler.previewMode;
@@ -76,6 +82,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.showSearchbarQuickActions = showSearchbarQuickActions;
     settingsHandler.autofocusSearchbar = autofocusSearchbar;
     settingsHandler.disableVibration = disableVibration;
+    settingsHandler.usePredictiveBack = usePredictiveBack;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
     settingsHandler.previewDisplayFallback = previewDisplayFallback;
@@ -231,6 +238,15 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: context.loc.settings.interface.searchViewInputAutofocus,
+              ),
+              SettingsToggle(
+                value: usePredictiveBack,
+                onChanged: (newValue) {
+                  setState(() {
+                    usePredictiveBack = newValue;
+                  });
+                },
+                title: context.loc.settings.interface.usePredictiveBack,
               ),
               SettingsToggle(
                 value: disableVibration,

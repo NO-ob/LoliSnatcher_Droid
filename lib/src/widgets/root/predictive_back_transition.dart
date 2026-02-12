@@ -235,7 +235,7 @@ class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
 
 class _PredictiveBackSharedElementPageTransitionState extends State<_PredictiveBackSharedElementPageTransition>
     with SingleTickerProviderStateMixin {
-  static const double _kMinScale = 0.5;
+  static const double _kMinScale = 0.66;
   static const double _kDivisionFactor = 20;
   static const double _kMargin = 8;
   static const double _kYPositionFactor = 0.1;
@@ -413,7 +413,7 @@ class _PredictiveBackFullscreenPageTransition extends StatefulWidget {
 
 class _PredictiveBackFullscreenPageTransitionState extends State<_PredictiveBackFullscreenPageTransition> {
   static const double _kScaleStart = 1;
-  static const double _kScaleCommit = 0.5;
+  static const double _kScaleCommit = 0.95;
   static const double _kOpacityFullyOpened = 1;
   static const double _kOpacityStartTransition = 0.95;
   static const double _kCommitAt = 0.65;

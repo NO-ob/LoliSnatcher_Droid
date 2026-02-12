@@ -1959,6 +1959,8 @@ class _TranslationsSettingsInterfaceRu extends TranslationsSettingsInterfaceEn {
       TranslationOverrides.string(_root.$meta, 'settings.interface.disableVibrationSubtitle', {}) ??
       'Может всё ещё происходить при некоторых действиях даже при отключении';
   @override
+  String get usePredictiveBack => TranslationOverrides.string(_root.$meta, 'settings.interface.usePredictiveBack', {}) ?? 'Анимация смахивания';
+  @override
   String get previewColumnsPortrait =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewColumnsPortrait', {}) ?? 'Столбцы превью (портрет)';
   @override
@@ -4538,6 +4540,8 @@ extension on TranslationsRu {
           'settings.interface.disableVibrationSubtitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.disableVibrationSubtitle', {}) ??
                 'Может всё ещё происходить при некоторых действиях даже при отключении',
+          'settings.interface.usePredictiveBack' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.usePredictiveBack', {}) ?? 'Анимация смахивания',
           'settings.interface.previewColumnsPortrait' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewColumnsPortrait', {}) ?? 'Столбцы превью (портрет)',
           'settings.interface.previewColumnsLandscape' =>
@@ -4842,12 +4846,12 @@ extension on TranslationsRu {
           'settings.video.cacheModes.streamCacheMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamCacheMode', {}) ??
                 '- Потоковый+Кэш - Смешанный режим, но в данный момент приводит к двойной загрузке',
-          'settings.video.cacheModes.cacheNote' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
-                '[Примечание]: Видео будут кэшироваться только если включено \'Кэшировать медиа\'.',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.cacheModes.cacheNote' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
+                '[Примечание]: Видео будут кэшироваться только если включено \'Кэшировать медиа\'.',
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
@@ -5802,10 +5806,10 @@ extension on TranslationsRu {
           'desktopHome.save' => TranslationOverrides.string(_root.$meta, 'desktopHome.save', {}) ?? 'Сохранить',
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? 'Ничего не выбрано',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'Нет элементов',
-          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
           _ => null,
         } ??
         switch (path) {
+          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Закрыть',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'Конфигурации сайтов не найдены',

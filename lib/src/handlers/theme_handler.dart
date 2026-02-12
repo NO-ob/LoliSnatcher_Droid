@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';
@@ -347,17 +348,19 @@ class ThemeHandler {
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   );
 
-  PageTransitionsTheme pageTransitionsTheme() => const PageTransitionsTheme(
+  PageTransitionsTheme pageTransitionsTheme() => PageTransitionsTheme(
     // ZoomPageTransitionsBuilder alternatives:
     // PredictiveBackPageTransitionsBuilder - android only, requires predictive back enabled, still wip
     // FadeForwardsPageTransitionsBuilder - latest material3 spec animation, currently conflicts with modal routes (and stuttering if there is a global restate?)
     builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: CustomPredictiveBackPageTransitionsBuilder(),
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
-      TargetPlatform.linux: ZoomPageTransitionsBuilder(),
-      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+      TargetPlatform.android: SettingsHandler.instance.usePredictiveBack
+          ? const CustomPredictiveBackPageTransitionsBuilder()
+          : const ZoomPageTransitionsBuilder(),
+      TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.fuchsia: const ZoomPageTransitionsBuilder(),
+      TargetPlatform.linux: const ZoomPageTransitionsBuilder(),
+      TargetPlatform.macOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.windows: const ZoomPageTransitionsBuilder(),
     },
   );
 

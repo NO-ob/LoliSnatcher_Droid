@@ -198,6 +198,7 @@ class SettingsHandler {
   bool showSearchbarQuickActions = false;
   bool autofocusSearchbar = true;
   bool expandDetails = false;
+  bool usePredictiveBack = true;
   final RxBool useLockscreen = false.obs;
   final RxBool blurOnLeave = false.obs;
   final RxList<Booru> booruList = RxList<Booru>([]);
@@ -281,6 +282,7 @@ class SettingsHandler {
     'showSearchbarQuickActions',
     'autofocusSearchbar',
     'expandDetails',
+    'usePredictiveBack',
     'useLockscreen',
     'blurOnLeave',
   ];
@@ -688,6 +690,10 @@ class SettingsHandler {
     'expandDetails': {
       'type': 'bool',
       'default': false,
+    },
+    'usePredictiveBack': {
+      'type': 'bool',
+      'default': true,
     },
     'useLockscreen': {
       'type': 'bool',
@@ -1145,6 +1151,8 @@ class SettingsHandler {
         return autofocusSearchbar;
       case 'expandDetails':
         return expandDetails;
+      case 'usePredictiveBack':
+        return usePredictiveBack;
       case 'useLockscreen':
         return useLockscreen;
       case 'blurOnLeave':
@@ -1488,6 +1496,9 @@ class SettingsHandler {
         break;
       case 'expandDetails':
         expandDetails = validatedValue;
+        break;
+      case 'usePredictiveBack':
+        usePredictiveBack = validatedValue;
         break;
       case 'useLockscreen':
         useLockscreen.value = validatedValue;

@@ -444,6 +444,7 @@
       "searchViewInputAutofocus": "Автофокус поля ввода на экране поиска",
       "disableVibration": "Отключить вибрацию",
       "disableVibrationSubtitle": "Может всё ещё происходить при некоторых действиях даже при отключении",
+      "usePredictiveBack": "Анимация смахивания",
       "previewColumnsPortrait": "Столбцы превью (портрет)",
       "previewColumnsLandscape": "Столбцы превью (ландшафт)",
       "previewQuality": "Качество превью",

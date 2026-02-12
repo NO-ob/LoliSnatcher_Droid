@@ -444,6 +444,7 @@
             "searchViewInputAutofocus": "{Search view input autofocus}",
             "disableVibration": "{Disable vibration}",
             "disableVibrationSubtitle": "{May still happen on some actions even when disabled}",
+            "usePredictiveBack": "{Predictive back gesture}",
             "previewColumnsPortrait": "{Preview columns (portrait)}",
             "previewColumnsLandscape": "{Preview columns (landscape)}",
             "previewQuality": "{Preview quality}",

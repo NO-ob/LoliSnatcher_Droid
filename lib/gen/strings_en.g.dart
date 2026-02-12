@@ -2426,6 +2426,9 @@ class TranslationsSettingsInterfaceEn {
       TranslationOverrides.string(_root.$meta, 'settings.interface.disableVibrationSubtitle', {}) ??
       'May still happen on some actions even when disabled';
 
+  /// en: 'Predictive back gesture'
+  String get usePredictiveBack => TranslationOverrides.string(_root.$meta, 'settings.interface.usePredictiveBack', {}) ?? 'Predictive back gesture';
+
   /// en: 'Preview columns (portrait)'
   String get previewColumnsPortrait =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewColumnsPortrait', {}) ?? 'Preview columns (portrait)';
@@ -5506,6 +5509,8 @@ extension on Translations {
           'settings.interface.disableVibrationSubtitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.disableVibrationSubtitle', {}) ??
                 'May still happen on some actions even when disabled',
+          'settings.interface.usePredictiveBack' =>
+            TranslationOverrides.string(_root.$meta, 'settings.interface.usePredictiveBack', {}) ?? 'Predictive back gesture',
           'settings.interface.previewColumnsPortrait' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewColumnsPortrait', {}) ?? 'Preview columns (portrait)',
           'settings.interface.previewColumnsLandscape' =>
@@ -5794,12 +5799,12 @@ extension on Translations {
           'settings.video.cacheModes.streamCacheMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamCacheMode', {}) ??
                 '- Stream+Cache - Mix of both, but currently leads to double download',
-          'settings.video.cacheModes.cacheNote' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
-                '[Note]: Videos will cache only if \'Cache Media\' is enabled.',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.cacheModes.cacheNote' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
+                '[Note]: Videos will cache only if \'Cache Media\' is enabled.',
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
@@ -6713,10 +6718,10 @@ extension on Translations {
           'desktopHome.save' => TranslationOverrides.string(_root.$meta, 'desktopHome.save', {}) ?? 'Save',
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? 'No items selected',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'No items',
-          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'No item selected',
           _ => null,
         } ??
         switch (path) {
+          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'No item selected',
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Close',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'No booru configs found',
