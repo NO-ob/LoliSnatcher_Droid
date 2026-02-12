@@ -68,10 +68,7 @@ class _PerformancePageState extends State<PerformancePage> {
     settingsHandler.autoPlayEnabled = autoPlayEnabled;
     settingsHandler.disableVideo = disableVideo;
 
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: false);
   }
 
   Future<bool> showLowPerfConfirmDialog(bool withConfirmation) async {
@@ -132,7 +129,6 @@ class _PerformancePageState extends State<PerformancePage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,

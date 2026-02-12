@@ -111,10 +111,7 @@ class _ThemePageState extends State<ThemePage> {
     } else {
       settingsHandler.drawerMascotPathOverride = mascotPathOverride;
     }
-    final bool result = await settingsHandler.saveSettings(restate: withRestate ?? false);
-    if (result && withRestate == null) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: withRestate ?? false);
   }
 
   Future<void> updateTheme({bool withRestate = false}) async {
@@ -248,7 +245,6 @@ class _ThemePageState extends State<ThemePage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,

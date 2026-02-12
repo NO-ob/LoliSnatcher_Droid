@@ -72,10 +72,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     settingsHandler.filterFavourites = filterFavourites;
     settingsHandler.filterSnatched = filterSnatched;
     settingsHandler.filterAi = filterAi;
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: false);
   }
 
   List<String> getTagsList(String type) {
@@ -170,7 +167,6 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,

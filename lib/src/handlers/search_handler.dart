@@ -756,7 +756,6 @@ class SearchHandler {
       changeTabIndex(newIndex);
     } else {
       Booru defaultBooru = Booru.unknown();
-      // settingsHandler.getBooru();
       // Set the default booru and tags at the start
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];

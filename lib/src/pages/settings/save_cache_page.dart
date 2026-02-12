@@ -144,10 +144,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.downloadNotifications = downloadNotifications;
     settingsHandler.snatchOnFavourite = snatchOnFavourite;
     settingsHandler.favouriteOnSnatch = favouriteOnSnatch;
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: false);
   }
 
   void setPath(String path) {
@@ -213,7 +210,6 @@ class _SaveCachePageState extends State<SaveCachePage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,

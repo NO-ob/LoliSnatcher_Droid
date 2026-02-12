@@ -3006,9 +3006,8 @@ class _PinnedTagsReorderDialogState extends State<PinnedTagsReorderDialog> {
             shrinkWrap: true,
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             itemCount: tags.length,
-            onReorder: (oldIndex, newIndex) {
+            onReorderItem: (oldIndex, newIndex) {
               setState(() {
-                if (newIndex > oldIndex) newIndex--;
                 final item = tags.removeAt(oldIndex);
                 tags.insert(newIndex, item);
               });

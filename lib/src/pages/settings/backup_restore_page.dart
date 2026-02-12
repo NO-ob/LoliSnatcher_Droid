@@ -127,40 +127,30 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       );
       return;
     }
-
-    settingsHandler.backupPath = backupPath;
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    if (result) {
-      Navigator.of(context).pop();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     if (!Platform.isAndroid) {
-      return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: _onPopInvoked,
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          appBar: SettingsAppBar(title: backupLoc.title),
-          body: Center(
-            child: ListView(
-              children: [
-                Container(
-                  margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                  width: double.infinity,
-                  child: Text(backupLoc.androidOnlyFeatureMsg),
-                ),
-              ],
-            ),
+      return Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: SettingsAppBar(title: backupLoc.title),
+        body: Center(
+          child: ListView(
+            children: [
+              Container(
+                margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                width: double.infinity,
+                child: Text(backupLoc.androidOnlyFeatureMsg),
+              ),
+            ],
           ),
         ),
       );
     }
 
     return PopScope(
-      canPop: false,
+      canPop: !inProgress,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -179,6 +169,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         setState(() {
                           backupPath = path;
                           settingsHandler.backupPath = path;
+                          settingsHandler.saveSettings(restate: false);
                         });
                       } else {
                         showSnackbar(
@@ -208,6 +199,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         setState(() {
                           backupPath = '';
                           settingsHandler.backupPath = '';
+                          settingsHandler.saveSettings(restate: false);
                         });
                       },
                       drawTopBorder: true,

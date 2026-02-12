@@ -380,6 +380,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   final SearchHandler searchHandler = SearchHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
   final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
+  final ConnectivityHandler connectivityHandler = ConnectivityHandler.instance;
 
   Timer? backupTimer;
   Timer? cacheStaleTimer;
@@ -483,10 +484,12 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       case AppLifecycleState.paused:
         // record time when user left the app
         localAuthHandler.onLeave();
+        connectivityHandler.initialize();
         break;
       case AppLifecycleState.resumed:
         // check if app needs to be locked when user returns to the app
         localAuthHandler.onReturn();
+        connectivityHandler.initialize();
         break;
     }
   }

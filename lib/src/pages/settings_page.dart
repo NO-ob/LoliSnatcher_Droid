@@ -33,7 +33,6 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
-/// Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -43,20 +42,8 @@ class SettingsPage extends StatelessWidget {
     }
 
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final bool result = await settingsHandler.saveSettings(restate: true);
+    await settingsHandler.saveSettings(restate: true);
     await settingsHandler.loadSettings();
-    // await settingsHandler.getBooru();
-    if (result) {
-      Navigator.of(context).pop();
-    }
-  }
-
-  Future<bool> _onWillPop() async {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final bool result = await settingsHandler.saveSettings(restate: true);
-    await settingsHandler.loadSettings();
-    // await settingsHandler.getBooru();
-    return result;
   }
 
   @override
@@ -64,20 +51,11 @@ class SettingsPage extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: (didPop, result) async => _onPopInvoked(context, didPop, result),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: SettingsAppBar(
           title: context.loc.settings.title,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              if (await _onWillPop()) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
         ),
         body: Center(
           child: ListView(

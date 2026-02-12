@@ -83,16 +83,12 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.landscapeColumns = max(1, int.tryParse(columnsLandscapeController.text) ?? 6);
     settingsHandler.portraitColumns = max(1, int.tryParse(columnsPortraitController.text) ?? 3);
     settingsHandler.mousewheelScrollSpeed = double.parse(mouseSpeedController.text);
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: false);
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,

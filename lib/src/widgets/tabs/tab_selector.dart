@@ -1321,11 +1321,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
                   child: ReorderableListView.builder(
                     scrollController: scrollController,
                     itemExtent: tabHeight,
-                    onReorder: (oldIndex, newIndex) {
+                    onReorderItem: (oldIndex, newIndex) {
                       if (oldIndex == newIndex) {
                         return;
-                      } else if (oldIndex < newIndex) {
-                        newIndex -= 1;
                       }
 
                       searchHandler.moveTab(oldIndex, newIndex);

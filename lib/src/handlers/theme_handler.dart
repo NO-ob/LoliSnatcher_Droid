@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/widgets/root/predictive_back_transition.dart';
 
 class ThemeHandler {
   ThemeHandler({
@@ -351,7 +352,7 @@ class ThemeHandler {
     // PredictiveBackPageTransitionsBuilder - android only, requires predictive back enabled, still wip
     // FadeForwardsPageTransitionsBuilder - latest material3 spec animation, currently conflicts with modal routes (and stuttering if there is a global restate?)
     builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: ZoomPageTransitionsBuilder(),
+      TargetPlatform.android: CustomPredictiveBackPageTransitionsBuilder(),
       TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
       TargetPlatform.linux: ZoomPageTransitionsBuilder(),

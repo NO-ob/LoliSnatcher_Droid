@@ -48,11 +48,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
     settingsHandler.autoLockTimeout =
         int.tryParse(autoLockTimeoutController.text) ?? settingsHandler.map['autoLockTimeout']!['default'];
     settingsHandler.incognitoKeyboard = incognitoKeyboard;
-    final bool result = await settingsHandler.saveSettings(restate: false);
-
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: false);
   }
 
   Future<void> _changeAppAlias(AppAlias? newAlias) async {
@@ -111,7 +107,6 @@ class _PrivacyPageState extends State<PrivacyPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,

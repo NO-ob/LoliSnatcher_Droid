@@ -35,6 +35,7 @@ class ConnectivityHandler {
       final List<ConnectivityResult> result = await _connectivity.checkConnectivity();
       await _updateConnectivityStatus(result);
 
+      await _subscription?.cancel();
       _subscription = _connectivity.onConnectivityChanged.listen(
         (List<ConnectivityResult> result) {
           _debounceTimer?.cancel();

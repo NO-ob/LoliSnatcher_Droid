@@ -120,10 +120,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.preloadSizeLimit = (double.tryParse(preloadSizeController.text) ?? 0.2).clamp(0, double.infinity);
     settingsHandler.preloadHeight = (int.tryParse(preloadHeightController.text) ?? (4096 * 4)).clamp(0, 2_000_000_000);
 
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: false);
   }
 
   @override
@@ -135,7 +132,6 @@ class _GalleryPageState extends State<GalleryPage> {
     final bool hasHydrus = settingsHandler.hasHydrus;
 
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
@@ -486,11 +482,8 @@ class _GalleryPageState extends State<GalleryPage> {
                             ),
                           ),
                       ],
-                      onReorder: (int oldIndex, int newIndex) {
+                      onReorderItem: (int oldIndex, int newIndex) {
                         setState(() {
-                          if (oldIndex < newIndex) {
-                            newIndex -= 1;
-                          }
                           final item = buttonOrder.removeAt(oldIndex);
                           buttonOrder.insert(newIndex, item);
                         });

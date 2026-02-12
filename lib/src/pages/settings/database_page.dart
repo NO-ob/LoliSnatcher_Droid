@@ -103,10 +103,7 @@ class _DatabasePageState extends State<DatabasePage> {
     settingsHandler.indexesEnabled = indexesEnabled;
     settingsHandler.searchHistoryEnabled = searchHistoryEnabled;
     settingsHandler.tagTypeFetchEnabled = tagTypeFetchEnabled;
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: false);
   }
 
   List<Booru> getSankakuBoorus() {
@@ -295,7 +292,7 @@ class _DatabasePageState extends State<DatabasePage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: !isUpdating && !changingIndexes,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,

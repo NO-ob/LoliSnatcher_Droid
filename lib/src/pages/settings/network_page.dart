@@ -65,19 +65,14 @@ class _NetworkPageState extends State<NetworkPage> {
     settingsHandler.proxyAddress = proxyAddressController.text;
     settingsHandler.proxyUsername = proxyUsernameController.text;
     settingsHandler.proxyPassword = proxyPasswordController.text;
-    final bool result = await settingsHandler.saveSettings(restate: false);
+    await settingsHandler.saveSettings(restate: false);
 
     await initProxy();
-
-    if (result) {
-      Navigator.of(context).pop();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,

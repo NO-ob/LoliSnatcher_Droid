@@ -11,13 +11,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
 
-    <!-- <application ... android:enableOnBackInvokedCallback="true" - required for predictive back -->
     <application
         android:name="${applicationName}"
         android:label="LoliSnatcher"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
         android:resizeableActivity="true"
+        android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
@@ -65,7 +65,7 @@
             android:targetActivity=".MainActivity"
             android:label="Loli Snatcher"
             android:icon="@mipmap/ic_launcher"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -78,7 +78,7 @@
             android:targetActivity=".MainActivity"
             android:label="LoSn"
             android:icon="@mipmap/ic_launcher"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -91,7 +91,7 @@
             android:targetActivity=".MainActivity"
             android:label="LS"
             android:icon="@mipmap/ic_launcher"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -104,7 +104,7 @@
             android:targetActivity=".MainActivity"
             android:label="BooruSnatcher"
             android:icon="@mipmap/ic_launcher"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -117,7 +117,7 @@
             android:targetActivity=".MainActivity"
             android:label="Booru Snatcher"
             android:icon="@mipmap/ic_launcher"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -130,7 +130,7 @@
             android:targetActivity=".MainActivity"
             android:label="Booru"
             android:icon="@mipmap/ic_launcher"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

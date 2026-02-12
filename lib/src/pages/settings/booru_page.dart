@@ -109,11 +109,8 @@ class _BooruPageState extends State<BooruPage> {
       }
     }
     settingsHandler.itemLimit = int.parse(limitController.text);
-    final bool result = await settingsHandler.saveSettings(restate: false);
+    await settingsHandler.saveSettings(restate: false);
     await settingsHandler.sortBooruList();
-    if (result) {
-      Navigator.of(context).pop();
-    }
   }
 
   Widget addButton() {
@@ -439,7 +436,6 @@ class _BooruPageState extends State<BooruPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,

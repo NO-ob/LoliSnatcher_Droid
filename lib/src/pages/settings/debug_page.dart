@@ -54,23 +54,17 @@ class _DebugPageState extends State<DebugPage> {
     ).open();
   }
 
-  //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
 
-    final bool result = await settingsHandler.saveSettings(restate: true);
-
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: true);
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
