@@ -1285,7 +1285,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     final double extraPadding = isOnTop ? 0 : MediaQuery.paddingOf(context).bottom;
 
     return PopScope(
-      onPopInvokedWithResult: (bool didPop, _) {
+      onPopInvokedWithResult: (_, _) {
         // clear currently loading item from cache to avoid creating broken files
         // TODO move sharing download routine to somewhere in global context?
         shareCancelToken?.cancel();

@@ -43,7 +43,6 @@ class SettingsPage extends StatelessWidget {
 
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     await settingsHandler.saveSettings(restate: true);
-    await settingsHandler.loadSettings();
   }
 
   @override

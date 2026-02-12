@@ -126,12 +126,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     d.send(await ImageWriterIsolate(config['path']).getCacheStat(config['type']));
   }
 
-  //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.snatchCooldown = int.parse(snatchCooldownController.text);
     settingsHandler.jsonWrite = jsonWrite;
     settingsHandler.mediaCache = mediaCache;

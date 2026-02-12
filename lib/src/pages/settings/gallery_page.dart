@@ -89,11 +89,7 @@ class _GalleryPageState extends State<GalleryPage> {
     super.dispose();
   }
 
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.autoHideImageBar = autoHideImageBar;
     settingsHandler.galleryMode = galleryMode;
     settingsHandler.galleryBarPosition = galleryBarPosition;

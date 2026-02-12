@@ -82,12 +82,7 @@ class _BooruPageState extends State<BooruPage> {
     }
   }
 
-  //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.defTags = defaultTagsController.text;
     if (int.parse(limitController.text) > 100) {
       limitController.text = '100';

@@ -81,14 +81,10 @@ class _ThemePageState extends State<ThemePage> {
 
   //called when page is closed or to debounce theme change, sets settingshandler variables and then writes settings to disk
   Future<void> _onPopInvoked(
-    bool didPop,
+    _,
     _, {
     bool? withRestate,
   }) async {
-    if (didPop) {
-      return;
-    }
-
     settingsHandler.theme.value = theme;
     settingsHandler.themeMode.value = themeMode;
     settingsHandler.useDynamicColor.value = useDynamicColor;

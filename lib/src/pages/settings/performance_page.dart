@@ -51,12 +51,7 @@ class _PerformancePageState extends State<PerformancePage> {
     disableVideo = settingsHandler.disableVideo;
   }
 
-  //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.shitDevice = shitDevice;
     settingsHandler.previewMode = previewMode;
     settingsHandler.galleryMode = galleryMode;

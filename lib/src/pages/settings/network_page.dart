@@ -54,11 +54,7 @@ class _NetworkPageState extends State<NetworkPage> {
     super.dispose();
   }
 
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     settingsHandler.customUserAgent = userAgentController.text;
     settingsHandler.proxyType = proxyType;

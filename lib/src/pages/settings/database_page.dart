@@ -67,12 +67,7 @@ class _DatabasePageState extends State<DatabasePage> {
     super.dispose();
   }
 
-  //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     if (isUpdating) {
       FlashElements.showSnackbar(
         title: Text(context.loc.settings.database.cantLeavePageNow, style: const TextStyle(fontSize: 20)),
@@ -98,7 +93,6 @@ class _DatabasePageState extends State<DatabasePage> {
       return;
     }
 
-    // Set settingshandler values here
     settingsHandler.dbEnabled = dbEnabled;
     settingsHandler.indexesEnabled = indexesEnabled;
     settingsHandler.searchHistoryEnabled = searchHistoryEnabled;

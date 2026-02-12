@@ -69,12 +69,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     super.dispose();
   }
 
-  //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.appMode.value = appMode;
     settingsHandler.handSide.value = handSide;
     settingsHandler.showBottomSearchbar = showBottomSearchbar;
@@ -82,6 +77,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.showSearchbarQuickActions = showSearchbarQuickActions;
     settingsHandler.autofocusSearchbar = autofocusSearchbar;
     settingsHandler.disableVibration = disableVibration;
+    final bool needThemeChange = usePredictiveBack != settingsHandler.usePredictiveBack;
     settingsHandler.usePredictiveBack = usePredictiveBack;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
@@ -90,7 +86,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.landscapeColumns = max(1, int.tryParse(columnsLandscapeController.text) ?? 6);
     settingsHandler.portraitColumns = max(1, int.tryParse(columnsPortraitController.text) ?? 3);
     settingsHandler.mousewheelScrollSpeed = double.parse(mouseSpeedController.text);
-    await settingsHandler.saveSettings(restate: false);
+    await settingsHandler.saveSettings(restate: needThemeChange);
   }
 
   @override

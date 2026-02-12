@@ -38,11 +38,7 @@ class _PrivacyPageState extends State<PrivacyPage> {
     appAlias = settingsHandler.appAlias;
   }
 
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.blurOnLeave.value = blurOnLeave;
     settingsHandler.useLockscreen.value = useLockscreen;
     settingsHandler.autoLockTimeout =

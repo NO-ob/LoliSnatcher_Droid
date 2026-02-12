@@ -54,11 +54,7 @@ class _DebugPageState extends State<DebugPage> {
     ).open();
   }
 
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     await settingsHandler.saveSettings(restate: true);
   }
 

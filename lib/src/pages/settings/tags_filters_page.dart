@@ -61,11 +61,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     super.dispose();
   }
 
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.hiddenTags = settingsHandler.cleanTagsList(hiddenList.map(Tag.new).toList());
     settingsHandler.markedTags = settingsHandler.cleanTagsList(markedList.map(Tag.new).toList());
     settingsHandler.filterHated = filterHated;

@@ -17,12 +17,7 @@ class _SettingsTemplateState extends State<SettingsTemplate> {
     super.initState();
   }
 
-  //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     await settingsHandler.saveSettings(restate: false);
   }
 

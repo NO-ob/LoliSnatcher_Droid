@@ -47,11 +47,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     videoCacheMode = settingsHandler.videoCacheMode;
   }
 
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.autoPlayEnabled = autoPlay;
     settingsHandler.startVideosMuted = startVideosMuted;
     settingsHandler.disableVideo = disableVideo;
