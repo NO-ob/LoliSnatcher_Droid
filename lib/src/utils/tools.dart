@@ -150,7 +150,9 @@ class Tools {
             headers['Referer'] = 'https://rule34storage.b-cdn.net';
           }
           break;
-
+        case BooruType.Gelbooru:
+          headers['Referer'] = booru?.baseURL ?? 'https://gelbooru.com';
+          break;
         default:
           break;
       }
