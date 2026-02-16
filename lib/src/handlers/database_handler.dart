@@ -913,7 +913,7 @@ class DBHandler {
     ]) {
       for (final type in ['fileURL', 'sampleURL', 'thumbnailURL']) {
         conditions.add(
-          '($type LIKE "%${server.keys.first}%.gelbooru.com%" AND $type NOT LIKE "%${server.values.first}.gelbooru.com%")',
+          "($type LIKE '%${server.keys.first}%.gelbooru.com%' AND $type NOT LIKE '%${server.values.first}.gelbooru.com%')",
         );
       }
     }
