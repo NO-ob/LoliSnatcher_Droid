@@ -490,6 +490,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.onReset,
     this.itemExtent,
     this.expendableByScroll = false,
+    this.placeholder,
     super.key,
   });
 
@@ -511,9 +512,10 @@ class SettingsDropdown<T> extends StatelessWidget {
   final VoidCallback? onReset;
   final double? itemExtent;
   final bool expendableByScroll;
+  final String? placeholder;
 
   String getTitle(T? value) {
-    return itemTitleBuilder?.call(value) ?? value.toString();
+    return itemTitleBuilder?.call(value) ?? value?.toString() ?? placeholder ?? '';
   }
 
   String getSubtitle(T? value) {

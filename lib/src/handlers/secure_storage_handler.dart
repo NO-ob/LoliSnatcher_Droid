@@ -16,9 +16,7 @@ class SecureStorageHandler {
   //
 
   final FlutterSecureStorage storage = const FlutterSecureStorage(
-    aOptions: AndroidOptions(
-      encryptedSharedPreferences: true,
-    ),
+    aOptions: AndroidOptions.defaultOptions,
     iOptions: IOSOptions(
       accessibility: KeychainAccessibility.first_unlock_this_device,
     ),

@@ -58,7 +58,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     settingsHandler.videoCacheMode = videoCacheMode;
 
     if (SettingsHandler.isDesktopPlatform) {
-      MediaKitVideoPlayer.registerWith();
+      fvp.registerWith();
     } else {
       switch (videoBackendMode) {
         case VideoBackendMode.normal:

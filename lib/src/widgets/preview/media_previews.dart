@@ -21,32 +21,28 @@ class _MediaPreviewsState extends State<MediaPreviews> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
 
-  bool booruListFilled = false, tabListFilled = false;
+  final ValueNotifier<bool> booruListFilled = ValueNotifier(false), tabListFilled = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
 
-    booruListFilled = settingsHandler.booruList.isNotEmpty;
+    booruListFilled.value = settingsHandler.booruList.isNotEmpty;
     settingsHandler.booruList.addListener(booruListener);
 
-    tabListFilled = searchHandler.tabs.isNotEmpty;
+    tabListFilled.value = searchHandler.tabs.isNotEmpty;
     searchHandler.tabs.addListener(tabListener);
   }
 
   void booruListener() {
-    if (!booruListFilled) {
-      setState(() {
-        booruListFilled = settingsHandler.booruList.isNotEmpty;
-      });
+    if (!booruListFilled.value) {
+      booruListFilled.value = settingsHandler.booruList.isNotEmpty;
     }
   }
 
   void tabListener() {
-    if (!tabListFilled) {
-      setState(() {
-        tabListFilled = searchHandler.tabs.isNotEmpty;
-      });
+    if (!tabListFilled.value) {
+      tabListFilled.value = searchHandler.tabs.isNotEmpty;
     }
   }
 
@@ -61,66 +57,70 @@ class _MediaPreviewsState extends State<MediaPreviews> {
   Widget build(BuildContext context) {
     // print('image previews build $booruListFilled $tabListFilled');
 
-    // no booru configs
-    if (!booruListFilled) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            const SettingsButton(
-              name: 'No Booru Configs Found',
-              icon: Icon(null),
-            ),
-            SettingsButton(
-              name: 'Add new Booru',
-              icon: const Icon(Icons.settings),
-              page: () => BooruEdit(Booru('New', null, '', '', '')),
-            ),
-            SettingsButton(
-              name: 'Help',
-              icon: const Icon(Icons.help_center_outlined),
-              action: () {
-                launchUrlString(
-                  'https://github.com/NO-ob/LoliSnatcher_Droid/wiki',
-                  mode: LaunchMode.externalApplication,
-                );
-              },
-              trailingIcon: const Icon(Icons.exit_to_app),
-            ),
-            SettingsButton(
-              name: 'Settings',
-              icon: const Icon(Icons.settings),
-              page: () => const SettingsPage(),
-            ),
-          ],
-        ),
-      );
-    }
+    return ValueListenableBuilder(
+      valueListenable: booruListFilled,
+      builder: (_, booruListFilled, _) =>
+          // no booru configs
+          !booruListFilled
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const SettingsButton(
+                    name: 'No Booru Configs Found',
+                    icon: Icon(null),
+                  ),
+                  SettingsButton(
+                    name: 'Add new Booru',
+                    icon: const Icon(Icons.settings),
+                    page: () => BooruEdit(Booru('New', null, '', '', '')),
+                  ),
+                  SettingsButton(
+                    name: 'Help',
+                    icon: const Icon(Icons.help_center_outlined),
+                    action: () {
+                      launchUrlString(
+                        'https://github.com/NO-ob/LoliSnatcher_Droid/wiki',
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    trailingIcon: const Icon(Icons.exit_to_app),
+                  ),
+                  SettingsButton(
+                    name: 'Settings',
+                    icon: const Icon(Icons.settings),
+                    page: () => const SettingsPage(),
+                  ),
+                ],
+              ),
+            )
+          : ValueListenableBuilder(
+              valueListenable: tabListFilled,
+              builder: (_, tabListFilled, _) =>
+                  // temp message while restoring tabs (or for some reason initial tab was not created)
+                  !tabListFilled
+                  ? Center(
+                      child: Column(
+                        children: [
+                          const CircularProgressIndicator(),
+                          ValueListenableBuilder(
+                            valueListenable: searchHandler.isRestored,
+                            builder: (context, isRestored, child) {
+                              if (searchHandler.isRestored.value) {
+                                return const SizedBox.shrink();
+                              }
 
-    // temp message while restoring tabs (or for some reason initial tab was not created)
-    if (!tabListFilled) {
-      return Center(
-        child: Column(
-          children: [
-            const CircularProgressIndicator(),
-            ValueListenableBuilder(
-              valueListenable: searchHandler.isRestored,
-              builder: (context, isRestored, child) {
-                if (searchHandler.isRestored.value) {
-                  return const SizedBox.shrink();
-                }
-
-                return child!;
-              },
-              child: const Text('Restoring previous session...'),
+                              return child!;
+                            },
+                            child: const Text('Restoring previous session...'),
+                          ),
+                        ],
+                      ),
+                      // render thumbnails grid
+                    )
+                  : const WaterfallView(),
             ),
-          ],
-        ),
-      );
-    }
-
-    // render thumbnails grid
-    return const WaterfallView();
+    );
   }
 }

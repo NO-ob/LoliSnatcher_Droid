@@ -34,6 +34,7 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/restartable_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/gallery/image_search_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/snatched_status_icon.dart';
 import 'package:lolisnatcher/src/widgets/gallery/toolbar_action.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
@@ -191,6 +192,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
           return widget.canSelect;
         case 'external_player':
           return isVideo && Platform.isAndroid;
+        case 'image_search':
+          return isImage;
       }
 
       return true;
@@ -405,6 +408,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'external_player':
         icon = Icons.exit_to_app;
         break;
+      case 'image_search':
+        icon = Icons.image_search_rounded;
+        break;
     }
     return Icon(icon);
   }
@@ -594,6 +600,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
         break;
       case 'external_player':
         ExternalVideoPlayerLauncher.launchOtherPlayer(item.fileURL, MIME.video, null);
+        break;
+      case 'image_search':
+        await showImageSearchDialog(context, item);
         break;
     }
   }

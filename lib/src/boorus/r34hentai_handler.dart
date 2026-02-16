@@ -22,7 +22,7 @@ class R34HentaiHandler extends ShimmieHandler {
   }
 
   @override
-  List parseListFromResponse(dynamic response) {
+  Future<List> parseListFromResponse(dynamic response) async {
     final document = parse(response.data);
     return document.getElementsByClassName('thumb');
   }
@@ -200,7 +200,7 @@ class R34HentaiHandlerOld extends R34HentaiHandler {
   R34HentaiHandlerOld(super.booru, super.limit);
 
   @override
-  List parseListFromResponse(dynamic response) {
+  Future<List> parseListFromResponse(dynamic response) async {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse; // Limit doesn't work with this api
   }

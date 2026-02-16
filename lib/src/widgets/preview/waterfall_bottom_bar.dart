@@ -12,7 +12,7 @@ import 'package:dio/dio.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get.dart' hide FirstWhereOrNullExt;
+import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
@@ -464,7 +464,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
         enabled: !settingsHandler.shitDevice,
         filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
         child: Material(
-          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+          color: context.theme.colorScheme.surface.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(16),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
@@ -474,7 +474,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  color: context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   width: 1,
                 ),
               ),
@@ -500,8 +500,8 @@ class _MainSearchBarState extends State<MainSearchBar> {
                                   padding: const EdgeInsets.symmetric(horizontal: 8),
                                   child: Text(
                                     'Search',
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                    style: context.theme.textTheme.bodyLarge?.copyWith(
+                                      color: context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                       fontSize: 16,
                                       height: 1,
                                     ),
@@ -539,7 +539,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
                                                 color: Colors.transparent,
                                                 borderRadius: BorderRadius.circular(12),
                                                 border: Border.all(
-                                                  color: Theme.of(context).colorScheme.secondary,
+                                                  color: context.theme.colorScheme.secondary,
                                                   width: 2,
                                                 ),
                                               ),
@@ -737,7 +737,7 @@ class MainSearchTagChip extends StatelessWidget {
                                       : Colors.white.withValues(alpha: 0.8),
                                   border: Border(
                                     right: BorderSide(
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                      color: context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                       width: 1,
                                     ),
                                   ),
@@ -749,7 +749,7 @@ class MainSearchTagChip extends StatelessWidget {
                                         : isOr
                                         ? '~'
                                         : '',
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    style: context.theme.textTheme.bodyLarge?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                       height: 1,
@@ -766,7 +766,7 @@ class MainSearchTagChip extends StatelessWidget {
                                     color: Colors.white.withValues(alpha: 0.8),
                                     border: Border(
                                       right: BorderSide(
-                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                        color: context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                         width: 1,
                                       ),
                                     ),
@@ -776,7 +776,7 @@ class MainSearchTagChip extends StatelessWidget {
                                       children: [
                                         Text(
                                           booruNumber.toString(),
-                                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                          style: context.theme.textTheme.bodyLarge?.copyWith(
                                             color: Colors.black,
                                             fontWeight: FontWeight.w600,
                                             height: 1,
@@ -795,7 +795,7 @@ class MainSearchTagChip extends StatelessWidget {
                                     color: Colors.red,
                                     border: Border(
                                       right: BorderSide(
-                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                        color: context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                         width: 1,
                                       ),
                                     ),
@@ -803,7 +803,7 @@ class MainSearchTagChip extends StatelessWidget {
                                   child: Center(
                                     child: Text(
                                       '?#',
-                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      style: context.theme.textTheme.bodyLarge?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600,
                                         height: 1,
@@ -820,7 +820,7 @@ class MainSearchTagChip extends StatelessWidget {
                                   color: Colors.white.withValues(alpha: 0.8),
                                   border: Border(
                                     right: BorderSide(
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                      color: context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                       width: 1,
                                     ),
                                   ),
@@ -841,7 +841,7 @@ class MainSearchTagChip extends StatelessWidget {
                                             )
                                           : Text(
                                               metaTagParseData['key'],
-                                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                              style: context.theme.textTheme.bodyLarge?.copyWith(
                                                 color: tagColor,
                                                 fontWeight: FontWeight.w600,
                                                 height: 1,
@@ -849,7 +849,7 @@ class MainSearchTagChip extends StatelessWidget {
                                             ),
                                     _ => Text(
                                       metaTagParseData['key'],
-                                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      style: context.theme.textTheme.bodyLarge?.copyWith(
                                         color: tagColor,
                                         fontWeight: FontWeight.w600,
                                         height: 1,
@@ -906,7 +906,7 @@ class MainSearchTagChip extends StatelessWidget {
 
                                       return Text(
                                         dates,
-                                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                        style: context.theme.textTheme.bodyLarge?.copyWith(
                                           color: Colors.white,
                                           fontWeight: FontWeight.w600,
                                           height: 1,
@@ -922,7 +922,7 @@ class MainSearchTagChip extends StatelessWidget {
                                   padding: const EdgeInsets.symmetric(vertical: 4),
                                   child: Text(
                                     formattedTag,
-                                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    style: context.theme.textTheme.bodyLarge?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                       height: 1,
@@ -980,10 +980,13 @@ class MainSearchTagChip extends StatelessWidget {
                   // border moved here becuase if it's in the main container, there are rendering artifacts on borderRadius clipping
                   child: DecoratedBox(
                     decoration: BoxDecoration(
+                      color: Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                        width: 1,
+                        color: isSelected
+                            ? context.theme.colorScheme.secondary
+                            : context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        width: isSelected ? 2 : 1,
                       ),
                     ),
                   ),
@@ -1202,7 +1205,9 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
               failed = false;
               failedMsg = null;
               suggestedTags = data;
-              setState(() {});
+              if (mounted) {
+                setState(() {});
+              }
 
               for (final tag in suggestedTags.where((t) => !t.type.isNone)) {
                 unawaited(tagHandler.addTagsWithType([tag.tag], tag.type));
@@ -1482,7 +1487,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
             preferredSize: Size.fromHeight(keyboardActionsHeight),
             child: KeyboardVisibilityBuilder(
               builder: (context, isKbVisible) {
-                final buttonStyle = Theme.of(context).elevatedButtonTheme.style?.copyWith(
+                final buttonStyle = context.theme.elevatedButtonTheme.style?.copyWith(
                   fixedSize: WidgetStateProperty.all<Size>(
                     Size(keyboardActionsHeight, keyboardActionsHeight),
                   ),
@@ -1499,7 +1504,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                 return Container(
                   padding: const EdgeInsets.only(top: 2, bottom: 2),
                   height: keyboardActionsHeight - 4,
-                  color: Theme.of(context).colorScheme.surface,
+                  color: context.theme.colorScheme.surface,
                   child: Row(
                     children: [
                       const SizedBox(width: 16),
@@ -1543,7 +1548,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                               height: 3,
                               child: DecoratedBox(
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.onSecondary,
+                                  color: context.theme.colorScheme.onSecondary,
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
@@ -1572,7 +1577,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                           padding: EdgeInsets.only(bottom: isKbVisible ? 0 : 20),
                           child: Icon(
                             Icons.paste,
-                            color: Theme.of(context).colorScheme.onSecondary,
+                            color: context.theme.colorScheme.onSecondary,
                           ),
                         ),
                       ),
@@ -1584,7 +1589,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                           padding: EdgeInsets.only(bottom: isKbVisible ? 0 : 20),
                           child: Icon(
                             Icons.keyboard_hide,
-                            color: Theme.of(context).colorScheme.onSecondary,
+                            color: context.theme.colorScheme.onSecondary,
                           ),
                         ),
                       ),
@@ -1604,7 +1609,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                               padding: EdgeInsets.only(bottom: isKbVisible ? 0 : 20),
                               child: Icon(
                                 suggestionTextControllerRawInput.isEmpty ? Icons.search : Icons.add_rounded,
-                                color: Theme.of(context).colorScheme.onSecondary,
+                                color: context.theme.colorScheme.onSecondary,
                               ),
                             ),
                           );
@@ -1649,7 +1654,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                   child: RefreshIndicator(
                     triggerMode: RefreshIndicatorTriggerMode.anywhere,
                     strokeWidth: 4,
-                    color: Theme.of(context).colorScheme.secondary,
+                    color: context.theme.colorScheme.secondary,
                     // edgeOffset: MediaQuery.paddingOf(context).top,
                     onRefresh: runSearch,
                     child: FadingEdgeScrollView.fromScrollView(
@@ -1686,7 +1691,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                                           Expanded(
                                             child: Text(
                                               'Failed to load suggestions, tap to retry${failedMsg?.isNotEmpty == true ? '\n\n[$failedMsg]' : ''}',
-                                              style: Theme.of(context).textTheme.bodyLarge,
+                                              style: context.theme.textTheme.bodyLarge,
                                             ),
                                           ),
                                         ],
@@ -1719,7 +1724,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                                       searchHandler.currentBooruHandler.hasTagSuggestions
                                           ? 'No suggestions found'
                                           : 'Tag suggestions are not available for this booru',
-                                      style: Theme.of(context).textTheme.bodyLarge,
+                                      style: context.theme.textTheme.bodyLarge,
                                     ),
                                   ],
                                 ),
@@ -1768,7 +1773,7 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                                             if (tag.hasDescription)
                                               Text(
                                                 tag.description!,
-                                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                style: context.theme.textTheme.bodySmall?.copyWith(
                                                   color: Theme.of(
                                                     context,
                                                   ).colorScheme.onSurface.withValues(alpha: 0.66),
@@ -1784,8 +1789,8 @@ class _SearchQueryEditorPageState extends State<SearchQueryEditorPage> {
                                           child: Text(
                                             // TODO locale
                                             NumberFormat.compact(locale: 'en').format(tag.count),
-                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
+                                            style: context.theme.textTheme.bodySmall?.copyWith(
+                                              color: context.theme.colorScheme.onSurface.withValues(alpha: 0.66),
                                               height: 1,
                                             ),
                                           ),
@@ -1970,11 +1975,11 @@ class TagSuggestionText extends StatelessWidget {
     final tagHandler = TagHandler.instance;
 
     Color tagColor = !tag.type.isNone ? tag.type.getColour() : tagHandler.getTag(tag.tag).getColour();
-    if (tagColor == Colors.transparent) tagColor = Theme.of(context).colorScheme.onSurface;
+    if (tagColor == Colors.transparent) tagColor = context.theme.colorScheme.onSurface;
 
     //
 
-    final style = Theme.of(context).textTheme.bodyLarge?.copyWith(
+    final style = context.theme.textTheme.bodyLarge?.copyWith(
       color: tagColor,
       fontWeight: FontWeight.w400,
       height: 1,
@@ -2082,13 +2087,13 @@ class AddMetatagBottomSheet extends StatelessWidget {
         children: [
           Text(
             'Metatags',
-            style: Theme.of(context).textTheme.titleLarge,
+            style: context.theme.textTheme.titleLarge,
           ),
           const SizedBox(width: 12),
           Text(
             metaTags.length.toString(),
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: context.theme.textTheme.titleSmall?.copyWith(
+              color: context.theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -2105,7 +2110,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: Theme.of(context).colorScheme.surfaceContainer,
+              color: context.theme.colorScheme.surfaceContainer,
             ),
             child: Column(
               children: [
@@ -2115,7 +2120,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       'Free metatags',
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: context.theme.textTheme.bodyMedium,
                     ),
                   ],
                 ),
@@ -2172,12 +2177,12 @@ class AddMetatagBottomSheet extends StatelessWidget {
                                     tag.name,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context).textTheme.bodyLarge,
+                                    style: context.theme.textTheme.bodyLarge,
                                   ),
                                   Text(
                                     tag.keyName,
-                                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.66),
+                                    style: context.theme.textTheme.bodySmall?.copyWith(
+                                      color: context.theme.colorScheme.onSurface.withValues(alpha: 0.66),
                                     ),
                                   ),
                                 ],
@@ -2188,13 +2193,13 @@ class AddMetatagBottomSheet extends StatelessWidget {
                                 margin: const EdgeInsets.only(left: 8),
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.surfaceContainer.withValues(alpha: 0.66),
+                                  color: context.theme.colorScheme.surfaceContainer.withValues(alpha: 0.66),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   'Free',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
+                                  style: context.theme.textTheme.bodySmall?.copyWith(
+                                    color: context.theme.colorScheme.primary,
                                   ),
                                 ),
                               ),
@@ -2336,7 +2341,7 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
                       const SizedBox(width: 8),
                       Text(
                         'Popular',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                        style: context.theme.textTheme.bodyLarge,
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -2372,7 +2377,7 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
                       return Container(
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
+                          color: context.theme.colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Placeholder(fallbackWidth: 150),
@@ -2409,7 +2414,7 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
                       Expanded(
                         child: Text(
                           'Favourties',
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: context.theme.textTheme.bodyLarge,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -2424,7 +2429,7 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
                             children: [
                               Text(
                                 '[All]',
-                                style: Theme.of(context).textTheme.bodySmall,
+                                style: context.theme.textTheme.bodySmall,
                               ),
                               const SizedBox(width: 4),
                               const Icon(
@@ -2458,7 +2463,7 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
                       return Container(
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
+                          color: context.theme.colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Placeholder(fallbackWidth: 150),
@@ -2516,20 +2521,20 @@ class _SingleDatePickerBottomSheetState extends State<SingleDatePickerBottomShee
     return SettingsBottomSheet(
       title: Text(
         'Select date',
-        style: Theme.of(context).textTheme.titleLarge,
+        style: context.theme.textTheme.titleLarge,
       ),
       contentItems: [
         const SizedBox(height: 16),
         Text(
           DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(date.first),
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: context.theme.textTheme.bodyLarge,
         ),
         CalendarDatePicker2(
           config: CalendarDatePicker2Config(
             calendarType: CalendarDatePicker2Type.single,
             firstDate: DateTime(2000),
             lastDate: DateTime.now(),
-            selectedDayHighlightColor: Theme.of(context).colorScheme.secondary,
+            selectedDayHighlightColor: context.theme.colorScheme.secondary,
           ),
           value: date,
           onValueChanged: (value) => setState(() => date = value),
@@ -2595,7 +2600,7 @@ class _RangeDatePickerBottomSheetState extends State<RangeDatePickerBottomSheet>
     return SettingsBottomSheet(
       title: Text(
         'Select dates range',
-        style: Theme.of(context).textTheme.titleLarge,
+        style: context.theme.textTheme.titleLarge,
       ),
       contentItems: [
         const SizedBox(height: 16),
@@ -2604,14 +2609,14 @@ class _RangeDatePickerBottomSheetState extends State<RangeDatePickerBottomSheet>
           DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(range.first) +
               ' - ' +
               DateFormat(widget.dateFormat ?? 'yyyy-MM-dd').format(range.last),
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: context.theme.textTheme.bodyLarge,
         ),
         CalendarDatePicker2(
           config: CalendarDatePicker2Config(
             calendarType: CalendarDatePicker2Type.range,
             firstDate: DateTime(2000),
             lastDate: DateTime.now(),
-            selectedDayHighlightColor: Theme.of(context).colorScheme.secondary,
+            selectedDayHighlightColor: context.theme.colorScheme.secondary,
           ),
           value: range,
           onValueChanged: (value) => setState(() => range = value),
@@ -2661,7 +2666,9 @@ class _HistoryBlockState extends State<HistoryBlock> {
     setState(() {});
     history = await settingsHandler.dbHandler.getLatestSearchHistory();
     loading = false;
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> showHistoryEntryActions(Widget row, HistoryItem entry, Booru? booru) async {
@@ -2785,7 +2792,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                 Expanded(
                   child: Text(
                     'History',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: context.theme.textTheme.bodyLarge,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -2848,7 +2855,7 @@ class _HistoryBlockState extends State<HistoryBlock> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainer,
+                          color: context.theme.colorScheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Row(
@@ -2959,7 +2966,7 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
                 Expanded(
                   child: Text(
                     'Metatags',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: context.theme.textTheme.bodyLarge,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -3014,11 +3021,11 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
                     avatar: switch (tag.type) {
                       MetaTagType.date => Icon(
                         Icons.calendar_month_rounded,
-                        color: Theme.of(context).colorScheme.onSurface,
+                        color: context.theme.colorScheme.onSurface,
                       ),
                       MetaTagType.sort => Icon(
                         Icons.sort_rounded,
-                        color: Theme.of(context).colorScheme.onSurface,
+                        color: context.theme.colorScheme.onSurface,
                       ),
                       _ => null,
                     },

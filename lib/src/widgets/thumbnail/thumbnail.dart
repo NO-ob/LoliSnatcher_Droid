@@ -70,6 +70,8 @@ class _ThumbnailState extends State<Thumbnail> {
   ImageStreamListener? mainImageListener, extraImageListener;
   ImageStream? mainImageStream, extraImageStream;
 
+  bool isBlurred = true;
+
   @override
   void initState() {
     super.initState();
@@ -464,23 +466,20 @@ class _ThumbnailState extends State<Thumbnail> {
                     child: child,
                   );
                 },
-                child: AnimatedSwitcher(
-                  duration: Duration(milliseconds: widget.isStandalone ? 100 : 0),
-                  child: ImageFiltered(
-                    enabled: settingsHandler.blurImages || widget.item.isHated,
-                    imageFilter: ImageFilter.blur(
-                      sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                      sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                      tileMode: TileMode.decal,
-                    ),
-                    child: ValueListenableBuilder(
-                      valueListenable: extraProvider,
-                      builder: (context, extraProvider, _) {
-                        if (extraProvider == null) {
-                          return const SizedBox.shrink();
-                        }
+                child: ImageFiltered(
+                  enabled: settingsHandler.blurImages || widget.item.isHated,
+                  imageFilter: ImageFilter.blur(
+                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                    tileMode: TileMode.decal,
+                  ),
+                  child: ValueListenableBuilder(
+                    valueListenable: extraProvider,
+                    builder: (context, extraProvider, _) {
+                      Widget child = const SizedBox.shrink();
 
-                        return Image(
+                      if (extraProvider != null) {
+                        child = Image(
                           image: extraProvider,
                           fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                           isAntiAlias: true,
@@ -489,14 +488,23 @@ class _ThumbnailState extends State<Thumbnail> {
                           height: double.infinity,
                           errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                             if (widget.isStandalone) {
-                              return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withValues(alpha: 0.5));
+                              return Icon(
+                                Icons.broken_image,
+                                size: 30,
+                                color: Colors.yellow.withValues(alpha: 0.5),
+                              );
                             } else {
                               return const SizedBox.shrink();
                             }
                           },
                         );
-                      },
-                    ),
+                      }
+
+                      return AnimatedSwitcher(
+                        duration: Duration(milliseconds: widget.isStandalone ? 100 : 0),
+                        child: child,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -511,10 +519,13 @@ class _ThumbnailState extends State<Thumbnail> {
                   child: child,
                 );
               },
-              child: AnimatedSwitcher(
-                duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
+              child: GestureDetector(
+                onTap: (widget.item.isHated && !settingsHandler.shitDevice && widget.isStandalone)
+                    ? () => setState(() => isBlurred = !isBlurred)
+                    : null,
                 child: ImageFiltered(
-                  enabled: settingsHandler.blurImages || (widget.item.isHated && !settingsHandler.shitDevice),
+                  enabled:
+                      isBlurred && (settingsHandler.blurImages || (widget.item.isHated && !settingsHandler.shitDevice)),
                   imageFilter: ImageFilter.blur(
                     sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
                     sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
@@ -523,24 +534,33 @@ class _ThumbnailState extends State<Thumbnail> {
                   child: ValueListenableBuilder(
                     valueListenable: mainProvider,
                     builder: (context, mainProvider, _) {
-                      if (mainProvider == null) {
-                        return const SizedBox.shrink();
+                      Widget child = const SizedBox.shrink();
+
+                      if (mainProvider != null) {
+                        child = Image(
+                          image: mainProvider,
+                          fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+                          isAntiAlias: true,
+                          filterQuality: FilterQuality.medium,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                            if (widget.isStandalone) {
+                              return Icon(
+                                Icons.broken_image,
+                                size: 30,
+                                color: Colors.white.withValues(alpha: 0.5),
+                              );
+                            } else {
+                              return const SizedBox.shrink();
+                            }
+                          },
+                        );
                       }
 
-                      return Image(
-                        image: mainProvider,
-                        fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
-                        isAntiAlias: true,
-                        filterQuality: FilterQuality.medium,
-                        width: double.infinity,
-                        height: double.infinity,
-                        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                          if (widget.isStandalone) {
-                            return Icon(Icons.broken_image, size: 30, color: Colors.white.withValues(alpha: 0.5));
-                          } else {
-                            return const SizedBox.shrink();
-                          }
-                        },
+                      return AnimatedSwitcher(
+                        duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
+                        child: child,
                       );
                     },
                   ),
