@@ -40,22 +40,19 @@ Small release with quality of life changes and fixes with preparations for a big
 
 -------------------
 
-Release - 2.4.5+5205 (??-12-25):
+Release - 2.4.5+5206 (17-02-26):
 
 New features:
-- 
-
+- Image reverse search (Yandex, Google, SauceNao, ImgOps)
 
 Changes:
-- 
+- Update chrome useragent
+- Cap video playback fast forward speed to 4, down from 6
 
 
 Booru changes/fixes:
-- 
+- Fix for gelbooru image loading
 
-
-Fixes:
-- 
 ''',
   );
 }
