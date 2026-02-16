@@ -152,14 +152,11 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   /// en: 'Go to settings'
   String get goToSettings => TranslationOverrides.string(_root.$meta, 'goToSettings', {}) ?? 'Go to settings';
 
-  /// en: 'Are you sure?'
-  String get areYouSure => TranslationOverrides.string(_root.$meta, 'areYouSure', {}) ?? 'Are you sure?';
-
   /// en: 'This may take some time...'
   String get thisMayTakeSomeTime => TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? 'This may take some time...';
 
-  /// en: 'Do you want to exit the app?'
-  String get doYouWantToExitApp => TranslationOverrides.string(_root.$meta, 'doYouWantToExitApp', {}) ?? 'Do you want to exit the app?';
+  /// en: 'Exit the app?'
+  String get exitTheAppQuestion => TranslationOverrides.string(_root.$meta, 'exitTheAppQuestion', {}) ?? 'Exit the app?';
 
   /// en: 'Close the app'
   String get closeTheApp => TranslationOverrides.string(_root.$meta, 'closeTheApp', {}) ?? 'Close the app';
@@ -4921,9 +4918,8 @@ extension on Translations {
           'copyErrorText' => TranslationOverrides.string(_root.$meta, 'copyErrorText', {}) ?? 'Copy error',
           'booru' => TranslationOverrides.string(_root.$meta, 'booru', {}) ?? 'Booru',
           'goToSettings' => TranslationOverrides.string(_root.$meta, 'goToSettings', {}) ?? 'Go to settings',
-          'areYouSure' => TranslationOverrides.string(_root.$meta, 'areYouSure', {}) ?? 'Are you sure?',
           'thisMayTakeSomeTime' => TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? 'This may take some time...',
-          'doYouWantToExitApp' => TranslationOverrides.string(_root.$meta, 'doYouWantToExitApp', {}) ?? 'Do you want to exit the app?',
+          'exitTheAppQuestion' => TranslationOverrides.string(_root.$meta, 'exitTheAppQuestion', {}) ?? 'Exit the app?',
           'closeTheApp' => TranslationOverrides.string(_root.$meta, 'closeTheApp', {}) ?? 'Close the app',
           'invalidUrl' => TranslationOverrides.string(_root.$meta, 'invalidUrl', {}) ?? 'Invalid URL!',
           'clipboardIsEmpty' => TranslationOverrides.string(_root.$meta, 'clipboardIsEmpty', {}) ?? 'Clipboard is empty!',
@@ -5799,12 +5795,12 @@ extension on Translations {
           'settings.video.cacheModes.streamCacheMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamCacheMode', {}) ??
                 '- Stream+Cache - Mix of both, but currently leads to double download',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '[Note]: Videos will cache only if \'Cache Media\' is enabled.',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
@@ -6718,10 +6714,10 @@ extension on Translations {
           'desktopHome.save' => TranslationOverrides.string(_root.$meta, 'desktopHome.save', {}) ?? 'Save',
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? 'No items selected',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'No items',
+          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'No item selected',
           _ => null,
         } ??
         switch (path) {
-          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'No item selected',
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Close',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'No booru configs found',

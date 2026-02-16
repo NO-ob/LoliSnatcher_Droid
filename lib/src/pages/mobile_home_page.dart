@@ -66,10 +66,7 @@ class _MobileHomeState extends State<MobileHome> {
       context: context,
       builder: (context) {
         return SettingsDialog(
-          title: Text(context.loc.areYouSure),
-          contentItems: [
-            Text(context.loc.doYouWantToExitApp),
-          ],
+          title: Text(context.loc.exitTheAppQuestion),
           actionButtons: [
             ElevatedButton.icon(
               label: Text(context.loc.no),

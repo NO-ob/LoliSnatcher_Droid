@@ -468,10 +468,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return SettingsDialog(
-                          title: Text(context.loc.areYouSure),
-                          contentItems: [
-                            Text(context.loc.settings.database.deleteDatabaseConfirm),
-                          ],
+                          title: Text(context.loc.settings.database.deleteDatabaseConfirm),
                           actionButtons: [
                             const CancelButton(withIcon: true),
                             ElevatedButton.icon(
@@ -512,10 +509,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return SettingsDialog(
-                          title: Text(context.loc.areYouSure),
-                          contentItems: [
-                            Text(context.loc.settings.database.clearAllSnatchedConfirm),
-                          ],
+                          title: Text(context.loc.settings.database.clearAllSnatchedConfirm),
                           actionButtons: [
                             const CancelButton(withIcon: true),
                             ElevatedButton.icon(
@@ -566,10 +560,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return SettingsDialog(
-                          title: Text(context.loc.areYouSure),
-                          contentItems: [
-                            Text(context.loc.settings.database.clearAllFavouritedConfirm),
-                          ],
+                          title: Text(context.loc.settings.database.clearAllFavouritedConfirm),
                           actionButtons: [
                             const CancelButton(withIcon: true),
                             ElevatedButton.icon(
@@ -620,10 +611,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return SettingsDialog(
-                          title: Text(context.loc.areYouSure),
-                          contentItems: [
-                            Text(context.loc.settings.database.clearSearchHistoryConfirm),
-                          ],
+                          title: Text(context.loc.settings.database.clearSearchHistoryConfirm),
                           actionButtons: [
                             const CancelButton(withIcon: true),
                             ElevatedButton.icon(

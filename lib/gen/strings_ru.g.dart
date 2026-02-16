@@ -116,11 +116,9 @@ class TranslationsRu extends Translations with BaseTranslations<AppLocale, Trans
   @override
   String get goToSettings => TranslationOverrides.string(_root.$meta, 'goToSettings', {}) ?? 'В настройки';
   @override
-  String get areYouSure => TranslationOverrides.string(_root.$meta, 'areYouSure', {}) ?? 'Ты уверен?';
-  @override
   String get thisMayTakeSomeTime => TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? 'Это может занять некоторое время...';
   @override
-  String get doYouWantToExitApp => TranslationOverrides.string(_root.$meta, 'doYouWantToExitApp', {}) ?? 'Ты хочешь выйти из приложения?';
+  String get exitTheAppQuestion => TranslationOverrides.string(_root.$meta, 'exitTheAppQuestion', {}) ?? 'Выйти из приложения?';
   @override
   String get closeTheApp => TranslationOverrides.string(_root.$meta, 'closeTheApp', {}) ?? 'Закрыть приложение';
   @override
@@ -3932,9 +3930,8 @@ extension on TranslationsRu {
           'copyErrorText' => TranslationOverrides.string(_root.$meta, 'copyErrorText', {}) ?? 'Скопировать ошибку',
           'booru' => TranslationOverrides.string(_root.$meta, 'booru', {}) ?? 'Сайт',
           'goToSettings' => TranslationOverrides.string(_root.$meta, 'goToSettings', {}) ?? 'В настройки',
-          'areYouSure' => TranslationOverrides.string(_root.$meta, 'areYouSure', {}) ?? 'Ты уверен?',
           'thisMayTakeSomeTime' => TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? 'Это может занять некоторое время...',
-          'doYouWantToExitApp' => TranslationOverrides.string(_root.$meta, 'doYouWantToExitApp', {}) ?? 'Ты хочешь выйти из приложения?',
+          'exitTheAppQuestion' => TranslationOverrides.string(_root.$meta, 'exitTheAppQuestion', {}) ?? 'Выйти из приложения?',
           'closeTheApp' => TranslationOverrides.string(_root.$meta, 'closeTheApp', {}) ?? 'Закрыть приложение',
           'invalidUrl' => TranslationOverrides.string(_root.$meta, 'invalidUrl', {}) ?? 'Неправильная ссылка!',
           'clipboardIsEmpty' => TranslationOverrides.string(_root.$meta, 'clipboardIsEmpty', {}) ?? 'Буфер обмена пуст!',
@@ -4846,12 +4843,12 @@ extension on TranslationsRu {
           'settings.video.cacheModes.streamCacheMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamCacheMode', {}) ??
                 '- Потоковый+Кэш - Смешанный режим, но в данный момент приводит к двойной загрузке',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '[Примечание]: Видео будут кэшироваться только если включено \'Кэшировать медиа\'.',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
@@ -5806,10 +5803,10 @@ extension on TranslationsRu {
           'desktopHome.save' => TranslationOverrides.string(_root.$meta, 'desktopHome.save', {}) ?? 'Сохранить',
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? 'Ничего не выбрано',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'Нет элементов',
+          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
           _ => null,
         } ??
         switch (path) {
-          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Закрыть',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'Конфигурации сайтов не найдены',

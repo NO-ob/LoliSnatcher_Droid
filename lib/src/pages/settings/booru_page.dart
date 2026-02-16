@@ -286,10 +286,7 @@ class _BooruPageState extends State<BooruPage> {
           context: context,
           builder: (BuildContext context) {
             return SettingsDialog(
-              title: Text(context.loc.areYouSure),
-              contentItems: [
-                Text('${booruLoc.deleteBooru}: ${selectedBooru?.name}'),
-              ],
+              title: Text('${booruLoc.deleteBooru}: ${selectedBooru?.name}?'),
               actionButtons: [
                 const CancelButton(withIcon: true),
                 ElevatedButton.icon(
