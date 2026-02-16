@@ -831,6 +831,7 @@ class _FontPickerSheetState extends State<_FontPickerSheet> {
                     child: Text(context.loc.tabs.filters.apply),
                   ),
                 ),
+                SizedBox(height: MediaQuery.paddingOf(context).bottom),
               ],
             );
           },
