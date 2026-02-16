@@ -2540,7 +2540,7 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
 
   @override
   Widget build(BuildContext context) {
-    if (!settingsHandler.dbEnabled || (allPinnedTags.isEmpty && !loading)) {
+    if (!settingsHandler.dbEnabled) {
       return const SizedBox.shrink();
     }
 
@@ -2666,17 +2666,33 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: (filteredPinnedTags.isEmpty && loading) ? 1 : filteredPinnedTags.length,
+                itemCount: filteredPinnedTags.isEmpty ? 1 : filteredPinnedTags.length,
                 itemBuilder: (BuildContext context, int index) {
                   if (filteredPinnedTags.isEmpty) {
-                    return GestureDetector(
-                      onTap: init,
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: 30,
-                        width: 30,
-                        child: const CircularProgressIndicator(),
-                      ),
+                    if (loading) {
+                      return GestureDetector(
+                        onTap: init,
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 30,
+                          width: 30,
+                          child: const CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    return Row(
+                      spacing: 8,
+                      children: [
+                        const Kaomoji(
+                          category: .indifference,
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        Text(
+                          context.loc.pinnedTags.noPinnedTagsYet,
+                          style: context.theme.textTheme.bodyLarge,
+                        ),
+                      ],
                     );
                   }
 
