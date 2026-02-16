@@ -16,6 +16,7 @@ import 'package:image/image.dart' as img;
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
@@ -600,7 +601,14 @@ class ImageViewerState extends State<ImageViewer> {
       if (descriptor.height >= kMaxTextureHeight) {
         isTilingProcessing.value = true;
 
-        final List<Uint8List> slices = await compute(
+        // Try native region decoding on Android (uses BitmapRegionDecoder)
+        List<Uint8List>? nativeSlices;
+        if (!SettingsHandler.isDesktopPlatform) {
+          nativeSlices = await ServiceHandler.sliceImage(cachePath, kMaxTextureHeight);
+        }
+
+        // Fallback: Dart isolate with JPEG encoding (desktop or if native fails)
+        final List<Uint8List> slices = nativeSlices ?? await compute(
           sliceImageOnIsolate,
           {
             'path': cachePath,
@@ -670,7 +678,7 @@ class ImageViewerState extends State<ImageViewer> {
 
       final img.Image slice = img.copyCrop(original, x: 0, y: y, width: original.width, height: currentHeight);
 
-      chunks.add(img.encodePng(slice));
+      chunks.add(Uint8List.fromList(img.encodeJpg(slice, quality: 90)));
       y += currentHeight;
     }
 

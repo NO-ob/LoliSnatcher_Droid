@@ -486,6 +486,21 @@ class ServiceHandler {
     return thumbnail;
   }
 
+  static Future<List<Uint8List>?> sliceImage(String path, int sliceHeight, {int quality = 90}) async {
+    if (!Platform.isAndroid) return null;
+    try {
+      final List<dynamic>? result = await platform.invokeMethod('sliceImage', {
+        'path': path,
+        'sliceHeight': sliceHeight,
+        'quality': quality,
+      });
+      return result?.map((e) => e as Uint8List).toList();
+    } catch (e) {
+      log(e);
+      return null;
+    }
+  }
+
   static Future<String?> writeImage(
     dynamic imageData,
     String fileName,

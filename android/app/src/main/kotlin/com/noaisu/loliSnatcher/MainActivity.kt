@@ -9,6 +9,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.BitmapRegionDecoder
+import android.graphics.Rect
 import android.media.MediaMetadataRetriever
 import android.media.MediaScannerConnection
 import android.net.Uri
@@ -149,6 +152,49 @@ class MainActivity: FlutterFragmentActivity() {
                             result.success(byteArray)
                         } else {
                             result.error("INVALID_ARGUMENT", "videoURL is null", null)
+                        }
+                    }
+                    "sliceImage" -> {
+                        val path = call.argument<String>("path")
+                        val sliceHeight = call.argument<Int>("sliceHeight")
+                        val quality = call.argument<Int>("quality") ?: 90
+                        if (path != null && sliceHeight != null) {
+                            Executors.newSingleThreadExecutor().execute {
+                                try {
+                                    val decoder = BitmapRegionDecoder.newInstance(path, false)
+                                    if (decoder == null) {
+                                        runOnUiThread { result.error("DECODE_ERROR", "Failed to create BitmapRegionDecoder", null) }
+                                        return@execute
+                                    }
+                                    val width = decoder.width
+                                    val height = decoder.height
+                                    val options = BitmapFactory.Options().apply {
+                                        inPreferredConfig = Bitmap.Config.ARGB_8888
+                                    }
+
+                                    val slices = mutableListOf<ByteArray>()
+                                    var y = 0
+                                    while (y < height) {
+                                        val currentHeight = minOf(sliceHeight, height - y)
+                                        val rect = Rect(0, y, width, y + currentHeight)
+                                        val bitmap = decoder.decodeRegion(rect, options)
+                                        if (bitmap != null) {
+                                            val stream = ByteArrayOutputStream()
+                                            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, stream)
+                                            slices.add(stream.toByteArray())
+                                            bitmap.recycle()
+                                        }
+                                        y += sliceHeight
+                                    }
+                                    decoder.recycle()
+
+                                    runOnUiThread { result.success(slices) }
+                                } catch (e: Exception) {
+                                    runOnUiThread { result.error("SLICE_ERROR", e.message, null) }
+                                }
+                            }
+                        } else {
+                            result.error("INVALID_ARGUMENT", "path or sliceHeight is null", null)
                         }
                     }
                     "getIP" -> result.success(getIpv4HostAddress())
