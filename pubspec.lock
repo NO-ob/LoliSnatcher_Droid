@@ -1413,10 +1413,10 @@ packages:
     dependency: transitive
     description:
       name: petitparser
-      sha256: "1a97266a94f7350d30ae522c0af07890c70b8e62c71e8e3920d1db4d23c057d1"
+      sha256: "91bd59303e9f769f108f8df05e371341b15d59e995e6806aefab827b58336675"
       url: "https://pub.dev"
     source: hosted
-    version: "7.0.1"
+    version: "7.0.2"
   photo_view:
     dependency: "direct main"
     description:
@@ -1668,10 +1668,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3
-      sha256: "45f195ae1714b333530eaa33ce8bfcdc6187cb54156fbf907eb778fe04e8c0e9"
+      sha256: b7cf6b37667f6a921281797d2499ffc60fb878b161058d422064f0ddc78f6aa6
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.5"
+    version: "3.1.6"
   stack_trace:
     dependency: transitive
     description:
@@ -1804,10 +1804,10 @@ packages:
     dependency: transitive
     description:
       name: url_launcher_ios
-      sha256: b1aca26728b7cc7a3af971bb6f601554a8ae9df2e0a006de8450ba06a17ad36a
+      sha256: "580fe5dfb51671ae38191d316e027f6b76272b026370708c2d898799750a02b0"
       url: "https://pub.dev"
     source: hosted
-    version: "6.4.0"
+    version: "6.4.1"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -1900,10 +1900,10 @@ packages:
     dependency: transitive
     description:
       name: video_player_avfoundation
-      sha256: "0d753e1d6bcc741a9c182a689434a9f22041f8a2cf5b3bd3b46ae51f057947a3"
+      sha256: f93b93a3baa12ca0ff7d00ca8bc60c1ecd96865568a01ff0c18a99853ee201a5
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.2"
+    version: "2.9.3"
   video_player_platform_interface:
     dependency: transitive
     description:
