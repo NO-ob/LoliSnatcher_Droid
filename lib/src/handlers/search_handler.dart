@@ -921,7 +921,9 @@ class SearchHandler {
               Text(context.loc.searchHandler.listOfBrokenTabs),
               Text(
                 brokenItems
-                    .map((t) => '${tabBackups.indexOf(t)}${t.booru}: ${t.tags.isEmpty ? '[empty]' : t.tags}')
+                    .map(
+                      (t) => '${tabBackups.indexOf(t)}${t.booru}: ${t.tags.isEmpty ? context.loc.tabs.empty : t.tags}',
+                    )
                     .join(', '),
               ),
             ],

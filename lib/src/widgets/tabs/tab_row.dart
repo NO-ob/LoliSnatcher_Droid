@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart' hide FirstWhereOrNullExt;
+import 'package:lolisnatcher/gen/strings.g.dart';
 
 import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -35,7 +36,7 @@ class TabRow extends StatelessWidget {
     return Obx(
       () {
         final String rawTagsStr = tab.tags;
-        final String tagText = (rawTagsStr.trim().isEmpty ? '[Empty]' : rawTagsStr).trim();
+        final String tagText = (rawTagsStr.trim().isEmpty ? context.loc.tabs.empty : rawTagsStr).trim();
 
         final bool hasItems = tab.booruHandler.filteredFetched.isNotEmpty;
 
