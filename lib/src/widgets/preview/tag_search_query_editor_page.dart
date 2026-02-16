@@ -422,6 +422,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
                                 onMetatagSelect: onMetatagSelect,
                                 onTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
                                 hideHistory: true,
+                                hidePopular: selectedBooru?.type?.isFavouritesOrDownloads == true,
                               );
                             }
 

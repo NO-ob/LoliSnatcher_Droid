@@ -777,6 +777,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                               return SuggestionsMainContent(
                                 onMetatagSelect: onMetatagSelect,
                                 onTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
+                                hidePopular: searchHandler.currentBooru.type?.isFavouritesOrDownloads == true,
                               );
                             }
 
@@ -1385,12 +1386,14 @@ class SuggestionsMainContent extends StatefulWidget {
     required this.onMetatagSelect,
     required this.onTagTap,
     this.hideHistory = false,
+    this.hidePopular = false,
     super.key,
   });
 
   final void Function(AddMetatagBottomSheetResult result) onMetatagSelect;
   final void Function(String tag) onTagTap;
   final bool hideHistory;
+  final bool hidePopular;
 
   @override
   State<SuggestionsMainContent> createState() => _SuggestionsMainContentState();
@@ -1406,11 +1409,11 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
     final bool isReverse = SettingsHandler.instance.useTopSearchbarInput;
 
     List<Widget> blocks = [
-      // blocks have a small delay to force order of requests, from fast to slow (i.e. favs popular search will lock db for too long and history and pinned won't load until it's done)
-      PopularTagsBlock(
-        onTagTap: widget.onTagTap,
-        delay: const Duration(milliseconds: 20),
-      ),
+      if (!widget.hidePopular)
+        PopularTagsBlock(
+          onTagTap: widget.onTagTap,
+          delay: const Duration(milliseconds: 20),
+        ),
       //
       if (!widget.hideHistory)
         HistoryBlock(
