@@ -69,6 +69,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
   final ValueNotifier<bool> drawerOpen = ValueNotifier(false);
 
   final ValueNotifier<bool> isActive = ValueNotifier(true);
+  final ValueNotifier<bool> drawerVisibility = ValueNotifier(true);
 
   @override
   void initState() {
@@ -159,6 +160,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
     super.dispose();
   }
 
+  void drawerVisibilityChanged(bool visible) => drawerVisibility.value = visible;
+
   void volumeCallback(String event) {
     // print('in gallery $event');
     int dir = 0;
@@ -191,7 +194,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
       },
     );
 
-    return Scaffold(
+    final scaffold = Scaffold(
       key: viewerScaffoldKey,
       extendBodyBehindAppBar: true,
       extendBody: true,
@@ -579,11 +582,30 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
       endDrawerEnableOpenDragGesture: false,
       onEndDrawerChanged: (isOpened) {
         drawerOpen.value = isOpened;
+        drawerVisibilityChanged(isOpened);
       },
       endDrawer: ItemInfoDrawer(
         tab: widget.tab,
         pageController: controller,
+        onVisibilityChanged: drawerVisibilityChanged,
       ),
+    );
+
+    //
+
+    return ValueListenableBuilder(
+      valueListenable: drawerVisibility,
+      builder: (context, drawerVisibility, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            drawerTheme: Theme.of(context).drawerTheme.copyWith(
+              scrimColor: drawerVisibility ? null : Colors.transparent,
+            ),
+          ),
+          child: child!,
+        );
+      },
+      child: scaffold,
     );
   }
 }
@@ -616,11 +638,13 @@ class ItemInfoDrawer extends StatefulWidget {
   const ItemInfoDrawer({
     required this.tab,
     required this.pageController,
+    required this.onVisibilityChanged,
     super.key,
   });
 
   final SearchTab tab;
   final PreloadPageController pageController;
+  final ValueChanged<bool> onVisibilityChanged;
 
   @override
   State<ItemInfoDrawer> createState() => _ItemInfoDrawerState();
@@ -645,6 +669,11 @@ class _ItemInfoDrawerState extends State<ItemInfoDrawer> {
   void pageListener() {
     page.value = widget.pageController.page?.round() ?? 0;
     print('page: ${page.value}/${widget.pageController.page}');
+  }
+
+  void toggleVisibility() {
+    isVisible.value = !isVisible.value;
+    widget.onVisibilityChanged(isVisible.value);
   }
 
   @override
@@ -682,11 +711,11 @@ class _ItemInfoDrawerState extends State<ItemInfoDrawer> {
           valueListenable: isVisible,
           builder: (context, _, _) {
             return GestureDetector(
-              onLongPressDown: (_) => isVisible.value = !isVisible.value,
-              onLongPressUp: () => isVisible.value = !isVisible.value,
-              onLongPressCancel: () => isVisible.value = !isVisible.value,
+              onLongPressDown: (_) => toggleVisibility(),
+              onLongPressUp: toggleVisibility,
+              onLongPressCancel: toggleVisibility,
               child: OutlinedButton(
-                onPressed: () => isVisible.value = !isVisible.value,
+                onPressed: toggleVisibility,
                 child: isVisible.value ? const Icon(Icons.remove_red_eye) : const Icon(Icons.remove_red_eye_outlined),
               ),
             );
