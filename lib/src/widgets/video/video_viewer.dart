@@ -179,7 +179,7 @@ class VideoViewerState extends State<VideoViewer> {
       stopLoading(
         reason: ViewerStopReason.tooBig,
         details:
-            '${context.loc.media.loading.fileSize(size: Tools.formatBytes(size, 2))}'
+            '${context.loc.media.loading.fileSize(size: Tools.formatBytes(size, 2))}\n'
             '${context.loc.media.loading.sizeLimit(limit: Tools.formatBytes(maxSize, 2, withTrailingZeroes: false))}',
       );
     }
