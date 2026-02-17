@@ -102,6 +102,8 @@ class ImageViewerState extends State<ImageViewer> {
   CancelToken? loadItemCancelToken;
 
   static const int kMaxTextureHeight = 4096;
+  static const int kMaxTileMemoryBudget = 512 * 1024 * 1024; // max GPU texture memory for all tiles
+  static const int kMaxPixelsHeight = 80000;
   bool isTiled = false;
   List<ImageProvider>? tiledProviders;
   ValueNotifier<bool?> isTilingProcessing = ValueNotifier(null);
@@ -576,7 +578,7 @@ class ImageViewerState extends State<ImageViewer> {
       final File file = File(cachePath);
       if (!await file.exists()) return;
 
-      final buffer = await ImmutableBuffer.fromUint8List(await file.readAsBytes());
+      final buffer = await ImmutableBuffer.fromFilePath(cachePath);
       final descriptor = await ImageDescriptor.encoded(buffer);
 
       final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
@@ -598,7 +600,18 @@ class ImageViewerState extends State<ImageViewer> {
         return;
       }
 
+      // skip tiling if image height is absurd, will use default decoding instead (will be very low quality, but it's better than OOM crash)
+      if (descriptor.height > kMaxPixelsHeight) {
+        isTilingProcessing.value = false;
+
+        descriptor.dispose();
+        buffer.dispose();
+        return;
+      }
+
       if (descriptor.height >= kMaxTextureHeight) {
+        await mainProvider.value?.evict();
+
         isTilingProcessing.value = true;
 
         // Try native region decoding on Android (uses BitmapRegionDecoder)
@@ -608,7 +621,9 @@ class ImageViewerState extends State<ImageViewer> {
         }
 
         // Fallback: Dart isolate with JPEG encoding (desktop or if native fails)
-        final List<Uint8List> slices = nativeSlices ?? await compute(
+        final List<Uint8List> slices =
+            nativeSlices ??
+            await compute(
           sliceImageOnIsolate,
           {
             'path': cachePath,
@@ -617,27 +632,22 @@ class ImageViewerState extends State<ImageViewer> {
         );
 
         if (mounted) {
-          final bool shouldResize =
-              !widget.booruItem.mediaType.value.isAnimation &&
-              !settingsHandler.disableImageScaling &&
-              !SettingsHandler.isDesktopPlatform &&
-              !widget.booruItem.isNoScale.value &&
-              (widthLimit ?? 0) > 0;
+          // Adaptive tile width: cap total GPU texture memory at kMaxTileMemoryBudget
+          // Each tile decoded as: tileWidth × kMaxTextureHeight × 4 bytes (RGBA)
+          final int adaptiveWidth = kMaxTileMemoryBudget ~/ (kMaxTextureHeight * 4 * slices.length);
+          final int tileWidth = adaptiveWidth.clamp(256, widthLimit ?? 4096);
+
           tiledProviders = slices.map((s) {
-            if (shouldResize) {
               return ResizeImage(
                     MemoryImage(s),
-                    width: widthLimit,
+                  width: tileWidth,
                     policy: ResizeImagePolicy.fit,
                     allowUpscaling: false,
                   )
                   as ImageProvider;
-            } else {
-              return MemoryImage(s);
-            }
           }).toList();
-          final double maxWidth = min(size.width, widthLimit?.toDouble() ?? size.height);
-          tiledSize = shouldResize ? Size(maxWidth, maxWidth / size.aspectRatio) : size;
+          final double maxWidth = min(size.width, tileWidth.toDouble());
+          tiledSize = Size(maxWidth, maxWidth / size.aspectRatio);
           isTiled = true;
           isTilingProcessing.value = false;
         }

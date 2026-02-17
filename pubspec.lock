@@ -77,10 +77,10 @@ packages:
     dependency: transitive
     description:
       name: archive
-      sha256: "2fde1607386ab523f7a36bb3e7edb43bd58e6edaf2ffb29d8a6d578b297fdbbd"
+      sha256: "16a4a4610a4375e2cfe0db0985bd817935219c627f8fd25a4b2a5b408ed34e64"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.7"
+    version: "4.0.8"
   args:
     dependency: transitive
     description:
