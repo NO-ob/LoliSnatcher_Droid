@@ -60,6 +60,7 @@ class ThumbnailCardBuild extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             DecoratedBox(
+              position: DecorationPosition.foreground,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
                 border: showHighlightBorder
