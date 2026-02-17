@@ -142,17 +142,12 @@ class Tools {
 
     // some boorus require referer header
     if (checkForReferer) {
-      switch (booru?.type) {
-        case BooruType.World:
-          if (uri.host.contains('rule34.xyz')) {
-            headers['Referer'] = 'https://rule34xyz.b-cdn.net';
-          } else if (uri.host.contains('rule34.world')) {
-            headers['Referer'] = 'https://rule34storage.b-cdn.net';
-          }
-          break;
-
-        default:
-          break;
+      if (uri.host.contains('rule34.xyz')) {
+        headers['Referer'] = 'https://rule34xyz.b-cdn.net';
+      } else if (uri.host.contains('rule34.world')) {
+        headers['Referer'] = 'https://rule34storage.b-cdn.net';
+      } else if (uri.host.contains('gelbooru.com')) {
+        headers['Referer'] = 'https://gelbooru.com';
       }
     }
 
