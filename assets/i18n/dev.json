@@ -863,6 +863,7 @@
             "noFiltersFound": "{No filters found}",
             "noFiltersAdded": "{No filters added}",
             "removeHidden": "{Completely hide items which match Hidden filters}",
+            "removeMarked": "{Completely hide items which match Marked filters}",
             "removeFavourited": "{Remove favourited items}",
             "removeSnatched": "{Remove snatched items}",
             "removeAI": "{Remove AI items}"

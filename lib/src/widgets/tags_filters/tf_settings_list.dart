@@ -11,6 +11,8 @@ class TagsFiltersSettingsList extends StatelessWidget {
     required this.scrollController,
     required this.filterHated,
     required this.onFilterHatedChanged,
+    required this.filterMarked,
+    required this.onFilterMarkedChanged,
     required this.filterFavourites,
     required this.onFilterFavouritesChanged,
     required this.filterSnatched,
@@ -23,6 +25,8 @@ class TagsFiltersSettingsList extends StatelessWidget {
   final ScrollController scrollController;
   final bool filterHated;
   final Function(bool) onFilterHatedChanged;
+  final bool filterMarked;
+  final Function(bool) onFilterMarkedChanged;
   final bool filterFavourites;
   final Function(bool) onFilterFavouritesChanged;
   final bool filterSnatched;
@@ -42,6 +46,15 @@ class TagsFiltersSettingsList extends StatelessWidget {
           value: filterHated,
           onChanged: onFilterHatedChanged,
           trailingIcon: const Icon(CupertinoIcons.eye_slash),
+        ),
+        SettingsToggle(
+          title: context.loc.settings.itemFilters.removeMarked,
+          value: filterMarked,
+          onChanged: onFilterMarkedChanged,
+          trailingIcon: const Icon(
+            Icons.star,
+            color: Colors.yellow,
+          ),
         ),
         SettingsToggle(
           title: context.loc.settings.itemFilters.removeFavourited,

@@ -2972,6 +2972,9 @@ class _TranslationsSettingsItemFiltersDev extends TranslationsSettingsItemFilter
   String get removeHidden =>
       TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeHidden', {}) ?? '{Completely hide items which match Hidden filters}';
   @override
+  String get removeMarked =>
+      TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeMarked', {}) ?? '{Completely hide items which match Marked filters}';
+  @override
   String get removeFavourited => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? '{Remove favourited items}';
   @override
   String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? '{Remove snatched items}';
@@ -5228,6 +5231,8 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersAdded', {}) ?? '{No filters added}',
           'settings.itemFilters.removeHidden' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeHidden', {}) ?? '{Completely hide items which match Hidden filters}',
+          'settings.itemFilters.removeMarked' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeMarked', {}) ?? '{Completely hide items which match Marked filters}',
           'settings.itemFilters.removeFavourited' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? '{Remove favourited items}',
           'settings.itemFilters.removeSnatched' =>
@@ -5701,10 +5706,10 @@ extension on TranslationsDev {
           'desktopHome.save' => TranslationOverrides.string(_root.$meta, 'desktopHome.save', {}) ?? '{Save}',
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? '{No items selected}',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? '{No items}',
-          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? '{No item selected}',
           _ => null,
         } ??
         switch (path) {
+          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? '{No item selected}',
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? '{Close}',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? '{No booru configs found}',

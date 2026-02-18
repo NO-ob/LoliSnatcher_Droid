@@ -3015,7 +3015,11 @@ class _TranslationsSettingsItemFiltersRu extends TranslationsSettingsItemFilters
   @override
   String get removeHidden =>
       TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeHidden', {}) ??
-      'Полностью скрыть элементы, подпадающие под фильтры типа Скрытые';
+      'Полностью скрыть элементы, подпадающие под Скрытые фильтры';
+  @override
+  String get removeMarked =>
+      TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeMarked', {}) ??
+      'Полностью скрыть элементы, подпадающие под Отмеченные фильтры';
   @override
   String get removeFavourited => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? 'Скрыть избранные элементы';
   @override
@@ -5319,7 +5323,10 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.noFiltersAdded', {}) ?? 'Нет фильтров',
           'settings.itemFilters.removeHidden' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeHidden', {}) ??
-                'Полностью скрыть элементы, подпадающие под фильтры типа Скрытые',
+                'Полностью скрыть элементы, подпадающие под Скрытые фильтры',
+          'settings.itemFilters.removeMarked' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeMarked', {}) ??
+                'Полностью скрыть элементы, подпадающие под Отмеченные фильтры',
           'settings.itemFilters.removeFavourited' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? 'Скрыть избранные элементы',
           'settings.itemFilters.removeSnatched' =>
@@ -5803,10 +5810,10 @@ extension on TranslationsRu {
           'desktopHome.save' => TranslationOverrides.string(_root.$meta, 'desktopHome.save', {}) ?? 'Сохранить',
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? 'Ничего не выбрано',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'Нет элементов',
-          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
           _ => null,
         } ??
         switch (path) {
+          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Закрыть',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'Конфигурации сайтов не найдены',

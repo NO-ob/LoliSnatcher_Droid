@@ -168,6 +168,7 @@ class SettingsHandler {
   bool indexesEnabled = false;
   bool searchHistoryEnabled = true;
   bool filterHated = false;
+  bool filterMarked = false;
   bool filterFavourites = false;
   bool filterSnatched = false;
   bool filterAi = false;
@@ -563,6 +564,10 @@ class SettingsHandler {
       'default': true,
     },
     'filterHated': {
+      'type': 'bool',
+      'default': false,
+    },
+    'filterMarked': {
       'type': 'bool',
       'default': false,
     },
@@ -1097,6 +1102,8 @@ class SettingsHandler {
         return searchHistoryEnabled;
       case 'filterHated':
         return filterHated;
+      case 'filterMarked':
+        return filterMarked;
       case 'filterFavourites':
         return filterFavourites;
       case 'filterSnatched':
@@ -1333,6 +1340,9 @@ class SettingsHandler {
         break;
       case 'filterHated':
         filterHated = validatedValue;
+        break;
+      case 'filterMarked':
+        filterMarked = validatedValue;
         break;
       case 'filterFavourites':
         filterFavourites = validatedValue;

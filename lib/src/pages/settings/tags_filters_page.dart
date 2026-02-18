@@ -27,7 +27,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
 
   List<String> hiddenList = [];
   List<String> markedList = [];
-  bool filterHated = false, filterFavourites = false, filterSnatched = false, filterAi = false;
+  bool filterHated = false, filterMarked = false, filterFavourites = false, filterSnatched = false, filterAi = false;
 
   @override
   void initState() {
@@ -40,6 +40,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     markedList.sort(sortTags);
 
     filterHated = settingsHandler.filterHated;
+    filterMarked = settingsHandler.filterMarked;
     filterFavourites = settingsHandler.filterFavourites;
     filterSnatched = settingsHandler.filterSnatched;
     filterAi = settingsHandler.filterAi;
@@ -65,6 +66,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     settingsHandler.hiddenTags = settingsHandler.cleanTagsList(hiddenList.map(Tag.new).toList());
     settingsHandler.markedTags = settingsHandler.cleanTagsList(markedList.map(Tag.new).toList());
     settingsHandler.filterHated = filterHated;
+    settingsHandler.filterMarked = filterMarked;
     settingsHandler.filterFavourites = filterFavourites;
     settingsHandler.filterSnatched = filterSnatched;
     settingsHandler.filterAi = filterAi;
@@ -264,6 +266,11 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
               filterHated: filterHated,
               onFilterHatedChanged: (bool newValue) {
                 filterHated = newValue;
+                updateState();
+              },
+              filterMarked: filterMarked,
+              onFilterMarkedChanged: (bool newValue) {
+                filterMarked = newValue;
                 updateState();
               },
               filterFavourites: filterFavourites,
