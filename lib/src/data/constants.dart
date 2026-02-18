@@ -38,19 +38,14 @@ class Constants {
     changelog: '''
 If you encounter any issues or have suggestions, please post them in github issues or in our discord server
 
-Small release with quality of life changes and fixes with preparations for a bigger release next year.
+Emergency release to fix gelbooru. Bigger release coming soon.
 
 -------------------
 
 Release - 2.4.5+5206 (17-02-26):
 
 New features:
-- Image reverse search (Yandex, Google, SauceNao, ImgOps)
-
-Changes:
-- Update chrome useragent
-- Cap video playback fast forward speed to 4, down from 6
-
+- Reverse image search (Yandex, Google, SauceNao, ImgOps)
 
 Booru changes/fixes:
 - Fix for gelbooru image loading
