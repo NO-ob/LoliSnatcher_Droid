@@ -50,14 +50,14 @@ dependencies:
   fvp: ^0.35.2
   get_it: ^9.2.0
   get: ^5.0.0-release-candidate-9.3.2 # ^4.7.3
-  google_fonts: ^8.0.1
+  google_fonts: ^8.0.2
   html: ^0.15.6
   http_proxy: # ^1.2.2
     git:
       url: https://github.com/NANI-SORE/http_proxy.git
       ref: 36a202ceec982d199acdcd717ce85436372f447d # master - forked to fix build errors and remove allowing all bad certs
   huge_listview: ^2.0.12
-  image: ^4.7.2
+  image: ^4.8.0
   intl: ^0.20.2
   keyboard_actions: # ^4.2.0
     git:
@@ -95,8 +95,8 @@ dependencies:
   talker: ^5.1.13
   url_launcher: ^6.3.2
   uuid: ^4.5.2
-  vibration: ^3.1.6
-  video_player: ^2.10.1
+  vibration: ^3.1.7
+  video_player: ^2.11.0
   waterfall_flow: ^3.1.1
   xml: ^6.6.1
 
