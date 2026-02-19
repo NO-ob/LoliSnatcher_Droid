@@ -645,12 +645,10 @@ class VideoViewerState extends State<VideoViewer> {
               ),
               ChewieControllerProvider(
                 controller: chewieController.value!,
-                child: TransparentPointer(
+                child: const TransparentPointer(
                   child: SafeArea(
                     top: false,
-                    child: LoliControls(
-                      useLongTapFastForward: settingsHandler.longTapFastForwardVideo,
-                    ),
+                    child: LoliControls(),
                   ),
                 ),
               ),
@@ -863,7 +861,7 @@ class VideoViewerState extends State<VideoViewer> {
                                     valueListenable: isZoomed,
                                     builder: (context, isZoomedVal, _) {
                                       return LoliControls(
-                                        useLongTapFastForward: !isZoomedVal && settingsHandler.longTapFastForwardVideo,
+                                        useLongTapFastForward: !isZoomedVal,
                                       );
                                     },
                                   ),

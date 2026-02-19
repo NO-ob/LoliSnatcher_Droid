@@ -23,7 +23,6 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
   bool autoPlay = true;
   bool startVideosMuted = false;
   bool disableVideo = false;
-  bool longTapFastForwardVideo = false;
   bool altVideoPlayerHwAccel = true;
   VideoBackendMode videoBackendMode = SettingsHandler.isDesktopPlatform
       ? VideoBackendMode.mpv
@@ -39,7 +38,6 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     autoPlay = settingsHandler.autoPlayEnabled;
     startVideosMuted = settingsHandler.startVideosMuted;
     disableVideo = settingsHandler.disableVideo;
-    longTapFastForwardVideo = settingsHandler.longTapFastForwardVideo;
     videoBackendMode = settingsHandler.videoBackendMode;
     altVideoPlayerHwAccel = settingsHandler.altVideoPlayerHwAccel;
     altVideoPlayerVO = settingsHandler.altVideoPlayerVO;
@@ -51,7 +49,6 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     settingsHandler.autoPlayEnabled = autoPlay;
     settingsHandler.startVideosMuted = startVideosMuted;
     settingsHandler.disableVideo = disableVideo;
-    settingsHandler.longTapFastForwardVideo = longTapFastForwardVideo;
     settingsHandler.videoBackendMode = SettingsHandler.isDesktopPlatform ? VideoBackendMode.mpv : videoBackendMode;
     settingsHandler.altVideoPlayerHwAccel = altVideoPlayerHwAccel;
     settingsHandler.altVideoPlayerVO = altVideoPlayerVO;
@@ -139,18 +136,6 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
               SettingsButton(
                 name: context.loc.settings.video.experimental,
                 icon: const Icon(Icons.science),
-              ),
-              SettingsToggle(
-                value: longTapFastForwardVideo,
-                onChanged: (newValue) {
-                  setState(() {
-                    longTapFastForwardVideo = newValue;
-                  });
-                },
-                title: context.loc.settings.video.longTapToFastForwardVideo,
-                subtitle: Text(
-                  context.loc.settings.video.longTapToFastForwardVideoHelp,
-                ),
               ),
               if (!SettingsHandler.isDesktopPlatform)
                 SettingsDropdown(

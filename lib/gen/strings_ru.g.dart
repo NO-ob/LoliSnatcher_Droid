@@ -2310,13 +2310,6 @@ class _TranslationsSettingsVideoRu extends TranslationsSettingsVideoEn {
   @override
   String get experimental => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '[Экспериментально]';
   @override
-  String get longTapToFastForwardVideo =>
-      TranslationOverrides.string(_root.$meta, 'settings.video.longTapToFastForwardVideo', {}) ?? 'Длительное нажатие для перемотки видео';
-  @override
-  String get longTapToFastForwardVideoHelp =>
-      TranslationOverrides.string(_root.$meta, 'settings.video.longTapToFastForwardVideoHelp', {}) ??
-      'Когда это включено, панель инструментов можно скрыть нажатием, когда элементы управления видео видны. [Экспериментально] Может стать поведением по умолчанию в будущем.';
-  @override
   String get videoPlayerBackend => TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? 'Движок видеоплеера';
   @override
   String get backendDefault => TranslationOverrides.string(_root.$meta, 'settings.video.backendDefault', {}) ?? 'По умолчанию';
@@ -4808,11 +4801,6 @@ extension on TranslationsRu {
           'settings.video.startVideosMuted' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.startVideosMuted', {}) ?? 'Запускать видео без звука',
           'settings.video.experimental' => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '[Экспериментально]',
-          'settings.video.longTapToFastForwardVideo' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.longTapToFastForwardVideo', {}) ?? 'Длительное нажатие для перемотки видео',
-          'settings.video.longTapToFastForwardVideoHelp' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.longTapToFastForwardVideoHelp', {}) ??
-                'Когда это включено, панель инструментов можно скрыть нажатием, когда элементы управления видео видны. [Экспериментально] Может стать поведением по умолчанию в будущем.',
           'settings.video.videoPlayerBackend' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? 'Движок видеоплеера',
           'settings.video.backendDefault' => TranslationOverrides.string(_root.$meta, 'settings.video.backendDefault', {}) ?? 'По умолчанию',
@@ -4850,14 +4838,14 @@ extension on TranslationsRu {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '[Примечание]: Видео будут кэшироваться только если включено \'Кэшировать медиа\'.',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
@@ -5810,11 +5798,11 @@ extension on TranslationsRu {
           'desktopHome.save' => TranslationOverrides.string(_root.$meta, 'desktopHome.save', {}) ?? 'Сохранить',
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? 'Ничего не выбрано',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'Нет элементов',
+          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
+          'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Закрыть',
           _ => null,
         } ??
         switch (path) {
-          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
-          'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Закрыть',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'Конфигурации сайтов не найдены',
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Добавить новый сайт',

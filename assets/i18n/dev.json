@@ -607,8 +607,6 @@
             "autoplayVideos": "{Autoplay videos}",
             "startVideosMuted": "{Start videos muted}",
             "experimental": "{[Experimental]}",
-            "longTapToFastForwardVideo": "{Long tap to fast forward video}",
-            "longTapToFastForwardVideoHelp": "{When this is enabled toolbar can be hidden with the tap when video controls are visible. [Experimental] May become default behavior in the future.}",
             "videoPlayerBackend": "{Video player backend}",
             "backendDefault": "{Default}",
             "backendMPV": "{MPV}",

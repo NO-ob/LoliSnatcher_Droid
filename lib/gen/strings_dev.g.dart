@@ -2283,13 +2283,6 @@ class _TranslationsSettingsVideoDev extends TranslationsSettingsVideoEn {
   @override
   String get experimental => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '{[Experimental]}';
   @override
-  String get longTapToFastForwardVideo =>
-      TranslationOverrides.string(_root.$meta, 'settings.video.longTapToFastForwardVideo', {}) ?? '{Long tap to fast forward video}';
-  @override
-  String get longTapToFastForwardVideoHelp =>
-      TranslationOverrides.string(_root.$meta, 'settings.video.longTapToFastForwardVideoHelp', {}) ??
-      '{When this is enabled toolbar can be hidden with the tap when video controls are visible. [Experimental] May become default behavior in the future.}';
-  @override
   String get videoPlayerBackend => TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? '{Video player backend}';
   @override
   String get backendDefault => TranslationOverrides.string(_root.$meta, 'settings.video.backendDefault', {}) ?? '{Default}';
@@ -4729,11 +4722,6 @@ extension on TranslationsDev {
           'settings.video.startVideosMuted' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.startVideosMuted', {}) ?? '{Start videos muted}',
           'settings.video.experimental' => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '{[Experimental]}',
-          'settings.video.longTapToFastForwardVideo' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.longTapToFastForwardVideo', {}) ?? '{Long tap to fast forward video}',
-          'settings.video.longTapToFastForwardVideoHelp' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.longTapToFastForwardVideoHelp', {}) ??
-                '{When this is enabled toolbar can be hidden with the tap when video controls are visible. [Experimental] May become default behavior in the future.}',
           'settings.video.videoPlayerBackend' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? '{Video player backend}',
           'settings.video.backendDefault' => TranslationOverrides.string(_root.$meta, 'settings.video.backendDefault', {}) ?? '{Default}',
@@ -4770,14 +4758,14 @@ extension on TranslationsDev {
           'settings.video.cacheModes.cacheNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.cacheNote', {}) ??
                 '{[Note]: Videos will cache only if \'Cache Media\' is enabled.}',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '{[Warning]: On desktop Stream mode can work incorrectly for some Boorus.}',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? '{Stream}',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? '{Cache}',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? '{Stream+Cache}',
@@ -5706,11 +5694,11 @@ extension on TranslationsDev {
           'desktopHome.save' => TranslationOverrides.string(_root.$meta, 'desktopHome.save', {}) ?? '{Save}',
           'desktopHome.noItemsSelected' => TranslationOverrides.string(_root.$meta, 'desktopHome.noItemsSelected', {}) ?? '{No items selected}',
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? '{No items}',
+          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? '{No item selected}',
+          'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? '{Close}',
           _ => null,
         } ??
         switch (path) {
-          'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? '{No item selected}',
-          'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? '{Close}',
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? '{No booru configs found}',
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? '{Add new Booru}',

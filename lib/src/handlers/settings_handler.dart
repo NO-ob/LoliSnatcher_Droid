@@ -175,7 +175,6 @@ class SettingsHandler {
   bool useVolumeButtonsForScroll = false;
   bool shitDevice = false;
   bool disableVideo = false;
-  bool longTapFastForwardVideo = false;
   bool enableDrawerMascot = false;
   bool allowSelfSignedCerts = false;
   bool wakeLockEnabled = true;
@@ -228,7 +227,6 @@ class SettingsHandler {
   List<String> deviceSpecificSettings = [
     'shitDevice',
     'disableVideo',
-    'longTapFastForwardVideo',
     'thumbnailCache',
     'mediaCache',
     'dbEnabled',
@@ -592,10 +590,6 @@ class SettingsHandler {
       'default': false,
     },
     'disableVideo': {
-      'type': 'bool',
-      'default': false,
-    },
-    'longTapFastForwardVideo': {
       'type': 'bool',
       'default': false,
     },
@@ -1120,8 +1114,6 @@ class SettingsHandler {
         return preloadSizeLimit;
       case 'disableVideo':
         return disableVideo;
-      case 'longTapFastForwardVideo':
-        return longTapFastForwardVideo;
       case 'shitDevice':
         return shitDevice;
       case 'galleryAutoScrollTime':
@@ -1367,9 +1359,6 @@ class SettingsHandler {
         break;
       case 'disableVideo':
         disableVideo = validatedValue;
-        break;
-      case 'longTapFastForwardVideo':
-        longTapFastForwardVideo = validatedValue;
         break;
       case 'shitDevice':
         shitDevice = validatedValue;
