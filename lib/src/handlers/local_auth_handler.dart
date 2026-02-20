@@ -106,6 +106,10 @@ class LocalAuthHandler {
               leadingIcon: Icons.warning_amber,
             );
             break;
+          case LocalAuthExceptionCode.authInProgress:
+            // do nothing
+            break;
+
           // TODO handle all errors
           default:
             FlashElements.showSnackbar(
