@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -578,10 +579,7 @@ class _TagViewState extends State<TagView> {
                         );
                       }
                     },
-                    title: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Text(link, overflow: TextOverflow.fade),
-                    ),
+                    title: DraggableOverflowText(link),
                   ),
                 )
                 .toList(),
@@ -622,7 +620,7 @@ class _TagViewState extends State<TagView> {
             : null,
         title: Row(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               '$title: ',
@@ -633,11 +631,22 @@ class _TagViewState extends State<TagView> {
             ),
             if (!isLink)
               Expanded(
-                child: Text(
+                child: AutoSizeText(
                   data,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14),
+                  maxLines: 1,
+                  minFontSize: 13,
+                  maxFontSize: 14,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1,
+                  ),
+                  overflowReplacement: DraggableOverflowText(
+                    data,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1,
+                    ),
+                  ),
                 ),
               ),
           ],
