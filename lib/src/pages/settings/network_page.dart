@@ -187,7 +187,7 @@ class _NetworkPageState extends State<NetworkPage> {
                   }
                   setState(() {});
                 },
-                title: context.loc.settings.network.booru,
+                title: context.loc.booru,
                 subtitle: Text(context.loc.settings.network.selectBooruToClearCookies),
               ),
               if (selectedBooruCookies.isNotEmpty) ...[

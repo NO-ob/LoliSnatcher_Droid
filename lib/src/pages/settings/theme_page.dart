@@ -47,8 +47,6 @@ class _ThemePageState extends State<ThemePage> {
   bool needToWriteMascot = false;
   int currentSdk = 0;
 
-  TranslationsSettingsThemeEn get themeLoc => context.loc.settings.theme;
-
   @override
   void initState() {
     super.initState();
@@ -189,15 +187,15 @@ class _ThemePageState extends State<ThemePage> {
       runSpacing: 5,
       wheelDiameter: 300,
       heading: Text(
-        themeLoc.selectColor,
+        context.loc.settings.theme.selectColor,
         style: Theme.of(context).textTheme.titleMedium,
       ),
       subheading: Text(
-        themeLoc.selectedColorAndShades,
+        context.loc.settings.theme.selectedColorAndShades,
         style: Theme.of(context).textTheme.titleMedium,
       ),
       wheelSubheading: Text(
-        themeLoc.selectedColorAndShades,
+        context.loc.settings.theme.selectedColorAndShades,
         style: Theme.of(context).textTheme.titleMedium,
       ),
       showMaterialName: true,
@@ -245,7 +243,7 @@ class _ThemePageState extends State<ThemePage> {
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: SettingsAppBar(title: themeLoc.title),
+        appBar: SettingsAppBar(title: context.loc.settings.theme.title),
         body: Center(
           child: ListView(
             children: [
@@ -256,7 +254,7 @@ class _ThemePageState extends State<ThemePage> {
                   themeMode = newValue!;
                   updateTheme();
                 },
-                title: themeLoc.themeMode,
+                title: context.loc.settings.theme.themeMode,
                 itemTitleBuilder: (item) => item?.locName(context) ?? '?',
                 itemLeadingBuilder: (ThemeMode? item) {
                   const double size = 40;
@@ -298,7 +296,7 @@ class _ThemePageState extends State<ThemePage> {
                     isAmoled = newValue;
                     updateTheme();
                   },
-                  title: themeLoc.blackBg,
+                  title: context.loc.settings.theme.blackBg,
                 ),
               if (currentSdk >= 31)
                 SettingsToggle(
@@ -307,8 +305,8 @@ class _ThemePageState extends State<ThemePage> {
                     useDynamicColor = newValue;
                     updateTheme();
                   },
-                  title: themeLoc.useDynamicColor,
-                  subtitle: Platform.isAndroid ? Text(themeLoc.android12PlusOnly) : null,
+                  title: context.loc.settings.theme.useDynamicColor,
+                  subtitle: Platform.isAndroid ? Text(context.loc.settings.theme.android12PlusOnly) : null,
                 ),
               if (!useDynamicColor)
                 SettingsDropdown(
@@ -318,7 +316,7 @@ class _ThemePageState extends State<ThemePage> {
                     theme = settingsHandler.map['theme']!['options'].where((e) => e.name == newValue).toList()[0];
                     updateTheme(withRestate: true);
                   },
-                  title: themeLoc.theme,
+                  title: context.loc.settings.theme.theme,
                   itemBuilder: (String? value) {
                     final ThemeItem theme = settingsHandler.map['theme']!['options'].firstWhere((e) => e.name == value);
                     final Color? primary = theme.name == 'Custom' ? primaryPickerColor : theme.primary;
@@ -388,7 +386,7 @@ class _ThemePageState extends State<ThemePage> {
                 ),
               if (theme.name == 'Custom' && !useDynamicColor)
                 SettingsButton(
-                  name: themeLoc.primaryColor,
+                  name: context.loc.settings.theme.primaryColor,
                   subtitle: Text(
                     '${ColorTools.materialNameAndCode(primaryPickerColor!)} '
                     'aka ${ColorTools.nameThatColor(primaryPickerColor!)}',
@@ -422,7 +420,7 @@ class _ThemePageState extends State<ThemePage> {
                 ),
               if (theme.name == 'Custom' && !useDynamicColor)
                 SettingsButton(
-                  name: themeLoc.secondaryColor,
+                  name: context.loc.settings.theme.secondaryColor,
                   subtitle: Text(
                     '${ColorTools.materialNameAndCode(accentPickerColor!)} '
                     'aka ${ColorTools.nameThatColor(accentPickerColor!)}',
@@ -467,9 +465,9 @@ class _ThemePageState extends State<ThemePage> {
                 ),
               const SettingsButton(name: '', enabled: false),
               SettingsButton(
-                name: themeLoc.fontFamily,
+                name: context.loc.settings.theme.fontFamily,
                 subtitle: Text(
-                  fontFamily == 'System' ? themeLoc.systemDefault : fontFamily,
+                  fontFamily == 'System' ? context.loc.settings.theme.systemDefault : fontFamily,
                   style: _getFontStyle(fontFamily),
                 ),
                 icon: const Icon(Icons.font_download),
@@ -497,13 +495,13 @@ class _ThemePageState extends State<ThemePage> {
                   enableMascot = newValue;
                   updateTheme();
                 },
-                title: themeLoc.enableDrawerMascot,
+                title: context.loc.settings.theme.enableDrawerMascot,
               ),
               SettingsButton(
-                name: themeLoc.setCustomMascot,
+                name: context.loc.settings.theme.setCustomMascot,
                 subtitle: mascotPathOverride.isEmpty
                     ? null
-                    : Text('${themeLoc.currentMascotPath}: $mascotPathOverride'),
+                    : Text('${context.loc.settings.theme.currentMascotPath}: $mascotPathOverride'),
                 icon: const Icon(Icons.image_search_outlined),
                 action: () async {
                   mascotPathOverride = await ServiceHandler.getImageSAFUri();
@@ -513,7 +511,7 @@ class _ThemePageState extends State<ThemePage> {
               ),
               if (mascotPathOverride.isNotEmpty)
                 SettingsButton(
-                  name: themeLoc.removeCustomMascot,
+                  name: context.loc.settings.theme.removeCustomMascot,
                   icon: const Icon(Icons.delete_forever),
                   action: () async {
                     final File file = File(mascotPathOverride);
@@ -694,7 +692,6 @@ class _FontPickerSheetState extends State<_FontPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final themeLoc = context.loc.settings.theme;
     final List<String> fontsToShow = showAllFonts ? [...widget.defaultFonts, ...extendedFonts] : widget.defaultFonts;
 
     return Column(
@@ -704,7 +701,7 @@ class _FontPickerSheetState extends State<_FontPickerSheet> {
           child: Row(
             children: [
               Text(
-                themeLoc.fontFamily,
+                context.loc.settings.theme.fontFamily,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const Spacer(),
@@ -731,7 +728,7 @@ class _FontPickerSheetState extends State<_FontPickerSheet> {
                 if (!showAllFonts && index == fontsToShow.length) {
                   return ListTile(
                     leading: const Icon(Icons.expand_more),
-                    title: Text(themeLoc.viewMoreFonts),
+                    title: Text(context.loc.settings.theme.viewMoreFonts),
                     onTap: () => setState(() => showAllFonts = true),
                   );
                 }
@@ -745,8 +742,8 @@ class _FontPickerSheetState extends State<_FontPickerSheet> {
 
                   return ListTile(
                     leading: isCustomSelected ? const Icon(Icons.check) : const SizedBox(width: 24),
-                    title: Text(themeLoc.customFont),
-                    subtitle: Text(themeLoc.customFontSubtitle),
+                    title: Text(context.loc.settings.theme.customFont),
+                    subtitle: Text(context.loc.settings.theme.customFontSubtitle),
                     trailing: const Icon(Icons.edit),
                     selectedTileColor: Theme.of(context).colorScheme.secondary,
                     selectedColor: Theme.of(context).colorScheme.onSecondary,
@@ -764,7 +761,7 @@ class _FontPickerSheetState extends State<_FontPickerSheet> {
                   child: ListTile(
                     leading: isSelected ? const Icon(Icons.check) : const SizedBox(width: 24),
                     title: Text(
-                      font == 'System' ? themeLoc.systemDefault : font,
+                      font == 'System' ? context.loc.settings.theme.systemDefault : font,
                       style: fontStyle?.copyWith(fontSize: 16),
                     ),
                     selectedTileColor: Theme.of(context).colorScheme.secondary,
@@ -803,7 +800,7 @@ class _FontPickerSheetState extends State<_FontPickerSheet> {
                       const Icon(Icons.check),
                       Expanded(
                         child: Text(
-                          selectedFont == 'System' ? themeLoc.systemDefault : selectedFont,
+                          selectedFont == 'System' ? context.loc.settings.theme.systemDefault : selectedFont,
                           style: fontStyle?.copyWith(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,

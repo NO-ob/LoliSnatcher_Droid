@@ -64,6 +64,8 @@ class TranslationsRu extends Translations with BaseTranslations<AppLocale, Trans
   @override
   String get cancel => TranslationOverrides.string(_root.$meta, 'cancel', {}) ?? 'Отмена';
   @override
+  String get kReturn => TranslationOverrides.string(_root.$meta, 'kReturn', {}) ?? 'Вернуться';
+  @override
   String get later => TranslationOverrides.string(_root.$meta, 'later', {}) ?? 'Позже';
   @override
   String get close => TranslationOverrides.string(_root.$meta, 'close', {}) ?? 'Закрыть';
@@ -1156,38 +1158,9 @@ class _TranslationsTagViewRu extends TranslationsTagViewEn {
   @override
   String get editTag => TranslationOverrides.string(_root.$meta, 'tagView.editTag', {}) ?? 'Редактировать тег';
   @override
-  String copiedSelected({required String type}) =>
-      TranslationOverrides.string(_root.$meta, 'tagView.copiedSelected', {'type': type}) ?? '${type}: скопировано в буфер обмена';
-  @override
-  String get selectedText => TranslationOverrides.string(_root.$meta, 'tagView.selectedText', {}) ?? 'выбранный текст';
-  @override
-  String get source => TranslationOverrides.string(_root.$meta, 'tagView.source', {}) ?? 'источник';
-  @override
   String get sourceDialogTitle => TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogTitle', {}) ?? 'Источник';
   @override
-  String get sourceDialogText1 =>
-      TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText1', {}) ??
-      'Текст в поле источника не может быть открыт как ссылка, либо потому что это не ссылка, либо потому что несколько ссылок в одной строке.';
-  @override
-  String get sourceDialogText2 =>
-      TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText2', {}) ??
-      'Ты можешь выбрать любой текст ниже длительным нажатием, затем нажми «Открыть выбранное», чтобы попытаться открыть его как ссылку:';
-  @override
-  String get noTextSelected => TranslationOverrides.string(_root.$meta, 'tagView.noTextSelected', {}) ?? '[Текст не выбран]';
-  @override
-  String copySelected({required String type}) =>
-      TranslationOverrides.string(_root.$meta, 'tagView.copySelected', {'type': type}) ?? 'Копировать ${type}';
-  @override
-  String get selected => TranslationOverrides.string(_root.$meta, 'tagView.selected', {}) ?? 'выбранное';
-  @override
-  String get all => TranslationOverrides.string(_root.$meta, 'tagView.all', {}) ?? 'всё';
-  @override
-  String openSelected({required String type}) =>
-      TranslationOverrides.string(_root.$meta, 'tagView.openSelected', {'type': type}) ?? 'Открыть ${type}';
-  @override
   String get preview => TranslationOverrides.string(_root.$meta, 'tagView.preview', {}) ?? 'Предпросмотр';
-  @override
-  String get booru => TranslationOverrides.string(_root.$meta, 'tagView.booru', {}) ?? 'Сайт';
   @override
   String get selectBooruToLoad => TranslationOverrides.string(_root.$meta, 'tagView.selectBooruToLoad', {}) ?? 'Выбери сайт для загрузки';
   @override
@@ -1210,6 +1183,8 @@ class _TranslationsTagViewRu extends TranslationsTagViewEn {
       TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreviewPage', {}) ?? 'Не удалось загрузить страницу предпросмотра';
   @override
   String get tryAgain => TranslationOverrides.string(_root.$meta, 'tagView.tryAgain', {}) ?? 'Попробовать снова';
+  @override
+  String get detectedLinks => TranslationOverrides.string(_root.$meta, 'tagView.detectedLinks', {}) ?? 'Обнаруженные ссылки:';
 }
 
 // Path: pinnedTags
@@ -1732,8 +1707,6 @@ class _TranslationsSettingsBooruRu extends TranslationsSettingsBooruEn {
   @override
   String get title => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Сайты и Поиск';
   @override
-  String get dropdown => TranslationOverrides.string(_root.$meta, 'settings.booru.dropdown', {}) ?? 'Сайт';
-  @override
   String get defaultTags => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Теги по умолчанию';
   @override
   String get itemsPerPage => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Элементов на странице';
@@ -1873,18 +1846,11 @@ class _TranslationsSettingsBooruEditorRu extends TranslationsSettingsBooruEditor
   @override
   String get booruType => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Тип конфига';
   @override
-  String booruTypeIs({required Object booruType}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruTypeIs', {'booruType': booruType}) ?? 'Сайт типа: ${booruType}';
-  @override
   String get booruFavicon => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFavicon', {}) ?? 'URL иконки';
   @override
   String get booruFaviconPlaceholder =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFaviconPlaceholder', {}) ??
       '(Автоматически заполняется, если оставить пустым)';
-  @override
-  String booruApiCredsInfo({required Object userIdTitle, required Object apiKeyTitle}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruApiCredsInfo', {'userIdTitle': userIdTitle, 'apiKeyTitle': apiKeyTitle}) ??
-      '${userIdTitle} и ${apiKeyTitle} могут быть обязательны для некоторых сайтов, но в большинстве случаев не нужны.';
   @override
   String get booruDefTags => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Теги по умолчанию';
   @override
@@ -2742,8 +2708,6 @@ class _TranslationsSettingsNetworkRu extends TranslationsSettingsNetworkEn {
   @override
   String get cookieCleaner => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Очистка куки';
   @override
-  String get booru => TranslationOverrides.string(_root.$meta, 'settings.network.booru', {}) ?? 'Сайт';
-  @override
   String get selectBooruToClearCookies =>
       TranslationOverrides.string(_root.$meta, 'settings.network.selectBooruToClearCookies', {}) ??
       'Выбери сайт для очистки куки или оставь пустым для очистки всех';
@@ -2869,11 +2833,11 @@ class _TranslationsSettingsCacheRu extends TranslationsSettingsCacheEn {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Кэш';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Скачивание и Кэш';
   @override
-  String get snatchQuality => TranslationOverrides.string(_root.$meta, 'settings.cache.snatchQuality', {}) ?? 'Качество сохраненных';
+  String get snatchQuality => TranslationOverrides.string(_root.$meta, 'settings.cache.snatchQuality', {}) ?? 'Качество скачивания';
   @override
-  String get snatchCooldown => TranslationOverrides.string(_root.$meta, 'settings.cache.snatchCooldown', {}) ?? 'Задержка между загрузками (в мс)';
+  String get snatchCooldown => TranslationOverrides.string(_root.$meta, 'settings.cache.snatchCooldown', {}) ?? 'Задержка между скачиваниями (в мс)';
   @override
   String get pleaseEnterAValidTimeout =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.pleaseEnterAValidTimeout', {}) ??
@@ -2882,19 +2846,19 @@ class _TranslationsSettingsCacheRu extends TranslationsSettingsCacheEn {
   String get biggerThan10 => TranslationOverrides.string(_root.$meta, 'settings.cache.biggerThan10', {}) ?? 'Пожалуйста, введи значение больше 10мс';
   @override
   String get showDownloadNotifications =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.showDownloadNotifications', {}) ?? 'Показывать уведомления о загрузке';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.showDownloadNotifications', {}) ?? 'Показывать уведомления о скачивании';
   @override
   String get snatchItemsOnFavouriting =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.snatchItemsOnFavouriting', {}) ?? 'Скачивать при добавлении в избранное';
   @override
   String get favouriteItemsOnSnatching =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.favouriteItemsOnSnatching', {}) ?? 'Добавлять в избранное при сохранении';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.favouriteItemsOnSnatching', {}) ?? 'Добавлять в избранное при скачивании';
   @override
   String get writeImageDataOnSave =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.writeImageDataOnSave', {}) ?? 'Записывать данные в JSON при сохранении';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.writeImageDataOnSave', {}) ?? 'Записывать данные в JSON при скачивании';
   @override
   String get requiresCustomStorageDirectory =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.requiresCustomStorageDirectory', {}) ?? 'Необходимо настроить пользовательскую папку';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.requiresCustomStorageDirectory', {}) ?? 'Необходимо назначить папку хранилища';
   @override
   String get setStorageDirectory => TranslationOverrides.string(_root.$meta, 'settings.cache.setStorageDirectory', {}) ?? 'Назначить папку хранилища';
   @override
@@ -3902,6 +3866,7 @@ extension on TranslationsRu {
           'success' => TranslationOverrides.string(_root.$meta, 'success', {}) ?? 'Успешно',
           'successExclamation' => TranslationOverrides.string(_root.$meta, 'successExclamation', {}) ?? 'Успешно!',
           'cancel' => TranslationOverrides.string(_root.$meta, 'cancel', {}) ?? 'Отмена',
+          'kReturn' => TranslationOverrides.string(_root.$meta, 'kReturn', {}) ?? 'Вернуться',
           'later' => TranslationOverrides.string(_root.$meta, 'later', {}) ?? 'Позже',
           'close' => TranslationOverrides.string(_root.$meta, 'close', {}) ?? 'Закрыть',
           'ok' => TranslationOverrides.string(_root.$meta, 'ok', {}) ?? 'OK',
@@ -4377,7 +4342,6 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
                 'Посети <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate',
           'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Сайты и Поиск',
-          'settings.booru.dropdown' => TranslationOverrides.string(_root.$meta, 'settings.booru.dropdown', {}) ?? 'Сайт',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Теги по умолчанию',
           'settings.booru.itemsPerPage' => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Элементов на странице',
           'settings.booru.itemsPerPageTip' =>
@@ -4472,20 +4436,10 @@ extension on TranslationsRu {
           'settings.booruEditor.booruUrlRequired' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrlRequired', {}) ?? 'URL обязательно!',
           'settings.booruEditor.booruType' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Тип конфига',
-          'settings.booruEditor.booruTypeIs' =>
-            ({required Object booruType}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruTypeIs', {'booruType': booruType}) ?? 'Сайт типа: ${booruType}',
           'settings.booruEditor.booruFavicon' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFavicon', {}) ?? 'URL иконки',
           'settings.booruEditor.booruFaviconPlaceholder' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFaviconPlaceholder', {}) ??
                 '(Автоматически заполняется, если оставить пустым)',
-          'settings.booruEditor.booruApiCredsInfo' =>
-            ({required Object userIdTitle, required Object apiKeyTitle}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruApiCredsInfo', {
-                  'userIdTitle': userIdTitle,
-                  'apiKeyTitle': apiKeyTitle,
-                }) ??
-                '${userIdTitle} и ${apiKeyTitle} могут быть обязательны для некоторых сайтов, но в большинстве случаев не нужны.',
           'settings.booruEditor.booruDefTags' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Теги по умолчанию',
           'settings.booruEditor.booruDefTagsPlaceholder' =>
@@ -4845,12 +4799,12 @@ extension on TranslationsRu {
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.videoBackendModeValues.normal' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'По умолчанию',
           'settings.video.videoBackendModeValues.mpv' =>
@@ -5137,7 +5091,6 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
                 'Нажми здесь, чтобы установить рекомендуемый user agent браузера (рекомендуется только когда сайты, которые ты используешь, банят небраузерные user agent):',
           'settings.network.cookieCleaner' => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Очистка куки',
-          'settings.network.booru' => TranslationOverrides.string(_root.$meta, 'settings.network.booru', {}) ?? 'Сайт',
           'settings.network.selectBooruToClearCookies' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.selectBooruToClearCookies', {}) ??
                 'Выбери сайт для очистки куки или оставь пустым для очистки всех',
@@ -5217,26 +5170,25 @@ extension on TranslationsRu {
           'settings.performance.disableVideosHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.disableVideosHelp', {}) ??
                 'Полезно на слабых устройствах, которые вылетают при попытке загрузить видео. Даёт возможность просмотреть видео во внешнем плеере или браузере.',
-          'settings.cache.title' => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Кэш',
-          'settings.cache.snatchQuality' => TranslationOverrides.string(_root.$meta, 'settings.cache.snatchQuality', {}) ?? 'Качество сохраненных',
+          'settings.cache.title' => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Скачивание и Кэш',
+          'settings.cache.snatchQuality' => TranslationOverrides.string(_root.$meta, 'settings.cache.snatchQuality', {}) ?? 'Качество скачивания',
           'settings.cache.snatchCooldown' =>
-            TranslationOverrides.string(_root.$meta, 'settings.cache.snatchCooldown', {}) ?? 'Задержка между загрузками (в мс)',
+            TranslationOverrides.string(_root.$meta, 'settings.cache.snatchCooldown', {}) ?? 'Задержка между скачиваниями (в мс)',
           'settings.cache.pleaseEnterAValidTimeout' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.pleaseEnterAValidTimeout', {}) ??
                 'Пожалуйста, введи корректное значение времени ожидания',
           'settings.cache.biggerThan10' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.biggerThan10', {}) ?? 'Пожалуйста, введи значение больше 10мс',
           'settings.cache.showDownloadNotifications' =>
-            TranslationOverrides.string(_root.$meta, 'settings.cache.showDownloadNotifications', {}) ?? 'Показывать уведомления о загрузке',
+            TranslationOverrides.string(_root.$meta, 'settings.cache.showDownloadNotifications', {}) ?? 'Показывать уведомления о скачивании',
           'settings.cache.snatchItemsOnFavouriting' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.snatchItemsOnFavouriting', {}) ?? 'Скачивать при добавлении в избранное',
           'settings.cache.favouriteItemsOnSnatching' =>
-            TranslationOverrides.string(_root.$meta, 'settings.cache.favouriteItemsOnSnatching', {}) ?? 'Добавлять в избранное при сохранении',
+            TranslationOverrides.string(_root.$meta, 'settings.cache.favouriteItemsOnSnatching', {}) ?? 'Добавлять в избранное при скачивании',
           'settings.cache.writeImageDataOnSave' =>
-            TranslationOverrides.string(_root.$meta, 'settings.cache.writeImageDataOnSave', {}) ?? 'Записывать данные в JSON при сохранении',
+            TranslationOverrides.string(_root.$meta, 'settings.cache.writeImageDataOnSave', {}) ?? 'Записывать данные в JSON при скачивании',
           'settings.cache.requiresCustomStorageDirectory' =>
-            TranslationOverrides.string(_root.$meta, 'settings.cache.requiresCustomStorageDirectory', {}) ??
-                'Необходимо настроить пользовательскую папку',
+            TranslationOverrides.string(_root.$meta, 'settings.cache.requiresCustomStorageDirectory', {}) ?? 'Необходимо назначить папку хранилища',
           'settings.cache.setStorageDirectory' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.setStorageDirectory', {}) ?? 'Назначить папку хранилища',
           'settings.cache.currentPath' =>
@@ -5673,27 +5625,8 @@ extension on TranslationsRu {
           'tagView.removeFromMarked' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? 'Убрать из Отмеченных',
           'tagView.removeFromHidden' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHidden', {}) ?? 'Убрать из Скрытых',
           'tagView.editTag' => TranslationOverrides.string(_root.$meta, 'tagView.editTag', {}) ?? 'Редактировать тег',
-          'tagView.copiedSelected' =>
-            ({required String type}) =>
-                TranslationOverrides.string(_root.$meta, 'tagView.copiedSelected', {'type': type}) ?? '${type}: скопировано в буфер обмена',
-          'tagView.selectedText' => TranslationOverrides.string(_root.$meta, 'tagView.selectedText', {}) ?? 'выбранный текст',
-          'tagView.source' => TranslationOverrides.string(_root.$meta, 'tagView.source', {}) ?? 'источник',
           'tagView.sourceDialogTitle' => TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogTitle', {}) ?? 'Источник',
-          'tagView.sourceDialogText1' =>
-            TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText1', {}) ??
-                'Текст в поле источника не может быть открыт как ссылка, либо потому что это не ссылка, либо потому что несколько ссылок в одной строке.',
-          'tagView.sourceDialogText2' =>
-            TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText2', {}) ??
-                'Ты можешь выбрать любой текст ниже длительным нажатием, затем нажми «Открыть выбранное», чтобы попытаться открыть его как ссылку:',
-          'tagView.noTextSelected' => TranslationOverrides.string(_root.$meta, 'tagView.noTextSelected', {}) ?? '[Текст не выбран]',
-          'tagView.copySelected' =>
-            ({required String type}) => TranslationOverrides.string(_root.$meta, 'tagView.copySelected', {'type': type}) ?? 'Копировать ${type}',
-          'tagView.selected' => TranslationOverrides.string(_root.$meta, 'tagView.selected', {}) ?? 'выбранное',
-          'tagView.all' => TranslationOverrides.string(_root.$meta, 'tagView.all', {}) ?? 'всё',
-          'tagView.openSelected' =>
-            ({required String type}) => TranslationOverrides.string(_root.$meta, 'tagView.openSelected', {'type': type}) ?? 'Открыть ${type}',
           'tagView.preview' => TranslationOverrides.string(_root.$meta, 'tagView.preview', {}) ?? 'Предпросмотр',
-          'tagView.booru' => TranslationOverrides.string(_root.$meta, 'tagView.booru', {}) ?? 'Сайт',
           'tagView.selectBooruToLoad' => TranslationOverrides.string(_root.$meta, 'tagView.selectBooruToLoad', {}) ?? 'Выбери сайт для загрузки',
           'tagView.previewIsLoading' => TranslationOverrides.string(_root.$meta, 'tagView.previewIsLoading', {}) ?? 'Предпросмотр загружается...',
           'tagView.failedToLoadPreview' =>
@@ -5707,6 +5640,7 @@ extension on TranslationsRu {
           'tagView.failedToLoadPreviewPage' =>
             TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreviewPage', {}) ?? 'Не удалось загрузить страницу предпросмотра',
           'tagView.tryAgain' => TranslationOverrides.string(_root.$meta, 'tagView.tryAgain', {}) ?? 'Попробовать снова',
+          'tagView.detectedLinks' => TranslationOverrides.string(_root.$meta, 'tagView.detectedLinks', {}) ?? 'Обнаруженные ссылки:',
           'pinnedTags.pinnedTags' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedTags', {}) ?? 'Закрепленные теги',
           'pinnedTags.pinTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinTag', {}) ?? 'Закрепить тег',
           'pinnedTags.unpinTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinTag', {}) ?? 'Открепить тег',
@@ -5802,9 +5736,6 @@ extension on TranslationsRu {
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'Нет элементов',
           'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Нет выбранного элемента',
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Закрыть',
-          _ => null,
-        } ??
-        switch (path) {
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'Конфигурации сайтов не найдены',
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Добавить новый сайт',
@@ -5827,6 +5758,9 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reachedLastLoadedItem', {}) ?? 'Достигнут последний загруженный элемент',
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Пауза',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Старт',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Удалить из избранного',
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
           'viewer.appBar.reloadWithScaling' =>

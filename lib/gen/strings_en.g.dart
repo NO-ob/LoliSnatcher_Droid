@@ -74,6 +74,9 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   /// en: 'Cancel'
   String get cancel => TranslationOverrides.string(_root.$meta, 'cancel', {}) ?? 'Cancel';
 
+  /// en: 'Return'
+  String get kReturn => TranslationOverrides.string(_root.$meta, 'kReturn', {}) ?? 'Return';
+
   /// en: 'Later'
   String get later => TranslationOverrides.string(_root.$meta, 'later', {}) ?? 'Later';
 
@@ -1403,49 +1406,11 @@ class TranslationsTagViewEn {
   /// en: 'Edit tag'
   String get editTag => TranslationOverrides.string(_root.$meta, 'tagView.editTag', {}) ?? 'Edit tag';
 
-  /// en: 'Copied ${type: String} to clipboard'
-  String copiedSelected({required String type}) =>
-      TranslationOverrides.string(_root.$meta, 'tagView.copiedSelected', {'type': type}) ?? 'Copied ${type} to clipboard';
-
-  /// en: 'selected text'
-  String get selectedText => TranslationOverrides.string(_root.$meta, 'tagView.selectedText', {}) ?? 'selected text';
-
-  /// en: 'source'
-  String get source => TranslationOverrides.string(_root.$meta, 'tagView.source', {}) ?? 'source';
-
   /// en: 'Source'
   String get sourceDialogTitle => TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogTitle', {}) ?? 'Source';
 
-  /// en: 'The text in source field can't be opened as a link, either because it's not a link or there are multiple URLs in a single string.'
-  String get sourceDialogText1 =>
-      TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText1', {}) ??
-      'The text in source field can\'t be opened as a link, either because it\'s not a link or there are multiple URLs in a single string.';
-
-  /// en: 'You can select any text below by long tapping it and then press «Open selected» to try opening it as a link:'
-  String get sourceDialogText2 =>
-      TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText2', {}) ??
-      'You can select any text below by long tapping it and then press «Open selected» to try opening it as a link:';
-
-  /// en: '[No text selected]'
-  String get noTextSelected => TranslationOverrides.string(_root.$meta, 'tagView.noTextSelected', {}) ?? '[No text selected]';
-
-  /// en: 'Copy ${type: String}'
-  String copySelected({required String type}) => TranslationOverrides.string(_root.$meta, 'tagView.copySelected', {'type': type}) ?? 'Copy ${type}';
-
-  /// en: 'selected'
-  String get selected => TranslationOverrides.string(_root.$meta, 'tagView.selected', {}) ?? 'selected';
-
-  /// en: 'all'
-  String get all => TranslationOverrides.string(_root.$meta, 'tagView.all', {}) ?? 'all';
-
-  /// en: 'Open ${type: String}'
-  String openSelected({required String type}) => TranslationOverrides.string(_root.$meta, 'tagView.openSelected', {'type': type}) ?? 'Open ${type}';
-
   /// en: 'Preview'
   String get preview => TranslationOverrides.string(_root.$meta, 'tagView.preview', {}) ?? 'Preview';
-
-  /// en: 'Booru'
-  String get booru => TranslationOverrides.string(_root.$meta, 'tagView.booru', {}) ?? 'Booru';
 
   /// en: 'Select a booru to load'
   String get selectBooruToLoad => TranslationOverrides.string(_root.$meta, 'tagView.selectBooruToLoad', {}) ?? 'Select a booru to load';
@@ -1477,6 +1442,9 @@ class TranslationsTagViewEn {
 
   /// en: 'Try again'
   String get tryAgain => TranslationOverrides.string(_root.$meta, 'tagView.tryAgain', {}) ?? 'Try again';
+
+  /// en: 'Detected links:'
+  String get detectedLinks => TranslationOverrides.string(_root.$meta, 'tagView.detectedLinks', {}) ?? 'Detected links:';
 }
 
 // Path: pinnedTags
@@ -2133,9 +2101,6 @@ class TranslationsSettingsBooruEn {
   /// en: 'Boorus & Search'
   String get title => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus & Search';
 
-  /// en: 'Booru'
-  String get dropdown => TranslationOverrides.string(_root.$meta, 'settings.booru.dropdown', {}) ?? 'Booru';
-
   /// en: 'Default tags'
   String get defaultTags => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Default tags';
 
@@ -2320,21 +2285,12 @@ class TranslationsSettingsBooruEditorEn {
   /// en: 'Booru Type'
   String get booruType => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru Type';
 
-  /// en: 'Booru Type is ${booruType: String}'
-  String booruTypeIs({required String booruType}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruTypeIs', {'booruType': booruType}) ?? 'Booru Type is ${booruType}';
-
   /// en: 'Favicon URL'
   String get booruFavicon => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFavicon', {}) ?? 'Favicon URL';
 
   /// en: '(Autofills if blank)'
   String get booruFaviconPlaceholder =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFaviconPlaceholder', {}) ?? '(Autofills if blank)';
-
-  /// en: '${userIdTitle: String} and ${apiKeyTitle: String} may be needed with some boorus but in most cases aren't necessary.'
-  String booruApiCredsInfo({required String userIdTitle, required String apiKeyTitle}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruApiCredsInfo', {'userIdTitle': userIdTitle, 'apiKeyTitle': apiKeyTitle}) ??
-      '${userIdTitle} and ${apiKeyTitle} may be needed with some boorus but in most cases aren\'t necessary.';
 
   /// en: 'Default tags'
   String get booruDefTags => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Default tags';
@@ -3422,9 +3378,6 @@ class TranslationsSettingsNetworkEn {
 
   /// en: 'Cookie cleaner'
   String get cookieCleaner => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Cookie cleaner';
-
-  /// en: 'Booru'
-  String get booru => TranslationOverrides.string(_root.$meta, 'settings.network.booru', {}) ?? 'Booru';
 
   /// en: 'Select a booru to clear cookies for or leave empty to clear all'
   String get selectBooruToClearCookies =>
@@ -4888,6 +4841,7 @@ extension on Translations {
           'success' => TranslationOverrides.string(_root.$meta, 'success', {}) ?? 'Success',
           'successExclamation' => TranslationOverrides.string(_root.$meta, 'successExclamation', {}) ?? 'Success!',
           'cancel' => TranslationOverrides.string(_root.$meta, 'cancel', {}) ?? 'Cancel',
+          'kReturn' => TranslationOverrides.string(_root.$meta, 'kReturn', {}) ?? 'Return',
           'later' => TranslationOverrides.string(_root.$meta, 'later', {}) ?? 'Later',
           'close' => TranslationOverrides.string(_root.$meta, 'close', {}) ?? 'Close',
           'ok' => TranslationOverrides.string(_root.$meta, 'ok', {}) ?? 'OK',
@@ -5349,7 +5303,6 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
                 'Visit <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> for details or tap on the image below to go to Weblate',
           'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus & Search',
-          'settings.booru.dropdown' => TranslationOverrides.string(_root.$meta, 'settings.booru.dropdown', {}) ?? 'Booru',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Default tags',
           'settings.booru.itemsPerPage' => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Items fetched per page',
           'settings.booru.itemsPerPageTip' =>
@@ -5445,20 +5398,9 @@ extension on Translations {
           'settings.booruEditor.booruUrlRequired' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrlRequired', {}) ?? 'Booru URL is required!',
           'settings.booruEditor.booruType' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru Type',
-          'settings.booruEditor.booruTypeIs' =>
-            ({required String booruType}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruTypeIs', {'booruType': booruType}) ??
-                'Booru Type is ${booruType}',
           'settings.booruEditor.booruFavicon' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFavicon', {}) ?? 'Favicon URL',
           'settings.booruEditor.booruFaviconPlaceholder' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFaviconPlaceholder', {}) ?? '(Autofills if blank)',
-          'settings.booruEditor.booruApiCredsInfo' =>
-            ({required String userIdTitle, required String apiKeyTitle}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruApiCredsInfo', {
-                  'userIdTitle': userIdTitle,
-                  'apiKeyTitle': apiKeyTitle,
-                }) ??
-                '${userIdTitle} and ${apiKeyTitle} may be needed with some boorus but in most cases aren\'t necessary.',
           'settings.booruEditor.booruDefTags' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Default tags',
           'settings.booruEditor.booruDefTagsPlaceholder' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTagsPlaceholder', {}) ?? 'Default search for booru',
@@ -5795,12 +5737,12 @@ extension on Translations {
                 '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Stream',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.videoBackendModeValues.normal' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Default',
           'settings.video.videoBackendModeValues.mpv' =>
@@ -6068,7 +6010,6 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
                 'Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):',
           'settings.network.cookieCleaner' => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Cookie cleaner',
-          'settings.network.booru' => TranslationOverrides.string(_root.$meta, 'settings.network.booru', {}) ?? 'Booru',
           'settings.network.selectBooruToClearCookies' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.selectBooruToClearCookies', {}) ??
                 'Select a booru to clear cookies for or leave empty to clear all',
@@ -6585,27 +6526,8 @@ extension on Translations {
           'tagView.removeFromMarked' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? 'Remove from Marked',
           'tagView.removeFromHidden' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromHidden', {}) ?? 'Remove from Hidden',
           'tagView.editTag' => TranslationOverrides.string(_root.$meta, 'tagView.editTag', {}) ?? 'Edit tag',
-          'tagView.copiedSelected' =>
-            ({required String type}) =>
-                TranslationOverrides.string(_root.$meta, 'tagView.copiedSelected', {'type': type}) ?? 'Copied ${type} to clipboard',
-          'tagView.selectedText' => TranslationOverrides.string(_root.$meta, 'tagView.selectedText', {}) ?? 'selected text',
-          'tagView.source' => TranslationOverrides.string(_root.$meta, 'tagView.source', {}) ?? 'source',
           'tagView.sourceDialogTitle' => TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogTitle', {}) ?? 'Source',
-          'tagView.sourceDialogText1' =>
-            TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText1', {}) ??
-                'The text in source field can\'t be opened as a link, either because it\'s not a link or there are multiple URLs in a single string.',
-          'tagView.sourceDialogText2' =>
-            TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogText2', {}) ??
-                'You can select any text below by long tapping it and then press «Open selected» to try opening it as a link:',
-          'tagView.noTextSelected' => TranslationOverrides.string(_root.$meta, 'tagView.noTextSelected', {}) ?? '[No text selected]',
-          'tagView.copySelected' =>
-            ({required String type}) => TranslationOverrides.string(_root.$meta, 'tagView.copySelected', {'type': type}) ?? 'Copy ${type}',
-          'tagView.selected' => TranslationOverrides.string(_root.$meta, 'tagView.selected', {}) ?? 'selected',
-          'tagView.all' => TranslationOverrides.string(_root.$meta, 'tagView.all', {}) ?? 'all',
-          'tagView.openSelected' =>
-            ({required String type}) => TranslationOverrides.string(_root.$meta, 'tagView.openSelected', {'type': type}) ?? 'Open ${type}',
           'tagView.preview' => TranslationOverrides.string(_root.$meta, 'tagView.preview', {}) ?? 'Preview',
-          'tagView.booru' => TranslationOverrides.string(_root.$meta, 'tagView.booru', {}) ?? 'Booru',
           'tagView.selectBooruToLoad' => TranslationOverrides.string(_root.$meta, 'tagView.selectBooruToLoad', {}) ?? 'Select a booru to load',
           'tagView.previewIsLoading' => TranslationOverrides.string(_root.$meta, 'tagView.previewIsLoading', {}) ?? 'Preview is loading...',
           'tagView.failedToLoadPreview' => TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreview', {}) ?? 'Failed to load preview',
@@ -6617,6 +6539,7 @@ extension on Translations {
           'tagView.failedToLoadPreviewPage' =>
             TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreviewPage', {}) ?? 'Failed to load preview page',
           'tagView.tryAgain' => TranslationOverrides.string(_root.$meta, 'tagView.tryAgain', {}) ?? 'Try again',
+          'tagView.detectedLinks' => TranslationOverrides.string(_root.$meta, 'tagView.detectedLinks', {}) ?? 'Detected links:',
           'pinnedTags.pinnedTags' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinnedTags', {}) ?? 'Pinned tags',
           'pinnedTags.pinTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinTag', {}) ?? 'Pin tag',
           'pinnedTags.unpinTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinTag', {}) ?? 'Unpin tag',
@@ -6710,9 +6633,6 @@ extension on Translations {
           'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'No items',
           'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'No item selected',
           'galleryView.close' => TranslationOverrides.string(_root.$meta, 'galleryView.close', {}) ?? 'Close',
-          _ => null,
-        } ??
-        switch (path) {
           'mediaPreviews.noBooruConfigsFound' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.noBooruConfigsFound', {}) ?? 'No booru configs found',
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Add new Booru',
@@ -6734,6 +6654,9 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reachedLastLoadedItem', {}) ?? 'Reached the Last loaded Item',
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Pause',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Start',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Unfavourite',
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
           'viewer.appBar.reloadWithScaling' =>

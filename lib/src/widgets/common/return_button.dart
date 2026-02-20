@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lolisnatcher/gen/strings.g.dart';
 
 class ReturnButton extends StatelessWidget {
   const ReturnButton({
@@ -33,7 +34,7 @@ class ReturnButton extends StatelessWidget {
           }
         },
         icon: const Icon(Icons.keyboard_return_rounded),
-        label: const Text('Return'),
+        label: Text(context.loc.kReturn),
       );
     }
 
@@ -54,7 +55,7 @@ class ReturnButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: const Text('Return'),
+      child: Text(context.loc.kReturn),
     );
   }
 }

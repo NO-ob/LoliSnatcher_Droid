@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -102,6 +104,26 @@ class CompactErrorWidget extends StatelessWidget {
               ),
             ),
           ),
+          if (Platform.isWindows || Platform.isLinux)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: TextButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(Icons.keyboard_return_rounded, size: 12, color: onErrorColor),
+                label: Text(
+                  'Return',
+                  style: TextStyle(fontSize: 10, color: onErrorColor),
+                ),
+                style: TextButton.styleFrom(
+                  backgroundColor: errorColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            ),
         ],
       ),
     );

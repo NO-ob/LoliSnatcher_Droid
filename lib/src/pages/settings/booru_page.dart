@@ -36,8 +36,6 @@ class _BooruPageState extends State<BooruPage> {
   final limitController = TextEditingController();
   Booru? selectedBooru, initPrefBooru;
 
-  TranslationsSettingsBooruEn get booruLoc => context.loc.settings.booru;
-
   @override
   void initState() {
     super.initState();
@@ -70,7 +68,7 @@ class _BooruPageState extends State<BooruPage> {
       FlashElements.showSnackbar(
         context: context,
         title: Text(
-          booruLoc.booruConfigLinkCopied,
+          context.loc.settings.booru.booruConfigLinkCopied,
           style: const TextStyle(fontSize: 20),
         ),
         leadingIcon: Icons.share,
@@ -110,7 +108,7 @@ class _BooruPageState extends State<BooruPage> {
 
   Widget addButton() {
     return SettingsButton(
-      name: booruLoc.addBooru,
+      name: context.loc.settings.booru.addBooru,
       icon: const Icon(Icons.add),
       page: () => BooruEdit(Booru('New', null, '', '', '')),
     );
@@ -127,7 +125,7 @@ class _BooruPageState extends State<BooruPage> {
           settingsHandler.sortBooruList();
         });
       },
-      title: booruLoc.addedBoorus,
+      title: context.loc.settings.booru.addedBoorus,
       trailingIcon: IconButton(
         icon: const Icon(Icons.help_outline),
         onPressed: () {
@@ -137,7 +135,7 @@ class _BooruPageState extends State<BooruPage> {
               return SettingsDialog(
                 title: Text(context.loc.booru),
                 contentItems: [
-                  Text(booruLoc.booruDropdownInfo),
+                  Text(context.loc.settings.booru.booruDropdownInfo),
                 ],
               );
             },
@@ -153,19 +151,19 @@ class _BooruPageState extends State<BooruPage> {
     }
 
     return SettingsButton(
-      name: booruLoc.shareBooru,
+      name: context.loc.settings.booru.shareBooru,
       icon: const Icon(Icons.share),
       action: () {
         showDialog(
           context: context,
           builder: (context) {
             return SettingsDialog(
-              title: Text(booruLoc.shareBooru),
+              title: Text(context.loc.settings.booru.shareBooru),
               contentItems: [
                 Text(
                   Platform.isAndroid
-                      ? booruLoc.shareBooruDialogMsgMobile(booruName: selectedBooru?.name ?? '')
-                      : booruLoc.shareBooruDialogMsgDesktop(booruName: selectedBooru?.name ?? ''),
+                      ? context.loc.settings.booru.shareBooruDialogMsgMobile(booruName: selectedBooru?.name ?? '')
+                      : context.loc.settings.booru.shareBooruDialogMsgDesktop(booruName: selectedBooru?.name ?? ''),
                 ),
               ],
               actionButtons: [
@@ -197,13 +195,13 @@ class _BooruPageState extends State<BooruPage> {
                   context: context,
                   builder: (context) {
                     return SettingsDialog(
-                      title: Text(booruLoc.booruSharing),
+                      title: Text(context.loc.settings.booru.booruSharing),
                       contentItems: [
                         // TODO more explanations about booru sharing, add screenshot, etc
                         const Text(''),
                         Padding(
                           padding: const EdgeInsets.only(bottom: 20),
-                          child: Text(booruLoc.booruSharingMsgAndroid),
+                          child: Text(context.loc.settings.booru.booruSharingMsgAndroid),
                         ),
                         ElevatedButton(
                           onPressed: ServiceHandler.openLinkDefaultsSettings,
@@ -225,7 +223,7 @@ class _BooruPageState extends State<BooruPage> {
     }
 
     return SettingsButton(
-      name: booruLoc.editBooru,
+      name: context.loc.settings.booru.editBooru,
       icon: const Icon(Icons.edit),
       // do nothing if no selected or selected "Favourites/Dowloads"
       // TODO update all tabs with old booru with a new one
@@ -242,7 +240,7 @@ class _BooruPageState extends State<BooruPage> {
     }
 
     return SettingsButton(
-      name: booruLoc.deleteBooru,
+      name: context.loc.settings.booru.deleteBooru,
       icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
       action: () {
         // do nothing if no selected or selected "Favourites/Downloads" or there are tabs with it
@@ -250,7 +248,7 @@ class _BooruPageState extends State<BooruPage> {
           FlashElements.showSnackbar(
             context: context,
             title: Text(
-              booruLoc.noBooruSelected,
+              context.loc.settings.booru.noBooruSelected,
               style: const TextStyle(fontSize: 20),
             ),
             leadingIcon: Icons.warning_amber,
@@ -268,11 +266,11 @@ class _BooruPageState extends State<BooruPage> {
           FlashElements.showSnackbar(
             context: context,
             title: Text(
-              booruLoc.cantDeleteThisBooru,
+              context.loc.settings.booru.cantDeleteThisBooru,
               style: const TextStyle(fontSize: 20),
             ),
             content: Text(
-              booruLoc.removeRelatedTabsFirst,
+              context.loc.settings.booru.removeRelatedTabsFirst,
               style: const TextStyle(fontSize: 16),
             ),
             leadingIcon: Icons.warning_amber,
@@ -286,7 +284,7 @@ class _BooruPageState extends State<BooruPage> {
           context: context,
           builder: (BuildContext context) {
             return SettingsDialog(
-              title: Text('${booruLoc.deleteBooru}: ${selectedBooru?.name}?'),
+              title: Text('${context.loc.settings.booru.deleteBooru}: ${selectedBooru?.name}?'),
               actionButtons: [
                 const CancelButton(withIcon: true),
                 ElevatedButton.icon(
@@ -309,7 +307,7 @@ class _BooruPageState extends State<BooruPage> {
                       FlashElements.showSnackbar(
                         context: context,
                         title: Text(
-                          booruLoc.booruDeleted,
+                          context.loc.settings.booru.booruDeleted,
                           style: const TextStyle(fontSize: 20),
                         ),
                         leadingIcon: Icons.delete_forever,
@@ -329,7 +327,7 @@ class _BooruPageState extends State<BooruPage> {
                           style: const TextStyle(fontSize: 20),
                         ),
                         content: Text(
-                          booruLoc.deleteBooruError,
+                          context.loc.settings.booru.deleteBooruError,
                           style: const TextStyle(fontSize: 16),
                         ),
                         leadingIcon: Icons.warning_amber,
@@ -341,7 +339,7 @@ class _BooruPageState extends State<BooruPage> {
                     setState(() {});
                     Navigator.of(context).pop(true);
                   },
-                  label: Text(booruLoc.deleteBooru),
+                  label: Text(context.loc.settings.booru.deleteBooru),
                   icon: const Icon(Icons.delete_forever),
                 ),
               ],
@@ -368,7 +366,7 @@ class _BooruPageState extends State<BooruPage> {
 
   Widget addFromClipboardButton() {
     return SettingsButton(
-      name: booruLoc.importBooru,
+      name: context.loc.settings.booru.importBooru,
       icon: const Icon(Icons.paste),
       action: () async {
         final ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
@@ -401,7 +399,7 @@ class _BooruPageState extends State<BooruPage> {
                 style: const TextStyle(fontSize: 20),
               ),
               content: Text(
-                booruLoc.onlyLSURLsSupported,
+                context.loc.settings.booru.onlyLSURLsSupported,
                 style: const TextStyle(fontSize: 16),
               ),
               leadingIcon: Icons.warning_amber,
@@ -432,14 +430,14 @@ class _BooruPageState extends State<BooruPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: SettingsAppBar(
-          title: booruLoc.title,
+          title: context.loc.settings.booru.title,
         ),
         body: Center(
           child: ListView(
             children: [
               TagSearchBox(
                 controller: defaultTagsController,
-                title: booruLoc.defaultTags,
+                title: context.loc.settings.booru.defaultTags,
                 hintText: context.loc.snatcher.enterTags,
                 booru: selectedBooru,
                 allowMultipleTags: true,
@@ -449,9 +447,9 @@ class _BooruPageState extends State<BooruPage> {
               ),
               SettingsTextInput(
                 controller: limitController,
-                title: booruLoc.itemsPerPage,
-                hintText: '10-100',
-                subtitle: Text(booruLoc.itemsPerPageTip),
+                title: context.loc.settings.booru.itemsPerPage,
+                hintText: context.loc.settings.booru.itemsPerPagePlaceholder,
+                subtitle: Text(context.loc.settings.booru.itemsPerPageTip),
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['limit']!['default']!.toString(),
@@ -503,15 +501,13 @@ Future<bool?> askToChangePrefBooru(
     return showDialog<bool>(
       context: context,
       builder: (context) {
-        final booruLoc = context.loc.settings.booru;
-
         return SettingsDialog(
-          title: Text(booruLoc.changeDefaultBooru),
+          title: Text(context.loc.settings.booru.changeDefaultBooru),
           contentItems: [
             RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(text: booruLoc.changeTo),
+                  TextSpan(text: context.loc.settings.booru.changeTo),
                   TextSpan(
                     text: selectedBooru.name,
                     style: const TextStyle(fontWeight: FontWeight.bold),
@@ -526,7 +522,7 @@ Future<bool?> askToChangePrefBooru(
             RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(text: booruLoc.keepCurrentBooru),
+                  TextSpan(text: context.loc.settings.booru.keepCurrentBooru),
                   TextSpan(
                     text: initBooru.name,
                     style: const TextStyle(fontWeight: FontWeight.bold),
@@ -538,7 +534,7 @@ Future<bool?> askToChangePrefBooru(
             RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(text: booruLoc.changeToNewBooru),
+                  TextSpan(text: context.loc.settings.booru.changeToNewBooru),
                   TextSpan(
                     text: selectedBooru.name,
                     style: const TextStyle(fontWeight: FontWeight.bold),
