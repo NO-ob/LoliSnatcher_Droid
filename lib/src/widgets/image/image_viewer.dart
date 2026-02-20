@@ -26,8 +26,6 @@ import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
-// TODO optimize tiling ("too long") blocker to not force download again
-
 enum ViewerStopReason {
   user,
   error,

@@ -369,7 +369,8 @@ class _TranslationsAuthenticationDev extends TranslationsAuthenticationEn {
   String get temporaryLockout => TranslationOverrides.string(_root.$meta, 'authentication.temporaryLockout', {}) ?? '{Temporary lockout}';
   @override
   String somethingWentWrong({required String error}) =>
-      TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ?? '{Something went wrong: ${error}}';
+      TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ??
+      '{Something went wrong during authentication: ${error}}';
 }
 
 // Path: searchHandler
@@ -3963,7 +3964,8 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'authentication.temporaryLockout', {}) ?? '{Temporary lockout}',
           'authentication.somethingWentWrong' =>
             ({required String error}) =>
-                TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ?? '{Something went wrong: ${error}}',
+                TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ??
+                '{Something went wrong during authentication: ${error}}',
           'searchHandler.removedLastTab' => TranslationOverrides.string(_root.$meta, 'searchHandler.removedLastTab', {}) ?? '{Removed last tab}',
           'searchHandler.resettingSearchToDefaultTags' =>
             TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? '{Resetting to default tags}',

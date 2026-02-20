@@ -370,7 +370,8 @@ class _TranslationsAuthenticationRu extends TranslationsAuthenticationEn {
   String get temporaryLockout => TranslationOverrides.string(_root.$meta, 'authentication.temporaryLockout', {}) ?? 'Временная блокировка';
   @override
   String somethingWentWrong({required String error}) =>
-      TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ?? 'Что-то пошло не так: ${error}';
+      TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ??
+      'Что-то пошло не так во время аутентификации: ${error}';
 }
 
 // Path: searchHandler
@@ -4022,7 +4023,8 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'authentication.temporaryLockout', {}) ?? 'Временная блокировка',
           'authentication.somethingWentWrong' =>
             ({required String error}) =>
-                TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ?? 'Что-то пошло не так: ${error}',
+                TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ??
+                'Что-то пошло не так во время аутентификации: ${error}',
           'searchHandler.removedLastTab' =>
             TranslationOverrides.string(_root.$meta, 'searchHandler.removedLastTab', {}) ?? 'Последняя вкладка удалена',
           'searchHandler.resettingSearchToDefaultTags' =>

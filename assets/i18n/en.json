@@ -108,7 +108,7 @@
         "pleaseAuthenticateToUseTheApp": "Please authenticate to use the app",
         "noBiometricHardwareAvailable": "No biometric hardware available",
         "temporaryLockout": "Temporary lockout",
-        "somethingWentWrong(param=error)": "Something went wrong: ${error: String}"
+        "somethingWentWrong(param=error)": "Something went wrong during authentication: ${error: String}"
     },
     "searchHandler": {
         "removedLastTab": "Removed last tab",

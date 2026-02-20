@@ -104,7 +104,7 @@
     "pleaseAuthenticateToUseTheApp": "Пожалуйста, пройди аутентификацию для использования приложения",
     "noBiometricHardwareAvailable": "Биометрия недоступна",
     "temporaryLockout": "Временная блокировка",
-    "somethingWentWrong(param=error)": "Что-то пошло не так: ${error: String}"
+    "somethingWentWrong(param=error)": "Что-то пошло не так во время аутентификации: ${error: String}"
   },
   "searchHandler": {
     "removedLastTab": "Последняя вкладка удалена",

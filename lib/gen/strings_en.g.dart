@@ -433,9 +433,10 @@ class TranslationsAuthenticationEn {
   /// en: 'Temporary lockout'
   String get temporaryLockout => TranslationOverrides.string(_root.$meta, 'authentication.temporaryLockout', {}) ?? 'Temporary lockout';
 
-  /// en: 'Something went wrong: ${error: String}'
+  /// en: 'Something went wrong during authentication: ${error: String}'
   String somethingWentWrong({required String error}) =>
-      TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ?? 'Something went wrong: ${error}';
+      TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ??
+      'Something went wrong during authentication: ${error}';
 }
 
 // Path: searchHandler
@@ -5006,7 +5007,8 @@ extension on Translations {
           'authentication.temporaryLockout' => TranslationOverrides.string(_root.$meta, 'authentication.temporaryLockout', {}) ?? 'Temporary lockout',
           'authentication.somethingWentWrong' =>
             ({required String error}) =>
-                TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ?? 'Something went wrong: ${error}',
+                TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ??
+                'Something went wrong during authentication: ${error}',
           'searchHandler.removedLastTab' => TranslationOverrides.string(_root.$meta, 'searchHandler.removedLastTab', {}) ?? 'Removed last tab',
           'searchHandler.resettingSearchToDefaultTags' =>
             TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Resetting to default tags',

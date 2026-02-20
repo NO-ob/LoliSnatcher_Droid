@@ -72,6 +72,7 @@ class LocalAuthHandler {
             await auth.authenticate(
               localizedReason: NavigationHandler.instance.navContext.loc.authentication.pleaseAuthenticateToUseTheApp,
               persistAcrossBackgrounding: true,
+              sensitiveTransaction: false,
               biometricOnly: false,
             );
 
