@@ -28,9 +28,9 @@ class Constants {
 
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
-    versionName: '2.4.5',
-    buildNumber: 5206,
-    title: '2.4.5',
+    versionName: '2.5.0',
+    buildNumber: 5207,
+    title: '2.5.0 - Localization, fonts, optimization, pinned tags and more',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.loliSnatcher',
@@ -38,17 +38,15 @@ class Constants {
     changelog: '''
 If you encounter any issues or have suggestions, please post them in github issues or in our discord server
 
-Emergency release to fix gelbooru. Bigger release coming soon.
-
 -------------------
 
-Release - 2.4.5+5206 (17-02-26):
+Release - 2.5.0+5207 (??-??-26):
 
 New features:
-- Reverse image search (Yandex, Google, SauceNao, ImgOps)
+- 
 
 Booru changes/fixes:
-- Fix for gelbooru image loading
+- 
 
 ''',
   );
