@@ -160,4 +160,18 @@ class UrlParseRule extends TextParseRule {
 
     return matches;
   }
+
+  /// Returns the resolved URL string if [source] consists of exactly one URL
+  /// spanning the entire (trimmed) string. Returns null for mixed content,
+  /// plain text, or multiple URLs.
+  static String? detectPureUrl(String source) {
+    final trimmed = source.trim();
+    if (trimmed.isEmpty) return null;
+    const rule = UrlParseRule();
+    final matches = rule.findMatches(trimmed);
+    if (matches.length == 1 && matches.first.start == 0 && matches.first.end == trimmed.length) {
+      return matches.first.segment.metadata['url'] as String? ?? trimmed;
+    }
+    return null;
+  }
 }

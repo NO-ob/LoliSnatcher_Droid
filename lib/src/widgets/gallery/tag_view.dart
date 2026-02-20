@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fpdart/fpdart.dart' show FpdartOnIterable;
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
@@ -38,12 +37,14 @@ import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
+import 'package:lolisnatcher/src/utils/text_parser/rules/url_rule.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
-import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/close_dialog_button.dart';
 import 'package:lolisnatcher/src/widgets/common/draggable_overflow_text.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
+import 'package:lolisnatcher/src/widgets/common/parsed_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
@@ -529,7 +530,8 @@ class _TagViewState extends State<TagView> {
   }
 
   Widget sourcesList(List<String> sources) {
-    sources = sources.where((link) => link.trim().isNotEmpty).toList();
+    sources = sources.where((l) => l.trim().isNotEmpty).toList();
+
     if (sources.isNotEmpty) {
       return Column(
         children: [
@@ -545,27 +547,34 @@ class _TagViewState extends State<TagView> {
                       await ServiceHandler.vibrate();
                       await showDialog(
                         context: context,
-                        builder: (context) {
-                          return SourceLinkErrorDialog(link: link, fromError: false);
-                        },
+                        builder: (_) => SourceLinkErrorDialog(link: link),
                       );
                     },
                     onTap: () async {
-                      if (!link.startsWith('https://') && !link.startsWith('http://')) {
-                        link = 'https://$link';
+                      final detectedUrl = UrlParseRule.detectPureUrl(link);
+                      if (detectedUrl != null) {
+                        if (await canLaunchUrlString(detectedUrl)) {
+                          await launchUrlString(
+                            detectedUrl,
+                            mode: LaunchMode.externalApplication,
+                          );
+                          return;
+                        }
+                        // Pure URL but failed to launch — show dialog with error context
+                        if (mounted) {
+                          await showDialog(
+                            context: context,
+                            builder: (_) => SourceLinkErrorDialog(link: link),
+                          );
+                        }
+                        return;
                       }
 
-                      if (await canLaunchUrlString(link)) {
-                        await launchUrlString(
-                          link,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      } else {
+                      // Mixed content or no URL — show dialog without error header
+                      if (mounted) {
                         await showDialog(
                           context: context,
-                          builder: (context) {
-                            return SourceLinkErrorDialog(link: link);
-                          },
+                          builder: (_) => SourceLinkErrorDialog(link: link),
                         );
                       }
                     },
@@ -1375,68 +1384,31 @@ Future<void> showTagDialog({
   );
 }
 
-class SourceLinkErrorDialog extends StatefulWidget {
+class SourceLinkErrorDialog extends StatelessWidget {
   const SourceLinkErrorDialog({
     required this.link,
-    this.fromError = true,
     super.key,
   });
 
   final String link;
-  final bool fromError;
+  List<String> get detectedUrls => const UrlParseRule()
+      .findMatches(link)
+      .map((m) => m.segment.metadata['url'] as String? ?? m.segment.text)
+      .toList();
 
-  @override
-  State<SourceLinkErrorDialog> createState() => _SourceLinkErrorDialogState();
-}
-
-class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
-  String selectedText = '';
-  bool get hasSelected => selectedText.isNotEmpty;
-
-  // crutch to reset the selection
-  int selectionKeyIndex = 0;
-
-  Future<void> copy() async {
-    final link = hasSelected ? selectedText : widget.link;
-
+  Future<void> copy(BuildContext context) async {
     await Clipboard.setData(ClipboardData(text: link));
     FlashElements.showSnackbar(
       context: context,
       duration: const Duration(seconds: 2),
       title: Text(
-        context.loc.tagView.copiedSelected(
-          type: hasSelected ? context.loc.tagView.selectedText : context.loc.tagView.source,
-        ),
+        context.loc.copiedToClipboard,
         style: const TextStyle(fontSize: 20),
       ),
       content: Text(link, style: const TextStyle(fontSize: 16)),
       leadingIcon: Icons.copy,
       sideColor: Colors.green,
     );
-  }
-
-  Future<void> open() async {
-    String link = hasSelected ? selectedText : widget.link;
-    if (!link.startsWith('https://') && !link.startsWith('http://')) {
-      link = 'https://$link';
-    }
-
-    if (await canLaunchUrlString(link)) {
-      await launchUrlString(
-        link,
-        mode: LaunchMode.externalApplication,
-      );
-    } else {
-      FlashElements.showSnackbar(
-        context: context,
-        duration: const Duration(seconds: 2),
-        title: Text(
-          context.loc.failedToOpenLink,
-          style: const TextStyle(fontSize: 20),
-        ),
-        content: Text(link, style: const TextStyle(fontSize: 16)),
-      );
-    }
   }
 
   @override
@@ -1448,104 +1420,54 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.fromError)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: Text(
-                context.loc.tagView.sourceDialogText1,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+          const SizedBox(height: 16),
+          if (detectedUrls.isNotEmpty) ...[
+            Text(
+              context.loc.tagView.detectedLinks,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 4),
+            ...detectedUrls.map(
+              (url) => ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.link, size: 20),
+                title: Text(url, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14)),
+                onTap: () async {
+                  final ok = await launchUrlString(
+                    url,
+                    mode: LaunchMode.externalApplication,
+                  );
+                  if (!ok) {
+                    FlashElements.showSnackbar(
+                      title: Text(context.loc.failedToOpenLink),
+                      content: Text(url),
+                    );
+                  }
+                },
               ),
             ),
-          Text(
-            context.loc.tagView.sourceDialogText2,
-          ),
-          const SizedBox(height: 16),
-          SelectableLinkify(
-            key: ValueKey('selection-$selectionKeyIndex'),
-            text: widget.link,
-            options: const LinkifyOptions(
-              humanize: false,
-              removeWww: true,
-              looseUrl: true,
-              defaultToHttps: true,
-              excludeLastPeriod: true,
-            ),
-            scrollPhysics: const NeverScrollableScrollPhysics(),
-            useMouseRegion: true,
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
-              setState(() {
-                selectedText = selection.textInside(widget.link);
-              });
-            },
-            onOpen: (link) async {
-              final res = await launchUrlString(
-                link.url,
-                mode: LaunchMode.externalApplication,
-              );
-              if (!res) {
-                FlashElements.showSnackbar(
-                  title: Text(context.loc.error),
-                  content: Text(context.loc.failedToOpenLink),
-                );
-              }
-            },
+            const SizedBox(height: 8),
+          ],
+          ParsedText(
+            text: link,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 16),
-          Material(
-            color: Theme.of(context).colorScheme.secondaryContainer,
-            borderRadius: BorderRadius.circular(8),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(8),
-              onTap: selectedText.isEmpty
-                  ? null
-                  : () {
-                      setState(() {
-                        selectionKeyIndex++;
-                        selectedText = '';
-                      });
-                    },
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Row(
-                  children: [
-                    const Icon(Icons.select_all, size: 30),
-                    const SizedBox(width: 8),
-                    if (selectedText.isNotEmpty)
-                      Expanded(child: Text(selectedText))
-                    else
-                      Text(context.loc.tagView.noTextSelected),
-                  ],
-                ),
-              ),
-            ),
-          ),
         ],
       ),
       actionsOverflowDirection: VerticalDirection.down,
       actionsOverflowButtonSpacing: 8,
       actions: [
         ElevatedButton.icon(
-          onPressed: copy,
-          label: Text(
-            context.loc.tagView.copySelected(
-              type: hasSelected ? context.loc.tagView.selected : context.loc.tagView.all,
-            ),
-          ),
+          onPressed: () => copy(context),
+          label: Text(context.loc.copy),
           icon: const Icon(Icons.copy),
         ),
-        ElevatedButton.icon(
-          onPressed: open,
-          label: Text(context.loc.tagView.openSelected(type: hasSelected ? context.loc.tagView.selected : '')),
-          icon: const Icon(Icons.open_in_new),
-        ),
-        const CancelButton(withIcon: true),
+        const CloseDialogButton(withIcon: true),
       ],
     );
   }
@@ -1777,7 +1699,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                         width: context.mediaSize.width,
                         height: 80,
                         child: SettingsBooruDropdown(
-                          title: context.loc.tagView.booru,
+                          title: context.loc.booru,
                           placeholder: context.loc.tagView.selectBooruToLoad,
                           value: selectedBooru,
                           items: isSingleBooru ? settingsHandler.booruList : widget.boorus,
@@ -1919,7 +1841,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                           width: context.mediaSize.width,
                           height: 80,
                           child: SettingsBooruDropdown(
-                            title: context.loc.tagView.booru,
+                            title: context.loc.booru,
                             placeholder: context.loc.tagView.selectBooruToLoad,
                             value: selectedBooru,
                             items: settingsHandler.booruList,
