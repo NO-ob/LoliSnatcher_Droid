@@ -529,15 +529,6 @@ class _BooruEditState extends State<BooruEdit> {
             booruExists = true;
             booruExistsReason = context.loc.settings.booruEditor.booruConfigExistsError;
           }
-
-          final bool oldEditBooruExists =
-              settingsHandler.booruList[i].baseURL == widget.booru.baseURL &&
-              settingsHandler.booruList[i].name == widget.booru.name;
-          if (!booruExists && oldEditBooruExists) {
-            // remove the old config (same url and name as the start booru)
-            settingsHandler.booruList.removeAt(i);
-            await settingsHandler.deleteBooru(widget.booru);
-          }
         }
       }
     }
@@ -602,6 +593,19 @@ class _BooruEditState extends State<BooruEdit> {
 
       if (!confirmRes) {
         return;
+      }
+
+      for (int i = 0; i < settingsHandler.booruList.length; i++) {
+        if (settingsHandler.booruList[i].baseURL == booruURLController.text) {
+          final bool oldEditBooruExists =
+              settingsHandler.booruList[i].baseURL == widget.booru.baseURL &&
+              settingsHandler.booruList[i].name == widget.booru.name;
+          if (!booruExists && oldEditBooruExists) {
+            // remove the old config (same url and name as the start booru)
+            settingsHandler.booruList.removeAt(i);
+            await settingsHandler.deleteBooru(widget.booru);
+          }
+        }
       }
 
       await settingsHandler.saveBooru(newBooru);
