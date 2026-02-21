@@ -1021,7 +1021,7 @@
     "possibleMaxPage(param=number)": "Возможная макс. страница №~${number: int}",
     "searchCurrentlyRunning": "В данный момент выполняется поиск!",
     "jumpToPage": "Перейти на страницу",
-    "searchUntilPage": "Искать до страницы",
+    "searchUntilPage": "Поиск до страницы",
     "stopSearching": "Остановить поиск"
   },
   "tagsFiltersDialogs": {
@@ -1132,7 +1132,7 @@
     "unpinQuestion(param=tag)": "Убрать «${tag: String}» из закрепленных тегов?",
     "onlyForBooru(param=name)": "Только для ${name: String}",
     "labelsOptional": "Метки (необязательно)",
-    "typeAndEnterToAdd": "Введи и нажми отправить для добавления",
+    "typeAndPressAdd": "Ввведи и нажми кнопку Добавить для включения метки в список",
     "selectExistingLabel": "Выбери существующую метку",
     "tagPinned": "Тег закреплен",
     "pinnedForBooru(param=name, param=labels)": "Закреплен для ${name: String}${labels: String}",
@@ -1141,7 +1141,6 @@
     "all": "Все",
     "reorderPinnedTags": "Поменять порядок закрепленных тегов",
     "saving": "Сохраняется...",
-    "searchPinnedTags": "Искать закрепленные теги...",
     "reorder": "Поменять порядок",
     "addTagManually": "Добавить тег вручную",
     "noTagsMatchSearch": "Нет подходящих тегов",

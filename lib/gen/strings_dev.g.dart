@@ -1208,7 +1208,8 @@ class _TranslationsPinnedTagsDev extends TranslationsPinnedTagsEn {
   @override
   String get labelsOptional => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? '{Labels (optional)}';
   @override
-  String get typeAndEnterToAdd => TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndEnterToAdd', {}) ?? '{Type and press Send to add}';
+  String get typeAndPressAdd =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndPressAdd', {}) ?? '{Type and press Add button to include a label}';
   @override
   String get selectExistingLabel => TranslationOverrides.string(_root.$meta, 'pinnedTags.selectExistingLabel', {}) ?? '{Select existing label}';
   @override
@@ -1227,8 +1228,6 @@ class _TranslationsPinnedTagsDev extends TranslationsPinnedTagsEn {
   String get reorderPinnedTags => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? '{Reorder pinned tags}';
   @override
   String get saving => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? '{Saving...}';
-  @override
-  String get searchPinnedTags => TranslationOverrides.string(_root.$meta, 'pinnedTags.searchPinnedTags', {}) ?? '{Search pinned tags...}';
   @override
   String get reorder => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? '{Reorder}';
   @override
@@ -5555,8 +5554,8 @@ extension on TranslationsDev {
           'pinnedTags.onlyForBooru' =>
             ({required String name}) => TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? '{Only for ${name}}',
           'pinnedTags.labelsOptional' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? '{Labels (optional)}',
-          'pinnedTags.typeAndEnterToAdd' =>
-            TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndEnterToAdd', {}) ?? '{Type and press Send to add}',
+          'pinnedTags.typeAndPressAdd' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndPressAdd', {}) ?? '{Type and press Add button to include a label}',
           'pinnedTags.selectExistingLabel' =>
             TranslationOverrides.string(_root.$meta, 'pinnedTags.selectExistingLabel', {}) ?? '{Select existing label}',
           'pinnedTags.tagPinned' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagPinned', {}) ?? '{Tag pinned}',
@@ -5571,7 +5570,6 @@ extension on TranslationsDev {
           'pinnedTags.all' => TranslationOverrides.string(_root.$meta, 'pinnedTags.all', {}) ?? '{All}',
           'pinnedTags.reorderPinnedTags' => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? '{Reorder pinned tags}',
           'pinnedTags.saving' => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? '{Saving...}',
-          'pinnedTags.searchPinnedTags' => TranslationOverrides.string(_root.$meta, 'pinnedTags.searchPinnedTags', {}) ?? '{Search pinned tags...}',
           'pinnedTags.reorder' => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? '{Reorder}',
           'pinnedTags.addTagManually' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? '{Add tag manually}',
           'pinnedTags.noTagsMatchSearch' =>
@@ -5655,10 +5653,10 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reachedLastLoadedItem', {}) ?? '{Reached the Last loaded Item}',
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? '{Pause}',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? '{Start}',
+          'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? '{Unfavourite}',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? '{Unfavourite}',
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? '{Deselect}',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? '{Reload with scaling}',

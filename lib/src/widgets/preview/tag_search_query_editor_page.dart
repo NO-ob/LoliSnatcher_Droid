@@ -869,21 +869,17 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           ? Wrap(
                               spacing: 4,
                               runSpacing: 4,
-                              children: _controller.text.split(' ').where((t) => t.isNotEmpty).map((tag) {
-                                final tagColor = tagHandler.getTag(tag).getColour();
-                                return Chip(
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  visualDensity: VisualDensity.compact,
-                                  label: Text(
-                                    tag.replaceAll('_', ' '),
-                                    style: TextStyle(
-                                      color: tagColor == Colors.transparent ? null : tagColor,
+                              alignment: WrapAlignment.start,
+                              children: _controller.text
+                                  .split(' ')
+                                  .where((t) => t.isNotEmpty)
+                                  .map(
+                                    (t) => SizedBox(
+                                      height: 32,
+                                      child: MainSearchTagChip(tag: t),
                                     ),
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                  labelPadding: const EdgeInsets.symmetric(horizontal: 4),
-                                );
-                              }).toList(),
+                                  )
+                                  .toList(),
                             )
                           : Text(
                               _controller.text.replaceAll('_', ' '),

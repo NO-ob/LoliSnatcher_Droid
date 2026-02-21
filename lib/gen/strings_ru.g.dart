@@ -941,7 +941,7 @@ class _TranslationsPageChangerRu extends TranslationsPageChangerEn {
   @override
   String get jumpToPage => TranslationOverrides.string(_root.$meta, 'pageChanger.jumpToPage', {}) ?? 'Перейти на страницу';
   @override
-  String get searchUntilPage => TranslationOverrides.string(_root.$meta, 'pageChanger.searchUntilPage', {}) ?? 'Искать до страницы';
+  String get searchUntilPage => TranslationOverrides.string(_root.$meta, 'pageChanger.searchUntilPage', {}) ?? 'Поиск до страницы';
   @override
   String get stopSearching => TranslationOverrides.string(_root.$meta, 'pageChanger.stopSearching', {}) ?? 'Остановить поиск';
 }
@@ -1216,8 +1216,8 @@ class _TranslationsPinnedTagsRu extends TranslationsPinnedTagsEn {
   @override
   String get labelsOptional => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? 'Метки (необязательно)';
   @override
-  String get typeAndEnterToAdd =>
-      TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndEnterToAdd', {}) ?? 'Введи и нажми отправить для добавления';
+  String get typeAndPressAdd =>
+      TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndPressAdd', {}) ?? 'Ввведи и нажми кнопку Добавить для включения метки в список';
   @override
   String get selectExistingLabel => TranslationOverrides.string(_root.$meta, 'pinnedTags.selectExistingLabel', {}) ?? 'Выбери существующую метку';
   @override
@@ -1237,8 +1237,6 @@ class _TranslationsPinnedTagsRu extends TranslationsPinnedTagsEn {
       TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? 'Поменять порядок закрепленных тегов';
   @override
   String get saving => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? 'Сохраняется...';
-  @override
-  String get searchPinnedTags => TranslationOverrides.string(_root.$meta, 'pinnedTags.searchPinnedTags', {}) ?? 'Искать закрепленные теги...';
   @override
   String get reorder => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? 'Поменять порядок';
   @override
@@ -5521,7 +5519,7 @@ extension on TranslationsRu {
           'pageChanger.searchCurrentlyRunning' =>
             TranslationOverrides.string(_root.$meta, 'pageChanger.searchCurrentlyRunning', {}) ?? 'В данный момент выполняется поиск!',
           'pageChanger.jumpToPage' => TranslationOverrides.string(_root.$meta, 'pageChanger.jumpToPage', {}) ?? 'Перейти на страницу',
-          'pageChanger.searchUntilPage' => TranslationOverrides.string(_root.$meta, 'pageChanger.searchUntilPage', {}) ?? 'Искать до страницы',
+          'pageChanger.searchUntilPage' => TranslationOverrides.string(_root.$meta, 'pageChanger.searchUntilPage', {}) ?? 'Поиск до страницы',
           'pageChanger.stopSearching' => TranslationOverrides.string(_root.$meta, 'pageChanger.stopSearching', {}) ?? 'Остановить поиск',
           'tagsFiltersDialogs.emptyInput' => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.emptyInput', {}) ?? 'Пустой ввод!',
           'tagsFiltersDialogs.addNewFilter' =>
@@ -5655,8 +5653,9 @@ extension on TranslationsRu {
           'pinnedTags.onlyForBooru' =>
             ({required String name}) => TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Только для ${name}',
           'pinnedTags.labelsOptional' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? 'Метки (необязательно)',
-          'pinnedTags.typeAndEnterToAdd' =>
-            TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndEnterToAdd', {}) ?? 'Введи и нажми отправить для добавления',
+          'pinnedTags.typeAndPressAdd' =>
+            TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndPressAdd', {}) ??
+                'Ввведи и нажми кнопку Добавить для включения метки в список',
           'pinnedTags.selectExistingLabel' =>
             TranslationOverrides.string(_root.$meta, 'pinnedTags.selectExistingLabel', {}) ?? 'Выбери существующую метку',
           'pinnedTags.tagPinned' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagPinned', {}) ?? 'Тег закреплен',
@@ -5672,8 +5671,6 @@ extension on TranslationsRu {
           'pinnedTags.reorderPinnedTags' =>
             TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? 'Поменять порядок закрепленных тегов',
           'pinnedTags.saving' => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? 'Сохраняется...',
-          'pinnedTags.searchPinnedTags' =>
-            TranslationOverrides.string(_root.$meta, 'pinnedTags.searchPinnedTags', {}) ?? 'Искать закрепленные теги...',
           'pinnedTags.reorder' => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? 'Поменять порядок',
           'pinnedTags.addTagManually' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? 'Добавить тег вручную',
           'pinnedTags.noTagsMatchSearch' => TranslationOverrides.string(_root.$meta, 'pinnedTags.noTagsMatchSearch', {}) ?? 'Нет подходящих тегов',
@@ -5758,10 +5755,10 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reachedLastLoadedItem', {}) ?? 'Достигнут последний загруженный элемент',
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Пауза',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Старт',
+          'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Удалить из избранного',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Удалить из избранного',
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Перезагрузить с масштабированием',

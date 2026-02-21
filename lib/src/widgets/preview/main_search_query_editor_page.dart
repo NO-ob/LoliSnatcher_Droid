@@ -2701,6 +2701,7 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
 
                   final pinnedTag = filteredPinnedTags[index];
                   final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
+                  final bool isMultiword = pinnedTag.tagName.split(' ').length > 1;
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -2716,7 +2717,7 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
                               ),
                             ),
                       label: Text(
-                        pinnedTag.tagName.replaceAll('_', ' '),
+                        isMultiword ? pinnedTag.tagName : pinnedTag.tagName.replaceAll('_', ' '),
                         style: TextStyle(color: tagColor),
                       ),
                       onPressed: () => widget.onTagTap(pinnedTag.tagName),
@@ -2795,9 +2796,17 @@ class _PinTagDialogState extends State<PinTagDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.loc.pinnedTags.pinQuestion(tag: widget.tagName.replaceAll('_', ' ')),
-            style: context.theme.textTheme.bodyLarge,
+          Builder(
+            builder: (context) {
+              final bool isMultiword = widget.tagName.split(' ').length > 1;
+
+              return Text(
+                context.loc.pinnedTags.pinQuestion(
+                  tag: isMultiword ? widget.tagName : widget.tagName.replaceAll('_', ' '),
+                ),
+                style: context.theme.textTheme.bodyLarge,
+              );
+            },
           ),
           const SizedBox(height: 16),
           CheckboxListTile(
@@ -2808,14 +2817,30 @@ class _PinTagDialogState extends State<PinTagDialog> {
             contentPadding: EdgeInsets.zero,
           ),
           const SizedBox(height: 8),
-          SettingsTextInput(
-            controller: labelController,
-            title: context.loc.pinnedTags.labelsOptional,
-            titleAsLabel: true,
-            subtitle: Text(context.loc.pinnedTags.typeAndEnterToAdd),
-            onlyInput: true,
-            prefixIcon: widget.existingLabels.isNotEmpty
-                ? PopupMenuButton<String>(
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: labelController,
+                  decoration: InputDecoration(
+                    labelText: context.loc.pinnedTags.labelsOptional,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                    suffixIcon: labelController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.add, size: 18),
+                            onPressed: () => _addLabel(labelController.text),
+                          )
+                        : null,
+                  ),
+                  onSubmitted: _addLabel,
+                ),
+              ),
+              //
+              if (widget.existingLabels.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: PopupMenuButton<String>(
                     icon: const Icon(Icons.arrow_drop_down),
                     tooltip: context.loc.pinnedTags.selectExistingLabel,
                     onSelected: _addLabel,
@@ -2828,34 +2853,55 @@ class _PinTagDialogState extends State<PinTagDialog> {
                           ),
                         )
                         .toList(),
-                  )
-                : null,
-            trailingIcon: labelController.text.isNotEmpty
-                ? IconButton(
-                    icon: const Icon(Icons.add, size: 18),
-                    onPressed: () => _addLabel(labelController.text),
-                  )
-                : null,
-            onSubmitted: _addLabel,
+                  ),
+                ),
+              //
+              Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  child: ValueListenableBuilder(
+                    valueListenable: labelController,
+                    builder: (_, value, _) {
+                      if (value.text.isNotEmpty) {
+                        return IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () => _addLabel(value.text),
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
-          if (selectedLabels.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: selectedLabels
-                  .map(
-                    (label) => Chip(
-                      label: Text(label),
-                      onDeleted: () => _removeLabel(label),
-                      deleteIconColor: context.theme.colorScheme.error,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  )
-                  .toList(),
+          //
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(context.loc.pinnedTags.typeAndPressAdd),
+          ),
+          //
+          if (selectedLabels.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: selectedLabels
+                    .map(
+                      (label) => Chip(
+                        label: Text(label),
+                        onDeleted: () => _removeLabel(label),
+                        deleteIconColor: context.theme.colorScheme.error,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          ],
         ],
       ),
       actions: [
@@ -2935,8 +2981,14 @@ Future<void> showUnpinTagDialog(
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(ctx.loc.pinnedTags.unpinTag),
-      content: Text(
-        ctx.loc.pinnedTags.unpinQuestion(tag: tagName.replaceAll('_', ' ')),
+      content: Builder(
+        builder: (context) {
+          final bool isMultiword = tagName.split(' ').length > 1;
+
+          return Text(
+            ctx.loc.pinnedTags.unpinQuestion(tag: isMultiword ? tagName : tagName.replaceAll('_', ' ')),
+          );
+        },
       ),
       actions: [
         const CancelButton(),
@@ -3034,6 +3086,7 @@ class _PinnedTagsReorderDialogState extends State<PinnedTagsReorderDialog> {
             itemBuilder: (context, index) {
               final pinnedTag = tags[index];
               final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
+              final bool isMultiword = pinnedTag.tagName.split(' ').length > 1;
 
               return ListTile(
                 key: ValueKey(pinnedTag.id),
@@ -3059,7 +3112,7 @@ class _PinnedTagsReorderDialogState extends State<PinnedTagsReorderDialog> {
                   ],
                 ),
                 title: Text(
-                  pinnedTag.tagName.replaceAll('_', ' '),
+                  isMultiword ? pinnedTag.tagName : pinnedTag.tagName.replaceAll('_', ' '),
                   style: TextStyle(color: tagColor),
                 ),
                 subtitle: pinnedTag.isGlobal ? const Text('Global') : Text(pinnedTag.booruName ?? ''),
@@ -3349,7 +3402,7 @@ class _PinnedTagsManagerDialogState extends State<PinnedTagsManagerDialog> {
                       child: TextField(
                         controller: searchController,
                         decoration: InputDecoration(
-                          hintText: context.loc.pinnedTags.searchPinnedTags,
+                          labelText: context.loc.search,
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon: searchController.text.isNotEmpty
                               ? IconButton(
@@ -3419,6 +3472,7 @@ class _PinnedTagsManagerDialogState extends State<PinnedTagsManagerDialog> {
                         itemBuilder: (context, index) {
                           final pinnedTag = filteredTags[index];
                           final tagColor = tagHandler.getTag(pinnedTag.tagName).getColour();
+                          final bool isMultiword = pinnedTag.tagName.split(' ').length > 1;
 
                           final scopeText = pinnedTag.isGlobal ? 'Global' : pinnedTag.booruName ?? '';
                           final labelText = pinnedTag.labels.isNotEmpty ? pinnedTag.labels.join(', ') : null;
@@ -3439,7 +3493,7 @@ class _PinnedTagsManagerDialogState extends State<PinnedTagsManagerDialog> {
                                     ),
                                   ),
                             title: Text(
-                              pinnedTag.tagName.replaceAll('_', ' '),
+                              isMultiword ? pinnedTag.tagName : pinnedTag.tagName.replaceAll('_', ' '),
                               style: TextStyle(color: tagColor),
                             ),
                             subtitle: Text(
@@ -3541,7 +3595,6 @@ class _EditLabelsDialogState extends State<EditLabelsDialog> {
                   controller: labelController,
                   decoration: InputDecoration(
                     labelText: context.loc.pinnedTags.labels,
-                    hintText: context.loc.pinnedTags.typeAndEnterToAdd,
                     border: const OutlineInputBorder(),
                     isDense: true,
                     suffixIcon: labelController.text.isNotEmpty
@@ -3555,43 +3608,72 @@ class _EditLabelsDialogState extends State<EditLabelsDialog> {
                   autofocus: true,
                 ),
               ),
-              if (widget.existingLabels.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.arrow_drop_down),
-                  tooltip: context.loc.pinnedTags.selectExistingLabel,
-                  onSelected: _addLabel,
-                  itemBuilder: (context) => widget.existingLabels
-                      .where((l) => !selectedLabels.contains(l))
-                      .map(
-                        (label) => PopupMenuItem(
-                          value: label,
-                          child: Text(label),
-                        ),
-                      )
-                      .toList(),
+              //
+              if (widget.existingLabels.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(Icons.arrow_drop_down),
+                    tooltip: context.loc.pinnedTags.selectExistingLabel,
+                    onSelected: _addLabel,
+                    itemBuilder: (context) => widget.existingLabels
+                        .where((l) => !selectedLabels.contains(l))
+                        .map(
+                          (label) => PopupMenuItem(
+                            value: label,
+                            child: Text(label),
+                          ),
+                        )
+                        .toList(),
+                  ),
                 ),
-              ],
+              //
+              Padding(
+                padding: const EdgeInsets.only(left: 6),
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  child: ValueListenableBuilder(
+                    valueListenable: labelController,
+                    builder: (_, value, _) {
+                      if (value.text.isNotEmpty) {
+                        return IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () => _addLabel(value.text),
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ),
             ],
           ),
-          if (selectedLabels.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: selectedLabels
-                  .map(
-                    (label) => Chip(
-                      label: Text(label),
-                      onDeleted: () => _removeLabel(label),
-                      deleteIconColor: context.theme.colorScheme.error,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  )
-                  .toList(),
+          //
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(context.loc.pinnedTags.typeAndPressAdd),
+          ),
+          //
+          if (selectedLabels.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: selectedLabels
+                    .map(
+                      (label) => Chip(
+                        label: Text(label),
+                        onDeleted: () => _removeLabel(label),
+                        deleteIconColor: context.theme.colorScheme.error,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          ],
         ],
       ),
       actions: [
@@ -3704,7 +3786,6 @@ class _ManualPinTagDialogState extends State<ManualPinTagDialog> {
                     controller: labelController,
                     decoration: InputDecoration(
                       labelText: context.loc.pinnedTags.labelsOptional,
-                      hintText: context.loc.pinnedTags.typeAndEnterToAdd,
                       border: const OutlineInputBorder(),
                       isDense: true,
                       suffixIcon: labelController.text.isNotEmpty
@@ -3717,43 +3798,72 @@ class _ManualPinTagDialogState extends State<ManualPinTagDialog> {
                     onSubmitted: _addLabel,
                   ),
                 ),
-                if (widget.existingLabels.isNotEmpty) ...[
-                  const SizedBox(width: 8),
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.arrow_drop_down),
-                    tooltip: context.loc.pinnedTags.selectExistingLabel,
-                    onSelected: _addLabel,
-                    itemBuilder: (context) => widget.existingLabels
-                        .where((l) => !selectedLabels.contains(l))
-                        .map(
-                          (label) => PopupMenuItem(
-                            value: label,
-                            child: Text(label),
-                          ),
-                        )
-                        .toList(),
+                //
+                if (widget.existingLabels.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: PopupMenuButton<String>(
+                      icon: const Icon(Icons.arrow_drop_down),
+                      tooltip: context.loc.pinnedTags.selectExistingLabel,
+                      onSelected: _addLabel,
+                      itemBuilder: (context) => widget.existingLabels
+                          .where((l) => !selectedLabels.contains(l))
+                          .map(
+                            (label) => PopupMenuItem(
+                              value: label,
+                              child: Text(label),
+                            ),
+                          )
+                          .toList(),
+                    ),
                   ),
-                ],
+                //
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    child: ValueListenableBuilder(
+                      valueListenable: labelController,
+                      builder: (_, value, _) {
+                        if (value.text.isNotEmpty) {
+                          return IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () => _addLabel(value.text),
+                          );
+                        }
+
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                ),
               ],
             ),
-            if (selectedLabels.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: selectedLabels
-                    .map(
-                      (label) => Chip(
-                        label: Text(label),
-                        onDeleted: () => _removeLabel(label),
-                        deleteIconColor: context.theme.colorScheme.error,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    )
-                    .toList(),
+            //
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(context.loc.pinnedTags.typeAndPressAdd),
+            ),
+            //
+            if (selectedLabels.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: selectedLabels
+                      .map(
+                        (label) => Chip(
+                          label: Text(label),
+                          onDeleted: () => _removeLabel(label),
+                          deleteIconColor: context.theme.colorScheme.error,
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      )
+                      .toList(),
+                ),
               ),
-            ],
           ],
         ),
       ),
