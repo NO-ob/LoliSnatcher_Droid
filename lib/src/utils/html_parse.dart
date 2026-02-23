@@ -82,6 +82,7 @@ InlineSpan _parseText(dom.Text text, TextStyle? style, int prevChar) {
 
 final _fontSizePropertyRegex = RegExp(r'font-size\s*:\s*([^;]+)', caseSensitive: false);
 final _fontSizeValueRegex = RegExp(r'^([+-]?[0-9]*\.?[0-9]+)(px|%|em|pt|rem)?$');
+final _colorPropertyRegex = RegExp(r'(?:^|;)\s*color\s*:\s*([^;]+)', caseSensitive: false);
 
 /// Parses a CSS `font-size` value from an inline [style] attribute string.
 /// Returns the resolved size in logical pixels given the [currentSize] for
@@ -127,14 +128,20 @@ double? _parseFontSize(String style, double currentSize) {
   };
 }
 
-/// Applies any `font-size` found in [element]'s `style` attribute to [style].
-/// Returns the (possibly updated) style, or `null` if no font-size was found.
-TextStyle? _applyInlineFontSize(dom.Element element, TextStyle? style) {
+/// Applies any `font-size` and `color` found in [element]'s `style` attribute to [style].
+/// Returns the (possibly updated) style, or the original if nothing matched.
+TextStyle? _applyInlineStyle(dom.Element element, TextStyle? style) {
   final inlineStyle = element.attributes['style'] ?? '';
   if (inlineStyle.isEmpty) return style;
-  final size = _parseFontSize(inlineStyle, style?.fontSize ?? 14);
-  if (size == null) return style;
-  return (style ?? const TextStyle()).copyWith(fontSize: size);
+  var s = style;
+  final size = _parseFontSize(inlineStyle, s?.fontSize ?? 14);
+  if (size != null) s = (s ?? const TextStyle()).copyWith(fontSize: size);
+  final colorMatch = _colorPropertyRegex.firstMatch(inlineStyle);
+  if (colorMatch != null) {
+    final color = html_color.tryParse(colorMatch.group(1)!.trim());
+    if (color != null) s = (s ?? const TextStyle()).copyWith(color: color);
+  }
+  return s;
 }
 
 TextDecoration _combine(TextDecoration? nullable, TextDecoration nonnull) {
@@ -155,8 +162,8 @@ InlineSpan _parseElement(
 
   GestureRecognizer? recognizer;
 
-  // Apply inline font-size from style="" before any tag-specific logic.
-  style = _applyInlineFontSize(element, style);
+  // Apply inline font-size and color from style="" before any tag-specific logic.
+  style = _applyInlineStyle(element, style);
   // Use a non-null working copy so all copyWith calls below are safe.
   var s = style ?? const TextStyle();
   // Tracks whether s was modified from the incoming style.
