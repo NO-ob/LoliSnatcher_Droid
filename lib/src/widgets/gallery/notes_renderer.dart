@@ -340,12 +340,8 @@ class _NoteBuildState extends State<NoteBuild> {
             content: Text.rich(
               parse(
                 widget.text ?? '',
-                const TextStyle(
-                  fontSize: 14,
-                ),
-                false,
+                style: const TextStyle(fontSize: 14),
               ),
-              overflow: TextOverflow.fade,
             ),
             duration: null,
             sideColor: Colors.blue,
@@ -400,11 +396,11 @@ class _NoteBuildContent extends StatelessWidget {
                 child: Text.rich(
                   parse(
                     text ?? '',
-                    const TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                     ),
-                    true,
+                    isBordered: true,
                   ),
                   overflow: TextOverflow.fade,
                 ),
@@ -442,10 +438,7 @@ class NotesDialog extends StatelessWidget {
                   title: Text.rich(
                     parse(
                       note.content ?? '',
-                      const TextStyle(
-                        fontSize: 14,
-                      ),
-                      false,
+                      style: const TextStyle(fontSize: 14),
                     ),
                   ),
                   subtitle: Text(context.loc.viewer.notes.coordinates(posX: note.posX, posY: note.posY)),

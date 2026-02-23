@@ -38,6 +38,7 @@ class CommentParser {
         const ItalicParseRule(),
         const UnderlineParseRule(),
         const StrikethroughParseRule(),
+        const RubyParseRule(),
 
         // Tags and hashtags
         const HashtagParseRule(),
@@ -91,6 +92,7 @@ class CommentParser {
       rules.add(const ItalicParseRule());
       rules.add(const UnderlineParseRule());
       rules.add(const StrikethroughParseRule());
+      rules.add(const RubyParseRule());
     }
 
     if (mentions) {

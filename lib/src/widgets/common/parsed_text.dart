@@ -116,7 +116,30 @@ class _ParsedTextState extends State<ParsedText> {
 
   void _parseText() {
     final parser = widget.parser ?? CommentParser.instance;
-    _segments = parser.parse(_fixOverlappingTags(widget.text));
+    _segments = parser.parse(_fixOverlappingTags(_stripUnknownHtml(widget.text)));
+  }
+
+  // HTML tags that the parser knows how to handle — strip everything else.
+  static const _knownHtmlTags = {
+    'b', 'i', 'u', 's', 'em', 'strong', 'strike', 'del', 'code',
+    'ruby', 'rb', 'rt',
+  };
+
+  static final RegExp _htmlTagPattern = RegExp(
+    r'<(/?)([a-zA-Z][a-zA-Z0-9]*)(?:\s[^>]*)?>',
+  );
+
+  /// Strips HTML tags not understood by the parser while preserving known ones.
+  /// Unknown opening/closing tags are removed; their text content is kept.
+  String _stripUnknownHtml(String text) {
+    return text.replaceAllMapped(_htmlTagPattern, (m) {
+      final tagName = m.group(2)!.toLowerCase();
+      if (_knownHtmlTags.contains(tagName)) {
+        // Reconstruct without attributes: <b>, </b>, <ruby>, etc.
+        return '<${m.group(1)}$tagName>';
+      }
+      return ''; // Strip the tag entirely, keeping inner text
+    });
   }
 
   /// Fix common malformed overlapping tags by removing orphaned closing tags
@@ -546,6 +569,27 @@ class _ParsedTextState extends State<ParsedText> {
                     fontFamily: 'monospace',
                     backgroundColor: theme.colorScheme.surfaceContainerHighest,
                   ),
+            ),
+          );
+
+        case 'ruby':
+          final base = segment.metadata['base'] as String? ?? '';
+          final ruby = segment.metadata['ruby'] as String? ?? '';
+          final baseFontSize = baseStyle?.fontSize ?? 14.0;
+          spans.add(
+            WidgetSpan(
+              alignment: PlaceholderAlignment.middle,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    ruby,
+                    style: baseStyle?.copyWith(fontSize: baseFontSize * 0.6),
+                  ),
+                  Text(base, style: baseStyle),
+                ],
+              ),
             ),
           );
 

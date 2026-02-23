@@ -177,6 +177,69 @@ class StrikethroughParseRule extends TextParseRule {
   }
 }
 
+/// Rule for parsing ruby (furigana) text.
+/// Supports:
+///   HTML: `<ruby>base<rt>reading</rt></ruby>`
+///   HTML with rb: `<ruby><rb>base</rb><rt>reading</rt></ruby>`
+///   BBCode: `[ruby]base[rt]reading[/ruby]`
+class RubyParseRule extends TextParseRule {
+  const RubyParseRule();
+
+  @override
+  String get type => 'ruby';
+
+  @override
+  int get priority => 40;
+
+  @override
+  bool get allowNested => false;
+
+  // Groups:
+  //   HTML form: group(1) = <rb> base (optional), group(2) = bare base, group(3) = <rt> content
+  //   BBCode form: group(4) = base, group(5) = rt content
+  static final RegExp _regex = RegExp(
+    '(?:'
+    r'<ruby>(?:<rb>([\s\S]*?)<\/rb>)?([\s\S]*?)<rt>([\s\S]*?)<\/rt><\/ruby>'
+    '|'
+    r'\[ruby\]([\s\S]*?)\[rt\]([\s\S]*?)\[\/ruby\]'
+    ')',
+    caseSensitive: false,
+  );
+
+  @override
+  List<TextParseMatch> findMatches(String text) {
+    final List<TextParseMatch> matches = [];
+
+    for (final match in _regex.allMatches(text)) {
+      final String base;
+      final String ruby;
+      if (match.group(4) != null) {
+        // BBCode form
+        base = match.group(4)!;
+        ruby = match.group(5) ?? '';
+      } else {
+        // HTML form — prefer explicit <rb> content, fall back to bare base
+        base = match.group(1) ?? match.group(2) ?? '';
+        ruby = match.group(3) ?? '';
+      }
+
+      matches.add(
+        TextParseMatch(
+          start: match.start,
+          end: match.end,
+          segment: ParsedTextSegment(
+            text: match.group(0)!,
+            type: type,
+            metadata: {'base': base, 'ruby': ruby},
+          ),
+        ),
+      );
+    }
+
+    return matches;
+  }
+}
+
 /// Rule for parsing code blocks [code]...[/code] or <code>...</code>
 class CodeParseRule extends TextParseRule {
   const CodeParseRule();
