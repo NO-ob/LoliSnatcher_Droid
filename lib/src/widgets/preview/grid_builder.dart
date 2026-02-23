@@ -58,6 +58,7 @@ class GridBuilder extends StatelessWidget {
             final bool hasSelected = tab.selected.isNotEmpty;
             final selectedIndex = tab.selected.indexOf(item);
             final bool isSelected = selectedIndex != -1;
+            final bool isHighlighted = ViewerHandler.instance.current.value?.key == item.key;
 
             return GridTile(
               child: ThumbnailCardBuild(
@@ -65,7 +66,7 @@ class GridBuilder extends StatelessWidget {
                 item: item,
                 handler: tab.booruHandler,
                 scrollController: scrollController,
-                isHighlighted: ViewerHandler.instance.current.value?.key == item.key,
+                isHighlighted: isHighlighted,
                 selectable: true,
                 selectedIndex: isSelected ? selectedIndex : null,
                 onSelected: hasSelected ? onSelected : null,
