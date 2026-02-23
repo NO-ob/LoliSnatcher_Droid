@@ -50,11 +50,40 @@ class ThumbnailBuild extends StatelessWidget {
         alignment: settingsHandler.previewDisplay.isSquare ? .center : .bottomCenter,
         children: [
           RepaintBoundary(
-            child: Thumbnail(
-              item: item,
-              booru: handler.booru,
-              isStandalone: true,
-              useHero: selectable,
+            child: Builder(
+              builder: (context) {
+                final bool isFavsOrDls = handler is FavouritesHandler || handler is DownloadsHandler;
+                Booru? possibleBooru;
+                if (isFavsOrDls) {
+                  final itemFileHost = Uri.tryParse(item.fileURL)?.host;
+                  final itemPostHost = Uri.tryParse(item.postURL)?.host;
+                  possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
+                    final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
+
+                    return (itemPostHost?.isNotEmpty == true &&
+                            booruHost?.isNotEmpty == true &&
+                            (itemPostHost! == booruHost! ||
+                                switch (e.type) {
+                                  BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(itemPostHost),
+                                  BooruType.Sankaku => SankakuHandler.knownPostUrls.contains(itemPostHost),
+                                  _ => false,
+                                })) ||
+                        (itemFileHost?.isNotEmpty == true &&
+                            booruHost?.isNotEmpty == true &&
+                            itemFileHost! == booruHost!);
+                  });
+                  if (possibleBooru?.type?.isFavouritesOrDownloads == true) {
+                    possibleBooru = null;
+                  }
+                }
+
+                return Thumbnail(
+                  item: item,
+                  booru: possibleBooru ?? handler.booru,
+                  isStandalone: true,
+                  useHero: selectable,
+                );
+              },
             ),
           ),
 

@@ -5,20 +5,24 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 
 import 'package:photo_view/photo_view.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/close_dialog_button.dart';
+import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 import 'package:lolisnatcher/src/widgets/gallery/gallery_buttons.dart';
 import 'package:lolisnatcher/src/widgets/gallery/hideable_appbar.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
@@ -27,8 +31,8 @@ import 'package:lolisnatcher/src/widgets/gallery/viewer_tutorial.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/load_item_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 
 class GalleryViewPage extends StatefulWidget {
   const GalleryViewPage({
@@ -353,6 +357,36 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                             itemBuilder: (context, index) {
                               final BooruItem item = widget.tab.booruHandler.filteredFetched[index];
 
+                              final bool isFavsOrDls =
+                                  widget.tab.booruHandler.booru.type?.isFavouritesOrDownloads == true;
+                              Booru? possibleBooru;
+                              if (isFavsOrDls) {
+                                final itemFileHost = Uri.tryParse(item.fileURL)?.host;
+                                final itemPostHost = Uri.tryParse(item.postURL)?.host;
+                                possibleBooru = SettingsHandler.instance.booruList.firstWhereOrNull((e) {
+                                  final booruHost = Uri.tryParse(e.baseURL ?? '')?.host;
+
+                                  return (itemPostHost?.isNotEmpty == true &&
+                                          booruHost?.isNotEmpty == true &&
+                                          (itemPostHost! == booruHost! ||
+                                              switch (e.type) {
+                                                BooruType.IdolSankaku => IdolSankakuHandler.knownUrls.contains(
+                                                  itemPostHost,
+                                                ),
+                                                BooruType.Sankaku => SankakuHandler.knownPostUrls.contains(
+                                                  itemPostHost,
+                                                ),
+                                                _ => false,
+                                              })) ||
+                                      (itemFileHost?.isNotEmpty == true &&
+                                          booruHost?.isNotEmpty == true &&
+                                          itemFileHost! == booruHost!);
+                                });
+                                if (possibleBooru?.type?.isFavouritesOrDownloads == true) {
+                                  possibleBooru = null;
+                                }
+                              }
+
                               return ValueListenableBuilder(
                                 valueListenable: item.mediaType,
                                 builder: (context, mediaType, _) {
@@ -369,7 +403,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                       builder: (_, pageVal, _) {
                                         return ImageViewer(
                                           item,
-                                          booru: widget.tab.booruHandler.booru,
+                                          booru: possibleBooru ?? widget.tab.booruHandler.booru,
                                           isViewed: pageVal == index,
                                           key: item.key,
                                         );
@@ -386,7 +420,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                         builder: (_, pageVal, _) {
                                           return VideoViewer(
                                             item,
-                                            booru: widget.tab.booruHandler.booru,
+                                            booru: possibleBooru ?? widget.tab.booruHandler.booru,
                                             isViewed: pageVal == index,
                                             enableFullscreen: true,
                                             key: item.key,
@@ -396,14 +430,14 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                     } else {
                                       itemWidget = VideoViewerPlaceholder(
                                         item: item,
-                                        booru: widget.tab.booruHandler.booru,
+                                        booru: possibleBooru ?? widget.tab.booruHandler.booru,
                                         key: item.key,
                                       );
                                     }
                                   } else if (isNeedToGuess) {
                                     itemWidget = GuessExtensionViewer(
                                       item: item,
-                                      booru: widget.tab.booruHandler.booru,
+                                      booru: possibleBooru ?? widget.tab.booruHandler.booru,
                                       onMediaTypeGuessed: (MediaType newMediaType) {
                                         item.mediaType.value = newMediaType;
                                         item.possibleMediaType.value = newMediaType.isUnknown
@@ -426,7 +460,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                                   } else {
                                     itemWidget = GuessExtensionViewer(
                                       item: item,
-                                      booru: widget.tab.booruHandler.booru,
+                                      booru: possibleBooru ?? widget.tab.booruHandler.booru,
                                       onMediaTypeGuessed: (MediaType newMediaType) {
                                         item.mediaType.value = newMediaType;
                                         item.possibleMediaType.value = newMediaType.isUnknown
