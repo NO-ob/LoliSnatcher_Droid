@@ -258,7 +258,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 8),
                                     child: Text(
-                                      'Search',
+                                      context.loc.search,
                                       style: context.theme.textTheme.bodyLarge?.copyWith(
                                         color: context.theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                         fontSize: 16,
