@@ -39,6 +39,7 @@ class DBHandler {
     } else if (Platform.isWindows || Platform.isLinux) {
       db = await databaseFactory.openDatabase('${path}store.db');
     }
+    await db!.execute('PRAGMA journal_mode=WAL;');
     await updateTable();
     await fixBooruItems(onStatusUpdate);
     await deleteUntracked();
