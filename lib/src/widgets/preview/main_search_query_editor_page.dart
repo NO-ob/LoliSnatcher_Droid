@@ -65,7 +65,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
   final AutoScrollController searchBarScrollController = AutoScrollController();
 
   late final RichTextController suggestionTextController;
-  String get suggestionTextControllerRawInput => suggestionTextController.text
+  String get suggestionTextControllerCleanedInput => suggestionTextController.text
       .replaceAll(RegExp('^-'), '')
       .replaceAll(RegExp('^~'), '')
       .replaceAll(RegExp(r'^\d+#'), '')
@@ -167,7 +167,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
     bool instant = true,
   }) async {
     final handler = searchHandler.currentBooruHandler;
-    if (suggestionTextControllerRawInput.isEmpty) {
+    if (suggestionTextControllerCleanedInput.isEmpty) {
       debounce?.cancel();
       cancelToken?.cancel();
       loading = false;
@@ -204,11 +204,11 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
 
         final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
         final MetaTag? metaTag = metaTags.firstWhereOrNull(
-          (p) => p.keyParser(suggestionTextControllerRawInput) != null,
+          (p) => p.keyParser(suggestionTextControllerCleanedInput) != null,
         );
         if (metaTag != null) {
           if (metaTag.hasAutoComplete) {
-            suggestedTags = await metaTag.getAutoComplete(suggestionTextControllerRawInput);
+            suggestedTags = await metaTag.getAutoComplete(suggestionTextControllerCleanedInput);
             suggestedTags.sort((a, b) => a.tag.compareTo(b.tag));
           } else {
             suggestedTags.clear();
@@ -221,7 +221,9 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
         } else if (handler.hasTagSuggestions) {
           cancelToken = CancelToken();
           final res = await handler.getTagSuggestions(
-            suggestionTextControllerRawInput,
+            searchHandler.currentBooruHandler is MergebooruHandler
+                ? suggestionTextController.text
+                : suggestionTextControllerCleanedInput,
             cancelToken: cancelToken,
           );
           res.fold(
@@ -254,18 +256,20 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
             },
           );
         } else {
-          final databaseSearch = (await settingsHandler.dbHandler.getTags(suggestionTextControllerRawInput, 10)).map((
-            tag,
-          ) {
-            return TagSuggestion(
-              tag: tag,
-              type: tagHandler.getTag(tag).tagType,
-              icon: const Icon(Icons.archive),
-            );
-          }).toList();
+          final databaseSearch = (await settingsHandler.dbHandler.getTags(suggestionTextControllerCleanedInput, 10))
+              .map((
+                tag,
+              ) {
+                return TagSuggestion(
+                  tag: tag,
+                  type: tagHandler.getTag(tag).tagType,
+                  icon: const Icon(Icons.archive),
+                );
+              })
+              .toList();
 
           final historySearch =
-              (await settingsHandler.dbHandler.getSearchHistoryByInput(suggestionTextControllerRawInput, 10))
+              (await settingsHandler.dbHandler.getSearchHistoryByInput(suggestionTextControllerCleanedInput, 10))
                   .map((tag) {
                     return TagSuggestion(
                       tag: tag,
@@ -374,7 +378,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
 
     if (!raw) {
       final String extrasFromInput = suggestionTextController.text
-          .replaceAll(suggestionTextControllerRawInput, '')
+          .replaceAll(suggestionTextControllerCleanedInput, '')
           .trim();
       tagText = '$extrasFromInput$tagText';
     }
@@ -662,17 +666,17 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                         valueListenable: suggestionTextController,
                         builder: (context, _, _) {
                           return ElevatedButton(
-                            onPressed: suggestionTextControllerRawInput.isEmpty
+                            onPressed: suggestionTextControllerCleanedInput.isEmpty
                                 ? onSearchTap
                                 : () => onSuggestionTextSubmitted(suggestionTextController.text),
-                            onLongPress: suggestionTextControllerRawInput.isEmpty
+                            onLongPress: suggestionTextControllerCleanedInput.isEmpty
                                 ? onSearchLongTap
-                                : () => onSuggestionLongTap(TagSuggestion(tag: suggestionTextControllerRawInput)),
+                                : () => onSuggestionLongTap(TagSuggestion(tag: suggestionTextControllerCleanedInput)),
                             style: buttonStyle,
                             child: Padding(
                               padding: EdgeInsets.only(bottom: isKbVisible ? 0 : 20),
                               child: Icon(
-                                suggestionTextControllerRawInput.isEmpty ? Icons.search : Icons.add_rounded,
+                                suggestionTextControllerCleanedInput.isEmpty ? Icons.search : Icons.add_rounded,
                                 color: context.theme.colorScheme.onSecondary,
                               ),
                             ),
@@ -773,7 +777,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                               );
                             }
 
-                            if (suggestionTextControllerRawInput.isEmpty) {
+                            if (suggestionTextControllerCleanedInput.isEmpty) {
                               return SuggestionsMainContent(
                                 onMetatagSelect: onMetatagSelect,
                                 onTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
@@ -841,7 +845,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                                           children: [
                                             TagSuggestionText(
                                               tag: tag,
-                                              searchText: suggestionTextControllerRawInput,
+                                              searchText: suggestionTextControllerCleanedInput,
                                             ),
                                             if (tag.hasDescription)
                                               Text(
@@ -952,7 +956,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                   clearable: true,
                   onSubmitted: onSuggestionTextSubmitted,
                   onSubmittedLongTap: (_) => onSuggestionLongTap(
-                    TagSuggestion(tag: suggestionTextControllerRawInput),
+                    TagSuggestion(tag: suggestionTextControllerCleanedInput),
                   ),
                   onlyInput: true,
                   floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -2354,7 +2358,6 @@ class _PrefixEditDialog extends StatelessWidget {
               if (hasSecondaryBoorus)
                 Container(
                   width: MediaQuery.sizeOf(context).width,
-                  height: 50,
                   margin: const EdgeInsets.only(bottom: 12),
                   child: SettingsBooruDropdown(
                     value: selectedBooru,

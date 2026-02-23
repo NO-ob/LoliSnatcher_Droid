@@ -42,13 +42,59 @@ class MergebooruHandler extends BooruHandler {
       final booruTags = booruHandlers[i].availableMetaTags();
       for (final tag in booruTags) {
         if (!tags.contains(tag)) {
-          tags.add(tag);
+          final List<BooruHandler> boorusWhereTagExists = booruHandlers
+              .where((e) => e.availableMetaTags().any((t) => t.keyName == tag.keyName))
+              .toList();
+          final String combinedName =
+              '${tag.name} (${boorusWhereTagExists.map((e) => e.booru.name ?? '').where((e) => e.isNotEmpty).join(', ')})';
+          if (tag is MetaTagWithValues) {
+            final List<MetaTagValue> combinedValues = [];
+            for (final handler in boorusWhereTagExists) {
+              final tagWithValues =
+                  handler.availableMetaTags().firstWhereOrNull(
+                        (e) => e is MetaTagWithValues && e.keyName == tag.keyName,
+                      )
+                      as MetaTagWithValues?;
+              final values = tagWithValues?.values;
+              if (values != null) {
+                for (final v in values) {
+                  if (!combinedValues.any((e) => e.value == v.value)) {
+                    combinedValues.add(v);
+                  }
+                }
+              }
+            }
+
+            tags.add(
+              tag.copyWith(
+                name: combinedName,
+                values: combinedValues,
+              ),
+            );
+          } else {
+            tags.add(tag.copyWith(name: combinedName));
+          }
         }
       }
     }
 
     return tags;
   }
+
+  String cleanBooruIndexesFromTags(String tags, int? currentIndex) => tags
+      .replaceAll(
+        currentIndex == null
+            ? ''
+            : RegExp(
+                '(?!'
+                '${currentIndex + 1}'
+                r')\d+#\S*',
+              ),
+        '',
+      )
+      .replaceAll('  ', ' ')
+      .replaceAll(RegExp(r'\d+#'), '')
+      .trim();
 
   @override
   Future search(String tags, int? pageNumCustom, {bool withCaptchaCheck = true}) async {
@@ -58,18 +104,7 @@ class MergebooruHandler extends BooruHandler {
     final Map<int, ({Booru booru, List<BooruItem> items})> tmpFetchedMap = {};
     int fetchedMax = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
-      final String currentTags = tags
-          .replaceAll(
-            RegExp(
-              '(?!'
-              '${i + 1}'
-              r')\d+#\S*',
-            ),
-            '',
-          )
-          .replaceAll('  ', ' ')
-          .replaceAll(RegExp(r'\d+#'), '')
-          .trim();
+      final String currentTags = cleanBooruIndexesFromTags(tags, i);
       Logger.Inst().log('TAGS FOR #$i are: $currentTags', 'MergeBooruHandler', 'Search', LogTypes.booruHandlerInfo);
       booruHandlers[i].pageNum = pageNum + booruHandlerPageNums[i];
       final List<BooruItem> tmpFetched = (await booruHandlers[i].search(currentTags, null)) ?? [];
@@ -238,12 +273,30 @@ class MergebooruHandler extends BooruHandler {
     String input, {
     CancelToken? cancelToken,
   }) async {
-    final res = booruHandlers
-        .firstWhereOrNull((e) => e.hasTagSuggestions)
-        ?.getTagSuggestions(
-          input,
-          cancelToken: cancelToken,
-        );
+    final regex = RegExp(r'(\d+)#\S*');
+    final matches = regex.allMatches(input).toList();
+
+    BooruHandler? selectedHandler;
+
+    try {
+      if (matches.isNotEmpty && !input.contains(' ')) {
+        final int matchedIndex = int.parse(matches[0].group(1)!);
+        // match handler if booru index is present (ignore if multiword query)
+        if (booruHandlers[matchedIndex - 1].hasTagSuggestions) {
+          selectedHandler = booruHandlers[matchedIndex - 1];
+        }
+      }
+    } catch (_) {
+      //
+    } finally {
+      // get first (if any) possible handler with tag suggestions if no match
+      selectedHandler ??= booruHandlers.firstWhereOrNull((e) => e.hasTagSuggestions);
+    }
+
+    final res = selectedHandler?.getTagSuggestions(
+      cleanBooruIndexesFromTags(input, null),
+      cancelToken: cancelToken,
+    );
     if (res == null) {
       return const Right([]);
     } else {
@@ -255,18 +308,7 @@ class MergebooruHandler extends BooruHandler {
   Future<void> searchCount(String input) async {
     int result = 0;
     for (int i = 0; i < booruHandlers.length; i++) {
-      final String currentTags = input
-          .replaceAll(
-            RegExp(
-              '(?!'
-              '${i + 1}'
-              r')\d+#\S*',
-            ),
-            '',
-          )
-          .replaceAll('  ', ' ')
-          .replaceAll(RegExp(r'\d+#'), '')
-          .trim();
+      final String currentTags = cleanBooruIndexesFromTags(input, i);
       await booruHandlers[i].searchCount(currentTags);
       result += booruHandlers[i].totalCount.value;
     }
