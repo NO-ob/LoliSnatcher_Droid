@@ -596,10 +596,12 @@ class _CommentsHeader extends StatelessWidget {
           // height > width
           height = MediaQuery.sizeOf(context).height * 0.4;
           width = height * minRatio;
+          if (width > constraints.maxWidth) width = constraints.maxWidth * 0.8;
         } else {
           // width > height
           width = constraints.maxWidth * 0.6;
           height = width / maxRatio;
+          if (height > constraints.maxHeight) height = constraints.maxHeight * 0.4;
         }
 
         if (context.isLandscape) {
