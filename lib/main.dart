@@ -421,8 +421,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   }
 
   Future<void> clearCache() async {
-    await imageWriter.clearStaleCache();
-    await imageWriter.clearCacheOverflow();
+    await imageWriter.cleanupCache();
   }
 
   Future<void> initDeepLinks() async {
