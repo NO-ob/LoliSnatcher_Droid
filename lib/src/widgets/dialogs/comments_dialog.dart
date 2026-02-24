@@ -203,7 +203,10 @@ class _CommentsDialogState extends State<CommentsDialog> {
                   await getComments(initial: true);
                 },
                 child: ListView.builder(
-                  padding: const EdgeInsets.only(top: 8, bottom: 100),
+                  padding: EdgeInsets.only(
+                    top: 8,
+                    bottom: 128 + MediaQuery.paddingOf(context).bottom,
+                  ),
                   controller: scrollController,
                   itemCount: areThereErrors ? 2 : comments.length + 1,
                   scrollDirection: Axis.vertical,
@@ -248,9 +251,9 @@ class _CommentsDialogState extends State<CommentsDialog> {
           ),
           if (comments.isNotEmpty)
             Positioned(
-              bottom: 16,
-              left: settingsHandler.handSide.value.isLeft ? 16 : null,
-              right: settingsHandler.handSide.value.isLeft ? null : 16,
+              bottom: 32 + MediaQuery.paddingOf(context).bottom,
+              left: settingsHandler.handSide.value.isLeft ? 32 : null,
+              right: settingsHandler.handSide.value.isLeft ? null : 32,
               child: Material(
                 color: Colors.transparent,
                 child: Container(
