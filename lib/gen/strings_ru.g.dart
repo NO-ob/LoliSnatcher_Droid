@@ -2682,10 +2682,10 @@ class _TranslationsSettingsNetworkRu extends TranslationsSettingsNetworkEn {
       TranslationOverrides.string(_root.$meta, 'settings.network.proxySubtitle', {}) ??
       'Не применяется к режиму потокового видео, используй вместо него режим кэширования видео';
   @override
-  String get customUserAgent => TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Пользовательский user agent';
+  String get customUserAgent => TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Пользовательский User-Agent';
   @override
   String get customUserAgentTitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgentTitle', {}) ?? 'Пользовательский user agent';
+      TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgentTitle', {}) ?? 'Пользовательский User-Agent';
   @override
   String get keepEmptyForDefault =>
       TranslationOverrides.string(_root.$meta, 'settings.network.keepEmptyForDefault', {}) ?? 'Оставь пустым для использования значения по умолчанию';
@@ -2702,7 +2702,7 @@ class _TranslationsSettingsNetworkRu extends TranslationsSettingsNetworkEn {
   @override
   String get setBrowserUserAgent =>
       TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
-      'Нажми здесь, чтобы установить рекомендуемый user agent браузера (рекомендуется только когда сайты, которые ты используешь, банят небраузерные user agent):';
+      'Нажми здесь, чтобы установить User-Agent браузера Chrome (рекомендуется только когда сайт банит небраузерные user agent)';
   @override
   String get cookieCleaner => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Очистка куки';
   @override
@@ -5069,9 +5069,9 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.network.proxySubtitle', {}) ??
                 'Не применяется к режиму потокового видео, используй вместо него режим кэширования видео',
           'settings.network.customUserAgent' =>
-            TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Пользовательский user agent',
+            TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Пользовательский User-Agent',
           'settings.network.customUserAgentTitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgentTitle', {}) ?? 'Пользовательский user agent',
+            TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgentTitle', {}) ?? 'Пользовательский User-Agent',
           'settings.network.keepEmptyForDefault' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.keepEmptyForDefault', {}) ??
                 'Оставь пустым для использования значения по умолчанию',
@@ -5085,7 +5085,7 @@ extension on TranslationsRu {
             TranslationOverrides.string(_root.$meta, 'settings.network.valueSavedAfterLeaving', {}) ?? 'Сохраняется при закрытии страницы',
           'settings.network.setBrowserUserAgent' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
-                'Нажми здесь, чтобы установить рекомендуемый user agent браузера (рекомендуется только когда сайты, которые ты используешь, банят небраузерные user agent):',
+                'Нажми здесь, чтобы установить User-Agent браузера Chrome (рекомендуется только когда сайт банит небраузерные user agent)',
           'settings.network.cookieCleaner' => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Очистка куки',
           'settings.network.selectBooruToClearCookies' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.selectBooruToClearCookies', {}) ??

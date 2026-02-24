@@ -3347,11 +3347,11 @@ class TranslationsSettingsNetworkEn {
       TranslationOverrides.string(_root.$meta, 'settings.network.proxySubtitle', {}) ??
       'Does not apply to streaming video mode, use caching video mode instead';
 
-  /// en: 'Custom user agent'
-  String get customUserAgent => TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Custom user agent';
+  /// en: 'Custom User-Agent'
+  String get customUserAgent => TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Custom User-Agent';
 
-  /// en: 'Custom user agent'
-  String get customUserAgentTitle => TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgentTitle', {}) ?? 'Custom user agent';
+  /// en: 'Custom User-Agent'
+  String get customUserAgentTitle => TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgentTitle', {}) ?? 'Custom User-Agent';
 
   /// en: 'Keep empty to use default value'
   String get keepEmptyForDefault =>
@@ -3369,10 +3369,10 @@ class TranslationsSettingsNetworkEn {
   String get valueSavedAfterLeaving =>
       TranslationOverrides.string(_root.$meta, 'settings.network.valueSavedAfterLeaving', {}) ?? 'Saved on page exit';
 
-  /// en: 'Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):'
+  /// en: 'Tap here to use Chrome browser User-Agent (recommended only when site bans non-browser user agents)'
   String get setBrowserUserAgent =>
       TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
-      'Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):';
+      'Tap here to use Chrome browser User-Agent (recommended only when site bans non-browser user agents)';
 
   /// en: 'Cookie cleaner'
   String get cookieCleaner => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Cookie cleaner';
@@ -5989,9 +5989,9 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.network.proxySubtitle', {}) ??
                 'Does not apply to streaming video mode, use caching video mode instead',
           'settings.network.customUserAgent' =>
-            TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Custom user agent',
+            TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgent', {}) ?? 'Custom User-Agent',
           'settings.network.customUserAgentTitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgentTitle', {}) ?? 'Custom user agent',
+            TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgentTitle', {}) ?? 'Custom User-Agent',
           'settings.network.keepEmptyForDefault' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.keepEmptyForDefault', {}) ?? 'Keep empty to use default value',
           'settings.network.defaultUserAgent' =>
@@ -6003,7 +6003,7 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.network.valueSavedAfterLeaving', {}) ?? 'Saved on page exit',
           'settings.network.setBrowserUserAgent' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
-                'Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):',
+                'Tap here to use Chrome browser User-Agent (recommended only when site bans non-browser user agents)',
           'settings.network.cookieCleaner' => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Cookie cleaner',
           'settings.network.selectBooruToClearCookies' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.selectBooruToClearCookies', {}) ??

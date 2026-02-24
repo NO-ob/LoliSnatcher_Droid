@@ -159,7 +159,6 @@ class _NetworkPageState extends State<NetworkPage> {
               if (userAgentController.text != Constants.defaultBrowserUserAgent)
                 SettingsButton(
                   name: context.loc.settings.network.setBrowserUserAgent,
-                  subtitle: const Text(Constants.defaultBrowserUserAgent),
                   action: () {
                     userAgentController.text = Constants.defaultBrowserUserAgent;
                     setState(() {});
