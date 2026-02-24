@@ -353,6 +353,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   NoteItem? parseNote(dynamic responseItem, int index) {
     final current = responseItem;
+    if (current.getAttribute('is_active') == false) return null;
     return NoteItem(
       id: current.getAttribute('id'),
       postID: current.getAttribute('post_id'),

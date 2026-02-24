@@ -249,6 +249,7 @@ class DanbooruHandler extends BooruHandler {
   @override
   NoteItem? parseNote(dynamic responseItem, int index) {
     final current = responseItem;
+    if (current['is_active'] == false) return null;
     return NoteItem(
       id: current['id'].toString(),
       postID: current['post_id'].toString(),
