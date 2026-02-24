@@ -500,22 +500,20 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                   leading: Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined),
                   onTap: () async {
                     Navigator.of(context).pop();
-                    if (pinnedTag != null) {
-                      if (isPinned) {
-                        await showUnpinTagDialog(
-                          context,
-                          tag.tag,
-                          pinnedTag,
-                          () => onTagUnpinned(tag),
-                        );
-                      } else {
-                        await showPinTagDialog(
-                          context,
-                          tag.tag,
-                          searchHandler.currentBooru,
-                          () => onTagPinned(tag),
-                        );
-                      }
+                    if (isPinned && pinnedTag != null) {
+                      await showUnpinTagDialog(
+                        context,
+                        tag.tag,
+                        pinnedTag,
+                        () => onTagUnpinned(tag),
+                      );
+                    } else {
+                      await showPinTagDialog(
+                        context,
+                        tag.tag,
+                        searchHandler.currentBooru,
+                        () => onTagPinned(tag),
+                      );
                     }
                   },
                 );
