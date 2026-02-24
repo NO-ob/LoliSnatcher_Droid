@@ -325,9 +325,16 @@ class NoteBuild extends StatefulWidget {
 }
 
 class _NoteBuildState extends State<NoteBuild> {
-  bool isVisible = true;
+  bool isViewed = false, isColored = false, isVisible = true;
   late InlineSpan _parsedContent;
   late InlineSpan _parsedContentBordered;
+  late InlineSpan _parsedContentColorless;
+
+  @override
+  void initState() {
+    super.initState();
+    _rebuildParsed();
+  }
 
   void _rebuildParsed() {
     _parsedContent = parse(
@@ -336,15 +343,51 @@ class _NoteBuildState extends State<NoteBuild> {
     );
     _parsedContentBordered = parse(
       widget.text ?? '',
-      style: const TextStyle(color: Colors.white, fontSize: 12),
+      style: const TextStyle(color: Colors.white, fontSize: 14),
       isBordered: true,
     );
+    _parsedContentColorless = colorlessSpan(_parsedContent);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _rebuildParsed();
+  Future<void> openNoteDialog() async {
+    setState(() {
+      isViewed = true;
+    });
+
+    final res = await FlashElements.showSnackbar(
+      title: Row(
+        children: [
+          Flexible(child: Text(context.loc.viewer.notes.note)),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: Icon(
+              isColored ? Icons.color_lens : Icons.color_lens_outlined,
+              size: 24,
+            ),
+            onPressed: () {
+              setState(() {
+                isColored = !isColored;
+              });
+
+              // pop(true) to avoid redrawing red border on the note when dialog reopens
+              Navigator.of(context).pop(true);
+              openNoteDialog();
+            },
+          ),
+        ],
+      ),
+      content: Text.rich(isColored ? _parsedContentBordered : _parsedContentColorless),
+      duration: null,
+      sideColor: Colors.blue,
+      shouldLeadingPulse: false,
+      asDialog: true,
+    );
+
+    if (res != true) {
+      setState(() {
+        isViewed = false;
+      });
+    }
   }
 
   @override
@@ -374,16 +417,7 @@ class _NoteBuildState extends State<NoteBuild> {
             isVisible = true;
           });
         },
-        onTap: () {
-          FlashElements.showSnackbar(
-            title: Text(context.loc.viewer.notes.note),
-            content: Text.rich(_parsedContent),
-            duration: null,
-            sideColor: Colors.blue,
-            shouldLeadingPulse: false,
-            asDialog: true,
-          );
-        },
+        onTap: openNoteDialog,
         behavior: HitTestBehavior.translucent,
         child: AnimatedOpacity(
           opacity: isVisible ? 1 : 0,
@@ -392,6 +426,7 @@ class _NoteBuildState extends State<NoteBuild> {
             parsedContent: _parsedContentBordered,
             width: widget.width,
             height: widget.height,
+            isViewed: isViewed,
           ),
         ),
       ),
@@ -404,11 +439,13 @@ class _NoteBuildContent extends StatelessWidget {
     required this.parsedContent,
     required this.width,
     required this.height,
+    required this.isViewed,
   });
 
   final InlineSpan parsedContent;
   final double width;
   final double height;
+  final bool isViewed;
 
   @override
   Widget build(BuildContext context) {
@@ -420,8 +457,8 @@ class _NoteBuildContent extends StatelessWidget {
           color: const Color(0xFFFFF300).withValues(alpha: 0.25),
           borderRadius: BorderRadius.circular(2),
           border: Border.all(
-            width: 1,
-            color: const Color(0xFFFFF176).withValues(alpha: 0.5),
+            width: isViewed ? 4 : 1,
+            color: isViewed ? Colors.red : const Color(0xFFFFF176).withValues(alpha: 0.5),
           ),
         ),
         child:

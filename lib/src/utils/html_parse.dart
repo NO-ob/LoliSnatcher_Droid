@@ -173,6 +173,21 @@ InlineSpan _parseElement(
   switch (tag) {
     case 'br':
       return TextSpan(text: '\n', style: style);
+    case 'p':
+      // Block element: render children then append a newline.
+      final inner = _parseParent(
+        element,
+        styleChanged ? s : null,
+        null,
+        isBordered: isBordered,
+        onLinkTap: onLinkTap,
+      );
+      return TextSpan(
+        children: [
+          inner,
+          TextSpan(text: '\n', style: style),
+        ],
+      );
     case 'strong':
     case 'b':
       s = s.copyWith(fontWeight: FontWeight.bold);
@@ -241,12 +256,14 @@ InlineSpan _parseElement(
       break;
   }
 
+  final double lum = s.color?.computeLuminance() ?? 0;
+  final bool isDark = s.color == null ? false : lum < 0.5;
   if (isBordered) {
     final Paint paint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.75)
+      ..color = (isDark ? Colors.white : Colors.black).withValues(alpha: 0.75)
       ..style = PaintingStyle.fill
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = 2;
+      ..strokeWidth = 3;
 
     s = s.copyWith(background: paint);
     styleChanged = true;
@@ -427,4 +444,32 @@ InlineSpan _parseParent(
     style: style,
     recognizer: recognizer,
   );
+}
+
+/// Returns a copy of [span] with all explicit `color` and `decorationColor`
+/// values stripped from every [TextStyle] in the tree (including children).
+/// [WidgetSpan]s are left untouched since their widget subtree is opaque.
+InlineSpan colorlessSpan(InlineSpan span) {
+  if (span is TextSpan) {
+    return TextSpan(
+      text: span.text,
+      style: span.style == null
+          ? null
+          : TextStyle(
+              inherit: span.style!.inherit,
+              fontSize: span.style!.fontSize,
+              fontWeight: span.style!.fontWeight,
+              fontStyle: span.style!.fontStyle,
+              height: span.style!.height,
+              fontFamily: span.style!.fontFamily,
+              fontFamilyFallback: span.style!.fontFamilyFallback,
+              letterSpacing: span.style!.letterSpacing,
+              decoration: span.style!.decoration,
+              wordSpacing: span.style!.wordSpacing,
+            ),
+      recognizer: span.recognizer,
+      children: span.children?.map(colorlessSpan).toList(),
+    );
+  }
+  return span;
 }

@@ -93,7 +93,7 @@ class FlashElements {
   /// [asDialog] - should the tip be shown as a dialog
   ///
   /// [ignoreDesktopCheck] - should we ignore desktop specific style checks
-  static FutureOr<void> showSnackbar({
+  static FutureOr<dynamic> showSnackbar({
     required Widget title,
     BuildContext? context,
     String? key,
