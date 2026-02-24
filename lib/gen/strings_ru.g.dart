@@ -2726,8 +2726,6 @@ class _TranslationsSettingsNetworkRu extends TranslationsSettingsNetworkEn {
       'Куки для ${booruName} удалены';
   @override
   String get allCookiesDeleted => TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? 'Все куки удалены';
-  @override
-  String get noConnection => TranslationOverrides.string(_root.$meta, 'settings.network.noConnection', {}) ?? 'Нет соединения';
 }
 
 // Path: settings.privacy
@@ -5110,7 +5108,6 @@ extension on TranslationsRu {
                 'Куки для ${booruName} удалены',
           'settings.network.allCookiesDeleted' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? 'Все куки удалены',
-          'settings.network.noConnection' => TranslationOverrides.string(_root.$meta, 'settings.network.noConnection', {}) ?? 'Нет соединения',
           'settings.privacy.title' => TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? 'Приватность',
           'settings.privacy.appLock' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'Блокировка приложения',
           'settings.privacy.appLockMsg' =>
@@ -5756,10 +5753,10 @@ extension on TranslationsRu {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Пауза',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Старт',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Удалить из избранного',
+          'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Перезагрузить с масштабированием',
           'viewer.appBar.loadSampleQuality' =>

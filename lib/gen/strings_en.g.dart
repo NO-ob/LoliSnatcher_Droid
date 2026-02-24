@@ -3404,9 +3404,6 @@ class TranslationsSettingsNetworkEn {
 
   /// en: 'All cookies deleted'
   String get allCookiesDeleted => TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? 'All cookies deleted';
-
-  /// en: 'No connection'
-  String get noConnection => TranslationOverrides.string(_root.$meta, 'settings.network.noConnection', {}) ?? 'No connection';
 }
 
 // Path: settings.privacy
@@ -6029,7 +6026,6 @@ extension on Translations {
                 'Cookies for ${booruName} deleted',
           'settings.network.allCookiesDeleted' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? 'All cookies deleted',
-          'settings.network.noConnection' => TranslationOverrides.string(_root.$meta, 'settings.network.noConnection', {}) ?? 'No connection',
           'settings.privacy.title' => TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? 'Privacy',
           'settings.privacy.appLock' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'App lock',
           'settings.privacy.appLockMsg' =>
@@ -6652,10 +6648,10 @@ extension on Translations {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Pause',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Start',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Unfavourite',
+          'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Reload with scaling',
           'viewer.appBar.loadSampleQuality' =>
