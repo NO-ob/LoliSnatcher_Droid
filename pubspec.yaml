@@ -19,7 +19,6 @@ dependencies:
   calendar_date_picker2: ^2.0.1
   chewie: ^1.13.0
   collection: ^1.19.1
-  connectivity_plus: ^7.0.0
   country_flags: ^4.1.2
   crypto: ^3.0.7
   dio: ^5.9.1
@@ -89,12 +88,12 @@ dependencies:
   sqflite_common_ffi: ^2.4.0+2
   sqflite: ^2.4.2
   sqlite3: ^3.1.6
-  talker_dio_logger: ^5.1.13
-  talker_flutter: ^5.1.13
-  talker_logger: ^5.1.13
-  talker: ^5.1.13
+  talker_dio_logger: ^5.1.14
+  talker_flutter: ^5.1.14
+  talker_logger: ^5.1.14
+  talker: ^5.1.14
   url_launcher: ^6.3.2
-  uuid: ^4.5.2
+  uuid: ^4.5.3
   vibration: ^3.1.7
   video_player: ^2.11.0
   waterfall_flow: ^3.1.1

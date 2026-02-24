@@ -18,7 +18,6 @@ import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
-import 'package:lolisnatcher/src/handlers/connectivity_handler.dart';
 import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/notify_handler.dart';
@@ -75,9 +74,6 @@ void main() async {
   initSettingsEnumRegistry();
   await SettingsHandler.register().initialize();
   LocalAuthHandler.register();
-
-  ConnectivityHandler.register();
-  await ConnectivityHandler.instance.initialize();
 
   await ServiceHandler.setSystemUiVisibility(true);
 
@@ -155,7 +151,6 @@ class _MainAppState extends State<MainApp> {
   @override
   void dispose() {
     settingsHandler.isDebug.removeListener(devOverlayListener);
-    ConnectivityHandler.instance.dispose();
     NotifyHandler.unregister();
     NavigationHandler.unregister();
     ViewerHandler.unregister();
@@ -380,7 +375,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   final SearchHandler searchHandler = SearchHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
   final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
-  final ConnectivityHandler connectivityHandler = ConnectivityHandler.instance;
 
   Timer? backupTimer;
   Timer? cacheStaleTimer;
@@ -483,12 +477,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       case AppLifecycleState.paused:
         // record time when user left the app
         localAuthHandler.onLeave();
-        connectivityHandler.initialize();
         break;
       case AppLifecycleState.resumed:
         // check if app needs to be locked when user returns to the app
         localAuthHandler.onReturn();
-        connectivityHandler.initialize();
         break;
     }
   }
