@@ -53,7 +53,6 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   void initState() {
     super.initState();
     secondaryBoorus = searchHandler.currentSecondaryBoorus.value ?? <Booru>[];
-    customPageController.text = searchHandler.currentTab.booruHandler.pageNum.toString();
   }
 
   @override
@@ -79,13 +78,16 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
 
   void addNewTab() {
     searchHandler.searchTextController.text = usedQuery;
+    int? customPage = int.tryParse(customPageController.text);
+    customPage = customPage == null ? null : customPage - 1;
+
     searchHandler.addTabByString(
       usedQuery,
       customBooru: booru,
       secondaryBoorus: (addSecondaryBoorus && secondaryBoorus.isNotEmpty) ? [...secondaryBoorus] : null,
       switchToNew: switchToNew,
       addMode: addMode,
-      customPage: (int.tryParse(customPageController.text) ?? 0) - 1,
+      customPage: useCustomPage ? customPage : null,
     );
 
     Navigator.of(context).pop();
