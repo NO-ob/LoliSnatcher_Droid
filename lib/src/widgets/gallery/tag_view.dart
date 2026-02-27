@@ -191,6 +191,7 @@ class _TagViewState extends State<TagView> {
       Debounce.debounce(
         tag: 'tag_view_reload_item',
         callback: () {
+          WidgetsBinding.instance.addPostFrameCallback((_) => parseSortGroupTags());
           cancelToken?.cancel();
           reloadItemData(initial: true).then((_) async {
             await Future.delayed(const Duration(seconds: 3));
@@ -206,6 +207,7 @@ class _TagViewState extends State<TagView> {
         },
       );
     }
+
     if (widget.handler != handler) {
       handler = widget.handler;
       hasLoadItemSupport = handler.hasLoadItemSupport;
@@ -1781,66 +1783,93 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                                 icon: const Icon(Icons.list),
                                 onPressed: showTagPreviewsListDialog,
                               ),
-                            IconButton(
-                              icon: const Icon(Icons.fiber_new),
-                              onPressed: () {
-                                SearchHandler.instance.addTabByString(
+                            Builder(
+                              builder: (context) {
+                                final HasTabWithTagResult hasTabWithTag = SearchHandler.instance.hasTabWithTag(
                                   widget.tag,
-                                  customBooru: selectedBooru,
                                 );
 
-                                FlashElements.showSnackbar(
-                                  context: context,
-                                  isKeyUnique: true,
-                                  key: 'added_new_tab',
-                                  duration: const Duration(seconds: 2),
-                                  title: Text(context.loc.tagView.addedNewTab, style: const TextStyle(fontSize: 20)),
-                                  content: Text(widget.tag, style: const TextStyle(fontSize: 16)),
-                                  leadingIcon: Icons.fiber_new,
-                                  sideColor: Colors.green,
-                                  primaryActionBuilder: (context, controller) {
-                                    return Row(
-                                      children: [
-                                        IconButton(
-                                          onPressed: () {
-                                            ServiceHandler.vibrate();
-                                            if (settingsHandler.appMode.value.isMobile) {
-                                              Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
-                                            }
-                                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                                              SearchHandler.instance.changeTabIndex(
-                                                SearchHandler.instance.tabs.length - 1,
-                                              );
-                                            });
-                                            controller.dismiss();
-                                          },
-                                          icon: Icon(
-                                            Icons.arrow_forward_rounded,
-                                            color: Theme.of(context).colorScheme.onSurface,
+                                return IconButton(
+                                  icon: Stack(
+                                    children: [
+                                      const Icon(Icons.fiber_new),
+                                      if (hasTabWithTag.hasTag)
+                                        Positioned(
+                                          right: 0,
+                                          top: 0,
+                                          child: Icon(
+                                            Icons.circle,
+                                            size: 6,
+                                            color: hasTabWithTag.isOnlyTag
+                                                ? Theme.of(context).colorScheme.onSurface
+                                                : (hasTabWithTag.isOnlyTagDifferentBooru ? Colors.yellow : Colors.blue),
                                           ),
                                         ),
-                                        const SizedBox(width: 4),
-                                        IconButton(
-                                          onPressed: () => controller.dismiss(),
-                                          icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
-                                        ),
-                                      ],
+                                    ],
+                                  ),
+                                  onPressed: () {
+                                    SearchHandler.instance.addTabByString(
+                                      widget.tag,
+                                      customBooru: selectedBooru,
+                                    );
+
+                                    FlashElements.showSnackbar(
+                                      context: context,
+                                      isKeyUnique: true,
+                                      key: 'added_new_tab',
+                                      duration: const Duration(seconds: 2),
+                                      title: Text(
+                                        context.loc.tagView.addedNewTab,
+                                        style: const TextStyle(fontSize: 20),
+                                      ),
+                                      content: Text(widget.tag, style: const TextStyle(fontSize: 16)),
+                                      leadingIcon: Icons.fiber_new,
+                                      sideColor: Colors.green,
+                                      primaryActionBuilder: (context, controller) {
+                                        return Row(
+                                          children: [
+                                            IconButton(
+                                              onPressed: () {
+                                                ServiceHandler.vibrate();
+                                                if (settingsHandler.appMode.value.isMobile) {
+                                                  Navigator.of(context).popUntil((r) => r.isFirst); // exit viewer
+                                                }
+                                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                  SearchHandler.instance.changeTabIndex(
+                                                    SearchHandler.instance.tabs.length - 1,
+                                                  );
+                                                });
+                                                controller.dismiss();
+                                              },
+                                              icon: Icon(
+                                                Icons.arrow_forward_rounded,
+                                                color: Theme.of(context).colorScheme.onSurface,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            IconButton(
+                                              onPressed: () => controller.dismiss(),
+                                              icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     );
                                   },
+                                  onLongPress: () async {
+                                    await ServiceHandler.vibrate();
+                                    if (settingsHandler.appMode.value.isMobile) {
+                                      Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
+                                    }
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      SearchHandler.instance.addTabByString(
+                                        widget.tag,
+                                        customBooru: selectedBooru,
+                                        switchToNew: true,
+                                      );
+                                    });
+                                  },
                                 );
-                              },
-                              onLongPress: () async {
-                                await ServiceHandler.vibrate();
-                                if (settingsHandler.appMode.value.isMobile) {
-                                  Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
-                                }
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  SearchHandler.instance.addTabByString(
-                                    widget.tag,
-                                    customBooru: selectedBooru,
-                                    switchToNew: true,
-                                  );
-                                });
                               },
                             ),
                           ],
