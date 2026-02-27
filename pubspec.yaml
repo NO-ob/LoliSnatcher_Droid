@@ -6,7 +6,7 @@ version: 2.5.0+5207 # remember to update the values in constants.dart->updateInf
 
 environment:
   sdk: ">=3.12.0-113.1.beta <4.0.0"
-  flutter: 3.42.0-0.0.pre # using beta channel to enable predictive back gesture
+  flutter: 3.42.0-0.2.pre # using beta channel to enable predictive back gesture
 
 dependencies:
   flutter:
@@ -63,7 +63,7 @@ dependencies:
       url: https://github.com/EdgarJan/flutter_keyboard_actions.git
       ref: 561a1e3b59691b1323ac104462e76216274d6bf5 # master - fork with a fix for f3.38
   lemberfpsmonitor: ^0.0.3+6
-  local_auth: ^3.0.0
+  local_auth: ^3.0.1
   material_color_utilities: ^0.13.0
   media_kit: ^1.2.6
   media_kit_video: ^2.0.1
