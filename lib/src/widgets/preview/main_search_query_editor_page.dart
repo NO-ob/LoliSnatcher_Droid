@@ -357,6 +357,15 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
     searchHandler.searchTextController.text = searchHandler.currentTab.tags.trim();
   }
 
+  void onClearTap() {
+    if (tagToEditIndex != null) {
+      tagToEditIndex = null;
+      tagToEdit = null;
+      suggestionTextController.clear();
+      setState(() {});
+    }
+  }
+
   void onSearchTap() {
     Navigator.of(context).pop();
     searchHandler.searchTextController.clearComposing();
@@ -952,6 +961,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
                 onChipLongTap: onChipLongTap,
                 onChipDeleteTap: onChipDeleteTap,
                 onResetTap: onResetTap,
+                onClearTap: onClearTap,
                 onSearchTap: onSearchTap,
                 onSearchLongTap: onSearchLongTap,
                 scrollController: searchBarScrollController,

@@ -102,6 +102,7 @@ class MainSearchBarWithActions extends StatelessWidget {
           onChipDeleteTap: onChipDeleteTap,
           onSearchBackgroundTap: () => onSearchBackgroundTap(context),
           onResetTap: onResetTap,
+          onClearTap: () {},
           onSearchTap: onSearchTap,
           onSearchLongTap: onSearchLongTap,
           subTag: subTag,
@@ -117,6 +118,7 @@ class MainSearchBar extends StatefulWidget {
     required this.onChipLongTap,
     required this.onChipDeleteTap,
     required this.onResetTap,
+    required this.onClearTap,
     required this.onSearchTap,
     required this.onSearchLongTap,
     this.onSearchBackgroundTap,
@@ -131,6 +133,7 @@ class MainSearchBar extends StatefulWidget {
   final void Function(String, int)? onChipLongTap;
   final void Function(String, int)? onChipDeleteTap;
   final VoidCallback onResetTap;
+  final VoidCallback onClearTap;
   final VoidCallback onSearchTap;
   final VoidCallback onSearchLongTap;
   final VoidCallback? onSearchBackgroundTap;
@@ -204,6 +207,11 @@ class _MainSearchBarState extends State<MainSearchBar> {
         );
       }
     });
+  }
+
+  void _onClearTap() {
+    widget.onClearTap();
+    searchHandler.searchTextController.clear();
   }
 
   @override
@@ -323,7 +331,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
                               key: const Key('clear-button'),
                               color: Colors.transparent,
                               child: InkWell(
-                                onTap: searchHandler.searchTextController.clear,
+                                onTap: _onClearTap,
                                 child: const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 10),
                                   child: Icon(
