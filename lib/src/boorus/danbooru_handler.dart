@@ -173,7 +173,7 @@ class DanbooruHandler extends BooruHandler {
     // return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=20&order=count";
 
     // EXAMPLE: https://danbooru.donmai.us/autocomplete.json?search[query]=fis&search[type]=tag_query&limit=20
-    return '${booru.baseURL}/autocomplete.json?search[query]=$input*&search[type]=tag_query&limit=20&order=count';
+    return '${booru.baseURL}/autocomplete.json?search[query]=*$input*&search[type]=tag_query&limit=20&order=count';
   }
 
   @override
