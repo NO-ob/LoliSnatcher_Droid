@@ -94,7 +94,7 @@ dependencies:
   talker: ^5.1.14
   url_launcher: ^6.3.2
   uuid: ^4.5.3
-  vibration: ^3.1.7
+  vibration: ^3.1.8
   video_player: ^2.11.0
   waterfall_flow: ^3.1.1
   xml: ^6.6.1
