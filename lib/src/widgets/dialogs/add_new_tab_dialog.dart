@@ -52,6 +52,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   @override
   void initState() {
     super.initState();
+    customTagsController.text = usedQuery;
     secondaryBoorus = searchHandler.currentSecondaryBoorus.value ?? <Booru>[];
   }
 
@@ -148,7 +149,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                 padding: const EdgeInsets.only(top: 8),
                 child: TagSearchBox(
                   controller: customTagsController,
-                  title: context.loc.tabs.customQuery,
+                  title: queryMode == _Querymode.custom ? context.loc.tabs.customQuery : null,
                   onlyInput: true,
                   enabled: queryMode == _Querymode.custom,
                   hintText: switch (queryMode) {
