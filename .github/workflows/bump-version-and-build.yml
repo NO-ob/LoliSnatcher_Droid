@@ -1,4 +1,4 @@
-name: Manual Build
+name: Bump Version and Build
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ on:
         type: string
 
 jobs:
-  manual-build:
+  bump-version-and-build:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,12 +25,24 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Bump build number
+        id: bump_version
+        run: python .github/scripts/bump_version.py
+
       - name: Get version info
         id: version_info
         run: |
           echo "version_name=$(cat version_name.txt)" >> $GITHUB_OUTPUT
           echo "build_number=$(cat build_number.txt)" >> $GITHUB_OUTPUT
           rm version_name.txt build_number.txt
+
+      - name: Commit version bump
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add pubspec.yaml lib/src/data/constants.dart
+          git commit -m "chore: bump version to ${{ steps.version_info.outputs.version_name }}+${{ steps.version_info.outputs.build_number }}"
+          git push
 
       - name: Set up Java
         uses: actions/setup-java@v4
