@@ -51,8 +51,6 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   /// en: 'en'
   String get locale => TranslationOverrides.string(_root.$meta, 'locale', {}) ?? 'en';
 
-  /// Human readable name of this locale
-  ///
   /// en: 'English'
   String get localeName => TranslationOverrides.string(_root.$meta, 'localeName', {}) ?? 'English';
 
@@ -1031,8 +1029,6 @@ class TranslationsSettingsEn {
 
   // Translations
 
-  /// Main settings page/button title
-  ///
   /// en: 'Settings'
   String get title => TranslationOverrides.string(_root.$meta, 'settings.title', {}) ?? 'Settings';
 

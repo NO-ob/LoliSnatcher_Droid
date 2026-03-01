@@ -1,10 +1,6 @@
 {
     "locale": "en",
     "localeName": "English",
-    "@localeName": {
-        "context": "locale",
-        "description": "Human readable name of this locale"
-    },
     "appName": "LoliSnatcher",
     "error": "Error",
     "errorExclamation": "Error!",
@@ -362,10 +358,6 @@
     },
     "settings": {
         "title": "Settings",
-        "@title": {
-            "context": "SettingsPage",
-            "description": "Main settings page/button title"
-        },
         "language": {
             "title": "Language",
             "system": "System",
