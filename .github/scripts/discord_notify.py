@@ -7,7 +7,7 @@ import sys
 import json
 import urllib.request
 import urllib.error
-from datetime import datetime
+from datetime import datetime, timezone
 
 def send_discord_notification():
     webhook_url = os.environ.get('DISCORD_WEBHOOK_URL')
@@ -59,7 +59,7 @@ def send_discord_notification():
                 'inline': True
             }
         ],
-        'timestamp': datetime.utcnow().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
         'footer': {
             'text': 'LoliSnatcher Build System'
         }
@@ -80,7 +80,10 @@ def send_discord_notification():
         req = urllib.request.Request(
             webhook_url,
             data=data,
-            headers={'Content-Type': 'application/json'}
+            headers={
+                'Content-Type': 'application/json',
+                'User-Agent': 'DiscordBot (github-actions, 1.0)',
+            }
         )
 
         with urllib.request.urlopen(req) as response:
