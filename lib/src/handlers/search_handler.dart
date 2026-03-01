@@ -408,45 +408,61 @@ class SearchHandler {
     isRunningAutoSearch.value = false;
   }
 
-  HasTabWithTagResult hasTabWithTag(String tag) {
+  HasTabWithTagResult hasTabWithTag(String tag, {Booru? customBooru}) {
     tag = tag.toLowerCase().trim();
-    List<SearchTab> tabsWithOnlyTag = tabs.where((tab) => tab.tags == tag).toList();
-    if (tabsWithOnlyTag.isNotEmpty) {
-      tabsWithOnlyTag = tabsWithOnlyTag.where((tab) => tab.tags.toLowerCase().trim() == tag).toList();
-      if (tabsWithOnlyTag.isNotEmpty) {
-        if (tabsWithOnlyTag.any((tab) => tab.selectedBooru.value == currentBooru)) {
-          return HasTabWithTagResult.onlyTag;
-        } else {
-          return HasTabWithTagResult.onlyTagDifferentBooru;
-        }
+    final Booru targetBooru = customBooru ?? currentBooru;
+
+    final onlyTagMatches = tabs.where((tab) => tab.tags.toLowerCase().trim() == tag);
+    if (onlyTagMatches.isNotEmpty) {
+      if (onlyTagMatches.any((tab) => tab.selectedBooru.value == targetBooru)) {
+        return HasTabWithTagResult.onlyTag;
       }
+      return HasTabWithTagResult.onlyTagDifferentBooru;
     }
 
-    List<SearchTab> tabsContainingTag = tabs
-        .where(
-          (tab) => tab.tags.contains(tag),
-        )
-        .toList();
-    if (tabsContainingTag.isNotEmpty) {
-      tabsContainingTag = tabsContainingTag
-          .where((tab) => tab.tags.toLowerCase().trim().split(' ').contains(tag))
-          .toList();
-      if (tabsContainingTag.isNotEmpty) {
-        return HasTabWithTagResult.containsTag;
-      }
+    if (getTabsContainingTag(tag).isNotEmpty) {
+      return HasTabWithTagResult.containsTag;
     }
 
     return HasTabWithTagResult.noTag;
   }
 
-  List<SearchTab> getTabsWithTag(String tag) {
-    final List<SearchTab> tabsWithTag = [];
-    for (final SearchTab tab in tabs) {
-      if (tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim())) {
-        tabsWithTag.add(tab);
+  List<(int, SearchTab)> getTabsWithOnlyTag(String tag) {
+    tag = tag.toLowerCase().trim();
+    final result = <(int, SearchTab)>[];
+    for (int i = 0; i < tabs.length; i++) {
+      final tab = tabs[i];
+      final parts = tab.tags.toLowerCase().trim().split(' ');
+      if (parts.length == 1 && parts[0] == tag && tab.selectedBooru.value == currentBooru) {
+        result.add((i, tab));
       }
     }
-    return tabsWithTag;
+    return result;
+  }
+
+  List<(int, SearchTab)> getTabsWithOnlyTagDifferentBooru(String tag) {
+    tag = tag.toLowerCase().trim();
+    final result = <(int, SearchTab)>[];
+    for (int i = 0; i < tabs.length; i++) {
+      final tab = tabs[i];
+      final parts = tab.tags.toLowerCase().trim().split(' ');
+      if (parts.length == 1 && parts[0] == tag && tab.selectedBooru.value != currentBooru) {
+        result.add((i, tab));
+      }
+    }
+    return result;
+  }
+
+  List<(int, SearchTab)> getTabsContainingTag(String tag) {
+    tag = tag.toLowerCase().trim();
+    final result = <(int, SearchTab)>[];
+    for (int i = 0; i < tabs.length; i++) {
+      final tab = tabs[i];
+      if (tab.tags.toLowerCase().trim().split(' ').contains(tag)) {
+        result.add((i, tab));
+      }
+    }
+    return result;
   }
 
   int get currentIndex => index.value;
@@ -1384,10 +1400,24 @@ enum HasTabWithTagResult {
   bool get isOnlyTagDifferentBooru => this == HasTabWithTagResult.onlyTagDifferentBooru;
   bool get isContainsTag => this == HasTabWithTagResult.containsTag;
   bool get isNoTag => this == HasTabWithTagResult.noTag;
-  bool get hasTag =>
+  bool get hasTagInAnyForm =>
       this == HasTabWithTagResult.onlyTag ||
       this == HasTabWithTagResult.onlyTagDifferentBooru ||
       this == HasTabWithTagResult.containsTag;
+
+  String? locName(BuildContext context) => switch (this) {
+    .onlyTag => context.loc.tagView.tabsWithOnlyTag,
+    .onlyTagDifferentBooru => context.loc.tagView.tabsWithOnlyTagDifferentBooru,
+    .containsTag => context.loc.tagView.tabsContainingTag,
+    _ => null,
+  };
+
+  Color? color(BuildContext context) => switch (this) {
+    onlyTag => Theme.of(context).colorScheme.onSurface,
+    onlyTagDifferentBooru => Colors.yellow,
+    containsTag => Colors.blue,
+    _ => null,
+  };
 }
 
 enum TabAddMode {

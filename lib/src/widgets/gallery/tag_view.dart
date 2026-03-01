@@ -13,6 +13,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fpdart/fpdart.dart' show FpdartOnIterable;
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:uuid/uuid.dart';
@@ -729,6 +731,7 @@ class _TagViewState extends State<TagView> {
                   isHidden: isHidden,
                   isMarked: isMarked,
                   isInSearch: isInSearch,
+                  hasTabWithTag: hasTabWithTag,
                   onUpdate: parseSortGroupTagsWithoutCache,
                 );
               },
@@ -835,16 +838,14 @@ class _TagViewState extends State<TagView> {
                     icon: Stack(
                       children: [
                         Icon(Icons.fiber_new, color: Theme.of(context).colorScheme.secondary),
-                        if (hasTabWithTag.hasTag)
+                        if (hasTabWithTag.hasTagInAnyForm)
                           Positioned(
                             right: 0,
                             top: 0,
                             child: Icon(
                               Icons.circle,
                               size: 6,
-                              color: hasTabWithTag.isOnlyTag
-                                  ? Theme.of(context).colorScheme.onSurface
-                                  : (hasTabWithTag.isOnlyTagDifferentBooru ? Colors.yellow : Colors.blue),
+                              color: hasTabWithTag.color(context),
                             ),
                           ),
                       ],
@@ -1154,6 +1155,7 @@ Future<void> showTagDialog({
   required bool isHidden,
   required bool isMarked,
   required bool isInSearch,
+  required HasTabWithTagResult hasTabWithTag,
   required VoidCallback onUpdate,
 }) async {
   final settingsHandler = SettingsHandler.instance;
@@ -1353,6 +1355,30 @@ Future<void> showTagDialog({
                 Navigator.of(context).pop();
               },
             ),
+          if (hasTabWithTag.hasTagInAnyForm)
+            ListTile(
+              leading: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    CupertinoIcons.doc_on_doc,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
+
+                  Positioned(
+                    right: -5,
+                    top: -5,
+                    child: Icon(
+                      Icons.circle,
+                      size: 6,
+                      color: hasTabWithTag.color(context),
+                    ),
+                  ),
+                ],
+              ),
+              title: Text(context.loc.tagView.relatedTabs),
+              onTap: () => showRelatedTabsDialog(context, tag),
+            ),
           ListTile(
             leading: Icon(
               Icons.edit,
@@ -1394,6 +1420,129 @@ Future<void> showTagDialog({
     },
   );
 }
+
+Future<void> showRelatedTabsDialog(
+  BuildContext context,
+  String tag,
+) async {
+  await showDialog<void>(
+    context: context,
+    builder: (_) => _RelatedTabsDialog(tag),
+  );
+}
+
+class _RelatedTabsDialog extends StatefulWidget {
+  const _RelatedTabsDialog(
+    this.tag,
+  );
+
+  final String tag;
+
+  @override
+  State<_RelatedTabsDialog> createState() => _RelatedTabsDialogState();
+}
+
+class _RelatedTabsDialogState extends State<_RelatedTabsDialog> {
+  final searchHandler = SearchHandler.instance;
+
+  List<(int, SearchTab)> tabsWithOnlyTag = [], tabsWithOnlyTagDifferentBooru = [], tabsContainingTag = [];
+
+  HasTabWithTagResult selectedType = HasTabWithTagResult.noTag;
+
+  @override
+  void initState() {
+    super.initState();
+
+    tabsWithOnlyTag = searchHandler.getTabsWithOnlyTag(widget.tag);
+    tabsWithOnlyTagDifferentBooru = searchHandler.getTabsWithOnlyTagDifferentBooru(widget.tag);
+    tabsContainingTag = searchHandler.getTabsContainingTag(widget.tag);
+
+    selectedType = HasTabWithTagResult.noTag;
+    if (tabsWithOnlyTag.isNotEmpty) {
+      selectedType = HasTabWithTagResult.onlyTag;
+    } else if (tabsWithOnlyTagDifferentBooru.isNotEmpty) {
+      selectedType = HasTabWithTagResult.onlyTagDifferentBooru;
+    } else if (tabsContainingTag.isNotEmpty) {
+      selectedType = HasTabWithTagResult.containsTag;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final listItems = switch (selectedType) {
+      .onlyTag => tabsWithOnlyTag,
+      .onlyTagDifferentBooru => tabsWithOnlyTagDifferentBooru,
+      .containsTag => tabsContainingTag,
+      _ => <(int, SearchTab)>[],
+    };
+
+    return SettingsDialog(
+      scrollable: false,
+      content: Column(
+        mainAxisSize: .min,
+        crossAxisAlignment: .start,
+        children: [
+          LoliDropdown(
+            value: selectedType,
+            onChanged: (newType) {
+              setState(() => selectedType = newType ?? HasTabWithTagResult.noTag);
+            },
+            items: [
+              if (tabsWithOnlyTag.isNotEmpty) HasTabWithTagResult.onlyTag,
+              if (tabsWithOnlyTagDifferentBooru.isNotEmpty) HasTabWithTagResult.onlyTagDifferentBooru,
+              if (tabsContainingTag.isNotEmpty) HasTabWithTagResult.containsTag,
+            ],
+            itemBuilder: (v) => ListTile(
+              leading: Icon(
+                Icons.circle,
+                size: 12,
+                color: v?.color(context),
+              ),
+              title: Text(
+                '${v?.locName(context) ?? ''} (${switch (v) {
+                  .onlyTag => tabsWithOnlyTag.length,
+                  .onlyTagDifferentBooru => tabsWithOnlyTagDifferentBooru.length,
+                  .containsTag => tabsContainingTag.length,
+                  _ => 0,
+                }})',
+              ),
+            ),
+            selectedItemBuilder: (v) => ListTile(
+              leading: Icon(
+                Icons.circle,
+                size: 12,
+                color: v?.color(context),
+              ),
+              title: Text(v?.locName(context) ?? ''),
+            ),
+            labelText: context.loc.tagView.relatedTabs,
+          ),
+          Container(
+            width: double.maxFinite,
+            height: (listItems.length * 80.0).clamp(0, MediaQuery.sizeOf(context).height * 0.66) + 32,
+            decoration: const BoxDecoration(),
+            child: ListView.builder(
+              itemCount: listItems.length,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              itemBuilder: (context, index) {
+                final (tabIndex, tab) = listItems[index];
+                return TabManagerItem(
+                  tab: tab,
+                  index: index,
+                  isFiltered: true,
+                  originalIndex: tabIndex,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      actionButtons: const [CloseDialogButton(withIcon: true)],
+    );
+  }
+}
+
+//
 
 class SourceLinkErrorDialog extends StatelessWidget {
   const SourceLinkErrorDialog({
@@ -1706,9 +1855,10 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                       ),
                 subtitle: isSingleBooru
                     ? null
-                    : SizedBox(
+                    : Container(
                         width: context.mediaSize.width,
-                        height: 80,
+                        height: 50,
+                        margin: const EdgeInsets.only(top: 8),
                         child: SettingsBooruDropdown(
                           title: context.loc.booru,
                           placeholder: context.loc.tagView.selectBooruToLoad,
@@ -1719,6 +1869,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                             selectedBooru = value;
                             loadPreview(refresh: true);
                           },
+                          titleAsLabel: true,
                           drawBottomBorder: false,
                         ),
                       ),
@@ -1787,22 +1938,21 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               builder: (context) {
                                 final HasTabWithTagResult hasTabWithTag = SearchHandler.instance.hasTabWithTag(
                                   widget.tag,
+                                  customBooru: selectedBooru,
                                 );
 
                                 return IconButton(
                                   icon: Stack(
                                     children: [
                                       const Icon(Icons.fiber_new),
-                                      if (hasTabWithTag.hasTag)
+                                      if (hasTabWithTag.hasTagInAnyForm)
                                         Positioned(
                                           right: 0,
                                           top: 0,
                                           child: Icon(
                                             Icons.circle,
                                             size: 6,
-                                            color: hasTabWithTag.isOnlyTag
-                                                ? Theme.of(context).colorScheme.onSurface
-                                                : (hasTabWithTag.isOnlyTagDifferentBooru ? Colors.yellow : Colors.blue),
+                                            color: hasTabWithTag.color(context),
                                           ),
                                         ),
                                     ],
@@ -1877,7 +2027,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                         const SizedBox(height: 8),
                         SizedBox(
                           width: context.mediaSize.width,
-                          height: 80,
+                          height: 50,
                           child: SettingsBooruDropdown(
                             title: context.loc.booru,
                             placeholder: context.loc.tagView.selectBooruToLoad,
@@ -1888,6 +2038,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               selectedBooru = value;
                               loadPreview(refresh: true);
                             },
+                            titleAsLabel: true,
                             drawBottomBorder: false,
                           ),
                         ),
@@ -2147,6 +2298,7 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                                         (t) => t == tag.toLowerCase() || t == '-${tag.toLowerCase()}',
                                                       ) !=
                                                   -1,
+                                              hasTabWithTag: searchHandler.hasTabWithTag(tag),
                                               onUpdate: () {},
                                             ),
                                           );
@@ -2205,6 +2357,7 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                                                     t == '-${tag.toLowerCase()}',
                                                               ) !=
                                                           -1,
+                                                      hasTabWithTag: searchHandler.hasTabWithTag(tag),
                                                       onUpdate: () {},
                                                     ),
                                                   );

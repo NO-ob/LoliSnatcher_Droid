@@ -195,7 +195,7 @@
         "title": "Multibooru",
         "multibooruMode": "Multibooru mode",
         "multibooruRequiresAtLeastTwoBoorus": "Requires at least 2 configured boorus",
-        "selectSecondaryBoorus": "Select secondary boorus:",
+        "selectSecondaryBoorus": "Select additional boorus:",
         "akaMultibooruMode": "aka Multibooru mode",
         "labelSecondaryBoorusToInclude": "Secondary boorus to include"
     },
@@ -1127,7 +1127,11 @@
         "history": "History",
         "failedToLoadPreviewPage": "Failed to load preview page",
         "tryAgain": "Try again",
-        "detectedLinks": "Detected links:"
+        "detectedLinks": "Detected links:",
+        "relatedTabs": "Related tabs",
+        "tabsWithOnlyTag": "Tabs with only this tag",
+        "tabsWithOnlyTagDifferentBooru": "Tabs with only this tag but on a different booru",
+        "tabsContainingTag": "Tabs containing this tag"
     },
     "pinnedTags": {
         "pinnedTags": "Pinned tags",

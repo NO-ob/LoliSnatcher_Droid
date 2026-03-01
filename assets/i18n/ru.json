@@ -191,7 +191,7 @@
     "title": "Мультисайт",
     "multibooruMode": "Режим мультисайта",
     "multibooruRequiresAtLeastTwoBoorus": "Требует как минимум 2 настроенных сайта",
-    "selectSecondaryBoorus": "Выбери второстепенные конфиги:",
+    "selectSecondaryBoorus": "Выбери дополнительные сайты:",
     "akaMultibooruMode": "режим Мультисайта",
     "labelSecondaryBoorusToInclude": "Выбранные дополнительные сайты"
   },
@@ -1119,7 +1119,11 @@
     "history": "История",
     "failedToLoadPreviewPage": "Не удалось загрузить страницу предпросмотра",
     "tryAgain": "Попробовать снова",
-    "detectedLinks": "Обнаруженные ссылки:"
+    "detectedLinks": "Обнаруженные ссылки:",
+    "relatedTabs": "Связанные вкладки",
+    "tabsWithOnlyTag": "Вкладки только с этим тегом",
+    "tabsWithOnlyTagDifferentBooru": "Вкладки только с этим тегом, но на другом сайте",
+    "tabsContainingTag": "Вкладки, содержащие этот тег"
   },
   "pinnedTags": {
     "pinnedTags": "Закрепленные теги",
