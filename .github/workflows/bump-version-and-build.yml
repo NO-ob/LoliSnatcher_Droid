@@ -90,11 +90,23 @@ jobs:
       - name: Build APK for testing
         run: bash build.sh test
 
-      - name: Upload APK artifacts
+      - name: Upload APK (arm64-v8a)
         uses: actions/upload-artifact@v4
         with:
-          name: lolisnatcher-${{ steps.version_info.outputs.version_name }}-${{ steps.version_info.outputs.build_number }}
-          path: build/app/outputs/flutter-apk/LoliSnatcher_*.apk
+          name: lolisnatcher-${{ steps.version_info.outputs.version_name }}-${{ steps.version_info.outputs.build_number }}-arm64-v8a
+          path: build/app/outputs/flutter-apk/LoliSnatcher_*_arm64-v8a_*.apk
+
+      - name: Upload APK (armeabi-v7a)
+        uses: actions/upload-artifact@v4
+        with:
+          name: lolisnatcher-${{ steps.version_info.outputs.version_name }}-${{ steps.version_info.outputs.build_number }}-armeabi-v7a
+          path: build/app/outputs/flutter-apk/LoliSnatcher_*_armeabi-v7a_*.apk
+
+      - name: Upload APK (x86_64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: lolisnatcher-${{ steps.version_info.outputs.version_name }}-${{ steps.version_info.outputs.build_number }}-x86_64
+          path: build/app/outputs/flutter-apk/LoliSnatcher_*_x86_64_*.apk
 
       - name: Send Discord notification
         if: success()
