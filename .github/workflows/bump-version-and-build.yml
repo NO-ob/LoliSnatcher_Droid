@@ -78,13 +78,13 @@ jobs:
           EOF
 
       - name: Build APK for testing
-        run: sh build.sh test
+        run: bash build.sh test
 
-      - name: Upload APK artifact
+      - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: lolisnatcher-${{ steps.version_info.outputs.version_name }}-${{ steps.version_info.outputs.build_number }}.apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: lolisnatcher-${{ steps.version_info.outputs.version_name }}-${{ steps.version_info.outputs.build_number }}
+          path: build/app/outputs/flutter-apk/LoliSnatcher_*.apk
 
       - name: Send Discord notification
         if: success()
