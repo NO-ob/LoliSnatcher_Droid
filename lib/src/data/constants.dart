@@ -53,7 +53,7 @@ Main in this update:
 
 
 New features:
-- Localization: app is now translated into Russian, more languages will be added in future updates, can be changed in [Settings -> Language]
+- Localization: app is now translated into Russian, more languages will be added in future updates, can be changed in [Settings -> Language], uses System locale by default (fallback to English if not supported)
 - Custom fonts: [Settings -> Themes -> Font]
 - Tags can now be pinned in the tag search view with custom labels for quick access
 - All input fields where you can enter tags now open a full tag search view where you can quickly look for suggestions
@@ -71,35 +71,40 @@ New features:
 
 
 Changes:
-- [Hated] tags renamed to [Hidden], [Loved] renamed to [Marked] throughout the app
+- Reverted to old rendering engine (previous version used the new one, but it caused issues on older devices). [NOTE]: In the future we may be forced to switch to a new engine
+- [Hated] tag filters renamed to [Hidden], [Loved] renamed to [Marked] throughout the app
 - Reworked cache cleanup
 - Improved app startup time
 - Image viewer performance improvements when switching between items
 - Added tag counts in item info drawer and tag suggestions
-- Reworked comments and translation notes parsing
+- Reworked comments and translation notes parsing and rendering
+- Improved sources parsing in item info drawer
 - Expanded kaomoji (text emojis) presentation
 - Replaced default error widget with a custom one to prevent layout breakage on app exceptions
 - Improved booru add/edit page flow
+- Added a button in tag details which opens a dialog with a list of related tabs (also explains what white/yellow/blue dots on [Add new tab] button mean)
 - Enabled predictive back gesture support on supported devices, can be toggled in [Settings -> Interface -> Predictive back gesture]
-- Routes tag suggestion requests to the correct booru when a booru index prefix is included in the search query while using Multibooru
-- Merged meta tags on Multibooru
+- Routes tag suggestion requests to the correct booru when a booru index prefix is included in the query when using Multibooru
+- Merged meta tags suggestions on Multibooru
 - Media cache is now enabled by default (only applies to new users)
 - Long tap to fast forward on videos is now enabled by default, related setting is removed
-- Improved sources parsing in item info drawer
 
 
 Booru changes/fixes:
 - Multibooru: combined meta tags, prefix-based tag suggestion routing per handler
-- xyz-based boorus: fixed item loading
+- xyz-based boorus: fixed item details not loading in some cases
 
 
 Fixes:
 - Possible fix for rare thumbnail rendering artifacts
-- Possible fix for currently viewed item thumbnail border not disabling after closing the viewer
+- Possible fix for currently viewed item thumbnail border staying visible after closing the viewer
 - Fixed some cases when database operations were taking too long
 - Fixed Multibooru tag splitting on special characters (e.g. [1#tag 2#score:>20] was turning into [1#tag >20])
 - Fixed exception when deleting duplicate tag from tag search view
 - Removed [Something went wrong: authInProgress] message when starting the app with App lock enabled
+- Fixed [Add new tab dialog] applying custom page number to tab when it was not enabled
+- Fixed [Add new tab dialog] not applying default query when dialog is opened
+- Fixed broken state after clearing search query when editing a tag in the query
 
 
 and other small fixes and changes...
