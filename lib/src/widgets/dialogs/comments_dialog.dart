@@ -180,7 +180,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
           Text(context.loc.comments.title),
           if (comments.isNotEmpty)
             Text(
-              '${comments.length}',
+              '${selectedIndex != null ? '${selectedIndex! + 1}/' : ''}${comments.length}',
               style: Theme.of(context).textTheme.bodySmall,
             ),
         ],
