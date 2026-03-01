@@ -80,6 +80,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
       contentItems: [
         SettingsBooruDropdown(
           title: context.loc.booru,
+          titleAsLabel: true,
           value: booruFilter,
           drawBottomBorder: false,
           nullable: true,
@@ -98,6 +99,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
         ),
         SettingsDropdown<bool?>(
           title: context.loc.tabs.filters.loaded,
+          titleAsLabel: true,
           value: loadedFilter,
           drawBottomBorder: false,
           onChanged: (bool? newValue) {
@@ -118,6 +120,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
         ),
         SettingsDropdown<TagType?>(
           title: context.loc.tabs.filters.tagType,
+          titleAsLabel: true,
           value: tagTypeFilter,
           drawBottomBorder: false,
           onChanged: (TagType? newValue) {
@@ -151,6 +154,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
         ),
         SettingsDropdown<bool?>(
           title: context.loc.tabs.filters.multibooru,
+          titleAsLabel: true,
           value: isMultiBooruMode,
           drawBottomBorder: false,
           onChanged: (bool? newValue) {

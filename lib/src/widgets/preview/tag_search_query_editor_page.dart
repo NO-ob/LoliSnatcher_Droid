@@ -595,6 +595,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
             value: selectedBooru,
             onChanged: onBooruChanged,
             title: context.loc.booru,
+            titleAsLabel: true,
             placeholder: context.loc.select,
             drawBottomBorder: false,
             contentPadding: EdgeInsets.zero,
@@ -703,7 +704,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
 /// ```
 class TagSearchBox extends StatefulWidget {
   const TagSearchBox({
-    required this.title,
+    this.title,
     this.controller,
     this.hintText,
     this.booru,
@@ -725,7 +726,7 @@ class TagSearchBox extends StatefulWidget {
   final TextEditingController? controller;
 
   /// Label text for the input field
-  final String title;
+  final String? title;
 
   /// Hint text when empty
   final String? hintText;
@@ -829,8 +830,11 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.title),
-          const SizedBox(height: 8),
+          if (widget.title != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(widget.title!),
+            ),
           Material(
             color: Theme.of(context).inputDecorationTheme.fillColor,
             borderRadius: BorderRadius.circular(10),

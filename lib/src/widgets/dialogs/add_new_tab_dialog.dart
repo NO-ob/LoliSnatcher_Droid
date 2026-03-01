@@ -112,6 +112,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
               title: context.loc.booru,
               placeholder: context.loc.tabs.selectABooruOrLeaveEmpty,
               nullable: true,
+              titleAsLabel: true,
               onChanged: (value) {
                 setState(() {
                   booru = value;
@@ -121,6 +122,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
             SettingsDropdown(
               value: addMode,
               items: TabAddMode.values,
+              titleAsLabel: true,
               itemTitleBuilder: (v) => v?.locName(context) ?? '',
               onChanged: (v) {
                 setState(() {
@@ -132,6 +134,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
             SettingsDropdown(
               value: queryMode,
               items: _Querymode.values,
+              titleAsLabel: true,
               itemTitleBuilder: (v) => v?.locName(context) ?? '',
               onChanged: (v) {
                 setState(() {

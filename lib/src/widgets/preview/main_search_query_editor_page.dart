@@ -2419,6 +2419,7 @@ class _PrefixEditDialog extends StatelessWidget {
                             '${newBooru == null ? '' : usedBoorus.indexOf(newBooru) + 1}${newBooru == null ? '' : '#'}${isExclude ? '-' : ''}${isOr ? '~' : ''}$text';
                       },
                       title: context.loc.searchBar.booruNumberPrefix,
+                      titleAsLabel: true,
                       contentPadding: EdgeInsets.zero,
                       itemBuilder: (booru, _) {
                         if (booru == null) {

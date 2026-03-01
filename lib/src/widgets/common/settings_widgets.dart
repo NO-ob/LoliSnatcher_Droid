@@ -648,6 +648,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     this.nullable = false,
     this.trailingIcon,
     this.contentPadding,
+    this.titleAsLabel = false,
     super.key,
   });
 
@@ -665,6 +666,7 @@ class SettingsBooruDropdown extends StatelessWidget {
   final bool nullable;
   final Widget? trailingIcon;
   final EdgeInsets? contentPadding;
+  final bool titleAsLabel;
 
   Widget _selectedItemBuilder(BuildContext context, Booru? item) {
     if (item == null) {
@@ -720,6 +722,7 @@ class SettingsBooruDropdown extends StatelessWidget {
       itemExtent: kMinInteractiveDimension,
       expendableByScroll: true,
       contentPadding: contentPadding,
+      titleAsLabel: titleAsLabel,
     );
   }
 }

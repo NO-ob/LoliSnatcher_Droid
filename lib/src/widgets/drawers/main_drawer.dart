@@ -55,6 +55,7 @@ class MainDrawer extends StatelessWidget {
                     },
                     title: context.loc.booru,
                     contentPadding: EdgeInsets.zero,
+                    titleAsLabel: true,
                     drawBottomBorder: false,
                   ),
                 ),
