@@ -237,13 +237,13 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   Future<void> onTap(int index) async {
-    viewerHandler.setCurrent(searchHandler.currentFetched[index]);
-
     if (isMobile) {
       // protection from opening multiple viewers at once
       if (!isActive.value) {
         return;
       }
+
+      viewerHandler.setCurrent(searchHandler.currentFetched[index]);
 
       isActive.value = false;
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
@@ -289,7 +289,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
         navigationHandler.bottomBarKey.currentState?.show();
       });
     } else {
-      //
+      viewerHandler.setCurrent(searchHandler.currentFetched[index]);
     }
   }
 

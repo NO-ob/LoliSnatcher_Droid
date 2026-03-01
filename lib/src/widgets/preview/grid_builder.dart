@@ -52,16 +52,16 @@ class GridBuilder extends StatelessWidget {
           crossAxisSpacing: 4,
         ),
         itemBuilder: (BuildContext context, int index) {
-          return Obx(() {
-            final BooruItem item = currentFetched[index];
+          return GridTile(
+            child: Obx(() {
+              final BooruItem item = currentFetched[index];
 
-            final bool hasSelected = tab.selected.isNotEmpty;
-            final selectedIndex = tab.selected.indexOf(item);
-            final bool isSelected = selectedIndex != -1;
-            final bool isHighlighted = ViewerHandler.instance.current.value?.key == item.key;
+              final bool hasSelected = tab.selected.isNotEmpty;
+              final selectedIndex = tab.selected.indexOf(item);
+              final bool isSelected = selectedIndex != -1;
+              final bool isHighlighted = ViewerHandler.instance.current.value?.key == item.key;
 
-            return GridTile(
-              child: ThumbnailCardBuild(
+              return ThumbnailCardBuild(
                 index: index,
                 item: item,
                 handler: tab.booruHandler,
@@ -74,9 +74,9 @@ class GridBuilder extends StatelessWidget {
                 onDoubleTap: onDoubleTap,
                 onLongPress: onLongPress,
                 onSecondaryTap: onSecondaryTap,
-              ),
-            );
-          });
+              );
+            }),
+          );
         },
       ),
     );
