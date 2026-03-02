@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -12,7 +11,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
@@ -34,10 +32,6 @@ class DebugPage extends StatefulWidget {
 
 class _DebugPageState extends State<DebugPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-
-  double vDuration = 0;
-  double vAmplitude = -1;
-  bool vFlutterway = false;
 
   final TextEditingController sessionStrController = TextEditingController();
 
@@ -156,135 +150,6 @@ class _DebugPageState extends State<DebugPage> {
                 icon: const Icon(Icons.text_fields),
                 page: () => const TextParserTestPage(),
               ),
-
-              if (kDebugMode && (Platform.isAndroid || Platform.isIOS)) ...[
-                SettingsButton(name: context.loc.settings.debug.vibration, enabled: false),
-                Column(
-                  children: [
-                    SettingsButton(
-                      name: context.loc.settings.debug.vibrationTests,
-                    ),
-                    SettingsButton(
-                      name: context.loc.settings.debug.duration,
-                      subtitle: Row(
-                        children: [
-                          ElevatedButton(
-                            child: const Text('-1'),
-                            onPressed: () {
-                              setState(() {
-                                if ((vDuration - 1) <= 0) {
-                                  vDuration = 0;
-                                } else {
-                                  vDuration -= 1;
-                                }
-                              });
-                            },
-                          ),
-                          Expanded(
-                            child: Slider(
-                              value: vDuration,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  vDuration = newValue;
-                                });
-                              },
-                              min: 0,
-                              max: 500,
-                              divisions: 500,
-                              label: '$vDuration',
-                            ),
-                          ),
-                          ElevatedButton(
-                            child: const Text('+1'),
-                            onPressed: () {
-                              setState(() {
-                                if ((vDuration + 1) >= 500) {
-                                  vDuration = 500;
-                                } else {
-                                  vDuration += 1;
-                                }
-                              });
-                            },
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text('$vDuration'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SettingsButton(
-                      name: context.loc.settings.debug.amplitude,
-                      subtitle: Row(
-                        children: [
-                          ElevatedButton(
-                            child: const Text('-1'),
-                            onPressed: () {
-                              setState(() {
-                                if ((vAmplitude - 1) <= -1) {
-                                  vAmplitude = -1;
-                                } else {
-                                  vAmplitude -= 1;
-                                }
-                              });
-                            },
-                          ),
-                          Expanded(
-                            child: Slider(
-                              value: vAmplitude,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  vAmplitude = newValue;
-                                });
-                              },
-                              min: -1,
-                              max: 255,
-                              divisions: 256,
-                              label: '$vAmplitude',
-                            ),
-                          ),
-                          ElevatedButton(
-                            child: const Text('+1'),
-                            onPressed: () {
-                              setState(() {
-                                if ((vAmplitude + 1) >= 255) {
-                                  vAmplitude = 255;
-                                } else {
-                                  vAmplitude += 1;
-                                }
-                              });
-                            },
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text('$vAmplitude'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SettingsToggle(
-                      value: vFlutterway,
-                      onChanged: (newValue) {
-                        setState(() {
-                          vFlutterway = newValue;
-                        });
-                      },
-                      title: context.loc.settings.debug.flutterway,
-                    ),
-                    SettingsButton(
-                      name: context.loc.settings.debug.vibrate,
-                      action: () {
-                        print('Vibrate $vDuration $vAmplitude');
-                        ServiceHandler.vibrate(
-                          flutterWay: vFlutterway,
-                          duration: vDuration.round(),
-                          amplitude: vAmplitude.round(),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
 
               SettingsButton(
                 name: context.loc.settings.debug.resolution(

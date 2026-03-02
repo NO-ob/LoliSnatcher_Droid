@@ -524,7 +524,6 @@ class ServiceHandler {
   }
 
   static Future<void> vibrate({
-    bool flutterWay = false,
     int duration = 10,
     int amplitude = -1,
   }) async {
@@ -534,15 +533,11 @@ class ServiceHandler {
 
     try {
       if (Platform.isAndroid || Platform.isIOS) {
-        if (flutterWay) {
-          await HapticFeedback.vibrate();
-        } else {
-          if (await Vibration.hasVibrator()) {
-            await Vibration.vibrate(
-              duration: duration,
-              amplitude: amplitude,
-            );
-          }
+        if (await Vibration.hasVibrator()) {
+          await Vibration.vibrate(
+            duration: duration,
+            amplitude: amplitude,
+          );
         }
       }
     } catch (e, s) {

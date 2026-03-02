@@ -3250,18 +3250,6 @@ class _TranslationsSettingsDebugDev extends TranslationsSettingsDebugEn {
   @override
   String get tagsManager => TranslationOverrides.string(_root.$meta, 'settings.debug.tagsManager', {}) ?? '{Tags Manager}';
   @override
-  String get vibration => TranslationOverrides.string(_root.$meta, 'settings.debug.vibration', {}) ?? '{Vibration}';
-  @override
-  String get vibrationTests => TranslationOverrides.string(_root.$meta, 'settings.debug.vibrationTests', {}) ?? '{Vibration tests}';
-  @override
-  String get duration => TranslationOverrides.string(_root.$meta, 'settings.debug.duration', {}) ?? '{Duration}';
-  @override
-  String get amplitude => TranslationOverrides.string(_root.$meta, 'settings.debug.amplitude', {}) ?? '{Amplitude}';
-  @override
-  String get flutterway => TranslationOverrides.string(_root.$meta, 'settings.debug.flutterway', {}) ?? '{Flutterway}';
-  @override
-  String get vibrate => TranslationOverrides.string(_root.$meta, 'settings.debug.vibrate', {}) ?? '{Vibrate}';
-  @override
   String resolution({required String width, required String height}) =>
       TranslationOverrides.string(_root.$meta, 'settings.debug.resolution', {'width': width, 'height': height}) ?? '{Res: ${width}x${height}}';
   @override
@@ -5360,12 +5348,6 @@ extension on TranslationsDev {
             ({required double speed}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.debug.animationSpeed', {'speed': speed}) ?? '{Animation speed (${speed})}',
           'settings.debug.tagsManager' => TranslationOverrides.string(_root.$meta, 'settings.debug.tagsManager', {}) ?? '{Tags Manager}',
-          'settings.debug.vibration' => TranslationOverrides.string(_root.$meta, 'settings.debug.vibration', {}) ?? '{Vibration}',
-          'settings.debug.vibrationTests' => TranslationOverrides.string(_root.$meta, 'settings.debug.vibrationTests', {}) ?? '{Vibration tests}',
-          'settings.debug.duration' => TranslationOverrides.string(_root.$meta, 'settings.debug.duration', {}) ?? '{Duration}',
-          'settings.debug.amplitude' => TranslationOverrides.string(_root.$meta, 'settings.debug.amplitude', {}) ?? '{Amplitude}',
-          'settings.debug.flutterway' => TranslationOverrides.string(_root.$meta, 'settings.debug.flutterway', {}) ?? '{Flutterway}',
-          'settings.debug.vibrate' => TranslationOverrides.string(_root.$meta, 'settings.debug.vibrate', {}) ?? '{Vibrate}',
           'settings.debug.resolution' =>
             ({required String width, required String height}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.debug.resolution', {'width': width, 'height': height}) ??
@@ -5659,9 +5641,6 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.cantStartSlideshow', {}) ?? '{Can\'t start Slideshow}',
           'viewer.appBar.reachedLastLoadedItem' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reachedLastLoadedItem', {}) ?? '{Reached the Last loaded Item}',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? '{Pause}',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? '{Start}',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? '{Unfavourite}',
@@ -5670,6 +5649,9 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? '{Reload with scaling}',
           'viewer.appBar.loadSampleQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? '{Load sample quality}',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? '{Load high quality}',
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? '{Drop snatched status}',
