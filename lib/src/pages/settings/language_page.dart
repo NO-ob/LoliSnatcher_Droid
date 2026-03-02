@@ -91,35 +91,21 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
     );
 
     Widget firstFlag = CountryFlag.fromLanguageCode(
-      locale.localeCode,
+      locale.languageCode,
       theme: flagTheme,
     );
     Widget? secondFlag;
     switch (locale) {
-      case AppLocale.en:
+      case AppLocale.enUs:
         firstFlag = CountryFlag.fromLanguageCode(
           'en-us',
           theme: flagTheme,
         );
         secondFlag = CountryFlag.fromLanguageCode(
-          locale.localeCode,
+          locale.languageCode,
           theme: flagTheme,
         );
         break;
-      case AppLocale.dev:
-        return Container(
-          width: width,
-          height: height,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.secondaryContainer,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Icon(
-            Icons.developer_board,
-            size: 20,
-            color: Theme.of(context).colorScheme.onSecondaryContainer,
-          ),
-        );
       default:
         break;
     }
@@ -143,16 +129,10 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
   Widget build(BuildContext context) {
     return SettingsDropdown(
       value: locale,
-      items:
-          const [
-                null,
-                ...AppLocale.values,
-              ]
-              .where(
-                // don't show dev loc when not in debug (unless it's already selected)
-                (e) => e?.name != 'dev' || settingsHandler.isDebug.value || locale?.name == e?.name,
-              )
-              .toList(),
+      items: const [
+        null,
+        ...AppLocale.values,
+      ],
       onChanged: (newValue) async {
         locale = newValue;
         setState(() {});
@@ -175,8 +155,9 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
             child: buildFlag(e),
           ),
           Text(
-            e?.localeName ??
-                '${context.loc.settings.language.system} (${PlatformDispatcher.instance.locale.toLanguageTag()})',
+            e != null
+                ? '${e.localeName} (${e.localeCode})'
+                : '${context.loc.settings.language.system} (${PlatformDispatcher.instance.locale.toLanguageTag()})',
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,

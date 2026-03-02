@@ -117,7 +117,7 @@ String formatNumber(num number) {
     );
     return formatter.format(number);
   } catch (_) {
-    // workaround for dev locale
+    // use en format on exceptions
     final formatter = NumberFormat.decimalPattern('en');
     return formatter.format(number);
   }

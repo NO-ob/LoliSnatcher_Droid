@@ -1,4 +1,4 @@
-base_locale: en
+base_locale: en-US
 fallback_strategy: base_locale
 flat_map: true
 input_directory: assets/i18n
