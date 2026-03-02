@@ -21,8 +21,8 @@ dependencies:
   collection: ^1.19.1
   country_flags: ^4.1.2
   crypto: ^3.0.7
-  dio: ^5.9.1
-  dio_http2_adapter: ^2.6.0
+  dio: ^5.9.2
+  dio_http2_adapter: ^2.7.0
   dynamic_color: ^1.8.1
   equatable: ^2.0.8
   external_video_player_launcher: ^0.0.3
@@ -44,6 +44,7 @@ dependencies:
     git:
       url: https://github.com/jiangtian616/socks_proxy
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
+  flutter_svg: ^2.2.3
   font_awesome_flutter: ^10.12.0
   fpdart: ^1.2.0
   fvp: ^0.35.2

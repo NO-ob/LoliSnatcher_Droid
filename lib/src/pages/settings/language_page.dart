@@ -4,10 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:country_flags/country_flags.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class LanguageSettingsPage extends StatelessWidget {
   const LanguageSettingsPage({super.key});
@@ -23,14 +25,23 @@ class LanguageSettingsPage extends StatelessWidget {
         child: ListView(
           children: [
             const LanguageDropdown(),
+            const SizedBox(height: 24),
             SettingsButton(name: context.loc.settings.language.helpUsTranslate),
             SettingsButton(
               name: context.loc.settings.language.visitForDetails,
               useHtml: true,
               trailingIcon: const Icon(Icons.exit_to_app),
             ),
-            // TODO Add weblate widget
-            const Placeholder(fallbackHeight: 300),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () => launchUrlString(
+                'https://hosted.weblate.org/engage/loli-snatcher/',
+                mode: LaunchMode.externalApplication,
+              ),
+              child: SvgPicture.network(
+                'https://hosted.weblate.org/widget/loli-snatcher/multi-auto.svg',
+              ),
+            ),
           ],
         ),
       ),
@@ -129,9 +140,9 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
   Widget build(BuildContext context) {
     return SettingsDropdown(
       value: locale,
-      items: const [
+      items: [
         null,
-        ...AppLocale.values,
+        ...AppLocaleExt.allowedValues,
       ],
       onChanged: (newValue) async {
         locale = newValue;
@@ -177,6 +188,16 @@ extension AppLocaleExt on AppLocale {
   String get localeName {
     return LocaleSettings.instance.translationMap[this]?.localeName ?? 'Loading...';
   }
+
+  static List<AppLocale> get allowedValues => AppLocale.values
+      .where(
+        (l) => ![
+          // Disabled languages until they reach at least 80% of completion
+          AppLocale.ptBr,
+          AppLocale.zhCn,
+        ].any((bl) => bl == l),
+      )
+      .toList();
 }
 
 class _SecondLanguageFlagClipper extends CustomClipper<Path> {

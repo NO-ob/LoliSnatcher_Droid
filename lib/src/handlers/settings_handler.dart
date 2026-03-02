@@ -12,6 +12,7 @@ import 'package:fvp/fvp.dart' as fvp;
 import 'package:get/get.dart';
 import 'package:get_it/get_it.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/pages/settings/language_page.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/gen/strings.g.dart';
@@ -931,7 +932,7 @@ class SettingsHandler {
             return (value as AppLocale?)?.name;
           } else {
             if (value is String) {
-              return AppLocale.values.firstWhereOrNull((e) => e.name == value);
+              return AppLocaleExt.allowedValues.firstWhereOrNull((e) => e.name == value);
             } else {
               return settingParams['default'];
             }

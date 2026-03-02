@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/gen/strings.g.dart';
 import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/pages/settings/language_page.dart';
 
 /// Base class for setting definitions.
 /// Provides type-safe access to setting values with validation.
@@ -334,7 +335,7 @@ class LocaleSetting extends SettingDefinition<AppLocale?> {
   @override
   AppLocale? fromJson(dynamic value) {
     if (value is String) {
-      return AppLocale.values.firstWhereOrNull((e) => e.name == value);
+      return AppLocaleExt.allowedValues.firstWhereOrNull((e) => e.name == value);
     }
     return defaultValue;
   }
