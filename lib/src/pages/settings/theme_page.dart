@@ -782,9 +782,9 @@ class _FontPickerSheetState extends State<_FontPickerSheet> {
             final settings = SettingsHandler.instance;
             if (settings.locale.value == null
                 ? PlatformDispatcher.instance.locale.languageCode != 'en'
-                : settings.locale.value != AppLocale.enUs) {
+                : settings.locale.value != AppLocale.en) {
               text =
-                  '${LocaleSettings.instance.translationMap[AppLocale.enUs]?.settings.theme.fontPreviewText}\n\n${context.loc.settings.theme.fontPreviewText}';
+                  '${LocaleSettings.instance.translationMap[AppLocale.en]?.settings.theme.fontPreviewText}\n\n${context.loc.settings.theme.fontPreviewText}';
             }
 
             return Column(
@@ -937,9 +937,9 @@ class _CustomFontDialogState extends State<_CustomFontDialog> {
                   final settings = SettingsHandler.instance;
                   if (settings.locale.value == null
                       ? PlatformDispatcher.instance.locale.languageCode != 'en'
-                      : settings.locale.value != AppLocale.enUs) {
+                      : settings.locale.value != AppLocale.en) {
                     text =
-                        '${LocaleSettings.instance.translationMap[AppLocale.enUs]?.settings.theme.fontPreviewText}\n\n${context.loc.settings.theme.fontPreviewText}';
+                        '${LocaleSettings.instance.translationMap[AppLocale.en]?.settings.theme.fontPreviewText}\n\n${context.loc.settings.theme.fontPreviewText}';
                   }
 
                   return Text(

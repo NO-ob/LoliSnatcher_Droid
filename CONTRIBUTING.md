@@ -66,12 +66,12 @@ LoliSnatcher uses the [slang](https://pub.dev/packages/slang) package for intern
 ### Translation Files
 
 Translation files are located in `assets/i18n/`:
-- `en-US.json` - English (base language)
+- `en.json` - English (base language)
 
 ### Adding a New Language
 
-1. Create a new file `assets/i18n/XX-XX.json` (where XX is the language code)
-2. Copy the structure from `en-US.json` and translate all strings
+1. Create a new file `assets/i18n/xx-XX.json` (where xx-XX is the language code)
+2. Copy the structure from `en.json` and translate all strings
 3. Register the locale in the app configuration
 4. Run `sh loc_build.sh` to regenerate types
 

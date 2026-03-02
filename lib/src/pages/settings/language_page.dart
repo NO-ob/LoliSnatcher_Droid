@@ -96,13 +96,13 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
     );
     Widget? secondFlag;
     switch (locale) {
-      case AppLocale.enUs:
+      case AppLocale.en:
         firstFlag = CountryFlag.fromLanguageCode(
           'en-us',
           theme: flagTheme,
         );
         secondFlag = CountryFlag.fromLanguageCode(
-          locale.languageCode,
+          'en',
           theme: flagTheme,
         );
         break;

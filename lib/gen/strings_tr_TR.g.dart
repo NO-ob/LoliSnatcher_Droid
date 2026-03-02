@@ -260,7 +260,7 @@ class TranslationsTrTr extends Translations with BaseTranslations<AppLocale, Tra
 }
 
 // Path: validationErrors
-class _TranslationsValidationErrorsTrTr extends TranslationsValidationErrorsEnUs {
+class _TranslationsValidationErrorsTrTr extends TranslationsValidationErrorsEn {
   _TranslationsValidationErrorsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -303,7 +303,7 @@ class _TranslationsValidationErrorsTrTr extends TranslationsValidationErrorsEnUs
 }
 
 // Path: init
-class _TranslationsInitTrTr extends TranslationsInitEnUs {
+class _TranslationsInitTrTr extends TranslationsInitEn {
   _TranslationsInitTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -324,7 +324,7 @@ class _TranslationsInitTrTr extends TranslationsInitEnUs {
 }
 
 // Path: permissions
-class _TranslationsPermissionsTrTr extends TranslationsPermissionsEnUs {
+class _TranslationsPermissionsTrTr extends TranslationsPermissionsEn {
   _TranslationsPermissionsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -354,7 +354,7 @@ class _TranslationsPermissionsTrTr extends TranslationsPermissionsEnUs {
 }
 
 // Path: authentication
-class _TranslationsAuthenticationTrTr extends TranslationsAuthenticationEnUs {
+class _TranslationsAuthenticationTrTr extends TranslationsAuthenticationEn {
   _TranslationsAuthenticationTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -375,7 +375,7 @@ class _TranslationsAuthenticationTrTr extends TranslationsAuthenticationEnUs {
 }
 
 // Path: searchHandler
-class _TranslationsSearchHandlerTrTr extends TranslationsSearchHandlerEnUs {
+class _TranslationsSearchHandlerTrTr extends TranslationsSearchHandlerEn {
   _TranslationsSearchHandlerTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -447,7 +447,7 @@ class _TranslationsSearchHandlerTrTr extends TranslationsSearchHandlerEnUs {
 }
 
 // Path: snatcher
-class _TranslationsSnatcherTrTr extends TranslationsSnatcherEnUs {
+class _TranslationsSnatcherTrTr extends TranslationsSnatcherEn {
   _TranslationsSnatcherTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -540,7 +540,7 @@ class _TranslationsSnatcherTrTr extends TranslationsSnatcherEnUs {
 }
 
 // Path: multibooru
-class _TranslationsMultibooruTrTr extends TranslationsMultibooruEnUs {
+class _TranslationsMultibooruTrTr extends TranslationsMultibooruEn {
   _TranslationsMultibooruTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -563,7 +563,7 @@ class _TranslationsMultibooruTrTr extends TranslationsMultibooruEnUs {
 }
 
 // Path: hydrus
-class _TranslationsHydrusTrTr extends TranslationsHydrusEnUs {
+class _TranslationsHydrusTrTr extends TranslationsHydrusEn {
   _TranslationsHydrusTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -582,7 +582,7 @@ class _TranslationsHydrusTrTr extends TranslationsHydrusEnUs {
 }
 
 // Path: tabs
-class _TranslationsTabsTrTr extends TranslationsTabsEnUs {
+class _TranslationsTabsTrTr extends TranslationsTabsEn {
   _TranslationsTabsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -747,7 +747,7 @@ class _TranslationsTabsTrTr extends TranslationsTabsEnUs {
 }
 
 // Path: history
-class _TranslationsHistoryTrTr extends TranslationsHistoryEnUs {
+class _TranslationsHistoryTrTr extends TranslationsHistoryEn {
   _TranslationsHistoryTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -813,7 +813,7 @@ class _TranslationsHistoryTrTr extends TranslationsHistoryEnUs {
 }
 
 // Path: webview
-class _TranslationsWebviewTrTr extends TranslationsWebviewEnUs {
+class _TranslationsWebviewTrTr extends TranslationsWebviewEn {
   _TranslationsWebviewTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -828,7 +828,7 @@ class _TranslationsWebviewTrTr extends TranslationsWebviewEnUs {
 }
 
 // Path: settings
-class _TranslationsSettingsTrTr extends TranslationsSettingsEnUs {
+class _TranslationsSettingsTrTr extends TranslationsSettingsEn {
   _TranslationsSettingsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -889,7 +889,7 @@ class _TranslationsSettingsTrTr extends TranslationsSettingsEnUs {
 }
 
 // Path: comments
-class _TranslationsCommentsTrTr extends TranslationsCommentsEnUs {
+class _TranslationsCommentsTrTr extends TranslationsCommentsEn {
   _TranslationsCommentsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -906,7 +906,7 @@ class _TranslationsCommentsTrTr extends TranslationsCommentsEnUs {
 }
 
 // Path: pageChanger
-class _TranslationsPageChangerTrTr extends TranslationsPageChangerEnUs {
+class _TranslationsPageChangerTrTr extends TranslationsPageChangerEn {
   _TranslationsPageChangerTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -939,7 +939,7 @@ class _TranslationsPageChangerTrTr extends TranslationsPageChangerEnUs {
 }
 
 // Path: tagsFiltersDialogs
-class _TranslationsTagsFiltersDialogsTrTr extends TranslationsTagsFiltersDialogsEnUs {
+class _TranslationsTagsFiltersDialogsTrTr extends TranslationsTagsFiltersDialogsEn {
   _TranslationsTagsFiltersDialogsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -960,7 +960,7 @@ class _TranslationsTagsFiltersDialogsTrTr extends TranslationsTagsFiltersDialogs
 }
 
 // Path: tagsManager
-class _TranslationsTagsManagerTrTr extends TranslationsTagsManagerEnUs {
+class _TranslationsTagsManagerTrTr extends TranslationsTagsManagerEn {
   _TranslationsTagsManagerTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1008,7 +1008,7 @@ class _TranslationsTagsManagerTrTr extends TranslationsTagsManagerEnUs {
 }
 
 // Path: lockscreen
-class _TranslationsLockscreenTrTr extends TranslationsLockscreenEnUs {
+class _TranslationsLockscreenTrTr extends TranslationsLockscreenEn {
   _TranslationsLockscreenTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1025,7 +1025,7 @@ class _TranslationsLockscreenTrTr extends TranslationsLockscreenEnUs {
 }
 
 // Path: loliSync
-class _TranslationsLoliSyncTrTr extends TranslationsLoliSyncEnUs {
+class _TranslationsLoliSyncTrTr extends TranslationsLoliSyncEn {
   _TranslationsLoliSyncTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1063,7 +1063,7 @@ class _TranslationsLoliSyncTrTr extends TranslationsLoliSyncEnUs {
 }
 
 // Path: imageSearch
-class _TranslationsImageSearchTrTr extends TranslationsImageSearchEnUs {
+class _TranslationsImageSearchTrTr extends TranslationsImageSearchEn {
   _TranslationsImageSearchTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1074,7 +1074,7 @@ class _TranslationsImageSearchTrTr extends TranslationsImageSearchEnUs {
 }
 
 // Path: tagView
-class _TranslationsTagViewTrTr extends TranslationsTagViewEnUs {
+class _TranslationsTagViewTrTr extends TranslationsTagViewEn {
   _TranslationsTagViewTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1189,7 +1189,7 @@ class _TranslationsTagViewTrTr extends TranslationsTagViewEnUs {
 }
 
 // Path: pinnedTags
-class _TranslationsPinnedTagsTrTr extends TranslationsPinnedTagsEnUs {
+class _TranslationsPinnedTagsTrTr extends TranslationsPinnedTagsEn {
   _TranslationsPinnedTagsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1263,7 +1263,7 @@ class _TranslationsPinnedTagsTrTr extends TranslationsPinnedTagsEnUs {
 }
 
 // Path: searchBar
-class _TranslationsSearchBarTrTr extends TranslationsSearchBarEnUs {
+class _TranslationsSearchBarTrTr extends TranslationsSearchBarEn {
   _TranslationsSearchBarTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1316,7 +1316,7 @@ class _TranslationsSearchBarTrTr extends TranslationsSearchBarEnUs {
 }
 
 // Path: mobileHome
-class _TranslationsMobileHomeTrTr extends TranslationsMobileHomeEnUs {
+class _TranslationsMobileHomeTrTr extends TranslationsMobileHomeEn {
   _TranslationsMobileHomeTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1349,7 +1349,7 @@ class _TranslationsMobileHomeTrTr extends TranslationsMobileHomeEnUs {
 }
 
 // Path: desktopHome
-class _TranslationsDesktopHomeTrTr extends TranslationsDesktopHomeEnUs {
+class _TranslationsDesktopHomeTrTr extends TranslationsDesktopHomeEn {
   _TranslationsDesktopHomeTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1368,7 +1368,7 @@ class _TranslationsDesktopHomeTrTr extends TranslationsDesktopHomeEnUs {
 }
 
 // Path: galleryView
-class _TranslationsGalleryViewTrTr extends TranslationsGalleryViewEnUs {
+class _TranslationsGalleryViewTrTr extends TranslationsGalleryViewEn {
   _TranslationsGalleryViewTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1383,7 +1383,7 @@ class _TranslationsGalleryViewTrTr extends TranslationsGalleryViewEnUs {
 }
 
 // Path: mediaPreviews
-class _TranslationsMediaPreviewsTrTr extends TranslationsMediaPreviewsEnUs {
+class _TranslationsMediaPreviewsTrTr extends TranslationsMediaPreviewsEn {
   _TranslationsMediaPreviewsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1406,7 +1406,7 @@ class _TranslationsMediaPreviewsTrTr extends TranslationsMediaPreviewsEnUs {
 }
 
 // Path: viewer
-class _TranslationsViewerTrTr extends TranslationsViewerEnUs {
+class _TranslationsViewerTrTr extends TranslationsViewerEn {
   _TranslationsViewerTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1421,7 +1421,7 @@ class _TranslationsViewerTrTr extends TranslationsViewerEnUs {
 }
 
 // Path: common
-class _TranslationsCommonTrTr extends TranslationsCommonEnUs {
+class _TranslationsCommonTrTr extends TranslationsCommonEn {
   _TranslationsCommonTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1435,7 +1435,7 @@ class _TranslationsCommonTrTr extends TranslationsCommonEnUs {
 }
 
 // Path: gallery
-class _TranslationsGalleryTrTr extends TranslationsGalleryEnUs {
+class _TranslationsGalleryTrTr extends TranslationsGalleryEn {
   _TranslationsGalleryTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1461,7 +1461,7 @@ class _TranslationsGalleryTrTr extends TranslationsGalleryEnUs {
 }
 
 // Path: galleryButtons
-class _TranslationsGalleryButtonsTrTr extends TranslationsGalleryButtonsEnUs {
+class _TranslationsGalleryButtonsTrTr extends TranslationsGalleryButtonsEn {
   _TranslationsGalleryButtonsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1492,7 +1492,7 @@ class _TranslationsGalleryButtonsTrTr extends TranslationsGalleryButtonsEnUs {
 }
 
 // Path: media
-class _TranslationsMediaTrTr extends TranslationsMediaEnUs {
+class _TranslationsMediaTrTr extends TranslationsMediaEn {
   _TranslationsMediaTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1505,7 +1505,7 @@ class _TranslationsMediaTrTr extends TranslationsMediaEnUs {
 }
 
 // Path: imageStats
-class _TranslationsImageStatsTrTr extends TranslationsImageStatsEnUs {
+class _TranslationsImageStatsTrTr extends TranslationsImageStatsEn {
   _TranslationsImageStatsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1524,7 +1524,7 @@ class _TranslationsImageStatsTrTr extends TranslationsImageStatsEnUs {
 }
 
 // Path: preview
-class _TranslationsPreviewTrTr extends TranslationsPreviewEnUs {
+class _TranslationsPreviewTrTr extends TranslationsPreviewEn {
   _TranslationsPreviewTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1535,7 +1535,7 @@ class _TranslationsPreviewTrTr extends TranslationsPreviewEnUs {
 }
 
 // Path: tagType
-class _TranslationsTagTypeTrTr extends TranslationsTagTypeEnUs {
+class _TranslationsTagTypeTrTr extends TranslationsTagTypeEn {
   _TranslationsTagTypeTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1556,7 +1556,7 @@ class _TranslationsTagTypeTrTr extends TranslationsTagTypeEnUs {
 }
 
 // Path: tabs.filters
-class _TranslationsTabsFiltersTrTr extends TranslationsTabsFiltersEnUs {
+class _TranslationsTabsFiltersTrTr extends TranslationsTabsFiltersEn {
   _TranslationsTabsFiltersTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1598,7 +1598,7 @@ class _TranslationsTabsFiltersTrTr extends TranslationsTabsFiltersEnUs {
 }
 
 // Path: tabs.move
-class _TranslationsTabsMoveTrTr extends TranslationsTabsMoveEnUs {
+class _TranslationsTabsMoveTrTr extends TranslationsTabsMoveEn {
   _TranslationsTabsMoveTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1627,7 +1627,7 @@ class _TranslationsTabsMoveTrTr extends TranslationsTabsMoveEnUs {
 }
 
 // Path: webview.navigation
-class _TranslationsWebviewNavigationTrTr extends TranslationsWebviewNavigationEnUs {
+class _TranslationsWebviewNavigationTrTr extends TranslationsWebviewNavigationEn {
   _TranslationsWebviewNavigationTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1677,7 +1677,7 @@ class _TranslationsWebviewNavigationTrTr extends TranslationsWebviewNavigationEn
 }
 
 // Path: settings.language
-class _TranslationsSettingsLanguageTrTr extends TranslationsSettingsLanguageEnUs {
+class _TranslationsSettingsLanguageTrTr extends TranslationsSettingsLanguageEn {
   _TranslationsSettingsLanguageTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1696,7 +1696,7 @@ class _TranslationsSettingsLanguageTrTr extends TranslationsSettingsLanguageEnUs
 }
 
 // Path: settings.booru
-class _TranslationsSettingsBooruTrTr extends TranslationsSettingsBooruEnUs {
+class _TranslationsSettingsBooruTrTr extends TranslationsSettingsBooruEn {
   _TranslationsSettingsBooruTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1775,7 +1775,7 @@ class _TranslationsSettingsBooruTrTr extends TranslationsSettingsBooruEnUs {
 }
 
 // Path: settings.booruEditor
-class _TranslationsSettingsBooruEditorTrTr extends TranslationsSettingsBooruEditorEnUs {
+class _TranslationsSettingsBooruEditorTrTr extends TranslationsSettingsBooruEditorEn {
   _TranslationsSettingsBooruEditorTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1871,7 +1871,7 @@ class _TranslationsSettingsBooruEditorTrTr extends TranslationsSettingsBooruEdit
 }
 
 // Path: settings.interface
-class _TranslationsSettingsInterfaceTrTr extends TranslationsSettingsInterfaceEnUs {
+class _TranslationsSettingsInterfaceTrTr extends TranslationsSettingsInterfaceEn {
   _TranslationsSettingsInterfaceTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -1998,7 +1998,7 @@ class _TranslationsSettingsInterfaceTrTr extends TranslationsSettingsInterfaceEn
 }
 
 // Path: settings.theme
-class _TranslationsSettingsThemeTrTr extends TranslationsSettingsThemeEnUs {
+class _TranslationsSettingsThemeTrTr extends TranslationsSettingsThemeEn {
   _TranslationsSettingsThemeTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2080,7 +2080,7 @@ class _TranslationsSettingsThemeTrTr extends TranslationsSettingsThemeEnUs {
 }
 
 // Path: settings.viewer
-class _TranslationsSettingsViewerTrTr extends TranslationsSettingsViewerEnUs {
+class _TranslationsSettingsViewerTrTr extends TranslationsSettingsViewerEn {
   _TranslationsSettingsViewerTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2256,7 +2256,7 @@ class _TranslationsSettingsViewerTrTr extends TranslationsSettingsViewerEnUs {
 }
 
 // Path: settings.video
-class _TranslationsSettingsVideoTrTr extends TranslationsSettingsVideoEnUs {
+class _TranslationsSettingsVideoTrTr extends TranslationsSettingsVideoEn {
   _TranslationsSettingsVideoTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2320,7 +2320,7 @@ class _TranslationsSettingsVideoTrTr extends TranslationsSettingsVideoEnUs {
 }
 
 // Path: settings.downloads
-class _TranslationsSettingsDownloadsTrTr extends TranslationsSettingsDownloadsEnUs {
+class _TranslationsSettingsDownloadsTrTr extends TranslationsSettingsDownloadsEn {
   _TranslationsSettingsDownloadsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2358,7 +2358,7 @@ class _TranslationsSettingsDownloadsTrTr extends TranslationsSettingsDownloadsEn
 }
 
 // Path: settings.database
-class _TranslationsSettingsDatabaseTrTr extends TranslationsSettingsDatabaseEnUs {
+class _TranslationsSettingsDatabaseTrTr extends TranslationsSettingsDatabaseEn {
   _TranslationsSettingsDatabaseTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2533,7 +2533,7 @@ class _TranslationsSettingsDatabaseTrTr extends TranslationsSettingsDatabaseEnUs
 }
 
 // Path: settings.backupAndRestore
-class _TranslationsSettingsBackupAndRestoreTrTr extends TranslationsSettingsBackupAndRestoreEnUs {
+class _TranslationsSettingsBackupAndRestoreTrTr extends TranslationsSettingsBackupAndRestoreEn {
   _TranslationsSettingsBackupAndRestoreTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2666,7 +2666,7 @@ class _TranslationsSettingsBackupAndRestoreTrTr extends TranslationsSettingsBack
 }
 
 // Path: settings.network
-class _TranslationsSettingsNetworkTrTr extends TranslationsSettingsNetworkEnUs {
+class _TranslationsSettingsNetworkTrTr extends TranslationsSettingsNetworkEn {
   _TranslationsSettingsNetworkTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2732,7 +2732,7 @@ class _TranslationsSettingsNetworkTrTr extends TranslationsSettingsNetworkEnUs {
 }
 
 // Path: settings.privacy
-class _TranslationsSettingsPrivacyTrTr extends TranslationsSettingsPrivacyEnUs {
+class _TranslationsSettingsPrivacyTrTr extends TranslationsSettingsPrivacyEn {
   _TranslationsSettingsPrivacyTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2784,7 +2784,7 @@ class _TranslationsSettingsPrivacyTrTr extends TranslationsSettingsPrivacyEnUs {
 }
 
 // Path: settings.performance
-class _TranslationsSettingsPerformanceTrTr extends TranslationsSettingsPerformanceEnUs {
+class _TranslationsSettingsPerformanceTrTr extends TranslationsSettingsPerformanceEn {
   _TranslationsSettingsPerformanceTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2824,7 +2824,7 @@ class _TranslationsSettingsPerformanceTrTr extends TranslationsSettingsPerforman
 }
 
 // Path: settings.cache
-class _TranslationsSettingsCacheTrTr extends TranslationsSettingsCacheEnUs {
+class _TranslationsSettingsCacheTrTr extends TranslationsSettingsCacheEn {
   _TranslationsSettingsCacheTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2944,7 +2944,7 @@ class _TranslationsSettingsCacheTrTr extends TranslationsSettingsCacheEnUs {
 }
 
 // Path: settings.itemFilters
-class _TranslationsSettingsItemFiltersTrTr extends TranslationsSettingsItemFiltersEnUs {
+class _TranslationsSettingsItemFiltersTrTr extends TranslationsSettingsItemFiltersEn {
   _TranslationsSettingsItemFiltersTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -2982,7 +2982,7 @@ class _TranslationsSettingsItemFiltersTrTr extends TranslationsSettingsItemFilte
 }
 
 // Path: settings.sync
-class _TranslationsSettingsSyncTrTr extends TranslationsSettingsSyncEnUs {
+class _TranslationsSettingsSyncTrTr extends TranslationsSettingsSyncEn {
   _TranslationsSettingsSyncTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3148,7 +3148,7 @@ class _TranslationsSettingsSyncTrTr extends TranslationsSettingsSyncEnUs {
 }
 
 // Path: settings.about
-class _TranslationsSettingsAboutTrTr extends TranslationsSettingsAboutEnUs {
+class _TranslationsSettingsAboutTrTr extends TranslationsSettingsAboutEn {
   _TranslationsSettingsAboutTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3183,7 +3183,7 @@ class _TranslationsSettingsAboutTrTr extends TranslationsSettingsAboutEnUs {
 }
 
 // Path: settings.checkForUpdates
-class _TranslationsSettingsCheckForUpdatesTrTr extends TranslationsSettingsCheckForUpdatesEnUs {
+class _TranslationsSettingsCheckForUpdatesTrTr extends TranslationsSettingsCheckForUpdatesEn {
   _TranslationsSettingsCheckForUpdatesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3217,7 +3217,7 @@ class _TranslationsSettingsCheckForUpdatesTrTr extends TranslationsSettingsCheck
 }
 
 // Path: settings.logs
-class _TranslationsSettingsLogsTrTr extends TranslationsSettingsLogsEnUs {
+class _TranslationsSettingsLogsTrTr extends TranslationsSettingsLogsEn {
   _TranslationsSettingsLogsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3237,7 +3237,7 @@ class _TranslationsSettingsLogsTrTr extends TranslationsSettingsLogsEnUs {
 }
 
 // Path: settings.help
-class _TranslationsSettingsHelpTrTr extends TranslationsSettingsHelpEnUs {
+class _TranslationsSettingsHelpTrTr extends TranslationsSettingsHelpEn {
   _TranslationsSettingsHelpTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3248,7 +3248,7 @@ class _TranslationsSettingsHelpTrTr extends TranslationsSettingsHelpEnUs {
 }
 
 // Path: settings.debug
-class _TranslationsSettingsDebugTrTr extends TranslationsSettingsDebugEnUs {
+class _TranslationsSettingsDebugTrTr extends TranslationsSettingsDebugEn {
   _TranslationsSettingsDebugTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3312,7 +3312,7 @@ class _TranslationsSettingsDebugTrTr extends TranslationsSettingsDebugEnUs {
 }
 
 // Path: settings.logging
-class _TranslationsSettingsLoggingTrTr extends TranslationsSettingsLoggingEnUs {
+class _TranslationsSettingsLoggingTrTr extends TranslationsSettingsLoggingEn {
   _TranslationsSettingsLoggingTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3323,7 +3323,7 @@ class _TranslationsSettingsLoggingTrTr extends TranslationsSettingsLoggingEnUs {
 }
 
 // Path: settings.webview
-class _TranslationsSettingsWebviewTrTr extends TranslationsSettingsWebviewEnUs {
+class _TranslationsSettingsWebviewTrTr extends TranslationsSettingsWebviewEn {
   _TranslationsSettingsWebviewTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3337,7 +3337,7 @@ class _TranslationsSettingsWebviewTrTr extends TranslationsSettingsWebviewEnUs {
 }
 
 // Path: settings.dirPicker
-class _TranslationsSettingsDirPickerTrTr extends TranslationsSettingsDirPickerEnUs {
+class _TranslationsSettingsDirPickerTrTr extends TranslationsSettingsDirPickerEn {
   _TranslationsSettingsDirPickerTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3370,7 +3370,7 @@ class _TranslationsSettingsDirPickerTrTr extends TranslationsSettingsDirPickerEn
 }
 
 // Path: viewer.tutorial
-class _TranslationsViewerTutorialTrTr extends TranslationsViewerTutorialEnUs {
+class _TranslationsViewerTutorialTrTr extends TranslationsViewerTutorialEn {
   _TranslationsViewerTutorialTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3388,7 +3388,7 @@ class _TranslationsViewerTutorialTrTr extends TranslationsViewerTutorialEnUs {
 }
 
 // Path: viewer.appBar
-class _TranslationsViewerAppBarTrTr extends TranslationsViewerAppBarEnUs {
+class _TranslationsViewerAppBarTrTr extends TranslationsViewerAppBarEn {
   _TranslationsViewerAppBarTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3476,7 +3476,7 @@ class _TranslationsViewerAppBarTrTr extends TranslationsViewerAppBarEnUs {
 }
 
 // Path: viewer.notes
-class _TranslationsViewerNotesTrTr extends TranslationsViewerNotesEnUs {
+class _TranslationsViewerNotesTrTr extends TranslationsViewerNotesEn {
   _TranslationsViewerNotesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3492,7 +3492,7 @@ class _TranslationsViewerNotesTrTr extends TranslationsViewerNotesEnUs {
 }
 
 // Path: media.loading
-class _TranslationsMediaLoadingTrTr extends TranslationsMediaLoadingEnUs {
+class _TranslationsMediaLoadingTrTr extends TranslationsMediaLoadingEn {
   _TranslationsMediaLoadingTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3535,7 +3535,7 @@ class _TranslationsMediaLoadingTrTr extends TranslationsMediaLoadingEnUs {
 }
 
 // Path: media.video
-class _TranslationsMediaVideoTrTr extends TranslationsMediaVideoEnUs {
+class _TranslationsMediaVideoTrTr extends TranslationsMediaVideoEn {
   _TranslationsMediaVideoTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3568,7 +3568,7 @@ class _TranslationsMediaVideoTrTr extends TranslationsMediaVideoEnUs {
 }
 
 // Path: preview.error
-class _TranslationsPreviewErrorTrTr extends TranslationsPreviewErrorEnUs {
+class _TranslationsPreviewErrorTrTr extends TranslationsPreviewErrorEn {
   _TranslationsPreviewErrorTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3615,7 +3615,7 @@ class _TranslationsPreviewErrorTrTr extends TranslationsPreviewErrorEnUs {
 }
 
 // Path: settings.interface.previewQualityValues
-class _TranslationsSettingsInterfacePreviewQualityValuesTrTr extends TranslationsSettingsInterfacePreviewQualityValuesEnUs {
+class _TranslationsSettingsInterfacePreviewQualityValuesTrTr extends TranslationsSettingsInterfacePreviewQualityValuesEn {
   _TranslationsSettingsInterfacePreviewQualityValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3628,7 +3628,7 @@ class _TranslationsSettingsInterfacePreviewQualityValuesTrTr extends Translation
 }
 
 // Path: settings.interface.previewDisplayModeValues
-class _TranslationsSettingsInterfacePreviewDisplayModeValuesTrTr extends TranslationsSettingsInterfacePreviewDisplayModeValuesEnUs {
+class _TranslationsSettingsInterfacePreviewDisplayModeValuesTrTr extends TranslationsSettingsInterfacePreviewDisplayModeValuesEn {
   _TranslationsSettingsInterfacePreviewDisplayModeValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3643,7 +3643,7 @@ class _TranslationsSettingsInterfacePreviewDisplayModeValuesTrTr extends Transla
 }
 
 // Path: settings.interface.appModeValues
-class _TranslationsSettingsInterfaceAppModeValuesTrTr extends TranslationsSettingsInterfaceAppModeValuesEnUs {
+class _TranslationsSettingsInterfaceAppModeValuesTrTr extends TranslationsSettingsInterfaceAppModeValuesEn {
   _TranslationsSettingsInterfaceAppModeValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3656,7 +3656,7 @@ class _TranslationsSettingsInterfaceAppModeValuesTrTr extends TranslationsSettin
 }
 
 // Path: settings.interface.handSideValues
-class _TranslationsSettingsInterfaceHandSideValuesTrTr extends TranslationsSettingsInterfaceHandSideValuesEnUs {
+class _TranslationsSettingsInterfaceHandSideValuesTrTr extends TranslationsSettingsInterfaceHandSideValuesEn {
   _TranslationsSettingsInterfaceHandSideValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3669,7 +3669,7 @@ class _TranslationsSettingsInterfaceHandSideValuesTrTr extends TranslationsSetti
 }
 
 // Path: settings.viewer.imageQualityValues
-class _TranslationsSettingsViewerImageQualityValuesTrTr extends TranslationsSettingsViewerImageQualityValuesEnUs {
+class _TranslationsSettingsViewerImageQualityValuesTrTr extends TranslationsSettingsViewerImageQualityValuesEn {
   _TranslationsSettingsViewerImageQualityValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3682,7 +3682,7 @@ class _TranslationsSettingsViewerImageQualityValuesTrTr extends TranslationsSett
 }
 
 // Path: settings.viewer.scrollDirectionValues
-class _TranslationsSettingsViewerScrollDirectionValuesTrTr extends TranslationsSettingsViewerScrollDirectionValuesEnUs {
+class _TranslationsSettingsViewerScrollDirectionValuesTrTr extends TranslationsSettingsViewerScrollDirectionValuesEn {
   _TranslationsSettingsViewerScrollDirectionValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3695,7 +3695,7 @@ class _TranslationsSettingsViewerScrollDirectionValuesTrTr extends TranslationsS
 }
 
 // Path: settings.viewer.toolbarPositionValues
-class _TranslationsSettingsViewerToolbarPositionValuesTrTr extends TranslationsSettingsViewerToolbarPositionValuesEnUs {
+class _TranslationsSettingsViewerToolbarPositionValuesTrTr extends TranslationsSettingsViewerToolbarPositionValuesEn {
   _TranslationsSettingsViewerToolbarPositionValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3708,7 +3708,7 @@ class _TranslationsSettingsViewerToolbarPositionValuesTrTr extends TranslationsS
 }
 
 // Path: settings.viewer.buttonPositionValues
-class _TranslationsSettingsViewerButtonPositionValuesTrTr extends TranslationsSettingsViewerButtonPositionValuesEnUs {
+class _TranslationsSettingsViewerButtonPositionValuesTrTr extends TranslationsSettingsViewerButtonPositionValuesEn {
   _TranslationsSettingsViewerButtonPositionValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3723,7 +3723,7 @@ class _TranslationsSettingsViewerButtonPositionValuesTrTr extends TranslationsSe
 }
 
 // Path: settings.viewer.shareActionValues
-class _TranslationsSettingsViewerShareActionValuesTrTr extends TranslationsSettingsViewerShareActionValuesEnUs {
+class _TranslationsSettingsViewerShareActionValuesTrTr extends TranslationsSettingsViewerShareActionValuesEn {
   _TranslationsSettingsViewerShareActionValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3750,7 +3750,7 @@ class _TranslationsSettingsViewerShareActionValuesTrTr extends TranslationsSetti
 }
 
 // Path: settings.video.cacheModes
-class _TranslationsSettingsVideoCacheModesTrTr extends TranslationsSettingsVideoCacheModesEnUs {
+class _TranslationsSettingsVideoCacheModesTrTr extends TranslationsSettingsVideoCacheModesEn {
   _TranslationsSettingsVideoCacheModesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3781,7 +3781,7 @@ class _TranslationsSettingsVideoCacheModesTrTr extends TranslationsSettingsVideo
 }
 
 // Path: settings.video.cacheModeValues
-class _TranslationsSettingsVideoCacheModeValuesTrTr extends TranslationsSettingsVideoCacheModeValuesEnUs {
+class _TranslationsSettingsVideoCacheModeValuesTrTr extends TranslationsSettingsVideoCacheModeValuesEn {
   _TranslationsSettingsVideoCacheModeValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3796,7 +3796,7 @@ class _TranslationsSettingsVideoCacheModeValuesTrTr extends TranslationsSettings
 }
 
 // Path: settings.video.videoBackendModeValues
-class _TranslationsSettingsVideoVideoBackendModeValuesTrTr extends TranslationsSettingsVideoVideoBackendModeValuesEnUs {
+class _TranslationsSettingsVideoVideoBackendModeValuesTrTr extends TranslationsSettingsVideoVideoBackendModeValuesEn {
   _TranslationsSettingsVideoVideoBackendModeValuesTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field
@@ -3811,7 +3811,7 @@ class _TranslationsSettingsVideoVideoBackendModeValuesTrTr extends TranslationsS
 }
 
 // Path: media.loading.stopReasons
-class _TranslationsMediaLoadingStopReasonsTrTr extends TranslationsMediaLoadingStopReasonsEnUs {
+class _TranslationsMediaLoadingStopReasonsTrTr extends TranslationsMediaLoadingStopReasonsEn {
   _TranslationsMediaLoadingStopReasonsTrTr._(TranslationsTrTr root) : this._root = root, super.internal(root);
 
   final TranslationsTrTr _root; // ignore: unused_field

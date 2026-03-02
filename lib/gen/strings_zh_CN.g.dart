@@ -202,7 +202,7 @@ class TranslationsZhCn extends Translations with BaseTranslations<AppLocale, Tra
 }
 
 // Path: validationErrors
-class _TranslationsValidationErrorsZhCn extends TranslationsValidationErrorsEnUs {
+class _TranslationsValidationErrorsZhCn extends TranslationsValidationErrorsEn {
   _TranslationsValidationErrorsZhCn._(TranslationsZhCn root) : this._root = root, super.internal(root);
 
   final TranslationsZhCn _root; // ignore: unused_field
@@ -236,7 +236,7 @@ class _TranslationsValidationErrorsZhCn extends TranslationsValidationErrorsEnUs
 }
 
 // Path: init
-class _TranslationsInitZhCn extends TranslationsInitEnUs {
+class _TranslationsInitZhCn extends TranslationsInitEn {
   _TranslationsInitZhCn._(TranslationsZhCn root) : this._root = root, super.internal(root);
 
   final TranslationsZhCn _root; // ignore: unused_field
@@ -257,7 +257,7 @@ class _TranslationsInitZhCn extends TranslationsInitEnUs {
 }
 
 // Path: permissions
-class _TranslationsPermissionsZhCn extends TranslationsPermissionsEnUs {
+class _TranslationsPermissionsZhCn extends TranslationsPermissionsEn {
   _TranslationsPermissionsZhCn._(TranslationsZhCn root) : this._root = root, super.internal(root);
 
   final TranslationsZhCn _root; // ignore: unused_field
@@ -284,7 +284,7 @@ class _TranslationsPermissionsZhCn extends TranslationsPermissionsEnUs {
 }
 
 // Path: authentication
-class _TranslationsAuthenticationZhCn extends TranslationsAuthenticationEnUs {
+class _TranslationsAuthenticationZhCn extends TranslationsAuthenticationEn {
   _TranslationsAuthenticationZhCn._(TranslationsZhCn root) : this._root = root, super.internal(root);
 
   final TranslationsZhCn _root; // ignore: unused_field
@@ -304,7 +304,7 @@ class _TranslationsAuthenticationZhCn extends TranslationsAuthenticationEnUs {
 }
 
 // Path: searchHandler
-class _TranslationsSearchHandlerZhCn extends TranslationsSearchHandlerEnUs {
+class _TranslationsSearchHandlerZhCn extends TranslationsSearchHandlerEn {
   _TranslationsSearchHandlerZhCn._(TranslationsZhCn root) : this._root = root, super.internal(root);
 
   final TranslationsZhCn _root; // ignore: unused_field
