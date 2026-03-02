@@ -60,6 +60,10 @@ abstract class BooruHandler {
         continue;
       }
 
+      if (settingsHandler.filterMarked && item.isMarked) {
+        continue;
+      }
+
       if (settingsHandler.filterAi && item.isAI) {
         continue;
       }
