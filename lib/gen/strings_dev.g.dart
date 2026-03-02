@@ -1783,7 +1783,7 @@ class _TranslationsSettingsBooruEditorDev extends TranslationsSettingsBooruEdito
   @override
   String get testBooruFailedMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
-      '{Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error.}';
+      '{Config parameters may be incorrect, booru doesn\'t allow API access, request didn\'t return any data or there was a network error.}';
   @override
   String get saveBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? '{Save Booru}';
   @override
@@ -1808,7 +1808,7 @@ class _TranslationsSettingsBooruEditorDev extends TranslationsSettingsBooruEdito
       '{Existing tabs with this Booru need to be reloaded in order to apply changes!}';
   @override
   String get failedVerifyApiHydrus =>
-      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.failedVerifyApiHydrus', {}) ?? '{Failed to verify api access for Hydrus}';
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.failedVerifyApiHydrus', {}) ?? '{Failed to verify API access for Hydrus}';
   @override
   String get accessKeyRequestedTitle =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyRequestedTitle', {}) ?? '{Access key requested}';
@@ -1825,7 +1825,7 @@ class _TranslationsSettingsBooruEditorDev extends TranslationsSettingsBooruEdito
   @override
   String get hydrusInstructions =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.hydrusInstructions', {}) ??
-      '{To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client api > Add > From API request}';
+      '{To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client API > Add > From API request}';
   @override
   String get getHydrusApiKey => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.getHydrusApiKey', {}) ?? '{Get Hydrus API key}';
   @override
@@ -2224,7 +2224,7 @@ class _TranslationsSettingsViewerDev extends TranslationsSettingsViewerEn {
   String get usingCustomAnimation =>
       TranslationOverrides.string(_root.$meta, 'settings.viewer.usingCustomAnimation', {}) ?? '{Using custom animation}';
   @override
-  String get kannaLoadingGif => TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? '{Kanna loading Gif}';
+  String get kannaLoadingGif => TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? '{Kanna loading GIF}';
   @override
   late final _TranslationsSettingsViewerImageQualityValuesDev imageQualityValues = _TranslationsSettingsViewerImageQualityValuesDev._(_root);
   @override
@@ -4327,7 +4327,7 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? '{Booru test failed}',
           'settings.booruEditor.testBooruFailedMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
-                '{Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error.}',
+                '{Config parameters may be incorrect, booru doesn\'t allow API access, request didn\'t return any data or there was a network error.}',
           'settings.booruEditor.saveBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? '{Save Booru}',
           'settings.booruEditor.runningTest' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? '{Running test…}',
           'settings.booruEditor.booruConfigExistsError' =>
@@ -4346,7 +4346,7 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.existingTabsNeedReload', {}) ??
                 '{Existing tabs with this Booru need to be reloaded in order to apply changes!}',
           'settings.booruEditor.failedVerifyApiHydrus' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.failedVerifyApiHydrus', {}) ?? '{Failed to verify api access for Hydrus}',
+            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.failedVerifyApiHydrus', {}) ?? '{Failed to verify API access for Hydrus}',
           'settings.booruEditor.accessKeyRequestedTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyRequestedTitle', {}) ?? '{Access key requested}',
           'settings.booruEditor.accessKeyRequestedMsg' =>
@@ -4359,7 +4359,7 @@ extension on TranslationsDev {
                 '{Do you have the request window open in Hydrus?}',
           'settings.booruEditor.hydrusInstructions' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.hydrusInstructions', {}) ??
-                '{To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client api > Add > From API request}',
+                '{To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client API > Add > From API request}',
           'settings.booruEditor.getHydrusApiKey' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.getHydrusApiKey', {}) ?? '{Get Hydrus API key}',
           'settings.booruEditor.booruName' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? '{Booru Name}',
@@ -4628,7 +4628,7 @@ extension on TranslationsDev {
           'settings.viewer.usingCustomAnimation' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.usingCustomAnimation', {}) ?? '{Using custom animation}',
           'settings.viewer.kannaLoadingGif' =>
-            TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? '{Kanna loading Gif}',
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? '{Kanna loading GIF}',
           'settings.viewer.imageQualityValues.sample' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? '{Sample}',
           'settings.viewer.imageQualityValues.fullRes' =>

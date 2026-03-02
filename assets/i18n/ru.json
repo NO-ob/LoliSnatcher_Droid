@@ -410,7 +410,7 @@
       "accessKeyRequestedMsg": "Нажми [Ок] в Hydrus, затем примени. Можешь нажать [Проверить сайт] после этого",
       "accessKeyFailedTitle": "Не удалось получить ключ доступа",
       "accessKeyFailedMsg": "Открыл ли ты окно запроса в Hydrus?",
-      "hydrusInstructions": "Для получения ключа Hydrus нужно открыть окно запроса в клиенте Hydrus. Services > Review services > Client api > Add > From API request",
+      "hydrusInstructions": "Для получения ключа Hydrus нужно открыть окно запроса в клиенте Hydrus. Services > Review services > Client API > Add > From API request",
       "getHydrusApiKey": "Получить ключ API Hydrus",
       "booruName": "Имя конфига",
       "booruNameRequired": "Имя конфига обязательно!",

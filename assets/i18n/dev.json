@@ -396,7 +396,7 @@
         "booruEditor": {
             "title": "{Booru Editor}",
             "testBooruFailedTitle": "{Booru test failed}",
-            "testBooruFailedMsg": "{Config parameters may be incorrect, booru doesn't allow api access, request didn't return any data or there was a network error.}",
+            "testBooruFailedMsg": "{Config parameters may be incorrect, booru doesn't allow API access, request didn't return any data or there was a network error.}",
             "saveBooru": "{Save Booru}",
             "runningTest": "{Running test…}",
             "booruConfigExistsError": "{This Booru config already exists}",
@@ -405,12 +405,12 @@
             "thisBooruConfigWontBeAdded": "{This booru config won't be added}",
             "booruConfigSaved": "{Booru config saved}",
             "existingTabsNeedReload": "{Existing tabs with this Booru need to be reloaded in order to apply changes!}",
-            "failedVerifyApiHydrus": "{Failed to verify api access for Hydrus}",
+            "failedVerifyApiHydrus": "{Failed to verify API access for Hydrus}",
             "accessKeyRequestedTitle": "{Access key requested}",
             "accessKeyRequestedMsg": "{Tap okay on Hydrus then apply. You can tap 'Test Booru' afterwards}",
             "accessKeyFailedTitle": "{Failed to get access key}",
             "accessKeyFailedMsg": "{Do you have the request window open in Hydrus?}",
-            "hydrusInstructions": "{To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client api > Add > From API request}",
+            "hydrusInstructions": "{To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client API > Add > From API request}",
             "getHydrusApiKey": "{Get Hydrus API key}",
             "booruName": "{Booru Name}",
             "booruNameRequired": "{Booru Name is required!}",
@@ -569,7 +569,7 @@
             "viewerPageChangeAnimation": "{Viewer page change animation}",
             "usingDefaultAnimation": "{Using default animation}",
             "usingCustomAnimation": "{Using custom animation}",
-            "kannaLoadingGif": "{Kanna loading Gif}",
+            "kannaLoadingGif": "{Kanna loading GIF}",
             "imageQualityValues": {
                 "sample": "{Sample}",
                 "fullRes": "{Original}"
