@@ -76,7 +76,7 @@ class TranslationsDev extends Translations with BaseTranslations<AppLocale, Tran
   @override
   String get no => TranslationOverrides.string(_root.$meta, 'no', {}) ?? '{No}';
   @override
-  String get pleaseWait => TranslationOverrides.string(_root.$meta, 'pleaseWait', {}) ?? '{Please wait...}';
+  String get pleaseWait => TranslationOverrides.string(_root.$meta, 'pleaseWait', {}) ?? '{Please wait…}';
   @override
   String get show => TranslationOverrides.string(_root.$meta, 'show', {}) ?? '{Show}';
   @override
@@ -118,7 +118,7 @@ class TranslationsDev extends Translations with BaseTranslations<AppLocale, Tran
   @override
   String get goToSettings => TranslationOverrides.string(_root.$meta, 'goToSettings', {}) ?? '{Go to settings}';
   @override
-  String get thisMayTakeSomeTime => TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? '{This may take some time...}';
+  String get thisMayTakeSomeTime => TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? '{This may take some time…}';
   @override
   String get exitTheAppQuestion => TranslationOverrides.string(_root.$meta, 'exitTheAppQuestion', {}) ?? '{Exit the app?}';
   @override
@@ -313,15 +313,15 @@ class _TranslationsInitDev extends TranslationsInitEn {
   @override
   String get initError => TranslationOverrides.string(_root.$meta, 'init.initError', {}) ?? '{Initialization error!}';
   @override
-  String get settingUpProxy => TranslationOverrides.string(_root.$meta, 'init.settingUpProxy', {}) ?? '{Setting up proxy...}';
+  String get settingUpProxy => TranslationOverrides.string(_root.$meta, 'init.settingUpProxy', {}) ?? '{Setting up proxy…}';
   @override
-  String get loadingDatabase => TranslationOverrides.string(_root.$meta, 'init.loadingDatabase', {}) ?? '{Loading database...}';
+  String get loadingDatabase => TranslationOverrides.string(_root.$meta, 'init.loadingDatabase', {}) ?? '{Loading database…}';
   @override
-  String get loadingBoorus => TranslationOverrides.string(_root.$meta, 'init.loadingBoorus', {}) ?? '{Loading boorus...}';
+  String get loadingBoorus => TranslationOverrides.string(_root.$meta, 'init.loadingBoorus', {}) ?? '{Loading boorus…}';
   @override
-  String get loadingTags => TranslationOverrides.string(_root.$meta, 'init.loadingTags', {}) ?? '{Loading tags...}';
+  String get loadingTags => TranslationOverrides.string(_root.$meta, 'init.loadingTags', {}) ?? '{Loading tags…}';
   @override
-  String get restoringTabs => TranslationOverrides.string(_root.$meta, 'init.restoringTabs', {}) ?? '{Restoring tabs...}';
+  String get restoringTabs => TranslationOverrides.string(_root.$meta, 'init.restoringTabs', {}) ?? '{Restoring tabs…}';
 }
 
 // Path: permissions
@@ -478,8 +478,7 @@ class _TranslationsSnatcherDev extends TranslationsSnatcherEn {
   @override
   String get itemWasCancelled => TranslationOverrides.string(_root.$meta, 'snatcher.itemWasCancelled', {}) ?? '{Item was cancelled}';
   @override
-  String get startingNextQueueItem =>
-      TranslationOverrides.string(_root.$meta, 'snatcher.startingNextQueueItem', {}) ?? '{Starting next queue item...}';
+  String get startingNextQueueItem => TranslationOverrides.string(_root.$meta, 'snatcher.startingNextQueueItem', {}) ?? '{Starting next queue item…}';
   @override
   String get itemsSnatched => TranslationOverrides.string(_root.$meta, 'snatcher.itemsSnatched', {}) ?? '{Items snatched}';
   @override
@@ -657,7 +656,7 @@ class _TranslationsTabsDev extends TranslationsTabsEn {
   @override
   String get scrollToBottom => TranslationOverrides.string(_root.$meta, 'tabs.scrollToBottom', {}) ?? '{Scroll to bottom}';
   @override
-  String get filterTabsByBooru => TranslationOverrides.string(_root.$meta, 'tabs.filterTabsByBooru', {}) ?? '{Filter by booru, state, duplicates...}';
+  String get filterTabsByBooru => TranslationOverrides.string(_root.$meta, 'tabs.filterTabsByBooru', {}) ?? '{Filter by booru, state, duplicates…}';
   @override
   String get scrolling => TranslationOverrides.string(_root.$meta, 'tabs.scrolling', {}) ?? '{Scrolling:}';
   @override
@@ -1042,9 +1041,9 @@ class _TranslationsLoliSyncDev extends TranslationsLoliSyncEn {
   @override
   String get noConnection => TranslationOverrides.string(_root.$meta, 'loliSync.noConnection', {}) ?? '{No connection}';
   @override
-  String get waitingForConnection => TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? '{Waiting for connection...}';
+  String get waitingForConnection => TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? '{Waiting for connection…}';
   @override
-  String get startingServer => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? '{Starting server...}';
+  String get startingServer => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? '{Starting server…}';
   @override
   String get keepScreenAwake => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? '{Keep the screen awake}';
   @override
@@ -1157,7 +1156,7 @@ class _TranslationsTagViewDev extends TranslationsTagViewEn {
   @override
   String get selectBooruToLoad => TranslationOverrides.string(_root.$meta, 'tagView.selectBooruToLoad', {}) ?? '{Select a booru to load}';
   @override
-  String get previewIsLoading => TranslationOverrides.string(_root.$meta, 'tagView.previewIsLoading', {}) ?? '{Preview is loading...}';
+  String get previewIsLoading => TranslationOverrides.string(_root.$meta, 'tagView.previewIsLoading', {}) ?? '{Preview is loading…}';
   @override
   String get failedToLoadPreview => TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreview', {}) ?? '{Failed to load preview}';
   @override
@@ -1236,7 +1235,7 @@ class _TranslationsPinnedTagsDev extends TranslationsPinnedTagsEn {
   @override
   String get reorderPinnedTags => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? '{Reorder pinned tags}';
   @override
-  String get saving => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? '{Saving...}';
+  String get saving => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? '{Saving…}';
   @override
   String get reorder => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? '{Reorder}';
   @override
@@ -1310,7 +1309,7 @@ class _TranslationsSearchBarDev extends TranslationsSearchBarEn {
   @override
   String get history => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? '{History}';
   @override
-  String get more => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '{...}';
+  String get more => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '{…}';
 }
 
 // Path: mobileHome
@@ -1397,7 +1396,7 @@ class _TranslationsMediaPreviewsDev extends TranslationsMediaPreviewsEn {
   String get settings => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? '{Settings}';
   @override
   String get restoringPreviousSession =>
-      TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? '{Restoring previous session...}';
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? '{Restoring previous session…}';
   @override
   String get copiedFileURL => TranslationOverrides.string(_root.$meta, 'mediaPreviews.copiedFileURL', {}) ?? '{Copied file URL to clipboard!}';
 }
@@ -1443,10 +1442,10 @@ class _TranslationsGalleryDev extends TranslationsGalleryEn {
   @override
   String get noPostUrl => TranslationOverrides.string(_root.$meta, 'gallery.noPostUrl', {}) ?? '{No post URL!}';
   @override
-  String get loadingFile => TranslationOverrides.string(_root.$meta, 'gallery.loadingFile', {}) ?? '{Loading file...}';
+  String get loadingFile => TranslationOverrides.string(_root.$meta, 'gallery.loadingFile', {}) ?? '{Loading file…}';
   @override
   String get loadingFileMessage =>
-      TranslationOverrides.string(_root.$meta, 'gallery.loadingFileMessage', {}) ?? '{This can take some time, please wait...}';
+      TranslationOverrides.string(_root.$meta, 'gallery.loadingFileMessage', {}) ?? '{This can take some time, please wait…}';
   @override
   String sources({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
@@ -1788,7 +1787,7 @@ class _TranslationsSettingsBooruEditorDev extends TranslationsSettingsBooruEdito
   @override
   String get saveBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? '{Save Booru}';
   @override
-  String get runningTest => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? '{Running test...}';
+  String get runningTest => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? '{Running test…}';
   @override
   String get booruConfigExistsError =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigExistsError', {}) ?? '{This Booru config already exists}';
@@ -2334,7 +2333,7 @@ class _TranslationsSettingsDownloadsDev extends TranslationsSettingsDownloadsEn 
   @override
   String get clearSelected => TranslationOverrides.string(_root.$meta, 'settings.downloads.clearSelected', {}) ?? '{Clear selected}';
   @override
-  String get updatingData => TranslationOverrides.string(_root.$meta, 'settings.downloads.updatingData', {}) ?? '{Updating data...}';
+  String get updatingData => TranslationOverrides.string(_root.$meta, 'settings.downloads.updatingData', {}) ?? '{Updating data…}';
 }
 
 // Path: settings.database
@@ -2402,7 +2401,7 @@ class _TranslationsSettingsDatabaseDev extends TranslationsSettingsDatabaseEn {
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryRecords', {'limit': limit}) ?? '{Saves last ${limit} searches}';
   @override
   String get searchHistoryTapInfo =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ?? '{Tap entry for actions (Delete, Favourite...)}';
+      TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ?? '{Tap entry for actions (Delete, Favourite…)}';
   @override
   String get searchHistoryFavouritesInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ??
@@ -2776,7 +2775,7 @@ class _TranslationsSettingsPerformanceDev extends TranslationsSettingsPerformanc
   @override
   String get lowPerformanceModeDialogDisablesResourceIntensive =>
       TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDisablesResourceIntensive', {}) ??
-      '{- Disables resource-intensive elements (blurs, animated opacity, some animations...)}';
+      '{- Disables resource-intensive elements (blurs, animated opacity, some animations…)}';
   @override
   String get lowPerformanceModeDialogSetsOptimal =>
       TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
@@ -2870,7 +2869,7 @@ class _TranslationsSettingsCacheDev extends TranslationsSettingsCacheEn {
   @override
   String get cacheStats => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheStats', {}) ?? '{Cache stats:}';
   @override
-  String get loading => TranslationOverrides.string(_root.$meta, 'settings.cache.loading', {}) ?? '{Loading...}';
+  String get loading => TranslationOverrides.string(_root.$meta, 'settings.cache.loading', {}) ?? '{Loading…}';
   @override
   String get empty => TranslationOverrides.string(_root.$meta, 'settings.cache.empty', {}) ?? '{Empty}';
   @override
@@ -2994,7 +2993,7 @@ class _TranslationsSettingsSyncDev extends TranslationsSettingsSyncEn {
   String get sendFavouritesLegacy =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.sendFavouritesLegacy', {}) ?? '{Send favourites (Legacy)}';
   @override
-  String get syncFavsFrom => TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFrom', {}) ?? '{Sync favs from #...}';
+  String get syncFavsFrom => TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFrom', {}) ?? '{Sync favs from #…}';
   @override
   String get syncFavsFromHelpText1 =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText1', {}) ??
@@ -3016,7 +3015,7 @@ class _TranslationsSettingsSyncDev extends TranslationsSettingsSyncEn {
   String snatchedCount({required String count}) =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.snatchedCount', {'count': count}) ?? '{Snatched: ${count}}';
   @override
-  String get syncSnatchedFrom => TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFrom', {}) ?? '{Sync snatched from #...}';
+  String get syncSnatchedFrom => TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFrom', {}) ?? '{Sync snatched from #…}';
   @override
   String get syncSnatchedFromHelpText1 =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText1', {}) ??
@@ -3471,16 +3470,16 @@ class _TranslationsMediaLoadingDev extends TranslationsMediaLoadingEn {
 
   // Translations
   @override
-  String get rendering => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? '{Rendering...}';
+  String get rendering => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? '{Rendering…}';
   @override
   String get loadingAndRenderingFromCache =>
-      TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? '{Loading and rendering from cache...}';
+      TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? '{Loading and rendering from cache…}';
   @override
-  String get loadingFromCache => TranslationOverrides.string(_root.$meta, 'media.loading.loadingFromCache', {}) ?? '{Loading from cache...}';
+  String get loadingFromCache => TranslationOverrides.string(_root.$meta, 'media.loading.loadingFromCache', {}) ?? '{Loading from cache…}';
   @override
-  String get buffering => TranslationOverrides.string(_root.$meta, 'media.loading.buffering', {}) ?? '{Buffering...}';
+  String get buffering => TranslationOverrides.string(_root.$meta, 'media.loading.buffering', {}) ?? '{Buffering…}';
   @override
-  String get loading => TranslationOverrides.string(_root.$meta, 'media.loading.loading', {}) ?? '{Loading...}';
+  String get loading => TranslationOverrides.string(_root.$meta, 'media.loading.loading', {}) ?? '{Loading…}';
   @override
   String get loadAnyway => TranslationOverrides.string(_root.$meta, 'media.loading.loadAnyway', {}) ?? '{Load anyway}';
   @override
@@ -3524,7 +3523,7 @@ class _TranslationsMediaVideoDev extends TranslationsMediaVideoEn {
   @override
   String get failedToLoadItemData => TranslationOverrides.string(_root.$meta, 'media.video.failedToLoadItemData', {}) ?? '{Failed to load item data}';
   @override
-  String get loadingItemData => TranslationOverrides.string(_root.$meta, 'media.video.loadingItemData', {}) ?? '{Loading item data...}';
+  String get loadingItemData => TranslationOverrides.string(_root.$meta, 'media.video.loadingItemData', {}) ?? '{Loading item data…}';
   @override
   String get retry => TranslationOverrides.string(_root.$meta, 'media.video.retry', {}) ?? '{Retry}';
   @override
@@ -3559,7 +3558,7 @@ class _TranslationsPreviewErrorDev extends TranslationsPreviewErrorEn {
       '{Loaded pages: ${pageNum}\nTap here to reload last page}';
   @override
   String loadingPage({required int pageNum}) =>
-      TranslationOverrides.string(_root.$meta, 'preview.error.loadingPage', {'pageNum': pageNum}) ?? '{Loading page #${pageNum}...}';
+      TranslationOverrides.string(_root.$meta, 'preview.error.loadingPage', {'pageNum': pageNum}) ?? '{Loading page #${pageNum}…}';
   @override
   String startedAgo({required num seconds}) =>
       TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
@@ -3822,7 +3821,7 @@ extension on TranslationsDev {
           'ok' => TranslationOverrides.string(_root.$meta, 'ok', {}) ?? '{OK}',
           'yes' => TranslationOverrides.string(_root.$meta, 'yes', {}) ?? '{Yes}',
           'no' => TranslationOverrides.string(_root.$meta, 'no', {}) ?? '{No}',
-          'pleaseWait' => TranslationOverrides.string(_root.$meta, 'pleaseWait', {}) ?? '{Please wait...}',
+          'pleaseWait' => TranslationOverrides.string(_root.$meta, 'pleaseWait', {}) ?? '{Please wait…}',
           'show' => TranslationOverrides.string(_root.$meta, 'show', {}) ?? '{Show}',
           'hide' => TranslationOverrides.string(_root.$meta, 'hide', {}) ?? '{Hide}',
           'enable' => TranslationOverrides.string(_root.$meta, 'enable', {}) ?? '{Enable}',
@@ -3843,7 +3842,7 @@ extension on TranslationsDev {
           'copyErrorText' => TranslationOverrides.string(_root.$meta, 'copyErrorText', {}) ?? '{Copy error}',
           'booru' => TranslationOverrides.string(_root.$meta, 'booru', {}) ?? '{Booru}',
           'goToSettings' => TranslationOverrides.string(_root.$meta, 'goToSettings', {}) ?? '{Go to settings}',
-          'thisMayTakeSomeTime' => TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? '{This may take some time...}',
+          'thisMayTakeSomeTime' => TranslationOverrides.string(_root.$meta, 'thisMayTakeSomeTime', {}) ?? '{This may take some time…}',
           'exitTheAppQuestion' => TranslationOverrides.string(_root.$meta, 'exitTheAppQuestion', {}) ?? '{Exit the app?}',
           'closeTheApp' => TranslationOverrides.string(_root.$meta, 'closeTheApp', {}) ?? '{Close the app}',
           'invalidUrl' => TranslationOverrides.string(_root.$meta, 'invalidUrl', {}) ?? '{Invalid URL!}',
@@ -3909,11 +3908,11 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'validationErrors.moreThan8ColumnsWarning', {}) ??
                 '{Using more than 8 columns can affect performance}',
           'init.initError' => TranslationOverrides.string(_root.$meta, 'init.initError', {}) ?? '{Initialization error!}',
-          'init.settingUpProxy' => TranslationOverrides.string(_root.$meta, 'init.settingUpProxy', {}) ?? '{Setting up proxy...}',
-          'init.loadingDatabase' => TranslationOverrides.string(_root.$meta, 'init.loadingDatabase', {}) ?? '{Loading database...}',
-          'init.loadingBoorus' => TranslationOverrides.string(_root.$meta, 'init.loadingBoorus', {}) ?? '{Loading boorus...}',
-          'init.loadingTags' => TranslationOverrides.string(_root.$meta, 'init.loadingTags', {}) ?? '{Loading tags...}',
-          'init.restoringTabs' => TranslationOverrides.string(_root.$meta, 'init.restoringTabs', {}) ?? '{Restoring tabs...}',
+          'init.settingUpProxy' => TranslationOverrides.string(_root.$meta, 'init.settingUpProxy', {}) ?? '{Setting up proxy…}',
+          'init.loadingDatabase' => TranslationOverrides.string(_root.$meta, 'init.loadingDatabase', {}) ?? '{Loading database…}',
+          'init.loadingBoorus' => TranslationOverrides.string(_root.$meta, 'init.loadingBoorus', {}) ?? '{Loading boorus…}',
+          'init.loadingTags' => TranslationOverrides.string(_root.$meta, 'init.loadingTags', {}) ?? '{Loading tags…}',
+          'init.restoringTabs' => TranslationOverrides.string(_root.$meta, 'init.restoringTabs', {}) ?? '{Restoring tabs…}',
           'permissions.noAccessToCustomStorageDirectory' =>
             TranslationOverrides.string(_root.$meta, 'permissions.noAccessToCustomStorageDirectory', {}) ?? '{No access to custom storage directory}',
           'permissions.pleaseSetStorageDirectoryAgain' =>
@@ -4007,7 +4006,7 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'snatcher.failedToSnatchItem', {}) ?? '{Failed to snatch the item}',
           'snatcher.itemWasCancelled' => TranslationOverrides.string(_root.$meta, 'snatcher.itemWasCancelled', {}) ?? '{Item was cancelled}',
           'snatcher.startingNextQueueItem' =>
-            TranslationOverrides.string(_root.$meta, 'snatcher.startingNextQueueItem', {}) ?? '{Starting next queue item...}',
+            TranslationOverrides.string(_root.$meta, 'snatcher.startingNextQueueItem', {}) ?? '{Starting next queue item…}',
           'snatcher.itemsSnatched' => TranslationOverrides.string(_root.$meta, 'snatcher.itemsSnatched', {}) ?? '{Items snatched}',
           'snatcher.snatchedCount' =>
             ({required num count}) =>
@@ -4113,7 +4112,7 @@ extension on TranslationsDev {
           'tabs.scrollToTop' => TranslationOverrides.string(_root.$meta, 'tabs.scrollToTop', {}) ?? '{Scroll to top}',
           'tabs.scrollToBottom' => TranslationOverrides.string(_root.$meta, 'tabs.scrollToBottom', {}) ?? '{Scroll to bottom}',
           'tabs.filterTabsByBooru' =>
-            TranslationOverrides.string(_root.$meta, 'tabs.filterTabsByBooru', {}) ?? '{Filter by booru, state, duplicates...}',
+            TranslationOverrides.string(_root.$meta, 'tabs.filterTabsByBooru', {}) ?? '{Filter by booru, state, duplicates…}',
           'tabs.scrolling' => TranslationOverrides.string(_root.$meta, 'tabs.scrolling', {}) ?? '{Scrolling:}',
           'tabs.sorting' => TranslationOverrides.string(_root.$meta, 'tabs.sorting', {}) ?? '{Sorting:}',
           'tabs.defaultTabsOrder' => TranslationOverrides.string(_root.$meta, 'tabs.defaultTabsOrder', {}) ?? '{Default tabs order}',
@@ -4342,8 +4341,7 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
                 '{Config parameters may be incorrect, booru doesn\'t allow api access, request didn\'t return any data or there was a network error.}',
           'settings.booruEditor.saveBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? '{Save Booru}',
-          'settings.booruEditor.runningTest' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? '{Running test...}',
+          'settings.booruEditor.runningTest' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? '{Running test…}',
           'settings.booruEditor.booruConfigExistsError' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigExistsError', {}) ?? '{This Booru config already exists}',
           'settings.booruEditor.booruSameNameExistsError' =>
@@ -4759,8 +4757,7 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'settings.downloads.unfavouriteSelected', {}) ?? '{Unfavorite selected}',
           'settings.downloads.clearSelected' =>
             TranslationOverrides.string(_root.$meta, 'settings.downloads.clearSelected', {}) ?? '{Clear selected}',
-          'settings.downloads.updatingData' =>
-            TranslationOverrides.string(_root.$meta, 'settings.downloads.updatingData', {}) ?? '{Updating data...}',
+          'settings.downloads.updatingData' => TranslationOverrides.string(_root.$meta, 'settings.downloads.updatingData', {}) ?? '{Updating data…}',
           'settings.database.title' => TranslationOverrides.string(_root.$meta, 'settings.database.title', {}) ?? '{Database}',
           'settings.database.indexingDatabase' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.indexingDatabase', {}) ?? '{Indexing database}',
@@ -4806,8 +4803,7 @@ extension on TranslationsDev {
                 TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryRecords', {'limit': limit}) ??
                 '{Saves last ${limit} searches}',
           'settings.database.searchHistoryTapInfo' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ??
-                '{Tap entry for actions (Delete, Favourite...)}',
+            TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ?? '{Tap entry for actions (Delete, Favourite…)}',
           'settings.database.searchHistoryFavouritesInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ??
                 '{Favourited queries are pinned to the top of the list and will not be counted towards the limit.}',
@@ -5074,7 +5070,7 @@ extension on TranslationsDev {
                 '{- Disables detailed loading progress information}',
           'settings.performance.lowPerformanceModeDialogDisablesResourceIntensive' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDisablesResourceIntensive', {}) ??
-                '{- Disables resource-intensive elements (blurs, animated opacity, some animations...)}',
+                '{- Disables resource-intensive elements (blurs, animated opacity, some animations…)}',
           'settings.performance.lowPerformanceModeDialogSetsOptimal' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
                 '{Sets optimal settings for these options (you can change them separately later):}',
@@ -5137,7 +5133,7 @@ extension on TranslationsDev {
           'settings.cache.maximumTotalCacheSize' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.maximumTotalCacheSize', {}) ?? '{Maximum total cache size}',
           'settings.cache.cacheStats' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheStats', {}) ?? '{Cache stats:}',
-          'settings.cache.loading' => TranslationOverrides.string(_root.$meta, 'settings.cache.loading', {}) ?? '{Loading...}',
+          'settings.cache.loading' => TranslationOverrides.string(_root.$meta, 'settings.cache.loading', {}) ?? '{Loading…}',
           'settings.cache.empty' => TranslationOverrides.string(_root.$meta, 'settings.cache.empty', {}) ?? '{Empty}',
           'settings.cache.inFilesPlural' =>
             ({required String size, required int count}) =>
@@ -5214,7 +5210,7 @@ extension on TranslationsDev {
                 TranslationOverrides.string(_root.$meta, 'settings.sync.favouritesCount', {'count': count}) ?? '{Favorites: ${count}}',
           'settings.sync.sendFavouritesLegacy' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.sendFavouritesLegacy', {}) ?? '{Send favourites (Legacy)}',
-          'settings.sync.syncFavsFrom' => TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFrom', {}) ?? '{Sync favs from #...}',
+          'settings.sync.syncFavsFrom' => TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFrom', {}) ?? '{Sync favs from #…}',
           'settings.sync.syncFavsFromHelpText1' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText1', {}) ??
                 '{Allows to set from where the sync should start from, useful if you already synced all your favs before and want to sync only the newest items}',
@@ -5232,7 +5228,7 @@ extension on TranslationsDev {
             ({required String count}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.sync.snatchedCount', {'count': count}) ?? '{Snatched: ${count}}',
           'settings.sync.syncSnatchedFrom' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFrom', {}) ?? '{Sync snatched from #...}',
+            TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFrom', {}) ?? '{Sync snatched from #…}',
           'settings.sync.syncSnatchedFromHelpText1' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText1', {}) ??
                 '{Allows to set from where the sync should start from, useful if you already synced all your snatched history before and want to sync only the newest items}',
@@ -5479,8 +5475,8 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'loliSync.stopServerQuestion', {}) ?? '{Do you want to stop the server?}',
           'loliSync.noConnection' => TranslationOverrides.string(_root.$meta, 'loliSync.noConnection', {}) ?? '{No connection}',
           'loliSync.waitingForConnection' =>
-            TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? '{Waiting for connection...}',
-          'loliSync.startingServer' => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? '{Starting server...}',
+            TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? '{Waiting for connection…}',
+          'loliSync.startingServer' => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? '{Starting server…}',
           'loliSync.keepScreenAwake' => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? '{Keep the screen awake}',
           'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? '{LoliSync server killed}',
           'loliSync.testError' =>
@@ -5535,7 +5531,7 @@ extension on TranslationsDev {
           'tagView.sourceDialogTitle' => TranslationOverrides.string(_root.$meta, 'tagView.sourceDialogTitle', {}) ?? '{Source}',
           'tagView.preview' => TranslationOverrides.string(_root.$meta, 'tagView.preview', {}) ?? '{Preview}',
           'tagView.selectBooruToLoad' => TranslationOverrides.string(_root.$meta, 'tagView.selectBooruToLoad', {}) ?? '{Select a booru to load}',
-          'tagView.previewIsLoading' => TranslationOverrides.string(_root.$meta, 'tagView.previewIsLoading', {}) ?? '{Preview is loading...}',
+          'tagView.previewIsLoading' => TranslationOverrides.string(_root.$meta, 'tagView.previewIsLoading', {}) ?? '{Preview is loading…}',
           'tagView.failedToLoadPreview' => TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreview', {}) ?? '{Failed to load preview}',
           'tagView.tapToTryAgain' => TranslationOverrides.string(_root.$meta, 'tagView.tapToTryAgain', {}) ?? '{Tap to try again}',
           'tagView.copiedFileURL' => TranslationOverrides.string(_root.$meta, 'tagView.copiedFileURL', {}) ?? '{Copied file URL to clipboard}',
@@ -5581,7 +5577,7 @@ extension on TranslationsDev {
           'pinnedTags.tagUnpinned' => TranslationOverrides.string(_root.$meta, 'pinnedTags.tagUnpinned', {}) ?? '{Tag unpinned}',
           'pinnedTags.all' => TranslationOverrides.string(_root.$meta, 'pinnedTags.all', {}) ?? '{All}',
           'pinnedTags.reorderPinnedTags' => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorderPinnedTags', {}) ?? '{Reorder pinned tags}',
-          'pinnedTags.saving' => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? '{Saving...}',
+          'pinnedTags.saving' => TranslationOverrides.string(_root.$meta, 'pinnedTags.saving', {}) ?? '{Saving…}',
           'pinnedTags.reorder' => TranslationOverrides.string(_root.$meta, 'pinnedTags.reorder', {}) ?? '{Reorder}',
           'pinnedTags.addTagManually' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? '{Add tag manually}',
           'pinnedTags.noTagsMatchSearch' =>
@@ -5620,7 +5616,7 @@ extension on TranslationsDev {
           'searchBar.selectDate' => TranslationOverrides.string(_root.$meta, 'searchBar.selectDate', {}) ?? '{Select date}',
           'searchBar.selectDatesRange' => TranslationOverrides.string(_root.$meta, 'searchBar.selectDatesRange', {}) ?? '{Select dates range}',
           'searchBar.history' => TranslationOverrides.string(_root.$meta, 'searchBar.history', {}) ?? '{History}',
-          'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '{...}',
+          'searchBar.more' => TranslationOverrides.string(_root.$meta, 'searchBar.more', {}) ?? '{…}',
           'mobileHome.selectBooruForWebview' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.selectBooruForWebview', {}) ?? '{Select booru for webview}',
           'mobileHome.lockApp' => TranslationOverrides.string(_root.$meta, 'mobileHome.lockApp', {}) ?? '{Lock app}',
@@ -5650,7 +5646,7 @@ extension on TranslationsDev {
           'mediaPreviews.help' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.help', {}) ?? '{Help}',
           'mediaPreviews.settings' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? '{Settings}',
           'mediaPreviews.restoringPreviousSession' =>
-            TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? '{Restoring previous session...}',
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? '{Restoring previous session…}',
           'mediaPreviews.copiedFileURL' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.copiedFileURL', {}) ?? '{Copied file URL to clipboard!}',
           'viewer.tutorial.images' => TranslationOverrides.string(_root.$meta, 'viewer.tutorial.images', {}) ?? '{Images}',
@@ -5720,9 +5716,9 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'common.booruItemCopiedToClipboard', {}) ?? '{Booru item copied to clipboard}',
           'gallery.snatchQuestion' => TranslationOverrides.string(_root.$meta, 'gallery.snatchQuestion', {}) ?? '{Snatch?}',
           'gallery.noPostUrl' => TranslationOverrides.string(_root.$meta, 'gallery.noPostUrl', {}) ?? '{No post URL!}',
-          'gallery.loadingFile' => TranslationOverrides.string(_root.$meta, 'gallery.loadingFile', {}) ?? '{Loading file...}',
+          'gallery.loadingFile' => TranslationOverrides.string(_root.$meta, 'gallery.loadingFile', {}) ?? '{Loading file…}',
           'gallery.loadingFileMessage' =>
-            TranslationOverrides.string(_root.$meta, 'gallery.loadingFileMessage', {}) ?? '{This can take some time, please wait...}',
+            TranslationOverrides.string(_root.$meta, 'gallery.loadingFileMessage', {}) ?? '{This can take some time, please wait…}',
           'gallery.sources' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
@@ -5742,13 +5738,13 @@ extension on TranslationsDev {
           'galleryButtons.toggleQuality' => TranslationOverrides.string(_root.$meta, 'galleryButtons.toggleQuality', {}) ?? '{Toggle quality}',
           'galleryButtons.externalPlayer' => TranslationOverrides.string(_root.$meta, 'galleryButtons.externalPlayer', {}) ?? '{External player}',
           'galleryButtons.imageSearch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.imageSearch', {}) ?? '{Image search}',
-          'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? '{Rendering...}',
+          'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? '{Rendering…}',
           'media.loading.loadingAndRenderingFromCache' =>
-            TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? '{Loading and rendering from cache...}',
+            TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? '{Loading and rendering from cache…}',
           'media.loading.loadingFromCache' =>
-            TranslationOverrides.string(_root.$meta, 'media.loading.loadingFromCache', {}) ?? '{Loading from cache...}',
-          'media.loading.buffering' => TranslationOverrides.string(_root.$meta, 'media.loading.buffering', {}) ?? '{Buffering...}',
-          'media.loading.loading' => TranslationOverrides.string(_root.$meta, 'media.loading.loading', {}) ?? '{Loading...}',
+            TranslationOverrides.string(_root.$meta, 'media.loading.loadingFromCache', {}) ?? '{Loading from cache…}',
+          'media.loading.buffering' => TranslationOverrides.string(_root.$meta, 'media.loading.buffering', {}) ?? '{Buffering…}',
+          'media.loading.loading' => TranslationOverrides.string(_root.$meta, 'media.loading.loading', {}) ?? '{Loading…}',
           'media.loading.loadAnyway' => TranslationOverrides.string(_root.$meta, 'media.loading.loadAnyway', {}) ?? '{Load anyway}',
           'media.loading.restartLoading' => TranslationOverrides.string(_root.$meta, 'media.loading.restartLoading', {}) ?? '{Restart loading}',
           'media.loading.stopLoading' => TranslationOverrides.string(_root.$meta, 'media.loading.stopLoading', {}) ?? '{Stop loading}',
@@ -5781,7 +5777,7 @@ extension on TranslationsDev {
             TranslationOverrides.string(_root.$meta, 'media.video.openVideoInBrowser', {}) ?? '{Open video in browser}',
           'media.video.failedToLoadItemData' =>
             TranslationOverrides.string(_root.$meta, 'media.video.failedToLoadItemData', {}) ?? '{Failed to load item data}',
-          'media.video.loadingItemData' => TranslationOverrides.string(_root.$meta, 'media.video.loadingItemData', {}) ?? '{Loading item data...}',
+          'media.video.loadingItemData' => TranslationOverrides.string(_root.$meta, 'media.video.loadingItemData', {}) ?? '{Loading item data…}',
           'media.video.retry' => TranslationOverrides.string(_root.$meta, 'media.video.retry', {}) ?? '{Retry}',
           'media.video.openFileInBrowser' =>
             TranslationOverrides.string(_root.$meta, 'media.video.openFileInBrowser', {}) ?? '{Open file in browser}',
@@ -5811,7 +5807,7 @@ extension on TranslationsDev {
                 '{Loaded pages: ${pageNum}\nTap here to reload last page}',
           'preview.error.loadingPage' =>
             ({required int pageNum}) =>
-                TranslationOverrides.string(_root.$meta, 'preview.error.loadingPage', {'pageNum': pageNum}) ?? '{Loading page #${pageNum}...}',
+                TranslationOverrides.string(_root.$meta, 'preview.error.loadingPage', {'pageNum': pageNum}) ?? '{Loading page #${pageNum}…}',
           'preview.error.startedAgo' =>
             ({required num seconds}) =>
                 TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
