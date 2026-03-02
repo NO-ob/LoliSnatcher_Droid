@@ -1735,7 +1735,7 @@ class _TranslationsSettingsBooruDev extends TranslationsSettingsBooruEn {
   String get importBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.importBooru', {}) ?? '{Import Booru config from clipboard}';
   @override
   String get onlyLSURLsSupported =>
-      TranslationOverrides.string(_root.$meta, 'settings.booru.onlyLSURLsSupported', {}) ?? '{Only loli.snatcher URLs are supported!}';
+      TranslationOverrides.string(_root.$meta, 'settings.booru.onlyLSURLsSupported', {}) ?? '{Only loli.snatcher URLs are supported}';
   @override
   String get deleteBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooru', {}) ?? '{Delete Booru config}';
   @override
@@ -4298,7 +4298,7 @@ extension on TranslationsDev {
           'settings.booru.importBooru' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.importBooru', {}) ?? '{Import Booru config from clipboard}',
           'settings.booru.onlyLSURLsSupported' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booru.onlyLSURLsSupported', {}) ?? '{Only loli.snatcher URLs are supported!}',
+            TranslationOverrides.string(_root.$meta, 'settings.booru.onlyLSURLsSupported', {}) ?? '{Only loli.snatcher URLs are supported}',
           'settings.booru.deleteBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooru', {}) ?? '{Delete Booru config}',
           'settings.booru.deleteBooruError' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooruError', {}) ??

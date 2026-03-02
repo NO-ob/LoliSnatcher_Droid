@@ -379,7 +379,7 @@
             "addedBoorus": "Added Boorus",
             "editBooru": "Edit Booru config",
             "importBooru": "Import Booru config from clipboard",
-            "onlyLSURLsSupported": "Only loli.snatcher URLs are supported!",
+            "onlyLSURLsSupported": "Only loli.snatcher URLs are supported",
             "deleteBooru": "Delete Booru config",
             "deleteBooruError": "Something went wrong during deletion of a Booru config!",
             "booruDeleted": "Booru config deleted",
