@@ -191,10 +191,11 @@ extension AppLocaleExt on AppLocale {
 
   static List<AppLocale> get allowedValues => AppLocale.values
       .where(
-        (l) => ![
-          // Disabled languages until they reach at least 80% of completion
-          AppLocale.ptBr,
-          AppLocale.zhCn,
+        (l) => [
+          // Other languages are disabled until they reach at least 80% of completion
+          AppLocale.en,
+          AppLocale.ruRu,
+          AppLocale.trTr,
         ].any((bl) => bl == l),
       )
       .toList();
