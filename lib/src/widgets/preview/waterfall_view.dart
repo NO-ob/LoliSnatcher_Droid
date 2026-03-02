@@ -46,6 +46,9 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
 
   final ValueNotifier<bool> isActive = ValueNotifier(true);
 
+  Timer? viewedItemCleanupTimer;
+  int viewedItemCleanupCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -176,6 +179,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
 
   @override
   void dispose() {
+    viewedItemCleanupTimer?.cancel();
     NavigationHandler.instance.routeObserver.unsubscribe(this);
     searchHandler.index.removeListener(tabIndexListener);
     searchHandler.tabId.removeListener(tabIdListener);
@@ -243,6 +247,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
         return;
       }
 
+      viewedItemCleanupTimer?.cancel();
       viewerHandler.setCurrent(searchHandler.currentFetched[index]);
 
       isActive.value = false;
@@ -276,6 +281,23 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       );
 
       viewerHandler.dropCurrent();
+
+      viewedItemCleanupTimer = Timer.periodic(
+        const Duration(milliseconds: 200),
+        (_) {
+          // workaround to forcefully clear the viewed item if it got set after we left the viewer (i.e. check after favouriting)
+          if (viewerHandler.current.value != null) {
+            viewerHandler.dropCurrent();
+          }
+
+          // run for 5s with 200ms interval
+          if (viewedItemCleanupCount < 25) {
+            viewedItemCleanupCount++;
+          } else {
+            viewedItemCleanupTimer?.cancel();
+          }
+        },
+      );
 
       isActive.value = true;
 
