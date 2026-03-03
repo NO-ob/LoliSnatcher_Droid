@@ -53,7 +53,7 @@ class e621Handler extends BooruHandler {
         }
       } else {
         fileURL = current['file']['url'];
-        sampleURL = current['sample']['url'];
+        sampleURL = current['sample']?['url'] ?? current['preview']['url'];
         thumbURL = current['preview']['url'];
       }
 
@@ -99,8 +99,8 @@ class e621Handler extends BooruHandler {
         fileSize: current['file']['size'],
         fileWidth: current['file']['width']?.toDouble(),
         fileHeight: current['file']['height']?.toDouble(),
-        sampleWidth: current['sample']['width']?.toDouble(),
-        sampleHeight: current['sample']['height']?.toDouble(),
+        sampleWidth: current['sample']?['width']?.toDouble() ?? current['preview']['width']?.toDouble(),
+        sampleHeight: current['sample']?['height']?.toDouble() ?? current['preview']['height']?.toDouble(),
         previewWidth: current['preview']['width']?.toDouble(),
         previewHeight: current['preview']['height']?.toDouble(),
         hasNotes: current['has_notes'],
