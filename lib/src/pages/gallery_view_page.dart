@@ -805,14 +805,16 @@ class _ItemInfoDrawerState extends State<ItemInfoDrawer> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Container(
-                alignment: Alignment.bottomCenter,
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                height: (50 * buttons.length) + (12 * (buttons.length - 1)),
-                width: 50,
-                child: Column(
-                  spacing: 12,
-                  children: buttons,
+              SafeArea(
+                child: Container(
+                  alignment: Alignment.bottomCenter,
+                  margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  height: (50 * buttons.length) + (12 * (buttons.length - 1)),
+                  width: 50,
+                  child: Column(
+                    spacing: 12,
+                    children: buttons,
+                  ),
                 ),
               ),
 
