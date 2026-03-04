@@ -415,6 +415,21 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                         });
                       }
 
+                      // If loading just finished but content doesn't fill the viewport,
+                      // the NotificationListener won't fire (no scroll possible), so trigger next page here with a small delay.
+                      if (!searchHandler.isLoading.value && searchHandler.currentFetched.isNotEmpty) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) async {
+                          if (searchHandler.gridScrollController.hasClients && !searchHandler.isLoading.value) {
+                            final pos = searchHandler.gridScrollController.position;
+                            final bool screenNotFilled = pos.extentBefore == 0 && pos.extentAfter == 0;
+                            if (screenNotFilled) {
+                              await Future.delayed(const Duration(milliseconds: 500));
+                              unawaited(searchHandler.runSearch());
+                            }
+                          }
+                        });
+                      }
+
                       return CustomScrollView(
                         key: ValueKey('CustomScrollView-${searchHandler.currentTabId}'),
                         controller: searchHandler.gridScrollController,
