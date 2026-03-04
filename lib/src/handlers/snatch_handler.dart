@@ -107,32 +107,36 @@ class SnatchHandler {
     }
 
     final List<SnatchItem> snatchItems = [];
-    booruItemsMap.forEach((booru, items) async {
-      final booruHandler = BooruHandlerFactory().getBooruHandler([booru], 10).booruHandler;
-      if (booruHandler.hasLoadItemSupport) {
-        try {
-          // refetch data only on smaller-ish batches, otherwise they will most likely rate limit the user
-          if (items.length <= 20) {
-            for (final item in items) {
-              await booruHandler.loadItem(
-                item: item,
-                withCapcthaCheck: true,
-              );
-              await Future.delayed(const Duration(milliseconds: 100));
+    await Future.wait(
+      booruItemsMap.entries.map((entry) async {
+        final booru = entry.key;
+        final items = entry.value;
+        final booruHandler = BooruHandlerFactory().getBooruHandler([booru], 10).booruHandler;
+        if (booruHandler.hasLoadItemSupport) {
+          try {
+            // refetch data only on smaller-ish batches, otherwise they will most likely rate limit the user
+            if (items.length <= 20) {
+              for (final item in items) {
+                await booruHandler.loadItem(
+                  item: item,
+                  withCapcthaCheck: true,
+                );
+                await Future.delayed(const Duration(milliseconds: 100));
+              }
             }
-          }
-        } catch (_) {}
-      }
+          } catch (_) {}
+        }
 
-      snatchItems.add(
-        SnatchItem(
-          items,
-          cooldown,
-          booru,
-          ignoreExists || items.any((i) => existsItems.any((e) => e.item == i)),
-        ),
-      );
-    });
+        snatchItems.add(
+          SnatchItem(
+            items,
+            cooldown,
+            booru,
+            ignoreExists || items.any((i) => existsItems.any((e) => e.item == i)),
+          ),
+        );
+      }),
+    );
 
     queuedList.addAll(snatchItems);
 
