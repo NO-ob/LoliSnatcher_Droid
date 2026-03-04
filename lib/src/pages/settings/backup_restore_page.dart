@@ -529,7 +529,8 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             return;
                           }
 
-                          final File newFile = File('${await ServiceHandler.getConfigDir()}store.db');
+                          final String configDir = await ServiceHandler.getConfigDir();
+                          final File newFile = File('${configDir}store.db');
                           if (!(await newFile.exists())) {
                             showSnackbar(
                               context.loc.settings.backupAndRestore.restoreDatabaseError,
@@ -541,8 +542,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             return;
                           }
 
+                          await settingsHandler.dbHandler.closeDb();
                           settingsHandler.dbHandler = DBHandler();
-                          await settingsHandler.dbHandler.dbConnect(newFile.path);
+                          await settingsHandler.dbHandler.dbConnect(configDir);
                           //
                           showSnackbar(
                             context.loc.settings.backupAndRestore.databaseRestored,

@@ -28,6 +28,11 @@ class DBHandler {
   DBHandler();
   Database? db;
 
+  Future<void> closeDb() async {
+    await db?.close();
+    db = null;
+  }
+
   /// Connects to the database file and create the database if the tables dont exist
   Future<bool> dbConnect(
     String path, {
@@ -39,7 +44,7 @@ class DBHandler {
     } else if (Platform.isWindows || Platform.isLinux) {
       db = await databaseFactory.openDatabase('${path}store.db');
     }
-    await db!.execute('PRAGMA journal_mode=WAL;');
+    await db!.rawQuery('PRAGMA journal_mode=WAL;');
     await updateTable();
     await fixBooruItems(onStatusUpdate);
     await deleteUntracked();
