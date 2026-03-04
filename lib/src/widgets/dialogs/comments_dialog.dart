@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -231,9 +232,11 @@ class _CommentsDialogState extends State<CommentsDialog> {
         }
 
         if (context.isLandscape) {
-          final double sizeDiff = thumbHeight / min(screenHeight * 0.4, thumbHeight);
+          final size = MediaQuery.sizeOf(context);
+          final double landscapeScreenMod = size.height == size.shortestSide ? 0.3 : 0.4;
+          final double sizeDiff = thumbHeight / min(screenHeight * landscapeScreenMod, thumbHeight);
           thumbHeight /= sizeDiff;
-          thumbHeight = min(thumbHeight, screenHeight * 0.4);
+          thumbHeight = min(thumbHeight, screenHeight * landscapeScreenMod);
         }
 
         final double expandedHeight = max(thumbHeight, _CommentsHeaderDelegate.minThumbHeight);
@@ -663,7 +666,8 @@ class _CommentsHeaderDelegate extends SliverPersistentHeaderDelegate {
   final BooruHandler handler;
   final VoidCallback onThumbTap;
 
-  static const double minThumbHeight = 100;
+  static double get minThumbHeight =>
+      MediaQuery.orientationOf(NavigationHandler.instance.navContext).isLandscape ? 50 : 100;
 
   ({double height, double width}) _thumbSize(double rawHeight) {
     final double ratio = item.fileAspectRatio ?? 16 / 9;
