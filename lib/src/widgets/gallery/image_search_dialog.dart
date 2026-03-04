@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 // TODO change to bottom sheet

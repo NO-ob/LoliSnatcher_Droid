@@ -3,18 +3,19 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
+import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 import 'package:lolisnatcher/src/widgets/common/parsed_text.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/gallery/image_search_dialog.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class CommentsDialog extends StatefulWidget {
@@ -160,174 +161,228 @@ class _CommentsDialogState extends State<CommentsDialog> {
   }
 
   void scrollToComment(int index) {
-    // +1 because index 0 is the header
-    scrollController.scrollToIndex(
-      index + 1,
-      duration: const Duration(milliseconds: 1),
-      preferPosition: AutoScrollPosition.begin,
-    );
+    // Cancel any in-progress scroll animation before starting a new one
+    scrollController.jumpTo(scrollController.offset);
+    if (index == 0) {
+      scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    } else {
+      scrollController.scrollToIndex(
+        index,
+        duration: const Duration(milliseconds: 200),
+        preferPosition: AutoScrollPosition.begin,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final bool areThereErrors = (isLoading && comments.isEmpty) || notSupported || comments.isEmpty;
 
-    return SettingsPageDialog(
-      title: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(context.loc.comments.title),
-          if (comments.isNotEmpty)
-            Text(
-              '${selectedIndex != null ? '${selectedIndex! + 1}/' : ''}${comments.length}',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-        ],
-      ),
-      content: Stack(
-        children: [
-          NotificationListener<ScrollUpdateNotification>(
-            onNotification: onScroll,
-            child: Scrollbar(
-              controller: scrollController,
-              interactive: true,
-              scrollbarOrientation: settingsHandler.handSide.value.isLeft
-                  ? ScrollbarOrientation.left
-                  : ScrollbarOrientation.right,
-              child: RefreshIndicator(
-                triggerMode: RefreshIndicatorTriggerMode.anywhere,
-                strokeWidth: 4,
-                color: Theme.of(context).colorScheme.secondary,
-                onRefresh: () async {
-                  await getComments(initial: true);
-                },
-                child: ListView.builder(
-                  padding: EdgeInsets.only(
-                    top: 8,
-                    bottom: 128 + MediaQuery.paddingOf(context).bottom,
-                  ),
-                  controller: scrollController,
-                  itemCount: areThereErrors ? 2 : comments.length + 1,
-                  scrollDirection: Axis.vertical,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return AutoScrollTag(
-                        key: const ValueKey(0),
-                        controller: scrollController,
-                        index: 0,
-                        child: _CommentsHeader(
-                          item: widget.item,
-                          handler: widget.handler,
-                        ),
-                      );
-                    }
+    final String countText = comments.isNotEmpty
+        ? '${selectedIndex != null ? '${selectedIndex! + 1}/' : ''}${comments.length}'
+        : '';
 
-                    if (areThereErrors) {
-                      return errorEntryBuild(context, index);
-                    }
-
-                    final commentIndex = index - 1;
-                    return AutoScrollTag(
-                      key: ValueKey(index),
-                      controller: scrollController,
-                      index: index,
-                      child: _CommentEntry(
-                        comment: comments[commentIndex],
-                        onTap: () => setState(() {
-                          if (selectedIndex == commentIndex) {
-                            selectedIndex = null;
-                          } else {
-                            selectedIndex = commentIndex;
-                          }
-                        }),
-                        isSelected: selectedIndex == commentIndex,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-          if (comments.isNotEmpty)
-            Positioned(
-              bottom: 32 + MediaQuery.paddingOf(context).bottom,
-              left: settingsHandler.handSide.value.isLeft ? 32 : null,
-              right: settingsHandler.handSide.value.isLeft ? null : 32,
-              child: Material(
-                color: Colors.transparent,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.8),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      LongPressRepeater(
-                        onStart: () async => navigateToComment(false, isHolding: true),
-                        startDelay: 300,
-                        child: InkWell(
-                          borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                          onTap: () => navigateToComment(false),
-                          child: SizedBox(
-                            width: kMinInteractiveDimension,
-                            height: kMinInteractiveDimension,
-                            child: Icon(
-                              Icons.arrow_upward,
-                              size: 30,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      LongPressRepeater(
-                        onStart: () async => navigateToComment(true, isHolding: true),
-                        startDelay: 300,
-                        child: InkWell(
-                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
-                          onTap: () => navigateToComment(true),
-                          child: SizedBox(
-                            width: kMinInteractiveDimension,
-                            height: kMinInteractiveDimension,
-                            child: Icon(
-                              Icons.arrow_downward,
-                              size: 30,
-                              color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-      actions: [
-        if (isLoading && comments.isNotEmpty)
-          const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(),
-          ),
-        IconButton(
-          onPressed: () => getComments(initial: true),
-          icon: const Icon(Icons.refresh),
+    final List<Widget> actions = [
+      if (isLoading && comments.isNotEmpty)
+        const SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(),
         ),
-        if (widget.item.postURL.isNotEmpty)
-          IconButton(
-            onPressed: () {
-              launchUrlString(
-                widget.item.postURL,
-                mode: LaunchMode.externalApplication,
-              );
-            },
-            icon: const Icon(Icons.public),
+      IconButton(
+        onPressed: () => getComments(initial: true),
+        icon: const Icon(Icons.refresh),
+      ),
+      if (widget.item.postURL.isNotEmpty)
+        IconButton(
+          onPressed: () => launchUrlString(
+            widget.item.postURL,
+            mode: LaunchMode.externalApplication,
           ),
-      ],
+          icon: const Icon(Icons.public),
+        ),
+    ];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double screenWidth = constraints.maxWidth - 32;
+        final double screenHeight = MediaQuery.sizeOf(context).height;
+        final double ratio = widget.item.fileAspectRatio ?? 16 / 9;
+        final double minRatio = max(0.4, ratio);
+        final double maxRatio = min(2, ratio);
+        double thumbHeight;
+        double thumbWidth;
+        if (ratio < 1) {
+          thumbHeight = screenHeight * 0.4;
+          thumbWidth = min(
+            thumbHeight * minRatio,
+            (screenWidth * 0.8) / minRatio,
+          );
+        } else {
+          thumbWidth = screenWidth;
+          thumbHeight = min(
+            thumbWidth / maxRatio,
+            screenHeight * 0.4,
+          );
+        }
+
+        if (context.isLandscape) {
+          final double sizeDiff = thumbHeight / min(screenHeight * 0.4, thumbHeight);
+          thumbHeight /= sizeDiff;
+          thumbHeight = min(thumbHeight, screenHeight * 0.4);
+        }
+
+        final double expandedHeight = max(thumbHeight, _CommentsHeaderDelegate.minThumbHeight);
+
+        return SettingsPageDialog(
+          title: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(context.loc.comments.title),
+              if (countText.isNotEmpty)
+                Text(
+                  countText,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+            ],
+          ),
+          actions: actions,
+          content: Stack(
+            children: [
+              NotificationListener<ScrollUpdateNotification>(
+                onNotification: onScroll,
+                child: Scrollbar(
+                  controller: scrollController,
+                  interactive: true,
+                  scrollbarOrientation: settingsHandler.handSide.value.isLeft
+                      ? ScrollbarOrientation.left
+                      : ScrollbarOrientation.right,
+                  child: RefreshIndicator(
+                    triggerMode: RefreshIndicatorTriggerMode.anywhere,
+                    strokeWidth: 4,
+                    color: Theme.of(context).colorScheme.secondary,
+                    onRefresh: () async {
+                      await getComments(initial: true);
+                    },
+                    child: CustomScrollView(
+                      controller: scrollController,
+                      slivers: [
+                        SliverPersistentHeader(
+                          pinned: true,
+                          delegate: _CommentsHeaderDelegate(
+                            maxExtent: expandedHeight,
+                            availableWidth: thumbWidth,
+                            item: widget.item,
+                            handler: widget.handler,
+                            onThumbTap: () => setState(() {
+                              selectedIndex = null;
+                              scrollToComment(0);
+                            }),
+                          ),
+                        ),
+                        SliverSafeArea(
+                          top: false,
+                          sliver: areThereErrors
+                              ? SliverToBoxAdapter(child: errorEntryBuild(context, 0))
+                              : SliverPadding(
+                                  padding: EdgeInsets.only(
+                                    top: 16,
+                                    bottom: 128 + MediaQuery.paddingOf(context).bottom,
+                                  ),
+                                  sliver: SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (context, i) {
+                                        return AutoScrollTag(
+                                          key: ValueKey(i),
+                                          controller: scrollController,
+                                          index: i,
+                                          child: _CommentEntry(
+                                            comment: comments[i],
+                                            onTap: () => setState(() {
+                                              if (selectedIndex == i) {
+                                                selectedIndex = null;
+                                              } else {
+                                                selectedIndex = i;
+                                              }
+                                            }),
+                                            isSelected: selectedIndex == i,
+                                          ),
+                                        );
+                                      },
+                                      childCount: comments.length,
+                                    ),
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              if (comments.isNotEmpty)
+                Positioned(
+                  bottom: 32 + MediaQuery.paddingOf(context).bottom,
+                  left: settingsHandler.handSide.value.isLeft ? 32 : null,
+                  right: settingsHandler.handSide.value.isLeft ? null : 32,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          LongPressRepeater(
+                            onStart: () async => navigateToComment(false, isHolding: true),
+                            startDelay: 300,
+                            child: InkWell(
+                              borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                              onTap: () => navigateToComment(false),
+                              child: SizedBox(
+                                width: kMinInteractiveDimension,
+                                height: kMinInteractiveDimension,
+                                child: Icon(
+                                  Icons.arrow_upward,
+                                  size: 30,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          LongPressRepeater(
+                            onStart: () async => navigateToComment(true, isHolding: true),
+                            startDelay: 300,
+                            child: InkWell(
+                              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
+                              onTap: () => navigateToComment(true),
+                              child: SizedBox(
+                                width: kMinInteractiveDimension,
+                                height: kMinInteractiveDimension,
+                                child: Icon(
+                                  Icons.arrow_downward,
+                                  size: 30,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -403,19 +458,17 @@ class _CommentEntry extends StatelessWidget {
       builder: (context) => Dialog(
         backgroundColor: Colors.transparent,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: .min,
+          spacing: 12,
           children: [
             if (authorName?.isNotEmpty == true)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  authorName!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    shadows: [Shadow(blurRadius: 4, color: Colors.black)],
-                  ),
+              Text(
+                authorName!,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  shadows: [Shadow(blurRadius: 4, color: Colors.black)],
                 ),
               ),
             ClipRRect(
@@ -427,6 +480,7 @@ class _CommentEntry extends StatelessWidget {
                 ),
                 child: Image.network(
                   avatarUrl,
+                  scale: 0.5,
                   fit: BoxFit.contain,
                   filterQuality: FilterQuality.medium,
                   loadingBuilder: (context, child, loadingProgress) {
@@ -448,6 +502,10 @@ class _CommentEntry extends StatelessWidget {
                   },
                 ),
               ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.image_search_rounded),
+              onPressed: () => showImageSearchDialog(context, avatarUrl),
             ),
           ],
         ),
@@ -577,63 +635,79 @@ class _CommentEntry extends StatelessWidget {
   }
 }
 
-class _CommentsHeader extends StatelessWidget {
-  const _CommentsHeader({
+class _CommentsHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _CommentsHeaderDelegate({
+    required this.maxExtent,
+    required this.availableWidth,
     required this.item,
     required this.handler,
+    required this.onThumbTap,
   });
 
-  final BooruItem item;
-  final BooruHandler handler;
+  @override
+  double get minExtent {
+    final double ratio = item.fileAspectRatio ?? 16 / 9;
+    double h = minThumbHeight;
+    double w = h * ratio;
+    if (w > availableWidth) {
+      w = availableWidth;
+      h = w / ratio;
+    }
+    return h;
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final ratio = item.fileAspectRatio ?? 16 / 9;
-        final minRatio = max(0.4, ratio);
-        final maxRatio = min(2, ratio);
-        double width = 100;
-        double height = 100;
-        if (ratio < 1) {
-          // height > width
-          height = MediaQuery.sizeOf(context).height * 0.4;
-          width = height * minRatio;
-          if (width > constraints.maxWidth) width = constraints.maxWidth * 0.8;
-        } else {
-          // width > height
-          width = constraints.maxWidth * 0.6;
-          height = width / maxRatio;
-          if (height > constraints.maxHeight) height = constraints.maxHeight * 0.4;
-        }
+  final double maxExtent;
+  final double availableWidth;
+  final BooruItem item;
+  final BooruHandler handler;
+  final VoidCallback onThumbTap;
 
-        if (context.isLandscape) {
-          final double sizeDiff = height / (min(MediaQuery.sizeOf(context).height * 0.4, height));
-          height /= sizeDiff;
-          width /= sizeDiff;
-        }
+  static const double minThumbHeight = 100;
 
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: height,
-                width: width,
-                child: HeroMode(
-                  enabled: false,
-                  child: ThumbnailBuild(
-                    item: item,
-                    handler: handler,
-                    selectable: false,
-                  ),
+  ({double height, double width}) _thumbSize(double rawHeight) {
+    final double ratio = item.fileAspectRatio ?? 16 / 9;
+    double h = rawHeight;
+    double w = h * ratio;
+    if (w > availableWidth) {
+      w = availableWidth;
+      h = w / ratio;
+    }
+    return (height: h, width: w);
+  }
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final double rawThumbHeight = (maxExtent - shrinkOffset).clamp(
+      minThumbHeight,
+      maxExtent,
+    );
+    final (:height, :width) = _thumbSize(rawThumbHeight);
+
+    return Material(
+      color: Theme.of(context).colorScheme.surface,
+      child: GestureDetector(
+        onTap: onThumbTap,
+        child: Center(
+          child: UnconstrainedBox(
+            child: SizedBox(
+              height: height,
+              width: width,
+              child: HeroMode(
+                enabled: false,
+                child: ThumbnailBuild(
+                  item: item,
+                  handler: handler,
+                  selectable: false,
                 ),
               ),
-            ],
+            ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
+
+  @override
+  bool shouldRebuild(_CommentsHeaderDelegate oldDelegate) => true;
 }
