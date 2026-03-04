@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -285,6 +286,7 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
     super.initState();
 
     setMaxFPS();
+    getDeviceInfo();
   }
 
   Future<void> setMaxFPS() async {
@@ -303,6 +305,53 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
         maxFps.value = currentMode.refreshRate.round();
       }
       Logger.Inst().log('Set max fps to ${maxFps.value}', 'MainApp', 'setMaxFPS', null);
+    }
+  }
+
+  Future<void> getDeviceInfo() async {
+    try {
+      if (Platform.isAndroid) {
+        final deviceInfo = await DeviceInfoPlugin().androidInfo;
+        final version = deviceInfo.version;
+        Logger.Inst().log(
+          {
+            'name': deviceInfo.name,
+            'manufacturer': deviceInfo.manufacturer,
+            'brand': deviceInfo.brand,
+            'model': deviceInfo.model,
+            'device': deviceInfo.device,
+            'product': deviceInfo.product,
+            'board': deviceInfo.board,
+            'hardware': deviceInfo.hardware,
+            'supportedAbis': deviceInfo.supportedAbis,
+            'version': {
+              'baseOS': version.baseOS,
+              'sdkInt': version.sdkInt,
+              'release': version.release,
+              'codename': version.codename,
+              'incremental': version.incremental,
+              'previewSdkInt': version.previewSdkInt,
+              'securityPatch': version.securityPatch,
+            },
+            'isLowRamDevice': deviceInfo.isLowRamDevice,
+            'freeDiskSize': deviceInfo.freeDiskSize,
+            'totalDiskSize': deviceInfo.totalDiskSize,
+            'physicalRamSize': deviceInfo.physicalRamSize,
+            'availableRamSize': deviceInfo.availableRamSize,
+          }.toString(),
+          'MainApp',
+          'getDeviceInfo',
+          null,
+        );
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'MainApp',
+        'getDeviceInfo',
+        null,
+        s: s,
+      );
     }
   }
 

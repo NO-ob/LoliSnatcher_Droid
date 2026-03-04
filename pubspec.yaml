@@ -21,6 +21,7 @@ dependencies:
   collection: ^1.19.1
   country_flags: ^4.1.2
   crypto: ^3.0.7
+  device_info_plus: ^12.3.0
   dio: ^5.9.2
   dio_http2_adapter: ^2.7.0
   dynamic_color: ^1.8.1
