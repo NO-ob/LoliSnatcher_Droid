@@ -637,8 +637,8 @@ class VideoViewerState extends State<VideoViewer> {
               ImageFiltered(
                 enabled: settingsHandler.blurImages,
                 imageFilter: ImageFilter.blur(
-                  sigmaX: 30,
-                  sigmaY: 30,
+                  sigmaX: 40,
+                  sigmaY: 40,
                   tileMode: TileMode.decal,
                 ),
                 child: controllerProvider,
@@ -795,8 +795,8 @@ class VideoViewerState extends State<VideoViewer> {
                           ImageFiltered(
                             enabled: settingsHandler.blurImages,
                             imageFilter: ImageFilter.blur(
-                              sigmaX: 30,
-                              sigmaY: 30,
+                              sigmaX: 40,
+                              sigmaY: 40,
                               tileMode: TileMode.decal,
                             ),
                             child: PhotoView.customChild(

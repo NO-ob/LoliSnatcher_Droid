@@ -622,12 +622,12 @@ class ImageViewerState extends State<ImageViewer> {
         final List<Uint8List> slices =
             nativeSlices ??
             await compute(
-          sliceImageOnIsolate,
-          {
-            'path': cachePath,
-            'sliceHeight': kMaxTextureHeight,
-          },
-        );
+              sliceImageOnIsolate,
+              {
+                'path': cachePath,
+                'sliceHeight': kMaxTextureHeight,
+              },
+            );
 
         if (mounted) {
           // Adaptive tile width: cap total GPU texture memory at kMaxTileMemoryBudget
@@ -636,13 +636,13 @@ class ImageViewerState extends State<ImageViewer> {
           final int tileWidth = adaptiveWidth.clamp(256, widthLimit ?? 4096);
 
           tiledProviders = slices.map((s) {
-              return ResizeImage(
-                    MemoryImage(s),
+            return ResizeImage(
+                  MemoryImage(s),
                   width: tileWidth,
-                    policy: ResizeImagePolicy.fit,
-                    allowUpscaling: false,
-                  )
-                  as ImageProvider;
+                  policy: ResizeImagePolicy.fit,
+                  allowUpscaling: false,
+                )
+                as ImageProvider;
           }).toList();
           final double maxWidth = min(size.width, tileWidth.toDouble());
           tiledSize = Size(maxWidth, maxWidth / size.aspectRatio);
@@ -773,8 +773,8 @@ class ImageViewerState extends State<ImageViewer> {
             child: ImageFiltered(
               enabled: settingsHandler.blurImages,
               imageFilter: ImageFilter.blur(
-                sigmaX: 30,
-                sigmaY: 30,
+                sigmaX: 40,
+                sigmaY: 40,
                 tileMode: TileMode.decal,
               ),
               child: ListenableBuilder(

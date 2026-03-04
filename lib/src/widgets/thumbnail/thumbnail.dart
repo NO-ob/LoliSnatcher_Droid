@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -480,8 +481,12 @@ class _ThumbnailState extends State<Thumbnail> {
                 child: ImageFiltered(
                   enabled: settingsHandler.blurImages || widget.item.isHidden,
                   imageFilter: ImageFilter.blur(
-                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone)
+                        ? 40
+                        : max(MediaQuery.sizeOf(context).shortestSide * 0.02, 10),
+                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone)
+                        ? 40
+                        : max(MediaQuery.sizeOf(context).shortestSide * 0.02, 10),
                     tileMode: TileMode.decal,
                   ),
                   child: ValueListenableBuilder(
@@ -542,8 +547,12 @@ class _ThumbnailState extends State<Thumbnail> {
                       isBlurred &&
                       (settingsHandler.blurImages || (widget.item.isHidden && !settingsHandler.shitDevice)),
                   imageFilter: ImageFilter.blur(
-                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone)
+                        ? 40
+                        : max(MediaQuery.sizeOf(context).shortestSide * 0.02, 10),
+                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone)
+                        ? 40
+                        : max(MediaQuery.sizeOf(context).shortestSide * 0.02, 10),
                     tileMode: TileMode.decal,
                   ),
                   child: ValueListenableBuilder(
