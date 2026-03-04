@@ -50,7 +50,7 @@ const List<ImageSearchEngine> imageSearchEngines = [
 
 Future<void> showImageSearchDialog(
   BuildContext context,
-  BooruItem item,
+  String url,
 ) async {
   await showDialog(
     context: context,
@@ -73,7 +73,7 @@ Future<void> showImageSearchDialog(
                     ),
                     onTap: () {
                       launchUrlString(
-                        e.url.replaceAll('<image_url>', item.fileURL),
+                        e.url.replaceAll('<image_url>', url),
                         mode: LaunchMode.externalApplication,
                       );
                       Navigator.of(context).pop();

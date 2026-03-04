@@ -622,7 +622,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         ExternalVideoPlayerLauncher.launchOtherPlayer(item.fileURL, MIME.video, null);
         break;
       case .imageSearch:
-        await showImageSearchDialog(context, item);
+        await showImageSearchDialog(context, item.fileURL);
         break;
     }
   }
