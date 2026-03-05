@@ -248,6 +248,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       }
 
       viewedItemCleanupTimer?.cancel();
+      viewedItemCleanupCount = 0;
       viewerHandler.setCurrent(searchHandler.currentFetched[index]);
 
       isActive.value = false;
