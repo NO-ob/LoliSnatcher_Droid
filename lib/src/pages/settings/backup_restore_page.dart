@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -460,6 +459,8 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             }
                           }
 
+                          // WAL mode keeps store.db in a consistent readable state
+                          // at all times, so we can copy it safely while it's open.
                           await ServiceHandler.copyFileToSafDir(
                             await ServiceHandler.getConfigDir(),
                             'store.db',
@@ -512,10 +513,21 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           // disable backupping while restoring the db
                           searchHandler.canBackup.value = false;
 
+                          final String configDir = await ServiceHandler.getConfigDir();
+
+                          // Close the DB before overwriting the file on disk.
+                          await settingsHandler.dbHandler.closeDb();
+
+                          // Delete stale WAL/SHM sidecars before copying.
+                          for (final suffix in ['-wal', '-shm']) {
+                            final sidecar = File('${configDir}store.db$suffix');
+                            if (await sidecar.exists()) await sidecar.delete();
+                          }
+
                           final bool res = await ServiceHandler.copySafFileToDir(
                             backupPath,
                             'store.db',
-                            await ServiceHandler.getConfigDir(),
+                            configDir,
                           );
 
                           if (!res) {
@@ -529,7 +541,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             return;
                           }
 
-                          final String configDir = await ServiceHandler.getConfigDir();
                           final File newFile = File('${configDir}store.db');
                           if (!(await newFile.exists())) {
                             showSnackbar(
@@ -541,11 +552,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             setState(() {});
                             return;
                           }
-
-                          await settingsHandler.dbHandler.closeDb();
-                          settingsHandler.dbHandler = DBHandler();
-                          await settingsHandler.dbHandler.dbConnect(configDir);
-                          //
                           showSnackbar(
                             context.loc.settings.backupAndRestore.databaseRestored,
                             isError: false,

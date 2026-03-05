@@ -40,11 +40,27 @@ class DBHandler {
   }) async {
     // await Sqflite.devSetDebugModeOn(true);
     if (Platform.isAndroid || Platform.isIOS) {
-      db = await openDatabase('${path}store.db', version: 1, singleInstance: false);
+      db = await openDatabase(
+        '${path}store.db',
+        version: 1,
+        singleInstance: false,
+        onConfigure: (db) async {
+          try {
+            await db.rawQuery('PRAGMA journal_mode=WAL;');
+          } catch (e, s) {
+            Logger.Inst().log(
+              e.toString(),
+              'DBHandler',
+              'dbConnect',
+              LogTypes.exception,
+              s: s,
+            );
+          }
+        },
+      );
     } else if (Platform.isWindows || Platform.isLinux) {
       db = await databaseFactory.openDatabase('${path}store.db');
     }
-    await db!.rawQuery('PRAGMA journal_mode=WAL;');
     await updateTable();
     await fixBooruItems(onStatusUpdate);
     await deleteUntracked();
@@ -442,7 +458,7 @@ class DBHandler {
     final Map<int, List<String>> tagsMap = {};
     for (final row in tagsResult) {
       final id = row['booruItemID']! as int;
-      final tagName = row['name']! as String;
+      final tagName = row['name'].toString();
       if (!tagsMap.containsKey(id)) tagsMap[id] = [];
       tagsMap[id]!.add(tagName);
     }
@@ -1233,7 +1249,7 @@ class DBHandler {
       );
 
       for (final g in duplicateGroups) {
-        final String cleanName = g['cleanName']! as String;
+        final String cleanName = g['cleanName'].toString();
 
         final variants =
             await db?.rawQuery('SELECT id, name FROM Tag WHERE name = ? ORDER BY id ASC', [cleanName]) ?? [];

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 
 import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/response_error.dart';
@@ -38,19 +39,40 @@ class FavouritesHandler extends BooruHandler {
     // get amount of items before fetching
     final int length = fetched.length;
 
-    final newItems = await SettingsHandler.instance.dbHandler.searchDB(
-      tags,
-      (pageNum * limit).toString(),
-      limit.toString(),
-      'DESC',
-    );
+    final List<BooruItem> newItems = [];
+    try {
+      newItems.addAll(
+        await SettingsHandler.instance.dbHandler.searchDB(
+          tags,
+          (pageNum * limit).toString(),
+          limit.toString(),
+          'DESC',
+        ),
+      );
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'DownloadsHandler',
+        'search',
+        LogTypes.booruHandlerInfo,
+        s: s,
+      );
+      errorString = 'DATABASE ERROR: $e';
+      locked = true;
+    }
 
     await afterParseResponse(newItems);
 
     prevTags = tags;
 
     if (fetched.isEmpty || fetched.length == length) {
-      Logger.Inst().log('dbhandler dbLocked', 'FavouritesHandler', 'search', LogTypes.booruHandlerInfo);
+      Logger.Inst().log(
+        'dbhandler dbLocked',
+        'FavouritesHandler',
+        'search',
+        LogTypes.booruHandlerInfo,
+        s: StackTrace.current,
+      );
       locked = true;
     }
 
