@@ -453,6 +453,10 @@ class _ThumbnailState extends State<Thumbnail> {
 
         final bool useExtra = isThumbQuality == false && !widget.item.isHidden && !settingsHandler.shitDevice;
 
+        final double blurAmount = (settingsHandler.blurImages && !widget.isStandalone)
+            ? 40
+            : max(constraints.maxWidth * (widget.isStandalone ? 0.1 : 0.06), 10);
+
         return Stack(
           alignment: Alignment.center,
           children: [
@@ -481,12 +485,8 @@ class _ThumbnailState extends State<Thumbnail> {
                 child: ImageFiltered(
                   enabled: settingsHandler.blurImages || widget.item.isHidden,
                   imageFilter: ImageFilter.blur(
-                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone)
-                        ? 40
-                        : max(MediaQuery.sizeOf(context).shortestSide * 0.02, 10),
-                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone)
-                        ? 40
-                        : max(MediaQuery.sizeOf(context).shortestSide * 0.02, 10),
+                    sigmaX: blurAmount,
+                    sigmaY: blurAmount,
                     tileMode: TileMode.decal,
                   ),
                   child: ValueListenableBuilder(
@@ -547,12 +547,8 @@ class _ThumbnailState extends State<Thumbnail> {
                       isBlurred &&
                       (settingsHandler.blurImages || (widget.item.isHidden && !settingsHandler.shitDevice)),
                   imageFilter: ImageFilter.blur(
-                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone)
-                        ? 40
-                        : max(MediaQuery.sizeOf(context).shortestSide * 0.02, 10),
-                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone)
-                        ? 40
-                        : max(MediaQuery.sizeOf(context).shortestSide * 0.02, 10),
+                    sigmaX: blurAmount,
+                    sigmaY: blurAmount,
                     tileMode: TileMode.decal,
                   ),
                   child: ValueListenableBuilder(
