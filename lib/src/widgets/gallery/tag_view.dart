@@ -1561,6 +1561,15 @@ class _RelatedTabsDialogState extends State<_RelatedTabsDialog> {
                   index: index,
                   isFiltered: true,
                   originalIndex: tabIndex,
+                  onTap: () async {
+                    await ServiceHandler.vibrate();
+                    if (SettingsHandler.instance.appMode.value.isMobile) {
+                      Navigator.of(context).popUntil((r) => r.isFirst); // exit viewer
+                    }
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      searchHandler.changeTabIndex(tabIndex);
+                    });
+                  },
                 );
               },
             ),
