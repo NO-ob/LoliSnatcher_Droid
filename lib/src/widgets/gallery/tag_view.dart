@@ -327,8 +327,38 @@ class _TagViewState extends State<TagView> {
   }
 
   Future<void> cacheTabMatchData() async {
+    final currentBooru = searchHandler.currentBooru;
+    final Set<String> onlyTagCurrentBooru = {};
+    final Set<String> onlyTagOtherBooru = {};
+    final Set<String> containsTag = {};
+
+    for (final tab in searchHandler.tabs) {
+      final parts = tab.tags.toLowerCase().trim().split(' ');
+      final isCurrentBooru = tab.selectedBooru.value == currentBooru;
+
+      if (parts.length == 1 && parts[0].isNotEmpty) {
+        if (isCurrentBooru) {
+          onlyTagCurrentBooru.add(parts[0]);
+        } else {
+          onlyTagOtherBooru.add(parts[0]);
+        }
+      }
+      for (final part in parts) {
+        if (part.isNotEmpty) containsTag.add(part);
+      }
+    }
+
     for (final tag in filteredTags) {
-      tabMatchesMap[tag.fullString] = searchHandler.hasTabWithTag(tag.fullString);
+      final normalized = tag.fullString.toLowerCase().trim();
+      if (onlyTagCurrentBooru.contains(normalized)) {
+        tabMatchesMap[tag.fullString] = HasTabWithTagResult.onlyTag;
+      } else if (onlyTagOtherBooru.contains(normalized)) {
+        tabMatchesMap[tag.fullString] = HasTabWithTagResult.onlyTagDifferentBooru;
+      } else if (containsTag.contains(normalized)) {
+        tabMatchesMap[tag.fullString] = HasTabWithTagResult.containsTag;
+      } else {
+        tabMatchesMap[tag.fullString] = HasTabWithTagResult.noTag;
+      }
     }
   }
 
