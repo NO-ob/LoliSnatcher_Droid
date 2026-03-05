@@ -150,10 +150,10 @@ class _CommentsDialogState extends State<CommentsDialog> {
       newIndex = forward ? 0 : comments.length - 1;
     } else {
       newIndex = selectedIndex! + (forward ? 1 : -1);
-      if (newIndex < 0) {
-        newIndex = isHolding ? 0 : comments.length - 1;
+      if (newIndex < -1) {
+        newIndex = isHolding ? -1 : comments.length - 1;
       } else if (newIndex >= comments.length) {
-        newIndex = isHolding ? comments.length - 1 : 0;
+        newIndex = isHolding ? comments.length - 1 : -1;
       }
     }
 
@@ -164,7 +164,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
   void scrollToComment(int index) {
     // Cancel any in-progress scroll animation before starting a new one
     scrollController.jumpTo(scrollController.offset);
-    if (index == 0) {
+    if (index == -1) {
       scrollController.animateTo(
         0,
         duration: const Duration(milliseconds: 200),
@@ -184,7 +184,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
     final bool areThereErrors = (isLoading && comments.isEmpty) || notSupported || comments.isEmpty;
 
     final String countText = comments.isNotEmpty
-        ? '${selectedIndex != null ? '${selectedIndex! + 1}/' : ''}${comments.length}'
+        ? '${(selectedIndex != null && selectedIndex != -1) ? '${selectedIndex! + 1}/' : ''}${comments.length}'
         : '';
 
     final List<Widget> actions = [
@@ -282,9 +282,15 @@ class _CommentsDialogState extends State<CommentsDialog> {
                             availableWidth: thumbWidth,
                             item: widget.item,
                             handler: widget.handler,
+                            isSelected: selectedIndex == -1,
                             onThumbTap: () => setState(() {
-                              selectedIndex = null;
-                              scrollToComment(0);
+                              if (selectedIndex != -1) {
+                                selectedIndex = -1;
+                                scrollToComment(-1);
+                              } else {
+                                selectedIndex = null;
+                              }
+                              setState(() {});
                             }),
                           ),
                         ),
@@ -644,6 +650,7 @@ class _CommentsHeaderDelegate extends SliverPersistentHeaderDelegate {
     required this.availableWidth,
     required this.item,
     required this.handler,
+    required this.isSelected,
     required this.onThumbTap,
   });
 
@@ -664,10 +671,12 @@ class _CommentsHeaderDelegate extends SliverPersistentHeaderDelegate {
   final double availableWidth;
   final BooruItem item;
   final BooruHandler handler;
+  final bool isSelected;
   final VoidCallback onThumbTap;
 
-  static double get minThumbHeight =>
-      MediaQuery.orientationOf(NavigationHandler.instance.navContext).isLandscape ? 50 : 100;
+  static double get minThumbHeight => MediaQuery.orientationOf(NavigationHandler.instance.navContext).isLandscape
+      ? MediaQuery.sizeOf(NavigationHandler.instance.navContext).height * 0.1
+      : MediaQuery.sizeOf(NavigationHandler.instance.navContext).height * 0.12;
 
   ({double height, double width}) _thumbSize(double rawHeight) {
     final double ratio = item.fileAspectRatio ?? 16 / 9;
@@ -688,6 +697,8 @@ class _CommentsHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
     final (:height, :width) = _thumbSize(rawThumbHeight);
 
+    final double borderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
+
     return Material(
       color: Theme.of(context).colorScheme.surface,
       child: GestureDetector(
@@ -695,14 +706,26 @@ class _CommentsHeaderDelegate extends SliverPersistentHeaderDelegate {
         child: Center(
           child: UnconstrainedBox(
             child: SizedBox(
-              height: height,
+              height: height - 4,
               width: width,
               child: HeroMode(
                 enabled: false,
-                child: ThumbnailBuild(
-                  item: item,
-                  handler: handler,
-                  selectable: false,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: isSelected
+                        ? Border.all(
+                            color: Theme.of(context).colorScheme.secondary,
+                            width: borderWidth,
+                          )
+                        : null,
+                    borderRadius: isSelected ? const BorderRadius.all(Radius.circular(8)) : null,
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: ThumbnailBuild(
+                    item: item,
+                    handler: handler,
+                    selectable: false,
+                  ),
                 ),
               ),
             ),
