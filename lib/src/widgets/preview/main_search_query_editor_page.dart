@@ -1855,11 +1855,12 @@ class _HistoryBlockState extends State<HistoryBlock> {
                   if (history.isEmpty) {
                     return GestureDetector(
                       onTap: init,
-                      child: Container(
+                      child: const Align(
                         alignment: Alignment.center,
-                        height: 30,
-                        width: 30,
-                        child: const CircularProgressIndicator(),
+                        child: SizedBox.square(
+                          dimension: 30,
+                          child: CircularProgressIndicator(),
+                        ),
                       ),
                     );
                   }
@@ -2224,12 +2225,7 @@ class _PopularTagsBlockState extends State<PopularTagsBlock> {
         ),
         const SizedBox(height: 8),
         if (loading)
-          const SizedBox(
-            height: 50,
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          )
+          const SizedBox(height: 50)
         else if (failed)
           SizedBox(
             height: 50,
@@ -2728,11 +2724,12 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
                     if (loading) {
                       return GestureDetector(
                         onTap: init,
-                        child: Container(
+                        child: const Align(
                           alignment: Alignment.center,
-                          height: 30,
-                          width: 30,
-                          child: const CircularProgressIndicator(),
+                          child: SizedBox.square(
+                            dimension: 30,
+                            child: CircularProgressIndicator(),
+                          ),
                         ),
                       );
                     }
@@ -3254,9 +3251,8 @@ class _PinnedTagsReorderDialogState extends State<PinnedTagsReorderDialog> {
                   ElevatedButton.icon(
                     onPressed: saving ? null : saveOrder,
                     icon: saving
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
+                        ? const SizedBox.square(
+                            dimension: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.check),
