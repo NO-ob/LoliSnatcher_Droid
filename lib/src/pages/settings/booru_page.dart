@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -92,7 +93,12 @@ class _BooruPageState extends State<BooruPage> {
       selectedBooru = settingsHandler.booruList[0];
     }
     if (selectedBooru != null) {
-      final res = await askToChangePrefBooru(context, initPrefBooru, selectedBooru!);
+      await Future.delayed(const Duration(milliseconds: 100));
+      final res = await askToChangePrefBooru(
+        NavigationHandler.instance.navContext,
+        initPrefBooru,
+        selectedBooru!,
+      );
       if (res == true) {
         settingsHandler.prefBooru = selectedBooru?.name ?? '';
       } else if (res == false && initPrefBooru != null) {
