@@ -674,9 +674,18 @@ class _CommentsHeaderDelegate extends SliverPersistentHeaderDelegate {
   final bool isSelected;
   final VoidCallback onThumbTap;
 
-  static double get minThumbHeight => MediaQuery.orientationOf(NavigationHandler.instance.navContext).isLandscape
-      ? MediaQuery.sizeOf(NavigationHandler.instance.navContext).height * 0.1
-      : MediaQuery.sizeOf(NavigationHandler.instance.navContext).height * 0.12;
+  static double get minThumbHeight {
+    final ctx = NavigationHandler.instance.navContext;
+    final orientation = MediaQuery.orientationOf(ctx);
+    final size = MediaQuery.sizeOf(ctx);
+
+    if (orientation.isLandscape && size.height <= 600) {
+      // allow to completely hide header when screen is too small in landscape mode
+      return 0;
+    }
+
+    return size.height * 0.12;
+  }
 
   ({double height, double width}) _thumbSize(double rawHeight) {
     final double ratio = item.fileAspectRatio ?? 16 / 9;
@@ -686,6 +695,8 @@ class _CommentsHeaderDelegate extends SliverPersistentHeaderDelegate {
       w = availableWidth;
       h = w / ratio;
     }
+    w = max(w, 80); // at least 80
+    h = h < 50 ? 0 : h; // jump to 0 if too small
     return (height: h, width: w);
   }
 
@@ -706,7 +717,8 @@ class _CommentsHeaderDelegate extends SliverPersistentHeaderDelegate {
         child: Center(
           child: UnconstrainedBox(
             child: SizedBox(
-              height: height - 4,
+              // -4 is to compensate for border
+              height: (height - 4).clamp(0, double.maxFinite),
               width: width,
               child: HeroMode(
                 enabled: false,
