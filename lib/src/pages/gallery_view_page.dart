@@ -320,6 +320,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> with RouteAware {
                           page.value,
                         );
                       }
+                    } else if (event.physicalKey == PhysicalKeyboardKey.keyR) {
+                      // force load on R
+                      viewerHandler.forceLoadCurrentItem();
                     } else if (event.physicalKey == PhysicalKeyboardKey.escape) {
                       // exit on escape if in focus
                       if (kbFocusNode.hasFocus) {
@@ -811,9 +814,32 @@ class _ItemInfoDrawerState extends State<ItemInfoDrawer> {
                   margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   height: (50 * buttons.length) + (12 * (buttons.length - 1)),
                   width: 50,
-                  child: Column(
-                    spacing: 12,
-                    children: buttons,
+                  child: ValueListenableBuilder(
+                    valueListenable: isVisible,
+                    builder: (context, isVisible, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          outlinedButtonTheme: OutlinedButtonThemeData(
+                            style: OutlinedButtonTheme.of(context).style?.copyWith(
+                              side: WidgetStatePropertyAll(
+                                BorderSide(
+                                  width: isVisible ? 1.5 : 0.5,
+                                  color: Theme.of(context).colorScheme.secondary,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        child: Opacity(
+                          opacity: isVisible ? 0.9 : 0.5,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Column(
+                      spacing: 12,
+                      children: buttons,
+                    ),
                   ),
                 ),
               ),
