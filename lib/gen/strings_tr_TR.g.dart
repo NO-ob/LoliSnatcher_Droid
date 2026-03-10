@@ -1105,7 +1105,7 @@ class _TranslationsTagViewTrTr extends TranslationsTagViewEn {
   @override
   String get postURL => TranslationOverrides.string(_root.$meta, 'tagView.postURL', {}) ?? 'Gönderi URL\'si';
   @override
-  String get posted => TranslationOverrides.string(_root.$meta, 'tagView.posted', {}) ?? 'Paylaşıldı';
+  String get posted => TranslationOverrides.string(_root.$meta, 'tagView.posted', {}) ?? 'Paylaşılma';
   @override
   String get details => TranslationOverrides.string(_root.$meta, 'tagView.details', {}) ?? 'Detaylar';
   @override
@@ -1546,7 +1546,7 @@ class _TranslationsTagTypeTrTr extends TranslationsTagTypeEn {
   @override
   String get character => TranslationOverrides.string(_root.$meta, 'tagType.character', {}) ?? 'Karakter';
   @override
-  String get copyright => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Telif Hakkı (Seri)';
+  String get copyright => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Telif Hakkı';
   @override
   String get meta => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'Meta';
   @override
@@ -1944,7 +1944,7 @@ class _TranslationsSettingsInterfaceTrTr extends TranslationsSettingsInterfaceEn
   @override
   String get previewQualityHelpNote =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpNote', {}) ??
-      '[Not]: Örnek (Sample) kalitesi performansı gözle görülür şekilde düşürebilir: özellikle önizleme ızgarasında çok fazla sütun varsa';
+      '[Not]: Örnek kalitesi performansı gözle görülür şekilde düşürebilir: özellikle önizleme ızgarasında çok fazla sütun varsa';
   @override
   String get previewDisplay => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplay', {}) ?? 'Önizleme görünümü';
   @override
@@ -2003,7 +2003,7 @@ class _TranslationsSettingsThemeTrTr extends TranslationsSettingsThemeEn {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Temalar';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Tema';
   @override
   String get themeMode => TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Tema modu';
   @override
@@ -2013,7 +2013,7 @@ class _TranslationsSettingsThemeTrTr extends TranslationsSettingsThemeEn {
   @override
   String get android12PlusOnly => TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Yalnızca Android 12+';
   @override
-  String get theme => TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'Tema';
+  String get theme => TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'Temalar';
   @override
   String get primaryColor => TranslationOverrides.string(_root.$meta, 'settings.theme.primaryColor', {}) ?? 'Birincil renk';
   @override
@@ -2058,7 +2058,7 @@ class _TranslationsSettingsThemeTrTr extends TranslationsSettingsThemeEn {
   @override
   String get fontFamily => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? 'Yazı Tipi';
   @override
-  String get systemDefault => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Sistemi varsayılanı';
+  String get systemDefault => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Sistem varsayılanı';
   @override
   String get viewMoreFonts => TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? 'Daha fazla yazı tipi görüntüle';
   @override
@@ -3410,8 +3410,7 @@ class _TranslationsViewerAppBarTrTr extends TranslationsViewerAppBarEn {
   String get reloadWithScaling =>
       TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Ölçeklendirme ile yeniden yükle';
   @override
-  String get loadSampleQuality =>
-      TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Örnek (sample) kalitesinde yükle';
+  String get loadSampleQuality => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Örnek kalitesinde yükle';
   @override
   String get loadHighQuality => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Yüksek kalitede yükle';
   @override
@@ -3497,7 +3496,7 @@ class _TranslationsMediaLoadingTrTr extends TranslationsMediaLoadingEn {
 
   // Translations
   @override
-  String get rendering => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'İşleniyor (Rendering)…';
+  String get rendering => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'İşleniyor…';
   @override
   String get loadingAndRenderingFromCache =>
       TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'Önbellekten yükleniyor ve işleniyor…';
@@ -4483,7 +4482,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpThumbnail', {}) ?? ' - Küçük Resim: Düşük çözünürlük',
           'settings.interface.previewQualityHelpNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpNote', {}) ??
-                '[Not]: Örnek (Sample) kalitesi performansı gözle görülür şekilde düşürebilir: özellikle önizleme ızgarasında çok fazla sütun varsa',
+                '[Not]: Örnek kalitesi performansı gözle görülür şekilde düşürebilir: özellikle önizleme ızgarasında çok fazla sütun varsa',
           'settings.interface.previewDisplay' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplay', {}) ?? 'Önizleme görünümü',
           'settings.interface.previewDisplayFallback' =>
@@ -4532,13 +4531,13 @@ extension on TranslationsTrTr {
           'settings.interface.handSideValues.left' => TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.left', {}) ?? 'Sol',
           'settings.interface.handSideValues.right' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.handSideValues.right', {}) ?? 'Sağ',
-          'settings.theme.title' => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Temalar',
+          'settings.theme.title' => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Tema',
           'settings.theme.themeMode' => TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'Tema modu',
           'settings.theme.blackBg' => TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? 'Siyah arka plan',
           'settings.theme.useDynamicColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.useDynamicColor', {}) ?? 'Dinamik renk kullan',
           'settings.theme.android12PlusOnly' =>
             TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Yalnızca Android 12+',
-          'settings.theme.theme' => TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'Tema',
+          'settings.theme.theme' => TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'Temalar',
           'settings.theme.primaryColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.primaryColor', {}) ?? 'Birincil renk',
           'settings.theme.secondaryColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.secondaryColor', {}) ?? 'İkincil renk',
           'settings.theme.enableDrawerMascot' =>
@@ -4564,7 +4563,7 @@ extension on TranslationsTrTr {
           'settings.theme.selectedColorAndShades' =>
             TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Seçilen renk ve tonları',
           'settings.theme.fontFamily' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? 'Yazı Tipi',
-          'settings.theme.systemDefault' => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Sistemi varsayılanı',
+          'settings.theme.systemDefault' => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Sistem varsayılanı',
           'settings.theme.viewMoreFonts' =>
             TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? 'Daha fazla yazı tipi görüntüle',
           'settings.theme.fontPreviewText' =>
@@ -5565,7 +5564,7 @@ extension on TranslationsTrTr {
           'tagView.addedNewTab' => TranslationOverrides.string(_root.$meta, 'tagView.addedNewTab', {}) ?? 'Yeni sekme eklendi:',
           'tagView.id' => TranslationOverrides.string(_root.$meta, 'tagView.id', {}) ?? 'ID',
           'tagView.postURL' => TranslationOverrides.string(_root.$meta, 'tagView.postURL', {}) ?? 'Gönderi URL\'si',
-          'tagView.posted' => TranslationOverrides.string(_root.$meta, 'tagView.posted', {}) ?? 'Paylaşıldı',
+          'tagView.posted' => TranslationOverrides.string(_root.$meta, 'tagView.posted', {}) ?? 'Paylaşılma',
           'tagView.details' => TranslationOverrides.string(_root.$meta, 'tagView.details', {}) ?? 'Detaylar',
           'tagView.filename' => TranslationOverrides.string(_root.$meta, 'tagView.filename', {}) ?? 'Dosya adı',
           'tagView.url' => TranslationOverrides.string(_root.$meta, 'tagView.url', {}) ?? 'URL',
@@ -5733,7 +5732,7 @@ extension on TranslationsTrTr {
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Ölçeklendirme ile yeniden yükle',
           'viewer.appBar.loadSampleQuality' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Örnek (sample) kalitesinde yükle',
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Örnek kalitesinde yükle',
           'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Yüksek kalitede yükle',
           _ => null,
         } ??
@@ -5808,7 +5807,7 @@ extension on TranslationsTrTr {
           'galleryButtons.toggleQuality' => TranslationOverrides.string(_root.$meta, 'galleryButtons.toggleQuality', {}) ?? 'Kaliteyi değiştir',
           'galleryButtons.externalPlayer' => TranslationOverrides.string(_root.$meta, 'galleryButtons.externalPlayer', {}) ?? 'Harici oynatıcı',
           'galleryButtons.imageSearch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.imageSearch', {}) ?? 'Görsel arama',
-          'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'İşleniyor (Rendering)…',
+          'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'İşleniyor…',
           'media.loading.loadingAndRenderingFromCache' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'Önbellekten yükleniyor ve işleniyor…',
           'media.loading.loadingFromCache' =>
@@ -5905,7 +5904,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'preview.error.tapToRetry', {}) ?? 'Tekrar denemek için buraya dokun',
           'tagType.artist' => TranslationOverrides.string(_root.$meta, 'tagType.artist', {}) ?? 'Sanatçı',
           'tagType.character' => TranslationOverrides.string(_root.$meta, 'tagType.character', {}) ?? 'Karakter',
-          'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Telif Hakkı (Seri)',
+          'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Telif Hakkı',
           'tagType.meta' => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'Meta',
           'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? 'Tür',
           'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'Yok (Genel)',

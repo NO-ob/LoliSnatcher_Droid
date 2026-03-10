@@ -3,8 +3,8 @@
 /// Source: assets/i18n
 /// To regenerate, run: `dart run slang`
 ///
-/// Locales: 5
-/// Strings: 3598 (719 per locale)
+/// Locales: 6
+/// Strings: 4880 (813 per locale)
 
 // coverage:ignore-file
 // ignore_for_file: type=lint, unused_import
@@ -16,6 +16,7 @@ import 'package:slang/overrides.dart';
 import 'package:slang_flutter/slang_flutter.dart';
 export 'package:slang_flutter/slang_flutter.dart';
 
+import 'strings_ja_JP.g.dart' deferred as l_ja_JP;
 import 'strings_pt_BR.g.dart' deferred as l_pt_BR;
 import 'strings_ru_RU.g.dart' deferred as l_ru_RU;
 import 'strings_tr_TR.g.dart' deferred as l_tr_TR;
@@ -50,6 +51,7 @@ final _buildConfig = BuildModelConfig(
 /// - if (LocaleSettings.currentLocale == AppLocale.en) // locale check
 enum AppLocale with BaseAppLocale<AppLocale, Translations> {
   en(languageCode: 'en'),
+  jaJp(languageCode: 'ja', countryCode: 'JP'),
   ptBr(languageCode: 'pt', countryCode: 'BR'),
   ruRu(languageCode: 'ru', countryCode: 'RU'),
   trTr(languageCode: 'tr', countryCode: 'TR'),
@@ -78,6 +80,13 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
     switch (this) {
       case AppLocale.en:
         return TranslationsEn(
+          overrides: overrides,
+          cardinalResolver: cardinalResolver,
+          ordinalResolver: ordinalResolver,
+        );
+      case AppLocale.jaJp:
+        await l_ja_JP.loadLibrary();
+        return l_ja_JP.TranslationsJaJp(
           overrides: overrides,
           cardinalResolver: cardinalResolver,
           ordinalResolver: ordinalResolver,
@@ -122,6 +131,12 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
     switch (this) {
       case AppLocale.en:
         return TranslationsEn(
+          overrides: overrides,
+          cardinalResolver: cardinalResolver,
+          ordinalResolver: ordinalResolver,
+        );
+      case AppLocale.jaJp:
+        return l_ja_JP.TranslationsJaJp(
           overrides: overrides,
           cardinalResolver: cardinalResolver,
           ordinalResolver: ordinalResolver,

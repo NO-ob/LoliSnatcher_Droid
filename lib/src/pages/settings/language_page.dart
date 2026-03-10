@@ -196,6 +196,7 @@ extension AppLocaleExt on AppLocale {
           AppLocale.en,
           AppLocale.ruRu,
           AppLocale.trTr,
+          AppLocale.jaJp,
         ].any((bl) => bl == l),
       )
       .toList();

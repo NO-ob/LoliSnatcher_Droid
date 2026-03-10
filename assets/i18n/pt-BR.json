@@ -75,7 +75,7 @@
         "invalidNumber": "Por favor, insira um número",
         "invalidNumericValue": "Por favor, insira um valor numérico válido",
         "tooSmall(param=min)": "Por favor, insira um valor maior do que ${min: double}",
-        "tooBig(param=max)": "Por favor, insira um valor menor do que ${min: double}",
+        "tooBig(param=max)": "Por favor, insira um valor menor do que ${max: double}",
         "rangeError(param=min, param=max)": "Por favor, insira um valor entre ${min: double} e ${max: double}",
         "greaterThanOrEqualZero": "Por favor, insira um valor maior ou igual a 0",
         "lessThan4": "Por favor, insira um valor menor do que 4",
