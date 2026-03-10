@@ -45,8 +45,8 @@ dependencies:
     git:
       url: https://github.com/jiangtian616/socks_proxy
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
-  flutter_svg: ^2.2.3
-  font_awesome_flutter: ^10.12.0
+  flutter_svg: ^2.2.4
+  font_awesome_flutter: ^11.0.0
   fpdart: ^1.2.0
   fvp: ^0.35.2
   get_it: ^9.2.1
@@ -89,7 +89,7 @@ dependencies:
   slang: ^4.13.0
   sqflite_common_ffi: ^2.4.0+2
   sqflite: ^2.4.2
-  sqlite3: ^3.1.6
+  sqlite3: ^3.1.7
   talker_dio_logger: ^5.1.15
   talker_flutter: ^5.1.15
   talker_logger: ^5.1.15

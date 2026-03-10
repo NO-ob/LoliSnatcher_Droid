@@ -60,7 +60,7 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 class _TagInfoIcon {
   _TagInfoIcon(this.icon, this.color);
 
-  final IconData icon;
+  final dynamic icon;
   final Color color;
 }
 
@@ -803,20 +803,23 @@ class _TagViewState extends State<TagView> {
                   ),
                   if (tagIconAndColor.isNotEmpty) ...[
                     ...tagIconAndColor.map(
-                      (t) => t.icon == FontAwesomeIcons.robot
-                          ? Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 4),
-                              child: FaIcon(
-                                t.icon,
-                                color: t.color,
-                                size: 18,
-                              ),
-                            )
-                          : Icon(
-                              t.icon,
-                              color: t.color,
-                              size: 20,
-                            ),
+                      (t) => switch (t.icon) {
+                        FaIconData _ => Padding(
+                          // add a bit of padding to compensate for some icons being too close to each other
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: FaIcon(
+                            t.icon,
+                            color: t.color,
+                            size: 18,
+                          ),
+                        ),
+                        IconData _ => Icon(
+                          t.icon,
+                          color: t.color,
+                          size: 20,
+                        ),
+                        _ => const SizedBox.shrink(),
+                      },
                     ),
                     const SizedBox(width: 5),
                   ],
