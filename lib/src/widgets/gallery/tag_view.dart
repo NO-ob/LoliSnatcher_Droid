@@ -13,7 +13,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fpdart/fpdart.dart' show FpdartOnIterable;
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/data/pinned_tag.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
+import 'package:lolisnatcher/src/widgets/preview/main_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -1388,6 +1390,56 @@ Future<void> showTagDialog({
                 Navigator.of(context).pop();
               },
             ),
+          //
+          FutureBuilder<PinnedTag?>(
+            future: settingsHandler.dbHandler.getPinnedTag(
+              tag,
+              booruType: searchHandler.currentBooru.type?.name,
+              booruName: searchHandler.currentBooru.name,
+            ),
+            builder: (_, snapshot) {
+              final isPinned = snapshot.data != null;
+              final pinnedTag = snapshot.data;
+
+              void reopenDialog() {
+                Navigator.of(context).pop();
+                showTagDialog(
+                  context: context,
+                  tag: tag,
+                  handler: handler,
+                  isHidden: isHidden,
+                  isMarked: isMarked,
+                  isInSearch: isInSearch,
+                  hasTabWithTag: hasTabWithTag,
+                  onUpdate: onUpdate,
+                );
+              }
+
+              return ListTile(
+                title: Text(isPinned ? context.loc.pinnedTags.unpinTag : context.loc.pinnedTags.pinTag),
+                leading: Icon(isPinned ? Icons.push_pin : Icons.push_pin_outlined),
+                onTap: () async {
+                  if (isPinned && pinnedTag != null) {
+                    await showUnpinTagDialog(
+                      context,
+                      tag,
+                      pinnedTag,
+                      () {},
+                    );
+                  } else {
+                    await showPinTagDialog(
+                      context,
+                      tag,
+                      searchHandler.currentBooru,
+                      () {},
+                    );
+                  }
+                  reopenDialog();
+                },
+              );
+            },
+          ),
+          //
           if (hasTabWithTag.hasTagInAnyForm)
             ListTile(
               leading: Stack(

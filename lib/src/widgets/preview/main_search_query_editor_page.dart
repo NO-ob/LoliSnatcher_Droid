@@ -13,6 +13,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll.dart';
+import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -1431,6 +1432,7 @@ class SuggestionsMainContent extends StatefulWidget {
     required this.onTagTap,
     this.hideHistory = false,
     this.hidePopular = false,
+    this.hidePinned = false,
     super.key,
   });
 
@@ -1438,6 +1440,7 @@ class SuggestionsMainContent extends StatefulWidget {
   final void Function(String tag) onTagTap;
   final bool hideHistory;
   final bool hidePopular;
+  final bool hidePinned;
 
   @override
   State<SuggestionsMainContent> createState() => _SuggestionsMainContentState();
@@ -1467,14 +1470,15 @@ class _SuggestionsMainContentState extends State<SuggestionsMainContent> {
       //
       MetatagsBlock(onSelect: widget.onMetatagSelect),
       //
-      PinnedTagsBlock(
-        key: _pinnedTagsKey,
-        onTagTap: widget.onTagTap,
-        onTagLongTap: (tagName, pinnedTag) async {
-          await showUnpinTagDialog(context, tagName, pinnedTag, () {});
-          await _pinnedTagsKey.currentState?.init();
-        },
-      ),
+      if (!widget.hidePinned)
+        PinnedTagsBlock(
+          key: _pinnedTagsKey,
+          onTagTap: widget.onTagTap,
+          onTagLongTap: (tagName, pinnedTag) async {
+            await showUnpinTagDialog(context, tagName, pinnedTag, () {});
+            await _pinnedTagsKey.currentState?.init();
+          },
+        ),
       //
       const SizedBox(height: 16),
     ];
@@ -3877,32 +3881,43 @@ class _ManualPinTagDialogState extends State<ManualPinTagDialog> {
   Widget build(BuildContext context) {
     final canSubmit = tagController.text.trim().isNotEmpty;
 
-    return AlertDialog(
-      title: Text(context.loc.pinnedTags.addPinnedTag),
-      insetPadding: const EdgeInsets.all(8),
-      content: SingleChildScrollView(
+    return BottomSheet(
+      onClosing: () {},
+      builder: (_) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          16,
+          0,
+          16,
+          MediaQuery.viewInsetsOf(context).bottom + 32,
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: .min,
+          crossAxisAlignment: .stretch,
+          spacing: 12,
           children: [
-            TextField(
-              controller: tagController,
-              decoration: InputDecoration(
-                labelText: context.loc.pinnedTags.tagQuery,
-                hintText: context.loc.pinnedTags.tagQueryHint,
-                border: const OutlineInputBorder(),
-              ),
-              onChanged: (_) => setState(() {}),
-              autofocus: true,
+            Text(
+              context.loc.pinnedTags.addPinnedTag,
+              style: context.theme.textTheme.headlineMedium,
             ),
-            const SizedBox(height: 8),
+            TagSearchBox(
+              controller: tagController,
+              title: context.loc.pinnedTags.tagQuery,
+              hintText: context.loc.pinnedTags.tagQueryHint,
+              titleAsLabel: true,
+              allowMultipleTags: false,
+              showBooruSelector: true,
+              onlyInput: true,
+              showPinnedTags: false,
+              onChanged: (_, _) => setState(() {}),
+            ),
+            //
             Text(
               context.loc.pinnedTags.rawQueryHelp,
               style: context.theme.textTheme.bodySmall?.copyWith(
                 color: context.theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 16),
+            //
             CheckboxListTile(
               value: pinForCurrentBooru,
               onChanged: (value) => setState(() => pinForCurrentBooru = value ?? false),
@@ -3910,7 +3925,7 @@ class _ManualPinTagDialogState extends State<ManualPinTagDialog> {
               controlAffinity: ListTileControlAffinity.leading,
               contentPadding: EdgeInsets.zero,
             ),
-            const SizedBox(height: 8),
+            //
             Row(
               children: [
                 Expanded(
@@ -3996,25 +4011,37 @@ class _ManualPinTagDialogState extends State<ManualPinTagDialog> {
                       .toList(),
                 ),
               ),
+            //
+            SizedBox(
+              width: double.maxFinite,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: .end,
+                  children: [
+                    const CancelButton(),
+                    ElevatedButton.icon(
+                      onPressed: canSubmit
+                          ? () => Navigator.of(context).pop(
+                              ManualPinTagDialogResult(
+                                tagName: tagController.text.trim(),
+                                pinForCurrentBooru: pinForCurrentBooru,
+                                labels: selectedLabels.toList(),
+                              ),
+                            )
+                          : null,
+                      icon: const Icon(Icons.push_pin),
+                      label: Text(context.loc.pinnedTags.pin),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
-      actions: [
-        const CancelButton(),
-        ElevatedButton.icon(
-          onPressed: canSubmit
-              ? () => Navigator.of(context).pop(
-                  ManualPinTagDialogResult(
-                    tagName: tagController.text.trim(),
-                    pinForCurrentBooru: pinForCurrentBooru,
-                    labels: selectedLabels.toList(),
-                  ),
-                )
-              : null,
-          icon: const Icon(Icons.push_pin),
-          label: Text(context.loc.pinnedTags.pin),
-        ),
-      ],
     );
   }
 }

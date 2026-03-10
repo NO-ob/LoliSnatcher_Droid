@@ -71,6 +71,7 @@ class TagSearchQueryEditorPage extends StatefulWidget {
     this.allowMultipleTags = false,
     this.showBooruSelector = false,
     this.readOnlyPreview = false,
+    this.showPinnedTags = true,
     this.onTagsSelected,
     super.key,
   });
@@ -89,6 +90,8 @@ class TagSearchQueryEditorPage extends StatefulWidget {
   final bool showBooruSelector;
 
   final bool readOnlyPreview;
+
+  final bool showPinnedTags;
 
   /// Optional callback when tags are selected (also returns via Navigator.pop)
   final void Function(String tags, Booru? booru)? onTagsSelected;
@@ -423,6 +426,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
                                 onTagTap: (tag) => onSuggestionTap(TagSuggestion(tag: tag)),
                                 hideHistory: true,
                                 hidePopular: selectedBooru?.type?.isFavouritesOrDownloads == true,
+                                hidePinned: !widget.showPinnedTags,
                               );
                             }
 
@@ -719,6 +723,8 @@ class TagSearchBox extends StatefulWidget {
     this.enabled = true,
     this.onlyInput = false,
     this.readOnlyPreview = false,
+    this.titleAsLabel = false,
+    this.showPinnedTags = true,
     super.key,
   });
 
@@ -753,6 +759,8 @@ class TagSearchBox extends StatefulWidget {
   final bool enabled;
   final bool onlyInput;
   final bool readOnlyPreview;
+  final bool titleAsLabel;
+  final bool showPinnedTags;
 
   @override
   State<TagSearchBox> createState() => _TagSearchBoxState();
@@ -789,6 +797,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           allowMultipleTags: widget.allowMultipleTags,
           showBooruSelector: widget.showBooruSelector,
           readOnlyPreview: widget.readOnlyPreview,
+          showPinnedTags: widget.showPinnedTags,
           onTagsSelected: (tags, booru) {
             setState(() {
               _controller.text = tags;
@@ -830,11 +839,12 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.title != null)
+          if (widget.title != null && !widget.titleAsLabel)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(widget.title!),
             ),
+          //
           Material(
             color: Theme.of(context).inputDecorationTheme.fillColor,
             borderRadius: BorderRadius.circular(10),
@@ -843,6 +853,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               borderRadius: BorderRadius.circular(10),
               child: InputDecorator(
                 decoration: InputDecoration(
+                  labelText: widget.titleAsLabel ? widget.title : null,
                   hintText: widget.hintText,
                   fillColor: Colors.transparent,
                   contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
@@ -857,6 +868,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           ),
                           onPressed: _clear,
                         ),
+                      //
                       IconButton(
                         icon: Icon(
                           Icons.search,
