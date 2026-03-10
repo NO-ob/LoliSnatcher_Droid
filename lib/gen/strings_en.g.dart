@@ -2047,9 +2047,6 @@ class TranslationsWebviewNavigationEn {
   String get textAboveSelectable =>
       TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(text above is selectable)';
 
-  /// en: 'Field to merge texts:'
-  String get fieldToMergeTexts => TranslationOverrides.string(_root.$meta, 'webview.navigation.fieldToMergeTexts', {}) ?? 'Field to merge texts:';
-
   /// en: 'Copy URL'
   String get copyUrl => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'Copy URL';
 
@@ -5267,8 +5264,6 @@ extension on Translations {
           'webview.navigation.host' => TranslationOverrides.string(_root.$meta, 'webview.navigation.host', {}) ?? 'Host:',
           'webview.navigation.textAboveSelectable' =>
             TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(text above is selectable)',
-          'webview.navigation.fieldToMergeTexts' =>
-            TranslationOverrides.string(_root.$meta, 'webview.navigation.fieldToMergeTexts', {}) ?? 'Field to merge texts:',
           'webview.navigation.copyUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'Copy URL',
           'webview.navigation.copiedUrlToClipboard' =>
             TranslationOverrides.string(_root.$meta, 'webview.navigation.copiedUrlToClipboard', {}) ?? 'Copied URL to clipboard',
@@ -5725,11 +5720,11 @@ extension on Translations {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache',
+          'settings.video.videoBackendModeValues.normal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Default',
           _ => null,
         } ??
         switch (path) {
-          'settings.video.videoBackendModeValues.normal' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Default',
           'settings.video.videoBackendModeValues.mpv' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV',
           'settings.video.videoBackendModeValues.mdk' =>
@@ -6643,10 +6638,10 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Reload with scaling',
           'viewer.appBar.loadSampleQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Load sample quality',
+          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Load high quality',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Load high quality',
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'Drop snatched status',
           'viewer.appBar.setSnatchedStatus' =>

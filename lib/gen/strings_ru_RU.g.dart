@@ -1664,9 +1664,6 @@ class _TranslationsWebviewNavigationRuRu extends TranslationsWebviewNavigationEn
   String get textAboveSelectable =>
       TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(текст выше можно выбрать)';
   @override
-  String get fieldToMergeTexts =>
-      TranslationOverrides.string(_root.$meta, 'webview.navigation.fieldToMergeTexts', {}) ?? 'Поле для объединения текстов:';
-  @override
   String get copyUrl => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'Копировать ссылку';
   @override
   String get copiedUrlToClipboard =>
@@ -4318,8 +4315,6 @@ extension on TranslationsRuRu {
           'webview.navigation.host' => TranslationOverrides.string(_root.$meta, 'webview.navigation.host', {}) ?? 'Хост:',
           'webview.navigation.textAboveSelectable' =>
             TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(текст выше можно выбрать)',
-          'webview.navigation.fieldToMergeTexts' =>
-            TranslationOverrides.string(_root.$meta, 'webview.navigation.fieldToMergeTexts', {}) ?? 'Поле для объединения текстов:',
           'webview.navigation.copyUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'Копировать ссылку',
           'webview.navigation.copiedUrlToClipboard' =>
             TranslationOverrides.string(_root.$meta, 'webview.navigation.copiedUrlToClipboard', {}) ?? 'Ссылка скопирована в буфер обмена',
@@ -4799,11 +4794,11 @@ extension on TranslationsRuRu {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
+          'settings.video.videoBackendModeValues.normal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'По умолчанию',
           _ => null,
         } ??
         switch (path) {
-          'settings.video.videoBackendModeValues.normal' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'По умолчанию',
           'settings.video.videoBackendModeValues.mpv' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV',
           'settings.video.videoBackendModeValues.mdk' =>
@@ -5758,11 +5753,11 @@ extension on TranslationsRuRu {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Перезагрузить с масштабированием',
           'viewer.appBar.loadSampleQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Загрузить семпл качество',
+          'viewer.appBar.loadHighQuality' =>
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Загрузить высокое качество',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.loadHighQuality' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Загрузить высокое качество',
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'Сбросить статус скачанного',
           'viewer.appBar.setSnatchedStatus' =>

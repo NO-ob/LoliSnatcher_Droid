@@ -1656,8 +1656,6 @@ class _TranslationsWebviewNavigationTrTr extends TranslationsWebviewNavigationEn
   String get textAboveSelectable =>
       TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(yukarıdaki metin seçilebilir)';
   @override
-  String get fieldToMergeTexts => TranslationOverrides.string(_root.$meta, 'webview.navigation.fieldToMergeTexts', {}) ?? 'Metin birleştirme alanı:';
-  @override
   String get copyUrl => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'URL\'yi kopyala';
   @override
   String get copiedUrlToClipboard =>
@@ -4299,8 +4297,6 @@ extension on TranslationsTrTr {
           'webview.navigation.host' => TranslationOverrides.string(_root.$meta, 'webview.navigation.host', {}) ?? 'Host:',
           'webview.navigation.textAboveSelectable' =>
             TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(yukarıdaki metin seçilebilir)',
-          'webview.navigation.fieldToMergeTexts' =>
-            TranslationOverrides.string(_root.$meta, 'webview.navigation.fieldToMergeTexts', {}) ?? 'Metin birleştirme alanı:',
           'webview.navigation.copyUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'URL\'yi kopyala',
           'webview.navigation.copiedUrlToClipboard' =>
             TranslationOverrides.string(_root.$meta, 'webview.navigation.copiedUrlToClipboard', {}) ?? 'URL panoya kopyalandı',
@@ -4779,11 +4775,11 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Önbellek',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Akış+Önbellek',
+          'settings.video.videoBackendModeValues.normal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Varsayılan',
           _ => null,
         } ??
         switch (path) {
-          'settings.video.videoBackendModeValues.normal' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Varsayılan',
           'settings.video.videoBackendModeValues.mpv' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV',
           'settings.video.videoBackendModeValues.mdk' =>
@@ -5738,10 +5734,10 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Ölçeklendirme ile yeniden yükle',
           'viewer.appBar.loadSampleQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Örnek (sample) kalitesinde yükle',
+          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Yüksek kalitede yükle',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Yüksek kalitede yükle',
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'İndirildi durumunu kaldır',
           'viewer.appBar.setSnatchedStatus' =>
