@@ -447,7 +447,7 @@
             "previewQualityHelp": "Önizleme ızgarasındaki görsel çözünürlüğünü değiştirir",
             "previewQualityHelpSample": " - Örnek: Orta çözünürlük, yüksek kalite yüklenirken uygulama yer tutucu olarak bir Küçük Resim kalitesi de yükler",
             "previewQualityHelpThumbnail": " - Küçük Resim: Düşük çözünürlük",
-            "previewQualityHelpNote": "[Not]: Örnek (Sample) kalitesi performansı gözle görülür şekilde düşürebilir: özellikle önizleme ızgarasında çok fazla sütun varsa",
+            "previewQualityHelpNote": "[Not]: Örnek kalitesi performansı gözle görülür şekilde düşürebilir: özellikle önizleme ızgarasında çok fazla sütun varsa",
             "previewDisplay": "Önizleme görünümü",
             "previewDisplayFallback": "Yedek önizleme görünümü",
             "previewDisplayFallbackHelp": "Kademeli (Staggered) seçeneği mümkün olmadığında bu kullanılacaktır",
@@ -480,12 +480,12 @@
             }
         },
         "theme": {
-            "title": "Temalar",
+            "title": "Tema",
             "themeMode": "Tema modu",
             "blackBg": "Siyah arka plan",
             "useDynamicColor": "Dinamik renk kullan",
             "android12PlusOnly": "Yalnızca Android 12+",
-            "theme": "Tema",
+            "theme": "Temalar",
             "primaryColor": "Birincil renk",
             "secondaryColor": "İkincil renk",
             "enableDrawerMascot": "Menü maskotunu etkinleştir",
@@ -507,7 +507,7 @@
             "selectedColor": "Seçilen renk",
             "selectedColorAndShades": "Seçilen renk ve tonları",
             "fontFamily": "Yazı Tipi",
-            "systemDefault": "Sistemi varsayılanı",
+            "systemDefault": "Sistem varsayılanı",
             "viewMoreFonts": "Daha fazla yazı tipi görüntüle",
             "fontPreviewText": "Pijamalı hasta yağız şoföre çabucak güvendi",
             "customFont": "Özel yazı tipi",
@@ -1078,7 +1078,7 @@
         "addedNewTab": "Yeni sekme eklendi:",
         "id": "ID",
         "postURL": "Gönderi URL'si",
-        "posted": "Paylaşıldı",
+        "posted": "Paylaşılma",
         "details": "Detaylar",
         "filename": "Dosya adı",
         "url": "URL",
@@ -1215,7 +1215,7 @@
             "unfavourite": "Favorilerden çıkar",
             "deselect": "Seçimi kaldır",
             "reloadWithScaling": "Ölçeklendirme ile yeniden yükle",
-            "loadSampleQuality": "Örnek (sample) kalitesinde yükle",
+            "loadSampleQuality": "Örnek kalitesinde yükle",
             "loadHighQuality": "Yüksek kalitede yükle",
             "dropSnatchedStatus": "İndirildi durumunu kaldır",
             "setSnatchedStatus": "İndirme durumunu ayarla",
@@ -1278,7 +1278,7 @@
     },
     "media": {
         "loading": {
-            "rendering": "İşleniyor (Rendering)…",
+            "rendering": "İşleniyor…",
             "loadingAndRenderingFromCache": "Önbellekten yükleniyor ve işleniyor…",
             "loadingFromCache": "Önbellekten yükleniyor…",
             "buffering": "Arabelleğe alınıyor (Buffering)…",
@@ -1342,7 +1342,7 @@
     "tagType": {
         "artist": "Sanatçı",
         "character": "Karakter",
-        "copyright": "Telif Hakkı (Seri)",
+        "copyright": "Telif Hakkı",
         "meta": "Meta",
         "species": "Tür",
         "none": "Yok (Genel)"
