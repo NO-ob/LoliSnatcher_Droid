@@ -1577,7 +1577,7 @@ class _TranslationsSettingsBooruJaJp extends TranslationsSettingsBooruEn {
   @override
   String get booruSharingMsgAndroid =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-      'Android 12 以降のアプリで Booru設定リンクを自動的に開く方法:\n1) 下のボタンをタップして、アプリの デフォルトで開く 設定を開きます\n2) «リンクを追加» をタップし、利用可能なすべてのオプションを選択します';
+      'Android 12 以降のアプリで Booru設定リンクを自動的に開く設定:\n1) 下のボタンをタップして、アプリの デフォルトで開く 設定を開きます\n2) «リンクを追加» をタップし、利用可能なすべてのオプションを選択します';
 }
 
 // Path: settings.interface
@@ -1726,9 +1726,9 @@ class _TranslationsSettingsThemeJaJp extends TranslationsSettingsThemeEn {
   @override
   String get system => TranslationOverrides.string(_root.$meta, 'settings.theme.system', {}) ?? 'システム';
   @override
-  String get light => TranslationOverrides.string(_root.$meta, 'settings.theme.light', {}) ?? 'ライトテーマ';
+  String get light => TranslationOverrides.string(_root.$meta, 'settings.theme.light', {}) ?? 'ライト';
   @override
-  String get dark => TranslationOverrides.string(_root.$meta, 'settings.theme.dark', {}) ?? 'ダークテーマ';
+  String get dark => TranslationOverrides.string(_root.$meta, 'settings.theme.dark', {}) ?? 'ダーク';
   @override
   String get pink => TranslationOverrides.string(_root.$meta, 'settings.theme.pink', {}) ?? 'ピンク';
   @override
@@ -1736,7 +1736,7 @@ class _TranslationsSettingsThemeJaJp extends TranslationsSettingsThemeEn {
   @override
   String get blue => TranslationOverrides.string(_root.$meta, 'settings.theme.blue', {}) ?? 'ブルー';
   @override
-  String get teal => TranslationOverrides.string(_root.$meta, 'settings.theme.teal', {}) ?? '鴨の羽色';
+  String get teal => TranslationOverrides.string(_root.$meta, 'settings.theme.teal', {}) ?? 'ティール';
   @override
   String get red => TranslationOverrides.string(_root.$meta, 'settings.theme.red', {}) ?? 'レッド';
   @override
@@ -2129,7 +2129,7 @@ class _TranslationsSettingsCacheJaJp extends TranslationsSettingsCacheEn {
   @override
   String get deleteCacheAfter => TranslationOverrides.string(_root.$meta, 'settings.cache.deleteCacheAfter', {}) ?? 'キャッシュを次の期間後に削除:';
   @override
-  String get cacheSizeLimit => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheSizeLimit', {}) ?? 'キャッシュサイズ制限 (GB)';
+  String get cacheSizeLimit => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheSizeLimit', {}) ?? 'キャッシュサイズの制限 (GB)';
   @override
   String get maximumTotalCacheSize => TranslationOverrides.string(_root.$meta, 'settings.cache.maximumTotalCacheSize', {}) ?? '最大合計キャッシュサイズ';
   @override
@@ -2348,6 +2348,13 @@ class _TranslationsSettingsDatabaseJaJp extends TranslationsSettingsDatabaseEn {
       TranslationOverrides.string(_root.$meta, 'settings.database.retryFailedItems', {'count': count}) ?? '失敗したアイテムを再試行します (${count})';
   @override
   String get useIfStuck => TranslationOverrides.string(_root.$meta, 'settings.database.useIfStuck', {}) ?? 'アイテムでスタックしているように見える場合に使用します';
+  @override
+  String get sankakuNewUrlsInfo =>
+      TranslationOverrides.string(_root.$meta, 'settings.database.sankakuNewUrlsInfo', {}) ?? 'お気に入りの Sankaku アイテムの新しい画像URLを取得します';
+  @override
+  String get sankakuRateLimitWarning =>
+      TranslationOverrides.string(_root.$meta, 'settings.database.sankakuRateLimitWarning', {}) ??
+      '失敗の数が継続的に増加し始めた場合は、停止してしばらくしてから再試行してください。レート制限に達したか、Sankaku がIPからのリクエストをブロックしている可能性があります。';
 }
 
 // Path: settings.itemFilters
@@ -2547,11 +2554,11 @@ class _TranslationsSettingsAboutJaJp extends TranslationsSettingsAboutEn {
   @override
   String get appDescription =>
       TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ??
-      'LoliSnatcherはオープンソースで、GPLv3ライセンスに基づいており、ソースコードはGitHubで公開されています。問題や機能リクエストがありましたら、リポジトリの Issues セクションにご報告ください。';
+      'LoliSnatcherはGPLv3ライセンスのオープンソースソフトウェアで、ソースコードはGitHubで公開されています。問題や機能リクエストがありましたら、リポジトリの Issues セクションにご報告ください。';
   @override
   String get appOnGitHub => TranslationOverrides.string(_root.$meta, 'settings.about.appOnGitHub', {}) ?? 'LoliSnatcher (GitHub)';
   @override
-  String get releasesMsg => TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ?? '最新バージョンと完全な変更ログは、GitHubのリリースページにあります:';
+  String get releasesMsg => TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ?? '最新バージョンと完全な変更ログは、GitHubのリリースページを参照:';
   @override
   String get title => TranslationOverrides.string(_root.$meta, 'settings.about.title', {}) ?? 'このアプリについて';
   @override
@@ -2559,7 +2566,7 @@ class _TranslationsSettingsAboutJaJp extends TranslationsSettingsAboutEn {
       TranslationOverrides.string(_root.$meta, 'settings.about.logoArtistThanks', {}) ??
       'アプリのロゴにイラストを使用させていただいた、Showers-U さんに心より感謝を申し上げます。Pixivでぜひチェックしてみてください';
   @override
-  String get contact => TranslationOverrides.string(_root.$meta, 'settings.about.contact', {}) ?? 'Contact';
+  String get contact => TranslationOverrides.string(_root.$meta, 'settings.about.contact', {}) ?? 'お問い合わせ';
   @override
   String get releases => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'リリースページ';
   @override
@@ -2578,7 +2585,7 @@ class _TranslationsSettingsNetworkJaJp extends TranslationsSettingsNetworkEn {
 
   // Translations
   @override
-  String get keepEmptyForDefault => TranslationOverrides.string(_root.$meta, 'settings.network.keepEmptyForDefault', {}) ?? 'デフォルトのままにしておくには空にしてください';
+  String get keepEmptyForDefault => TranslationOverrides.string(_root.$meta, 'settings.network.keepEmptyForDefault', {}) ?? '空でデフォルトを使用';
   @override
   String get selectBooruToClearCookies =>
       TranslationOverrides.string(_root.$meta, 'settings.network.selectBooruToClearCookies', {}) ?? 'Cookieを消去するBooruを選択するか、空白のままにしてすべてから消去';
@@ -2607,7 +2614,7 @@ class _TranslationsSettingsNetworkJaJp extends TranslationsSettingsNetworkEn {
   @override
   String get setBrowserUserAgent =>
       TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
-      'Chromeブラウザのユーザーエージェントを使用 (サイトでブラウザ以外のユーザーエージェントが禁止されている場合にのみ推奨されます)';
+      'Chromeブラウザの User-Agent を使用 (サイトでブラウザ以外のユーザーエージェントが禁止されている場合にのみ推奨されます)';
   @override
   String get cookieCleaner => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Cookie クリーナー';
   @override
@@ -2638,7 +2645,7 @@ class _TranslationsSettingsWebviewJaJp extends TranslationsSettingsWebviewEn {
   @override
   String get openWebview => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? 'Webviewを開く';
   @override
-  String get openWebviewTip => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'ログインまたはクッキーを取得する場合';
+  String get openWebviewTip => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'ログインまたはCookieの取得用';
 }
 
 // Path: settings.video
@@ -2839,7 +2846,7 @@ class _TranslationsSettingsPrivacyJaJp extends TranslationsSettingsPrivacyEn {
   @override
   String get autoLockAfter => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'ロックまでのアイドル時間';
   @override
-  String get autoLockAfterTip => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? '秒, 0で無効';
+  String get autoLockAfterTip => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? '(秒), 0で無効';
   @override
   String get bluronLeave => TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeave', {}) ?? 'アプリを離れるときに画面をぼかす';
   @override
@@ -3644,7 +3651,7 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? '関連するタブを先に削除してください',
           'settings.booru.booruSharingMsgAndroid' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-                'Android 12 以降のアプリで Booru設定リンクを自動的に開く方法:\n1) 下のボタンをタップして、アプリの デフォルトで開く 設定を開きます\n2) «リンクを追加» をタップし、利用可能なすべてのオプションを選択します',
+                'Android 12 以降のアプリで Booru設定リンクを自動的に開く設定:\n1) 下のボタンをタップして、アプリの デフォルトで開く 設定を開きます\n2) «リンクを追加» をタップし、利用可能なすべてのオプションを選択します',
           'settings.interface.title' => TranslationOverrides.string(_root.$meta, 'settings.interface.title', {}) ?? 'インターフェース',
           'settings.interface.appUIMode' => TranslationOverrides.string(_root.$meta, 'settings.interface.appUIMode', {}) ?? 'アプリUIモード',
           'settings.interface.appUIModeWarningTitle' =>
@@ -3740,12 +3747,12 @@ extension on TranslationsJaJp {
           'settings.theme.removeCustomMascot' => TranslationOverrides.string(_root.$meta, 'settings.theme.removeCustomMascot', {}) ?? 'カスタムマスコットを削除',
           'settings.theme.currentMascotPath' => TranslationOverrides.string(_root.$meta, 'settings.theme.currentMascotPath', {}) ?? '現在のマスコットのパス',
           'settings.theme.system' => TranslationOverrides.string(_root.$meta, 'settings.theme.system', {}) ?? 'システム',
-          'settings.theme.light' => TranslationOverrides.string(_root.$meta, 'settings.theme.light', {}) ?? 'ライトテーマ',
-          'settings.theme.dark' => TranslationOverrides.string(_root.$meta, 'settings.theme.dark', {}) ?? 'ダークテーマ',
+          'settings.theme.light' => TranslationOverrides.string(_root.$meta, 'settings.theme.light', {}) ?? 'ライト',
+          'settings.theme.dark' => TranslationOverrides.string(_root.$meta, 'settings.theme.dark', {}) ?? 'ダーク',
           'settings.theme.pink' => TranslationOverrides.string(_root.$meta, 'settings.theme.pink', {}) ?? 'ピンク',
           'settings.theme.purple' => TranslationOverrides.string(_root.$meta, 'settings.theme.purple', {}) ?? 'パープル',
           'settings.theme.blue' => TranslationOverrides.string(_root.$meta, 'settings.theme.blue', {}) ?? 'ブルー',
-          'settings.theme.teal' => TranslationOverrides.string(_root.$meta, 'settings.theme.teal', {}) ?? '鴨の羽色',
+          'settings.theme.teal' => TranslationOverrides.string(_root.$meta, 'settings.theme.teal', {}) ?? 'ティール',
           'settings.theme.red' => TranslationOverrides.string(_root.$meta, 'settings.theme.red', {}) ?? 'レッド',
           'settings.theme.green' => TranslationOverrides.string(_root.$meta, 'settings.theme.green', {}) ?? 'グリーン',
           'settings.theme.halloween' => TranslationOverrides.string(_root.$meta, 'settings.theme.halloween', {}) ?? 'ハロウィン',
@@ -4013,7 +4020,7 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.cache.videoCacheWarningDesktop', {}) ??
                 '[警告]: デスクトップ版では、一部のBooruで ストリーム モードが正しく動作しない場合があります。',
           'settings.cache.deleteCacheAfter' => TranslationOverrides.string(_root.$meta, 'settings.cache.deleteCacheAfter', {}) ?? 'キャッシュを次の期間後に削除:',
-          'settings.cache.cacheSizeLimit' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheSizeLimit', {}) ?? 'キャッシュサイズ制限 (GB)',
+          'settings.cache.cacheSizeLimit' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheSizeLimit', {}) ?? 'キャッシュサイズの制限 (GB)',
           'settings.cache.maximumTotalCacheSize' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.maximumTotalCacheSize', {}) ?? '最大合計キャッシュサイズ',
           'settings.cache.cacheStats' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheStats', {}) ?? 'キャッシュの統計:',
@@ -4170,6 +4177,11 @@ extension on TranslationsJaJp {
                 TranslationOverrides.string(_root.$meta, 'settings.database.retryFailedItems', {'count': count}) ?? '失敗したアイテムを再試行します (${count})',
           'settings.database.useIfStuck' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.useIfStuck', {}) ?? 'アイテムでスタックしているように見える場合に使用します',
+          'settings.database.sankakuNewUrlsInfo' =>
+            TranslationOverrides.string(_root.$meta, 'settings.database.sankakuNewUrlsInfo', {}) ?? 'お気に入りの Sankaku アイテムの新しい画像URLを取得します',
+          'settings.database.sankakuRateLimitWarning' =>
+            TranslationOverrides.string(_root.$meta, 'settings.database.sankakuRateLimitWarning', {}) ??
+                '失敗の数が継続的に増加し始めた場合は、停止してしばらくしてから再試行してください。レート制限に達したか、Sankaku がIPからのリクエストをブロックしている可能性があります。',
           'settings.itemFilters.removeSnatched' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'ダウンロードしたアイテムを削除',
           'settings.itemFilters.title' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.title', {}) ?? 'フィルター',
@@ -4290,21 +4302,21 @@ extension on TranslationsJaJp {
           'settings.sync.startReceiverServer' => TranslationOverrides.string(_root.$meta, 'settings.sync.startReceiverServer', {}) ?? 'レシーバーサーバーを開始',
           'settings.about.appDescription' =>
             TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ??
-                'LoliSnatcherはオープンソースで、GPLv3ライセンスに基づいており、ソースコードはGitHubで公開されています。問題や機能リクエストがありましたら、リポジトリの Issues セクションにご報告ください。',
+                'LoliSnatcherはGPLv3ライセンスのオープンソースソフトウェアで、ソースコードはGitHubで公開されています。問題や機能リクエストがありましたら、リポジトリの Issues セクションにご報告ください。',
           'settings.about.appOnGitHub' => TranslationOverrides.string(_root.$meta, 'settings.about.appOnGitHub', {}) ?? 'LoliSnatcher (GitHub)',
           'settings.about.releasesMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ?? '最新バージョンと完全な変更ログは、GitHubのリリースページにあります:',
+            TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ?? '最新バージョンと完全な変更ログは、GitHubのリリースページを参照:',
           'settings.about.title' => TranslationOverrides.string(_root.$meta, 'settings.about.title', {}) ?? 'このアプリについて',
           'settings.about.logoArtistThanks' =>
             TranslationOverrides.string(_root.$meta, 'settings.about.logoArtistThanks', {}) ??
                 'アプリのロゴにイラストを使用させていただいた、Showers-U さんに心より感謝を申し上げます。Pixivでぜひチェックしてみてください',
-          'settings.about.contact' => TranslationOverrides.string(_root.$meta, 'settings.about.contact', {}) ?? 'Contact',
+          'settings.about.contact' => TranslationOverrides.string(_root.$meta, 'settings.about.contact', {}) ?? 'お問い合わせ',
           'settings.about.releases' => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'リリースページ',
           'settings.about.licenses' => TranslationOverrides.string(_root.$meta, 'settings.about.licenses', {}) ?? 'ライセンス',
           'settings.about.developers' => TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? '開発',
           'settings.about.emailCopied' => TranslationOverrides.string(_root.$meta, 'settings.about.emailCopied', {}) ?? 'Eメールがクリップボードにコピーされました',
           'settings.network.keepEmptyForDefault' =>
-            TranslationOverrides.string(_root.$meta, 'settings.network.keepEmptyForDefault', {}) ?? 'デフォルトのままにしておくには空にしてください',
+            TranslationOverrides.string(_root.$meta, 'settings.network.keepEmptyForDefault', {}) ?? '空でデフォルトを使用',
           'settings.network.selectBooruToClearCookies' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.selectBooruToClearCookies', {}) ?? 'Cookieを消去するBooruを選択するか、空白のままにしてすべてから消去',
           'settings.network.title' => TranslationOverrides.string(_root.$meta, 'settings.network.title', {}) ?? 'ネットワーク',
@@ -4325,7 +4337,7 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.network.valueSavedAfterLeaving', {}) ?? 'ページを閉じて保存',
           'settings.network.setBrowserUserAgent' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.setBrowserUserAgent', {}) ??
-                'Chromeブラウザのユーザーエージェントを使用 (サイトでブラウザ以外のユーザーエージェントが禁止されている場合にのみ推奨されます)',
+                'Chromeブラウザの User-Agent を使用 (サイトでブラウザ以外のユーザーエージェントが禁止されている場合にのみ推奨されます)',
           'settings.network.cookieCleaner' => TranslationOverrides.string(_root.$meta, 'settings.network.cookieCleaner', {}) ?? 'Cookie クリーナー',
           'settings.network.cookiesFor' =>
             ({required String booruName}) =>
@@ -4346,8 +4358,7 @@ extension on TranslationsJaJp {
           'settings.network.allCookiesDeleted' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? 'すべてのCookieを消去しました',
           'settings.webview.openWebview' => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? 'Webviewを開く',
-          'settings.webview.openWebviewTip' =>
-            TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'ログインまたはクッキーを取得する場合',
+          'settings.webview.openWebviewTip' => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'ログインまたはCookieの取得用',
           'settings.video.title' => TranslationOverrides.string(_root.$meta, 'settings.video.title', {}) ?? '動画',
           'settings.video.videoPlayerBackend' => TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? 'プレーヤーのバックエンド',
           'settings.video.backendDefaultHelp' =>
@@ -4491,13 +4502,13 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupCancelled', {}) ?? 'バックアップをキャンセルしました',
           'settings.privacy.title' => TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? 'プライバシー',
           'settings.privacy.appLock' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'アプリのロック',
-          'settings.privacy.appLockMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.privacy.appLockMsg', {}) ?? '手動で、またはアイドル状態の場合にアプリをロックします。PIN/生体認証が必要です',
-          'settings.privacy.autoLockAfter' => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'ロックまでのアイドル時間',
           _ => null,
         } ??
         switch (path) {
-          'settings.privacy.autoLockAfterTip' => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? '秒, 0で無効',
+          'settings.privacy.appLockMsg' =>
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appLockMsg', {}) ?? '手動で、またはアイドル状態の場合にアプリをロックします。PIN/生体認証が必要です',
+          'settings.privacy.autoLockAfter' => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'ロックまでのアイドル時間',
+          'settings.privacy.autoLockAfterTip' => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? '(秒), 0で無効',
           'settings.privacy.bluronLeave' => TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeave', {}) ?? 'アプリを離れるときに画面をぼかす',
           'settings.privacy.bluronLeaveMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.bluronLeaveMsg', {}) ?? 'システムの制限により、一部デバイスでは動作しない場合があります',
@@ -5282,11 +5293,11 @@ extension on TranslationsJaJp {
           'tagView.id' => TranslationOverrides.string(_root.$meta, 'tagView.id', {}) ?? 'ID',
           'tagView.postURL' => TranslationOverrides.string(_root.$meta, 'tagView.postURL', {}) ?? '投稿URL',
           'tagView.posted' => TranslationOverrides.string(_root.$meta, 'tagView.posted', {}) ?? '投稿日時',
-          'tagView.details' => TranslationOverrides.string(_root.$meta, 'tagView.details', {}) ?? '詳細',
-          'tagView.filename' => TranslationOverrides.string(_root.$meta, 'tagView.filename', {}) ?? 'ファイル名',
           _ => null,
         } ??
         switch (path) {
+          'tagView.details' => TranslationOverrides.string(_root.$meta, 'tagView.details', {}) ?? '詳細',
+          'tagView.filename' => TranslationOverrides.string(_root.$meta, 'tagView.filename', {}) ?? 'ファイル名',
           'tagView.url' => TranslationOverrides.string(_root.$meta, 'tagView.url', {}) ?? 'コンテンツURL',
           'tagView.extension' => TranslationOverrides.string(_root.$meta, 'tagView.extension', {}) ?? '拡張子',
           'tagView.resolution' => TranslationOverrides.string(_root.$meta, 'tagView.resolution', {}) ?? '解像度',
