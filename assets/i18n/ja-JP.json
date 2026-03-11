@@ -32,7 +32,7 @@
             "noBooruSelected": "Booruが未選択です！",
             "cantDeleteThisBooru": "このBooruは削除できません！",
             "removeRelatedTabsFirst": "関連するタブを先に削除してください",
-            "booruSharingMsgAndroid": "Android 12 以降のアプリで Booru設定リンクを自動的に開く方法:\n1) 下のボタンをタップして、アプリの デフォルトで開く 設定を開きます\n2) «リンクを追加» をタップし、利用可能なすべてのオプションを選択します"
+            "booruSharingMsgAndroid": "Android 12 以降のアプリで Booru設定リンクを自動的に開く設定:\n1) 下のボタンをタップして、アプリの デフォルトで開く 設定を開きます\n2) «リンクを追加» をタップし、利用可能なすべてのオプションを選択します"
         },
         "interface": {
             "title": "インターフェース",
@@ -103,12 +103,12 @@
             "removeCustomMascot": "カスタムマスコットを削除",
             "currentMascotPath": "現在のマスコットのパス",
             "system": "システム",
-            "light": "ライトテーマ",
-            "dark": "ダークテーマ",
+            "light": "ライト",
+            "dark": "ダーク",
             "pink": "ピンク",
             "purple": "パープル",
             "blue": "ブルー",
-            "teal": "鴨の羽色",
+            "teal": "ティール",
             "red": "レッド",
             "green": "グリーン",
             "halloween": "ハロウィン",
@@ -284,7 +284,7 @@
             "videoCacheModeStreamCache": "- ストリーム+キャッシュ - 両方の組み合わせ、現在は2重ダウンロードが発生します",
             "videoCacheWarningDesktop": "[警告]: デスクトップ版では、一部のBooruで ストリーム モードが正しく動作しない場合があります。",
             "deleteCacheAfter": "キャッシュを次の期間後に削除:",
-            "cacheSizeLimit": "キャッシュサイズ制限 (GB)",
+            "cacheSizeLimit": "キャッシュサイズの制限 (GB)",
             "maximumTotalCacheSize": "最大合計キャッシュサイズ",
             "cacheStats": "キャッシュの統計:",
             "loading": "読み込み中…",
@@ -372,7 +372,9 @@
             "pressToStop": "ここをタップして停止",
             "purgeFailedItems(param=count)": "失敗したアイテムを消去します (${count: int})",
             "retryFailedItems(param=count)": "失敗したアイテムを再試行します (${count: int})",
-            "useIfStuck": "アイテムでスタックしているように見える場合に使用します"
+            "useIfStuck": "アイテムでスタックしているように見える場合に使用します",
+            "sankakuNewUrlsInfo": "お気に入りの Sankaku アイテムの新しい画像URLを取得します",
+            "sankakuRateLimitWarning": "失敗の数が継続的に増加し始めた場合は、停止してしばらくしてから再試行してください。レート制限に達したか、Sankaku がIPからのリクエストをブロックしている可能性があります。"
         },
         "itemFilters": {
             "removeSnatched": "ダウンロードしたアイテムを削除",
@@ -448,19 +450,19 @@
             "startReceiverServer": "レシーバーサーバーを開始"
         },
         "about": {
-            "appDescription": "LoliSnatcherはオープンソースで、GPLv3ライセンスに基づいており、ソースコードはGitHubで公開されています。問題や機能リクエストがありましたら、リポジトリの Issues セクションにご報告ください。",
+            "appDescription": "LoliSnatcherはGPLv3ライセンスのオープンソースソフトウェアで、ソースコードはGitHubで公開されています。問題や機能リクエストがありましたら、リポジトリの Issues セクションにご報告ください。",
             "appOnGitHub": "LoliSnatcher (GitHub)",
-            "releasesMsg": "最新バージョンと完全な変更ログは、GitHubのリリースページにあります:",
+            "releasesMsg": "最新バージョンと完全な変更ログは、GitHubのリリースページを参照:",
             "title": "このアプリについて",
             "logoArtistThanks": "アプリのロゴにイラストを使用させていただいた、Showers-U さんに心より感謝を申し上げます。Pixivでぜひチェックしてみてください",
-            "contact": "Contact",
+            "contact": "お問い合わせ",
             "releases": "リリースページ",
             "licenses": "ライセンス",
             "developers": "開発",
             "emailCopied": "Eメールがクリップボードにコピーされました"
         },
         "network": {
-            "keepEmptyForDefault": "デフォルトのままにしておくには空にしてください",
+            "keepEmptyForDefault": "空でデフォルトを使用",
             "selectBooruToClearCookies": "Cookieを消去するBooruを選択するか、空白のままにしてすべてから消去",
             "title": "ネットワーク",
             "enableSelfSignedSSLCertificates": "自己署名SSL証明書を有効化",
@@ -471,7 +473,7 @@
             "defaultUserAgent(param=agent)": "デフォルト: ${agent: String}",
             "userAgentUsedOnRequests": "ほとんどのBooruリクエストとWebviewに使用されます",
             "valueSavedAfterLeaving": "ページを閉じて保存",
-            "setBrowserUserAgent": "Chromeブラウザのユーザーエージェントを使用 (サイトでブラウザ以外のユーザーエージェントが禁止されている場合にのみ推奨されます)",
+            "setBrowserUserAgent": "Chromeブラウザの User-Agent を使用 (サイトでブラウザ以外のユーザーエージェントが禁止されている場合にのみ推奨されます)",
             "cookieCleaner": "Cookie クリーナー",
             "cookiesFor(param=booruName)": "${booruName: String} 上のCookie:",
             "cookieDeleted(param=cookieName)": "Cookie «${cookieName: String}» が削除されました",
@@ -482,7 +484,7 @@
         },
         "webview": {
             "openWebview": "Webviewを開く",
-            "openWebviewTip": "ログインまたはクッキーを取得する場合"
+            "openWebviewTip": "ログインまたはCookieの取得用"
         },
         "video": {
             "title": "動画",
@@ -571,7 +573,7 @@
             "appLock": "アプリのロック",
             "appLockMsg": "手動で、またはアイドル状態の場合にアプリをロックします。PIN/生体認証が必要です",
             "autoLockAfter": "ロックまでのアイドル時間",
-            "autoLockAfterTip": "秒, 0で無効",
+            "autoLockAfterTip": "(秒), 0で無効",
             "bluronLeave": "アプリを離れるときに画面をぼかす",
             "bluronLeaveMsg": "システムの制限により、一部デバイスでは動作しない場合があります",
             "incognitoKeyboard": "シークレットキーボード",
