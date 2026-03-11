@@ -46,14 +46,14 @@ If you encounter any issues or have suggestions, please post them in GitHub issu
 Release - 2.5.0+5207:
 
 Main in this update:
-- Russian localization
+- Localization (Russian, Turkish, Japanese)
 - Pinned tags
 - Custom fonts
 - Reverse image search
 
 
 New features:
-- Localization: app is now translated into Russian, more languages will be added in future updates, can be changed in [Settings -> Language], uses System locale by default (fallback to English if not supported)
+- Localization: app is now translated into Russian, Turkish and Japanese, more languages will be added in future updates, can be changed in [Settings -> Language], uses System locale by default (falls back to English if current locale is not supported or any of the strings are missing)
 - Custom fonts: [Settings -> Themes -> Font]
 - Tags can now be pinned in the tag search view with custom labels for quick access
 - All input fields where you can enter tags now open a full tag search view where you can quickly look for suggestions
@@ -72,7 +72,7 @@ New features:
 
 Changes:
 - Reverted to old rendering engine (previous version used the new one, but it caused issues on older devices). [NOTE]: In the future we may be forced to switch to a new engine
-- [Hated] tag filters renamed to [Hidden], [Loved] renamed to [Marked] throughout the app
+- [Hated] tag filters renamed to [Hidden] and [Loved] tag filters renamed to [Marked] throughout the app
 - Reworked cache cleanup
 - Improved app startup time
 - Image viewer performance improvements when switching between items
@@ -84,15 +84,17 @@ Changes:
 - Improved booru add/edit page flow
 - Added a button in tag details which opens a dialog with a list of related tabs (also explains what white/yellow/blue dots on [Add new tab] button mean)
 - Enabled predictive back gesture support on supported devices, can be toggled in [Settings -> Interface -> Predictive back gesture]
-- Routes tag suggestion requests to the correct booru when a booru index prefix is included in the query when using Multibooru
+- Tag suggestion requests will now route to the correct booru based on booru index prefix in the query when using Multibooru
 - Merged meta tags suggestions on Multibooru
 - Media cache is now enabled by default (only applies to new users)
 - Long tap to fast forward on videos is now enabled by default, related setting is removed
+- Increased blur on [Hidden] items
 
 
 Booru changes/fixes:
 - Multibooru: combined meta tags, prefix-based tag suggestion routing per handler
 - xyz-based boorus: fixed item details not loading in some cases
+- e621: fixed parsing error when item does not have sample url
 
 
 Fixes:
@@ -105,6 +107,9 @@ Fixes:
 - Fixed [Add new tab dialog] applying custom page number to tab when it was not enabled
 - Fixed [Add new tab dialog] not applying default query when dialog is opened
 - Fixed broken state after clearing search query when editing a tag in the query
+- Fixed not being able to load next page if there are not enough items on screen to start scrolling
+- Fixed rare case when local database could not load items with tags containing numbers
+- Fixed short freezes during opening of item info drawer if there is a lot of tabs/tags
 
 
 and other small fixes and changes...
