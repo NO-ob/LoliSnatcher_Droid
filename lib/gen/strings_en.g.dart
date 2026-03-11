@@ -2088,10 +2088,10 @@ class TranslationsSettingsLanguageEn {
   /// en: 'Help us translate'
   String get helpUsTranslate => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help us translate';
 
-  /// en: 'Visit <a href='https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization'>github</a> for details or tap on the image below to go to Weblate'
+  /// en: 'Visit <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> for details or tap on the image below to go to Weblate'
   String get visitForDetails =>
       TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-      'Visit <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> for details or tap on the image below to go to Weblate';
+      'Visit <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> for details or tap on the image below to go to Weblate';
 }
 
 // Path: settings.booru
@@ -5281,7 +5281,7 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help us translate',
           'settings.language.visitForDetails' =>
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-                'Visit <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> for details or tap on the image below to go to Weblate',
+                'Visit <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> for details or tap on the image below to go to Weblate',
           'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus & Search',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Default tags',
           'settings.booru.itemsPerPage' => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Items fetched per page',

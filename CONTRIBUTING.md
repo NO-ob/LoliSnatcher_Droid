@@ -61,7 +61,7 @@ For detailed build instructions, see [BUILDING.md](.github/BUILDING.md).
 
 ## Localization / Translations
 
-LoliSnatcher uses the [slang](https://pub.dev/packages/slang) package for internationalization code and [weblate]() for community translations.
+LoliSnatcher uses the [slang](https://pub.dev/packages/slang) package for internationalization code and [weblate](https://hosted.weblate.org/projects/loli-snatcher/) for community translations.
 
 ### Translation Files
 

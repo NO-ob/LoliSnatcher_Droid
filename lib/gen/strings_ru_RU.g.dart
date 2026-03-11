@@ -1698,7 +1698,7 @@ class _TranslationsSettingsLanguageRuRu extends TranslationsSettingsLanguageEn {
   @override
   String get visitForDetails =>
       TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-      'Посети <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate';
+      'Посети <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate';
 }
 
 // Path: settings.booru
@@ -4332,7 +4332,7 @@ extension on TranslationsRuRu {
             TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Помоги нам с переводом',
           'settings.language.visitForDetails' =>
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-                'Посети <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/wiki/Localization\'>github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate',
+                'Посети <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate',
           'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Сайты и Поиск',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Теги по умолчанию',
           'settings.booru.itemsPerPage' => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Элементов на странице',
