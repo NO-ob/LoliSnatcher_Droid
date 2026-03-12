@@ -2574,6 +2574,8 @@ class _TranslationsSettingsAboutJaJp extends TranslationsSettingsAboutEn {
   @override
   String get developers => TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? '開発';
   @override
+  String get localizers => TranslationOverrides.string(_root.$meta, 'settings.about.localizers', {}) ?? 'ローカライザー';
+  @override
   String get emailCopied => TranslationOverrides.string(_root.$meta, 'settings.about.emailCopied', {}) ?? 'Eメールがクリップボードにコピーされました';
 }
 
@@ -4314,6 +4316,7 @@ extension on TranslationsJaJp {
           'settings.about.releases' => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'リリースページ',
           'settings.about.licenses' => TranslationOverrides.string(_root.$meta, 'settings.about.licenses', {}) ?? 'ライセンス',
           'settings.about.developers' => TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? '開発',
+          'settings.about.localizers' => TranslationOverrides.string(_root.$meta, 'settings.about.localizers', {}) ?? 'ローカライザー',
           'settings.about.emailCopied' => TranslationOverrides.string(_root.$meta, 'settings.about.emailCopied', {}) ?? 'Eメールがクリップボードにコピーされました',
           'settings.network.keepEmptyForDefault' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.keepEmptyForDefault', {}) ?? '空でデフォルトを使用',
@@ -4501,10 +4504,10 @@ extension on TranslationsJaJp {
           'settings.backupAndRestore.backupCancelled' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupCancelled', {}) ?? 'バックアップをキャンセルしました',
           'settings.privacy.title' => TranslationOverrides.string(_root.$meta, 'settings.privacy.title', {}) ?? 'プライバシー',
-          'settings.privacy.appLock' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'アプリのロック',
           _ => null,
         } ??
         switch (path) {
+          'settings.privacy.appLock' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appLock', {}) ?? 'アプリのロック',
           'settings.privacy.appLockMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.appLockMsg', {}) ?? '手動で、またはアイドル状態の場合にアプリをロックします。PIN/生体認証が必要です',
           'settings.privacy.autoLockAfter' => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'ロックまでのアイドル時間',
@@ -5292,10 +5295,10 @@ extension on TranslationsJaJp {
           'tagView.addedNewTab' => TranslationOverrides.string(_root.$meta, 'tagView.addedNewTab', {}) ?? '新規タブに追加:',
           'tagView.id' => TranslationOverrides.string(_root.$meta, 'tagView.id', {}) ?? 'ID',
           'tagView.postURL' => TranslationOverrides.string(_root.$meta, 'tagView.postURL', {}) ?? '投稿URL',
-          'tagView.posted' => TranslationOverrides.string(_root.$meta, 'tagView.posted', {}) ?? '投稿日時',
           _ => null,
         } ??
         switch (path) {
+          'tagView.posted' => TranslationOverrides.string(_root.$meta, 'tagView.posted', {}) ?? '投稿日時',
           'tagView.details' => TranslationOverrides.string(_root.$meta, 'tagView.details', {}) ?? '詳細',
           'tagView.filename' => TranslationOverrides.string(_root.$meta, 'tagView.filename', {}) ?? 'ファイル名',
           'tagView.url' => TranslationOverrides.string(_root.$meta, 'tagView.url', {}) ?? 'コンテンツURL',

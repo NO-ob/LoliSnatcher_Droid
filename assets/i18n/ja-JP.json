@@ -459,6 +459,7 @@
             "releases": "リリースページ",
             "licenses": "ライセンス",
             "developers": "開発",
+            "localizers": "ローカライザー",
             "emailCopied": "Eメールがクリップボードにコピーされました"
         },
         "network": {

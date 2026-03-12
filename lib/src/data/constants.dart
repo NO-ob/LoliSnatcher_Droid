@@ -53,7 +53,7 @@ Main in this update:
 
 
 New features:
-- Localization: app is now translated into Russian, Turkish and Japanese, more languages will be added in future updates, can be changed in [Settings -> Language], uses System locale by default (falls back to English if current locale is not supported or any of the strings are missing)
+- Localization: app is now translated into Russian, Turkish and Japanese, more languages will be added in future updates, can be changed in [Settings -> Language]
 - Custom fonts: [Settings -> Themes -> Font]
 - Tags can now be pinned in the tag search view with custom labels for quick access
 - All input fields where you can enter tags now open a full tag search view where you can quickly look for suggestions

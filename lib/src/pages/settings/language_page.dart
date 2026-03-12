@@ -72,70 +72,6 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
     locale = settingsHandler.locale.value;
   }
 
-  Widget buildFlag(AppLocale? locale) {
-    const double width = 36, height = 24;
-
-    if (locale == null) {
-      return Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Icon(
-          Icons.settings,
-          size: 20,
-          color: Theme.of(context).colorScheme.onSecondaryContainer,
-        ),
-      );
-    }
-
-    if (locale.localeCode == '?') {
-      return const CircularProgressIndicator();
-    }
-
-    const flagTheme = ImageTheme(
-      width: width,
-      height: height,
-      shape: RoundedRectangle(6),
-    );
-
-    Widget firstFlag = CountryFlag.fromLanguageCode(
-      locale.languageCode,
-      theme: flagTheme,
-    );
-    Widget? secondFlag;
-    switch (locale) {
-      case AppLocale.en:
-        firstFlag = CountryFlag.fromLanguageCode(
-          'en-us',
-          theme: flagTheme,
-        );
-        secondFlag = CountryFlag.fromLanguageCode(
-          'en',
-          theme: flagTheme,
-        );
-        break;
-      default:
-        break;
-    }
-
-    if (secondFlag == null) {
-      return firstFlag;
-    } else {
-      return Stack(
-        children: [
-          firstFlag,
-          ClipPath(
-            clipper: _SecondLanguageFlagClipper(),
-            child: secondFlag,
-          ),
-        ],
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return SettingsDropdown(
@@ -163,7 +99,7 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
         children: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: buildFlag(e),
+            child: buildFlag(context, e),
           ),
           Text(
             e != null
@@ -176,6 +112,70 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
           ),
         ],
       ),
+    );
+  }
+}
+
+Widget buildFlag(BuildContext context, AppLocale? locale) {
+  const double width = 36, height = 24;
+
+  if (locale == null) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Icon(
+        Icons.settings,
+        size: 20,
+        color: Theme.of(context).colorScheme.onSecondaryContainer,
+      ),
+    );
+  }
+
+  if (locale.localeCode == '?') {
+    return const CircularProgressIndicator();
+  }
+
+  const flagTheme = ImageTheme(
+    width: width,
+    height: height,
+    shape: RoundedRectangle(6),
+  );
+
+  Widget firstFlag = CountryFlag.fromLanguageCode(
+    locale.languageCode,
+    theme: flagTheme,
+  );
+  Widget? secondFlag;
+  switch (locale) {
+    case AppLocale.en:
+      firstFlag = CountryFlag.fromLanguageCode(
+        'en-us',
+        theme: flagTheme,
+      );
+      secondFlag = CountryFlag.fromLanguageCode(
+        'en',
+        theme: flagTheme,
+      );
+      break;
+    default:
+      break;
+  }
+
+  if (secondFlag == null) {
+    return firstFlag;
+  } else {
+    return Stack(
+      children: [
+        firstFlag,
+        ClipPath(
+          clipper: _SecondLanguageFlagClipper(),
+          child: secondFlag,
+        ),
+      ],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:core';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lolisnatcher/src/pages/settings/language_page.dart';
 
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -64,11 +65,12 @@ class AboutPage extends StatelessWidget {
               },
             ),
             //
-            Container(
-              margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: Text(context.loc.settings.about.logoArtistThanks),
-            ),
-            if (!EnvironmentConfig.isFromStore)
+            if (!EnvironmentConfig.isFromStore) ...[
+              const SizedBox(height: kMinInteractiveDimension),
+              Container(
+                margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child: Text(context.loc.settings.about.logoArtistThanks),
+              ),
               SettingsButton(
                 name: 'Showers-U - Pixiv',
                 icon: const Icon(Icons.public),
@@ -80,7 +82,9 @@ class AboutPage extends StatelessWidget {
                   );
                 },
               ),
+            ],
             //
+            const SizedBox(height: kMinInteractiveDimension),
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
               child: Text('${context.loc.settings.about.developers}:'),
@@ -108,6 +112,23 @@ class AboutPage extends StatelessWidget {
               },
             ),
             //
+            const SizedBox(height: kMinInteractiveDimension),
+            Container(
+              margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child: Text('${context.loc.settings.about.localizers}:'),
+            ),
+            SettingsButton(
+              name: 'Turkish',
+              subtitle: const Text('kyomoe'),
+              icon: buildFlag(context, AppLocale.trTr),
+            ),
+            SettingsButton(
+              name: 'Japanese',
+              subtitle: const Text('stardust248397'),
+              icon: buildFlag(context, AppLocale.jaJp),
+            ),
+            //
+            const SizedBox(height: kMinInteractiveDimension),
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
               child: Text(context.loc.settings.about.releasesMsg),

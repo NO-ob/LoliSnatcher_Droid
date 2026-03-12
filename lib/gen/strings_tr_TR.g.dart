@@ -3171,6 +3171,8 @@ class _TranslationsSettingsAboutTrTr extends TranslationsSettingsAboutEn {
   @override
   String get developers => TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? 'Geliştiriciler';
   @override
+  String get localizers => TranslationOverrides.string(_root.$meta, 'settings.about.localizers', {}) ?? 'Yerelleştirme Uzmanları';
+  @override
   String get releases => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'Sürümler';
   @override
   String get releasesMsg =>
@@ -5370,6 +5372,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.about.logoArtistThanks', {}) ??
                 'Uygulama logosu için eserini kullanmamıza izin veren Showers-U\'ya koca bir teşekkürler: Lütfen Pixiv üzerinden ona göz atmayı unutma',
           'settings.about.developers' => TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? 'Geliştiriciler',
+          'settings.about.localizers' => TranslationOverrides.string(_root.$meta, 'settings.about.localizers', {}) ?? 'Yerelleştirme Uzmanları',
           'settings.about.releases' => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'Sürümler',
           'settings.about.releasesMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ??
@@ -5733,10 +5736,10 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Ölçeklendirme ile yeniden yükle',
           'viewer.appBar.loadSampleQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Örnek kalitesinde yükle',
-          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Yüksek kalitede yükle',
           _ => null,
         } ??
         switch (path) {
+          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Yüksek kalitede yükle',
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'İndirildi durumunu kaldır',
           'viewer.appBar.setSnatchedStatus' =>
