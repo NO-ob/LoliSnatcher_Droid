@@ -400,6 +400,40 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
   String get snatchingHistory => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingHistory', {}) ?? 'Histórico de downloads';
   @override
   String get enterTags => TranslationOverrides.string(_root.$meta, 'snatcher.enterTags', {}) ?? 'Inserir tags';
+  @override
+  String get amount => TranslationOverrides.string(_root.$meta, 'snatcher.amount', {}) ?? 'Quantidade';
+  @override
+  String get amountOfFilesToSnatch =>
+      TranslationOverrides.string(_root.$meta, 'snatcher.amountOfFilesToSnatch', {}) ?? 'Quantidade de arquivos para baixar';
+  @override
+  String get delayInMs => TranslationOverrides.string(_root.$meta, 'snatcher.delayInMs', {}) ?? 'Tempo de espera (em ms)';
+  @override
+  String get delayBetweenEachDownload =>
+      TranslationOverrides.string(_root.$meta, 'snatcher.delayBetweenEachDownload', {}) ?? 'Tempo de espera entre cada download';
+  @override
+  String get snatchFiles => TranslationOverrides.string(_root.$meta, 'snatcher.snatchFiles', {}) ?? 'Arquivos baixados';
+  @override
+  String get itemWasAlreadySnatched =>
+      TranslationOverrides.string(_root.$meta, 'snatcher.itemWasAlreadySnatched', {}) ?? 'O item já foi baixado anteriormente';
+  @override
+  String get failedToSnatchItem => TranslationOverrides.string(_root.$meta, 'snatcher.failedToSnatchItem', {}) ?? 'Falha ao baixar o item';
+  @override
+  String get itemWasCancelled => TranslationOverrides.string(_root.$meta, 'snatcher.itemWasCancelled', {}) ?? 'O item foi cancelado';
+  @override
+  String get startingNextQueueItem =>
+      TranslationOverrides.string(_root.$meta, 'snatcher.startingNextQueueItem', {}) ?? 'Começando próximo item da fila…';
+  @override
+  String get itemsSnatched => TranslationOverrides.string(_root.$meta, 'snatcher.itemsSnatched', {}) ?? 'Item baixado';
+  @override
+  String snatchedCount({required num count}) =>
+      TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+        count,
+        one: 'Baixado: ${count} item',
+        few: 'Baixados: ${count} itens',
+        many: 'Baixados: ${count} itens',
+        other: 'Baixados: ${count} itens',
+      );
 }
 
 /// The flat map containing all translations for locale <pt-BR>.
@@ -592,6 +626,30 @@ extension on TranslationsPtBr {
       'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Downloader',
       'snatcher.snatchingHistory' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingHistory', {}) ?? 'Histórico de downloads',
       'snatcher.enterTags' => TranslationOverrides.string(_root.$meta, 'snatcher.enterTags', {}) ?? 'Inserir tags',
+      'snatcher.amount' => TranslationOverrides.string(_root.$meta, 'snatcher.amount', {}) ?? 'Quantidade',
+      'snatcher.amountOfFilesToSnatch' =>
+        TranslationOverrides.string(_root.$meta, 'snatcher.amountOfFilesToSnatch', {}) ?? 'Quantidade de arquivos para baixar',
+      'snatcher.delayInMs' => TranslationOverrides.string(_root.$meta, 'snatcher.delayInMs', {}) ?? 'Tempo de espera (em ms)',
+      'snatcher.delayBetweenEachDownload' =>
+        TranslationOverrides.string(_root.$meta, 'snatcher.delayBetweenEachDownload', {}) ?? 'Tempo de espera entre cada download',
+      'snatcher.snatchFiles' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchFiles', {}) ?? 'Arquivos baixados',
+      'snatcher.itemWasAlreadySnatched' =>
+        TranslationOverrides.string(_root.$meta, 'snatcher.itemWasAlreadySnatched', {}) ?? 'O item já foi baixado anteriormente',
+      'snatcher.failedToSnatchItem' => TranslationOverrides.string(_root.$meta, 'snatcher.failedToSnatchItem', {}) ?? 'Falha ao baixar o item',
+      'snatcher.itemWasCancelled' => TranslationOverrides.string(_root.$meta, 'snatcher.itemWasCancelled', {}) ?? 'O item foi cancelado',
+      'snatcher.startingNextQueueItem' =>
+        TranslationOverrides.string(_root.$meta, 'snatcher.startingNextQueueItem', {}) ?? 'Começando próximo item da fila…',
+      'snatcher.itemsSnatched' => TranslationOverrides.string(_root.$meta, 'snatcher.itemsSnatched', {}) ?? 'Item baixado',
+      'snatcher.snatchedCount' =>
+        ({required num count}) =>
+            TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
+            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+              count,
+              one: 'Baixado: ${count} item',
+              few: 'Baixados: ${count} itens',
+              many: 'Baixados: ${count} itens',
+              other: 'Baixados: ${count} itens',
+            ),
       _ => null,
     };
   }
