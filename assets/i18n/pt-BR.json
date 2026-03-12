@@ -141,6 +141,22 @@
     "snatcher": {
         "title": "Downloader",
         "snatchingHistory": "Histórico de downloads",
-        "enterTags": "Inserir tags"
+        "enterTags": "Inserir tags",
+        "amount": "Quantidade",
+        "amountOfFilesToSnatch": "Quantidade de arquivos para baixar",
+        "delayInMs": "Tempo de espera (em ms)",
+        "delayBetweenEachDownload": "Tempo de espera entre cada download",
+        "snatchFiles": "Arquivos baixados",
+        "itemWasAlreadySnatched": "O item já foi baixado anteriormente",
+        "failedToSnatchItem": "Falha ao baixar o item",
+        "itemWasCancelled": "O item foi cancelado",
+        "startingNextQueueItem": "Começando próximo item da fila…",
+        "itemsSnatched": "Item baixado",
+        "snatchedCount(param=count)": {
+            "one": "Baixado: ${count} item",
+            "few": "Baixados: ${count} itens",
+            "many": "Baixados: ${count} itens",
+            "other": "Baixados: ${count} itens"
+        }
     }
 }
