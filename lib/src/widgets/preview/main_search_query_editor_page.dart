@@ -2278,8 +2278,8 @@ class _PopularTagsBlockState extends State<PopularTagsBlock> {
                             children: [
                               TextSpan(
                                 text: tag.tag.replaceAll('_', ' '),
-                                style: TextStyle(
-                                  color: tagColor == Colors.transparent ? null : tagColor,
+                                style: context.theme.textTheme.labelLarge?.copyWith(
+                                  color: tagColor,
                                 ),
                               ),
                               if (tag.count > 0) ...[
@@ -2759,25 +2759,28 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
 
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
-                    child: InputChip(
-                      avatar: pinnedTag.isGlobal
-                          ? null
-                          : BooruFavicon(
-                              settingsHandler.booruList.value.firstWhere(
-                                (b) =>
-                                    b.type == pinnedTag.booruType &&
-                                    (b.type?.isFavouritesOrDownloads == true || b.name == pinnedTag.booruName),
-                                orElse: Booru.unknown,
+                    child: GestureDetector(
+                      onLongPress: () => widget.onTagLongTap(pinnedTag.tagName, pinnedTag),
+                      child: InputChip(
+                        avatar: pinnedTag.isGlobal
+                            ? null
+                            : BooruFavicon(
+                                settingsHandler.booruList.value.firstWhere(
+                                  (b) =>
+                                      b.type == pinnedTag.booruType &&
+                                      (b.type?.isFavouritesOrDownloads == true || b.name == pinnedTag.booruName),
+                                  orElse: Booru.unknown,
+                                ),
                               ),
-                            ),
-                      label: Text(
-                        isMultiword ? pinnedTag.tagName : pinnedTag.tagName.replaceAll('_', ' '),
-                        style: TextStyle(color: tagColor),
+                        label: Text(
+                          isMultiword ? pinnedTag.tagName : pinnedTag.tagName.replaceAll('_', ' '),
+                          style: TextStyle(color: tagColor),
+                        ),
+                        onPressed: () => widget.onTagTap(pinnedTag.tagName),
+                        onDeleted: () => widget.onTagLongTap(pinnedTag.tagName, pinnedTag),
+                        deleteIcon: const Icon(Icons.more_vert, size: 18),
+                        deleteButtonTooltipMessage: '',
                       ),
-                      onPressed: () => widget.onTagTap(pinnedTag.tagName),
-                      onDeleted: () => widget.onTagLongTap(pinnedTag.tagName, pinnedTag),
-                      deleteIcon: const Icon(Icons.more_vert, size: 18),
-                      deleteButtonTooltipMessage: '',
                     ),
                   );
                 },
@@ -3040,7 +3043,7 @@ Future<void> showPinTagDialog(
   }
 }
 
-Future<void> showUnpinTagDialog(
+Future<bool> showUnpinTagDialog(
   BuildContext context,
   String tagName,
   PinnedTag pinnedTag,
@@ -3115,6 +3118,8 @@ Future<void> showUnpinTagDialog(
       duration: const Duration(seconds: 2),
     );
   }
+
+  return result ?? false;
 }
 
 Future<bool?> showPinnedTagsReorderDialog(
@@ -3230,15 +3235,19 @@ class _PinnedTagsReorderDialogState extends State<PinnedTagsReorderDialog> {
                     subtitle: Text(pinnedTag.booruName ?? ''),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline),
-                      onPressed: () async {
-                        await settingsHandler.dbHandler.removePinnedTag(pinnedTag.id);
-                        setState(() {
-                          tags.removeAt(index);
-                        });
-                        if (tags.isEmpty && mounted) {
-                          Navigator.of(context).pop(true);
-                        }
-                      },
+                      onPressed: () => showUnpinTagDialog(
+                        context,
+                        pinnedTag.tagName,
+                        pinnedTag,
+                        () {
+                          setState(() {
+                            tags.removeAt(index);
+                          });
+                          if (tags.isEmpty && mounted) {
+                            Navigator.of(context).pop(true);
+                          }
+                        },
+                      ),
                     ),
                   );
                 },
@@ -3398,10 +3407,16 @@ class _PinnedTagsManagerDialogState extends State<PinnedTagsManagerDialog> {
   };
 
   Future<void> _deleteTag(PinnedTag tag) async {
-    await settingsHandler.dbHandler.removePinnedTag(tag.id);
-    allTags.removeWhere((t) => t.id == tag.id);
-    _applyFilter();
-    hasChanges = true;
+    await showUnpinTagDialog(
+      context,
+      tag.tagName,
+      tag,
+      () {
+        allTags.removeWhere((t) => t.id == tag.id);
+        _applyFilter();
+        hasChanges = true;
+      },
+    );
   }
 
   Future<void> _editTagLabels(PinnedTag tag) async {
