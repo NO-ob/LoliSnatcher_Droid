@@ -13,7 +13,6 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
-import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -101,27 +100,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 await ServiceHandler.deleteFileFromSAFDirectory(backupPath, fileName);
               },
               child: Text(context.loc.yes),
-            ),
-          ],
-        );
-      },
-    );
-
-    return res ?? false;
-  }
-
-  Future<bool> confirmRestore() async {
-    final bool? res = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return SettingsDialog(
-          title: Text(context.loc.settings.backupAndRestore.restoreConfirmTitle),
-          actionButtons: [
-            const CancelButton(withIcon: true),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.of(context).pop(true),
-              icon: const Icon(Icons.restore),
-              label: Text(context.loc.yes),
             ),
           ],
         );
@@ -450,8 +428,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       icon: const Icon(Icons.settings_backup_restore),
                       subtitle: const Text('settings.json'),
                       action: () async {
-                        final bool confirmed = await confirmRestore();
-                        if (!confirmed) return;
                         inProgress = true;
                         setState(() {});
                         try {
@@ -499,8 +475,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       icon: const Icon(Icons.image_search),
                       subtitle: const Text('boorus.json'),
                       action: () async {
-                        final bool confirmed = await confirmRestore();
-                        if (!confirmed) return;
                         inProgress = true;
                         setState(() {});
                         try {
@@ -574,8 +548,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       icon: const Icon(Icons.list_alt),
                       subtitle: Text('store.db (${context.loc.settings.backupAndRestore.restoreDatabaseInfo})'),
                       action: () async {
-                        final bool confirmed = await confirmRestore();
-                        if (!confirmed) return;
                         inProgress = true;
                         setState(() {});
                         try {
@@ -665,8 +637,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         icon: const Icon(CupertinoIcons.tag),
                         subtitle: Text('tags.json (${context.loc.settings.backupAndRestore.restoreTagsInfo})'),
                         action: () async {
-                          final bool confirmed = await confirmRestore();
-                          if (!confirmed) return;
                           inProgress = true;
                           setState(() {});
                           try {

@@ -3328,10 +3328,6 @@ class TranslationsSettingsBackupAndRestoreEn {
 
   /// en: 'Backup cancelled'
   String get backupCancelled => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupCancelled', {}) ?? 'Backup cancelled';
-
-  /// en: 'Restore backup?'
-  String get restoreConfirmTitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreConfirmTitle', {}) ?? 'Restore backup?';
 }
 
 // Path: settings.network
@@ -5973,8 +5969,6 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDirNoAccess', {}) ?? 'No access to backup directory!',
           'settings.backupAndRestore.backupCancelled' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupCancelled', {}) ?? 'Backup cancelled',
-          'settings.backupAndRestore.restoreConfirmTitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreConfirmTitle', {}) ?? 'Restore backup?',
           'settings.network.title' => TranslationOverrides.string(_root.$meta, 'settings.network.title', {}) ?? 'Network',
           'settings.network.enableSelfSignedSSLCertificates' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.enableSelfSignedSSLCertificates', {}) ?? 'Enable self signed SSL certificates',
@@ -6646,11 +6640,11 @@ extension on Translations {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Reload with scaling',
+          'viewer.appBar.loadSampleQuality' =>
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Load sample quality',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.loadSampleQuality' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Load sample quality',
           'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Load high quality',
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'Drop snatched status',

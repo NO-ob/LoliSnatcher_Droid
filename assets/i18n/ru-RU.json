@@ -750,8 +750,7 @@
             "operationTakesTooLongMsg": "Нажми Скрыть, если операция занимает слишком много времени, операция будет продолжена в фоновом режиме",
             "backupFileNotFound": "Файл бэкапа не найден или не может быть прочитан!",
             "backupDirNoAccess": "Нет доступа к папке бэкапов!",
-            "backupCancelled": "Бэкап отменен",
-            "restoreConfirmTitle": "Восстановить бэкап?"
+            "backupCancelled": "Бэкап отменен"
         },
         "network": {
             "title": "Сеть",

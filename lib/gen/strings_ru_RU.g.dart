@@ -2672,9 +2672,6 @@ class _TranslationsSettingsBackupAndRestoreRuRu extends TranslationsSettingsBack
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDirNoAccess', {}) ?? 'Нет доступа к папке бэкапов!';
   @override
   String get backupCancelled => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupCancelled', {}) ?? 'Бэкап отменен';
-  @override
-  String get restoreConfirmTitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreConfirmTitle', {}) ?? 'Восстановить бэкап?';
 }
 
 // Path: settings.network
@@ -5061,8 +5058,6 @@ extension on TranslationsRuRu {
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDirNoAccess', {}) ?? 'Нет доступа к папке бэкапов!',
           'settings.backupAndRestore.backupCancelled' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupCancelled', {}) ?? 'Бэкап отменен',
-          'settings.backupAndRestore.restoreConfirmTitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreConfirmTitle', {}) ?? 'Восстановить бэкап?',
           'settings.network.title' => TranslationOverrides.string(_root.$meta, 'settings.network.title', {}) ?? 'Сеть',
           'settings.network.enableSelfSignedSSLCertificates' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.enableSelfSignedSSLCertificates', {}) ??
@@ -5759,11 +5754,11 @@ extension on TranslationsRuRu {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Перезагрузить с масштабированием',
+          'viewer.appBar.loadSampleQuality' =>
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Загрузить семпл качество',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.loadSampleQuality' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Загрузить семпл качество',
           'viewer.appBar.loadHighQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Загрузить высокое качество',
           'viewer.appBar.dropSnatchedStatus' =>

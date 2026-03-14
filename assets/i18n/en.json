@@ -750,8 +750,7 @@
             "operationTakesTooLongMsg": "Press Hide below if it takes too long, operation will continue in background",
             "backupFileNotFound": "Backup file not found or cannot be read!",
             "backupDirNoAccess": "No access to backup directory!",
-            "backupCancelled": "Backup cancelled",
-            "restoreConfirmTitle": "Restore backup?"
+            "backupCancelled": "Backup cancelled"
         },
         "network": {
             "title": "Network",
