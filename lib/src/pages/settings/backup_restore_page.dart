@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -109,6 +110,27 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
     return res ?? false;
   }
 
+  Future<bool> confirmRestore() async {
+    final bool? res = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return SettingsDialog(
+          title: Text(context.loc.settings.backupAndRestore.restoreConfirmTitle),
+          actionButtons: [
+            const CancelButton(withIcon: true),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.of(context).pop(true),
+              icon: const Icon(Icons.restore),
+              label: Text(context.loc.yes),
+            ),
+          ],
+        );
+      },
+    );
+
+    return res ?? false;
+  }
+
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
@@ -157,6 +179,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
             children: [
               ListView(
                 children: [
+                  // Backup Directory
                   SettingsButton(
                     name: context.loc.settings.backupAndRestore.selectBackupDir,
                     icon: const Icon(Icons.folder),
@@ -188,7 +211,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     ),
                   ),
                   //
-                  if (backupPath.isNotEmpty) ...[
+                  if (backupPath.isNotEmpty)
                     SettingsButton(
                       name: context.loc.settings.backupAndRestore.resetBackupDir,
                       icon: const Icon(Icons.refresh_rounded),
@@ -201,12 +224,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       },
                       drawTopBorder: true,
                     ),
+                  //
+                  if (backupPath.isNotEmpty) ...[
+                    // Backup
                     const SettingsButton(name: '', enabled: false),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                      width: double.infinity,
-                      child: Text(context.loc.settings.backupAndRestore.restoreInfoMsg),
-                    ),
                     SettingsButton(
                       name: context.loc.settings.backupAndRestore.backupSettings,
                       icon: const Icon(Icons.settings),
@@ -257,53 +278,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       },
                       drawTopBorder: true,
                     ),
-                    SettingsButton(
-                      name: context.loc.settings.backupAndRestore.restoreSettings,
-                      icon: const Icon(null),
-                      subtitle: const Text('settings.json'),
-                      action: () async {
-                        inProgress = true;
-                        setState(() {});
-                        try {
-                          final Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(
-                            backupPath,
-                            'settings.json',
-                          );
-                          if (settingsFileBytes != null) {
-                            final File newFile = File('${await ServiceHandler.getConfigDir()}settings.json');
-                            if (!(await newFile.exists())) {
-                              await newFile.create();
-                            }
-                            await newFile.writeAsBytes(settingsFileBytes);
-                            await settingsHandler.loadSettingsJson();
-                            showSnackbar(
-                              context.loc.settings.backupAndRestore.settingsRestored,
-                              isError: false,
-                            );
-                          } else {
-                            showSnackbar(
-                              context.loc.settings.backupAndRestore.backupFileNotFound,
-                              isError: true,
-                            );
-                          }
-                        } catch (e, s) {
-                          showSnackbar(
-                            context.loc.settings.backupAndRestore.restoreSettingsError,
-                            isError: true,
-                          );
-                          Logger.Inst().log(
-                            e.toString(),
-                            'BackupRestorePage',
-                            'restoreSettings',
-                            LogTypes.exception,
-                            s: s,
-                          );
-                        }
-                        inProgress = false;
-                        setState(() {});
-                      },
-                    ),
-                    const SettingsButton(name: '', enabled: false),
                     SettingsButton(
                       name: context.loc.settings.backupAndRestore.backupBoorus,
                       icon: const Icon(Icons.image_search),
@@ -356,10 +330,177 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       },
                     ),
                     SettingsButton(
+                      name: context.loc.settings.backupAndRestore.backupDatabase,
+                      icon: const Icon(Icons.list_alt),
+                      action: () async {
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          final File file = File('${await ServiceHandler.getConfigDir()}store.db');
+                          if (!await file.exists()) {
+                            showSnackbar(
+                              context.loc.settings.backupAndRestore.databaseFileNotFound,
+                              isError: true,
+                            );
+                            inProgress = false;
+                            setState(() {});
+                            return;
+                          }
+                          if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
+                            final bool res = await detectedDuplicateFile('store.db');
+                            if (!res) {
+                              showSnackbar(
+                                context.loc.settings.backupAndRestore.backupCancelled,
+                                isError: true,
+                              );
+                              inProgress = false;
+                              setState(() {});
+                              return;
+                            }
+                          }
+
+                          // WAL mode keeps store.db in a consistent readable state
+                          // at all times, so we can copy it safely while it's open.
+                          await ServiceHandler.copyFileToSafDir(
+                            await ServiceHandler.getConfigDir(),
+                            'store.db',
+                            backupPath,
+                            'application/x-sqlite3',
+                          );
+                          showSnackbar(
+                            context.loc.settings.backupAndRestore.databaseBackedUp,
+                            isError: false,
+                          );
+                        } catch (e, s) {
+                          showSnackbar(
+                            context.loc.settings.backupAndRestore.backupDatabaseError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'backupDatabase',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                        }
+                        inProgress = false;
+                        setState(() {});
+                      },
+                    ),
+                    if (settingsHandler.isDebug.value)
+                      SettingsButton(
+                        name: context.loc.settings.backupAndRestore.backupTags,
+                        icon: const Icon(CupertinoIcons.tag),
+                        action: () async {
+                          inProgress = true;
+                          setState(() {});
+                          try {
+                            if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'tags.json')) {
+                              final bool res = await detectedDuplicateFile('tags.json');
+                              if (!res) {
+                                showSnackbar(
+                                  context.loc.settings.backupAndRestore.backupCancelled,
+                                  isError: true,
+                                );
+                                inProgress = false;
+                                setState(() {});
+                                return;
+                              }
+                            }
+
+                            await ServiceHandler.writeImage(
+                              utf8.encode(json.encode(tagHandler.toList())),
+                              'tags',
+                              'text',
+                              'json',
+                              backupPath,
+                            );
+                            showSnackbar(
+                              context.loc.settings.backupAndRestore.tagsBackedUp,
+                              isError: false,
+                            );
+                          } catch (e, s) {
+                            showSnackbar(
+                              context.loc.settings.backupAndRestore.backupTagsError,
+                              isError: true,
+                            );
+                            Logger.Inst().log(
+                              e.toString(),
+                              'BackupRestorePage',
+                              'backupTags',
+                              LogTypes.exception,
+                              s: s,
+                            );
+                          }
+                          inProgress = false;
+                          setState(() {});
+                        },
+                      ),
+
+                    // Restore
+                    const SettingsButton(name: '', enabled: false),
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      width: double.infinity,
+                      child: Text(context.loc.settings.backupAndRestore.restoreInfoMsg),
+                    ),
+                    SettingsButton(
+                      name: context.loc.settings.backupAndRestore.restoreSettings,
+                      icon: const Icon(Icons.settings_backup_restore),
+                      subtitle: const Text('settings.json'),
+                      action: () async {
+                        final bool confirmed = await confirmRestore();
+                        if (!confirmed) return;
+                        inProgress = true;
+                        setState(() {});
+                        try {
+                          final Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(
+                            backupPath,
+                            'settings.json',
+                          );
+                          if (settingsFileBytes != null) {
+                            final File newFile = File('${await ServiceHandler.getConfigDir()}settings.json');
+                            if (!(await newFile.exists())) {
+                              await newFile.create();
+                            }
+                            await newFile.writeAsBytes(settingsFileBytes);
+                            await settingsHandler.loadSettingsJson();
+                            showSnackbar(
+                              context.loc.settings.backupAndRestore.settingsRestored,
+                              isError: false,
+                            );
+                          } else {
+                            showSnackbar(
+                              context.loc.settings.backupAndRestore.backupFileNotFound,
+                              isError: true,
+                            );
+                          }
+                        } catch (e, s) {
+                          showSnackbar(
+                            context.loc.settings.backupAndRestore.restoreSettingsError,
+                            isError: true,
+                          );
+                          Logger.Inst().log(
+                            e.toString(),
+                            'BackupRestorePage',
+                            'restoreSettings',
+                            LogTypes.exception,
+                            s: s,
+                          );
+                        }
+                        inProgress = false;
+                        setState(() {});
+                      },
+                      drawTopBorder: true,
+                    ),
+                    SettingsButton(
                       name: context.loc.settings.backupAndRestore.restoreBoorus,
-                      icon: const Icon(null),
+                      icon: const Icon(Icons.image_search),
                       subtitle: const Text('boorus.json'),
                       action: () async {
+                        final bool confirmed = await confirmRestore();
+                        if (!confirmed) return;
                         inProgress = true;
                         setState(() {});
                         try {
@@ -428,71 +569,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         setState(() {});
                       },
                     ),
-                    const SettingsButton(name: '', enabled: false),
-                    SettingsButton(
-                      name: context.loc.settings.backupAndRestore.backupDatabase,
-                      icon: const Icon(Icons.list_alt),
-                      action: () async {
-                        inProgress = true;
-                        setState(() {});
-                        try {
-                          final File file = File('${await ServiceHandler.getConfigDir()}store.db');
-                          if (!await file.exists()) {
-                            showSnackbar(
-                              context.loc.settings.backupAndRestore.databaseFileNotFound,
-                              isError: true,
-                            );
-                            inProgress = false;
-                            setState(() {});
-                            return;
-                          }
-                          if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
-                            final bool res = await detectedDuplicateFile('store.db');
-                            if (!res) {
-                              showSnackbar(
-                                context.loc.settings.backupAndRestore.backupCancelled,
-                                isError: true,
-                              );
-                              inProgress = false;
-                              setState(() {});
-                              return;
-                            }
-                          }
-
-                          // WAL mode keeps store.db in a consistent readable state
-                          // at all times, so we can copy it safely while it's open.
-                          await ServiceHandler.copyFileToSafDir(
-                            await ServiceHandler.getConfigDir(),
-                            'store.db',
-                            backupPath,
-                            'application/x-sqlite3',
-                          );
-                          showSnackbar(
-                            context.loc.settings.backupAndRestore.databaseBackedUp,
-                            isError: false,
-                          );
-                        } catch (e, s) {
-                          showSnackbar(
-                            context.loc.settings.backupAndRestore.backupDatabaseError,
-                            isError: true,
-                          );
-                          Logger.Inst().log(
-                            e.toString(),
-                            'BackupRestorePage',
-                            'backupDatabase',
-                            LogTypes.exception,
-                            s: s,
-                          );
-                        }
-                        inProgress = false;
-                        setState(() {});
-                      },
-                    ),
                     SettingsButton(
                       name: context.loc.settings.backupAndRestore.restoreDatabase,
-                      icon: const Icon(null),
+                      icon: const Icon(Icons.list_alt),
                       subtitle: Text('store.db (${context.loc.settings.backupAndRestore.restoreDatabaseInfo})'),
                       action: () async {
+                        final bool confirmed = await confirmRestore();
+                        if (!confirmed) return;
                         inProgress = true;
                         setState(() {});
                         try {
@@ -576,61 +659,14 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         setState(() {});
                       },
                     ),
-                    const SettingsButton(name: '', enabled: false),
-                    if (settingsHandler.isDebug.value) ...[
-                      SettingsButton(
-                        name: context.loc.settings.backupAndRestore.backupTags,
-                        icon: const Icon(CupertinoIcons.tag),
-                        action: () async {
-                          inProgress = true;
-                          setState(() {});
-                          try {
-                            if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'tags.json')) {
-                              final bool res = await detectedDuplicateFile('tags.json');
-                              if (!res) {
-                                showSnackbar(
-                                  context.loc.settings.backupAndRestore.backupCancelled,
-                                  isError: true,
-                                );
-                                inProgress = false;
-                                setState(() {});
-                                return;
-                              }
-                            }
-
-                            await ServiceHandler.writeImage(
-                              utf8.encode(json.encode(tagHandler.toList())),
-                              'tags',
-                              'text',
-                              'json',
-                              backupPath,
-                            );
-                            showSnackbar(
-                              context.loc.settings.backupAndRestore.tagsBackedUp,
-                              isError: false,
-                            );
-                          } catch (e, s) {
-                            showSnackbar(
-                              context.loc.settings.backupAndRestore.backupTagsError,
-                              isError: true,
-                            );
-                            Logger.Inst().log(
-                              e.toString(),
-                              'BackupRestorePage',
-                              'backupTags',
-                              LogTypes.exception,
-                              s: s,
-                            );
-                          }
-                          inProgress = false;
-                          setState(() {});
-                        },
-                      ),
+                    if (settingsHandler.isDebug.value)
                       SettingsButton(
                         name: context.loc.settings.backupAndRestore.restoreTags,
-                        icon: const Icon(null),
+                        icon: const Icon(CupertinoIcons.tag),
                         subtitle: Text('tags.json (${context.loc.settings.backupAndRestore.restoreTagsInfo})'),
                         action: () async {
+                          final bool confirmed = await confirmRestore();
+                          if (!confirmed) return;
                           inProgress = true;
                           setState(() {});
                           try {
@@ -690,7 +726,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           }
                         },
                       ),
-                    ],
                   ],
                 ],
               ),
