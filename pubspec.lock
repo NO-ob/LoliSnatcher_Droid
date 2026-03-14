@@ -1580,18 +1580,18 @@ packages:
     dependency: "direct main"
     description:
       name: slang
-      sha256: "27f3490c7a9eb2908715ed7be6b11cc2cc35a51365f33041b561ded79636f136"
+      sha256: ea6702ed6b1c82065fb2de906fe34ac9298117342e3c2ea2567132efdc81bd17
       url: "https://pub.dev"
     source: hosted
-    version: "4.13.0"
+    version: "4.14.0"
   slang_flutter:
     dependency: "direct main"
     description:
       name: slang_flutter
-      sha256: "2200626c34540af594c31a052bc55a59febc353228feaa1232d60d6143a99680"
+      sha256: dcc4e77527c91b12348fc8bdd43d3eb92d8cea37c12a23a1f9719cdc12c804c6
       url: "https://pub.dev"
     source: hosted
-    version: "4.13.0"
+    version: "4.14.0"
   source_span:
     dependency: transitive
     description:
@@ -1948,10 +1948,10 @@ packages:
     dependency: transitive
     description:
       name: wakelock_plus
-      sha256: e4e125b7c1a2f0e491e5452afdc0e25ab77b2d2775a7caa231fcc1c1f2162c47
+      sha256: "8b12256f616346910c519a35606fb69b1fe0737c06b6a447c6df43888b097f39"
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.0"
+    version: "1.5.1"
   wakelock_plus_platform_interface:
     dependency: transitive
     description:
