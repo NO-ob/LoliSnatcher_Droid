@@ -173,11 +173,9 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
           bottom: TabBar(
             controller: tabController,
             indicatorColor: Theme.of(context).colorScheme.secondary,
-            onTap: (int index) {
-              tagSearchController.clear();
-            },
-            labelColor: Theme.of(context).colorScheme.secondary,
-            unselectedLabelColor: Theme.of(context).appBarTheme.foregroundColor,
+            onTap: (_) => tagSearchController.clear(),
+            labelColor: Theme.of(context).colorScheme.onSecondary,
+            unselectedLabelColor: Theme.of(context).colorScheme.onSecondary.withValues(alpha: 0.66),
             labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             unselectedLabelStyle: const TextStyle(fontSize: 16),
             isScrollable: true,
