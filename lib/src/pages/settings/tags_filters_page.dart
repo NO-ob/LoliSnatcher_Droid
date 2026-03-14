@@ -33,10 +33,10 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   void initState() {
     super.initState();
 
-    hiddenList = settingsHandler.hiddenTags;
+    hiddenList = settingsHandler.hiddenTags.toList();
     hiddenList.sort(sortTags);
 
-    markedList = settingsHandler.markedTags;
+    markedList = settingsHandler.markedTags.toList();
     markedList.sort(sortTags);
 
     filterHated = settingsHandler.filterHated;
@@ -63,8 +63,8 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   }
 
   Future<void> _onPopInvoked(_, _) async {
-    settingsHandler.hiddenTags = settingsHandler.cleanTagsList(hiddenList.map(Tag.new).toList());
-    settingsHandler.markedTags = settingsHandler.cleanTagsList(markedList.map(Tag.new).toList());
+    settingsHandler.hiddenTags = settingsHandler.cleanTagsList(hiddenList.map(Tag.new).toList()).toSet();
+    settingsHandler.markedTags = settingsHandler.cleanTagsList(markedList.map(Tag.new).toList()).toSet();
     settingsHandler.filterHated = filterHated;
     settingsHandler.filterMarked = filterMarked;
     settingsHandler.filterFavourites = filterFavourites;

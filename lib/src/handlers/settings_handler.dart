@@ -133,8 +133,8 @@ class SettingsHandler {
   MpvVideoOutput altVideoPlayerVO = MpvVideoOutput.defaultValue;
   MpvHardwareDecoding altVideoPlayerHWDEC = MpvHardwareDecoding.defaultValue;
 
-  List<String> hiddenTags = [];
-  List<String> markedTags = [];
+  Set<String> hiddenTags = {};
+  Set<String> markedTags = {};
 
   int itemLimit = Constants.defaultItemLimit;
   int portraitColumns = 2;
@@ -1666,11 +1666,10 @@ class SettingsHandler {
         // print('hiddenTags is a ${tempHiddenTags.runtimeType} type');
         tempHiddenTags = [];
       }
+      hiddenTags.clear();
       final List<String> hideTags = List<String>.from(tempHiddenTags);
       for (int i = 0; i < hideTags.length; i++) {
-        if (!hiddenTags.contains(hideTags.elementAt(i))) {
-          hiddenTags.add(hideTags.elementAt(i));
-        }
+        hiddenTags.add(hideTags.elementAt(i));
       }
     } catch (e, s) {
       Logger.Inst().log(
@@ -1693,11 +1692,10 @@ class SettingsHandler {
         // print('markedTags is a ${tempMarkedTags.runtimeType} type');
         tempMarkedTags = [];
       }
+      markedTags.clear();
       final List<String> markTags = List<String>.from(tempMarkedTags);
       for (int i = 0; i < markTags.length; i++) {
-        if (!markedTags.contains(markTags.elementAt(i))) {
-          markedTags.add(markTags.elementAt(i));
-        }
+        markedTags.add(markTags.elementAt(i));
       }
     } catch (e, s) {
       Logger.Inst().log(
@@ -1951,8 +1949,8 @@ class SettingsHandler {
 
   TagsListData parseTagsList(List<Tag> itemTags, {bool isCapped = true}) {
     final List<String> cleanItemTags = cleanTagsList(itemTags);
-    List<String> hiddenInItem = hiddenTags.where(cleanItemTags.contains).toList();
-    List<String> markedInItem = markedTags.where(cleanItemTags.contains).toList();
+    List<String> hiddenInItem = cleanItemTags.where(hiddenTags.contains).toList();
+    List<String> markedInItem = cleanItemTags.where(markedTags.contains).toList();
     final List<String> soundInItem = soundTags.where(cleanItemTags.contains).toList();
     final List<String> aiInItem = aiTags.where(cleanItemTags.contains).toList();
 
@@ -1969,34 +1967,30 @@ class SettingsHandler {
   }
 
   bool containsHidden(List<String> itemTags) {
-    return hiddenTags.where(itemTags.contains).isNotEmpty;
+    return itemTags.any(hiddenTags.contains);
   }
 
   bool containsMarked(List<String> itemTags) {
-    return markedTags.where(itemTags.contains).isNotEmpty;
+    return itemTags.any(markedTags.contains);
   }
 
   bool containsSound(List<String> itemTags) {
-    return soundTags.where(itemTags.contains).isNotEmpty;
+    return itemTags.any(soundTags.contains);
   }
 
   bool containsAI(List<String> itemTags) {
-    return aiTags.where(itemTags.contains).isNotEmpty;
+    return itemTags.any(aiTags.contains);
   }
 
   void addTagToList(String type, String tag) {
     switch (type) {
       case 'hated':
       case 'hidden':
-        if (!hiddenTags.contains(tag)) {
-          hiddenTags.add(tag);
-        }
+        hiddenTags.add(tag);
         break;
       case 'loved':
       case 'marked':
-        if (!markedTags.contains(tag)) {
-          markedTags.add(tag);
-        }
+        markedTags.add(tag);
         break;
       default:
         break;
@@ -2008,15 +2002,11 @@ class SettingsHandler {
     switch (type) {
       case 'hated':
       case 'hidden':
-        if (hiddenTags.contains(tag)) {
-          hiddenTags.remove(tag);
-        }
+        hiddenTags.remove(tag);
         break;
       case 'loved':
       case 'marked':
-        if (markedTags.contains(tag)) {
-          markedTags.remove(tag);
-        }
+        markedTags.remove(tag);
         break;
       default:
         break;
