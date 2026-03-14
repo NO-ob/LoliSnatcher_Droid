@@ -217,8 +217,10 @@ class _CommentsDialogState extends State<CommentsDialog> {
         final double maxRatio = min(2, ratio);
         double thumbHeight;
         double thumbWidth;
+
+        const double maxScreenRatio = 0.33;
         if (ratio < 1) {
-          thumbHeight = screenHeight * 0.4;
+          thumbHeight = screenHeight * maxScreenRatio;
           thumbWidth = min(
             thumbHeight * minRatio,
             (screenWidth * 0.8) / minRatio,
@@ -227,13 +229,13 @@ class _CommentsDialogState extends State<CommentsDialog> {
           thumbWidth = screenWidth;
           thumbHeight = min(
             thumbWidth / maxRatio,
-            screenHeight * 0.4,
+            screenHeight * maxScreenRatio,
           );
         }
 
         if (context.isLandscape) {
           final size = MediaQuery.sizeOf(context);
-          final double landscapeScreenMod = size.height == size.shortestSide ? 0.3 : 0.4;
+          final double landscapeScreenMod = size.height == size.shortestSide ? maxScreenRatio - 0.1 : maxScreenRatio;
           final double sizeDiff = thumbHeight / min(screenHeight * landscapeScreenMod, thumbHeight);
           thumbHeight /= sizeDiff;
           thumbHeight = min(thumbHeight, screenHeight * landscapeScreenMod);
