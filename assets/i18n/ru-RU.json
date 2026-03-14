@@ -711,7 +711,7 @@
         "backupAndRestore": {
             "title": "Резервное копирование и восстановление",
             "duplicateFileDetectedTitle": "Дублирующийся файл!",
-            "duplicateFileDetectedMsg(param=fileName)": "Файл ${fileName} уже существует. Ты хочешь его перезаписать? Усли выбрать нет, то бэкап будет отменен.",
+            "duplicateFileDetectedMsg(param=fileName)": "Файл ${fileName} уже существует. Ты хочешь его перезаписать? Если выбрать нет, то бэкап будет отменен.",
             "androidOnlyFeatureMsg": "Эта функция доступна только на Android, на десктопных билдах можно просто копировать файлы из папки данных приложения",
             "selectBackupDir": "Выбери папку для бэкапов",
             "failedToGetBackupPath": "Не удалось получить путь к папке бэкапов",

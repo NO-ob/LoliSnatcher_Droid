@@ -2554,7 +2554,7 @@ class _TranslationsSettingsBackupAndRestoreRuRu extends TranslationsSettingsBack
   @override
   String duplicateFileDetectedMsg({required Object fileName}) =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedMsg', {'fileName': fileName}) ??
-      'Файл ${fileName} уже существует. Ты хочешь его перезаписать? Усли выбрать нет, то бэкап будет отменен.';
+      'Файл ${fileName} уже существует. Ты хочешь его перезаписать? Если выбрать нет, то бэкап будет отменен.';
   @override
   String get androidOnlyFeatureMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.androidOnlyFeatureMsg', {}) ??
@@ -4968,7 +4968,7 @@ extension on TranslationsRuRu {
           'settings.backupAndRestore.duplicateFileDetectedMsg' =>
             ({required Object fileName}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedMsg', {'fileName': fileName}) ??
-                'Файл ${fileName} уже существует. Ты хочешь его перезаписать? Усли выбрать нет, то бэкап будет отменен.',
+                'Файл ${fileName} уже существует. Ты хочешь его перезаписать? Если выбрать нет, то бэкап будет отменен.',
           'settings.backupAndRestore.androidOnlyFeatureMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.androidOnlyFeatureMsg', {}) ??
                 'Эта функция доступна только на Android, на десктопных билдах можно просто копировать файлы из папки данных приложения',
