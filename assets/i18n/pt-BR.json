@@ -135,7 +135,8 @@
             "few": "${count} abas recebidas",
             "many": "${count} abas recebidas",
             "other": "${count} abas recebidas"
-        }
+        },
+        "resettingSearchToDefaultTags": "Redefinindo para as tags padrão"
     },
     "disable": "Desabilitar",
     "snatcher": {
@@ -157,6 +158,69 @@
             "few": "Baixados: ${count} itens",
             "many": "Baixados: ${count} itens",
             "other": "Baixados: ${count} itens"
+        },
+        "filesAlreadySnatched(param=count)": {
+            "one": "${count} arquivo já foi baixado",
+            "few": "${count} arquivos já foram baixados",
+            "many": "${count} arquivos já foram baixados",
+            "other": "${count} arquivos já foram baixados"
+        },
+        "failedToSnatchFiles(param=count)": {
+            "one": "Falha ao baixar ${count} arquivo",
+            "few": "Falha ao baixar ${count} arquivos",
+            "many": "Falha ao baixar ${count} arquivos",
+            "other": "Falha ao baixar ${count} arquivos"
+        },
+        "cancelledFiles(param=count)": {
+            "one": "${count} arquivo cancelado",
+            "few": "${count} arquivos cancelados",
+            "many": "${count} arquivos cancelados",
+            "other": "${count} arquivos cancelados"
+        },
+        "snatchingImages": "Baixando imagens",
+        "doNotCloseApp": "Não feche o app!",
+        "addedItemToQueue": "Item adicionado à fila de download",
+        "addedItemsToQueue(param=count)": {
+            "one": "${count} item adicionado a fila de download",
+            "few": "${count} itens adicionados a fila de download",
+            "many": "${count} itens adicionados a fila de download",
+            "other": "${count} itens adicionados a fila de download"
         }
+    },
+    "multibooru": {
+        "title": "Multibooru",
+        "multibooruMode": "Modo Multibooru",
+        "multibooruRequiresAtLeastTwoBoorus": "Requer ao menos 2 boorus configurados",
+        "selectSecondaryBoorus": "Selecione boorus adicionais:",
+        "akaMultibooruMode": "Ou seja, modo Multibooru",
+        "labelSecondaryBoorusToInclude": "Boorus adicionais para incluir"
+    },
+    "hydrus": {
+        "importError": "Erro ao importar para o Hydrus",
+        "apiPermissionsRequired": "Talvez as permissões da API não estejam corretas. Você pode editá-las em 'Revisar Serviços'",
+        "addTagsToFile": "Adicionar tags ao arquivo",
+        "addUrls": "Adicionar URLs"
+    },
+    "tabs": {
+        "tab": "Aba",
+        "addBoorusInSettings": "Adicionar boorus nas configurações",
+        "selectABooru": "Selecione um Booru",
+        "secondaryBoorus": "Boorus secundários",
+        "addNewTab": "Nova aba",
+        "selectABooruOrLeaveEmpty": "Selecione um booru ou deixe vazio",
+        "addPosition": "Posição",
+        "addModePrevTab": "Aba anterior",
+        "addModeNextTab": "Próximo aba",
+        "addModeListEnd": "Fim da lista",
+        "usedQuery": "Busca utilizada",
+        "queryModeDefault": "Padrão",
+        "queryModeCurrent": "Atual",
+        "queryModeCustom": "Personalizada",
+        "customQuery": "Busca personalizada",
+        "empty": "[vazia]",
+        "addSecondaryBoorus": "Adicionar boorus secundários",
+        "keepSecondaryBoorus": "Manter boorus secundários",
+        "startFromCustomPageNumber": "Página inicial personalizada",
+        "switchToNewTab": "Mudar para uma nova aba"
     }
 }
