@@ -201,6 +201,12 @@ class TranslationsPtBr extends Translations with BaseTranslations<AppLocale, Tra
   String get disable => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Desabilitar';
   @override
   late final _TranslationsSnatcherPtBr snatcher = _TranslationsSnatcherPtBr._(_root);
+  @override
+  late final _TranslationsMultibooruPtBr multibooru = _TranslationsMultibooruPtBr._(_root);
+  @override
+  late final _TranslationsHydrusPtBr hydrus = _TranslationsHydrusPtBr._(_root);
+  @override
+  late final _TranslationsTabsPtBr tabs = _TranslationsTabsPtBr._(_root);
 }
 
 // Path: validationErrors
@@ -385,6 +391,9 @@ class _TranslationsSearchHandlerPtBr extends TranslationsSearchHandlerEn {
         many: '${count} abas recebidas',
         other: '${count} abas recebidas',
       );
+  @override
+  String get resettingSearchToDefaultTags =>
+      TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Redefinindo para as tags padrão';
 }
 
 // Path: snatcher
@@ -434,6 +443,146 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
         many: 'Baixados: ${count} itens',
         other: 'Baixados: ${count} itens',
       );
+  @override
+  String filesAlreadySnatched({required num count}) =>
+      TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+        count,
+        one: '${count} arquivo já foi baixado',
+        few: '${count} arquivos já foram baixados',
+        many: '${count} arquivos já foram baixados',
+        other: '${count} arquivos já foram baixados',
+      );
+  @override
+  String failedToSnatchFiles({required num count}) =>
+      TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+        count,
+        one: 'Falha ao baixar ${count} arquivo',
+        few: 'Falha ao baixar ${count} arquivos',
+        many: 'Falha ao baixar ${count} arquivos',
+        other: 'Falha ao baixar ${count} arquivos',
+      );
+  @override
+  String cancelledFiles({required num count}) =>
+      TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+        count,
+        one: '${count} arquivo cancelado',
+        few: '${count} arquivos cancelados',
+        many: '${count} arquivos cancelados',
+        other: '${count} arquivos cancelados',
+      );
+  @override
+  String get snatchingImages => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingImages', {}) ?? 'Baixando imagens';
+  @override
+  String get doNotCloseApp => TranslationOverrides.string(_root.$meta, 'snatcher.doNotCloseApp', {}) ?? 'Não feche o app!';
+  @override
+  String get addedItemToQueue => TranslationOverrides.string(_root.$meta, 'snatcher.addedItemToQueue', {}) ?? 'Item adicionado à fila de download';
+  @override
+  String addedItemsToQueue({required num count}) =>
+      TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
+      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+        count,
+        one: '${count} item adicionado a fila de download',
+        few: '${count} itens adicionados a fila de download',
+        many: '${count} itens adicionados a fila de download',
+        other: '${count} itens adicionados a fila de download',
+      );
+}
+
+// Path: multibooru
+class _TranslationsMultibooruPtBr extends TranslationsMultibooruEn {
+  _TranslationsMultibooruPtBr._(TranslationsPtBr root) : this._root = root, super.internal(root);
+
+  final TranslationsPtBr _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get title => TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? 'Multibooru';
+  @override
+  String get multibooruMode => TranslationOverrides.string(_root.$meta, 'multibooru.multibooruMode', {}) ?? 'Modo Multibooru';
+  @override
+  String get multibooruRequiresAtLeastTwoBoorus =>
+      TranslationOverrides.string(_root.$meta, 'multibooru.multibooruRequiresAtLeastTwoBoorus', {}) ?? 'Requer ao menos 2 boorus configurados';
+  @override
+  String get selectSecondaryBoorus =>
+      TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? 'Selecione boorus adicionais:';
+  @override
+  String get akaMultibooruMode => TranslationOverrides.string(_root.$meta, 'multibooru.akaMultibooruMode', {}) ?? 'Ou seja, modo Multibooru';
+  @override
+  String get labelSecondaryBoorusToInclude =>
+      TranslationOverrides.string(_root.$meta, 'multibooru.labelSecondaryBoorusToInclude', {}) ?? 'Boorus adicionais para incluir';
+}
+
+// Path: hydrus
+class _TranslationsHydrusPtBr extends TranslationsHydrusEn {
+  _TranslationsHydrusPtBr._(TranslationsPtBr root) : this._root = root, super.internal(root);
+
+  final TranslationsPtBr _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get importError => TranslationOverrides.string(_root.$meta, 'hydrus.importError', {}) ?? 'Erro ao importar para o Hydrus';
+  @override
+  String get apiPermissionsRequired =>
+      TranslationOverrides.string(_root.$meta, 'hydrus.apiPermissionsRequired', {}) ??
+      'Talvez as permissões da API não estejam corretas. Você pode editá-las em \'Revisar Serviços\'';
+  @override
+  String get addTagsToFile => TranslationOverrides.string(_root.$meta, 'hydrus.addTagsToFile', {}) ?? 'Adicionar tags ao arquivo';
+  @override
+  String get addUrls => TranslationOverrides.string(_root.$meta, 'hydrus.addUrls', {}) ?? 'Adicionar URLs';
+}
+
+// Path: tabs
+class _TranslationsTabsPtBr extends TranslationsTabsEn {
+  _TranslationsTabsPtBr._(TranslationsPtBr root) : this._root = root, super.internal(root);
+
+  final TranslationsPtBr _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get tab => TranslationOverrides.string(_root.$meta, 'tabs.tab', {}) ?? 'Aba';
+  @override
+  String get addBoorusInSettings => TranslationOverrides.string(_root.$meta, 'tabs.addBoorusInSettings', {}) ?? 'Adicionar boorus nas configurações';
+  @override
+  String get selectABooru => TranslationOverrides.string(_root.$meta, 'tabs.selectABooru', {}) ?? 'Selecione um Booru';
+  @override
+  String get secondaryBoorus => TranslationOverrides.string(_root.$meta, 'tabs.secondaryBoorus', {}) ?? 'Boorus secundários';
+  @override
+  String get addNewTab => TranslationOverrides.string(_root.$meta, 'tabs.addNewTab', {}) ?? 'Nova aba';
+  @override
+  String get selectABooruOrLeaveEmpty =>
+      TranslationOverrides.string(_root.$meta, 'tabs.selectABooruOrLeaveEmpty', {}) ?? 'Selecione um booru ou deixe vazio';
+  @override
+  String get addPosition => TranslationOverrides.string(_root.$meta, 'tabs.addPosition', {}) ?? 'Posição';
+  @override
+  String get addModePrevTab => TranslationOverrides.string(_root.$meta, 'tabs.addModePrevTab', {}) ?? 'Aba anterior';
+  @override
+  String get addModeNextTab => TranslationOverrides.string(_root.$meta, 'tabs.addModeNextTab', {}) ?? 'Próximo aba';
+  @override
+  String get addModeListEnd => TranslationOverrides.string(_root.$meta, 'tabs.addModeListEnd', {}) ?? 'Fim da lista';
+  @override
+  String get usedQuery => TranslationOverrides.string(_root.$meta, 'tabs.usedQuery', {}) ?? 'Busca utilizada';
+  @override
+  String get queryModeDefault => TranslationOverrides.string(_root.$meta, 'tabs.queryModeDefault', {}) ?? 'Padrão';
+  @override
+  String get queryModeCurrent => TranslationOverrides.string(_root.$meta, 'tabs.queryModeCurrent', {}) ?? 'Atual';
+  @override
+  String get queryModeCustom => TranslationOverrides.string(_root.$meta, 'tabs.queryModeCustom', {}) ?? 'Personalizada';
+  @override
+  String get customQuery => TranslationOverrides.string(_root.$meta, 'tabs.customQuery', {}) ?? 'Busca personalizada';
+  @override
+  String get empty => TranslationOverrides.string(_root.$meta, 'tabs.empty', {}) ?? '[vazia]';
+  @override
+  String get addSecondaryBoorus => TranslationOverrides.string(_root.$meta, 'tabs.addSecondaryBoorus', {}) ?? 'Adicionar boorus secundários';
+  @override
+  String get keepSecondaryBoorus => TranslationOverrides.string(_root.$meta, 'tabs.keepSecondaryBoorus', {}) ?? 'Manter boorus secundários';
+  @override
+  String get startFromCustomPageNumber =>
+      TranslationOverrides.string(_root.$meta, 'tabs.startFromCustomPageNumber', {}) ?? 'Página inicial personalizada';
+  @override
+  String get switchToNewTab => TranslationOverrides.string(_root.$meta, 'tabs.switchToNewTab', {}) ?? 'Mudar para uma nova aba';
 }
 
 /// The flat map containing all translations for locale <pt-BR>.
@@ -622,6 +771,8 @@ extension on TranslationsPtBr {
               many: '${count} abas recebidas',
               other: '${count} abas recebidas',
             ),
+      'searchHandler.resettingSearchToDefaultTags' =>
+        TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Redefinindo para as tags padrão',
       'disable' => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Desabilitar',
       'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Downloader',
       'snatcher.snatchingHistory' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingHistory', {}) ?? 'Histórico de downloads',
@@ -650,6 +801,87 @@ extension on TranslationsPtBr {
               many: 'Baixados: ${count} itens',
               other: 'Baixados: ${count} itens',
             ),
+      'snatcher.filesAlreadySnatched' =>
+        ({required num count}) =>
+            TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
+            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+              count,
+              one: '${count} arquivo já foi baixado',
+              few: '${count} arquivos já foram baixados',
+              many: '${count} arquivos já foram baixados',
+              other: '${count} arquivos já foram baixados',
+            ),
+      'snatcher.failedToSnatchFiles' =>
+        ({required num count}) =>
+            TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
+            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+              count,
+              one: 'Falha ao baixar ${count} arquivo',
+              few: 'Falha ao baixar ${count} arquivos',
+              many: 'Falha ao baixar ${count} arquivos',
+              other: 'Falha ao baixar ${count} arquivos',
+            ),
+      'snatcher.cancelledFiles' =>
+        ({required num count}) =>
+            TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
+            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+              count,
+              one: '${count} arquivo cancelado',
+              few: '${count} arquivos cancelados',
+              many: '${count} arquivos cancelados',
+              other: '${count} arquivos cancelados',
+            ),
+      'snatcher.snatchingImages' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingImages', {}) ?? 'Baixando imagens',
+      'snatcher.doNotCloseApp' => TranslationOverrides.string(_root.$meta, 'snatcher.doNotCloseApp', {}) ?? 'Não feche o app!',
+      'snatcher.addedItemToQueue' =>
+        TranslationOverrides.string(_root.$meta, 'snatcher.addedItemToQueue', {}) ?? 'Item adicionado à fila de download',
+      'snatcher.addedItemsToQueue' =>
+        ({required num count}) =>
+            TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
+            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+              count,
+              one: '${count} item adicionado a fila de download',
+              few: '${count} itens adicionados a fila de download',
+              many: '${count} itens adicionados a fila de download',
+              other: '${count} itens adicionados a fila de download',
+            ),
+      'multibooru.title' => TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? 'Multibooru',
+      'multibooru.multibooruMode' => TranslationOverrides.string(_root.$meta, 'multibooru.multibooruMode', {}) ?? 'Modo Multibooru',
+      'multibooru.multibooruRequiresAtLeastTwoBoorus' =>
+        TranslationOverrides.string(_root.$meta, 'multibooru.multibooruRequiresAtLeastTwoBoorus', {}) ?? 'Requer ao menos 2 boorus configurados',
+      'multibooru.selectSecondaryBoorus' =>
+        TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? 'Selecione boorus adicionais:',
+      'multibooru.akaMultibooruMode' => TranslationOverrides.string(_root.$meta, 'multibooru.akaMultibooruMode', {}) ?? 'Ou seja, modo Multibooru',
+      'multibooru.labelSecondaryBoorusToInclude' =>
+        TranslationOverrides.string(_root.$meta, 'multibooru.labelSecondaryBoorusToInclude', {}) ?? 'Boorus adicionais para incluir',
+      'hydrus.importError' => TranslationOverrides.string(_root.$meta, 'hydrus.importError', {}) ?? 'Erro ao importar para o Hydrus',
+      'hydrus.apiPermissionsRequired' =>
+        TranslationOverrides.string(_root.$meta, 'hydrus.apiPermissionsRequired', {}) ??
+            'Talvez as permissões da API não estejam corretas. Você pode editá-las em \'Revisar Serviços\'',
+      'hydrus.addTagsToFile' => TranslationOverrides.string(_root.$meta, 'hydrus.addTagsToFile', {}) ?? 'Adicionar tags ao arquivo',
+      'hydrus.addUrls' => TranslationOverrides.string(_root.$meta, 'hydrus.addUrls', {}) ?? 'Adicionar URLs',
+      'tabs.tab' => TranslationOverrides.string(_root.$meta, 'tabs.tab', {}) ?? 'Aba',
+      'tabs.addBoorusInSettings' => TranslationOverrides.string(_root.$meta, 'tabs.addBoorusInSettings', {}) ?? 'Adicionar boorus nas configurações',
+      'tabs.selectABooru' => TranslationOverrides.string(_root.$meta, 'tabs.selectABooru', {}) ?? 'Selecione um Booru',
+      'tabs.secondaryBoorus' => TranslationOverrides.string(_root.$meta, 'tabs.secondaryBoorus', {}) ?? 'Boorus secundários',
+      'tabs.addNewTab' => TranslationOverrides.string(_root.$meta, 'tabs.addNewTab', {}) ?? 'Nova aba',
+      'tabs.selectABooruOrLeaveEmpty' =>
+        TranslationOverrides.string(_root.$meta, 'tabs.selectABooruOrLeaveEmpty', {}) ?? 'Selecione um booru ou deixe vazio',
+      'tabs.addPosition' => TranslationOverrides.string(_root.$meta, 'tabs.addPosition', {}) ?? 'Posição',
+      'tabs.addModePrevTab' => TranslationOverrides.string(_root.$meta, 'tabs.addModePrevTab', {}) ?? 'Aba anterior',
+      'tabs.addModeNextTab' => TranslationOverrides.string(_root.$meta, 'tabs.addModeNextTab', {}) ?? 'Próximo aba',
+      'tabs.addModeListEnd' => TranslationOverrides.string(_root.$meta, 'tabs.addModeListEnd', {}) ?? 'Fim da lista',
+      'tabs.usedQuery' => TranslationOverrides.string(_root.$meta, 'tabs.usedQuery', {}) ?? 'Busca utilizada',
+      'tabs.queryModeDefault' => TranslationOverrides.string(_root.$meta, 'tabs.queryModeDefault', {}) ?? 'Padrão',
+      'tabs.queryModeCurrent' => TranslationOverrides.string(_root.$meta, 'tabs.queryModeCurrent', {}) ?? 'Atual',
+      'tabs.queryModeCustom' => TranslationOverrides.string(_root.$meta, 'tabs.queryModeCustom', {}) ?? 'Personalizada',
+      'tabs.customQuery' => TranslationOverrides.string(_root.$meta, 'tabs.customQuery', {}) ?? 'Busca personalizada',
+      'tabs.empty' => TranslationOverrides.string(_root.$meta, 'tabs.empty', {}) ?? '[vazia]',
+      'tabs.addSecondaryBoorus' => TranslationOverrides.string(_root.$meta, 'tabs.addSecondaryBoorus', {}) ?? 'Adicionar boorus secundários',
+      'tabs.keepSecondaryBoorus' => TranslationOverrides.string(_root.$meta, 'tabs.keepSecondaryBoorus', {}) ?? 'Manter boorus secundários',
+      'tabs.startFromCustomPageNumber' =>
+        TranslationOverrides.string(_root.$meta, 'tabs.startFromCustomPageNumber', {}) ?? 'Página inicial personalizada',
+      'tabs.switchToNewTab' => TranslationOverrides.string(_root.$meta, 'tabs.switchToNewTab', {}) ?? 'Mudar para uma nova aba',
       _ => null,
     };
   }
