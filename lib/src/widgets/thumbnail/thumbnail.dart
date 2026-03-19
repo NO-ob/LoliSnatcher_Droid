@@ -636,8 +636,9 @@ class _ThumbnailState extends State<Thumbnail> {
                       item: widget.item,
                       hasProgress: true,
                       isFromCache: isFromCache.value,
-                      isDone: isLoaded.value && !isFailed.value,
-                      isFailed: isFailed.value,
+                      // if any of the thumbnails loaded - dont consider a failure
+                      isDone: isLoaded.value || (isFailed.value && isLoadedExtra.value),
+                      isFailed: isFailed.value && !isLoaded.value && !isLoadedExtra.value,
                       total: total,
                       received: received,
                       startedAt: startedAt,
