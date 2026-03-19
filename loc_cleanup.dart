@@ -48,22 +48,61 @@ void main() async {
   print('Cleanup finished.');
 }
 
+bool _isPluralMap(Map map) {
+  const pluralKeys = ['zero', 'one', 'two', 'few', 'many', 'other'];
+  if (map.isEmpty) return false;
+
+  for (final key in map.keys) {
+    if (!pluralKeys.contains(key.toString())) return false;
+  }
+  return true;
+}
+
 Map<String, dynamic> _cleanAndSort(Map master, Map target) {
   final Map<String, dynamic> result = {};
 
   for (final key in master.keys) {
+    final keyStr = key.toString();
+
     if (target.containsKey(key)) {
       final masterValue = master[key];
       final targetValue = target[key];
 
       if (masterValue is Map && targetValue is Map) {
-        final nestedResult = _cleanAndSort(masterValue, targetValue);
-        if (nestedResult.isNotEmpty) {
-          result[key.toString()] = nestedResult;
+        if (_isPluralMap(masterValue)) {
+          final Map<String, dynamic> pluralResult = {};
+          const pluralOrder = ['zero', 'one', 'two', 'few', 'many', 'other'];
+
+          final targetOther = targetValue['other'];
+          final hasOther = targetOther != null && targetOther != '';
+
+          for (final pk in pluralOrder) {
+            final tVal = targetValue[pk];
+
+            if (tVal != null && tVal != '') {
+              pluralResult[pk] = tVal;
+            } else if (hasOther) {
+              // Target is missing the key, but we have 'other' to use as a base.
+              // Enforce the standard 'one', 'few', 'many', 'other' set.
+              // Also restore 'zero' or 'two' if they existed in the master en.json.
+              if (['one', 'few', 'many', 'other'].contains(pk) || masterValue.containsKey(pk)) {
+                pluralResult[pk] = targetOther;
+              }
+            }
+          }
+
+          if (pluralResult.isNotEmpty) {
+            result[keyStr] = pluralResult;
+          }
+        } else {
+          final nestedResult = _cleanAndSort(masterValue, targetValue);
+          if (nestedResult.isNotEmpty) {
+            result[keyStr] = nestedResult;
+          }
         }
       } else {
         if (targetValue != '') {
-          result[key.toString()] = targetValue;
+          result[keyStr] = targetValue;
         }
       }
     }
@@ -71,16 +110,17 @@ Map<String, dynamic> _cleanAndSort(Map master, Map target) {
 
   if (keepDeprecatedKeys) {
     for (final key in target.keys) {
+      final keyStr = key.toString();
       if (!master.containsKey(key)) {
         final targetValue = target[key];
 
         if (targetValue is Map) {
           final cleanedOrphan = _filterEmptyStrings(targetValue);
           if (cleanedOrphan.isNotEmpty) {
-            result[key.toString()] = cleanedOrphan;
+            result[keyStr] = cleanedOrphan;
           }
         } else if (targetValue != '') {
-          result[key.toString()] = targetValue;
+          result[keyStr] = targetValue;
         }
       }
     }
@@ -93,11 +133,13 @@ Map<String, dynamic> _filterEmptyStrings(Map target) {
   final Map<String, dynamic> result = {};
   for (final key in target.keys) {
     final value = target[key];
+    final keyStr = key.toString();
+
     if (value is Map) {
       final nested = _filterEmptyStrings(value);
-      if (nested.isNotEmpty) result[key.toString()] = nested;
+      if (nested.isNotEmpty) result[keyStr] = nested;
     } else if (value != '') {
-      result[key.toString()] = value;
+      result[keyStr] = value;
     }
   }
   return result;
