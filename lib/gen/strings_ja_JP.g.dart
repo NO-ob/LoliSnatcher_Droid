@@ -1939,7 +1939,7 @@ class _TranslationsSettingsLanguageJaJp extends TranslationsSettingsLanguageEn {
   @override
   String get visitForDetails =>
       TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-      '詳細については、 <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>GitHub</a> を確認するか、下の画像をタップしてWeblateにアクセスできます';
+      '詳細については、 <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>GitHub</a> を確認するか、下の画像をタップしてPOEditorにアクセスできます';
 }
 
 // Path: settings.dirPicker
@@ -3909,7 +3909,7 @@ extension on TranslationsJaJp {
           'settings.language.helpUsTranslate' => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? '翻訳に貢献する',
           'settings.language.visitForDetails' =>
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-                '詳細については、 <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>GitHub</a> を確認するか、下の画像をタップしてWeblateにアクセスできます',
+                '詳細については、 <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>GitHub</a> を確認するか、下の画像をタップしてPOEditorにアクセスできます',
           'settings.dirPicker.yes' => TranslationOverrides.string(_root.$meta, 'settings.dirPicker.yes', {}) ?? 'はい',
           'settings.dirPicker.no' => TranslationOverrides.string(_root.$meta, 'settings.dirPicker.no', {}) ?? 'いいえ',
           'settings.dirPicker.directoryName' => TranslationOverrides.string(_root.$meta, 'settings.dirPicker.directoryName', {}) ?? 'ディレクトリ名',

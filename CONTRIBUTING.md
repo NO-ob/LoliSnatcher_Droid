@@ -61,14 +61,18 @@ For detailed build instructions, see [BUILDING.md](.github/BUILDING.md).
 
 ## Localization / Translations
 
-LoliSnatcher uses the [slang](https://pub.dev/packages/slang) package for internationalization code and [weblate](https://hosted.weblate.org/projects/loli-snatcher/) for community translations.
+LoliSnatcher uses the [slang](https://pub.dev/packages/slang) package for internationalization code and [poeditor](https://poeditor.com/join/project/RgscnzeWts) for community translations.
+
+### Requesting a new language
+
+Create an issue on GitHub with a request for new language or add new language on poeditor page.
 
 ### Translation Files
 
 Translation files are located in `assets/i18n/`:
 - `en.json` - English (base language)
 
-### Adding a New Language
+### Adding a new language manually
 
 1. Create a new file `assets/i18n/xx-XX.json` (where xx-XX is the language code)
 2. Copy the structure from `en.json` and translate all strings

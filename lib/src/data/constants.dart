@@ -15,6 +15,12 @@ class Constants {
 
   static const String email = 'no.aisu@protonmail.com';
 
+  static const String translationURL = 'https://poeditor.com/join/project/RgscnzeWts';
+
+  static const int poeditorProjectId = 825186;
+
+  static const String poeditorApiKey = 'e2449bca7b8fb820c96b1b643f2b3553'; // read-only key
+
   // TODO update to newer versions from time to time
   static const String defaultBrowserUserAgent =
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36';

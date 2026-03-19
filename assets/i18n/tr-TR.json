@@ -361,7 +361,7 @@
             "title": "Dil",
             "system": "Sistem",
             "helpUsTranslate": "Çeviriye katkıda bulun",
-            "visitForDetails": "Detaylar için <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> adresini ziyaret et veya Weblate'e gitmek için aşağıdaki görsele dokun"
+            "visitForDetails": "Detaylar için <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> adresini ziyaret et veya POEditor'e gitmek için aşağıdaki görsele dokun"
         },
         "booru": {
             "title": "Booru'lar ve Arama",

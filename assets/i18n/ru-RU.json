@@ -361,7 +361,7 @@
             "title": "Язык",
             "system": "Системный",
             "helpUsTranslate": "Помоги нам с переводом",
-            "visitForDetails": "Посети <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> для подробностей или нажми на изображение ниже, чтобы перейти на Weblate"
+            "visitForDetails": "Посети <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> для подробностей или нажми на изображение ниже, чтобы перейти на POEditor"
         },
         "booru": {
             "title": "Сайты и Поиск",

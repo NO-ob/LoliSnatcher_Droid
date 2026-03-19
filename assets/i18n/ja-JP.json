@@ -212,7 +212,7 @@
             "title": "言語 - Language",
             "system": "システム",
             "helpUsTranslate": "翻訳に貢献する",
-            "visitForDetails": "詳細については、 <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>GitHub</a> を確認するか、下の画像をタップしてWeblateにアクセスできます"
+            "visitForDetails": "詳細については、 <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>GitHub</a> を確認するか、下の画像をタップしてPOEditorにアクセスできます"
         },
         "dirPicker": {
             "yes": "はい",

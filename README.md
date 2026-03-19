@@ -8,7 +8,6 @@
   [![Google Play](https://img.shields.io/badge/Google%20Play-Available-green?logo=google-play)](https://play.google.com/store/apps/details?id=com.noaisu.play.loliSnatcher)
   [![Discord](https://img.shields.io/badge/Discord-Join-blue?logo=discord&logoColor=white)](https://discord.gg/yD47ANdEXW)
   [![License](https://img.shields.io/github/license/NO-ob/LoliSnatcher_Droid)](https://www.gnu.org/licenses/agpl-3.0.html)
-  [![Translation Status](https://hosted.weblate.org/widget/loli-snatcher/svg-badge.svg)](https://hosted.weblate.org/engage/loli-snatcher/)
 
 </div>
 
@@ -99,7 +98,7 @@ We especially welcome:
 
 ## Translation
 
-We are beginning to work on translations in other languages using Weblate, please get in touch if you are interested in translating LoliSnatcher: https://hosted.weblate.org/engage/loli-snatcher
+We are working on translating the app to other languages using POEditor, please get in touch there on our Discord server if you are interested in helping us: [POEditor](https://poeditor.com/join/project/RgscnzeWts)
 
 ## Links
 

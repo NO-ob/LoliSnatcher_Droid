@@ -1690,7 +1690,7 @@ class _TranslationsSettingsLanguageTrTr extends TranslationsSettingsLanguageEn {
   @override
   String get visitForDetails =>
       TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-      'Detaylar için <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> adresini ziyaret et veya Weblate\'e gitmek için aşağıdaki görsele dokun';
+      'Detaylar için <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> adresini ziyaret et veya POEditor\'e gitmek için aşağıdaki görsele dokun';
 }
 
 // Path: settings.booru
@@ -4315,7 +4315,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Çeviriye katkıda bulun',
           'settings.language.visitForDetails' =>
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-                'Detaylar için <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> adresini ziyaret et veya Weblate\'e gitmek için aşağıdaki görsele dokun',
+                'Detaylar için <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> adresini ziyaret et veya POEditor\'e gitmek için aşağıdaki görsele dokun',
           'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Booru\'lar ve Arama',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Varsayılan etiketler',
           'settings.booru.itemsPerPage' =>

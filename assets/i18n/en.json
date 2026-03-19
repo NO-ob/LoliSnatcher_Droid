@@ -361,7 +361,7 @@
             "title": "Language",
             "system": "System",
             "helpUsTranslate": "Help us translate",
-            "visitForDetails": "Visit <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> for details or tap on the image below to go to Weblate"
+            "visitForDetails": "Visit <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> for details or tap on the image below to go to POEditor"
         },
         "booru": {
             "title": "Boorus & Search",
