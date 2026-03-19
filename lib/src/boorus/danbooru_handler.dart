@@ -492,7 +492,31 @@ class DanbooruHandler extends BooruHandler {
       } else {
         final html = parse(response.data);
 
-        item.fileURL = html.getElementById('image')?.attributes['src'] ?? item.fileURL;
+        Element? source = html.getElementById('gelcomVideoPlayer');
+        if (source != null) {
+          // video
+          item.thumbnailURL = source.attributes['poster'] ?? item.thumbnailURL;
+          item.sampleURL = source.attributes['poster'] ?? item.sampleURL;
+          item.fileURL =
+              html.querySelector('meta[property="og:video"]')?.attributes['content'] ??
+              source.attributes['src'] ??
+              source.children.firstOrNull?.attributes['src'] ??
+              item.fileURL;
+        } else {
+          // image
+          source = html.getElementById('image');
+          if (source != null) {
+            final String? src = source.attributes['src'];
+            final isSample = src?.contains('sample') ?? false;
+            if (isSample) {
+              item.sampleURL = src ?? item.sampleURL;
+              item.fileURL = html.querySelector('meta[property="og:image"]')?.attributes['content'] ?? item.fileURL;
+            } else {
+              item.fileURL = src ?? item.fileURL;
+            }
+            item.thumbnailURL = isSample ? item.sampleURL : item.thumbnailURL;
+          }
+        }
 
         final sidebar = html.getElementById('tag-list');
         final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-3'));

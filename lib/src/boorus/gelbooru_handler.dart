@@ -438,13 +438,13 @@ class GelbooruHandler extends BooruHandler {
           source = html.getElementById('image');
           if (source != null) {
             final String? src = source.attributes['src'];
-            item.fileURL = src ?? item.fileURL;
-            final isSample = src?.contains('/samples/') ?? false;
+            final isSample = src?.contains('sample') ?? false;
             if (isSample) {
               item.sampleURL = src ?? item.sampleURL;
               item.fileURL = html.querySelector('meta[property="og:image"]')?.attributes['content'] ?? item.fileURL;
+            } else {
+              item.fileURL = src ?? item.fileURL;
             }
-            item.thumbnailURL = isSample ? item.sampleURL : item.thumbnailURL;
           }
         }
 
