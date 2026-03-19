@@ -7,6 +7,7 @@ class ToolbarAction extends StatelessWidget {
     this.onLongTap,
     this.subIcon,
     this.stackWidget,
+    this.tooltip,
     super.key,
   });
 
@@ -15,6 +16,7 @@ class ToolbarAction extends StatelessWidget {
   final VoidCallback? onLongTap;
   final Widget? subIcon;
   final Widget? stackWidget;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,7 @@ class ToolbarAction extends StatelessWidget {
               icon: icon,
               color: onTap != null ? Colors.white : Theme.of(context).colorScheme.onSurface,
               onPressed: onTap,
+              tooltip: tooltip,
             ),
             ?subIcon,
           ],
