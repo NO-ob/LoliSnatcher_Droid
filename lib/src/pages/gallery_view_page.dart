@@ -821,6 +821,9 @@ class _ItemInfoDrawerState extends State<ItemInfoDrawer> {
                         data: Theme.of(context).copyWith(
                           outlinedButtonTheme: OutlinedButtonThemeData(
                             style: OutlinedButtonTheme.of(context).style?.copyWith(
+                              backgroundColor: WidgetStatePropertyAll(
+                                Theme.of(context).canvasColor.withValues(alpha: isVisible ? 0.66 : 0.1),
+                              ),
                               side: WidgetStatePropertyAll(
                                 BorderSide(
                                   width: isVisible ? 1.5 : 0.5,
@@ -831,7 +834,7 @@ class _ItemInfoDrawerState extends State<ItemInfoDrawer> {
                           ),
                         ),
                         child: Opacity(
-                          opacity: isVisible ? 0.9 : 0.5,
+                          opacity: isVisible ? 0.9 : 0.3,
                           child: child,
                         ),
                       );
