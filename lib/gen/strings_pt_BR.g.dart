@@ -357,6 +357,7 @@ class _TranslationsSearchHandlerPtBr extends TranslationsSearchHandlerEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} aba restaurada da sessão anterior',
+        few: '${count} abas restauradas da sessão anterior',
         many: '${count} abas restauradas da sessão anterior',
         other: '${count} abas restauradas da sessão anterior',
       );
@@ -376,6 +377,8 @@ class _TranslationsSearchHandlerPtBr extends TranslationsSearchHandlerEn {
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
+        one: '${count} nova aba adicionada',
+        few: '${count} novas abas adicionadas',
         many: '${count} novas abas adicionadas',
         other: '${count} novas abas adicionadas',
       );
@@ -387,6 +390,7 @@ class _TranslationsSearchHandlerPtBr extends TranslationsSearchHandlerEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} aba recebida',
+        few: '${count} abas recebidas',
         many: '${count} abas recebidas',
         other: '${count} abas recebidas',
       );
@@ -435,6 +439,7 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: 'Baixado: ${count} item',
+        few: 'Baixados: ${count} itens',
         many: 'Baixados: ${count} itens',
         other: 'Baixados: ${count} itens',
       );
@@ -444,6 +449,7 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} arquivo já foi baixado',
+        few: '${count} arquivos já foram baixados',
         many: '${count} arquivos já foram baixados',
         other: '${count} arquivos já foram baixados',
       );
@@ -453,6 +459,7 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: 'Falha ao baixar ${count} arquivo',
+        few: 'Falha ao baixar ${count} arquivos',
         many: 'Falha ao baixar ${count} arquivos',
         other: 'Falha ao baixar ${count} arquivos',
       );
@@ -462,6 +469,7 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} arquivo cancelado',
+        few: '${count} arquivos cancelados',
         many: '${count} arquivos cancelados',
         other: '${count} arquivos cancelados',
       );
@@ -477,6 +485,7 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} item adicionado a fila de download',
+        few: '${count} itens adicionados a fila de download',
         many: '${count} itens adicionados a fila de download',
         other: '${count} itens adicionados a fila de download',
       );
@@ -731,6 +740,7 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} aba restaurada da sessão anterior',
+              few: '${count} abas restauradas da sessão anterior',
               many: '${count} abas restauradas da sessão anterior',
               other: '${count} abas restauradas da sessão anterior',
             ),
@@ -748,6 +758,8 @@ extension on TranslationsPtBr {
             TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
+              one: '${count} nova aba adicionada',
+              few: '${count} novas abas adicionadas',
               many: '${count} novas abas adicionadas',
               other: '${count} novas abas adicionadas',
             ),
@@ -758,6 +770,7 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} aba recebida',
+              few: '${count} abas recebidas',
               many: '${count} abas recebidas',
               other: '${count} abas recebidas',
             ),
@@ -784,6 +797,7 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: 'Baixado: ${count} item',
+              few: 'Baixados: ${count} itens',
               many: 'Baixados: ${count} itens',
               other: 'Baixados: ${count} itens',
             ),
@@ -793,6 +807,7 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} arquivo já foi baixado',
+              few: '${count} arquivos já foram baixados',
               many: '${count} arquivos já foram baixados',
               other: '${count} arquivos já foram baixados',
             ),
@@ -802,6 +817,7 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: 'Falha ao baixar ${count} arquivo',
+              few: 'Falha ao baixar ${count} arquivos',
               many: 'Falha ao baixar ${count} arquivos',
               other: 'Falha ao baixar ${count} arquivos',
             ),
@@ -811,6 +827,7 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} arquivo cancelado',
+              few: '${count} arquivos cancelados',
               many: '${count} arquivos cancelados',
               other: '${count} arquivos cancelados',
             ),
@@ -824,6 +841,7 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} item adicionado a fila de download',
+              few: '${count} itens adicionados a fila de download',
               many: '${count} itens adicionados a fila de download',
               other: '${count} itens adicionados a fila de download',
             ),

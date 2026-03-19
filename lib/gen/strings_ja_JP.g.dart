@@ -397,6 +397,9 @@ class _TranslationsSearchHandlerJaJp extends TranslationsSearchHandlerEn {
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '以前のセッションから${count}個のタブを復元しました',
+        few: '以前のセッションから${count}個のタブを復元しました',
+        many: '以前のセッションから${count}個のタブを復元しました',
         other: '以前のセッションから${count}個のタブを復元しました',
       );
   @override
@@ -414,6 +417,9 @@ class _TranslationsSearchHandlerJaJp extends TranslationsSearchHandlerEn {
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count}個の新しいタブを追加',
+        few: '${count}個の新しいタブを追加',
+        many: '${count}個の新しいタブを追加',
         other: '${count}個の新しいタブを追加',
       );
   @override
@@ -423,6 +429,9 @@ class _TranslationsSearchHandlerJaJp extends TranslationsSearchHandlerEn {
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count}個のタブを受け取りました',
+        few: '${count}個のタブを受け取りました',
+        many: '${count}個のタブを受け取りました',
         other: '${count}個のタブを受け取りました',
       );
 }
@@ -465,6 +474,9 @@ class _TranslationsSnatcherJaJp extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: 'ダウンロード済み: ${count}個',
+        few: 'ダウンロード済み: ${count}個',
+        many: 'ダウンロード済み: ${count}個',
         other: 'ダウンロード済み: ${count}個',
       );
   @override
@@ -472,6 +484,9 @@ class _TranslationsSnatcherJaJp extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count} 個のファイルがすでに保存済みです',
+        few: '${count} 個のファイルがすでに保存済みです',
+        many: '${count} 個のファイルがすでに保存済みです',
         other: '${count} 個のファイルがすでに保存済みです',
       );
   @override
@@ -479,6 +494,9 @@ class _TranslationsSnatcherJaJp extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count} 個のファイルの保存に失敗',
+        few: '${count} 個のファイルの保存に失敗',
+        many: '${count} 個のファイルの保存に失敗',
         other: '${count} 個のファイルの保存に失敗',
       );
   @override
@@ -486,6 +504,9 @@ class _TranslationsSnatcherJaJp extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count} 個のファイルがキャンセルされました',
+        few: '${count} 個のファイルがキャンセルされました',
+        many: '${count} 個のファイルがキャンセルされました',
         other: '${count} 個のファイルがキャンセルされました',
       );
   @override
@@ -499,6 +520,9 @@ class _TranslationsSnatcherJaJp extends TranslationsSnatcherEn {
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count} 個のアイテムをキューに追加しました',
+        few: '${count} 個のアイテムをキューに追加しました',
+        many: '${count} 個のアイテムをキューに追加しました',
         other: '${count} 個のアイテムをキューに追加しました',
       );
 }
@@ -688,6 +712,9 @@ class _TranslationsTabsJaJp extends TranslationsTabsEn {
       TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count} 個のタブを削除してよろしいですか？',
+        few: '${count} 個のタブを削除してよろしいですか？',
+        many: '${count} 個のタブを削除してよろしいですか？',
         other: '${count} 個のタブを削除してよろしいですか？',
       );
   @override
@@ -742,6 +769,9 @@ class _TranslationsHistoryJaJp extends TranslationsHistoryEn {
       TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count} 個のアイテムを削除してよろしいですか？',
+        few: '${count} 個のアイテムを削除してよろしいですか？',
+        many: '${count} 個のアイテムを削除してよろしいですか？',
         other: '${count} 個のアイテムを削除してよろしいですか？',
       );
   @override
@@ -751,6 +781,9 @@ class _TranslationsHistoryJaJp extends TranslationsHistoryEn {
       TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count} 個のアイテムを削除',
+        few: '${count} 個のアイテムを削除',
+        many: '${count} 個のアイテムを削除',
         other: '${count} 個のアイテムを削除',
       );
 }
@@ -936,6 +969,9 @@ class _TranslationsTagsManagerJaJp extends TranslationsTagsManagerEn {
       TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: '${count} 個のタグを削除',
+        few: '${count} 個のタグを削除',
+        many: '${count} 個のタグを削除',
         other: '${count} 個のタグを削除',
       );
   @override
@@ -1371,6 +1407,9 @@ class _TranslationsGalleryJaJp extends TranslationsGalleryEn {
       TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         count,
+        one: 'ソース',
+        few: 'ソース',
+        many: 'ソース',
         other: 'ソース',
       );
 }
@@ -3332,6 +3371,9 @@ class _TranslationsPreviewErrorJaJp extends TranslationsPreviewErrorEn {
       TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
         seconds,
+        one: '${seconds} 秒前から開始',
+        few: '${seconds} 秒前から開始',
+        many: '${seconds} 秒前から開始',
         other: '${seconds} 秒前から開始',
       );
   @override
@@ -3701,6 +3743,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '以前のセッションから${count}個のタブを復元しました',
+                  few: '以前のセッションから${count}個のタブを復元しました',
+                  many: '以前のセッションから${count}個のタブを復元しました',
                   other: '以前のセッションから${count}個のタブを復元しました',
                 ),
           'searchHandler.someRestoredTabsHadIssues' =>
@@ -3714,6 +3759,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count}個の新しいタブを追加',
+                  few: '${count}個の新しいタブを追加',
+                  many: '${count}個の新しいタブを追加',
                   other: '${count}個の新しいタブを追加',
                 ),
           'searchHandler.tabsReplaced' => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsReplaced', {}) ?? 'タブを置き換えました',
@@ -3722,6 +3770,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count}個のタブを受け取りました',
+                  few: '${count}個のタブを受け取りました',
+                  many: '${count}個のタブを受け取りました',
                   other: '${count}個のタブを受け取りました',
                 ),
           'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'ダウンローダー',
@@ -3742,6 +3793,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: 'ダウンロード済み: ${count}個',
+                  few: 'ダウンロード済み: ${count}個',
+                  many: 'ダウンロード済み: ${count}個',
                   other: 'ダウンロード済み: ${count}個',
                 ),
           'snatcher.filesAlreadySnatched' =>
@@ -3749,6 +3803,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count} 個のファイルがすでに保存済みです',
+                  few: '${count} 個のファイルがすでに保存済みです',
+                  many: '${count} 個のファイルがすでに保存済みです',
                   other: '${count} 個のファイルがすでに保存済みです',
                 ),
           'snatcher.failedToSnatchFiles' =>
@@ -3756,6 +3813,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count} 個のファイルの保存に失敗',
+                  few: '${count} 個のファイルの保存に失敗',
+                  many: '${count} 個のファイルの保存に失敗',
                   other: '${count} 個のファイルの保存に失敗',
                 ),
           'snatcher.cancelledFiles' =>
@@ -3763,6 +3823,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count} 個のファイルがキャンセルされました',
+                  few: '${count} 個のファイルがキャンセルされました',
+                  many: '${count} 個のファイルがキャンセルされました',
                   other: '${count} 個のファイルがキャンセルされました',
                 ),
           'snatcher.snatchingImages' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingImages', {}) ?? '画像を保存中',
@@ -3773,6 +3836,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count} 個のアイテムをキューに追加しました',
+                  few: '${count} 個のアイテムをキューに追加しました',
+                  many: '${count} 個のアイテムをキューに追加しました',
                   other: '${count} 個のアイテムをキューに追加しました',
                 ),
           'multibooru.title' => TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? 'Multibooru',
@@ -3860,6 +3926,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count} 個のタブを削除してよろしいですか？',
+                  few: '${count} 個のタブを削除してよろしいですか？',
+                  many: '${count} 個のタブを削除してよろしいですか？',
                   other: '${count} 個のタブを削除してよろしいですか？',
                 ),
           'tabs.filters.loaded' => TranslationOverrides.string(_root.$meta, 'tabs.filters.loaded', {}) ?? 'ロード済み',
@@ -3917,6 +3986,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count} 個のアイテムを削除してよろしいですか？',
+                  few: '${count} 個のアイテムを削除してよろしいですか？',
+                  many: '${count} 個のアイテムを削除してよろしいですか？',
                   other: '${count} 個のアイテムを削除してよろしいですか？',
                 ),
           'history.clearSelection' => TranslationOverrides.string(_root.$meta, 'history.clearSelection', {}) ?? '選択を解除',
@@ -3925,6 +3997,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count} 個のアイテムを削除',
+                  few: '${count} 個のアイテムを削除',
+                  many: '${count} 個のアイテムを削除',
                   other: '${count} 個のアイテムを削除',
                 ),
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Webview',
@@ -5001,6 +5076,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: '${count} 個のタグを削除',
+                  few: '${count} 個のタグを削除',
+                  many: '${count} 個のタグを削除',
                   other: '${count} 個のタグを削除',
                 ),
           'tagsManager.deleteTagsTitle' => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? 'タグの削除',
@@ -5241,6 +5319,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   count,
+                  one: 'ソース',
+                  few: 'ソース',
+                  many: 'ソース',
                   other: 'ソース',
                 ),
           'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'ダウンロード',
@@ -5324,6 +5405,9 @@ extension on TranslationsJaJp {
                 TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ja'))(
                   seconds,
+                  one: '${seconds} 秒前から開始',
+                  few: '${seconds} 秒前から開始',
+                  many: '${seconds} 秒前から開始',
                   other: '${seconds} 秒前から開始',
                 ),
           'preview.error.tapToRetryIfStuck' =>

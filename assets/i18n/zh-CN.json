@@ -116,6 +116,9 @@
         "appFixedRatingAutomatically": "评分已自动修正。请在以后的搜索中使用正确的评分",
         "tabsRestored": "标签已恢复",
         "restoredTabsCount(param=count)": {
+            "one": "从上次会话恢复了 ${count} 个标签页",
+            "few": "从上次会话恢复了 ${count} 个标签页",
+            "many": "从上次会话恢复了 ${count} 个标签页",
             "other": "从上次会话恢复了 ${count} 个标签页"
         },
         "someRestoredTabsHadIssues": "一些恢复的标签有未知的booru或损坏的字符。",

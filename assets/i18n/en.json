@@ -423,7 +423,7 @@
             "booruDefaultInstructions": "Fields below may be required for some boorus",
             "booruConfigShouldSave": "Confirm saving this booru config",
             "booruConfigSelectedType(param=booruType)": "Selected/Detected booru type: ${booruType: String}"
-         },
+        },
         "interface": {
             "title": "Interface",
             "appUIMode": "App UI mode",

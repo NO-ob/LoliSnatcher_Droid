@@ -332,6 +332,9 @@ class _TranslationsSearchHandlerZhCn extends TranslationsSearchHandlerEn {
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
         count,
+        one: '从上次会话恢复了 ${count} 个标签页',
+        few: '从上次会话恢复了 ${count} 个标签页',
+        many: '从上次会话恢复了 ${count} 个标签页',
         other: '从上次会话恢复了 ${count} 个标签页',
       );
   @override
@@ -494,6 +497,9 @@ extension on TranslationsZhCn {
             TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
               count,
+              one: '从上次会话恢复了 ${count} 个标签页',
+              few: '从上次会话恢复了 ${count} 个标签页',
+              many: '从上次会话恢复了 ${count} 个标签页',
               other: '从上次会话恢复了 ${count} 个标签页',
             ),
       'searchHandler.someRestoredTabsHadIssues' =>

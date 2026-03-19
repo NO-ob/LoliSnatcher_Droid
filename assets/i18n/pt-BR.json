@@ -117,6 +117,7 @@
         "tabsRestored": "Abas restauradas",
         "restoredTabsCount(param=count)": {
             "one": "${count} aba restaurada da sessão anterior",
+            "few": "${count} abas restauradas da sessão anterior",
             "many": "${count} abas restauradas da sessão anterior",
             "other": "${count} abas restauradas da sessão anterior"
         },
@@ -125,12 +126,15 @@
         "listOfBrokenTabs": "Lista de abas corrompidas:",
         "tabsMerged": "Abas mescladas",
         "addedTabsCount(param=count)": {
+            "one": "${count} nova aba adicionada",
+            "few": "${count} novas abas adicionadas",
             "many": "${count} novas abas adicionadas",
             "other": "${count} novas abas adicionadas"
         },
         "tabsReplaced": "Abas substituídas",
         "receivedTabsCount(param=count)": {
             "one": "${count} aba recebida",
+            "few": "${count} abas recebidas",
             "many": "${count} abas recebidas",
             "other": "${count} abas recebidas"
         }
@@ -151,21 +155,25 @@
         "itemsSnatched": "Item baixado",
         "snatchedCount(param=count)": {
             "one": "Baixado: ${count} item",
+            "few": "Baixados: ${count} itens",
             "many": "Baixados: ${count} itens",
             "other": "Baixados: ${count} itens"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} arquivo já foi baixado",
+            "few": "${count} arquivos já foram baixados",
             "many": "${count} arquivos já foram baixados",
             "other": "${count} arquivos já foram baixados"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "Falha ao baixar ${count} arquivo",
+            "few": "Falha ao baixar ${count} arquivos",
             "many": "Falha ao baixar ${count} arquivos",
             "other": "Falha ao baixar ${count} arquivos"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} arquivo cancelado",
+            "few": "${count} arquivos cancelados",
             "many": "${count} arquivos cancelados",
             "other": "${count} arquivos cancelados"
         },
@@ -174,6 +182,7 @@
         "addedItemToQueue": "Item adicionado à fila de download",
         "addedItemsToQueue(param=count)": {
             "one": "${count} item adicionado a fila de download",
+            "few": "${count} itens adicionados a fila de download",
             "many": "${count} itens adicionados a fila de download",
             "other": "${count} itens adicionados a fila de download"
         }

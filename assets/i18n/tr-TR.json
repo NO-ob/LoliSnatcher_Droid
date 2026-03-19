@@ -1261,6 +1261,8 @@
         "loadingFileMessage": "Bu biraz zaman alabilir, lütfen bekle…",
         "sources(param=count)": {
             "one": "Kaynak",
+            "few": "Kaynaklar",
+            "many": "Kaynaklar",
             "other": "Kaynaklar"
         }
     },

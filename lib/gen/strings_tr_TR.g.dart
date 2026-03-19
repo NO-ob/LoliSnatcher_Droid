@@ -1456,6 +1456,8 @@ class _TranslationsGalleryTrTr extends TranslationsGalleryEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
         count,
         one: 'Kaynak',
+        few: 'Kaynaklar',
+        many: 'Kaynaklar',
         other: 'Kaynaklar',
       );
 }
@@ -5796,6 +5798,8 @@ extension on TranslationsTrTr {
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
                   count,
                   one: 'Kaynak',
+                  few: 'Kaynaklar',
+                  many: 'Kaynaklar',
                   other: 'Kaynaklar',
                 ),
           'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'İndir',
