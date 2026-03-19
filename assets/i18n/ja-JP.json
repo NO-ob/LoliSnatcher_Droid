@@ -123,8 +123,7 @@
         "listOfBrokenTabs": "壊れたタブのリスト:",
         "tabsMerged": "タブが結合されました",
         "addedTabsCount(param=count)": {
-            "other": "${count}個の新しいタブを追加",
-            "one": ""
+            "other": "${count}個の新しいタブを追加"
         },
         "tabsReplaced": "タブを置き換えました",
         "receivedTabsCount(param=count)": {

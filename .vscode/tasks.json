@@ -42,6 +42,16 @@
             "problemMatcher": []
         },
         {
+            "label": "Localization cleanup",
+            "type": "shell",
+            "command": "dart run ./loc_cleanup.dart",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "Localization analyze",
             "type": "shell",
             "command": "dart run ./loc_analyze.dart",

@@ -1463,7 +1463,9 @@ class _TranslationsGalleryRuRu extends TranslationsGalleryEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(
         count,
         one: 'Источник',
-        other: 'Источников',
+        few: 'Источники',
+        many: 'Источники',
+        other: 'Источники',
       );
 }
 
@@ -5817,7 +5819,9 @@ extension on TranslationsRuRu {
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('ru'))(
                   count,
                   one: 'Источник',
-                  other: 'Источников',
+                  few: 'Источники',
+                  many: 'Источники',
+                  other: 'Источники',
                 ),
           'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'Скачать',
           'galleryButtons.favourite' => TranslationOverrides.string(_root.$meta, 'galleryButtons.favourite', {}) ?? 'В избранное',

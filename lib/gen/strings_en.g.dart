@@ -1787,12 +1787,14 @@ class TranslationsGalleryEn {
   String get loadingFileMessage =>
       TranslationOverrides.string(_root.$meta, 'gallery.loadingFileMessage', {}) ?? 'This can take some time, please wait…';
 
-  /// en: '(one) {Source} (other) {Sources}'
+  /// en: '(one) {Source} (few) {Sources} (many) {Sources} (other) {Sources}'
   String sources({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(
         count,
         one: 'Source',
+        few: 'Sources',
+        many: 'Sources',
         other: 'Sources',
       );
 }
@@ -6700,6 +6702,8 @@ extension on Translations {
                 (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(
                   count,
                   one: 'Source',
+                  few: 'Sources',
+                  many: 'Sources',
                   other: 'Sources',
                 ),
           'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'Snatch',

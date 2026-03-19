@@ -1261,6 +1261,8 @@
         "loadingFileMessage": "This can take some time, please wait…",
         "sources(param=count)": {
             "one": "Source",
+            "few": "Sources",
+            "many": "Sources",
             "other": "Sources"
         }
     },

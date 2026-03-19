@@ -52,9 +52,7 @@ class TranslationsPtBr extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get localeName => TranslationOverrides.string(_root.$meta, 'localeName', {}) ?? 'Português do Brasil';
   @override
-  String get yes => TranslationOverrides.string(_root.$meta, 'yes', {}) ?? 'Sim';
-  @override
-  String get no => TranslationOverrides.string(_root.$meta, 'no', {}) ?? 'Não';
+  String get appName => TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher';
   @override
   String get error => TranslationOverrides.string(_root.$meta, 'error', {}) ?? 'Erro';
   @override
@@ -74,6 +72,10 @@ class TranslationsPtBr extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get ok => TranslationOverrides.string(_root.$meta, 'ok', {}) ?? 'OK';
   @override
+  String get yes => TranslationOverrides.string(_root.$meta, 'yes', {}) ?? 'Sim';
+  @override
+  String get no => TranslationOverrides.string(_root.$meta, 'no', {}) ?? 'Não';
+  @override
   String get pleaseWait => TranslationOverrides.string(_root.$meta, 'pleaseWait', {}) ?? 'Por favor, aguarde…';
   @override
   String get show => TranslationOverrides.string(_root.$meta, 'show', {}) ?? 'Mostrar';
@@ -82,7 +84,7 @@ class TranslationsPtBr extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get enable => TranslationOverrides.string(_root.$meta, 'enable', {}) ?? 'Habilitar';
   @override
-  String get appName => TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher';
+  String get disable => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Desabilitar';
   @override
   String get add => TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Adicionar';
   @override
@@ -197,8 +199,6 @@ class TranslationsPtBr extends Translations with BaseTranslations<AppLocale, Tra
   late final _TranslationsAuthenticationPtBr authentication = _TranslationsAuthenticationPtBr._(_root);
   @override
   late final _TranslationsSearchHandlerPtBr searchHandler = _TranslationsSearchHandlerPtBr._(_root);
-  @override
-  String get disable => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Desabilitar';
   @override
   late final _TranslationsSnatcherPtBr snatcher = _TranslationsSnatcherPtBr._(_root);
   @override
@@ -335,6 +335,9 @@ class _TranslationsSearchHandlerPtBr extends TranslationsSearchHandlerEn {
   @override
   String get removedLastTab => TranslationOverrides.string(_root.$meta, 'searchHandler.removedLastTab', {}) ?? 'A última aba foi removida';
   @override
+  String get resettingSearchToDefaultTags =>
+      TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Redefinindo para as tags padrão';
+  @override
   String get uoh => TranslationOverrides.string(_root.$meta, 'searchHandler.uoh', {}) ?? 'UOOOOOOOHHH';
   @override
   String get ratingsChanged => TranslationOverrides.string(_root.$meta, 'searchHandler.ratingsChanged', {}) ?? 'Classificações alteradas';
@@ -354,7 +357,6 @@ class _TranslationsSearchHandlerPtBr extends TranslationsSearchHandlerEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} aba restaurada da sessão anterior',
-        few: '${count} abas restauradas da sessão anterior',
         many: '${count} abas restauradas da sessão anterior',
         other: '${count} abas restauradas da sessão anterior',
       );
@@ -374,8 +376,6 @@ class _TranslationsSearchHandlerPtBr extends TranslationsSearchHandlerEn {
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
-        one: '${count} nova aba adicionada',
-        few: '${count} novas abas adicionadas',
         many: '${count} novas abas adicionadas',
         other: '${count} novas abas adicionadas',
       );
@@ -387,13 +387,9 @@ class _TranslationsSearchHandlerPtBr extends TranslationsSearchHandlerEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} aba recebida',
-        few: '${count} abas recebidas',
         many: '${count} abas recebidas',
         other: '${count} abas recebidas',
       );
-  @override
-  String get resettingSearchToDefaultTags =>
-      TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Redefinindo para as tags padrão';
 }
 
 // Path: snatcher
@@ -439,7 +435,6 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: 'Baixado: ${count} item',
-        few: 'Baixados: ${count} itens',
         many: 'Baixados: ${count} itens',
         other: 'Baixados: ${count} itens',
       );
@@ -449,7 +444,6 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} arquivo já foi baixado',
-        few: '${count} arquivos já foram baixados',
         many: '${count} arquivos já foram baixados',
         other: '${count} arquivos já foram baixados',
       );
@@ -459,7 +453,6 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: 'Falha ao baixar ${count} arquivo',
-        few: 'Falha ao baixar ${count} arquivos',
         many: 'Falha ao baixar ${count} arquivos',
         other: 'Falha ao baixar ${count} arquivos',
       );
@@ -469,7 +462,6 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} arquivo cancelado',
-        few: '${count} arquivos cancelados',
         many: '${count} arquivos cancelados',
         other: '${count} arquivos cancelados',
       );
@@ -485,7 +477,6 @@ class _TranslationsSnatcherPtBr extends TranslationsSnatcherEn {
       (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
         count,
         one: '${count} item adicionado a fila de download',
-        few: '${count} itens adicionados a fila de download',
         many: '${count} itens adicionados a fila de download',
         other: '${count} itens adicionados a fila de download',
       );
@@ -595,8 +586,7 @@ extension on TranslationsPtBr {
     return switch (path) {
       'locale' => TranslationOverrides.string(_root.$meta, 'locale', {}) ?? 'pt-BR',
       'localeName' => TranslationOverrides.string(_root.$meta, 'localeName', {}) ?? 'Português do Brasil',
-      'yes' => TranslationOverrides.string(_root.$meta, 'yes', {}) ?? 'Sim',
-      'no' => TranslationOverrides.string(_root.$meta, 'no', {}) ?? 'Não',
+      'appName' => TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher',
       'error' => TranslationOverrides.string(_root.$meta, 'error', {}) ?? 'Erro',
       'errorExclamation' => TranslationOverrides.string(_root.$meta, 'errorExclamation', {}) ?? 'Erro!',
       'success' => TranslationOverrides.string(_root.$meta, 'success', {}) ?? 'Sucesso',
@@ -606,11 +596,13 @@ extension on TranslationsPtBr {
       'later' => TranslationOverrides.string(_root.$meta, 'later', {}) ?? 'Depois',
       'close' => TranslationOverrides.string(_root.$meta, 'close', {}) ?? 'Fechar',
       'ok' => TranslationOverrides.string(_root.$meta, 'ok', {}) ?? 'OK',
+      'yes' => TranslationOverrides.string(_root.$meta, 'yes', {}) ?? 'Sim',
+      'no' => TranslationOverrides.string(_root.$meta, 'no', {}) ?? 'Não',
       'pleaseWait' => TranslationOverrides.string(_root.$meta, 'pleaseWait', {}) ?? 'Por favor, aguarde…',
       'show' => TranslationOverrides.string(_root.$meta, 'show', {}) ?? 'Mostrar',
       'hide' => TranslationOverrides.string(_root.$meta, 'hide', {}) ?? 'Ocultar',
       'enable' => TranslationOverrides.string(_root.$meta, 'enable', {}) ?? 'Habilitar',
-      'appName' => TranslationOverrides.string(_root.$meta, 'appName', {}) ?? 'LoliSnatcher',
+      'disable' => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Desabilitar',
       'add' => TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Adicionar',
       'edit' => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? 'Editar',
       'remove' => TranslationOverrides.string(_root.$meta, 'remove', {}) ?? 'Remover',
@@ -721,6 +713,8 @@ extension on TranslationsPtBr {
             TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ??
             'Ocorreu um erro durante a autenticação: ${error}',
       'searchHandler.removedLastTab' => TranslationOverrides.string(_root.$meta, 'searchHandler.removedLastTab', {}) ?? 'A última aba foi removida',
+      'searchHandler.resettingSearchToDefaultTags' =>
+        TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Redefinindo para as tags padrão',
       'searchHandler.uoh' => TranslationOverrides.string(_root.$meta, 'searchHandler.uoh', {}) ?? 'UOOOOOOOHHH',
       'searchHandler.ratingsChanged' => TranslationOverrides.string(_root.$meta, 'searchHandler.ratingsChanged', {}) ?? 'Classificações alteradas',
       'searchHandler.ratingsChangedMessage' =>
@@ -737,7 +731,6 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} aba restaurada da sessão anterior',
-              few: '${count} abas restauradas da sessão anterior',
               many: '${count} abas restauradas da sessão anterior',
               other: '${count} abas restauradas da sessão anterior',
             ),
@@ -755,8 +748,6 @@ extension on TranslationsPtBr {
             TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
-              one: '${count} nova aba adicionada',
-              few: '${count} novas abas adicionadas',
               many: '${count} novas abas adicionadas',
               other: '${count} novas abas adicionadas',
             ),
@@ -767,13 +758,9 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} aba recebida',
-              few: '${count} abas recebidas',
               many: '${count} abas recebidas',
               other: '${count} abas recebidas',
             ),
-      'searchHandler.resettingSearchToDefaultTags' =>
-        TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Redefinindo para as tags padrão',
-      'disable' => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Desabilitar',
       'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Downloader',
       'snatcher.snatchingHistory' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingHistory', {}) ?? 'Histórico de downloads',
       'snatcher.enterTags' => TranslationOverrides.string(_root.$meta, 'snatcher.enterTags', {}) ?? 'Inserir tags',
@@ -797,7 +784,6 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: 'Baixado: ${count} item',
-              few: 'Baixados: ${count} itens',
               many: 'Baixados: ${count} itens',
               other: 'Baixados: ${count} itens',
             ),
@@ -807,7 +793,6 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} arquivo já foi baixado',
-              few: '${count} arquivos já foram baixados',
               many: '${count} arquivos já foram baixados',
               other: '${count} arquivos já foram baixados',
             ),
@@ -817,7 +802,6 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: 'Falha ao baixar ${count} arquivo',
-              few: 'Falha ao baixar ${count} arquivos',
               many: 'Falha ao baixar ${count} arquivos',
               other: 'Falha ao baixar ${count} arquivos',
             ),
@@ -827,7 +811,6 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} arquivo cancelado',
-              few: '${count} arquivos cancelados',
               many: '${count} arquivos cancelados',
               other: '${count} arquivos cancelados',
             ),
@@ -841,7 +824,6 @@ extension on TranslationsPtBr {
             (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
               count,
               one: '${count} item adicionado a fila de download',
-              few: '${count} itens adicionados a fila de download',
               many: '${count} itens adicionados a fila de download',
               other: '${count} itens adicionados a fila de download',
             ),
