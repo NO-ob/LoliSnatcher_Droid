@@ -46,7 +46,6 @@ class DownloadsHandler extends BooruHandler {
           tags,
           (pageNum * limit).toString(),
           limit.toString(),
-          'DESC',
           isDownloads: true,
         ),
       );
@@ -120,6 +119,7 @@ class DownloadsHandler extends BooruHandler {
       SortMetaTag(
         values: [
           MetaTagValue(name: 'Random', value: 'random'),
+          MetaTagValue(name: 'Reverse', value: 'reverse'),
         ],
       ),
       LocalDbSiteMetaTag(),

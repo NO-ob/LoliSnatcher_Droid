@@ -46,7 +46,6 @@ class FavouritesHandler extends BooruHandler {
           tags,
           (pageNum * limit).toString(),
           limit.toString(),
-          'DESC',
         ),
       );
     } catch (e, s) {
@@ -117,6 +116,7 @@ class FavouritesHandler extends BooruHandler {
       SortMetaTag(
         values: [
           MetaTagValue(name: 'Random', value: 'random'),
+          MetaTagValue(name: 'Reverse', value: 'reverse'),
         ],
       ),
       LocalDbSiteMetaTag(),

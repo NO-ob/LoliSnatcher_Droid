@@ -38,7 +38,6 @@ class DBHandler {
     String path, {
     ValueChanged<String>? onStatusUpdate,
   }) async {
-    // await Sqflite.devSetDebugModeOn(true);
     if (Platform.isAndroid || Platform.isIOS) {
       db = await openDatabase(
         '${path}store.db',
@@ -313,7 +312,6 @@ class DBHandler {
         search,
         '0',
         '1000000',
-        'DESC',
         customConditions: ["bi.postURL like '%${idol ? "idol" : "chan"}.sankakucomplex%'"],
       );
       for (final item in items) {
@@ -344,8 +342,8 @@ class DBHandler {
   Future<List<BooruItem>> searchDB(
     String searchTagsString,
     String offset,
-    String limit,
-    String order, {
+    String limit, {
+    String? order,
     List<String> customConditions = const [],
     bool isDownloads = false,
   }) async {
@@ -355,10 +353,12 @@ class DBHandler {
     // --- 1. PARSE PARAMETERS ---
     // Clean input tags and separate special commands
     final List<String> rawTags = searchTagsString.trim().split(' ').where((t) => t.isNotEmpty).toList();
-    final List<String> searchTags = [];
+    final List<String> andTags = [];
+    final List<String> orTags = [];
     final List<String> excludeTags = [];
     String siteQuery = '';
     bool isRandomOrder = false;
+    bool isReverseOrder = false;
 
     for (final tag in rawTags) {
       final lowerTag = tag.toLowerCase();
@@ -366,13 +366,22 @@ class DBHandler {
         final isExclude = lowerTag.startsWith('-site:');
         final term = tag.replaceAll(RegExp('^-?site:', caseSensitive: false), '');
         siteQuery =
-            "bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$term%' OR bi.fileURL ${isExclude ? 'NOT' : ''} LIKE '%$term%' ";
+            "(bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$term%' OR bi.fileURL ${isExclude ? 'NOT' : ''} LIKE '%$term%') ";
       } else if (lowerTag == 'sort:random') {
         isRandomOrder = true;
-      } else if (tag.startsWith('-')) {
-        excludeTags.add(tag.substring(1));
+      } else if (lowerTag == 'sort:reverse') {
+        isReverseOrder = true;
       } else {
-        searchTags.add(tag);
+        // Replace booru wildcard '*' with SQLite wildcard '%'
+        final String sqlTag = tag.replaceAll('*', '%');
+
+        if (sqlTag.startsWith('-')) {
+          excludeTags.add(sqlTag.substring(1));
+        } else if (sqlTag.startsWith('~')) {
+          orTags.add(sqlTag.substring(1));
+        } else {
+          andTags.add(sqlTag);
+        }
       }
     }
 
@@ -385,7 +394,9 @@ class DBHandler {
     final List<dynamic> args = [];
 
     // Only join if we need to filter by included tags
-    if (searchTags.isNotEmpty) {
+    final bool hasIncludedTags = andTags.isNotEmpty || orTags.isNotEmpty;
+
+    if (hasIncludedTags) {
       sql.write('JOIN ImageTag AS it ON bi.id = it.booruItemID ');
       sql.write('JOIN Tag AS t ON it.tagID = t.id ');
     }
@@ -397,27 +408,39 @@ class DBHandler {
     if (siteQuery.isNotEmpty) whereClauses.add(siteQuery);
 
     // C. Custom Conditions
-    if (customConditions.isNotEmpty) whereClauses.add('(${customConditions.join(' AND ')})');
+    if (customConditions.isNotEmpty) {
+      whereClauses.add('(${customConditions.join(' AND ')})');
+    }
 
     // D. Exclusions
     if (excludeTags.isNotEmpty) {
-      final placeholders = List.filled(excludeTags.length, '?').join(',');
+      final List<String> excludeConditions = [];
+      for (final ex in excludeTags) {
+        excludeConditions.add('t_ex.name LIKE ?');
+        args.add(ex);
+      }
+      final excludeSql = excludeConditions.join(' OR ');
+
       whereClauses.add('''
         bi.id NOT IN (
           SELECT it_ex.booruItemID 
           FROM ImageTag it_ex 
           JOIN Tag t_ex ON it_ex.tagID = t_ex.id 
-          WHERE t_ex.name IN ($placeholders)
+          WHERE $excludeSql
         )
       ''');
-      args.addAll(excludeTags);
     }
 
     // E. Inclusions
-    if (searchTags.isNotEmpty) {
-      final placeholders = List.filled(searchTags.length, '?').join(',');
-      whereClauses.add('t.name IN ($placeholders)');
-      args.addAll(searchTags);
+    if (hasIncludedTags) {
+      final List<String> allSearchTags = [...andTags, ...orTags];
+      final List<String> likeConditions = [];
+
+      for (final tag in allSearchTags) {
+        likeConditions.add('t.name LIKE ?');
+        args.add(tag);
+      }
+      whereClauses.add('(${likeConditions.join(' OR ')})');
     }
 
     // Apply WHERE
@@ -425,14 +448,37 @@ class DBHandler {
       sql.write('WHERE ${whereClauses.join(' AND ')} ');
     }
 
-    // Grouping for intersection logic (Must have ALL tags)
-    if (searchTags.isNotEmpty) {
-      sql.write('GROUP BY bi.id HAVING COUNT(DISTINCT t.id) = ? ');
-      args.add(searchTags.length);
+    // --- GROUPING & INTERSECTION LOGIC (AND / OR) ---
+    if (hasIncludedTags) {
+      sql.write('GROUP BY bi.id ');
+
+      final List<String> havingClauses = [];
+
+      // MUST satisfy EVERY individual AND tag
+      if (andTags.isNotEmpty) {
+        for (final andTag in andTags) {
+          havingClauses.add('MAX(CASE WHEN t.name LIKE ? THEN 1 ELSE 0 END) = 1');
+          args.add(andTag);
+        }
+      }
+
+      // MUST satisfy AT LEAST ONE of the OR tags
+      if (orTags.isNotEmpty) {
+        final List<String> orConditions = [];
+        for (final orTag in orTags) {
+          orConditions.add('t.name LIKE ?');
+          args.add(orTag);
+        }
+        havingClauses.add('MAX(CASE WHEN ${orConditions.join(' OR ')} THEN 1 ELSE 0 END) = 1');
+      }
+
+      if (havingClauses.isNotEmpty) {
+        sql.write('HAVING ${havingClauses.join(' AND ')} ');
+      }
     }
 
     // Ordering & Pagination
-    String orderByClause = 'bi.id $order';
+    String orderByClause = 'bi.id ${order ?? (isReverseOrder ? 'ASC' : null) ?? 'DESC'}';
     if (isRandomOrder) orderByClause = 'RANDOM()';
     sql.write('ORDER BY $orderByClause LIMIT ? OFFSET ?');
     args.add(limit);
@@ -494,24 +540,33 @@ class DBHandler {
     if (db == null) return 0;
 
     // --- 1. PARSE PARAMETERS ---
-    // Clean input tags and separate special commands
     final List<String> rawTags = searchTagsString.trim().split(' ').where((t) => t.isNotEmpty).toList();
-    final List<String> searchTags = [];
+    final List<String> andTags = [];
+    final List<String> orTags = [];
     final List<String> excludeTags = [];
     String siteQuery = '';
 
     for (final tag in rawTags) {
       final lowerTag = tag.toLowerCase();
+
       if (lowerTag.startsWith('site:') || lowerTag.startsWith('-site:')) {
         final isExclude = lowerTag.startsWith('-site:');
         final term = tag.replaceAll(RegExp('^-?site:', caseSensitive: false), '');
-        siteQuery = "bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$term%'";
-      } else if (lowerTag == 'sort:random') {
+        siteQuery =
+            "(bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$term%' OR bi.fileURL ${isExclude ? 'NOT' : ''} LIKE '%$term%')";
+      } else if (lowerTag == 'sort:random' || lowerTag == 'sort:reverse') {
         // do nothing
-      } else if (tag.startsWith('-')) {
-        excludeTags.add(tag.substring(1));
       } else {
-        searchTags.add(tag);
+        // Replace booru wildcard '*' with SQLite wildcard '%'
+        final String sqlTag = tag.replaceAll('*', '%');
+
+        if (sqlTag.startsWith('-')) {
+          excludeTags.add(sqlTag.substring(1));
+        } else if (sqlTag.startsWith('~')) {
+          orTags.add(sqlTag.substring(1));
+        } else {
+          andTags.add(sqlTag);
+        }
       }
     }
 
@@ -521,7 +576,9 @@ class DBHandler {
     final List<dynamic> args = [];
 
     // Join tables ONLY if filtering by included tags
-    if (searchTags.isNotEmpty) {
+    final bool hasIncludedTags = andTags.isNotEmpty || orTags.isNotEmpty;
+
+    if (hasIncludedTags) {
       sql.write('JOIN ImageTag AS it ON bi.id = it.booruItemID ');
       sql.write('JOIN Tag AS t ON it.tagID = t.id ');
     }
@@ -541,23 +598,33 @@ class DBHandler {
 
     // D. Exclusions
     if (excludeTags.isNotEmpty) {
-      final placeholders = List.filled(excludeTags.length, '?').join(',');
+      final List<String> excludeConditions = [];
+      for (final ex in excludeTags) {
+        excludeConditions.add('t_ex.name LIKE ?');
+        args.add(ex);
+      }
+      final excludeSql = excludeConditions.join(' OR ');
+
       whereClauses.add('''
         bi.id NOT IN (
           SELECT it_ex.booruItemID 
           FROM ImageTag it_ex 
           JOIN Tag t_ex ON it_ex.tagID = t_ex.id 
-          WHERE t_ex.name IN ($placeholders)
+          WHERE $excludeSql
         )
       ''');
-      args.addAll(excludeTags);
     }
 
     // E. Inclusions
-    if (searchTags.isNotEmpty) {
-      final placeholders = List.filled(searchTags.length, '?').join(',');
-      whereClauses.add('t.name IN ($placeholders)');
-      args.addAll(searchTags);
+    if (hasIncludedTags) {
+      final List<String> allSearchTags = [...andTags, ...orTags];
+      final List<String> likeConditions = [];
+
+      for (final tag in allSearchTags) {
+        likeConditions.add('t.name LIKE ?');
+        args.add(tag);
+      }
+      whereClauses.add('(${likeConditions.join(' OR ')})');
     }
 
     // Apply WHERE
@@ -566,23 +633,37 @@ class DBHandler {
     }
 
     // --- 4. INTERSECTION LOGIC ---
-    // For COUNT with multiple tags, we must count the GROUPS, not the rows.
-    if (searchTags.isNotEmpty) {
-      // Logic:
-      // 1. Group by ID
-      // 2. Filter groups that have ALL tags
-      // 3. Count the resulting groups
-      sql.write('GROUP BY bi.id HAVING COUNT(DISTINCT t.id) = ? ');
-      args.add(searchTags.length);
+    if (hasIncludedTags) {
+      sql.write('GROUP BY bi.id ');
 
-      // Because we used GROUP BY, the result will be multiple rows (one 'count' per item).
-      // We need to wrap this to count the number of rows returned.
+      final List<String> havingClauses = [];
+
+      // MUST satisfy EVERY individual AND tag
+      if (andTags.isNotEmpty) {
+        for (final andTag in andTags) {
+          havingClauses.add('MAX(CASE WHEN t.name LIKE ? THEN 1 ELSE 0 END) = 1');
+          args.add(andTag);
+        }
+      }
+
+      // MUST satisfy AT LEAST ONE of the OR tags
+      if (orTags.isNotEmpty) {
+        final List<String> orConditions = [];
+        for (final orTag in orTags) {
+          orConditions.add('t.name LIKE ?');
+          args.add(orTag);
+        }
+        havingClauses.add('MAX(CASE WHEN ${orConditions.join(' OR ')} THEN 1 ELSE 0 END) = 1');
+      }
+
+      if (havingClauses.isNotEmpty) {
+        sql.write('HAVING ${havingClauses.join(' AND ')} ');
+      }
 
       final fullSql = 'SELECT COUNT(*) as total FROM ($sql)';
       final result = await db.rawQuery(fullSql, args);
       return result.first['total'] as int? ?? 0;
     } else {
-      // Simple case (No Group By needed)
       final result = await db.rawQuery(sql.toString(), args);
       return result.first['count'] as int? ?? 0;
     }

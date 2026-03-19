@@ -548,7 +548,7 @@ class LoliSync {
                   '',
                   offset.toString(),
                   limit.toString(),
-                  'ASC',
+                  order: 'ASC',
                   isDownloads: isSnatched,
                 );
                 if (!isSnatched) {
@@ -593,7 +593,7 @@ class LoliSync {
                   '',
                   offset.toString(),
                   limit.toString(),
-                  'ASC',
+                  order: 'ASC',
                 );
                 for (final item in fetched) {
                   item.isSnatched.value = false;
