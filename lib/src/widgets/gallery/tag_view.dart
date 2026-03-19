@@ -2022,6 +2022,15 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               onPressed: () => loadPreview(refresh: true),
                               icon: const Icon(Icons.refresh),
                             ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  tab = null;
+                                });
+                              },
+                              icon: const Icon(Icons.close),
+                            ),
                             const Spacer(),
                             if (widget.parentTab != null)
                               IconButton(
