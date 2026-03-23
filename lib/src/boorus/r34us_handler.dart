@@ -83,7 +83,14 @@ class R34USHandler extends BooruHandler {
     bool withCapcthaCheck = false,
   }) async {
     try {
-      final response = await DioNetwork.get(item.postURL, headers: getHeaders());
+      final String cookies = await getCookies() ?? '';
+      final response = await DioNetwork.get(
+        item.postURL,
+        headers: {
+          ...getHeaders(),
+          if (cookies.isNotEmpty) 'Cookie': cookies,
+        },
+      );
       if (response.statusCode != 200) {
         return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {

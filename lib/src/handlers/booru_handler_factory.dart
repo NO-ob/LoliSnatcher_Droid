@@ -93,7 +93,6 @@ class BooruHandlerFactory {
           booruHandler = SzurubooruHandler(booru, limit);
           break;
         case BooruType.R34US:
-          pageNum = 0;
           booruHandler = R34USHandler(booru, limit);
           break;
         case BooruType.Sankaku:

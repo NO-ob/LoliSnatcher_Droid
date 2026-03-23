@@ -139,6 +139,7 @@ mixin _NetworkImageLoaderMixin {
                 headers: headers,
                 sendTimeout: sendTimeout,
                 receiveTimeout: receiveTimeout,
+                followRedirects: headers?.containsKey('LS-IGNORE-REDIRECT') == true ? false : true,
               ),
               onReceiveProgress: (int count, int total) {
                 chunkEvents.add(
@@ -157,6 +158,7 @@ mixin _NetworkImageLoaderMixin {
                 responseType: ResponseType.bytes,
                 sendTimeout: sendTimeout,
                 receiveTimeout: receiveTimeout,
+                followRedirects: headers?.containsKey('LS-IGNORE-REDIRECT') == true ? false : true,
               ),
               onReceiveProgress: (int count, int total) {
                 chunkEvents.add(
@@ -196,7 +198,9 @@ mixin _NetworkImageLoaderMixin {
         // Validate Content-Length
         final headerLen = int.tryParse(response.headers.value(HttpHeaders.contentLengthHeader) ?? '');
         if (headerLen != null && headerLen > 0 && actualLen != headerLen) {
-          await tempFile.delete();
+          try {
+            await tempFile.delete();
+          } catch (_) {}
           throw Exception('Download incomplete: Expected $headerLen bytes, got $actualLen');
         }
 
@@ -210,7 +214,9 @@ mixin _NetworkImageLoaderMixin {
               throw Exception('Image file is truncated (missing JPEG EOI marker)');
             }
           } catch (e) {
-            await tempFile.delete();
+            try {
+              await tempFile.delete();
+            } catch (_) {}
             rethrow;
           } finally {
             await handle.close();

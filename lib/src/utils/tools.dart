@@ -126,6 +126,8 @@ class Tools {
       'sankakuapi.com',
     ].any(uri.host.contains)) {
       headers['User-Agent'] = Constants.sankakuAppUserAgent;
+    } else if (uri.host.contains('rule34.us')) {
+      headers['LS-IGNORE-REDIRECT'] = '1';
     }
 
     if (!isTestMode) {
@@ -147,6 +149,8 @@ class Tools {
         headers['Referer'] = 'https://rule34storage.b-cdn.net';
       } else if (uri.host.contains('gelbooru.com')) {
         headers['Referer'] = 'https://gelbooru.com';
+      } else if (uri.host.contains('rule34.us')) {
+        headers['Referer'] = 'https://rule34.us';
       }
     }
 
