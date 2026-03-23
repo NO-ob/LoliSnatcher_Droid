@@ -36,15 +36,9 @@ class LanguageSettingsPage extends StatelessWidget {
               trailingIcon: const Icon(Icons.exit_to_app),
             ),
             const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: GestureDetector(
-                onTap: () => launchUrlString(
-                  Constants.translationURL,
-                  mode: LaunchMode.externalApplication,
-                ),
-                child: const POEditorProgressWidget(),
-              ),
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: POEditorProgressWidget(),
             ),
           ],
         ),
@@ -313,127 +307,147 @@ class _POEditorProgressWidgetState extends State<POEditorProgressWidget> {
   Widget build(BuildContext context) {
     return Card(
       color: Theme.of(context).colorScheme.surfaceContainer,
-      child: Column(
-        mainAxisSize: .min,
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            child: Row(
-              mainAxisAlignment: .center,
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: () => launchUrlString(
+          Constants.translationURL,
+          mode: LaunchMode.externalApplication,
+        ),
+        child: Column(
+          mainAxisSize: .min,
+          children: [
+            const Stack(
               children: [
-                Image(
-                  image: NetworkImage('https://poeditor.com/public/images/favicons/mstile-144x144.png'),
-                  width: 60,
-                  height: 60,
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: .center,
+                    children: [
+                      Image(
+                        image: NetworkImage('https://poeditor.com/public/images/favicons/mstile-144x144.png'),
+                        width: 60,
+                        height: 60,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'POEditor',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                SizedBox(width: 8),
-                Text(
-                  'POEditor',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                //
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Icon(
+                    Icons.exit_to_app,
+                    size: 24,
                   ),
                 ),
               ],
             ),
-          ),
-          //
-          if (_error == null && _languages != null && _languages!.isNotEmpty)
-            const Divider(
-              height: 1,
-              thickness: 0.5,
-            ),
-          //
-          Builder(
-            builder: (context) {
-              if (_isLoading) {
-                return const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(10),
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
-
-              if (_error != null || _languages == null || _languages!.isEmpty) {
-                return const SizedBox.shrink();
-              }
-
-              return ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(10),
-                itemCount: _languages!.length,
-                itemBuilder: (context, index) {
-                  final lang = _languages![index];
-                  final String name = lang['name'] ?? '[UNKNOWN]';
-                  double percentage = (lang['percentage'] as num?)?.toDouble() ?? 0.0;
-                  if (percentage >= 99.5) {
-                    // round up to 100 because there are some poeditor entries that require extra translations (i.e. one/few/many/other variants), but actually don't need them
-                    percentage = 100.0;
-                  }
-                  final Color progressColor = switch (percentage) {
-                    <= 30 => Colors.red,
-                    <= 80 => Colors.yellow,
-                    _ => Colors.green, // 80+% are considered good enough to enable the language
-                  };
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 1),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            name,
-                            textAlign: TextAlign.right,
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          flex: 3,
-                          child: Container(
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: Row(
-                              children: [
-                                Flexible(
-                                  flex: (percentage * 100).toInt(),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: progressColor,
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                  ),
-                                ),
-                                Flexible(
-                                  flex: ((100 - percentage) * 100).toInt(),
-                                  child: Container(),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        SizedBox(
-                          width: 64,
-                          child: Text(
-                            '${percentage.toStringAsFixed(percentage.truncate() == percentage ? 0 : 1)}%',
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ),
-                      ],
+            //
+            if (_error == null && _languages != null && _languages!.isNotEmpty)
+              const Divider(
+                height: 1,
+                thickness: 0.5,
+              ),
+            //
+            Builder(
+              builder: (context) {
+                if (_isLoading) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: CircularProgressIndicator(),
                     ),
                   );
-                },
-              );
-            },
-          ),
-        ],
+                }
+
+                if (_error != null || _languages == null || _languages!.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(10),
+                  itemCount: _languages!.length,
+                  itemBuilder: (context, index) {
+                    final lang = _languages![index];
+                    final String name = lang['name'] ?? '[UNKNOWN]';
+                    double percentage = (lang['percentage'] as num?)?.toDouble() ?? 0.0;
+                    if (percentage >= 99.5) {
+                      // round up to 100 because there are some poeditor entries that require extra translations (i.e. one/few/many/other variants), but actually don't need them
+                      percentage = 100.0;
+                    }
+                    final Color progressColor = switch (percentage) {
+                      <= 30 => Colors.red,
+                      <= 80 => Colors.yellow,
+                      _ => Colors.green, // 80+% are considered good enough to enable the language
+                    };
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 1),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              name,
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            flex: 3,
+                            child: Container(
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withValues(alpha: 0.25),
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    flex: (percentage * 100).toInt(),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: progressColor,
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                    ),
+                                  ),
+                                  Flexible(
+                                    flex: ((100 - percentage) * 100).toInt(),
+                                    child: Container(),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          SizedBox(
+                            width: 64,
+                            child: Text(
+                              '${percentage.toStringAsFixed(percentage.truncate() == percentage ? 0 : 1)}%',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
