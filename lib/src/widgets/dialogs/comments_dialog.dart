@@ -276,6 +276,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
                     },
                     child: CustomScrollView(
                       controller: scrollController,
+                      cacheExtent: MediaQuery.sizeOf(context).height * MediaQuery.devicePixelRatioOf(context),
                       slivers: [
                         SliverPersistentHeader(
                           pinned: true,
