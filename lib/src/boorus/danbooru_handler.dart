@@ -190,7 +190,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
-    final String tagStr = (responseItem['antecedent'] ?? responseItem['value'])?.toString() ?? '';
+    final String tagStr = responseItem['value']?.toString() ?? '';
     if (tagStr.isEmpty) {
       return null;
     }
