@@ -68,8 +68,8 @@ class ShimmieHandler extends BooruHandler {
         preURL = booru.baseURL!.split('/booru')[0];
       }
 
-      final String thumbnailUrl = preURL + current.getAttribute('preview_url')!,
-          fileUrl = preURL + current.getAttribute('file_url')!;
+      final String thumbnailUrl = preURL + current.getAttribute('preview_url')!;
+      final String fileUrl = preURL + current.getAttribute('file_url')!;
 
       final String dateString = current.getAttribute('date').toString();
       final BooruItem item = BooruItem(
@@ -226,7 +226,7 @@ class ShimmieHtmlHandler extends BooruHandler {
       final List<String> tags = current.attributes['data-tags']?.split(' ') ?? [];
 
       final BooruItem item = BooruItem(
-        thumbnailURL: booru.baseURL! + thumbURL,
+        thumbnailURL: thumbURL,
         sampleURL: fileURL,
         fileURL: fileURL,
         fileExt: fileExt,
