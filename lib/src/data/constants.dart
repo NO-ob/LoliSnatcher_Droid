@@ -35,7 +35,7 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.5.0',
-    buildNumber: 5207,
+    buildNumber: 5208,
     title: '2.5.0 - Localization, fonts, optimization, pinned tags and more',
     isInStore: true,
     isImportant: false,
@@ -49,7 +49,7 @@ If you encounter any issues or have suggestions, please post them in GitHub issu
 
 -------------------
 
-Release - 2.5.0+5207:
+Release - 2.5.0+5208:
 
 Main in this update:
 - Localization (Russian, Turkish, Japanese)
@@ -72,15 +72,15 @@ New features:
 - Long images (taller than 4K pixels) are now automatically split into tiles for smoother viewing + a new setting which controls preloading image vertical pixels limit (default: 16K pixels; above which loading is blocked to prevent crashes; absurdly long images could still render incorrectly or cause crashes; only works when Media cache is enabled)
 - Added buttons to flip through pages in viewer while item info drawer is open
 - Small improvements to Downloads drawer
-- [site:...] filter in local search will now suggest site urls from available booru configs
-- Added buttons to quickly go to next/previous comment
+- Added "sort:reverse", OR(~) and wildcard(*) operators to local db queries
+- [site:...] filter in local db search will now suggest site urls from available booru configs
+- Redesigned comments page and added buttons to quickly go to next/previous comment
 
 
 Changes:
 - Reverted to old rendering engine (previous version used the new one, but it caused issues on older devices). [NOTE]: In the future we may be forced to switch to a new engine
 - [Hated] tag filters renamed to [Hidden] and [Loved] tag filters renamed to [Marked] throughout the app
 - Reworked cache cleanup
-- Improved app startup time
 - Image viewer performance improvements when switching between items
 - Added tag counts in item info drawer and tag suggestions
 - Reworked comments and translation notes parsing and rendering
@@ -95,17 +95,22 @@ Changes:
 - Media cache is now enabled by default (only applies to new users)
 - Long tap to fast forward on videos is now enabled by default, related setting is removed
 - Increased blur on [Hidden] items
+- Changed thumbnails to not appear as failed if at least one type of quality loaded successfully (applies only when Sample quality is used)
 
 
 Booru changes/fixes:
 - Multibooru: combined meta tags, prefix-based tag suggestion routing per handler
 - xyz-based boorus: fixed item details not loading in some cases
 - e621: fixed parsing error when item does not have sample url
+- danbooru: fixed loading images of lower quality after opening item info drawer, fixed tag suggestions applying wrong values in some cases, 
+- paheal: fixed thumbnail urls
+- r34us: fixed parsing, fixed thumbnails/images not loading
 
 
 Fixes:
 - Possible fix for rare thumbnail rendering artifacts
 - Possible fix for currently viewed item thumbnail border staying visible after closing the viewer
+- Fixed performance issues when there are thousands of tag filters
 - Fixed some cases when database operations were taking too long
 - Fixed Multibooru tag splitting on special characters (e.g. [1#tag 2#score:>20] was turning into [1#tag >20])
 - Fixed exception when deleting duplicate tag from tag search view
