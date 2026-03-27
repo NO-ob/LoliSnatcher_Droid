@@ -121,8 +121,18 @@ class _ParsedTextState extends State<ParsedText> {
 
   // HTML tags that the parser knows how to handle — strip everything else.
   static const _knownHtmlTags = {
-    'b', 'i', 'u', 's', 'em', 'strong', 'strike', 'del', 'code',
-    'ruby', 'rb', 'rt',
+    'b',
+    'i',
+    'u',
+    's',
+    'em',
+    'strong',
+    'strike',
+    'del',
+    'code',
+    'ruby',
+    'rb',
+    'rt',
   };
 
   static final RegExp _htmlTagPattern = RegExp(
