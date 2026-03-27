@@ -481,13 +481,13 @@ class SearchHandler {
   }
 
   // runs search on current tab
-  void searchAction(String text, Booru? newBooru) {
+  Future<void> searchAction(String text, Booru? newBooru) async {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     // Remove extra spaces
     text = text.trim();
 
-    // clear image emory cache
+    // clear image memory cache
     Tools.forceClearMemoryCache(withLive: true);
 
     // set new tab data
@@ -509,30 +509,47 @@ class SearchHandler {
       tabs[currentIndex] = newTab;
     }
 
-    searchReactions(text, newBooru ?? currentBooru);
+    unawaited(searchReactions(text, newBooru ?? currentBooru));
 
     // run search
     changeTabIndex(currentIndex, ignoreSameIndexCheck: true);
 
     // write to history
     if (text != '' && settingsHandler.searchHistoryEnabled) {
-      settingsHandler.dbHandler.updateSearchHistory(
-        text,
-        currentBooru.type?.name,
-        currentBooru.name,
+      unawaited(
+        settingsHandler.dbHandler.updateSearchHistory(
+          text,
+          currentBooru.type?.name,
+          currentBooru.name,
+        ),
       );
     }
   }
 
-  void searchReactions(String text, Booru booru) {
+  //
+
+  final Map<SearchReaction, int> _reactionsCount = {};
+  int getSearchReactionCount(SearchReaction r) => _reactionsCount[r] ?? 0;
+  void incrementSearchReactionCount(SearchReaction r) => _reactionsCount[r] = (_reactionsCount[r] ?? 0) + 1;
+  bool canSendSearchReaction(SearchReaction r) => getSearchReactionCount(r) < r.limit;
+
+  Future<void> searchReactions(String text, Booru booru) async {
+    final context = NavigationHandler.instance.navContext;
+
     // UOOOOOHHHHH
-    if (text.toLowerCase().contains('loli')) {
-      final context = NavigationHandler.instance.navContext;
-      FlashElements.showSnackbar(
+    if (text.toLowerCase().contains('loli') && canSendSearchReaction(.uoh)) {
+      incrementSearchReactionCount(.uoh);
+      await FlashElements.showSnackbar(
         duration: const Duration(seconds: 2),
-        title: Text(context.loc.searchHandler.uoh, style: const TextStyle(fontSize: 20)),
+        title: Text(
+          context.loc.searchHandler.uoh,
+          style: const TextStyle(fontSize: 20),
+        ),
         // TODO replace with image asset to avoid system-to-system font differences
-        overrideLeadingIconWidget: const Text(' 😭 ', style: TextStyle(fontSize: 40)),
+        overrideLeadingIconWidget: const Text(
+          ' 😭 ',
+          style: TextStyle(fontSize: 40),
+        ),
         sideColor: Colors.pink,
       );
     }
@@ -543,10 +560,12 @@ class SearchHandler {
           (booru.type?.isGelbooru == true && booru.baseURL!.contains('gelbooru.com')) ||
           (booru.type?.isDanbooru == true && booru.baseURL!.contains('danbooru.donmai.us'));
       if (isOnBooruWhereRatingsChanged) {
-        final context = NavigationHandler.instance.navContext;
-        FlashElements.showSnackbar(
+        await FlashElements.showSnackbar(
           duration: null,
-          title: Text(context.loc.searchHandler.ratingsChanged, style: const TextStyle(fontSize: 20)),
+          title: Text(
+            context.loc.searchHandler.ratingsChanged,
+            style: const TextStyle(fontSize: 20),
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -568,6 +587,8 @@ class SearchHandler {
       }
     }
   }
+
+  //
 
   // add secondary boorus and run search
   void mergeAction(List<Booru>? secondaryBoorus) {
@@ -1436,4 +1457,13 @@ enum TabAddMode {
         return context.loc.tabs.addModeListEnd;
     }
   }
+}
+
+enum SearchReaction {
+  uoh,
+  ;
+
+  int get limit => switch (this) {
+    uoh => 5,
+  };
 }

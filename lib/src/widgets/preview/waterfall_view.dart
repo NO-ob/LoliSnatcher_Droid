@@ -392,9 +392,10 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
               edgeOffset: MediaQuery.paddingOf(context).top + MainAppBar.height,
               strokeWidth: 4,
               color: Theme.of(context).colorScheme.secondary,
-              onRefresh: () async {
-                searchHandler.searchAction(searchHandler.currentTab.tags, null);
-              },
+              onRefresh: () => searchHandler.searchAction(
+                searchHandler.currentTab.tags,
+                null,
+              ),
               child: Stack(
                 children: [
                   ValueListenableBuilder(
