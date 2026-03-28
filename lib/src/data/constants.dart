@@ -96,6 +96,10 @@ Changes:
 - Long tap to fast forward on videos is now enabled by default, related setting is removed
 - Increased blur on [Hidden] items
 - Changed thumbnails to not appear as failed if at least one type of quality loaded successfully (applies only when Sample quality is used)
+- Search easter eggs are now limited to 5 times per app lifetime
+- Improved logic of button which removes tag from query (detects ~ and N# operators)
+- Changed wording on button which adds tag as an exclusion to query
+- Added Exclude button to tag suggestion long tap dialog
 
 
 Booru changes/fixes:
@@ -124,6 +128,11 @@ Fixes:
 
 
 and other small fixes and changes...
+
+-------------------
+
+Known issues:
+- Rendering may break after changing screen orientation (i.e. by opening video in fullscreen), can be fixed by changing screen orientation back and forth/reentering video fullscreen
 ''',
   );
 }
