@@ -99,13 +99,8 @@ class _BooruPageState extends State<BooruPage> {
         initPrefBooru,
         selectedBooru!,
       );
-      if (res == true) {
-        settingsHandler.prefBooru = selectedBooru?.name ?? '';
-      } else if (res == false && initPrefBooru != null) {
-        settingsHandler.prefBooru = initPrefBooru?.name ?? '';
-      } else if (res == null) {
-        return;
-      }
+
+      settingsHandler.prefBooru = (res == true ? selectedBooru?.name : initPrefBooru?.name) ?? '';
     }
     settingsHandler.itemLimit = int.parse(limitController.text);
     await settingsHandler.saveSettings(restate: false);
