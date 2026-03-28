@@ -720,7 +720,13 @@ class _TagViewState extends State<TagView> {
         searchHandler.searchTextController.text
             .toLowerCase()
             .split(' ')
-            .indexWhere((tag) => tag == currentTag.toLowerCase() || tag == '-${currentTag.toLowerCase()}') !=
+            .indexWhere(
+              (t) =>
+                  t == currentTag.toLowerCase() ||
+                  t == '-${currentTag.toLowerCase()}' ||
+                  t == '~${currentTag.toLowerCase()}' ||
+                  RegExp(r'^(?:-|~)?\d+#(?:-|~)?' + currentTag + r'$').hasMatch(t),
+            ) !=
         -1;
     final HasTabWithTagResult hasTabWithTag = tabMatchesMap.containsKey(currentTag)
         ? tabMatchesMap[currentTag]!
@@ -1280,7 +1286,7 @@ Future<void> showTagDialog({
           if (isInSearch)
             ListTile(
               leading: Icon(
-                Icons.remove,
+                Icons.delete_outline,
                 color: Theme.of(context).iconTheme.color,
               ),
               title: Text(context.loc.tagView.removeFromSearch),
@@ -1315,8 +1321,8 @@ Future<void> showTagDialog({
               },
             ),
             ListTile(
-              leading: const Icon(Icons.add, color: Colors.red),
-              title: Text(context.loc.tagView.addToSearchExclude),
+              leading: const Icon(Icons.remove_rounded, color: Colors.red),
+              title: Text(context.loc.tagView.excludeFromSearch),
               onTap: () {
                 searchHandler.addTagToSearch('-$tag');
 
@@ -1324,7 +1330,7 @@ Future<void> showTagDialog({
                   context: context,
                   duration: const Duration(seconds: 2),
                   title: Text(
-                    context.loc.tagView.addedToSearchBarExclude,
+                    context.loc.tagView.exclusionAddedToSearchBar,
                     style: const TextStyle(fontSize: 20),
                   ),
                   content: Text(
@@ -2002,18 +2008,19 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                               return AnimatedSize(
                                 duration: const Duration(milliseconds: 200),
                                 alignment: Alignment.centerLeft,
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: Theme.of(context).textTheme.bodyLarge,
-                                    children: [
-                                      TextSpan(text: context.loc.tagView.preview),
-                                      if (count > 0)
-                                        TextSpan(
-                                          text: ' ($count)',
-                                          style: Theme.of(context).textTheme.bodySmall,
+                                child: Column(
+                                  mainAxisSize: .min,
+                                  crossAxisAlignment: .start,
+                                  children: [
+                                    Text(context.loc.tagView.preview),
+                                    if (count > 0)
+                                      Text(
+                                        count.toFormattedString(),
+                                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          color: Theme.of(context).textTheme.bodySmall!.color!.withValues(alpha: 0.66),
                                         ),
-                                    ],
-                                  ),
+                                      ),
+                                  ],
                                 ),
                               );
                             }),
@@ -2398,7 +2405,11 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                                       .toLowerCase()
                                                       .split(' ')
                                                       .indexWhere(
-                                                        (t) => t == tag.toLowerCase() || t == '-${tag.toLowerCase()}',
+                                                        (t) =>
+                                                            t == tag.toLowerCase() ||
+                                                            t == '-${tag.toLowerCase()}' ||
+                                                            t == '~${tag.toLowerCase()}' ||
+                                                            RegExp(r'^(?:-|~)?\d+#(?:-|~)?' + tag + r'$').hasMatch(t),
                                                       ) !=
                                                   -1,
                                               hasTabWithTag: searchHandler.hasTabWithTag(tag),
@@ -2457,7 +2468,11 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                                               .indexWhere(
                                                                 (t) =>
                                                                     t == tag.toLowerCase() ||
-                                                                    t == '-${tag.toLowerCase()}',
+                                                                    t == '-${tag.toLowerCase()}' ||
+                                                                    t == '~${tag.toLowerCase()}' ||
+                                                                    RegExp(
+                                                                      r'^(?:-|~)?\d+#(?:-|~)?' + tag + r'$',
+                                                                    ).hasMatch(t),
                                                               ) !=
                                                           -1,
                                                       hasTabWithTag: searchHandler.hasTabWithTag(tag),

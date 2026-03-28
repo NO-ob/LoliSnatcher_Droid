@@ -108,6 +108,9 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   /// en: 'Add'
   String get add => TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Add';
 
+  /// en: 'Exclude'
+  String get exclude => TranslationOverrides.string(_root.$meta, 'exclude', {}) ?? 'Exclude';
+
   /// en: 'Edit'
   String get edit => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? 'Edit';
 
@@ -1380,12 +1383,12 @@ class TranslationsTagViewEn {
   /// en: 'Added to search bar:'
   String get addedToSearchBar => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Added to search bar:';
 
-  /// en: 'Add to Search (Exclude)'
-  String get addToSearchExclude => TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? 'Add to Search (Exclude)';
+  /// en: 'Exclude from Search'
+  String get excludeFromSearch => TranslationOverrides.string(_root.$meta, 'tagView.excludeFromSearch', {}) ?? 'Exclude from Search';
 
-  /// en: 'Added to search bar (Exclude):'
-  String get addedToSearchBarExclude =>
-      TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? 'Added to search bar (Exclude):';
+  /// en: 'Added exclusion to search bar:'
+  String get exclusionAddedToSearchBar =>
+      TranslationOverrides.string(_root.$meta, 'tagView.exclusionAddedToSearchBar', {}) ?? 'Added exclusion to search bar:';
 
   /// en: 'Add to Marked'
   String get addToMarked => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'Add to Marked';
@@ -4841,6 +4844,7 @@ extension on Translations {
           'enable' => TranslationOverrides.string(_root.$meta, 'enable', {}) ?? 'Enable',
           'disable' => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Disable',
           'add' => TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Add',
+          'exclude' => TranslationOverrides.string(_root.$meta, 'exclude', {}) ?? 'Exclude',
           'edit' => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? 'Edit',
           'remove' => TranslationOverrides.string(_root.$meta, 'remove', {}) ?? 'Remove',
           'save' => TranslationOverrides.string(_root.$meta, 'save', {}) ?? 'Save',
@@ -5725,11 +5729,11 @@ extension on Translations {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache',
-          'settings.video.videoBackendModeValues.normal' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Default',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.videoBackendModeValues.normal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Default',
           'settings.video.videoBackendModeValues.mpv' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV',
           'settings.video.videoBackendModeValues.mdk' =>
@@ -6497,9 +6501,9 @@ extension on Translations {
           'tagView.removeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromSearch', {}) ?? 'Remove from Search',
           'tagView.addToSearch' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearch', {}) ?? 'Add to Search',
           'tagView.addedToSearchBar' => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Added to search bar:',
-          'tagView.addToSearchExclude' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? 'Add to Search (Exclude)',
-          'tagView.addedToSearchBarExclude' =>
-            TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? 'Added to search bar (Exclude):',
+          'tagView.excludeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.excludeFromSearch', {}) ?? 'Exclude from Search',
+          'tagView.exclusionAddedToSearchBar' =>
+            TranslationOverrides.string(_root.$meta, 'tagView.exclusionAddedToSearchBar', {}) ?? 'Added exclusion to search bar:',
           'tagView.addToMarked' => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'Add to Marked',
           'tagView.addToHidden' => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? 'Add to Hidden',
           'tagView.removeFromMarked' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? 'Remove from Marked',
@@ -6642,11 +6646,11 @@ extension on Translations {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Reload with scaling',
-          'viewer.appBar.loadSampleQuality' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Load sample quality',
           _ => null,
         } ??
         switch (path) {
+          'viewer.appBar.loadSampleQuality' =>
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Load sample quality',
           'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Load high quality',
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'Drop snatched status',

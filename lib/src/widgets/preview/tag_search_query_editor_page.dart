@@ -267,8 +267,23 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
             const SizedBox(height: 16),
             ListTile(
               title: Text(context.loc.add),
-              leading: const Icon(Icons.add_rounded),
+              leading: const Icon(
+                Icons.add_rounded,
+                color: Colors.green,
+              ),
               onTap: () async {
+                onSuggestionTap(tag);
+                Navigator.of(context).pop();
+              },
+            ),
+            ListTile(
+              title: Text(context.loc.exclude),
+              leading: const Icon(
+                Icons.remove_rounded,
+                color: Colors.red,
+              ),
+              onTap: () async {
+                tag = tag.copyWith(tag: '-${tag.tag}');
                 onSuggestionTap(tag);
                 Navigator.of(context).pop();
               },

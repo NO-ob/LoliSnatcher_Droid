@@ -88,6 +88,8 @@ class TranslationsTrTr extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get add => TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Ekle';
   @override
+  String get exclude => TranslationOverrides.string(_root.$meta, 'exclude', {}) ?? 'Hariç tut';
+  @override
   String get edit => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? 'Düzenle';
   @override
   String get remove => TranslationOverrides.string(_root.$meta, 'remove', {}) ?? 'Kaldır';
@@ -1135,11 +1137,6 @@ class _TranslationsTagViewTrTr extends TranslationsTagViewEn {
   @override
   String get addedToSearchBar => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Arama çubuğuna eklendi:';
   @override
-  String get addToSearchExclude => TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? 'Aramaya ekle (Hariç tut)';
-  @override
-  String get addedToSearchBarExclude =>
-      TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? 'Arama çubuğuna eklendi (Hariç tut):';
-  @override
   String get addToMarked => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'İşaretlenenlere ekle';
   @override
   String get addToHidden => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? 'Gizlenenlere ekle';
@@ -1286,7 +1283,7 @@ class _TranslationsSearchBarTrTr extends TranslationsSearchBarEn {
   @override
   String get prefix => TranslationOverrides.string(_root.$meta, 'searchBar.prefix', {}) ?? 'Önek';
   @override
-  String get exclude => TranslationOverrides.string(_root.$meta, 'searchBar.exclude', {}) ?? 'Hariç tut (:)';
+  String get exclude => TranslationOverrides.string(_root.$meta, 'searchBar.exclude', {}) ?? 'Hariç tut (—)';
   @override
   String get booruNumberPrefix => TranslationOverrides.string(_root.$meta, 'searchBar.booruNumberPrefix', {}) ?? 'Booru (N#)';
   @override
@@ -3860,6 +3857,7 @@ extension on TranslationsTrTr {
           'enable' => TranslationOverrides.string(_root.$meta, 'enable', {}) ?? 'Etkinleştir',
           'disable' => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Devre Dışı Bırak',
           'add' => TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Ekle',
+          'exclude' => TranslationOverrides.string(_root.$meta, 'exclude', {}) ?? 'Hariç tut',
           'edit' => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? 'Düzenle',
           'remove' => TranslationOverrides.string(_root.$meta, 'remove', {}) ?? 'Kaldır',
           'save' => TranslationOverrides.string(_root.$meta, 'save', {}) ?? 'Kaydet',
@@ -4778,11 +4776,11 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Önbellek',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Akış+Önbellek',
-          'settings.video.videoBackendModeValues.normal' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Varsayılan',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.videoBackendModeValues.normal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Varsayılan',
           'settings.video.videoBackendModeValues.mpv' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV',
           'settings.video.videoBackendModeValues.mdk' =>
@@ -5584,9 +5582,6 @@ extension on TranslationsTrTr {
           'tagView.removeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromSearch', {}) ?? 'Aramadan kaldır',
           'tagView.addToSearch' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearch', {}) ?? 'Aramaya ekle',
           'tagView.addedToSearchBar' => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Arama çubuğuna eklendi:',
-          'tagView.addToSearchExclude' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? 'Aramaya ekle (Hariç tut)',
-          'tagView.addedToSearchBarExclude' =>
-            TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? 'Arama çubuğuna eklendi (Hariç tut):',
           'tagView.addToMarked' => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'İşaretlenenlere ekle',
           'tagView.addToHidden' => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? 'Gizlenenlere ekle',
           'tagView.removeFromMarked' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? 'İşaretlenenlerden kaldır',
@@ -5670,7 +5665,7 @@ extension on TranslationsTrTr {
             ({required String tag}) =>
                 TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? '«${tag}» panoya kopyalandı',
           'searchBar.prefix' => TranslationOverrides.string(_root.$meta, 'searchBar.prefix', {}) ?? 'Önek',
-          'searchBar.exclude' => TranslationOverrides.string(_root.$meta, 'searchBar.exclude', {}) ?? 'Hariç tut (:)',
+          'searchBar.exclude' => TranslationOverrides.string(_root.$meta, 'searchBar.exclude', {}) ?? 'Hariç tut (—)',
           'searchBar.booruNumberPrefix' => TranslationOverrides.string(_root.$meta, 'searchBar.booruNumberPrefix', {}) ?? 'Booru (N#)',
           'searchBar.metatags' => TranslationOverrides.string(_root.$meta, 'searchBar.metatags', {}) ?? 'Meta etiketler',
           'searchBar.freeMetatags' => TranslationOverrides.string(_root.$meta, 'searchBar.freeMetatags', {}) ?? 'Sayımdan muaf meta etiketler',
@@ -5738,10 +5733,10 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Ölçeklendirme ile yeniden yükle',
           'viewer.appBar.loadSampleQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Örnek kalitesinde yükle',
+          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Yüksek kalitede yükle',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Yüksek kalitede yükle',
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'İndirildi durumunu kaldır',
           'viewer.appBar.setSnatchedStatus' =>

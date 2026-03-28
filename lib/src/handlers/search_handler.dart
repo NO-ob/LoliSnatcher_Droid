@@ -294,7 +294,11 @@ class SearchHandler {
 
   void removeTagFromSearch(String tag) {
     if (tag.isNotEmpty) {
-      searchTextController.text = searchTextController.text.replaceAll('-$tag', '').replaceAll(tag, '');
+      searchTextController.text = searchTextController.text
+          .replaceAll(RegExp(r'(?:-|~)?\d+#(?:-|~)?' + tag), '')
+          .replaceAll('-$tag', '')
+          .replaceAll('~$tag', '')
+          .replaceAll(tag, '');
     }
   }
 

@@ -88,6 +88,8 @@ class TranslationsJaJp extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get add => TranslationOverrides.string(_root.$meta, 'add', {}) ?? '追加';
   @override
+  String get exclude => TranslationOverrides.string(_root.$meta, 'exclude', {}) ?? '除外';
+  @override
   String get edit => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? '編集';
   @override
   String get remove => TranslationOverrides.string(_root.$meta, 'remove', {}) ?? '削除';
@@ -1102,10 +1104,6 @@ class _TranslationsTagViewJaJp extends TranslationsTagViewEn {
   String get addToSearch => TranslationOverrides.string(_root.$meta, 'tagView.addToSearch', {}) ?? '検索に追加';
   @override
   String get addedToSearchBar => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? '検索バーに追加:';
-  @override
-  String get addToSearchExclude => TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? '現在の検索に追加 (除外)';
-  @override
-  String get addedToSearchBarExclude => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? '除外として検索バーに追加:';
   @override
   String get addToMarked => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'お気に入りタグに追加';
   @override
@@ -3626,6 +3624,7 @@ extension on TranslationsJaJp {
           'enable' => TranslationOverrides.string(_root.$meta, 'enable', {}) ?? '有効化',
           'disable' => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? '無効化',
           'add' => TranslationOverrides.string(_root.$meta, 'add', {}) ?? '追加',
+          'exclude' => TranslationOverrides.string(_root.$meta, 'exclude', {}) ?? '除外',
           'edit' => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? '編集',
           'remove' => TranslationOverrides.string(_root.$meta, 'remove', {}) ?? '削除',
           'save' => TranslationOverrides.string(_root.$meta, 'save', {}) ?? '保存',
@@ -4432,11 +4431,11 @@ extension on TranslationsJaJp {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'キャッシュ',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'ストリーム+キャッシュ',
-          'settings.video.videoBackendModeValues.normal' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'デフォルト',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.videoBackendModeValues.normal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'デフォルト',
           'settings.video.videoBackendModeValues.mpv' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV',
           'settings.video.videoBackendModeValues.mdk' =>
@@ -5135,8 +5134,6 @@ extension on TranslationsJaJp {
           'tagView.removeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromSearch', {}) ?? '現在の検索から削除',
           'tagView.addToSearch' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearch', {}) ?? '検索に追加',
           'tagView.addedToSearchBar' => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? '検索バーに追加:',
-          'tagView.addToSearchExclude' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? '現在の検索に追加 (除外)',
-          'tagView.addedToSearchBarExclude' => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? '除外として検索バーに追加:',
           'tagView.addToMarked' => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'お気に入りタグに追加',
           'tagView.addToHidden' => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? '非表示タグに追加',
           'tagView.removeFromMarked' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? 'お気に入りタグから削除',
@@ -5266,10 +5263,10 @@ extension on TranslationsJaJp {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? '選択解除',
           'viewer.appBar.reloadWithScaling' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'スケーリングして再読み込み',
           'viewer.appBar.loadSampleQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'サンプル品質の読み込み',
+          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? '高品質の読み込み',
           _ => null,
         } ??
         switch (path) {
-          'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? '高品質の読み込み',
           'viewer.appBar.dropSnatchedStatus' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'ダウンロードステータスを削除',
           'viewer.appBar.setSnatchedStatus' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.setSnatchedStatus', {}) ?? 'ダウンロードステータスを設定',
           'viewer.appBar.snatch' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.snatch', {}) ?? 'ダウンロード',

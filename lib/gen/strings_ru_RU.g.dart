@@ -88,6 +88,8 @@ class TranslationsRuRu extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get add => TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Добавить';
   @override
+  String get exclude => TranslationOverrides.string(_root.$meta, 'exclude', {}) ?? 'Исключить';
+  @override
   String get edit => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? 'Редактировать';
   @override
   String get remove => TranslationOverrides.string(_root.$meta, 'remove', {}) ?? 'Убрать';
@@ -1143,10 +1145,10 @@ class _TranslationsTagViewRuRu extends TranslationsTagViewEn {
   @override
   String get addedToSearchBar => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Добавлено в строку поиска:';
   @override
-  String get addToSearchExclude => TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? 'Добавить в поиск (Исключить)';
+  String get excludeFromSearch => TranslationOverrides.string(_root.$meta, 'tagView.excludeFromSearch', {}) ?? 'Исключить из поиска';
   @override
-  String get addedToSearchBarExclude =>
-      TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? 'Добавлено в строку поиска (Исключить):';
+  String get exclusionAddedToSearchBar =>
+      TranslationOverrides.string(_root.$meta, 'tagView.exclusionAddedToSearchBar', {}) ?? 'Исключение добавлено в строку поиска:';
   @override
   String get addToMarked => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'Добавить в Отмеченные';
   @override
@@ -3876,6 +3878,7 @@ extension on TranslationsRuRu {
           'enable' => TranslationOverrides.string(_root.$meta, 'enable', {}) ?? 'Включить',
           'disable' => TranslationOverrides.string(_root.$meta, 'disable', {}) ?? 'Выключить',
           'add' => TranslationOverrides.string(_root.$meta, 'add', {}) ?? 'Добавить',
+          'exclude' => TranslationOverrides.string(_root.$meta, 'exclude', {}) ?? 'Исключить',
           'edit' => TranslationOverrides.string(_root.$meta, 'edit', {}) ?? 'Редактировать',
           'remove' => TranslationOverrides.string(_root.$meta, 'remove', {}) ?? 'Убрать',
           'save' => TranslationOverrides.string(_root.$meta, 'save', {}) ?? 'Сохранить',
@@ -4798,11 +4801,11 @@ extension on TranslationsRuRu {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
-          'settings.video.videoBackendModeValues.normal' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'По умолчанию',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.videoBackendModeValues.normal' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'По умолчанию',
           'settings.video.videoBackendModeValues.mpv' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.mpv', {}) ?? 'MPV',
           'settings.video.videoBackendModeValues.mdk' =>
@@ -5605,10 +5608,9 @@ extension on TranslationsRuRu {
           'tagView.removeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromSearch', {}) ?? 'Удалить из поиска',
           'tagView.addToSearch' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearch', {}) ?? 'Добавить в поиск',
           'tagView.addedToSearchBar' => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Добавлено в строку поиска:',
-          'tagView.addToSearchExclude' =>
-            TranslationOverrides.string(_root.$meta, 'tagView.addToSearchExclude', {}) ?? 'Добавить в поиск (Исключить)',
-          'tagView.addedToSearchBarExclude' =>
-            TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBarExclude', {}) ?? 'Добавлено в строку поиска (Исключить):',
+          'tagView.excludeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.excludeFromSearch', {}) ?? 'Исключить из поиска',
+          'tagView.exclusionAddedToSearchBar' =>
+            TranslationOverrides.string(_root.$meta, 'tagView.exclusionAddedToSearchBar', {}) ?? 'Исключение добавлено в строку поиска:',
           'tagView.addToMarked' => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'Добавить в Отмеченные',
           'tagView.addToHidden' => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? 'Добавить в Скрытые',
           'tagView.removeFromMarked' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? 'Убрать из Отмеченных',
@@ -5756,11 +5758,11 @@ extension on TranslationsRuRu {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Перезагрузить с масштабированием',
-          'viewer.appBar.loadSampleQuality' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Загрузить семпл качество',
           _ => null,
         } ??
         switch (path) {
+          'viewer.appBar.loadSampleQuality' =>
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Загрузить семпл качество',
           'viewer.appBar.loadHighQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Загрузить высокое качество',
           'viewer.appBar.dropSnatchedStatus' =>

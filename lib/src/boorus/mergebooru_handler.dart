@@ -86,9 +86,9 @@ class MergebooruHandler extends BooruHandler {
         currentIndex == null
             ? ''
             : RegExp(
-                '(?!'
+                '(?:-|~)?(?!'
                 '${currentIndex + 1}'
-                r')\d+#\S*',
+                r')\d+#(?:-|~)?\S*',
               ),
         '',
       )
