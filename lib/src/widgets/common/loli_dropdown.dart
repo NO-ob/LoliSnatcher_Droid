@@ -380,7 +380,7 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
                   Padding(
                     padding: const EdgeInsets.only(left: 16),
                     child: SizedBox(
-                      width: 180,
+                      width: 150,
                       height: kMinInteractiveDimension,
                       child: SearchBar(
                         controller: searchController,
