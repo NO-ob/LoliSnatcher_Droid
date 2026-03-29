@@ -486,10 +486,10 @@ class _BooruEditState extends State<BooruEdit> {
         sideColor: Colors.yellow,
       );
       final res = await onTest();
-      await FlashElements.dismissAll();
       if (!res) {
         return;
       }
+      await FlashElements.dismissAll();
     }
 
     await getStoragePermission();
