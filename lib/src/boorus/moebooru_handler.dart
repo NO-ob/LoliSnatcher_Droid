@@ -50,14 +50,14 @@ class MoebooruHandler extends BooruHandler {
   // can probably use the same method as gelbooru when the individual BooruItem is moved to separate method
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as XmlElement;
 
     if (current.getAttribute('file_url') != null) {
       // Fix for bleachbooru
       String fileURL = '', sampleURL = '', previewURL = '';
-      fileURL += current.getAttribute('file_url')!.toString();
-      sampleURL += current.getAttribute('sample_url')!.toString();
-      previewURL += current.getAttribute('preview_url')!.toString();
+      fileURL += current.getAttribute('file_url')!;
+      sampleURL += current.getAttribute('sample_url')!;
+      previewURL += current.getAttribute('preview_url')!;
       if (!fileURL.contains('http')) {
         fileURL = booru.baseURL! + fileURL;
         sampleURL = booru.baseURL! + sampleURL;

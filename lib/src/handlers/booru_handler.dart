@@ -38,7 +38,7 @@ abstract class BooruHandler {
   Booru booru;
 
   String errorString = '';
-  List<({BooruItem item, Object e, StackTrace? s})> failedItems = [];
+  // List<({BooruItem item, Object e, StackTrace? s})> failedItems = [];
 
   Map<String, TagType> get tagTypeMap => {};
 
@@ -290,7 +290,7 @@ abstract class BooruHandler {
             LogTypes.booruHandlerRawFetched,
             s: s,
           );
-          failedItems.add((item: post, e: e, s: s));
+          // failedItems.add((item: post, e: e, s: s));
         }
       }
     }
@@ -326,7 +326,7 @@ abstract class BooruHandler {
 
     // TODO
     // notifyAboutFailed();
-    failedItems.clear();
+    // failedItems.clear();
   }
 
   String validateTags(String tags) {
