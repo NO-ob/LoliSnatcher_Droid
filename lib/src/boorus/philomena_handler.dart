@@ -26,7 +26,7 @@ class PhilomenaHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as Map<String, dynamic>;
     if (current['representations']['full'] != null) {
       String sampleURL = current['representations']['medium'], thumbURL = current['representations']['thumb_small'];
       if (current['mime_type'].toString().contains('video')) {

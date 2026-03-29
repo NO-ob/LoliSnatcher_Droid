@@ -1,3 +1,4 @@
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -17,17 +18,17 @@ class WildCrittersHandler extends BooruHandler {
 
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
-    final linkItem = responseItem.firstChild;
-    final imgItem = linkItem.firstChild;
+    final linkItem = (responseItem as Element).firstChild;
+    final imgItem = linkItem?.firstChild;
 
-    if (imgItem?.attributes['src'] != null && linkItem.attributes['id'] != null) {
+    if (imgItem?.attributes['src'] != null && linkItem?.attributes['id'] != null) {
       final String id = linkItem!.attributes['id']!.substring(1);
       final String thumbURL = imgItem!.attributes['src']!;
       final String fileURL = await getFileUrl(id);
       if (fileURL.isEmpty) {
         return null;
       }
-      final List<String> tags = imgItem!.attributes['title']!.split(' ');
+      final List<String> tags = imgItem.attributes['title']!.split(' ');
       final BooruItem item = BooruItem(
         fileURL: fileURL,
         sampleURL: fileURL,

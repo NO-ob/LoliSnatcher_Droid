@@ -1,3 +1,4 @@
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -25,12 +26,12 @@ class GelbooruV1Handler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final linkItem = responseItem.firstChild;
-    final imgItem = linkItem.firstChild;
+    final linkItem = (responseItem as Element).firstChild;
+    final imgItem = linkItem?.firstChild;
 
     if (imgItem?.attributes['src'] != null && linkItem?.attributes['id'] != null) {
-      final String id = linkItem.attributes['id'].substring(1);
-      final String thumbURL = imgItem.attributes['src'];
+      final String id = linkItem!.attributes['id']!.substring(1);
+      final String thumbURL = imgItem!.attributes['src']!;
       final String fileURL = thumbURL
           .replaceFirst('thumbs', 'img')
           .replaceFirst('thumbnails', 'images')

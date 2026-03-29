@@ -77,7 +77,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final dynamic current = responseItem;
+    final current = responseItem as Map<String, dynamic>;
 
     final List<Tag> tags = [];
     final Map<TagType, List<String>> tagMap = {};

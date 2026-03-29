@@ -90,7 +90,7 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as Map<String, dynamic>;
 
     if (current['file_url'] != null) {
       // Fix for bleachbooru

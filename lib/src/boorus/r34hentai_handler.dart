@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
@@ -30,7 +31,7 @@ class R34HentaiHandler extends ShimmieHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as Element;
 
     final String id = current.attributes['data-post-id']!;
     final String fileExt = current.attributes['data-mime']?.split('/')[1] ?? 'png';

@@ -1632,7 +1632,7 @@ class TabManagerItem extends StatelessWidget {
                                   else
                                     tab.booruHandler.booru.name ?? '',
                                   //
-                                  for (final booru in (tab.secondaryBoorus.value ?? [])) booru.name ?? '',
+                                  for (final Booru booru in (tab.secondaryBoorus.value ?? [])) booru.name ?? '',
                                 ];
                                 final String booruNamesStr = booruNames.join(', ');
 

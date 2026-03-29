@@ -36,7 +36,7 @@ class TagsManagerListItemDialog extends StatefulWidget {
 }
 
 class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
-  void callbackWithSetState(Function callback) {
+  void callbackWithSetState(VoidCallback callback) {
     callback();
     setState(() {});
   }

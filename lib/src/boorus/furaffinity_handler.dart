@@ -53,11 +53,10 @@ class FurAffinityHandler extends BooruHandler {
 
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
-    final imgItem = responseItem.querySelector('img');
-
-    if (imgItem.attributes['src'] != null) {
+    final imgItem = (responseItem as Element).querySelector('img');
+    if (imgItem?.attributes['src'] != null) {
       final String id = responseItem.attributes['href']!.replaceAll('/', '').replaceAll('view', '');
-      final String thumbURL = "https:${imgItem.attributes["src"]!}";
+      final String thumbURL = "https:${imgItem!.attributes["src"]!}";
       final Document? postPage = await getPostPage(id);
 
       if (postPage == null) {

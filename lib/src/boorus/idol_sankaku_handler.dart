@@ -73,7 +73,7 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as Map<String, dynamic>;
     final List<String> tags = [];
     final Map<TagType, List<String>> tagMap = {};
     for (int x = 0; x < current['tags'].length; x++) {

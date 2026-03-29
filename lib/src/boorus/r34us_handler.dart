@@ -37,7 +37,7 @@ class R34USHandler extends BooruHandler {
 
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
-    final current = responseItem.children[0];
+    final current = (responseItem as Element).children[0];
     if (current.firstChild!.attributes['src'] != null) {
       final String id = current.attributes['id']!;
       final String thumbURL = current.firstChild!.attributes['src']!;

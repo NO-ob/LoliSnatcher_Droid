@@ -29,7 +29,7 @@ class SzurubooruHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as Map<String, dynamic>;
 
     final List<String> tags = [];
     for (int x = 0; x < current['tags'].length; x++) {

@@ -35,7 +35,7 @@ class e621Handler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final dynamic current = responseItem;
+    final dynamic current = responseItem as Map<String, dynamic>;
 
     if (current['file']['md5'] != null) {
       String fileURL = '';

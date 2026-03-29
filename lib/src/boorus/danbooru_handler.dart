@@ -93,7 +93,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as Map<String, dynamic>;
     /**
      * This check is needed as danbooru will return items which have been banned or deleted and will not have any image urls
      * to go with the rest of the data so cannot be displayed and are pointless for the app
