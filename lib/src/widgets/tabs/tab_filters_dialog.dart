@@ -261,7 +261,7 @@ class _BooruDropdownItem extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.only(left: 16, right: 16),
-      height: kMinInteractiveDimension,
+      height: 54,
       decoration: isCurrent
           ? BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,

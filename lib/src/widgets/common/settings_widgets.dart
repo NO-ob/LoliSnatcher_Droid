@@ -496,6 +496,8 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.itemTitleBuilder,
     this.itemSubtitleBuilder,
     this.clearable = false,
+    this.searchable = false,
+    this.searchCheck,
     this.onReset,
     this.itemExtent,
     this.expendableByScroll = false,
@@ -519,6 +521,8 @@ class SettingsDropdown<T> extends StatelessWidget {
   final String Function(T?)? itemTitleBuilder;
   final String Function(T?)? itemSubtitleBuilder;
   final bool clearable;
+  final bool searchable;
+  final bool Function(String, T)? searchCheck;
   final VoidCallback? onReset;
   final double? itemExtent;
   final bool expendableByScroll;
@@ -585,6 +589,8 @@ class SettingsDropdown<T> extends StatelessWidget {
               onChanged: onChanged ?? (item) {},
               items: items.where((item) => itemFilter?.call(item) ?? true).toList(),
               clearable: clearable,
+              searchable: searchable,
+              searchCheck: searchCheck,
               expandableByScroll: expendableByScroll,
               itemExtent: itemExtent,
               itemBuilder: (item) {
@@ -646,6 +652,8 @@ class SettingsBooruDropdown extends StatelessWidget {
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.nullable = false,
+    this.searcheable,
+    this.searchCheck,
     this.trailingIcon,
     this.contentPadding,
     this.titleAsLabel = false,
@@ -664,6 +672,8 @@ class SettingsBooruDropdown extends StatelessWidget {
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final bool nullable;
+  final bool? searcheable;
+  final bool Function(String, Booru?)? searchCheck;
   final Widget? trailingIcon;
   final EdgeInsets? contentPadding;
   final bool titleAsLabel;
@@ -705,10 +715,12 @@ class SettingsBooruDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final usedItems = (items ?? SettingsHandler.instance.booruList).where((b) => itemFilter?.call(b) ?? true);
+
     return SettingsDropdown<Booru?>(
       value: value,
       items: [
-        ...(items ?? SettingsHandler.instance.booruList).where((b) => itemFilter?.call(b) ?? true),
+        ...usedItems,
       ],
       onChanged: onChanged,
       title: title,
@@ -719,7 +731,13 @@ class SettingsBooruDropdown extends StatelessWidget {
       itemBuilder: (item) => _itemBuilder(context, item),
       selectedItemBuilder: (item) => _selectedItemBuilder(context, item),
       clearable: nullable,
-      itemExtent: kMinInteractiveDimension,
+      searchable: searcheable ?? usedItems.length > 5,
+      searchCheck:
+          searchCheck ??
+          (searchText, item) =>
+              (item?.name?.toLowerCase().contains(searchText) ?? true) ||
+              (item?.type?.name.toLowerCase().contains(searchText) ?? true),
+      itemExtent: 54,
       expendableByScroll: true,
       contentPadding: contentPadding,
       titleAsLabel: titleAsLabel,

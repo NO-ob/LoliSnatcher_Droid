@@ -102,8 +102,12 @@ class TabSelector extends StatelessWidget {
           }
         },
         expandableByScroll: true,
+        searchable: settingsHandler.booruList.length > 5,
+        searchCheck: (searchText, item) =>
+            (item.name?.toLowerCase().contains(searchText) ?? true) ||
+            (item.type?.name.toLowerCase().contains(searchText) ?? true),
         items: settingsHandler.booruList,
-        itemExtent: kMinInteractiveDimension,
+        itemExtent: 54,
         itemBuilder: (item) {
           final bool isCurrent = currentTab.selectedBooru.value == item;
 
@@ -115,7 +119,7 @@ class TabSelector extends StatelessWidget {
             padding: settingsHandler.appMode.value.isDesktop
                 ? const EdgeInsets.all(5)
                 : const EdgeInsets.only(left: 16, right: 16),
-            height: kMinInteractiveDimension,
+            height: 54,
             decoration: isCurrent
                 ? BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,

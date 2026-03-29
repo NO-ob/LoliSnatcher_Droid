@@ -182,6 +182,9 @@ class _BooruEditState extends State<BooruEdit> {
               title: context.loc.settings.booruEditor.booruType,
               itemTitleBuilder: (BooruType? type) => type?.alias ?? '',
               expendableByScroll: true,
+              searchable: true,
+              searchCheck: (searchText, item) =>
+                  item.name.toLowerCase().contains(searchText) || item.alias.toLowerCase().contains(searchText),
             ),
             SettingsTextInput(
               controller: booruFaviconController,

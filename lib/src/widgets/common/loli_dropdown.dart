@@ -21,6 +21,8 @@ class LoliDropdown<T> extends StatelessWidget {
     this.itemExtent,
     this.withBorder = true,
     this.clearable = false,
+    this.searchable = false,
+    this.searchCheck,
     this.expandableByScroll = false,
     super.key,
   });
@@ -38,6 +40,8 @@ class LoliDropdown<T> extends StatelessWidget {
   final double? itemExtent;
   final bool withBorder;
   final bool clearable;
+  final bool searchable;
+  final bool Function(String, T)? searchCheck;
   final bool expandableByScroll;
 
   Future<bool> showDialog(BuildContext context) async {
@@ -69,6 +73,8 @@ class LoliDropdown<T> extends StatelessWidget {
                     labelText: labelText,
                     itemExtent: itemExtent,
                     clearable: clearable,
+                    searchable: searchable,
+                    searchCheck: searchCheck,
                   );
                 },
               ),
@@ -83,6 +89,8 @@ class LoliDropdown<T> extends StatelessWidget {
             labelText: labelText,
             itemExtent: itemExtent,
             clearable: clearable,
+            searchable: searchable,
+            searchCheck: searchCheck,
           );
         }
       },
@@ -195,6 +203,8 @@ class LoliDropdownBottomSheet<T> extends StatefulWidget {
     required this.labelText,
     this.itemExtent,
     this.clearable = false,
+    this.searchable = false,
+    this.searchCheck,
     this.controller,
     super.key,
   });
@@ -206,6 +216,8 @@ class LoliDropdownBottomSheet<T> extends StatefulWidget {
   final String labelText;
   final double? itemExtent;
   final bool clearable;
+  final bool searchable;
+  final bool Function(String, T)? searchCheck;
   final ScrollController? controller;
 
   @override
@@ -214,6 +226,9 @@ class LoliDropdownBottomSheet<T> extends StatefulWidget {
 
 class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
   late final ScrollController scrollController;
+  final TextEditingController searchController = TextEditingController();
+
+  final List<T> filteredItems = [];
 
   final List<GlobalKey> _keys = [];
 
@@ -223,11 +238,12 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
 
     scrollController = widget.controller ?? ScrollController();
 
-    _keys.addAll(List.generate(widget.items.length, (_) => GlobalKey()));
+    filteredItems.addAll(widget.items);
+    _keys.addAll(filteredItems.map((_) => GlobalKey()));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.value != null) {
-        final index = widget.items.indexOf(widget.value as T);
+        final index = filteredItems.indexOf(widget.value as T);
         if (_keys[index].currentContext != null) {
           Scrollable.ensureVisible(
             _keys[index].currentContext!,
@@ -254,8 +270,22 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
     Navigator.of(context).pop(true);
   }
 
+  void filterItems() {
+    final search = searchController.text.toLowerCase().trim();
+    if (search.isEmpty) {
+      filteredItems.clear();
+      filteredItems.addAll(widget.items);
+    } else {
+      filteredItems.clear();
+      filteredItems.addAll(widget.items.where((item) => widget.searchCheck?.call(search, item) ?? true));
+    }
+    _keys.clear();
+    _keys.addAll(filteredItems.map((_) => GlobalKey()));
+    setState(() {});
+  }
+
   Widget itemBuilder(BuildContext context, int index) {
-    final item = widget.items[index];
+    final item = filteredItems[index];
 
     return Material(
       key: _keys[index],
@@ -280,11 +310,11 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
       thumbVisibility: true,
       // use more performant buidler when there are a lot of items,
       // but we lose ability to scroll to the selected item on first render
-      child: widget.items.length > 500
+      child: filteredItems.length > 500
           ? ListView.builder(
               controller: scrollController,
               shrinkWrap: widget.controller == null,
-              itemCount: widget.items.length,
+              itemCount: filteredItems.length,
               itemExtent: widget.itemExtent,
               itemBuilder: itemBuilder,
             )
@@ -292,7 +322,7 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
               controller: scrollController,
               shrinkWrap: widget.controller == null,
               itemExtent: widget.itemExtent,
-              children: List.generate(widget.items.length, (i) => itemBuilder(context, i)),
+              children: List.generate(filteredItems.length, (i) => itemBuilder(context, i)),
             ),
     );
 
@@ -346,7 +376,28 @@ class _LoliDropdownBottomSheet<T> extends State<LoliDropdownBottomSheet<T>> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                if (widget.searchable && widget.searchCheck != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: SizedBox(
+                      width: 180,
+                      height: kMinInteractiveDimension,
+                      child: SearchBar(
+                        controller: searchController,
+                        hintText: context.loc.search,
+                        trailing: const [
+                          IgnorePointer(
+                            child: Padding(
+                              padding: EdgeInsets.only(right: 8),
+                              child: Icon(Icons.search),
+                            ),
+                          ),
+                        ],
+                        onChanged: (_) => filterItems(),
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 16),
                 const CloseButton(),
                 const SizedBox(width: 16),
               ],

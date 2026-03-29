@@ -100,6 +100,7 @@ Changes:
 - Improved logic of button which removes tag from query (detects ~ and N# operators)
 - Changed wording on button which adds tag as an exclusion to query
 - Added Exclude button to tag suggestion long tap dialog
+- Added search to dropdown lists
 
 
 Booru changes/fixes:

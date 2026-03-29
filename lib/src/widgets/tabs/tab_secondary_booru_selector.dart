@@ -52,7 +52,7 @@ class TabSecondaryBooruSelector extends StatelessWidget {
           items: settingsHandler.booruList,
           itemBuilder: (item) => Container(
             padding: const EdgeInsets.only(left: 16),
-            height: kMinInteractiveDimension,
+            height: 54,
             child: TabBooruSelectorItem(booru: item),
           ),
           labelText: context.loc.tabs.secondaryBoorus,

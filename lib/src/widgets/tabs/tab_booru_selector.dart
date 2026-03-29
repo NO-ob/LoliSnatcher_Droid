@@ -57,7 +57,7 @@ class TabBooruSelector extends StatelessWidget {
           },
           expandableByScroll: true,
           items: settingsHandler.booruList,
-          itemExtent: kMinInteractiveDimension,
+          itemExtent: 54,
           itemBuilder: (item) {
             final bool isCurrent = selectedBooru == item;
 
@@ -67,7 +67,7 @@ class TabBooruSelector extends StatelessWidget {
 
             return Container(
               padding: isDesktop ? const EdgeInsets.all(5) : const EdgeInsets.only(left: 16, right: 16),
-              height: kMinInteractiveDimension,
+              height: 54,
               decoration: isCurrent
                   ? BoxDecoration(
                       color: Theme.of(context).colorScheme.primaryContainer,
@@ -107,9 +107,35 @@ class TabBooruSelectorItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String name = ' ${booru.name}${extraText?.isNotEmpty == true ? extraText : ''}';
+    final String type = ' ${booru.type?.name ?? ''}';
+
+    final column = Column(
+      mainAxisSize: .min,
+      crossAxisAlignment: .start,
+      children: [
+        MarqueeText(
+          key: ValueKey('name-$name'),
+          text: name,
+          isExpanded: false,
+        ),
+        if (!compact) ...[
+          const SizedBox(height: 8),
+          MarqueeText(
+            key: ValueKey('type-$type'),
+            text: type,
+            style: DefaultTextStyle.of(context).style.copyWith(
+              fontSize: 12,
+              height: 1,
+              color: DefaultTextStyle.of(context).style.color?.withValues(alpha: 0.66),
+            ),
+            isExpanded: false,
+          ),
+        ],
+      ],
+    );
 
     return Row(
-      mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+      mainAxisSize: compact ? .min : .max,
       children: [
         //Booru Icon
         if (withFavicon) ...[
@@ -117,11 +143,7 @@ class TabBooruSelectorItem extends StatelessWidget {
           const SizedBox(width: 4),
         ],
         //Booru name
-        MarqueeText(
-          key: ValueKey(name),
-          text: name,
-          isExpanded: !compact,
-        ),
+        if (compact) column else Expanded(child: column),
       ],
     );
   }
