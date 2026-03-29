@@ -19,6 +19,7 @@
     "enable": "Включить",
     "disable": "Выключить",
     "add": "Добавить",
+    "exclude": "Исключить",
     "edit": "Редактировать",
     "remove": "Убрать",
     "save": "Сохранить",
@@ -1094,8 +1095,8 @@
         "removeFromSearch": "Удалить из поиска",
         "addToSearch": "Добавить в поиск",
         "addedToSearchBar": "Добавлено в строку поиска:",
-        "addToSearchExclude": "Добавить в поиск (Исключить)",
-        "addedToSearchBarExclude": "Добавлено в строку поиска (Исключить):",
+        "excludeFromSearch": "Исключить из поиска",
+        "exclusionAddedToSearchBar": "Исключение добавлено в строку поиска:",
         "addToMarked": "Добавить в Отмеченные",
         "addToHidden": "Добавить в Скрытые",
         "removeFromMarked": "Убрать из Отмеченных",
@@ -1117,9 +1118,7 @@
         "relatedTabs": "Связанные вкладки",
         "tabsWithOnlyTag": "Вкладки только с этим тегом",
         "tabsWithOnlyTagDifferentBooru": "Вкладки только с этим тегом, но на другом сайте",
-        "tabsContainingTag": "Вкладки, содержащие этот тег",
-        "excludeFromSearch": "Исключить из поиска",
-        "exclusionAddedToSearchBar": "Исключение добавлено в строку поиска:"
+        "tabsContainingTag": "Вкладки, содержащие этот тег"
     },
     "pinnedTags": {
         "pinnedTags": "Закрепленные теги",
@@ -1351,6 +1350,5 @@
         "meta": "Мета",
         "species": "Раса",
         "none": "Нет/Общее"
-    },
-    "exclude": "Исключить"
+    }
 }
