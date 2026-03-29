@@ -1021,6 +1021,14 @@ class TranslationsWebviewEn {
   /// en: 'Not supported on this device'
   String get notSupportedOnDevice => TranslationOverrides.string(_root.$meta, 'webview.notSupportedOnDevice', {}) ?? 'Not supported on this device';
 
+  /// en: 'Captcha'
+  String get captcha => TranslationOverrides.string(_root.$meta, 'webview.captcha', {}) ?? 'Captcha';
+
+  /// en: 'Possible captcha detected, please solve it and return after you are done'
+  String get captchaCheckDescription =>
+      TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
+      'Possible captcha detected, please solve it and return after you are done';
+
   late final TranslationsWebviewNavigationEn navigation = TranslationsWebviewNavigationEn.internal(_root);
 }
 
@@ -3665,8 +3673,8 @@ class TranslationsSettingsCacheEn {
   /// en: 'Media'
   String get cacheTypeMedia => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeMedia', {}) ?? 'Media';
 
-  /// en: 'WebView'
-  String get cacheTypeWebView => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeWebView', {}) ?? 'WebView';
+  /// en: 'Webview'
+  String get cacheTypeWebView => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeWebView', {}) ?? 'Webview';
 
   /// en: 'Cache cleared'
   String get cacheCleared => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheCleared', {}) ?? 'Cache cleared';
@@ -5257,6 +5265,10 @@ extension on Translations {
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Webview',
           'webview.notSupportedOnDevice' =>
             TranslationOverrides.string(_root.$meta, 'webview.notSupportedOnDevice', {}) ?? 'Not supported on this device',
+          'webview.captcha' => TranslationOverrides.string(_root.$meta, 'webview.captcha', {}) ?? 'Captcha',
+          'webview.captchaCheckDescription' =>
+            TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
+                'Possible captcha detected, please solve it and return after you are done',
           'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Enter a URL',
           'webview.navigation.enterCustomUrl' =>
             TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Enter custom URL',
@@ -5726,12 +5738,12 @@ extension on Translations {
                 '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Stream',
-          'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache',
-          'settings.video.cacheModeValues.streamCache' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache',
+          'settings.video.cacheModeValues.streamCache' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache',
           'settings.video.videoBackendModeValues.normal' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Default',
           'settings.video.videoBackendModeValues.mpv' =>
@@ -6138,7 +6150,7 @@ extension on Translations {
           'settings.cache.cacheTypeThumbnails' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeThumbnails', {}) ?? 'Thumbnails',
           'settings.cache.cacheTypeSamples' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeSamples', {}) ?? 'Samples',
           'settings.cache.cacheTypeMedia' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeMedia', {}) ?? 'Media',
-          'settings.cache.cacheTypeWebView' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeWebView', {}) ?? 'WebView',
+          'settings.cache.cacheTypeWebView' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeWebView', {}) ?? 'Webview',
           'settings.cache.cacheCleared' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheCleared', {}) ?? 'Cache cleared',
           'settings.cache.clearedCacheType' =>
             ({required String type}) =>
@@ -6643,12 +6655,12 @@ extension on Translations {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Pause',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Start',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Unfavourite',
-          'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
-          'viewer.appBar.reloadWithScaling' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Reload with scaling',
           _ => null,
         } ??
         switch (path) {
+          'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
+          'viewer.appBar.reloadWithScaling' =>
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Reload with scaling',
           'viewer.appBar.loadSampleQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Load sample quality',
           'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Load high quality',

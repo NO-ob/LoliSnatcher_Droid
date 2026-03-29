@@ -254,9 +254,8 @@ class Tools {
           builder: (context) => InAppWebviewView(
             initialUrl: '${uri.scheme}://$host${uri.hasPort && uri.port != 80 ? ':${uri.port}' : ''}',
             userAgent: customUserAgent,
-            title: 'Captcha check',
-            subtitle:
-                "Possible captcha detected, please solve it and press back after that. If there is no captcha then it's probably some other authentication issue.",
+            title: context.loc.webview.captcha,
+            subtitle: context.loc.webview.captchaCheckDescription,
           ),
         ),
       );

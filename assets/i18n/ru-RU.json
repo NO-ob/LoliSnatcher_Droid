@@ -336,6 +336,8 @@
     "webview": {
         "title": "Вебвью",
         "notSupportedOnDevice": "Не поддерживается на этом устройстве",
+        "captcha": "Капча",
+        "captchaCheckDescription": "Обнаружена возможная капча. Пожалуйста реши ее и вернись обратно после выполнения",
         "navigation": {
             "enterUrlLabel": "Ввести ссылку",
             "enterCustomUrl": "Ввести ссылку",

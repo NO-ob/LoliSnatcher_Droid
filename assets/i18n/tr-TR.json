@@ -839,7 +839,7 @@
             "cacheTypeThumbnails": "Küçük Resimler",
             "cacheTypeSamples": "Örnekler",
             "cacheTypeMedia": "Medya",
-            "cacheTypeWebView": "WebView",
+            "cacheTypeWebView": "Webview",
             "cacheCleared": "Önbellek temizlendi",
             "clearedCacheType(param=type)": "${type: String} önbelleği temizlendi",
             "clearAllCache": "Tüm önbelleği temizle",

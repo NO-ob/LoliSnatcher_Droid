@@ -336,6 +336,8 @@
     "webview": {
         "title": "Webview",
         "notSupportedOnDevice": "Not supported on this device",
+        "captcha": "Captcha",
+        "captchaCheckDescription": "Possible captcha detected, please solve it and return after you are done",
         "navigation": {
             "enterUrlLabel": "Enter a URL",
             "enterCustomUrl": "Enter custom URL",
@@ -839,7 +841,7 @@
             "cacheTypeThumbnails": "Thumbnails",
             "cacheTypeSamples": "Samples",
             "cacheTypeMedia": "Media",
-            "cacheTypeWebView": "WebView",
+            "cacheTypeWebView": "Webview",
             "cacheCleared": "Cache cleared",
             "clearedCacheType(param=type)": "Cleared ${type: String} cache",
             "clearAllCache": "Clear all cache",

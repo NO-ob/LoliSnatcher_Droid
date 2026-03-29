@@ -835,6 +835,12 @@ class _TranslationsWebviewRuRu extends TranslationsWebviewEn {
   String get notSupportedOnDevice =>
       TranslationOverrides.string(_root.$meta, 'webview.notSupportedOnDevice', {}) ?? 'Не поддерживается на этом устройстве';
   @override
+  String get captcha => TranslationOverrides.string(_root.$meta, 'webview.captcha', {}) ?? 'Капча';
+  @override
+  String get captchaCheckDescription =>
+      TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
+      'Обнаружена возможная капча. Пожалуйста реши ее и вернись обратно после выполнения';
+  @override
   late final _TranslationsWebviewNavigationRuRu navigation = _TranslationsWebviewNavigationRuRu._(_root);
 }
 
@@ -4308,6 +4314,10 @@ extension on TranslationsRuRu {
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Вебвью',
           'webview.notSupportedOnDevice' =>
             TranslationOverrides.string(_root.$meta, 'webview.notSupportedOnDevice', {}) ?? 'Не поддерживается на этом устройстве',
+          'webview.captcha' => TranslationOverrides.string(_root.$meta, 'webview.captcha', {}) ?? 'Капча',
+          'webview.captchaCheckDescription' =>
+            TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
+                'Обнаружена возможная капча. Пожалуйста реши ее и вернись обратно после выполнения',
           'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Ввести ссылку',
           'webview.navigation.enterCustomUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Ввести ссылку',
           'webview.navigation.navigateTo' =>
@@ -4798,12 +4808,12 @@ extension on TranslationsRuRu {
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
-          'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
-          'settings.video.cacheModeValues.streamCache' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
+          'settings.video.cacheModeValues.streamCache' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
           'settings.video.videoBackendModeValues.normal' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'По умолчанию',
           'settings.video.videoBackendModeValues.mpv' =>
@@ -5755,12 +5765,12 @@ extension on TranslationsRuRu {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Пауза',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Старт',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Удалить из избранного',
-          'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
-          'viewer.appBar.reloadWithScaling' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Перезагрузить с масштабированием',
           _ => null,
         } ??
         switch (path) {
+          'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
+          'viewer.appBar.reloadWithScaling' =>
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Перезагрузить с масштабированием',
           'viewer.appBar.loadSampleQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Загрузить семпл качество',
           'viewer.appBar.loadHighQuality' =>

@@ -839,7 +839,7 @@
             "cacheTypeThumbnails": "サムネイル",
             "cacheTypeSamples": "サンプル",
             "cacheTypeMedia": "メディア",
-            "cacheTypeWebView": "WebView",
+            "cacheTypeWebView": "Webview",
             "cacheCleared": "キャッシュがクリアされました",
             "clearedCacheType(param=type)": "${type: String} キャッシュをクリアしました",
             "clearAllCache": "すべてのキャッシュをクリア",
