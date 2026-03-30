@@ -56,10 +56,11 @@ Main in this update:
 - Pinned tags
 - Custom fonts
 - Reverse image search
+- Performance optimizations
 
 
 New features:
-- Localization: app is now translated into Russian, Turkish and Japanese, more languages will be added in future updates, can be changed in [Settings -> Language]
+- Localization: [Settings -> Language], app is now translated into Russian, Turkish and Japanese, more languages will be added in future updates
 - Custom fonts: [Settings -> Themes -> Font]
 - Tags can now be pinned in the tag search view with custom labels for quick access
 - All input fields where you can enter tags now open a full tag search view where you can quickly look for suggestions
