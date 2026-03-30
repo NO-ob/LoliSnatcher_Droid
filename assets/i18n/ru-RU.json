@@ -19,7 +19,6 @@
     "enable": "Включить",
     "disable": "Выключить",
     "add": "Добавить",
-    "exclude": "Исключить",
     "edit": "Редактировать",
     "remove": "Убрать",
     "save": "Сохранить",
@@ -336,8 +335,6 @@
     "webview": {
         "title": "Вебвью",
         "notSupportedOnDevice": "Не поддерживается на этом устройстве",
-        "captcha": "Капча",
-        "captchaCheckDescription": "Обнаружена возможная капча. Пожалуйста реши ее и вернись обратно после выполнения",
         "navigation": {
             "enterUrlLabel": "Ввести ссылку",
             "enterCustomUrl": "Ввести ссылку",
@@ -356,7 +353,9 @@
             "history": "История",
             "noBackHistoryItem": "Нет элемента для возврата назад",
             "noForwardHistoryItem": "Нет элемента для перехода вперёд"
-        }
+        },
+        "captcha": "Капча",
+        "captchaCheckDescription": "Обнаружена возможная капча. Пожалуйста реши ее и вернись обратно после выполнения"
     },
     "settings": {
         "title": "Настройки",
@@ -1097,8 +1096,8 @@
         "removeFromSearch": "Удалить из поиска",
         "addToSearch": "Добавить в поиск",
         "addedToSearchBar": "Добавлено в строку поиска:",
-        "excludeFromSearch": "Исключить из поиска",
-        "exclusionAddedToSearchBar": "Исключение добавлено в строку поиска:",
+        "addToSearchExclude": "Добавить в поиск (Исключить)",
+        "addedToSearchBarExclude": "Добавлено в строку поиска (Исключить):",
         "addToMarked": "Добавить в Отмеченные",
         "addToHidden": "Добавить в Скрытые",
         "removeFromMarked": "Убрать из Отмеченных",
@@ -1120,7 +1119,9 @@
         "relatedTabs": "Связанные вкладки",
         "tabsWithOnlyTag": "Вкладки только с этим тегом",
         "tabsWithOnlyTagDifferentBooru": "Вкладки только с этим тегом, но на другом сайте",
-        "tabsContainingTag": "Вкладки, содержащие этот тег"
+        "tabsContainingTag": "Вкладки, содержащие этот тег",
+        "excludeFromSearch": "Исключить из поиска",
+        "exclusionAddedToSearchBar": "Исключение добавлено в строку поиска:"
     },
     "pinnedTags": {
         "pinnedTags": "Закрепленные теги",
@@ -1352,5 +1353,6 @@
         "meta": "Мета",
         "species": "Раса",
         "none": "Нет/Общее"
-    }
+    },
+    "exclude": "Исключить"
 }
