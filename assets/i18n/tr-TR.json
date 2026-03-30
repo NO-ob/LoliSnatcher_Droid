@@ -19,6 +19,7 @@
     "enable": "Etkinleştir",
     "disable": "Devre Dışı Bırak",
     "add": "Ekle",
+    "exclude": "Hariç tut",
     "edit": "Düzenle",
     "remove": "Kaldır",
     "save": "Kaydet",
@@ -117,6 +118,8 @@
         "tabsRestored": "Sekmeler geri yüklendi",
         "restoredTabsCount(param=count)": {
             "one": "Önceki oturumdan ${count} sekme geri yüklendi",
+            "few": "Önceki oturumdan ${count} sekme geri yüklendi",
+            "many": "Önceki oturumdan ${count} sekme geri yüklendi",
             "other": "Önceki oturumdan ${count} sekme geri yüklendi"
         },
         "someRestoredTabsHadIssues": "Geri yüklenen bazı sekmelerde bilinmeyen booru'lar veya bozuk karakterler vardı.",
@@ -124,12 +127,16 @@
         "listOfBrokenTabs": "Bozuk sekmelerin listesi:",
         "tabsMerged": "Sekmeler birleştirildi",
         "addedTabsCount(param=count)": {
-            "one": "",
+            "one": "${count} yeni sekme eklendi",
+            "few": "${count} yeni sekme eklendi",
+            "many": "${count} yeni sekme eklendi",
             "other": "${count} yeni sekme eklendi"
         },
         "tabsReplaced": "Sekmeler değiştirildi",
         "receivedTabsCount(param=count)": {
             "one": "${count} sekme alındı",
+            "few": "${count} sekme alındı",
+            "many": "${count} sekme alındı",
             "other": "${count} sekme alındı"
         }
     },
@@ -149,18 +156,26 @@
         "itemsSnatched": "İndirilen ögeler",
         "snatchedCount(param=count)": {
             "one": "İndirilen: ${count} öge",
+            "few": "İndirilen: ${count} öge",
+            "many": "İndirilen: ${count} öge",
             "other": "İndirilen: ${count} öge"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} dosya zaten indirilmiş",
+            "few": "${count} dosya zaten indirilmiş",
+            "many": "${count} dosya zaten indirilmiş",
             "other": "${count} dosya zaten indirilmiş"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "${count} dosya indirilemedi",
+            "few": "${count} dosya indirilemedi",
+            "many": "${count} dosya indirilemedi",
             "other": "${count} dosya indirilemedi"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} dosya iptal edildi",
+            "few": "${count} dosya iptal edildi",
+            "many": "${count} dosya iptal edildi",
             "other": "${count} dosya iptal edildi"
         },
         "snatchingImages": "Görseller indiriliyor",
@@ -168,6 +183,8 @@
         "addedItemToQueue": "Öge İndirme kuyruğuna eklendi",
         "addedItemsToQueue(param=count)": {
             "one": "${count} öge indirme kuyruğuna eklendi",
+            "few": "${count} öge indirme kuyruğuna eklendi",
+            "many": "${count} öge indirme kuyruğuna eklendi",
             "other": "${count} öge indirme kuyruğuna eklendi"
         }
     },
@@ -253,6 +270,8 @@
         "reversed": "(tersten)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "${count} sekmeyi silmek istediğine emin misin?",
+            "few": "${count} sekmeyi silmek istediğine emin misin?",
+            "many": "${count} sekmeyi silmek istediğine emin misin?",
             "other": "${count} sekmeyi silmek istediğine emin misin?"
         },
         "filters": {
@@ -302,11 +321,15 @@
         "deleteHistoryEntries": "Geçmiş girdilerini sil",
         "deleteItemsConfirm(param=count)": {
             "one": "${count} ögeyi silmek istediğine emin misin?",
+            "few": "${count} ögeyi silmek istediğine emin misin?",
+            "many": "${count} ögeyi silmek istediğine emin misin?",
             "other": "${count} ögeyi silmek istediğine emin misin?"
         },
         "clearSelection": "Seçimi temizle",
         "deleteItems(param=count)": {
             "one": "${count} ögeyi sil",
+            "few": "${count} ögeyi sil",
+            "many": "${count} ögeyi sil",
             "other": "${count} ögeyi sil"
         }
     },
@@ -331,9 +354,7 @@
             "history": "Geçmiş",
             "noBackHistoryItem": "Geri gidilecek geçmiş ögesi yok",
             "noForwardHistoryItem": "İleri gidilecek geçmiş ögesi yok"
-        },
-        "captcha": "",
-        "captchaCheckDescription": ""
+        }
     },
     "settings": {
         "title": "Ayarlar",
@@ -1019,6 +1040,8 @@
         "makeUnstaleable": "Eskimez yap",
         "deleteTags(param=count)": {
             "one": "${count} etiketi sil",
+            "few": "${count} etiketi sil",
+            "many": "${count} etiketi sil",
             "other": "${count} etiketi sil"
         },
         "deleteTagsTitle": "Etiketleri sil",
@@ -1072,8 +1095,6 @@
         "removeFromSearch": "Aramadan kaldır",
         "addToSearch": "Aramaya ekle",
         "addedToSearchBar": "Arama çubuğuna eklendi:",
-        "addToSearchExclude": "",
-        "addedToSearchBarExclude": "",
         "addToMarked": "İşaretlenenlere ekle",
         "addToHidden": "Gizlenenlere ekle",
         "removeFromMarked": "İşaretlenenlerden kaldır",
@@ -1095,9 +1116,7 @@
         "relatedTabs": "İlgili sekmeler",
         "tabsWithOnlyTag": "Sadece bu etiketi içeren sekmeler",
         "tabsWithOnlyTagDifferentBooru": "Sadece bu etiketi içeren ama farklı booru'daki sekmeler",
-        "tabsContainingTag": "Bu etiketi kapsayan sekmeler",
-        "excludeFromSearch": "",
-        "exclusionAddedToSearchBar": ""
+        "tabsContainingTag": "Bu etiketi kapsayan sekmeler"
     },
     "pinnedTags": {
         "pinnedTags": "Sabitlenmiş etiketler",
@@ -1241,6 +1260,8 @@
         "loadingFileMessage": "Bu biraz zaman alabilir, lütfen bekle…",
         "sources(param=count)": {
             "one": "Kaynak",
+            "few": "Kaynaklar",
+            "many": "Kaynaklar",
             "other": "Kaynaklar"
         }
     },
@@ -1309,6 +1330,8 @@
             "loadingPage(param=pageNum)": "Sayfa #${pageNum: int} yükleniyor…",
             "startedAgo(param=seconds)": {
                 "one": "${seconds} saniye önce başladı",
+                "few": "${seconds} saniye önce başladı",
+                "many": "${seconds} saniye önce başladı",
                 "other": "${seconds} saniye önce başladı"
             },
             "tapToRetryIfStuck": "İstek takılmış veya çok uzun sürmüş gibi görünüyorsa tekrar denemek için dokun",
@@ -1325,6 +1348,5 @@
         "meta": "Meta",
         "species": "Tür",
         "none": "Yok (Genel)"
-    },
-    "exclude": "Hariç tut"
+    }
 }
