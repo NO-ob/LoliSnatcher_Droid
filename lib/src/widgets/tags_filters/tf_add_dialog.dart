@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/add_button.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
-import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
 
 class TagsFiltersAddDialog extends StatefulWidget {
@@ -37,7 +38,10 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
     } else {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text('Empty input!', style: TextStyle(fontSize: 20)),
+        title: Text(
+          context.loc.tagsFiltersDialogs.emptyInput,
+          style: const TextStyle(fontSize: 20),
+        ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
@@ -54,7 +58,7 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
           child: AbsorbPointer(
             absorbing: true,
             child: TagsFiltersListItem(
-              tag: '[Add new ${widget.tagFilterType} filter]',
+              tag: context.loc.tagsFiltersDialogs.addNewFilter(type: widget.tagFilterType),
               overrideIcon: const Icon(Icons.add),
             ),
           ),
@@ -62,18 +66,14 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
         //
         Container(
           margin: const EdgeInsets.symmetric(vertical: 20),
-          child: SettingsTextInput(
-            title: 'New ${widget.tagFilterType} tag filter',
-            hintText: 'New filter',
+          child: TagSearchBox(
+            title: context.loc.tagsFiltersDialogs.newTagFilter(type: widget.tagFilterType),
+            hintText: context.loc.tagsFiltersDialogs.newFilter,
             onlyInput: true,
             controller: _controller,
-            autofocus: true,
-            inputType: TextInputType.text,
             clearable: true,
-            pasteable: true,
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            onSubmitted: onSubmit,
-            enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
+            allowMultipleTags: false,
+            showBooruSelector: true,
           ),
         ),
       ],
@@ -81,10 +81,8 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
         const CancelButton(
           withIcon: true,
         ),
-        ConfirmButton(
-          text: 'Add',
+        AddButton(
           withIcon: true,
-          customIcon: Icons.save,
           action: () => onSubmit(_controller.text),
         ),
       ],

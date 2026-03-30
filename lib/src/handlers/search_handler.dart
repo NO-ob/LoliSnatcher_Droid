@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
@@ -152,12 +153,13 @@ class SearchHandler {
       }
     } else {
       // if there is only one tab, reset to default tags
+      final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
-        title: const Text('Removed Last Tab', style: TextStyle(fontSize: 20)),
-        content: const Column(
+        title: Text(context.loc.searchHandler.removedLastTab, style: const TextStyle(fontSize: 20)),
+        content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Resetting search to default tags!'),
+            Text(context.loc.searchHandler.resettingSearchToDefaultTags),
           ],
         ),
         leadingIcon: Icons.warning_amber,
@@ -186,12 +188,13 @@ class SearchHandler {
     }
 
     if (totalTabs == tabsToRemove.length) {
+      final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
-        title: const Text('Removed last tab', style: TextStyle(fontSize: 20)),
-        content: const Column(
+        title: Text(context.loc.searchHandler.removedLastTab, style: const TextStyle(fontSize: 20)),
+        content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Resetting search to default tags!'),
+            Text(context.loc.searchHandler.resettingSearchToDefaultTags),
           ],
         ),
         leadingIcon: Icons.warning_amber,
@@ -291,7 +294,11 @@ class SearchHandler {
 
   void removeTagFromSearch(String tag) {
     if (tag.isNotEmpty) {
-      searchTextController.text = searchTextController.text.replaceAll('-$tag', '').replaceAll(tag, '');
+      searchTextController.text = searchTextController.text
+          .replaceAll(RegExp(r'(?:-|~)?\d+#(?:-|~)?' + tag), '')
+          .replaceAll('-$tag', '')
+          .replaceAll('~$tag', '')
+          .replaceAll(tag, '');
     }
   }
 
@@ -405,45 +412,61 @@ class SearchHandler {
     isRunningAutoSearch.value = false;
   }
 
-  HasTabWithTagResult hasTabWithTag(String tag) {
+  HasTabWithTagResult hasTabWithTag(String tag, {Booru? customBooru}) {
     tag = tag.toLowerCase().trim();
-    List<SearchTab> tabsWithOnlyTag = tabs.where((tab) => tab.tags == tag).toList();
-    if (tabsWithOnlyTag.isNotEmpty) {
-      tabsWithOnlyTag = tabsWithOnlyTag.where((tab) => tab.tags.toLowerCase().trim() == tag).toList();
-      if (tabsWithOnlyTag.isNotEmpty) {
-        if (tabsWithOnlyTag.any((tab) => tab.selectedBooru.value == currentBooru)) {
-          return HasTabWithTagResult.onlyTag;
-        } else {
-          return HasTabWithTagResult.onlyTagDifferentBooru;
-        }
+    final Booru targetBooru = customBooru ?? currentBooru;
+
+    final onlyTagMatches = tabs.where((tab) => tab.tags.toLowerCase().trim() == tag);
+    if (onlyTagMatches.isNotEmpty) {
+      if (onlyTagMatches.any((tab) => tab.selectedBooru.value == targetBooru)) {
+        return HasTabWithTagResult.onlyTag;
       }
+      return HasTabWithTagResult.onlyTagDifferentBooru;
     }
 
-    List<SearchTab> tabsContainingTag = tabs
-        .where(
-          (tab) => tab.tags.contains(tag),
-        )
-        .toList();
-    if (tabsContainingTag.isNotEmpty) {
-      tabsContainingTag = tabsContainingTag
-          .where((tab) => tab.tags.toLowerCase().trim().split(' ').contains(tag))
-          .toList();
-      if (tabsContainingTag.isNotEmpty) {
-        return HasTabWithTagResult.containsTag;
-      }
+    if (getTabsContainingTag(tag).isNotEmpty) {
+      return HasTabWithTagResult.containsTag;
     }
 
     return HasTabWithTagResult.noTag;
   }
 
-  List<SearchTab> getTabsWithTag(String tag) {
-    final List<SearchTab> tabsWithTag = [];
-    for (final SearchTab tab in tabs) {
-      if (tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim())) {
-        tabsWithTag.add(tab);
+  List<(int, SearchTab)> getTabsWithOnlyTag(String tag) {
+    tag = tag.toLowerCase().trim();
+    final result = <(int, SearchTab)>[];
+    for (int i = 0; i < tabs.length; i++) {
+      final tab = tabs[i];
+      final parts = tab.tags.toLowerCase().trim().split(' ');
+      if (parts.length == 1 && parts[0] == tag && tab.selectedBooru.value == currentBooru) {
+        result.add((i, tab));
       }
     }
-    return tabsWithTag;
+    return result;
+  }
+
+  List<(int, SearchTab)> getTabsWithOnlyTagDifferentBooru(String tag) {
+    tag = tag.toLowerCase().trim();
+    final result = <(int, SearchTab)>[];
+    for (int i = 0; i < tabs.length; i++) {
+      final tab = tabs[i];
+      final parts = tab.tags.toLowerCase().trim().split(' ');
+      if (parts.length == 1 && parts[0] == tag && tab.selectedBooru.value != currentBooru) {
+        result.add((i, tab));
+      }
+    }
+    return result;
+  }
+
+  List<(int, SearchTab)> getTabsContainingTag(String tag) {
+    tag = tag.toLowerCase().trim();
+    final result = <(int, SearchTab)>[];
+    for (int i = 0; i < tabs.length; i++) {
+      final tab = tabs[i];
+      if (tab.tags.toLowerCase().trim().split(' ').contains(tag)) {
+        result.add((i, tab));
+      }
+    }
+    return result;
   }
 
   int get currentIndex => index.value;
@@ -462,13 +485,13 @@ class SearchHandler {
   }
 
   // runs search on current tab
-  void searchAction(String text, Booru? newBooru) {
+  Future<void> searchAction(String text, Booru? newBooru) async {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     // Remove extra spaces
     text = text.trim();
 
-    // clear image emory cache
+    // clear image memory cache
     Tools.forceClearMemoryCache(withLive: true);
 
     // set new tab data
@@ -490,29 +513,47 @@ class SearchHandler {
       tabs[currentIndex] = newTab;
     }
 
-    searchReactions(text, newBooru ?? currentBooru);
+    unawaited(searchReactions(text, newBooru ?? currentBooru));
 
     // run search
     changeTabIndex(currentIndex, ignoreSameIndexCheck: true);
 
     // write to history
     if (text != '' && settingsHandler.searchHistoryEnabled) {
-      settingsHandler.dbHandler.updateSearchHistory(
-        text,
-        currentBooru.type?.name,
-        currentBooru.name,
+      unawaited(
+        settingsHandler.dbHandler.updateSearchHistory(
+          text,
+          currentBooru.type?.name,
+          currentBooru.name,
+        ),
       );
     }
   }
 
-  void searchReactions(String text, Booru booru) {
+  //
+
+  final Map<SearchReaction, int> _reactionsCount = {};
+  int getSearchReactionCount(SearchReaction r) => _reactionsCount[r] ?? 0;
+  void incrementSearchReactionCount(SearchReaction r) => _reactionsCount[r] = (_reactionsCount[r] ?? 0) + 1;
+  bool canSendSearchReaction(SearchReaction r) => getSearchReactionCount(r) < r.limit;
+
+  Future<void> searchReactions(String text, Booru booru) async {
+    final context = NavigationHandler.instance.navContext;
+
     // UOOOOOHHHHH
-    if (text.toLowerCase().contains('loli')) {
-      FlashElements.showSnackbar(
+    if (text.toLowerCase().contains('loli') && canSendSearchReaction(.uoh)) {
+      incrementSearchReactionCount(.uoh);
+      await FlashElements.showSnackbar(
         duration: const Duration(seconds: 2),
-        title: const Text('UOOOOOOOHHH', style: TextStyle(fontSize: 20)),
+        title: Text(
+          context.loc.searchHandler.uoh,
+          style: const TextStyle(fontSize: 20),
+        ),
         // TODO replace with image asset to avoid system-to-system font differences
-        overrideLeadingIconWidget: const Text(' 😭 ', style: TextStyle(fontSize: 40)),
+        overrideLeadingIconWidget: const Text(
+          ' 😭 ',
+          style: TextStyle(fontSize: 40),
+        ),
         sideColor: Colors.pink,
       );
     }
@@ -523,39 +564,23 @@ class SearchHandler {
           (booru.type?.isGelbooru == true && booru.baseURL!.contains('gelbooru.com')) ||
           (booru.type?.isDanbooru == true && booru.baseURL!.contains('danbooru.donmai.us'));
       if (isOnBooruWhereRatingsChanged) {
-        FlashElements.showSnackbar(
+        await FlashElements.showSnackbar(
           duration: null,
-          title: const Text('Ratings changed', style: TextStyle(fontSize: 20)),
+          title: Text(
+            context.loc.searchHandler.ratingsChanged,
+            style: const TextStyle(fontSize: 20),
+          ),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text.rich(
-                TextSpan(
-                  style: const TextStyle(fontSize: 16),
-                  children: [
-                    TextSpan(text: 'On ${booru.type?.name} '),
-                    const TextSpan(
-                      text: '[rating:safe]',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const TextSpan(text: ' is now replaced with '),
-                    const TextSpan(
-                      text: '[rating:general]',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    const TextSpan(text: ' and '),
-                    const TextSpan(
-                      text: '[rating:sensitive]',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
+              Text(
+                context.loc.searchHandler.ratingsChangedMessage(booruType: booru.type?.name ?? ''),
                 style: const TextStyle(fontSize: 16),
               ),
               const Text(''),
-              const Text(
-                'App fixed the rating automatically, but consider changing to correct rating in your future queries',
-                style: TextStyle(fontSize: 18),
+              Text(
+                context.loc.searchHandler.appFixedRatingAutomatically,
+                style: const TextStyle(fontSize: 18),
               ),
             ],
           ),
@@ -566,6 +591,8 @@ class SearchHandler {
       }
     }
   }
+
+  //
 
   // add secondary boorus and run search
   void mergeAction(List<Booru>? secondaryBoorus) {
@@ -702,10 +729,11 @@ class SearchHandler {
         final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
         if (isEntryValid) {
           // find booru by name and create searchtab with given tags
-          final Booru findBooru = settingsHandler.booruList.firstWhere(
+          Booru findBooru = settingsHandler.booruList.firstWhere(
             (booru) => booru.name == booruAndTags[0],
             orElse: Booru.unknown,
           );
+          findBooru = handleFavDlsNameChange(findBooru);
           if (findBooru.name != null) {
             final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
             restoredGlobals.add(newTab);
@@ -739,22 +767,23 @@ class SearchHandler {
 
     // set parsed tabs OR set first default tab if nothing to restore
     if (restoredGlobals.isNotEmpty) {
+      final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
-        title: const Text('Tabs restored', style: TextStyle(fontSize: 20)),
+        title: Text(context.loc.searchHandler.tabsRestored, style: const TextStyle(fontSize: 20)),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Restored ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)} from previous session!',
+              context.loc.searchHandler.restoredTabsCount(count: restoredGlobals.length),
             ),
             if (foundBrokenItem)
             // notify user if there was unknown booru or invalid entry in the tabs
             ...[
-              const Text(
-                'Some restored tabs had unknown boorus or broken characters.',
+              Text(
+                context.loc.searchHandler.someRestoredTabsHadIssues,
               ),
-              const Text('They were set to default or ignored.'),
-              const Text('List of broken tabs:'),
+              Text(context.loc.searchHandler.theyWereSetToDefaultOrIgnored),
+              Text(context.loc.searchHandler.listOfBrokenTabs),
               Text(brokenItems.join(', ')),
             ],
           ],
@@ -768,7 +797,6 @@ class SearchHandler {
       changeTabIndex(newIndex);
     } else {
       Booru defaultBooru = Booru.unknown();
-      // settingsHandler.getBooru();
       // Set the default booru and tags at the start
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
@@ -796,10 +824,11 @@ class SearchHandler {
       final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if (isEntryValid) {
         // find booru by name and create searchtab with given tags
-        final Booru findBooru = settingsHandler.booruList.firstWhere(
+        Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
           orElse: Booru.unknown,
         );
+        findBooru = handleFavDlsNameChange(findBooru);
         if (findBooru.name != null) {
           final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
           // add only if there are not already the same tab in the list and booru is available on this device
@@ -814,10 +843,11 @@ class SearchHandler {
     }
     tabs.addAll(restoredGlobals);
 
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text('Tabs merged'),
+      title: Text(context.loc.searchHandler.tabsMerged),
       content: Text(
-        'Added ${restoredGlobals.length} new ${Tools.pluralize('tab', restoredGlobals.length)}!',
+        context.loc.searchHandler.addedTabsCount(count: restoredGlobals.length),
       ),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore,
@@ -839,10 +869,11 @@ class SearchHandler {
       final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if (isEntryValid) {
         // find booru by name and create searchtab with given tags
-        final Booru findBooru = settingsHandler.booruList.firstWhere(
+        Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
           orElse: Booru.unknown,
         );
+        findBooru = handleFavDlsNameChange(findBooru);
         if (findBooru.name != null) {
           final SearchTab newTab = SearchTab(findBooru, null, booruAndTags[1]);
           restoredGlobals.add(newTab);
@@ -857,10 +888,11 @@ class SearchHandler {
     tabs.value = restoredGlobals;
     changeTabIndex(newIndex);
 
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text('Tabs replaced'),
+      title: Text(context.loc.searchHandler.tabsReplaced),
       content: Text(
-        'Received ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)}!',
+        context.loc.searchHandler.receivedTabsCount(count: restoredGlobals.length),
       ),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore,
@@ -914,22 +946,25 @@ class SearchHandler {
     isRestored.value = true;
 
     if (restoredTabs.isNotEmpty) {
+      final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
-        title: const Text('Tabs restored', style: TextStyle(fontSize: 20)),
+        title: Text(context.loc.searchHandler.tabsRestored, style: const TextStyle(fontSize: 20)),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Restored ${restoredTabs.length} ${Tools.pluralize('tab', restoredTabs.length)} from previous session!',
+              context.loc.searchHandler.restoredTabsCount(count: restoredTabs.length),
             ),
             if (foundBrokenItems) ...[
               // notify user if there was unknown booru or invalid entry in the tabs
-              const Text('Some restored tabs had unknown boorus or broken characters.'),
-              const Text('They were set to default or ignored.'),
-              const Text('List of broken tabs:'),
+              Text(context.loc.searchHandler.someRestoredTabsHadIssues),
+              Text(context.loc.searchHandler.theyWereSetToDefaultOrIgnored),
+              Text(context.loc.searchHandler.listOfBrokenTabs),
               Text(
                 brokenItems
-                    .map((t) => '${tabBackups.indexOf(t)}${t.booru}: ${t.tags.isEmpty ? '[empty]' : t.tags}')
+                    .map(
+                      (t) => '${tabBackups.indexOf(t)}${t.booru}: ${t.tags.isEmpty ? context.loc.tabs.empty : t.tags}',
+                    )
                     .join(', '),
               ),
             ],
@@ -982,10 +1017,11 @@ class SearchHandler {
 
     tabs.addAll(restoredTabs);
 
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text('Tabs merged'),
+      title: Text(context.loc.searchHandler.tabsMerged),
       content: Text(
-        'Added ${restoredTabs.length} new ${Tools.pluralize('tab', restoredTabs.length)}!',
+        context.loc.searchHandler.addedTabsCount(count: restoredTabs.length),
       ),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore,
@@ -1014,10 +1050,11 @@ class SearchHandler {
     tabs.value = restoredTabs;
     changeTabIndex(newSelectedIndex);
 
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text('Tabs replaced'),
+      title: Text(context.loc.searchHandler.tabsReplaced),
       content: Text(
-        'Received ${restoredTabs.length} ${Tools.pluralize('tab', restoredTabs.length)}!',
+        context.loc.searchHandler.receivedTabsCount(count: restoredTabs.length),
       ),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore,
@@ -1060,11 +1097,12 @@ class SearchHandler {
   SearchTab parseTabFromBackup(TabBackup backup) {
     final booruList = SettingsHandler.instance.booruList;
 
-    final Booru selectedBooru = booruList.firstWhere(
+    Booru selectedBooru = booruList.firstWhere(
       (b) => b.name == backup.booru,
       orElse: Booru.unknown,
     );
-    final List<Booru> secondaryBoorus = backup.secondaryBoorus
+    selectedBooru = handleFavDlsNameChange(selectedBooru);
+    List<Booru> secondaryBoorus = backup.secondaryBoorus
         .map(
           (b) => booruList.firstWhere(
             (booru) => booru.name == b,
@@ -1073,12 +1111,33 @@ class SearchHandler {
         )
         .where((b) => b.name != null)
         .toList();
+    secondaryBoorus = secondaryBoorus.map(handleFavDlsNameChange).where((b) => b.name != null).toList();
 
     return SearchTab(
       selectedBooru,
       secondaryBoorus.isEmpty ? null : secondaryBoorus,
       backup.tags,
     );
+  }
+
+  Booru handleFavDlsNameChange(Booru booru) {
+    if (booru.name != null) {
+      return booru;
+    }
+
+    final booruList = SettingsHandler.instance.booruList;
+    Booru tempBooru = Booru.unknown();
+    // a workaround to fix favs/dls tabs not parsing/restoring correctly due to localized names
+    for (final l in AppLocale.values) {
+      tempBooru = booruList.firstWhere(
+        (b) => b.name == l.translations['favourites'] || b.name == l.translations['downloads'],
+        orElse: Booru.unknown,
+      );
+      if (tempBooru.name != null) {
+        break;
+      }
+    }
+    return tempBooru;
   }
 
   Future<void> restoreTabs() async {
@@ -1359,31 +1418,56 @@ enum HasTabWithTagResult {
   onlyTag,
   onlyTagDifferentBooru,
   containsTag,
-  noTag;
+  noTag,
+  ;
 
   bool get isOnlyTag => this == HasTabWithTagResult.onlyTag;
   bool get isOnlyTagDifferentBooru => this == HasTabWithTagResult.onlyTagDifferentBooru;
   bool get isContainsTag => this == HasTabWithTagResult.containsTag;
   bool get isNoTag => this == HasTabWithTagResult.noTag;
-  bool get hasTag =>
+  bool get hasTagInAnyForm =>
       this == HasTabWithTagResult.onlyTag ||
       this == HasTabWithTagResult.onlyTagDifferentBooru ||
       this == HasTabWithTagResult.containsTag;
+
+  String? locName(BuildContext context) => switch (this) {
+    .onlyTag => context.loc.tagView.tabsWithOnlyTag,
+    .onlyTagDifferentBooru => context.loc.tagView.tabsWithOnlyTagDifferentBooru,
+    .containsTag => context.loc.tagView.tabsContainingTag,
+    _ => null,
+  };
+
+  Color? color(BuildContext context) => switch (this) {
+    onlyTag => Theme.of(context).colorScheme.onSurface,
+    onlyTagDifferentBooru => Colors.yellow,
+    containsTag => Colors.blue,
+    _ => null,
+  };
 }
 
 enum TabAddMode {
   prev,
   next,
-  end;
+  end,
+  ;
 
-  String get locName {
+  String locName(BuildContext context) {
     switch (this) {
       case prev:
-        return 'Prev tab';
+        return context.loc.tabs.addModePrevTab;
       case next:
-        return 'Next tab';
+        return context.loc.tabs.addModeNextTab;
       case end:
-        return 'List end';
+        return context.loc.tabs.addModeListEnd;
     }
   }
+}
+
+enum SearchReaction {
+  uoh,
+  ;
+
+  int get limit => switch (this) {
+    uoh => 5,
+  };
 }

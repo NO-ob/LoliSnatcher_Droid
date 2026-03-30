@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/gen/strings.g.dart';
 
 class ImageStats extends StatefulWidget {
   const ImageStats({
@@ -125,11 +126,11 @@ class _ImageStatsState extends State<ImageStats> {
                         ),
                         builder: (context, child) => Column(
                           children: [
-                            Text('Live: ${_totalLive.value}'),
-                            Text('Pending: ${_totalPending.value}'),
-                            Text('Total: ${_totalAll.value}'),
-                            Text('Size: ${Tools.formatBytes(_cacheSize.value, 0)}'),
-                            Text('Max: ${Tools.formatBytes(_cacheMax.value, 0)}'),
+                            Text(context.loc.imageStats.live(count: _totalLive.value)),
+                            Text(context.loc.imageStats.pending(count: _totalPending.value)),
+                            Text(context.loc.imageStats.total(count: _totalAll.value)),
+                            Text(context.loc.imageStats.size(size: Tools.formatBytes(_cacheSize.value, 0))),
+                            Text(context.loc.imageStats.max(max: Tools.formatBytes(_cacheMax.value, 0))),
                           ],
                         ),
                       ),

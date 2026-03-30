@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
 
 class TagsFiltersList extends StatelessWidget {
@@ -44,8 +44,9 @@ class TagsFiltersList extends StatelessWidget {
         children: [
           SettingsTextInput(
             controller: tagSearchController,
-            title: 'Search filters (${isSearchActive ? '$filteredCount/$originalCount' : '$originalCount'})',
-            floatingLabelBehavior: FloatingLabelBehavior.always,
+            title:
+                '${context.loc.search} (${isSearchActive ? '${filteredCount.toFormattedString()}/${originalCount.toFormattedString()}' : originalCount.toFormattedString()})',
+            titleAsLabel: true,
             clearable: true,
             pasteable: true,
             onChanged: onSearchTextChanged,
@@ -54,7 +55,9 @@ class TagsFiltersList extends StatelessWidget {
           //
           if (filteredTagsList.isEmpty)
             SettingsButton(
-              name: 'No filters ${isSearchActive ? 'found' : 'added'}',
+              name: isSearchActive
+                  ? context.loc.settings.itemFilters.noFiltersFound
+                  : context.loc.settings.itemFilters.noFiltersAdded,
               action: () {
                 if (!isSearchActive) {
                   openAddDialog();
@@ -63,29 +66,25 @@ class TagsFiltersList extends StatelessWidget {
             ),
           //
           Expanded(
-            child: DesktopScrollWrap(
+            child: ListView.builder(
               controller: scrollController,
-              child: ListView.builder(
-                controller: scrollController,
-                padding: EdgeInsets.fromLTRB(
-                  10,
-                  5,
-                  10,
-                  15 + MediaQuery.paddingOf(context).bottom,
-                ),
-                shrinkWrap: false,
-                itemCount: filteredTagsList.length,
-                scrollDirection: Axis.vertical,
-                physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                itemBuilder: (BuildContext context, int index) {
-                  final String currentEntry = filteredTagsList[index];
-
-                  return TagsFiltersListItem(
-                    tag: currentEntry,
-                    onTap: onTagSelected,
-                  );
-                },
+              padding: EdgeInsets.fromLTRB(
+                10,
+                5,
+                10,
+                15 + MediaQuery.paddingOf(context).bottom,
               ),
+              shrinkWrap: false,
+              itemCount: filteredTagsList.length,
+              scrollDirection: Axis.vertical,
+              itemBuilder: (BuildContext context, int index) {
+                final String currentEntry = filteredTagsList[index];
+
+                return TagsFiltersListItem(
+                  tag: currentEntry,
+                  onTap: onTagSelected,
+                );
+              },
             ),
           ),
         ],

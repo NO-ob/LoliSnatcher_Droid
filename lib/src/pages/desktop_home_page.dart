@@ -16,7 +16,7 @@ import 'package:lolisnatcher/src/widgets/desktop/desktop_image_listener.dart';
 import 'package:lolisnatcher/src/widgets/desktop/resizable_split_view.dart';
 import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
-import 'package:lolisnatcher/src/widgets/preview/waterfall_bottom_bar.dart';
+import 'package:lolisnatcher/src/widgets/preview/main_search_bar.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
@@ -64,7 +64,7 @@ class DesktopHome extends StatelessWidget {
           Obx(() {
             if (settingsHandler.booruList.isNotEmpty && searchHandler.tabs.isNotEmpty) {
               return SettingsButton(
-                name: 'Snatcher',
+                name: context.loc.desktopHome.snatcher,
                 icon: const Icon(Icons.download),
                 iconOnly: true,
                 page: () => const SnatcherPage(),
@@ -75,13 +75,13 @@ class DesktopHome extends StatelessWidget {
           }),
           Obx(() {
             if (settingsHandler.booruList.isEmpty || searchHandler.tabs.isEmpty) {
-              return const Center(child: Text('Add Boorus in Settings'));
+              return Center(child: Text(context.loc.desktopHome.addBoorusInSettings));
             } else {
               return const SizedBox.shrink();
             }
           }),
           SettingsButton(
-            name: 'Settings',
+            name: context.loc.desktopHome.settings,
             icon: const Icon(Icons.settings),
             iconOnly: true,
             page: () => const SettingsPage(),
@@ -92,7 +92,7 @@ class DesktopHome extends StatelessWidget {
                 alignment: Alignment.center,
                 children: [
                   SettingsButton(
-                    name: 'Save',
+                    name: context.loc.desktopHome.save,
                     icon: const Icon(Icons.save),
                     iconOnly: true,
                     action: () async {
@@ -117,9 +117,9 @@ class DesktopHome extends StatelessWidget {
                       } else {
                         FlashElements.showSnackbar(
                           context: context,
-                          title: const Text('No items selected', style: TextStyle(fontSize: 20)),
+                          title: Text(context.loc.desktopHome.noItemsSelected, style: const TextStyle(fontSize: 20)),
                           overrideLeadingIconWidget: const Kaomoji(
-                            type: KaomojiType.angryHandsUp,
+                            category: KaomojiCategory.dissatisfaction,
                             style: TextStyle(fontSize: 18),
                           ),
                         );

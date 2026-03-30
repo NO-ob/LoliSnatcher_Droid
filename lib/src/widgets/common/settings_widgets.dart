@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/html.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
@@ -28,6 +29,7 @@ class SettingsButton extends StatelessWidget {
     this.enabled = true, // disable button interaction (will also change text color to grey)
     this.iconOnly = false,
     this.dense = false,
+    this.useHtml = false,
     super.key,
   });
 
@@ -43,6 +45,7 @@ class SettingsButton extends StatelessWidget {
   final bool enabled;
   final bool iconOnly;
   final bool dense;
+  final bool useHtml;
 
   bool get interactive => action != null || page != null;
 
@@ -70,7 +73,7 @@ class SettingsButton extends StatelessWidget {
       color: Colors.transparent,
       child: ListTile(
         leading: icon,
-        title: Text(name),
+        title: useHtml ? LoliHtml(name) : Text(name),
         subtitle: subtitle,
         trailing: trailingIcon,
         enabled: enabled,
@@ -229,13 +232,8 @@ class SettingsToggle extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            Builder(
-              builder: (context) {
-                return MarqueeText(
-                  text: title,
-                  style: DefaultTextStyle.of(context).style,
-                );
-              },
+            Expanded(
+              child: Text(title),
             ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
@@ -324,13 +322,8 @@ class SettingsToggleTristate extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            Builder(
-              builder: (context) {
-                return MarqueeText(
-                  text: title,
-                  style: DefaultTextStyle.of(context).style,
-                );
-              },
+            Expanded(
+              child: Text(title),
             ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
@@ -404,13 +397,8 @@ class SettingsSegmentedButton<T> extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: leadingIcon,
               ),
-            Builder(
-              builder: (context) {
-                return MarqueeText(
-                  text: title,
-                  style: DefaultTextStyle.of(context).style,
-                );
-              },
+            Expanded(
+              child: Text(title),
             ),
             const SizedBox(width: 4),
             if (defaultValue != null && value != defaultValue)
@@ -426,36 +414,57 @@ class SettingsSegmentedButton<T> extends StatelessWidget {
             trailingIcon ?? const SizedBox(width: 8),
           ],
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SegmentedButton(
-              onSelectionChanged: (value) => onChanged(value.first),
-              emptySelectionAllowed: false,
-              multiSelectionEnabled: false,
-              style: ButtonStyle(
-                padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-                  const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SegmentedButton(
+                onSelectionChanged: (value) => onChanged(value.first),
+                emptySelectionAllowed: false,
+                multiSelectionEnabled: false,
+                style: ButtonStyle(
+                  padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+                    const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
                   ),
                 ),
+                direction: Axis.horizontal,
+                segments: [
+                  for (final T v in values)
+                    ButtonSegment(
+                      value: v,
+                      icon: const Icon(null),
+                      label: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 2,
+                          vertical: 4,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                itemTitleBuilder(v),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            const Icon(null),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+                selected: {value},
               ),
-              segments: [
-                for (final T v in values)
-                  ButtonSegment(
-                    value: v,
-                    label: Text(itemTitleBuilder(v)),
-                  ),
-              ],
-              selected: {value},
-            ),
-            if (subtitle != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: subtitle,
-              ),
-          ],
+              if (subtitle != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: subtitle,
+                ),
+            ],
+          ),
         ),
         shape: Border(
           // draw top border when item is in the middle of other items, but they are not listtile
@@ -487,10 +496,13 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.itemTitleBuilder,
     this.itemSubtitleBuilder,
     this.clearable = false,
+    this.searchable = false,
+    this.searchCheck,
     this.onReset,
     this.itemExtent,
     this.expendableByScroll = false,
     this.placeholder,
+    this.titleAsLabel = false,
     super.key,
   });
 
@@ -509,10 +521,13 @@ class SettingsDropdown<T> extends StatelessWidget {
   final String Function(T?)? itemTitleBuilder;
   final String Function(T?)? itemSubtitleBuilder;
   final bool clearable;
+  final bool searchable;
+  final bool Function(String, T)? searchCheck;
   final VoidCallback? onReset;
   final double? itemExtent;
   final bool expendableByScroll;
   final String? placeholder;
+  final bool titleAsLabel;
 
   String getTitle(T? value) {
     return itemTitleBuilder?.call(value) ?? value?.toString() ?? placeholder ?? '';
@@ -560,30 +575,44 @@ class SettingsDropdown<T> extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: ListTile(
-        title: LoliDropdown(
-          value: value,
-          onChanged: onChanged ?? (item) {},
-          items: items.where((item) => itemFilter?.call(item) ?? true).toList(),
-          clearable: clearable,
-          expandableByScroll: expendableByScroll,
-          itemExtent: itemExtent,
-          itemBuilder: (item) {
-            final bool isCurrent = value == item;
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!titleAsLabel)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(title),
+              ),
+            LoliDropdown(
+              value: value,
+              onChanged: onChanged ?? (item) {},
+              items: items.where((item) => itemFilter?.call(item) ?? true).toList(),
+              clearable: clearable,
+              searchable: searchable,
+              searchCheck: searchCheck,
+              expandableByScroll: expendableByScroll,
+              itemExtent: itemExtent,
+              itemBuilder: (item) {
+                final bool isCurrent = value == item;
 
-            return Container(
-              padding: const EdgeInsets.only(left: 16, right: 16),
-              constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
-              alignment: Alignment.centerLeft,
-              decoration: isCurrent
-                  ? BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                    )
-                  : null,
-              child: getItemWidget(item),
-            );
-          },
-          selectedItemBuilder: getSelectedItemWidget,
-          labelText: title,
+                return Container(
+                  padding: const EdgeInsets.only(left: 16, right: 16),
+                  constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+                  alignment: Alignment.centerLeft,
+                  decoration: isCurrent
+                      ? BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                        )
+                      : null,
+                  child: getItemWidget(item),
+                );
+              },
+              selectedItemBuilder: getSelectedItemWidget,
+              labelBuilder: titleAsLabel ? null : () => const SizedBox.shrink(),
+              labelText: title,
+            ),
+          ],
         ),
         subtitle: subtitle,
         trailing:
@@ -623,8 +652,11 @@ class SettingsBooruDropdown extends StatelessWidget {
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.nullable = false,
+    this.searcheable,
+    this.searchCheck,
     this.trailingIcon,
     this.contentPadding,
+    this.titleAsLabel = false,
     super.key,
   });
 
@@ -640,12 +672,15 @@ class SettingsBooruDropdown extends StatelessWidget {
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final bool nullable;
+  final bool? searcheable;
+  final bool Function(String, Booru?)? searchCheck;
   final Widget? trailingIcon;
   final EdgeInsets? contentPadding;
+  final bool titleAsLabel;
 
-  Widget _selectedItemBuilder(Booru? item) {
+  Widget _selectedItemBuilder(BuildContext context, Booru? item) {
     if (item == null) {
-      return Text(placeholder ?? 'Select a booru');
+      return Text(placeholder ?? context.loc.common.selectABooru);
     }
 
     if (selectedItemBuilder != null) {
@@ -680,10 +715,12 @@ class SettingsBooruDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final usedItems = (items ?? SettingsHandler.instance.booruList).where((b) => itemFilter?.call(b) ?? true);
+
     return SettingsDropdown<Booru?>(
       value: value,
       items: [
-        ...(items ?? SettingsHandler.instance.booruList).where((b) => itemFilter?.call(b) ?? true),
+        ...usedItems,
       ],
       onChanged: onChanged,
       title: title,
@@ -692,11 +729,18 @@ class SettingsBooruDropdown extends StatelessWidget {
       drawBottomBorder: drawBottomBorder,
       trailingIcon: trailingIcon,
       itemBuilder: (item) => _itemBuilder(context, item),
-      selectedItemBuilder: _selectedItemBuilder,
+      selectedItemBuilder: (item) => _selectedItemBuilder(context, item),
       clearable: nullable,
-      itemExtent: kMinInteractiveDimension,
+      searchable: searcheable ?? usedItems.length > 5,
+      searchCheck:
+          searchCheck ??
+          (searchText, item) =>
+              (item?.name?.toLowerCase().contains(searchText) ?? true) ||
+              (item?.type?.name.toLowerCase().contains(searchText) ?? true),
+      itemExtent: 54,
       expendableByScroll: true,
       contentPadding: contentPadding,
+      titleAsLabel: titleAsLabel,
     );
   }
 }
@@ -819,7 +863,7 @@ class SettingsTextInput extends StatefulWidget {
     this.inputType = TextInputType.text,
     this.inputFormatters,
     this.validator,
-    this.hintText = '',
+    this.hintText,
     this.subtitle,
     this.autofocus = false,
     this.onChanged,
@@ -848,6 +892,7 @@ class SettingsTextInput extends StatefulWidget {
     this.enableIMEPersonalizedLearning = true,
     this.submitIcon,
     this.showSubmitButton,
+    this.titleAsLabel = false,
     this.prefixIcon,
     this.contextMenuBuilder,
     super.key,
@@ -859,7 +904,7 @@ class SettingsTextInput extends StatefulWidget {
   final TextInputType inputType;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
-  final String hintText;
+  final String? hintText;
   final Widget? subtitle;
   final bool autofocus;
   final ValueChanged<String>? onChanged;
@@ -888,6 +933,7 @@ class SettingsTextInput extends StatefulWidget {
   final bool enableIMEPersonalizedLearning;
   final IconData? submitIcon;
   final bool Function(String)? showSubmitButton;
+  final bool titleAsLabel;
   final Widget? prefixIcon;
   final Widget Function(BuildContext, EditableTextState)? contextMenuBuilder;
 
@@ -1097,8 +1143,9 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         scrollPadding: const EdgeInsets.all(kToolbarHeight),
         contextMenuBuilder: widget.contextMenuBuilder,
         decoration: InputDecoration(
-          labelText: widget.title,
+          labelText: widget.titleAsLabel ? widget.title : null,
           hintText: widget.hintText,
+          errorMaxLines: 3,
           errorText: widget.validator?.call(widget.controller.text),
           contentPadding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
           prefixIcon: widget.prefixIcon,
@@ -1113,13 +1160,43 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
     // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
     if (widget.onlyInput) {
-      return field;
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (!widget.titleAsLabel)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Text(
+                widget.title,
+                style: Theme.of(context).inputDecorationTheme.labelStyle?.copyWith(
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          //
+          field,
+          //
+          if (widget.subtitle != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: widget.subtitle,
+            ),
+        ],
+      );
     }
 
     return Material(
       color: Colors.transparent,
       child: ListTile(
-        title: field,
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!widget.titleAsLabel) Text(widget.title),
+            field,
+          ],
+        ),
         subtitle: widget.subtitle,
         trailing: widget.trailingIcon,
         dense: false,
@@ -1258,7 +1335,9 @@ class SettingsBottomSheet extends StatelessWidget {
                           ),
                       ],
                     ),
-                    if (content != null) content!,
+                    //
+                    ?content,
+                    //
                     if (contentItems != null)
                       Flexible(
                         child: Padding(
@@ -1360,6 +1439,31 @@ class SettingsPageDialog extends StatelessWidget {
       body: SafeArea(
         child: content ?? const SizedBox.shrink(),
       ),
+    );
+  }
+}
+
+class SettingsAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const SettingsAppBar({
+    required this.title,
+    this.leading,
+    super.key,
+  });
+
+  final String title;
+  final Widget? leading;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: MarqueeText(
+        text: title,
+        isExpanded: false,
+      ),
+      leading: leading,
     );
   }
 }

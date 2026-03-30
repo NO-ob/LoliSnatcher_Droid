@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -7,7 +8,7 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 class LoggerViewPage extends StatelessWidget {
   const LoggerViewPage({
     required this.talker,
-    this.appBarTitle = 'Logger',
+    this.appBarTitle,
     this.theme = const TalkerScreenTheme(),
     this.itemsBuilder,
     super.key,
@@ -17,7 +18,7 @@ class LoggerViewPage extends StatelessWidget {
 
   final TalkerScreenTheme theme;
 
-  final String appBarTitle;
+  final String? appBarTitle;
 
   final TalkerDataBuilder? itemsBuilder;
 
@@ -35,7 +36,7 @@ class LoggerViewPage extends StatelessWidget {
           controller: Logger.viewController,
           talker: talker,
           theme: theme,
-          appBarTitle: appBarTitle,
+          appBarTitle: appBarTitle ?? context.loc.settings.logging.logger,
         ),
       ),
     );

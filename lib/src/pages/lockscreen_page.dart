@@ -51,7 +51,7 @@ class LockScreenPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Tap to authenticate',
+                      context.loc.lockscreen.tapToAuthenticate,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const Spacer(),
@@ -60,12 +60,12 @@ class LockScreenPage extends StatelessWidget {
                         onPressed: () {
                           LocalAuthHandler.instance.authenticate(forceUnlock: true);
                         },
-                        child: const Text('DEV UNLOCK'),
+                        child: Text(context.loc.lockscreen.devUnlock),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         child: Text(
-                          '[TESTING]: Press this if you cannot unlock the app through normal means. Report to developer with details about your device.',
+                          context.loc.lockscreen.testingMessage,
                         ),
                       ),
                       const Spacer(),

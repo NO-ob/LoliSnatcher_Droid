@@ -12,7 +12,6 @@ import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/custom_scroll_bar_thumb.dart';
 import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
@@ -150,7 +149,10 @@ class _HistoryListState extends State<HistoryList> {
         return SettingsDialog(
           contentItems: [
             SizedBox(width: double.maxFinite, child: row),
-            Text('Last search: ${formatDate(entry.timestamp)}', textAlign: TextAlign.center),
+            Text(
+              context.loc.history.lastSearchWithDate(date: formatDate(entry.timestamp)),
+              textAlign: TextAlign.center,
+            ),
             //
             const SizedBox(height: 20),
             ListTile(
@@ -165,7 +167,7 @@ class _HistoryListState extends State<HistoryList> {
                 } else {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: const Text('Unknown Booru type!', style: TextStyle(fontSize: 20)),
+                    title: Text(context.loc.history.unknownBooruType, style: const TextStyle(fontSize: 20)),
                     leadingIcon: Icons.warning_amber,
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
@@ -176,7 +178,7 @@ class _HistoryListState extends State<HistoryList> {
                 Navigator.of(context).popUntil(ModalRoute.withName('/'));
               },
               leading: const Icon(Icons.open_in_browser),
-              title: const Text('Open'),
+              title: Text(context.loc.history.open),
             ),
             //
             const SizedBox(height: 10),
@@ -196,7 +198,7 @@ class _HistoryListState extends State<HistoryList> {
                 } else {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: const Text('Unknown Booru type!', style: TextStyle(fontSize: 20)),
+                    title: Text(context.loc.history.unknownBooruType, style: const TextStyle(fontSize: 20)),
                     leadingIcon: Icons.warning_amber,
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
@@ -207,7 +209,7 @@ class _HistoryListState extends State<HistoryList> {
                 Navigator.of(context).popUntil(ModalRoute.withName('/'));
               },
               leading: const Icon(Icons.add_circle_outline),
-              title: const Text('Open in new tab'),
+              title: Text(context.loc.history.openInNewTab),
             ),
             //
             const SizedBox(height: 10),
@@ -233,7 +235,9 @@ class _HistoryListState extends State<HistoryList> {
                 entry.isFavourite ? Icons.favorite_border : Icons.favorite,
                 color: entry.isFavourite ? Colors.grey : Colors.red,
               ),
-              title: Text(entry.isFavourite ? 'Remove from Favourites' : 'Set as Favourite'),
+              title: Text(
+                entry.isFavourite ? context.loc.history.removeFromFavourites : context.loc.history.setAsFavourite,
+              ),
             ),
             //
             const SizedBox(height: 10),
@@ -247,7 +251,7 @@ class _HistoryListState extends State<HistoryList> {
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
-                  title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
+                  title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
                   content: Text(entry.searchText, style: const TextStyle(fontSize: 16)),
                   leadingIcon: Icons.copy,
                   sideColor: Colors.green,
@@ -255,7 +259,7 @@ class _HistoryListState extends State<HistoryList> {
                 Navigator.of(context).pop();
               },
               leading: const Icon(Icons.copy),
-              title: const Text('Copy'),
+              title: Text(context.loc.history.copy),
             ),
             //
             const SizedBox(height: 10),
@@ -270,7 +274,7 @@ class _HistoryListState extends State<HistoryList> {
                 Navigator.of(context).pop();
               },
               leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
-              title: const Text('Delete'),
+              title: Text(context.loc.history.delete),
             ),
           ],
         );
@@ -328,7 +332,9 @@ class _HistoryListState extends State<HistoryList> {
     Booru? booru;
     if (settingsHandler.booruList.isNotEmpty) {
       booru = settingsHandler.booruList.firstWhereOrNull(
-        (b) => b.type == currentEntry.booruType && b.name == currentEntry.booruName,
+        (b) =>
+            b.type == currentEntry.booruType &&
+            (b.type?.isFavouritesOrDownloads == true || b.name == currentEntry.booruName),
       );
     }
 
@@ -383,7 +389,10 @@ class _HistoryListState extends State<HistoryList> {
               isExpanded: false,
             ),
           ),
-          subtitle: Text(booru?.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
+          subtitle: Text(
+            booru?.name ??
+                context.loc.history.unknownBooru(name: currentEntry.booruName, type: currentEntry.booruType.toString()),
+          ),
         ),
       ),
     );
@@ -401,7 +410,8 @@ class _HistoryListState extends State<HistoryList> {
               onChanged: (String? input) {
                 getHistory();
               },
-              title: 'Filter Search History',
+              title: context.loc.search,
+              titleAsLabel: true,
               inputType: TextInputType.text,
               clearable: true,
               pasteable: true,
@@ -442,27 +452,27 @@ class _HistoryListState extends State<HistoryList> {
                 const CircularProgressIndicator()
               else if (history.isEmpty) ...[
                 const Kaomoji(
-                  type: KaomojiType.shrug,
-                  style: TextStyle(fontSize: 40),
+                  category: KaomojiCategory.indifference,
+                  style: TextStyle(fontSize: 36),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'Search History is empty',
-                  style: TextStyle(fontSize: 20),
+                Text(
+                  context.loc.history.searchHistoryIsEmpty,
+                  style: const TextStyle(fontSize: 20),
                 ),
               ] else if (filteredHistory.isEmpty) ...[
                 const Kaomoji(
-                  type: KaomojiType.shrug,
-                  style: TextStyle(fontSize: 40),
+                  category: KaomojiCategory.indifference,
+                  style: TextStyle(fontSize: 36),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'Nothing found',
-                  style: TextStyle(fontSize: 20),
+                Text(
+                  context.loc.nothingFound,
+                  style: const TextStyle(fontSize: 20),
                 ),
               ],
-              if (!settingsHandler.searchHistoryEnabled) const Text('Search History is disabled.'),
-              if (!settingsHandler.dbEnabled) const Text('Search History requires enabling Database in settings.'),
+              if (!settingsHandler.searchHistoryEnabled) Text(context.loc.history.searchHistoryIsDisabled),
+              if (!settingsHandler.dbEnabled) Text(context.loc.history.searchHistoryRequiresDatabase),
             ],
           )
         else
@@ -481,7 +491,7 @@ class _HistoryListState extends State<HistoryList> {
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.select_all),
-                  label: const Text('Select all'),
+                  label: Text(context.loc.selectAll),
                   onPressed: () {
                     // create new list through spread to avoid modifying the original list
                     selectedEntries = [...filteredHistory];
@@ -503,7 +513,7 @@ class _HistoryListState extends State<HistoryList> {
           child: Container(
             margin: const EdgeInsets.all(10),
             child: ElevatedButton.icon(
-              label: Text("Delete ${selectedEntries.length} ${Tools.pluralize('item', selectedEntries.length)}"),
+              label: Text(context.loc.history.deleteItems(count: selectedEntries.length)),
               icon: const Icon(Icons.delete_forever),
               onPressed: () {
                 if (selectedEntries.isEmpty) {
@@ -511,7 +521,7 @@ class _HistoryListState extends State<HistoryList> {
                 }
 
                 final Widget deleteDialog = SettingsDialog(
-                  title: const Text('Delete History Entries'),
+                  title: Text(context.loc.history.deleteHistoryEntries),
                   scrollable: false,
                   content: SizedBox(
                     width: double.maxFinite,
@@ -519,7 +529,7 @@ class _HistoryListState extends State<HistoryList> {
                       shrinkWrap: true,
                       children: [
                         Text(
-                          'Are you sure you want to delete ${selectedEntries.length} ${Tools.pluralize('item', selectedEntries.length)}?',
+                          context.loc.history.deleteItemsConfirm(count: selectedEntries.length),
                         ),
                         const SizedBox(height: 10),
                         ...selectedEntries.map((HistoryItem entry) {
@@ -556,7 +566,7 @@ class _HistoryListState extends State<HistoryList> {
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.border_clear),
-            label: const Text('Clear selection'),
+            label: Text(context.loc.history.clearSelection),
             onPressed: () {
               selectedEntries.clear();
               setState(() {});
@@ -587,7 +597,7 @@ class _HistoryListState extends State<HistoryList> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Search History'),
+          Text(context.loc.history.searchHistory),
           Text(
             '${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'}',
             style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(

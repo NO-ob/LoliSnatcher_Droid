@@ -11,7 +11,7 @@ import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/html_parse.dart';
-import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/close_dialog_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
@@ -61,7 +61,7 @@ class _NotesRendererState extends State<NotesRenderer> {
   void initState() {
     super.initState();
 
-    shouldScale = settingsHandler.galleryMode == 'Sample' || !settingsHandler.disableImageScaling;
+    shouldScale = settingsHandler.galleryMode.isSample || !settingsHandler.disableImageScaling;
     resizeScale = 1;
     screenToImageRatio = 1;
 
@@ -175,27 +175,29 @@ class _NotesRendererState extends State<NotesRenderer> {
     updateState();
   }
 
-  void doCalculations() {
-    final prevResizeScale = resizeScale, prevScreenToImageRatio = screenToImageRatio;
-
-    // do the calculations depending on the current item here
+  void _resolveImageDimensions() {
     imageWidth = viewerHandler.viewState.value?.scaleBoundaries?.childSize.width ?? item.fileWidth ?? screenWidth;
     imageHeight = viewerHandler.viewState.value?.scaleBoundaries?.childSize.height ?? item.fileHeight ?? screenHeight;
     imageRatio = imageWidth / imageHeight;
+  }
 
+  void _computeScaling() {
     resizeScale = 1;
     if (shouldScale && item.fileWidth != null && item.fileHeight != null && imageWidth != 0 && imageHeight != 0) {
       resizeScale = imageWidth / item.fileWidth!;
     }
-
     final viewScale = viewerHandler.viewState.value?.scale;
     screenToImageRatio =
         viewScale ?? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight));
+  }
 
-    final bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
+  void _computeOffsets() {
+    final bool isVertical = settingsHandler.galleryScrollDirection.isVertical;
     final bool isUsingCustomAnim = !settingsHandler.disableCustomPageTransitions;
 
     final double page = widget.pageController?.hasClients == true ? (widget.pageController!.page ?? 0) : 0;
+    // Extract the sub-page fractional offset and map it to [-0.5, 0.5]
+    // so that the note overlay tracks the image during horizontal/vertical page transitions.
     pageOffset = ((page * 10000).toInt() % 10000) / 10000;
     pageOffset = pageOffset > 0.5 ? (1 - pageOffset) : (0 - pageOffset);
 
@@ -207,7 +209,13 @@ class _NotesRendererState extends State<NotesRenderer> {
 
     viewOffsetX = viewerHandler.viewState.value?.position.dx ?? 0;
     viewOffsetY = viewerHandler.viewState.value?.position.dy ?? 0;
+  }
 
+  void doCalculations() {
+    final prevResizeScale = resizeScale, prevScreenToImageRatio = screenToImageRatio;
+    _resolveImageDimensions();
+    _computeScaling();
+    _computeOffsets();
     if (prevResizeScale != resizeScale || prevScreenToImageRatio != screenToImageRatio) {
       rebuildNotesMap();
     }
@@ -217,7 +225,7 @@ class _NotesRendererState extends State<NotesRenderer> {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+        builder: (context, constraints) {
           if (screenWidth != constraints.maxWidth || screenHeight != constraints.maxHeight) {
             screenWidth = constraints.maxWidth;
             screenHeight = constraints.maxHeight;
@@ -269,12 +277,25 @@ class _NotesRendererState extends State<NotesRenderer> {
                       ),
                     )
                   else
-                    ...item.notes.map((note) {
-                      return AnimatedPositioned(
-                        duration: const Duration(milliseconds: 10),
-                        left: (note.posX * scale) + totalOffsetX,
-                        top: (note.posY * scale) + totalOffsetY,
-                        child: notesMap[item.notes.indexOf(note)],
+                    ...List.generate(item.notes.length, (i) {
+                      final note = item.notes[i];
+                      final noteWidth = notesMap[i].width;
+                      final noteHeight = notesMap[i].height;
+                      final left = (note.posX * scale) + totalOffsetX;
+                      final top = (note.posY * scale) + totalOffsetY;
+                      // skip notes fully outside the visible area or notes with zero width/height
+                      if (left < -noteWidth - 30 ||
+                          top < -noteHeight - 30 ||
+                          left > screenWidth + 30 ||
+                          top > screenHeight + 30 ||
+                          noteWidth == 0 ||
+                          noteHeight == 0) {
+                        return const Positioned(left: 0, top: 0, child: SizedBox.shrink());
+                      }
+                      return Positioned(
+                        left: left,
+                        top: top,
+                        child: notesMap[i],
                       );
                     }),
                 ],
@@ -304,27 +325,89 @@ class NoteBuild extends StatefulWidget {
 }
 
 class _NoteBuildState extends State<NoteBuild> {
-  bool isVisible = true;
+  bool isViewed = false, isColored = false, isVisible = true;
+  late InlineSpan _parsedContent;
+  late InlineSpan _parsedContentBordered;
+  late InlineSpan _parsedContentColorless;
+
+  @override
+  void initState() {
+    super.initState();
+    _rebuildParsed();
+  }
+
+  void _rebuildParsed() {
+    _parsedContent = parse(
+      widget.text ?? '',
+      style: const TextStyle(fontSize: 14),
+    );
+    _parsedContentBordered = parse(
+      widget.text ?? '',
+      style: const TextStyle(color: Colors.white, fontSize: 14),
+      isBordered: true,
+    );
+    _parsedContentColorless = colorlessSpan(_parsedContent);
+  }
+
+  Future<void> openNoteDialog() async {
+    setState(() {
+      isViewed = true;
+    });
+
+    final res = await FlashElements.showSnackbar(
+      title: Row(
+        children: [
+          Flexible(child: Text(context.loc.viewer.notes.note)),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: Icon(
+              isColored ? Icons.color_lens : Icons.color_lens_outlined,
+              size: 24,
+            ),
+            onPressed: () {
+              setState(() {
+                isColored = !isColored;
+              });
+
+              // pop(true) to avoid redrawing red border on the note when dialog reopens
+              Navigator.of(context).pop(true);
+              openNoteDialog();
+            },
+          ),
+        ],
+      ),
+      content: Text.rich(isColored ? _parsedContentBordered : _parsedContentColorless),
+      duration: null,
+      sideColor: Colors.blue,
+      shouldLeadingPulse: false,
+      asDialog: true,
+    );
+
+    if (res != true) {
+      setState(() {
+        isViewed = false;
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(NoteBuild old) {
+    super.didUpdateWidget(old);
+    if (old.text != widget.text) {
+      _rebuildParsed();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // TODO don't render when box is out of the screen
-    // final screen = MediaQuery.sizeOf(context);
-    // if (widget.left < (0 - widget.width - 30) ||
-    //     widget.top < (0 - widget.height - 30) ||
-    //     widget.left > (screen.width + 30) ||
-    //     widget.top > (screen.height + 30)) {
-    //   return const SizedBox.shrink();
-    // }
-
     return TransparentPointer(
       child: GestureDetector(
-        onLongPressStart: (details) {
+        onLongPressStart: (_) {
           setState(() {
             isVisible = false;
           });
         },
-        onLongPressEnd: (details) {
+        onLongPressEnd: (_) {
           setState(() {
             isVisible = true;
           });
@@ -334,33 +417,16 @@ class _NoteBuildState extends State<NoteBuild> {
             isVisible = true;
           });
         },
-        onTap: () {
-          FlashElements.showSnackbar(
-            title: const Text('Note'),
-            content: Text.rich(
-              parse(
-                widget.text ?? '',
-                const TextStyle(
-                  fontSize: 14,
-                ),
-                false,
-              ),
-              overflow: TextOverflow.fade,
-            ),
-            duration: null,
-            sideColor: Colors.blue,
-            shouldLeadingPulse: false,
-            asDialog: true,
-          );
-        },
+        onTap: openNoteDialog,
         behavior: HitTestBehavior.translucent,
         child: AnimatedOpacity(
           opacity: isVisible ? 1 : 0,
           duration: const Duration(milliseconds: 100),
           child: _NoteBuildContent(
-            text: widget.text,
+            parsedContent: _parsedContentBordered,
             width: widget.width,
             height: widget.height,
+            isViewed: isViewed,
           ),
         ),
       ),
@@ -370,14 +436,16 @@ class _NoteBuildState extends State<NoteBuild> {
 
 class _NoteBuildContent extends StatelessWidget {
   const _NoteBuildContent({
-    required this.text,
+    required this.parsedContent,
     required this.width,
     required this.height,
+    required this.isViewed,
   });
 
-  final String? text;
+  final InlineSpan parsedContent;
   final double width;
   final double height;
+  final bool isViewed;
 
   @override
   Widget build(BuildContext context) {
@@ -389,8 +457,8 @@ class _NoteBuildContent extends StatelessWidget {
           color: const Color(0xFFFFF300).withValues(alpha: 0.25),
           borderRadius: BorderRadius.circular(2),
           border: Border.all(
-            width: 1,
-            color: const Color(0xFFFFF176).withValues(alpha: 0.5),
+            width: isViewed ? 4 : 1,
+            color: isViewed ? Colors.red : const Color(0xFFFFF176).withValues(alpha: 0.5),
           ),
         ),
         child:
@@ -398,14 +466,7 @@ class _NoteBuildContent extends StatelessWidget {
             ? Padding(
                 padding: const EdgeInsets.all(1),
                 child: Text.rich(
-                  parse(
-                    text ?? '',
-                    const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                    true,
-                  ),
+                  parsedContent,
                   overflow: TextOverflow.fade,
                 ),
               )
@@ -426,7 +487,7 @@ class NotesDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SettingsDialog(
-      title: const Text('Notes'),
+      title: Text(context.loc.viewer.notes.notes),
       content: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Material(
@@ -442,13 +503,10 @@ class NotesDialog extends StatelessWidget {
                   title: Text.rich(
                     parse(
                       note.content ?? '',
-                      const TextStyle(
-                        fontSize: 14,
-                      ),
-                      false,
+                      style: const TextStyle(fontSize: 14),
                     ),
                   ),
-                  subtitle: Text('X:${note.posX}, Y:${note.posY}'),
+                  subtitle: Text(context.loc.viewer.notes.coordinates(posX: note.posX, posY: note.posY)),
                   shape: Border(
                     bottom: BorderSide(
                       color: Colors.grey.shade600,
@@ -466,10 +524,7 @@ class NotesDialog extends StatelessWidget {
       // insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
       scrollable: false,
       actionButtons: const [
-        CancelButton(
-          text: 'Close',
-          withIcon: true,
-        ),
+        CloseDialogButton(withIcon: true),
       ],
     );
   }

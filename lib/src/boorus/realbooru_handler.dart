@@ -3,6 +3,7 @@ import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -61,7 +62,7 @@ class RealbooruHandler extends BooruHandler {
         fileURL: fullURL,
         sampleURL: fullURL,
         thumbnailURL: thumbURL,
-        tagsList: tags,
+        tagsList: tags.map(Tag.new).toList(),
         md5String: getHashFromURL(thumbURL),
         postURL: makePostURL(id),
       );

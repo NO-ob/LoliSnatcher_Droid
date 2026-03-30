@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/gen/strings.g.dart';
+
 class RetryButton extends StatelessWidget {
   const RetryButton({
-    this.text = 'Retry',
     this.onTap,
     this.onLongTap,
     this.withIcon = false,
-    this.customIcon,
     super.key,
   });
 
-  final String text;
   final VoidCallback? onTap;
   final VoidCallback? onLongTap;
   final bool withIcon;
-  final IconData? customIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +29,8 @@ class RetryButton extends StatelessWidget {
         ),
         onPressed: onTap,
         onLongPress: onLongTap,
-        icon: Icon(withIcon ? (customIcon ?? Icons.refresh) : null),
-        label: Text(text),
+        icon: const Icon(Icons.refresh),
+        label: Text(context.loc.retry),
       );
     }
 
@@ -48,7 +46,7 @@ class RetryButton extends StatelessWidget {
       ),
       onPressed: onTap,
       onLongPress: onLongTap,
-      child: Text(text),
+      child: Text(context.loc.retry),
     );
   }
 }

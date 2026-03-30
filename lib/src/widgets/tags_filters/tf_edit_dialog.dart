@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
-import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
+import 'package:lolisnatcher/src/widgets/common/save_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
@@ -46,7 +46,10 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
     } else {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text('Empty input!', style: TextStyle(fontSize: 20)),
+        title: Text(
+          context.loc.tagsFiltersDialogs.emptyInput,
+          style: const TextStyle(fontSize: 20),
+        ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
@@ -76,8 +79,8 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
         Container(
           margin: const EdgeInsets.symmetric(vertical: 20),
           child: SettingsTextInput(
-            title: 'Edit Filter',
-            hintText: 'Edit Filter',
+            title: context.loc.tagsFiltersDialogs.editFilter,
+            titleAsLabel: true,
             onlyInput: true,
             controller: _controller,
             autofocus: false,
@@ -91,17 +94,14 @@ class _TagsFiltersEditDialogState extends State<TagsFiltersEditDialog> {
       ],
       actionButtons: [
         const CancelButton(
-          text: 'Close',
           withIcon: true,
         ),
         DeleteButton(
           withIcon: true,
           action: onDelete,
         ),
-        ConfirmButton(
-          text: 'Save',
+        SaveButton(
           withIcon: true,
-          customIcon: Icons.save,
           action: () => onSubmit(_controller.text),
         ),
       ],

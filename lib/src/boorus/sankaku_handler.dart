@@ -7,10 +7,12 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -75,13 +77,18 @@ class SankakuHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final dynamic current = responseItem;
+    final current = responseItem as Map<String, dynamic>;
 
-    final List<String> tags = [];
+    final List<Tag> tags = [];
     final Map<TagType, List<String>> tagMap = {};
 
     for (int x = 0; x < current['tags'].length; x++) {
-      tags.add(current['tags'][x]['tagName'].toString());
+      tags.add(
+        Tag(
+          current['tags'][x]['tagName'].toString(),
+          count: current['tags'][x]['post_count'].toInt(),
+        ),
+      );
       final String typeStr = current['tags'][x]['type'].toString();
       final TagType type = tagTypeMap[typeStr] ?? TagType.none;
       if (tagMap.containsKey(type)) {
@@ -90,7 +97,7 @@ class SankakuHandler extends BooruHandler {
         tagMap[type] = [current['tags'][x]['tagName'].toString()];
       }
     }
-    tags.sort((a, b) => a.compareTo(b));
+    tags.sort((a, b) => a.fullString.compareTo(b.fullString));
 
     if (current['file_url'] != null) {
       for (int i = 0; i < tagMap.entries.length; i++) {
@@ -162,6 +169,21 @@ class SankakuHandler extends BooruHandler {
           item.sampleURL = current['sample_url'];
           item.thumbnailURL = current['preview_url'];
           item.mediaType.value = MediaType.fromExtension(Tools.getFileExt(item.fileURL));
+
+          final List<Tag> newTags = [];
+          for (final t in item.tagsList) {
+            int count = 0;
+            try {
+              count =
+                  (current['tags'] as List<dynamic>?)?.firstWhereOrNull(
+                    (e) => e['tagName'] == t.fullString,
+                  )?['post_count'] ??
+                  0;
+            } catch (_) {}
+            newTags.add(Tag(t.fullString, count: count));
+          }
+          item.tagsList = newTags;
+
           item.isUpdated = true;
         }
         return (item: item, failed: false, error: null);
@@ -338,6 +360,7 @@ class SankakuHandler extends BooruHandler {
   @override
   NoteItem? parseNote(dynamic responseItem, int index) {
     final current = responseItem;
+    if (current['is_active'] == false) return null;
     return NoteItem(
       id: current['id'].toString(),
       postID: current['post_id'].toString(),

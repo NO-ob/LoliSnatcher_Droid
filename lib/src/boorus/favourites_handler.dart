@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 
 import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/response_error.dart';
@@ -38,20 +39,39 @@ class FavouritesHandler extends BooruHandler {
     // get amount of items before fetching
     final int length = fetched.length;
 
-    final newItems = await SettingsHandler.instance.dbHandler.searchDB(
-      tags,
-      (pageNum * limit).toString(),
-      limit.toString(),
-      'DESC',
-      'Favourites',
-    );
+    final List<BooruItem> newItems = [];
+    try {
+      newItems.addAll(
+        await SettingsHandler.instance.dbHandler.searchDB(
+          tags,
+          (pageNum * limit).toString(),
+          limit.toString(),
+        ),
+      );
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'DownloadsHandler',
+        'search',
+        LogTypes.booruHandlerInfo,
+        s: s,
+      );
+      errorString = 'DATABASE ERROR: $e';
+      locked = true;
+    }
 
     await afterParseResponse(newItems);
 
     prevTags = tags;
 
     if (fetched.isEmpty || fetched.length == length) {
-      Logger.Inst().log('dbhandler dbLocked', 'FavouritesHandler', 'search', LogTypes.booruHandlerInfo);
+      Logger.Inst().log(
+        'dbhandler dbLocked',
+        'FavouritesHandler',
+        'search',
+        LogTypes.booruHandlerInfo,
+        s: StackTrace.current,
+      );
       locked = true;
     }
 
@@ -64,10 +84,14 @@ class FavouritesHandler extends BooruHandler {
     CancelToken? cancelToken,
   }) async {
     try {
-      final List<TagSuggestion> tags = (await SettingsHandler.instance.dbHandler.getTags(
-        input,
+      final tagsWithCount = await SettingsHandler.instance.dbHandler.getTagsByUsageCount(
+        input.isEmpty ? null : input,
         limit,
-      )).map((t) => TagSuggestion(tag: t)).where((t) => t.tag.trim().isNotEmpty).toList();
+      );
+      final List<TagSuggestion> tags = tagsWithCount
+          .where((t) => t.name.trim().isNotEmpty)
+          .map((t) => TagSuggestion(tag: t.name, count: t.count))
+          .toList();
       return Right(tags);
     } catch (e, s) {
       return Left(
@@ -92,9 +116,10 @@ class FavouritesHandler extends BooruHandler {
       SortMetaTag(
         values: [
           MetaTagValue(name: 'Random', value: 'random'),
+          MetaTagValue(name: 'Reverse', value: 'reverse'),
         ],
       ),
-      StringMetaTag(name: 'Site', keyName: 'site'),
+      LocalDbSiteMetaTag(),
     ];
   }
 }

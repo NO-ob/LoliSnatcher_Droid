@@ -5,6 +5,7 @@ import 'package:fpdart/fpdart.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/response_error.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -204,7 +205,7 @@ class InkBunnyHandler extends BooruHandler {
           previewWidth: double.tryParse(files[i]['preview_size_x'] ?? ''),
           previewHeight: double.tryParse(files[i]['preview_size_y'] ?? ''),
           md5String: files[i]['full_file_md5'],
-          tagsList: currentTags,
+          tagsList: currentTags.map(Tag.new).toList(),
           postURL: getPostURL(current['submission_id'].toString(), i),
           serverId: current['submission_id'].toString(),
           score: current['favorites_count'],

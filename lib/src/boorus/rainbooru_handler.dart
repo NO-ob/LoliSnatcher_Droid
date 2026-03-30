@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -31,9 +33,9 @@ class RainbooruHandler extends BooruHandler {
 
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
-    String thumbURL = '';
-    final urlElem = responseItem.firstChild;
-    thumbURL += urlElem.firstChild!.attributes['src']!;
+    final urlElem = (responseItem as Element).firstChild;
+    if (urlElem == null) return null;
+    final thumbURL = urlElem.firstChild?.attributes['src'] ?? '';
     final String url = makePostURL(urlElem.attributes['href']!.split('img/')[1]);
     final responseInner = await DioNetwork.get(url, headers: getHeaders());
     if (responseInner.statusCode == 200) {
@@ -53,7 +55,7 @@ class RainbooruHandler extends BooruHandler {
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: thumbURL,
-          tagsList: currentTags,
+          tagsList: currentTags.map(Tag.new).toList(),
           postURL: url,
         );
 

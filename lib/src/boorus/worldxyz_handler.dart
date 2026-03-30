@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -87,8 +88,8 @@ class WorldXyzHandler extends BooruHandler {
     const Map<int, String> thumbnailTypes = {
       11: 'PicThumbnail',
       12: 'PicThumbnailEx',
-      31: 'PicThumbnailAvif',
-      32: 'PicThumbnailExAvif',
+      // 31: 'PicThumbnailAvif',
+      // 32: 'PicThumbnailExAvif',
     };
 
     const Map<int, String> sampleTypes = {
@@ -100,9 +101,10 @@ class WorldXyzHandler extends BooruHandler {
       1: 'Raw',
       10: 'Pic',
       14: 'PicSmall',
-      30: 'PicAvif',
-      33: 'PicPreviewAvif',
-      34: 'PicSmallAvif',
+      // avif images seem to be broken after some date (example: 813195)
+      // 30: 'PicAvif',
+      // 33: 'PicPreviewAvif',
+      // 34: 'PicSmallAvif',
       100: 'Mov',
       111: 'Mov360',
       112: 'Mov480',
@@ -373,9 +375,10 @@ class WorldXyzHandler extends BooruHandler {
         final List<dynamic> tags = current['tags'] ?? [];
         final newTags = [...item.tagsList];
         for (final rawTag in tags) {
-          final tag = rawTag['value']!.replaceAll(' ', '_');
-          if (item.tagsList.contains(tag)) continue;
-          newTags.add(tag);
+          final String tag = rawTag['value']!.replaceAll(' ', '_');
+          final int count = int.tryParse(rawTag['count']?.toString() ?? '0') ?? 0;
+          if (item.tagsList.any((t) => t.fullString == tag)) continue;
+          newTags.add(Tag(tag, count: count));
           if (rawTag['type'] != null) {
             addTagsWithType(
               [tag],

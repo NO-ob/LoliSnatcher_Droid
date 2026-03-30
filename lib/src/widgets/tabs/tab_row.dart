@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart' hide FirstWhereOrNullExt;
+import 'package:lolisnatcher/gen/strings.g.dart';
 
 import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -35,9 +36,11 @@ class TabRow extends StatelessWidget {
     return Obx(
       () {
         final String rawTagsStr = tab.tags;
-        final String tagText = (rawTagsStr.trim().isEmpty ? '[Empty]' : rawTagsStr).trim();
+        final String tagText = (rawTagsStr.trim().isEmpty ? context.loc.tabs.empty : rawTagsStr).trim();
 
         final bool hasItems = tab.booruHandler.filteredFetched.isNotEmpty;
+
+        final textColor = color ?? (tab.tags.isEmpty ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface;
 
         Widget marquee = MarqueeText(
           key: ValueKey(tagText),
@@ -47,7 +50,7 @@ class TabRow extends StatelessWidget {
             fontSize: 16,
             fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
             fontWeight: fontWeight ?? FontWeight.normal,
-            color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
+            color: textColor,
           ),
         );
 
@@ -61,7 +64,7 @@ class TabRow extends StatelessWidget {
                 fontSize: 16,
                 fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
                 fontWeight: fontWeight ?? FontWeight.normal,
-                color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
+                color: textColor,
               );
 
               spans.add(
@@ -94,7 +97,7 @@ class TabRow extends StatelessWidget {
                 fontSize: 16,
                 fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
                 fontWeight: fontWeight ?? FontWeight.normal,
-                color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
+                color: textColor,
               ),
             );
           } else if (withColoredTags) {
@@ -122,10 +125,7 @@ class TabRow extends StatelessWidget {
               final bool isColored = !tagData.tagType.isNone || isMetaTag;
 
               final Color usedColor =
-                  (isColored ? (isMetaTag ? Colors.pink : tagData.tagType.getColour()) : null) ??
-                  color ??
-                  (tab.tags == '' ? Colors.grey : null) ??
-                  Theme.of(context).colorScheme.onSurface;
+                  (isColored ? (isMetaTag ? Colors.pink : tagData.tagType.getColour()) : null) ?? textColor;
 
               final spanStyle = TextStyle(
                 fontSize: 16,
@@ -190,7 +190,7 @@ class TabRow extends StatelessWidget {
                 fontSize: 16,
                 fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
                 fontWeight: fontWeight ?? FontWeight.normal,
-                color: color ?? (tab.tags == '' ? Colors.grey : null),
+                color: textColor,
               ),
             );
           }

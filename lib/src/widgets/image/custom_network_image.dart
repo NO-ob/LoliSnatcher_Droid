@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_avif/flutter_avif.dart';
 
@@ -16,8 +15,278 @@ import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/image/abstract_custom_network_image.dart' as custom_network_image;
 
+/// Shared logic for downloading, caching, and atomic writing of images.
+mixin _NetworkImageLoaderMixin {
+  Future<void> _commitCacheFile(File tempFile, String destPath) async {
+    final dest = File(destPath);
+    try {
+      await tempFile.rename(destPath);
+      return;
+    } catch (_) {}
+
+    if (await dest.exists()) {
+      try {
+        final len = await dest.length();
+        if (len > 0) {
+          try {
+            await tempFile.delete();
+          } catch (_) {}
+          return;
+        }
+        await dest.delete();
+      } catch (e) {
+        try {
+          await tempFile.delete();
+        } catch (_) {}
+        return;
+      }
+    }
+    for (int i = 0; i < 3; i++) {
+      try {
+        await tempFile.rename(destPath);
+        return;
+      } catch (_) {
+        await Future.delayed(Duration(milliseconds: 50 * (i + 1)));
+      }
+    }
+
+    if (await dest.exists()) {
+      try {
+        await tempFile.delete();
+      } catch (_) {}
+      return;
+    }
+
+    throw FileSystemException('Failed to commit cache file after retries', destPath);
+  }
+
+  Future<Uint8List> downloadAndCache({
+    required String url,
+    required String? cacheFolder,
+    required String fileNameExtras,
+    required bool withCache,
+    required Map<String, String>? headers,
+    required Duration? sendTimeout,
+    required Duration? receiveTimeout,
+    required CancelToken? cancelToken,
+    required bool withCaptchaCheck,
+    required StreamController<ImageChunkEvent> chunkEvents,
+    required void Function(bool)? onCacheDetected,
+  }) async {
+    final Uri resolved = Uri.base.resolve(url);
+    final String cacheFilePath = await ImageWriter().getCachePathString(
+      resolved.toString(),
+      cacheFolder ?? 'media',
+      clearName: cacheFolder != 'favicons',
+      fileNameExtras: fileNameExtras,
+    );
+
+    final String tempFilePath = '$cacheFilePath.temp_${DateTime.now().microsecondsSinceEpoch}';
+
+    File? cacheFile;
+
+    // Check existing cache
+    if (withCache) {
+      cacheFile = File(cacheFilePath);
+      if (await cacheFile.exists()) {
+        final int fileSize = await cacheFile.length();
+        if (fileSize < 10) {
+          try {
+            await cacheFile.delete();
+          } catch (_) {}
+          cacheFile = null;
+        } else {
+          chunkEvents.add(
+            ImageChunkEvent(
+              cumulativeBytesLoaded: fileSize,
+              expectedTotalBytes: fileSize,
+            ),
+          );
+        }
+      } else {
+        cacheFile = null;
+      }
+    }
+
+    if (onCacheDetected != null) {
+      onCacheDetected(cacheFile != null);
+    }
+
+    if (cacheFile != null) {
+      try {
+        return await cacheFile.readAsBytes();
+      } catch (e) {
+        cacheFile = null;
+      }
+    }
+
+    // --- Download Logic ---
+    final client = DioNetwork.getClient(skipLogging: true);
+    if (withCaptchaCheck) {
+      DioNetwork.captchaInterceptor(
+        client,
+        customUserAgent: Tools.appUserAgent,
+      );
+    }
+
+    Response? response;
+    try {
+      response = withCache
+          ? await client.downloadUri(
+              resolved,
+              tempFilePath,
+              options: Options(
+                headers: headers,
+                sendTimeout: sendTimeout,
+                receiveTimeout: receiveTimeout,
+                followRedirects: headers?.containsKey('LS-IGNORE-REDIRECT') == true ? false : true,
+              ),
+              onReceiveProgress: (int count, int total) {
+                chunkEvents.add(
+                  ImageChunkEvent(
+                    cumulativeBytesLoaded: count,
+                    expectedTotalBytes: total <= 0 ? null : total,
+                  ),
+                );
+              },
+              cancelToken: cancelToken,
+            )
+          : await client.getUri(
+              resolved,
+              options: Options(
+                headers: headers,
+                responseType: ResponseType.bytes,
+                sendTimeout: sendTimeout,
+                receiveTimeout: receiveTimeout,
+                followRedirects: headers?.containsKey('LS-IGNORE-REDIRECT') == true ? false : true,
+              ),
+              onReceiveProgress: (int count, int total) {
+                chunkEvents.add(
+                  ImageChunkEvent(
+                    cumulativeBytesLoaded: count,
+                    expectedTotalBytes: total <= 0 ? null : total,
+                  ),
+                );
+              },
+              cancelToken: cancelToken,
+            );
+    } catch (e) {
+      try {
+        await File(tempFilePath).delete();
+      } catch (_) {}
+      rethrow;
+    } finally {
+      client.close();
+    }
+
+    if (!Tools.isGoodResponse(response)) {
+      try {
+        await File(tempFilePath).delete();
+      } catch (_) {}
+
+      throw NetworkImageLoadException(
+        statusCode: response.statusCode ?? 0,
+        uri: resolved,
+      );
+    }
+
+    if (withCache) {
+      final tempFile = File(tempFilePath);
+      if (await tempFile.exists()) {
+        final actualLen = await tempFile.length();
+
+        // Validate Content-Length
+        final headerLen = int.tryParse(response.headers.value(HttpHeaders.contentLengthHeader) ?? '');
+        if (headerLen != null && headerLen > 0 && actualLen != headerLen) {
+          try {
+            await tempFile.delete();
+          } catch (_) {}
+          throw Exception('Download incomplete: Expected $headerLen bytes, got $actualLen');
+        }
+
+        // Validate JPEG EOI (End of Image)
+        if (actualLen > 2 && (url.toLowerCase().endsWith('.jpg') || url.toLowerCase().endsWith('.jpeg'))) {
+          final handle = await tempFile.open();
+          try {
+            await handle.setPosition(actualLen - 2);
+            final endBytes = await handle.read(2);
+            if (endBytes.length == 2 && (endBytes[0] != 0xFF || endBytes[1] != 0xD9)) {
+              throw Exception('Image file is truncated (missing JPEG EOI marker)');
+            }
+          } catch (e) {
+            try {
+              await tempFile.delete();
+            } catch (_) {}
+            rethrow;
+          } finally {
+            await handle.close();
+          }
+        }
+
+        try {
+          await _commitCacheFile(tempFile, cacheFilePath);
+          return File(cacheFilePath).readAsBytes();
+        } catch (_) {
+          try {
+            await tempFile.delete();
+          } catch (_) {}
+          rethrow;
+        }
+      }
+    }
+
+    return response.data as Uint8List;
+  }
+
+  Future<Uint8List> tryFixGifSpeed(String url, Uint8List image) async {
+    if (!url.toLowerCase().endsWith('.gif') && !url.toLowerCase().contains('.gif')) {
+      return image;
+    }
+
+    try {
+      final int len = image.length - 6;
+      for (int i = 0; i < len; i++) {
+        if (image[i] == 0x21 && image[i + 1] == 0xF9 && image[i + 2] == 0x04) {
+          final int delay = image[i + 4] | (image[i + 5] << 8);
+          if (delay < 10) {
+            image[i + 4] = 0x0A;
+          }
+          i += 5;
+        }
+      }
+    } catch (_) {}
+    return image;
+  }
+
+  Future<void> deleteCache(String url, String? cacheFolder, String fileNameExtras) async {
+    final Uri resolved = Uri.base.resolve(url);
+    final String cacheFilePath = await ImageWriter().getCachePathString(
+      resolved.toString(),
+      cacheFolder ?? 'media',
+      clearName: cacheFolder != 'favicons',
+      fileNameExtras: fileNameExtras,
+    );
+    final File cacheFile = File(cacheFilePath);
+    try {
+      if (await cacheFile.exists()) {
+        await cacheFile.delete();
+      }
+      // Note: We can't easily delete unique temp files here as their names are random.
+      // But they are cleaned up in the try/catch blocks of downloadAndCache.
+      // We can try deleting the legacy fixed temp file just in case.
+      final legacyTemp = File('$cacheFilePath.temp');
+      if (await legacyTemp.exists()) {
+        await legacyTemp.delete();
+      }
+    } catch (e) {
+      print('NetworkImage Exception :: delete cache file :: $e');
+    }
+  }
+}
+
 @immutable
 class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetworkImage>
+    with _NetworkImageLoaderMixin
     implements custom_network_image.CustomNetworkImage {
   const CustomNetworkImage(
     this.url, {
@@ -36,29 +305,18 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
 
   @override
   final String url;
-
   @override
   final double scale;
-
   @override
   final Map<String, String>? headers;
-
   final CancelToken? cancelToken;
-
   final bool withCache;
-
   final String? cacheFolder;
-
   final String fileNameExtras;
-
   final void Function(bool)? onCacheDetected;
-
   final void Function(Object)? onError;
-
   final Duration? sendTimeout;
-
   final Duration? receiveTimeout;
-
   final bool withCaptchaCheck;
 
   @override
@@ -74,11 +332,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(
-        key as CustomNetworkImage,
-        chunkEvents,
-        decode,
-      ),
+      codec: _loadAsync(key as CustomNetworkImage, chunkEvents, decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -90,28 +344,8 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
   }
 
   Future<bool> deleteCacheFile() async {
-    final key = this;
-    final Uri resolved = Uri.base.resolve(key.url);
-    final String cacheFilePath = await ImageWriter().getCachePathString(
-      resolved.toString(),
-      cacheFolder ?? 'media',
-      clearName: cacheFolder != 'favicons',
-      fileNameExtras: fileNameExtras,
-    );
-    final File cacheFile = File(cacheFilePath);
-
-    try {
-      assert(key == this, 'The $runtimeType cannot be reused after disposing.');
-
-      if (await cacheFile.exists()) {
-        await cacheFile.delete();
-        return true;
-      }
-    } catch (e) {
-      print('CustomNetworkImage Exception :: delete cache file :: $e');
-      return false;
-    }
-    return false;
+    await deleteCache(url, cacheFolder, fileNameExtras);
+    return true;
   }
 
   Future<ui.Codec> _loadAsync(
@@ -119,142 +353,36 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     StreamController<ImageChunkEvent> chunkEvents,
     ImageDecoderCallback decode,
   ) async {
-    final Uri resolved = Uri.base.resolve(key.url);
-    final String cacheFilePath = await ImageWriter().getCachePathString(
-      resolved.toString(),
-      cacheFolder ?? 'media',
-      clearName: cacheFolder != 'favicons',
-      fileNameExtras: fileNameExtras,
-    );
-    File? cacheFile;
     try {
       assert(key == this, 'The $runtimeType cannot be reused after disposing.');
 
-      // file already cached
-      if (withCache) {
-        cacheFile = File(cacheFilePath);
-        int fileSize = 0;
-
-        if (await cacheFile.exists()) {
-          fileSize = await cacheFile.length();
-          if (fileSize == 0) {
-            await cacheFile.delete();
-            cacheFile = null;
-          } else {
-            chunkEvents.add(
-              ImageChunkEvent(
-                cumulativeBytesLoaded: fileSize,
-                expectedTotalBytes: fileSize <= 0 ? null : fileSize,
-              ),
-            );
-          }
-        } else {
-          cacheFile = null;
-        }
-      }
-
-      if (onCacheDetected != null) {
-        onCacheDetected?.call(cacheFile != null);
-      }
-
-      final client = DioNetwork.getClient();
-      if (withCaptchaCheck) {
-        DioNetwork.captchaInterceptor(
-          client,
-          customUserAgent: Tools.appUserAgent,
-        );
-      }
-
-      Response? response;
-      if (cacheFile == null) {
-        response = withCache
-            ? await client.downloadUri(
-                resolved,
-                cacheFilePath,
-                options: Options(
-                  headers: headers,
-                  sendTimeout: sendTimeout,
-                  receiveTimeout: receiveTimeout,
-                ),
-                onReceiveProgress: (int count, int total) {
-                  chunkEvents.add(
-                    ImageChunkEvent(
-                      cumulativeBytesLoaded: count,
-                      expectedTotalBytes: total <= 0 ? null : total,
-                    ),
-                  );
-                },
-                cancelToken: cancelToken,
-              )
-            : await client.getUri(
-                resolved,
-                options: Options(
-                  headers: headers,
-                  responseType: ResponseType.bytes,
-                  sendTimeout: sendTimeout,
-                  receiveTimeout: receiveTimeout,
-                ),
-                onReceiveProgress: (int count, int total) {
-                  chunkEvents.add(
-                    ImageChunkEvent(
-                      cumulativeBytesLoaded: count,
-                      expectedTotalBytes: total <= 0 ? null : total,
-                    ),
-                  );
-                },
-                cancelToken: cancelToken,
-              );
-        client.close();
-
-        if (!Tools.isGoodResponse(response)) {
-          try {
-            final testFile = File(cacheFilePath);
-            if (await testFile.exists()) {
-              await testFile.delete();
-            }
-          } catch (_) {}
-
-          throw NetworkImageLoadException(
-            statusCode: response.statusCode ?? 0,
-            uri: resolved,
-          );
-        }
-      }
-
-      if (withCache) {
-        if (cacheFile == null) {
-          cacheFile = File(cacheFilePath);
-        } else {
-          // remove file when download wasn't finished
-          // TODO problematic?
-          // if (cancelToken?.isCancelled == true) {
-          //   if (lastChunk != null) {
-          //     if (lastChunk!.expectedTotalBytes != 0 && lastChunk!.expectedTotalBytes != lastChunk!.cumulativeBytesLoaded) {
-          //       await cacheFile.delete();
-          //       throw Exception('CustomNetworkImage cancelled: $resolved');
-          //     }
-          //   }
-          // }
-        }
-      }
-
-      final Uint8List bytes = cacheFile != null ? await cacheFile.readAsBytes() : response!.data;
-      if (bytes.lengthInBytes == 0) {
-        throw Exception('CustomNetworkImage is an empty file: $resolved');
-      }
-
-      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(
-        await _tryFixGifSpeed(
-          resolved.toString(),
-          bytes,
-        ),
+      final Uint8List bytes = await downloadAndCache(
+        url: key.url,
+        cacheFolder: cacheFolder,
+        fileNameExtras: fileNameExtras,
+        withCache: withCache,
+        headers: headers,
+        sendTimeout: sendTimeout,
+        receiveTimeout: receiveTimeout,
+        cancelToken: cancelToken,
+        withCaptchaCheck: withCaptchaCheck,
+        chunkEvents: chunkEvents,
+        onCacheDetected: onCacheDetected,
       );
+
+      if (bytes.isEmpty) {
+        await deleteCacheFile();
+        throw Exception('CustomNetworkImage is an empty file: ${key.url}');
+      }
+
+      final fixedBytes = await tryFixGifSpeed(key.url, bytes);
+
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(fixedBytes);
       return decode(buffer);
     } catch (e) {
       if (onError != null) {
         onError?.call(e);
       }
-
       scheduleMicrotask(() {
         PaintingBinding.instance.imageCache.evict(key);
       });
@@ -264,48 +392,9 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     }
   }
 
-  /// Try to fix gifs without proper frame timings and therefore are played too fast due to a bug in flutter (https://github.com/flutter/flutter/issues/29130)
-  ///
-  /// Source: https://github.com/fluttercandies/extended_image_library/pull/69
-  Future<Uint8List> _tryFixGifSpeed(String url, Uint8List image) async {
-    if (!url.contains('.gif')) {
-      // avoid computation if not a gif
-      return image;
-    }
-
-    return compute(
-      (Uint8List image) {
-        bool handled = false;
-        if (!handled) {
-          try {
-            for (int i = 0; i < image.length - 2; i++) {
-              final Uint8List slice = image.sublist(i, i + 3);
-              if (const ListEquality<int>().equals(slice, <int>[0x21, 0xF9, 0x04])) {
-                final int delay1 = image[i + 4];
-                final int delay2 = image[i + 5];
-                final int delay = delay1 | (delay2 << 8);
-                // min 100ms
-                if (delay < 10) {
-                  image[i + 4] = 0x0A;
-                }
-              }
-            }
-            handled = true;
-          } catch (_) {
-            //
-          }
-        }
-        return image;
-      },
-      image,
-    );
-  }
-
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
+    if (other.runtimeType != runtimeType) return false;
     return other is CustomNetworkImage &&
         other.url == url &&
         other.scale == scale &&
@@ -313,16 +402,23 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         other.withCache == withCache &&
         other.cacheFolder == cacheFolder &&
         other.fileNameExtras == fileNameExtras &&
-        other.onCacheDetected == onCacheDetected &&
-        other.onError == onError &&
         other.sendTimeout == sendTimeout &&
         other.receiveTimeout == receiveTimeout &&
-        other.withCaptchaCheck == withCaptchaCheck &&
-        other.cancelToken == cancelToken;
+        other.withCaptchaCheck == withCaptchaCheck;
   }
 
   @override
-  int get hashCode => Object.hash(url, scale);
+  int get hashCode => Object.hash(
+    url,
+    scale,
+    headers,
+    withCache,
+    cacheFolder,
+    fileNameExtras,
+    sendTimeout,
+    receiveTimeout,
+    withCaptchaCheck,
+  );
 
   @override
   String toString() => '${objectRuntimeType(this, 'CustomNetworkImage')}("$url", scale: $scale)';
@@ -330,6 +426,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
 
 @immutable
 class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNetworkImage>
+    with _NetworkImageLoaderMixin
     implements custom_network_image.CustomNetworkImage {
   const CustomNetworkAvifImage(
     this.url, {
@@ -348,29 +445,18 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
 
   @override
   final String url;
-
   @override
   final double scale;
-
   @override
   final Map<String, String>? headers;
-
   final CancelToken? cancelToken;
-
   final bool withCache;
-
   final String? cacheFolder;
-
   final String fileNameExtras;
-
   final void Function(bool)? onCacheDetected;
-
   final void Function(Object)? onError;
-
   final Duration? sendTimeout;
-
   final Duration? receiveTimeout;
-
   final bool withCaptchaCheck;
 
   @override
@@ -387,11 +473,7 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
 
     return AvifImageStreamCompleter(
       key: key,
-      codec: _loadAsync(
-        key as CustomNetworkAvifImage,
-        chunkEvents,
-        decode,
-      ),
+      codec: _loadAsync(key as CustomNetworkAvifImage, chunkEvents, decode),
       scale: key.scale,
       debugLabel: key.url,
       informationCollector: () => <DiagnosticsNode>[
@@ -402,28 +484,8 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
   }
 
   Future<bool> deleteCacheFile() async {
-    final key = this;
-    final Uri resolved = Uri.base.resolve(key.url);
-    final String cacheFilePath = await ImageWriter().getCachePathString(
-      resolved.toString(),
-      cacheFolder ?? 'media',
-      clearName: cacheFolder != 'favicons',
-      fileNameExtras: fileNameExtras,
-    );
-    final File cacheFile = File(cacheFilePath);
-
-    try {
-      assert(key == this, 'The $runtimeType cannot be reused after disposing.');
-
-      if (await cacheFile.exists()) {
-        await cacheFile.delete();
-        return true;
-      }
-    } catch (e) {
-      print('CustomNetworkAvifImage Exception :: delete cache file :: $e');
-      return false;
-    }
-    return false;
+    await deleteCache(url, cacheFolder, fileNameExtras);
+    return true;
   }
 
   Future<AvifCodec> _loadAsync(
@@ -431,134 +493,33 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
     StreamController<ImageChunkEvent> chunkEvents,
     ImageDecoderCallback decode,
   ) async {
-    final Uri resolved = Uri.base.resolve(key.url);
-    final String cacheFilePath = await ImageWriter().getCachePathString(
-      resolved.toString(),
-      cacheFolder ?? 'media',
-      clearName: cacheFolder != 'favicons',
-      fileNameExtras: fileNameExtras,
-    );
-    File? cacheFile;
     try {
       assert(key == this, 'The $runtimeType cannot be reused after disposing.');
 
-      // file already cached
-      if (withCache) {
-        cacheFile = File(cacheFilePath);
-        int fileSize = 0;
+      final Uint8List bytes = await downloadAndCache(
+        url: key.url,
+        cacheFolder: cacheFolder,
+        fileNameExtras: fileNameExtras,
+        withCache: withCache,
+        headers: headers,
+        sendTimeout: sendTimeout,
+        receiveTimeout: receiveTimeout,
+        cancelToken: cancelToken,
+        withCaptchaCheck: withCaptchaCheck,
+        chunkEvents: chunkEvents,
+        onCacheDetected: onCacheDetected,
+      );
 
-        if (await cacheFile.exists()) {
-          fileSize = await cacheFile.length();
-          if (fileSize == 0) {
-            await cacheFile.delete();
-            cacheFile = null;
-          } else {
-            chunkEvents.add(
-              ImageChunkEvent(
-                cumulativeBytesLoaded: fileSize,
-                expectedTotalBytes: fileSize <= 0 ? null : fileSize,
-              ),
-            );
-          }
-        } else {
-          cacheFile = null;
-        }
-      }
-
-      if (onCacheDetected != null) {
-        onCacheDetected?.call(cacheFile != null);
-      }
-
-      final client = DioNetwork.getClient();
-      if (withCaptchaCheck) {
-        DioNetwork.captchaInterceptor(
-          client,
-          customUserAgent: Tools.appUserAgent,
-        );
-      }
-
-      Response? response;
-      if (cacheFile == null) {
-        response = withCache
-            ? await client.downloadUri(
-                resolved,
-                cacheFilePath,
-                options: Options(
-                  headers: headers,
-                  sendTimeout: sendTimeout,
-                  receiveTimeout: receiveTimeout,
-                ),
-                onReceiveProgress: (int count, int total) {
-                  chunkEvents.add(
-                    ImageChunkEvent(
-                      cumulativeBytesLoaded: count,
-                      expectedTotalBytes: total <= 0 ? null : total,
-                    ),
-                  );
-                },
-                cancelToken: cancelToken,
-              )
-            : await client.getUri(
-                resolved,
-                options: Options(
-                  headers: headers,
-                  responseType: ResponseType.bytes,
-                  sendTimeout: sendTimeout,
-                  receiveTimeout: receiveTimeout,
-                ),
-                onReceiveProgress: (int count, int total) {
-                  chunkEvents.add(
-                    ImageChunkEvent(
-                      cumulativeBytesLoaded: count,
-                      expectedTotalBytes: total <= 0 ? null : total,
-                    ),
-                  );
-                },
-                cancelToken: cancelToken,
-              );
-        client.close();
-
-        if (!Tools.isGoodResponse(response)) {
-          try {
-            final testFile = File(cacheFilePath);
-            if (await testFile.exists()) {
-              await testFile.delete();
-            }
-          } catch (_) {}
-
-          throw NetworkImageLoadException(
-            statusCode: response.statusCode ?? 0,
-            uri: resolved,
-          );
-        }
-      }
-
-      if (withCache) {
-        if (cacheFile == null) {
-          cacheFile = File(cacheFilePath);
-        } else {
-          // remove file when download wasn't finished
-          // TODO problematic?
-          // if (cancelToken?.isCancelled == true) {
-          //   if (lastChunk != null) {
-          //     if (lastChunk!.expectedTotalBytes != 0 && lastChunk!.expectedTotalBytes != lastChunk!.cumulativeBytesLoaded) {
-          //       await cacheFile.delete();
-          //       throw Exception('CustomNetworkAvifImage cancelled: $resolved');
-          //     }
-          //   }
-          // }
-        }
-      }
-
-      final Uint8List bytes = cacheFile != null ? await cacheFile.readAsBytes() : response!.data;
-      if (bytes.lengthInBytes == 0) {
-        throw Exception('CustomNetworkAvifImage is an empty file: $resolved');
+      if (bytes.isEmpty) {
+        await deleteCacheFile();
+        throw Exception('CustomNetworkAvifImage is an empty file: ${key.url}');
       }
 
       final fType = isAvifFile(bytes.sublist(0, 16));
       if (fType == AvifFileType.unknown) {
-        throw Exception('CustomNetworkAvifImage is not an avif file: $resolved');
+        throw Exception('CustomNetworkAvifImage is not an avif file: ${key.url}');
       }
+
       final codec = fType == AvifFileType.avif
           ? SingleFrameAvifCodec(bytes: bytes)
           : MultiFrameAvifCodec(
@@ -572,7 +533,6 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
       if (onError != null) {
         onError?.call(e);
       }
-
       scheduleMicrotask(() {
         PaintingBinding.instance.imageCache.evict(key);
       });
@@ -584,9 +544,7 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
+    if (other.runtimeType != runtimeType) return false;
     return other is CustomNetworkAvifImage &&
         other.url == url &&
         other.scale == scale &&
@@ -594,16 +552,23 @@ class CustomNetworkAvifImage extends ImageProvider<custom_network_image.CustomNe
         other.withCache == withCache &&
         other.cacheFolder == cacheFolder &&
         other.fileNameExtras == fileNameExtras &&
-        other.onCacheDetected == onCacheDetected &&
-        other.onError == onError &&
         other.sendTimeout == sendTimeout &&
         other.receiveTimeout == receiveTimeout &&
-        other.withCaptchaCheck == withCaptchaCheck &&
-        other.cancelToken == cancelToken;
+        other.withCaptchaCheck == withCaptchaCheck;
   }
 
   @override
-  int get hashCode => Object.hash(url, scale);
+  int get hashCode => Object.hash(
+    url,
+    scale,
+    headers,
+    withCache,
+    cacheFolder,
+    fileNameExtras,
+    sendTimeout,
+    receiveTimeout,
+    withCaptchaCheck,
+  );
 
   @override
   String toString() => '${objectRuntimeType(this, 'CustomNetworkAvifImage')}("$url", scale: $scale)';

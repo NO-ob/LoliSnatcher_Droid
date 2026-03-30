@@ -2,14 +2,16 @@ name: lolisnatcher
 description: Booru Client with the ability to batch download Images.
 publish_to: none
 
-version: 2.4.5+5206 # remember to update the values in constants.dart->updateInfo after changing them here
+version: 2.5.0+5208 # remember to update the values in constants.dart->updateInfo after changing them here
 
 environment:
-  sdk: ">=3.10.4 <4.0.0"
-  flutter: ^3.38.5
+  sdk: ">=3.12.0-113.2.beta <4.0.0"
+  flutter: 3.42.0-0.4.pre # using beta channel to enable predictive back gesture
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
   alice_lightweight: ^3.10.0
   app_links: ^7.0.0
@@ -17,9 +19,11 @@ dependencies:
   calendar_date_picker2: ^2.0.1
   chewie: ^1.13.0
   collection: ^1.19.1
+  country_flags: ^4.1.2
   crypto: ^3.0.7
-  dio: ^5.9.0
-  dio_http2_adapter: ^2.6.0
+  device_info_plus: ^12.4.0
+  dio: ^5.9.2
+  dio_http2_adapter: ^2.7.0
   dynamic_color: ^1.8.1
   equatable: ^2.0.8
   external_video_player_launcher: ^0.0.3
@@ -33,8 +37,7 @@ dependencies:
   flutter_avif: ^3.1.0
   flutter_displaymode: ^0.7.0
   flutter_html: ^3.0.0
-  flutter_improved_scrolling: ^0.0.3
-  flutter_inappwebview: ^6.2.0-beta.2
+  flutter_inappwebview: ^6.2.0-beta.3
   flutter_keyboard_visibility: ^6.0.0
   flutter_linkify: ^6.0.0
   flutter_secure_storage: ^10.0.0
@@ -42,31 +45,31 @@ dependencies:
     git:
       url: https://github.com/jiangtian616/socks_proxy
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
-  font_awesome_flutter: ^10.12.0
+  font_awesome_flutter: ^11.0.0
   fpdart: ^1.2.0
   fvp: ^0.35.2
-  get_it: ^9.1.1
+  get_it: ^9.2.1
   get: ^5.0.0-release-candidate-9.3.2 # ^4.7.3
-  google_fonts: ^6.3.3
+  google_fonts: ^8.0.2
   html: ^0.15.6
   http_proxy: # ^1.2.2
     git:
       url: https://github.com/NANI-SORE/http_proxy.git
       ref: 36a202ceec982d199acdcd717ce85436372f447d # master - forked to fix build errors and remove allowing all bad certs
   huge_listview: ^2.0.12
-  image: ^4.5.4
+  image: ^4.8.0
   intl: ^0.20.2
   keyboard_actions: # ^4.2.0
     git:
       url: https://github.com/EdgarJan/flutter_keyboard_actions.git
       ref: 561a1e3b59691b1323ac104462e76216274d6bf5 # master - fork with a fix for f3.38
   lemberfpsmonitor: ^0.0.3+6
-  local_auth: ^3.0.0
+  local_auth: ^3.0.1
   material_color_utilities: ^0.13.0
-  media_kit: ^1.2.3
+  media_kit: ^1.2.6
   media_kit_video: ^2.0.1
   media_kit_libs_video: ^1.0.7
-  native_dio_adapter: ^1.5.0 # TODO use this for http3, probably should rewrite http client use to reduce amount of created clients
+  native_dio_adapter: ^1.5.1 # TODO use this for http3, probably should rewrite http client use to reduce amount of created clients
   path_provider: ^2.1.5
   permission_handler: ^12.0.1
   photo_view:
@@ -80,18 +83,20 @@ dependencies:
       ref: b84b371347ab4f13374c2709becaf247aec354e4 # master - forked to change IME composing style
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
-  share_plus: ^12.0.1 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
+  share_plus: ^12.0.2 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
+  slang_flutter: ^4.14.0
+  slang: ^4.14.0
   sqflite_common_ffi: ^2.4.0+2
   sqflite: ^2.4.2
-  sqlite3: ^3.1.6
-  talker_dio_logger: ^5.1.3
-  talker_flutter: ^5.1.3
-  talker_logger: ^5.1.3
-  talker: ^5.1.3
+  sqlite3: ^3.2.0
+  talker_dio_logger: ^5.1.16
+  talker_flutter: ^5.1.16
+  talker_logger: ^5.1.16
+  talker: ^5.1.16
   url_launcher: ^6.3.2
-  uuid: ^4.5.2
-  vibration: ^3.1.4
-  video_player: ^2.10.1
+  uuid: ^4.5.3
+  vibration: ^3.1.8
+  video_player: ^2.11.1
   waterfall_flow: ^3.1.1
   xml: ^6.6.1
 
@@ -100,13 +105,14 @@ dependencies:
 dependency_overrides:
   android_intent_plus: ^6.0.0
   material_color_utilities: ^0.13.0 # flutter_test conflict
-  share_plus: ^12.0.1 # alice conflict
+  share_plus: ^12.0.2 # alice conflict
 
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^2.13.1
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
 
@@ -120,9 +126,8 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/images/iconFG.png"
   adaptive_icon_monochrome: "assets/images/iconMonochrome.png"
 
-
-
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/images/app_icon.png

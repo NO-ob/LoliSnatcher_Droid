@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class VideoViewerPlaceholder extends StatelessWidget {
@@ -46,7 +47,7 @@ class VideoViewerPlaceholder extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'Videos disabled or not supported',
+                    context.loc.media.video.videosDisabledOrNotSupported,
                     style: TextStyle(
                       fontSize: 16,
                       color: Theme.of(context).colorScheme.onSurface,
@@ -55,7 +56,7 @@ class VideoViewerPlaceholder extends StatelessWidget {
                 ),
                 if (Platform.isLinux || Platform.isAndroid)
                   ElevatedButton.icon(
-                    label: const Text('Open video in external player'),
+                    label: Text(context.loc.media.video.openVideoInExternalPlayer),
                     icon: const Icon(Icons.play_arrow),
                     onPressed: () {
                       if (Platform.isLinux) {
@@ -71,7 +72,7 @@ class VideoViewerPlaceholder extends StatelessWidget {
                   ),
                 //
                 ElevatedButton.icon(
-                  label: const Text('Open video in browser'),
+                  label: Text(context.loc.media.video.openVideoInBrowser),
                   icon: const Icon(Icons.public),
                   onPressed: () {
                     launchUrlString(

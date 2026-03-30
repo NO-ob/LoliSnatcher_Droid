@@ -25,7 +25,7 @@ class MarqueeText extends StatelessWidget {
 
   const MarqueeText.rich({
     required this.textSpan,
-    required this.style,
+    this.style,
     this.velocity = 45.0,
     this.curve = Curves.linear,
     this.blankSpace = 50.0,
@@ -66,19 +66,13 @@ class MarqueeText extends StatelessWidget {
     return child;
   }
 
-  TextStyle get defaultStyle {
-    return const TextStyle(
-      fontSize: 16,
-      color: Colors.white,
-      fontWeight: FontWeight.w400,
-      fontStyle: FontStyle.normal,
-    );
-  }
-
-  double get fontSize => style?.fontSize ?? defaultStyle.fontSize!;
-  double get lineHeight => fontSize * 1.2;
-
   Widget innerBox(BuildContext context) {
+    final defaultStyle = DefaultTextStyle.of(context).style;
+    final usedStyle = (style ?? defaultStyle).copyWith(
+      height: 1,
+    );
+    final double fontSize = usedStyle.fontSize ?? 16;
+
     // allow text to shrink a bit, so that strings can exceed a few symbols in length before starting to scroll
     const double stepGranularity = 0.1;
     double minFontSize = double.parse((fontSize * 0.85).toStringAsFixed(1));
@@ -94,13 +88,7 @@ class MarqueeText extends StatelessWidget {
           maxFontSize: fontSize,
           maxLines: 1,
           stepGranularity: stepGranularity,
-          style:
-              style?.copyWith(
-                color: style?.color ?? Theme.of(context).colorScheme.onSurface,
-              ) ??
-              defaultStyle.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+          style: usedStyle,
           overflowReplacement: Marquee.rich(
             textSpan: textSpan,
             blankSpace: blankSpace,
@@ -126,13 +114,7 @@ class MarqueeText extends StatelessWidget {
         maxFontSize: fontSize,
         maxLines: 1,
         stepGranularity: stepGranularity,
-        style:
-            style?.copyWith(
-              color: style?.color ?? Theme.of(context).colorScheme.onSurface,
-            ) ??
-            defaultStyle.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+        style: usedStyle,
         overflowReplacement: Marquee(
           text: text,
           blankSpace: blankSpace,
@@ -145,13 +127,7 @@ class MarqueeText extends StatelessWidget {
           showFadingOnlyWhenScrolling: false,
           startAfter: startAfter,
           pauseAfterRound: pauseAfterRound,
-          style:
-              style?.copyWith(
-                color: style?.color ?? Theme.of(context).colorScheme.onSurface,
-              ) ??
-              defaultStyle.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+          style: usedStyle,
         ),
       ),
     );

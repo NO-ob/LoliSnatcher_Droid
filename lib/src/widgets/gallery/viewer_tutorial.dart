@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 
 class ViewerTutorial extends StatefulWidget {
@@ -71,7 +72,7 @@ class ImageTutorial extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: const Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -79,21 +80,21 @@ class ImageTutorial extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.image_outlined, size: 28),
-                SizedBox(width: 8),
-                Text('Images', style: TextStyle(color: Colors.white, fontSize: 28)),
+                const Icon(Icons.image_outlined, size: 28),
+                const SizedBox(width: 8),
+                Text(context.loc.viewer.tutorial.images, style: const TextStyle(color: Colors.white, fontSize: 28)),
               ],
             ),
           ),
-          SizedBox(height: 15),
+          const SizedBox(height: 15),
           Text(
-            'Tap/Long tap: toggle immersive mode',
-            style: TextStyle(color: Colors.white, fontSize: 20),
+            context.loc.viewer.tutorial.tapLongTapToggleImmersive,
+            style: const TextStyle(color: Colors.white, fontSize: 20),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
-            'Double tap: fit to screen / original size / reset zoom',
-            style: TextStyle(color: Colors.white, fontSize: 20),
+            context.loc.viewer.tutorial.doubleTapFitScreen,
+            style: const TextStyle(color: Colors.white, fontSize: 20),
           ),
         ],
       ),

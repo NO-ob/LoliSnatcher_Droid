@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -34,7 +35,7 @@ class e621Handler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final dynamic current = responseItem;
+    final dynamic current = responseItem as Map<String, dynamic>;
 
     if (current['file']['md5'] != null) {
       String fileURL = '';
@@ -52,18 +53,18 @@ class e621Handler extends BooruHandler {
         }
       } else {
         fileURL = current['file']['url'];
-        sampleURL = current['sample']['url'];
+        sampleURL = current['sample']?['url'] ?? current['preview']['url'];
         thumbURL = current['preview']['url'];
       }
 
-      final List characterTags = current['tags']?['character'] ?? [];
-      final List copyrightTags = current['tags']?['copyright'] ?? [];
-      final List franchiseTags = current['tags']?['franchise'] ?? [];
-      final List artistTags = current['tags']?['artist'] ?? [];
-      final List directorTags = current['tags']?['director'] ?? [];
-      final List metaTags = current['tags']?['meta'] ?? [];
-      final List generalTags = current['tags']?['general'] ?? [];
-      final List speciesTags = current['tags']?['species'] ?? [];
+      final List<String> characterTags = (current['tags']?['character'] ?? []).cast<String>();
+      final List<String> copyrightTags = (current['tags']?['copyright'] ?? []).cast<String>();
+      final List<String> franchiseTags = (current['tags']?['franchise'] ?? []).cast<String>();
+      final List<String> artistTags = (current['tags']?['artist'] ?? []).cast<String>();
+      final List<String> directorTags = (current['tags']?['director'] ?? []).cast<String>();
+      final List<String> metaTags = (current['tags']?['meta'] ?? []).cast<String>();
+      final List<String> generalTags = (current['tags']?['general'] ?? []).cast<String>();
+      final List<String> speciesTags = (current['tags']?['species'] ?? []).cast<String>();
 
       addTagsWithType([...characterTags], TagType.character);
       addTagsWithType([...copyrightTags], TagType.copyright);
@@ -84,22 +85,22 @@ class e621Handler extends BooruHandler {
         sampleURL: sampleURL,
         thumbnailURL: thumbURL,
         tagsList: [
-          ...characterTags,
-          ...copyrightTags,
-          ...franchiseTags,
-          ...artistTags,
-          ...directorTags,
-          ...metaTags,
-          ...generalTags,
-          ...speciesTags,
+          ...characterTags.map(Tag.new),
+          ...copyrightTags.map(Tag.new),
+          ...franchiseTags.map(Tag.new),
+          ...artistTags.map(Tag.new),
+          ...directorTags.map(Tag.new),
+          ...metaTags.map(Tag.new),
+          ...generalTags.map(Tag.new),
+          ...speciesTags.map(Tag.new),
         ],
         postURL: makePostURL(current['id'].toString()),
         fileExt: current['file']['ext'],
         fileSize: current['file']['size'],
         fileWidth: current['file']['width']?.toDouble(),
         fileHeight: current['file']['height']?.toDouble(),
-        sampleWidth: current['sample']['width']?.toDouble(),
-        sampleHeight: current['sample']['height']?.toDouble(),
+        sampleWidth: current['sample']?['width']?.toDouble() ?? current['preview']['width']?.toDouble(),
+        sampleHeight: current['sample']?['height']?.toDouble() ?? current['preview']['height']?.toDouble(),
         previewWidth: current['preview']['width']?.toDouble(),
         previewHeight: current['preview']['height']?.toDouble(),
         hasNotes: current['has_notes'],

@@ -1,0 +1,115 @@
+name: Manual Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      custom_message:
+        description: 'Custom message for Discord notification'
+        required: false
+        default: 'Manual build triggered'
+        type: string
+
+jobs:
+  manual-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Get version info
+        id: version_info
+        run: |
+          python -c "
+          import re
+          with open('pubspec.yaml', 'r') as f:
+              content = f.read()
+          m = re.search(r'version:\s*(\d+\.\d+\.\d+)\+(\d+)', content)
+          print('version_name=' + m.group(1), flush=True)
+          print('build_number=' + m.group(2), flush=True)
+          " >> $GITHUB_OUTPUT
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'beta'
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Decode signing key
+        env:
+          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
+        run: |
+          echo "$SIGNING_KEY_BASE64" | base64 --decode > android/app/upload-keystore.jks
+
+      - name: Create key.properties
+        env:
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        run: |
+          cat > android/key.properties << EOF
+          storePassword=$STORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=upload-keystore.jks
+          EOF
+
+      - name: Build APK for testing
+        run: bash build.sh test
+
+      - name: Upload APK (arm64-v8a)
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/app/outputs/flutter-apk/LoliSnatcher_*_arm64-v8a_*.apk
+          archive: false
+
+      - name: Upload APK (armeabi-v7a)
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/app/outputs/flutter-apk/LoliSnatcher_*_armeabi-v7a_*.apk
+          archive: false
+
+      - name: Upload APK (x86_64)
+        uses: actions/upload-artifact@v7
+        with:
+          path: build/app/outputs/flutter-apk/LoliSnatcher_*_x86_64_*.apk
+          archive: false
+
+      - name: Send Discord notification
+        if: success()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          VERSION_NAME: ${{ steps.version_info.outputs.version_name }}
+          BUILD_NUMBER: ${{ steps.version_info.outputs.build_number }}
+          CUSTOM_MESSAGE: ${{ inputs.custom_message }}
+          BUILD_STATUS: ${{ job.status }}
+          WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TRIGGERED_BY: ${{ github.actor }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: python .github/scripts/discord_notify.py

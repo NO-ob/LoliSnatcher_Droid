@@ -1,6 +1,9 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 extension BuildContextExtras on BuildContext {
   MediaQueryData get mediaQuery => MediaQuery.of(this);
@@ -53,10 +56,6 @@ extension UIExtras on Widget {
 }
 
 extension StringExtras on String {
-  String pluralize(int count) {
-    return count == 1 ? this : '${this}s';
-  }
-
   String _capitalize() => isEmpty ? '' : '${this[0].toUpperCase()}${substring(1)}';
 
   String get capitalizeFirst => _capitalize();
@@ -84,12 +83,16 @@ extension IntExtras on int {
   bool toBool() => this == 1;
 
   String toFormattedString() => formatNumber(this);
+
+  String toShortString() => formatNumberShort(this);
 }
 
 extension DoubleExtras on double {
   double clamp(double min, double max) => (min > this ? min : (max < this ? max : this));
 
   String toFormattedString() => formatNumber(this);
+
+  String toShortString() => formatNumberShort(this);
 
   double toPrecision(int fractionDigits) {
     final mod = pow(10, fractionDigits.toDouble()).toDouble();
@@ -108,11 +111,23 @@ extension BoolExtras on bool {
 }
 
 String formatNumber(num number) {
-  final String formattedPart = number.toString().replaceAllMapped(
-    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-    (Match match) => '${match[1]} ',
+  try {
+    final formatter = NumberFormat.decimalPattern(
+      SettingsHandler.instance.locale.value?.languageCode ?? PlatformDispatcher.instance.locale.languageCode,
+    );
+    return formatter.format(number);
+  } catch (_) {
+    // use en format on exceptions
+    final formatter = NumberFormat.decimalPattern('en');
+    return formatter.format(number);
+  }
+}
+
+String formatNumberShort(num number) {
+  final formatter = NumberFormat.compact(
+    locale: SettingsHandler.instance.locale.value?.languageCode ?? PlatformDispatcher.instance.locale.languageCode,
   );
-  return formattedPart.trim();
+  return formatter.format(number);
 }
 
 extension ListExts<T> on List<T> {
@@ -137,5 +152,14 @@ extension IterableExts<T> on Iterable<T> {
       if (test(e)) return e;
     }
     return null;
+  }
+}
+
+extension ColorExts on Color {
+  Color darken([double amount = .1]) {
+    assert(amount >= 0 && amount <= 1, 'Amount must be between 0 and 1');
+    final hsl = HSLColor.fromColor(this);
+    final hslDark = hsl.withLightness((hsl.lightness - amount).clamp(0.0, 1.0));
+    return hslDark.toColor();
   }
 }

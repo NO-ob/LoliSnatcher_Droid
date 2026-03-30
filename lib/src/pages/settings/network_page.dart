@@ -6,8 +6,8 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/data/settings/proxy_type.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -39,7 +39,7 @@ class _NetworkPageState extends State<NetworkPage> {
 
     allowSelfSignedCerts = settingsHandler.allowSelfSignedCerts;
     userAgentController.text = settingsHandler.customUserAgent;
-    proxyType = ProxyType.fromName(settingsHandler.proxyType);
+    proxyType = settingsHandler.proxyType;
     proxyAddressController.text = settingsHandler.proxyAddress;
     proxyUsernameController.text = settingsHandler.proxyUsername;
     proxyPasswordController.text = settingsHandler.proxyPassword;
@@ -54,35 +54,26 @@ class _NetworkPageState extends State<NetworkPage> {
     super.dispose();
   }
 
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     settingsHandler.customUserAgent = userAgentController.text;
-    settingsHandler.proxyType = proxyType.name;
+    settingsHandler.proxyType = proxyType;
     settingsHandler.proxyAddress = proxyAddressController.text;
     settingsHandler.proxyUsername = proxyUsernameController.text;
     settingsHandler.proxyPassword = proxyPasswordController.text;
-    final bool result = await settingsHandler.saveSettings(restate: false);
+    await settingsHandler.saveSettings(restate: false);
 
     await initProxy();
-
-    if (result) {
-      Navigator.of(context).pop();
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: const Text('Network'),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.network.title,
         ),
         body: Center(
           child: ListView(
@@ -94,25 +85,25 @@ class _NetworkPageState extends State<NetworkPage> {
                     allowSelfSignedCerts = newValue;
                   });
                 },
-                title: 'Enable self signed SSL certificates',
+                title: context.loc.settings.network.enableSelfSignedSSLCertificates,
               ),
               const SettingsButton(name: '', enabled: false),
               SettingsDropdown<ProxyType>(
                 value: proxyType,
-                items: (settingsHandler.map['proxyType']!['options'] as List<String>).map(ProxyType.fromName).toList(),
+                items: ProxyType.values,
                 onChanged: (ProxyType? newValue) {
                   setState(() {
-                    proxyType = newValue ?? ProxyType.direct;
+                    proxyType = newValue ?? ProxyType.defaultValue;
                   });
                 },
-                title: 'Proxy',
-                subtitle: const Text('Does not apply to streaming video mode, use caching video mode instead'),
-                itemBuilder: (item) => Text(item?.name.capitalizeFirst ?? ''),
+                title: context.loc.settings.network.proxy,
+                subtitle: Text(context.loc.settings.network.proxySubtitle),
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               if (!proxyType.isDirect && !proxyType.isSystem) ...[
                 SettingsTextInput(
                   controller: proxyAddressController,
-                  title: 'Address',
+                  title: context.loc.address,
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   resetText: () => '',
                   pasteable: true,
@@ -120,7 +111,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
                 SettingsTextInput(
                   controller: proxyUsernameController,
-                  title: 'Username',
+                  title: context.loc.username,
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   resetText: () => '',
                   pasteable: true,
@@ -128,7 +119,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
                 SettingsTextInput(
                   controller: proxyPasswordController,
-                  title: 'Password',
+                  title: context.loc.password,
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   resetText: () => '',
                   pasteable: true,
@@ -139,7 +130,7 @@ class _NetworkPageState extends State<NetworkPage> {
               const SettingsButton(name: '', enabled: false),
               SettingsTextInput(
                 controller: userAgentController,
-                title: 'Custom user agent',
+                title: context.loc.settings.network.customUserAgent,
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 resetText: () => '',
                 onChanged: (_) => setState(() {}),
@@ -152,12 +143,12 @@ class _NetworkPageState extends State<NetworkPage> {
                       context: context,
                       builder: (context) {
                         return SettingsDialog(
-                          title: const Text('Custom user agent'),
+                          title: Text(context.loc.settings.network.customUserAgentTitle),
                           contentItems: [
-                            const Text('Keep empty to use default value'),
-                            Text('Default: ${Tools.appUserAgent}'),
-                            const Text('Will be used on requests for almost all boorus and on the webview'),
-                            const Text('Value is saved after leaving this page'),
+                            Text(context.loc.settings.network.keepEmptyForDefault),
+                            Text(context.loc.settings.network.defaultUserAgent(agent: Tools.appUserAgent)),
+                            Text(context.loc.settings.network.userAgentUsedOnRequests),
+                            Text(context.loc.settings.network.valueSavedAfterLeaving),
                           ],
                         );
                       },
@@ -167,18 +158,16 @@ class _NetworkPageState extends State<NetworkPage> {
               ),
               if (userAgentController.text != Constants.defaultBrowserUserAgent)
                 SettingsButton(
-                  name:
-                      'Tap here to set suggested browser user agent (recommended only when sites you use ban non-browser user agents):',
-                  subtitle: const Text(Constants.defaultBrowserUserAgent),
+                  name: context.loc.settings.network.setBrowserUserAgent,
                   action: () {
                     userAgentController.text = Constants.defaultBrowserUserAgent;
                     setState(() {});
                   },
                 ),
               const SettingsButton(name: '', enabled: false),
-              const SettingsButton(
-                name: 'Cookie cleaner',
-                icon: Icon(Icons.cookie_rounded),
+              SettingsButton(
+                name: context.loc.settings.network.cookieCleaner,
+                icon: const Icon(Icons.cookie_rounded),
               ),
               SettingsBooruDropdown(
                 value: selectedBooru,
@@ -197,11 +186,14 @@ class _NetworkPageState extends State<NetworkPage> {
                   }
                   setState(() {});
                 },
-                title: 'Booru',
-                subtitle: const Text('Select a booru to clear cookies for or leave empty to clear all'),
+                title: context.loc.booru,
+                subtitle: Text(context.loc.settings.network.selectBooruToClearCookies),
               ),
               if (selectedBooruCookies.isNotEmpty) ...[
-                SettingsButton(name: 'Cookies for ${selectedBooru?.name}:', enabled: false),
+                SettingsButton(
+                  name: context.loc.settings.network.cookiesFor(booruName: selectedBooru?.name ?? ''),
+                  enabled: false,
+                ),
                 for (final Cookie cookie in selectedBooruCookies) ...[
                   SettingsButton(
                     name:
@@ -216,14 +208,16 @@ class _NetworkPageState extends State<NetworkPage> {
                       setState(() {});
                       FlashElements.showSnackbar(
                         context: context,
-                        title: Text('"${cookie.name}" cookie deleted'),
+                        title: Text(context.loc.settings.network.cookieDeleted(cookieName: cookie.name)),
                       );
                     },
                   ),
                 ],
               ],
               SettingsButton(
-                name: 'Clear cookies${selectedBooru != null ? ' for ${selectedBooru!.name}' : ''}',
+                name: selectedBooru != null
+                    ? context.loc.settings.network.clearCookiesFor(booruName: selectedBooru!.name!)
+                    : context.loc.settings.network.clearCookies,
                 icon: const Icon(
                   Icons.delete_forever,
                   color: Colors.red,
@@ -236,14 +230,16 @@ class _NetworkPageState extends State<NetworkPage> {
                     globalWindowsCookies[selectedBooru!.baseURL!]?.clear();
                     FlashElements.showSnackbar(
                       context: context,
-                      title: Text('Cookies for ${selectedBooru?.name} deleted'),
+                      title: Text(
+                        context.loc.settings.network.cookiesForBooruDeleted(booruName: selectedBooru?.name ?? ''),
+                      ),
                     );
                   } else {
                     await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteAllCookies();
                     globalWindowsCookies.clear();
                     FlashElements.showSnackbar(
                       context: context,
-                      title: const Text('All cookies deleted'),
+                      title: Text(context.loc.settings.network.allCookiesDeleted),
                     );
                   }
 
@@ -257,23 +253,5 @@ class _NetworkPageState extends State<NetworkPage> {
         ),
       ),
     );
-  }
-}
-
-enum ProxyType {
-  direct,
-  system,
-  http,
-  socks5,
-  socks4;
-
-  bool get isDirect => this == direct;
-  bool get isSystem => this == system;
-  bool get isHttp => this == http;
-  bool get isSocks5 => this == socks5;
-  bool get isSocks4 => this == socks4;
-
-  static ProxyType fromName(String name) {
-    return ProxyType.values.firstWhereOrNull((e) => e.name == name) ?? direct;
   }
 }

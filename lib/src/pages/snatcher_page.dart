@@ -7,6 +7,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 
 /// This is the page which allows the user to batch download images
 class SnatcherPage extends StatefulWidget {
@@ -49,26 +50,23 @@ class _SnatcherPageState extends State<SnatcherPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Snatcher'),
-      ),
+      appBar: SettingsAppBar(title: context.loc.snatcher.title),
       resizeToAvoidBottomInset: true,
       body: Center(
         child: ListView(
           children: [
-            SettingsTextInput(
+            TagSearchBox(
               controller: snatcherTagsController,
-              title: 'Tags',
-              hintText: 'Enter Tags',
-              inputType: TextInputType.text,
+              title: context.loc.tags,
+              hintText: context.loc.snatcher.enterTags,
+              booru: selectedBooru,
+              allowMultipleTags: true,
               clearable: true,
-              pasteable: true,
-              enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             ),
             SettingsTextInput(
               controller: snatcherAmountController,
-              title: 'Amount',
-              hintText: 'Amount of Files to Snatch',
+              title: context.loc.snatcher.amount,
+              hintText: context.loc.snatcher.amountOfFilesToSnatch,
               inputType: TextInputType.number,
               inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
               resetText: () => 10.toString(),
@@ -79,8 +77,8 @@ class _SnatcherPageState extends State<SnatcherPage> {
             ),
             SettingsTextInput(
               controller: snatcherSleepController,
-              title: 'Delay (in ms)',
-              hintText: 'Delay between each download',
+              title: context.loc.snatcher.delayInMs,
+              hintText: context.loc.snatcher.delayBetweenEachDownload,
               inputType: TextInputType.number,
               inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
               resetText: () => settingsHandler.snatchCooldown.toString(),
@@ -96,11 +94,11 @@ class _SnatcherPageState extends State<SnatcherPage> {
                   selectedBooru = newValue!;
                 });
               },
-              title: 'Booru',
+              title: context.loc.booru,
             ),
             const SettingsButton(name: '', enabled: false),
             SettingsButton(
-              name: 'Snatch Files',
+              name: context.loc.snatcher.snatchFiles,
               icon: const Icon(Icons.download),
               action: () {
                 if (snatcherSleepController.text.isEmpty) {

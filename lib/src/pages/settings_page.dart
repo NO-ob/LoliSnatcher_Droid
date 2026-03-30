@@ -16,6 +16,8 @@ import 'package:lolisnatcher/src/pages/settings/booru_page.dart';
 import 'package:lolisnatcher/src/pages/settings/database_page.dart';
 import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
 import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
+import 'package:lolisnatcher/src/pages/settings/language_page.dart';
+import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/pages/settings/network_page.dart';
 import 'package:lolisnatcher/src/pages/settings/performance_page.dart';
 import 'package:lolisnatcher/src/pages/settings/privacy_page.dart';
@@ -31,7 +33,6 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
-/// Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -41,20 +42,7 @@ class SettingsPage extends StatelessWidget {
     }
 
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final bool result = await settingsHandler.saveSettings(restate: true);
-    await settingsHandler.loadSettings();
-    // await settingsHandler.getBooru();
-    if (result) {
-      Navigator.of(context).pop();
-    }
-  }
-
-  Future<bool> _onWillPop() async {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    final bool result = await settingsHandler.saveSettings(restate: true);
-    await settingsHandler.loadSettings();
-    // await settingsHandler.getBooru();
-    return result;
+    await settingsHandler.saveSettings(restate: true);
   }
 
   @override
@@ -62,76 +50,72 @@ class SettingsPage extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: (didPop, result) async => _onPopInvoked(context, didPop, result),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: const Text('Settings'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              if (await _onWillPop()) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.title,
         ),
         body: Center(
           child: ListView(
             children: [
               SettingsButton(
-                name: 'Boorus & Search',
+                name: context.loc.settings.language.title,
+                icon: const Icon(Icons.translate_rounded),
+                page: () => const LanguageSettingsPage(),
+              ),
+              SettingsButton(
+                name: context.loc.settings.booru.title,
                 icon: const Icon(Icons.image_search),
                 page: () => const BooruPage(),
               ),
               SettingsButton(
-                name: 'Interface',
+                name: context.loc.settings.interface.title,
                 icon: const Icon(Icons.grid_on),
                 page: () => const UserInterfacePage(),
               ),
               SettingsButton(
-                name: 'Themes',
+                name: context.loc.settings.theme.title,
                 icon: const Icon(Icons.palette),
                 page: () => const ThemePage(),
               ),
               SettingsButton(
-                name: 'Viewer',
+                name: context.loc.settings.viewer.title,
                 icon: const Icon(Icons.view_carousel),
                 page: () => const GalleryPage(),
               ),
               SettingsButton(
-                name: 'Video',
+                name: context.loc.settings.video.title,
                 icon: const Icon(Icons.video_settings),
                 page: () => const VideoSettingsPage(),
               ),
               SettingsButton(
-                name: 'Snatching & Caching',
+                name: context.loc.settings.cache.title,
                 icon: const Icon(Icons.sd_storage_sharp),
                 page: () => const SaveCachePage(),
               ),
               SettingsButton(
-                name: 'Tag Filters',
+                name: context.loc.settings.itemFilters.title,
                 icon: const Icon(CupertinoIcons.tag),
                 page: () => const TagsFiltersPage(),
               ),
               SettingsButton(
-                name: 'Database',
+                name: context.loc.settings.database.title,
                 icon: const Icon(Icons.list_alt),
                 page: () => const DatabasePage(),
               ),
               SettingsButton(
-                name: 'Backup & Restore',
+                name: context.loc.settings.backupAndRestore.title,
                 icon: const Icon(Icons.restore_page),
                 page: () => const BackupRestorePage(),
               ),
               SettingsButton(
-                name: 'Network',
+                name: context.loc.settings.network.title,
                 icon: const Icon(Icons.wifi),
                 page: () => const NetworkPage(),
               ),
               SettingsButton(
-                name: 'Privacy',
+                name: context.loc.settings.privacy.title,
                 icon: const FaIcon(
                   FontAwesomeIcons.userShield,
                   size: 20,
@@ -139,7 +123,7 @@ class SettingsPage extends StatelessWidget {
                 page: () => const PrivacyPage(),
               ),
               SettingsButton(
-                name: 'Performance',
+                name: context.loc.settings.performance.title,
                 icon: const Icon(
                   Icons.speed,
                   size: 20,
@@ -147,19 +131,19 @@ class SettingsPage extends StatelessWidget {
                 page: () => const PerformancePage(),
               ),
               SettingsButton(
-                name: 'LoliSync',
+                name: context.loc.settings.sync.title,
                 icon: const Icon(Icons.sync),
                 action: settingsHandler.dbEnabled
                     ? null
                     : () {
                         FlashElements.showSnackbar(
                           context: context,
-                          title: const Text(
-                            'Error!',
-                            style: TextStyle(fontSize: 20),
+                          title: Text(
+                            context.loc.errorExclamation,
+                            style: const TextStyle(fontSize: 20),
                           ),
-                          content: const Text(
-                            'Database must be enabled to use LoliSync',
+                          content: Text(
+                            context.loc.settings.sync.dbError,
                           ),
                           leadingIcon: Icons.error_outline,
                           leadingIconColor: Colors.red,
@@ -170,12 +154,12 @@ class SettingsPage extends StatelessWidget {
               ),
               const DiscordButton(),
               SettingsButton(
-                name: 'About',
+                name: context.loc.settings.about.title,
                 icon: const Icon(Icons.info_outline),
                 page: () => const AboutPage(),
               ),
               SettingsButton(
-                name: 'Check for Updates',
+                name: context.loc.settings.checkForUpdates.title,
                 icon: const Icon(Icons.update),
                 action: () {
                   settingsHandler.checkUpdate(withMessage: true);
@@ -183,7 +167,7 @@ class SettingsPage extends StatelessWidget {
               ),
               if (Logger.viewController != null)
                 SettingsButton(
-                  name: 'Share logs',
+                  name: context.loc.settings.logs.title,
                   icon: const Icon(Icons.print),
                   trailingIcon: const Icon(Icons.exit_to_app),
                   action: () async {
@@ -191,7 +175,7 @@ class SettingsPage extends StatelessWidget {
                       context: context,
                       builder: (_) => SettingsDialog(
                         title: Text(
-                          'Logs',
+                          context.loc.settings.logs.title,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         content: Column(
@@ -199,11 +183,11 @@ class SettingsPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Share logs to external app?',
+                              context.loc.settings.logs.shareLogsWarningTitle,
                               style: Theme.of(context).textTheme.bodyLarge,
                             ),
                             Text(
-                              '[WARNING]: Logs may contain sensitive information, share with caution!',
+                              context.loc.settings.logs.shareLogsWarningMsg,
                               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -214,7 +198,7 @@ class SettingsPage extends StatelessWidget {
                           const CancelButton(withIcon: true),
                           ElevatedButton.icon(
                             icon: const Icon(Icons.check),
-                            label: const Text('Ok'),
+                            label: Text(context.loc.ok),
                             onPressed: () async {
                               await Logger.viewController?.downloadLogsFile(
                                 Logger.talker.history.text(
@@ -228,13 +212,20 @@ class SettingsPage extends StatelessWidget {
                       ),
                     );
                   },
+                  onLongPress: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => LoggerViewPage(talker: Logger.talker),
+                      ),
+                    );
+                  },
                 ),
               SettingsButton(
-                name: 'Help',
+                name: context.loc.settings.help.title,
                 icon: const Icon(Icons.help_center_outlined),
                 action: () {
                   launchUrlString(
-                    'https://github.com/NO-ob/LoliSnatcher_Droid/wiki',
+                    Constants.wikiURL,
                     mode: LaunchMode.externalApplication,
                   );
                 },
@@ -243,7 +234,7 @@ class SettingsPage extends StatelessWidget {
               Obx(() {
                 if (settingsHandler.isDebug.value) {
                   return SettingsButton(
-                    name: 'Debug',
+                    name: context.loc.settings.debug.title,
                     icon: const Icon(Icons.developer_mode),
                     page: () => const DebugPage(),
                   );
@@ -275,7 +266,9 @@ class _VersionButtonState extends State<VersionButton> {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    final String verText = 'Version: ${Constants.updateInfo.versionName} (${Constants.updateInfo.buildNumber})';
+    final String verText =
+        '${context.loc.settings.version}: ${Constants.updateInfo.versionName} (${Constants.updateInfo.buildNumber})';
+
     const String buildTypeText = EnvironmentConfig.isFromStore
         ? '/ Play'
         : (EnvironmentConfig.isTesting ? '/ Test' : (kDebugMode ? '/ Debug' : ''));
@@ -287,9 +280,9 @@ class _VersionButtonState extends State<VersionButton> {
         if (settingsHandler.isDebug.value) {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text(
-              'Debug mode is already enabled!',
-              style: TextStyle(fontSize: 18),
+            title: Text(
+              context.loc.settings.debug.alreadyEnabledSnackbarMsg,
+              style: const TextStyle(fontSize: 18),
             ),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.yellow,
@@ -301,9 +294,9 @@ class _VersionButtonState extends State<VersionButton> {
             settingsHandler.isDebug.value = true;
             FlashElements.showSnackbar(
               context: context,
-              title: const Text(
-                'Debug mode is enabled!',
-                style: TextStyle(fontSize: 18),
+              title: Text(
+                context.loc.settings.debug.enabledSnackbarMsg,
+                style: const TextStyle(fontSize: 18),
               ),
               leadingIcon: Icons.warning_amber,
               leadingIconColor: Colors.green,
@@ -323,9 +316,9 @@ class _VersionButtonState extends State<VersionButton> {
         settingsHandler.isDebug.value = false;
         FlashElements.showSnackbar(
           context: context,
-          title: const Text(
-            'Debug mode is disabled!',
-            style: TextStyle(fontSize: 18),
+          title: Text(
+            context.loc.settings.debug.disabledSnackbarMsg,
+            style: const TextStyle(fontSize: 18),
           ),
           leadingIcon: Icons.warning_amber,
           leadingIconColor: Colors.yellow,

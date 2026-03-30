@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart';
 
 import 'package:dio/dio.dart';
 
@@ -11,6 +12,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/services/saf_file_cache.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -57,7 +59,7 @@ class ImageWriter {
         ...await Tools.getFileCustomHeaders(booru, item: item, checkForReferer: true),
       };
 
-      final String url = ((settingsHandler.snatchMode == 'Sample' && item.sampleURL.isNotEmpty)
+      final String url = ((settingsHandler.snatchMode.isSample && item.sampleURL.isNotEmpty)
           ? item.sampleURL
           : item.fileURL);
 
@@ -133,6 +135,7 @@ class ImageWriter {
       }
 
       print('Image written: $path$fileName');
+      SAFFileCache.instance.onFileCreated(fileName);
       item.isSnatched.value = true;
       if (settingsHandler.dbEnabled) {
         await settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
@@ -389,127 +392,130 @@ class ImageWriter {
     return {'fileNum': fileNum, 'totalSize': totalSize};
   }
 
-  // keep files that are 100mb of the cache limit
-  static const double fileSizeToKeep = 100 * 1024 * 1024;
+  static const List<String> cleanableFolders = ['thumbnails', 'samples', 'media', 'WebView'];
 
-  // TODO move to isolate?
-  Future<void> clearStaleCache() async {
-    final bool isStaleClearActive = settingsHandler.cacheDuration.inMilliseconds > 0;
-
-    final timeNow = DateTime.now().millisecondsSinceEpoch;
-    final timeMonthAgo = DateTime.now().subtract(const Duration(days: 30)).millisecondsSinceEpoch;
-
-    String cacheDirPath;
+  /// 1. Temp file cleanup (always): removes .temp_* and 0-byte files from ALL folders
+  /// 2. Stale cleanup (if cacheDuration > 0): removes old files from cleanable folders
+  /// 3. Size overflow cleanup (if cacheSize > 0): removes oldest files until under limit
+  Future<void> cleanupCache() async {
     try {
       await setPaths();
-      cacheDirPath = '$cacheRootPath/';
-
-      final Directory cacheDir = Directory(cacheDirPath);
-      if (await cacheDir.exists()) {
-        final List<FileSystemEntity> files = await cacheDir.list(recursive: true, followLinks: false).toList();
-        for (final FileSystemEntity file in files) {
-          if (file is File) {
-            try {
-              final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
-              final DateTime lastModified = await file.lastModified();
-              if (isStaleClearActive) {
-                final bool isStale =
-                    (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < timeNow;
-                if (isNotExcludedExt && isStale) {
-                  await file.delete();
-                }
-              } else {
-                // delete files that are too big and older than 30 days, even when stale cache clearing is disabled
-                final bool isTooBig = await file.length() > fileSizeToKeep;
-                final bool isMonthOld = lastModified.millisecondsSinceEpoch < timeMonthAgo;
-                if (isNotExcludedExt && isTooBig && isMonthOld) {
-                  await file.delete();
-                }
-              }
-            } catch (e) {
-              print('Image Writer Exception :: clear stale cache :: $e');
-              try {
-                await file.delete();
-              } catch (_) {}
-            }
-          }
-        }
-      }
+      await compute(
+        _cleanupCacheIsolate,
+        _CacheCleanupConfig(
+          cacheRootPath: cacheRootPath,
+          cacheDurationMs: settingsHandler.cacheDuration.inMilliseconds,
+          cacheSizeLimitBytes: (settingsHandler.cacheSize * pow(1024, 3)).toInt(),
+          cleanableFolders: cleanableFolders,
+        ),
+      );
     } catch (e) {
-      print('Image Writer Exception :: clear stale cache :: $e');
+      print('Image Writer Exception :: cleanupCache :: $e');
     }
-    return;
   }
 
-  // TODO move to isolate?
-  Future<void> clearCacheOverflow() async {
-    // never clear cache overflow if limit is 0
-    // TODO maybe check available space left and ignore that setting if not enough space?
-    if (settingsHandler.cacheSize == 0) {
-      return;
-    }
+  static Future<void> _cleanupCacheIsolate(_CacheCleanupConfig config) async {
+    final String rootPath = config.cacheRootPath;
 
-    String cacheDirPath;
-    final List<FileSystemEntity> toDelete = [];
-    int toDeleteSize = 0;
-    int currentCacheSize = 0;
+    final allFolderPaths = <String>[];
     try {
-      await setPaths();
-      cacheDirPath = '$cacheRootPath/';
-
-      final Directory cacheDir = Directory(cacheDirPath);
-      if (await cacheDir.exists()) {
-        final List<File> files = (await cacheDir.list(recursive: true, followLinks: false).toList())
-            .whereType<File>()
-            .toList();
-
-        final List<FileStat> fileStats = await Future.wait([
-          for (final f in files) f.stat(),
-        ]);
-        final Map<String, FileStat> fileStatsMap = {
-          for (int i = 0; i < files.length; i++) files[i].path: fileStats[i],
-        };
-        for (int i = 0; i < files.length; i++) {
-          currentCacheSize += fileStats[i].size;
-        }
-
-        final int limitSize = settingsHandler.cacheSize * pow(1024, 3) as int;
-        final int overflowSize = currentCacheSize - limitSize;
-        if (overflowSize > 0) {
-          files.sort((a, b) => fileStatsMap[a.path]!.modified.compareTo(fileStatsMap[b.path]!.modified));
-
-          for (final file in files) {
-            try {
-              final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
-              final bool stillOverflows = toDeleteSize < overflowSize;
-              if (isNotExcludedExt && stillOverflows) {
-                final fileSize = fileStatsMap[file.path]?.size ?? 0;
-                if (fileSize <= fileSizeToKeep) {
-                  // if file is smaller than fileSizeToKeep, we delete it
-                  // otherwise leave it to be deleted by clearStaleCache after a month or manually by user
-                  toDelete.add(file);
-                  toDeleteSize += fileSize;
-                }
-              }
-            } catch (e) {
-              print('Image Writer Exception :: clear cache overflow :: $e');
-              try {
-                await file.delete();
-              } catch (_) {}
-            }
+      final rootDir = Directory('$rootPath/');
+      if (await rootDir.exists()) {
+        await for (final entity in rootDir.list(followLinks: false)) {
+          if (entity is Directory) {
+            allFolderPaths.add(entity.path);
           }
         }
       }
-    } catch (e) {
-      print('Image Writer Exception :: clear cache overflow :: $e');
+    } catch (_) {}
+
+    for (final folderPath in allFolderPaths) {
+      try {
+        final dir = Directory(folderPath);
+        if (!await dir.exists()) continue;
+
+        await for (final entity in dir.list(recursive: true, followLinks: false)) {
+          if (entity is! File) continue;
+          try {
+            final name = entity.path.split(Platform.pathSeparator).last;
+            final bool isTemp = name.contains('.temp_');
+            final bool isZeroBytes = isTemp ? false : (await entity.length()) == 0;
+            if (isTemp || isZeroBytes) {
+              await entity.delete();
+            }
+          } catch (_) {}
+        }
+      } catch (_) {}
     }
 
-    // print(toDelete);
-    // print(toDeleteSize);
-    for (final file in toDelete) {
-      await file.delete();
+    final cleanablePaths = <String>[];
+    for (final folder in config.cleanableFolders) {
+      cleanablePaths.add('$rootPath$folder');
     }
-    return;
+
+    if (config.cacheDurationMs > 0) {
+      final timeNow = DateTime.now().millisecondsSinceEpoch;
+
+      for (final folderPath in cleanablePaths) {
+        try {
+          final dir = Directory(folderPath);
+          if (!await dir.exists()) continue;
+
+          await for (final entity in dir.list(recursive: true, followLinks: false)) {
+            if (entity is! File) continue;
+            try {
+              final lastModified = await entity.lastModified();
+              final age = timeNow - lastModified.millisecondsSinceEpoch;
+              if (age > config.cacheDurationMs) {
+                await entity.delete();
+              }
+            } catch (_) {}
+          }
+        } catch (_) {}
+      }
+    }
+
+    if (config.cacheSizeLimitBytes > 0) {
+      final List<_CacheFileEntry> allFiles = [];
+      int totalSize = 0;
+
+      for (final folderPath in cleanablePaths) {
+        try {
+          final dir = Directory(folderPath);
+          if (!await dir.exists()) continue;
+
+          await for (final entity in dir.list(recursive: true, followLinks: false)) {
+            if (entity is! File) continue;
+            try {
+              final stat = await entity.stat();
+              totalSize += stat.size;
+              allFiles.add(
+                _CacheFileEntry(
+                  path: entity.path,
+                  size: stat.size,
+                  modified: stat.modified,
+                ),
+              );
+            } catch (_) {}
+          }
+        } catch (_) {}
+      }
+
+      if (totalSize > config.cacheSizeLimitBytes) {
+        allFiles.sort((a, b) => a.modified.compareTo(b.modified));
+
+        int deletedSize = 0;
+        final int overflowSize = totalSize - config.cacheSizeLimitBytes;
+
+        for (final entry in allFiles) {
+          if (deletedSize >= overflowSize) break;
+          try {
+            await File(entry.path).delete();
+            deletedSize += entry.size;
+          } catch (_) {}
+        }
+      }
+    }
   }
 
   String parseThumbUrlToName(String thumbURL) {
@@ -565,4 +571,30 @@ class ImageWriter {
     // print('cache path: $cacheRootPath');
     return true;
   }
+}
+
+class _CacheCleanupConfig {
+  const _CacheCleanupConfig({
+    required this.cacheRootPath,
+    required this.cacheDurationMs,
+    required this.cacheSizeLimitBytes,
+    required this.cleanableFolders,
+  });
+
+  final String cacheRootPath;
+  final int cacheDurationMs;
+  final int cacheSizeLimitBytes;
+  final List<String> cleanableFolders;
+}
+
+class _CacheFileEntry {
+  const _CacheFileEntry({
+    required this.path,
+    required this.size,
+    required this.modified,
+  });
+
+  final String path;
+  final int size;
+  final DateTime modified;
 }

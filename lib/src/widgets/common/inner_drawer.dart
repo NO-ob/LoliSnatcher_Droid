@@ -19,7 +19,8 @@ typedef InnerDragUpdateCallback =
 
 enum InnerDrawerDirection {
   start,
-  end;
+  end,
+  ;
 
   bool get isStart => this == InnerDrawerDirection.start;
   bool get isEnd => this == InnerDrawerDirection.end;
@@ -505,8 +506,8 @@ class InnerDrawerState extends State<InnerDrawer> with SingleTickerProviderState
 
                                   final Widget scaffoldChild = Stack(
                                     children: [
-                                      if (child != null) child,
-                                      if (invisibleCover != null) invisibleCover,
+                                      ?child,
+                                      ?invisibleCover,
                                     ],
                                   );
 

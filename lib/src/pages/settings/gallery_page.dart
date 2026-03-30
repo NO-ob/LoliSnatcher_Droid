@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:lolisnatcher/src/data/settings/button_position.dart';
+import 'package:lolisnatcher/src/data/settings/gallery_button.dart';
+import 'package:lolisnatcher/src/data/settings/image_quality.dart';
+import 'package:lolisnatcher/src/data/settings/scroll_direction.dart';
+import 'package:lolisnatcher/src/data/settings/share_action.dart';
+import 'package:lolisnatcher/src/data/settings/vertical_position.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -24,18 +30,19 @@ class _GalleryPageState extends State<GalleryPage> {
       enableHeroTransitions = true,
       disableCustomPageTransitions = false,
       disableVibration = false;
-  late String galleryMode,
-      galleryBarPosition,
-      galleryScrollDirection,
-      shareAction,
-      zoomButtonPosition,
-      changePageButtonsPosition;
+  late ImageQuality galleryMode;
+  late VerticalPosition galleryBarPosition;
+  late ScrollDirection galleryScrollDirection;
+  late ShareAction shareAction;
+  late ButtonPosition zoomButtonPosition;
+  late ButtonPosition changePageButtonsPosition;
 
-  late final List<String> buttonOrder;
-  late final List<String> disabledButtons;
+  late final List<GalleryButton> buttonOrder;
+  late final List<GalleryButton> disabledButtons;
 
   final TextEditingController preloadAmountController = TextEditingController();
   final TextEditingController preloadSizeController = TextEditingController();
+  final TextEditingController preloadHeightController = TextEditingController();
   final TextEditingController scrollSpeedController = TextEditingController();
   final TextEditingController galleryAutoScrollController = TextEditingController();
 
@@ -46,15 +53,13 @@ class _GalleryPageState extends State<GalleryPage> {
     autoHideImageBar = settingsHandler.autoHideImageBar;
     galleryMode = settingsHandler.galleryMode;
     galleryBarPosition = settingsHandler.galleryBarPosition;
-    buttonOrder = settingsHandler.buttonOrder;
-    disabledButtons = [
-      ...settingsHandler.disabledButtons,
-    ];
+    buttonOrder = [...settingsHandler.buttonOrder];
+    disabledButtons = [...settingsHandler.disabledButtons];
     galleryScrollDirection = settingsHandler.galleryScrollDirection;
 
     shareAction = settingsHandler.shareAction;
-    if (!settingsHandler.hasHydrus && settingsHandler.shareAction == 'Hydrus') {
-      shareAction = 'Ask';
+    if (!settingsHandler.hasHydrus && settingsHandler.shareAction.isHydrus) {
+      shareAction = .ask;
     }
 
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
@@ -66,6 +71,7 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
     preloadAmountController.text = settingsHandler.preloadCount.toString();
     preloadSizeController.text = settingsHandler.preloadSizeLimit.toString();
+    preloadHeightController.text = settingsHandler.preloadHeight.toString();
     loadingGif = settingsHandler.loadingGif;
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
     enableHeroTransitions = settingsHandler.enableHeroTransitions;
@@ -77,21 +83,18 @@ class _GalleryPageState extends State<GalleryPage> {
   void dispose() {
     preloadAmountController.dispose();
     preloadSizeController.dispose();
+    preloadHeightController.dispose();
     scrollSpeedController.dispose();
     galleryAutoScrollController.dispose();
     super.dispose();
   }
 
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.autoHideImageBar = autoHideImageBar;
     settingsHandler.galleryMode = galleryMode;
     settingsHandler.galleryBarPosition = galleryBarPosition;
-    settingsHandler.buttonOrder = buttonOrder;
-    settingsHandler.disabledButtons = disabledButtons;
+    settingsHandler.buttonOrder = [...buttonOrder];
+    settingsHandler.disabledButtons = [...disabledButtons];
     settingsHandler.galleryScrollDirection = galleryScrollDirection;
     settingsHandler.shareAction = shareAction;
     settingsHandler.zoomButtonPosition = zoomButtonPosition;
@@ -109,13 +112,11 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.volumeButtonsScrollSpeed = (int.tryParse(scrollSpeedController.text) ?? 200).clamp(0, 1_000_000);
     settingsHandler.galleryAutoScrollTime = (int.tryParse(galleryAutoScrollController.text) ?? 4000).clamp(100, 10000);
 
-    settingsHandler.preloadCount = (int.tryParse(preloadAmountController.text) ?? 1).clamp(0, 3);
-    settingsHandler.preloadSizeLimit = (double.tryParse(preloadSizeController.text) ?? 0).clamp(0, double.infinity);
+    settingsHandler.preloadCount = (int.tryParse(preloadAmountController.text) ?? 1).clamp(0, 4);
+    settingsHandler.preloadSizeLimit = (double.tryParse(preloadSizeController.text) ?? 0.2).clamp(0, double.infinity);
+    settingsHandler.preloadHeight = (int.tryParse(preloadHeightController.text) ?? (4096 * 4)).clamp(0, 2_000_000_000);
 
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: false);
   }
 
   @override
@@ -127,36 +128,35 @@ class _GalleryPageState extends State<GalleryPage> {
     final bool hasHydrus = settingsHandler.hasHydrus;
 
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: const Text('Viewer'),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.viewer.title,
         ),
         body: Center(
           child: ListView(
             children: [
               SettingsTextInput(
                 controller: preloadAmountController,
-                title: 'Preload amount',
+                title: context.loc.settings.viewer.preloadAmount,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['preloadCount']!['default']!.toString(),
                 numberButtons: true,
-                numberStep: 1,
-                numberMin: 0,
-                numberMax: 5,
+                numberStep: (settingsHandler.map['preloadCount']!['step']!).toDouble(),
+                numberMin: settingsHandler.map['preloadCount']!['lowerLimit']!.toDouble(),
+                numberMax: settingsHandler.map['preloadCount']!['upperLimit']!.toDouble(),
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
-                  } else if (parse < 0) {
-                    return 'Please enter a value equal to or greater than 0';
-                  } else if (parse > 3) {
-                    return 'Please enter a value less than 4';
+                    return context.loc.validationErrors.invalidNumericValue;
+                  } else if (parse < settingsHandler.map['preloadCount']!['lowerLimit']!.toDouble()) {
+                    return context.loc.validationErrors.greaterThanOrEqualZero;
+                  } else if (parse > settingsHandler.map['preloadCount']!['upperLimit']!.toDouble()) {
+                    return context.loc.validationErrors.lessThan4;
                   } else {
                     return null;
                   }
@@ -164,8 +164,8 @@ class _GalleryPageState extends State<GalleryPage> {
               ),
               SettingsTextInput(
                 controller: preloadSizeController,
-                title: 'Preload size limit',
-                subtitle: const Text('in GB, 0 for no limit'),
+                title: context.loc.settings.viewer.preloadSizeLimit,
+                subtitle: Text(context.loc.settings.viewer.preloadSizeLimitSubtitle),
                 inputType: TextInputType.number,
                 resetText: () => settingsHandler.map['preloadSizeLimit']!['default']!.toString(),
                 numberButtons: true,
@@ -175,67 +175,102 @@ class _GalleryPageState extends State<GalleryPage> {
                 validator: (String? value) {
                   final double? parse = double.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse < settingsHandler.map['preloadSizeLimit']!['lowerLimit']! ||
                       parse > settingsHandler.map['preloadSizeLimit']!['upperLimit']!) {
-                    return 'Please enter a value between ${settingsHandler.map['preloadSizeLimit']!['lowerLimit']!} and ${settingsHandler.map['preloadSizeLimit']!['upperLimit']!}';
+                    return context.loc.validationErrors.rangeError(
+                      min: settingsHandler.map['preloadSizeLimit']!['lowerLimit']!,
+                      max: settingsHandler.map['preloadSizeLimit']!['upperLimit']!,
+                    );
                   } else {
                     return null;
                   }
                 },
               ),
-              SettingsOptionsList(
+              SettingsTextInput(
+                controller: preloadHeightController,
+                title: context.loc.settings.viewer.preloadHeightLimit,
+                subtitle: Text(context.loc.settings.viewer.preloadHeightLimitSubtitle),
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                resetText: () => settingsHandler.map['preloadHeight']!['default']!.toString(),
+                numberButtons: true,
+                numberStep: settingsHandler.map['preloadHeight']!['step']!.toDouble(),
+                numberMin: settingsHandler.map['preloadHeight']!['lowerLimit']!.toDouble(),
+                numberMax: settingsHandler.map['preloadHeight']!['upperLimit']!.toDouble(),
+                validator: (String? value) {
+                  final int? parse = int.tryParse(value ?? '');
+                  if (value == null || value.isEmpty) {
+                    return context.loc.validationErrors.required;
+                  } else if (parse == null) {
+                    return context.loc.validationErrors.invalidNumericValue;
+                  } else if (parse < settingsHandler.map['preloadHeight']!['lowerLimit']!.toDouble() ||
+                      parse > settingsHandler.map['preloadHeight']!['upperLimit']!.toDouble()) {
+                    return context.loc.validationErrors.rangeError(
+                      min: settingsHandler.map['preloadHeight']!['lowerLimit']!.toDouble(),
+                      max: settingsHandler.map['preloadHeight']!['upperLimit']!.toDouble(),
+                    );
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              SettingsOptionsList<ImageQuality>(
                 value: galleryMode,
-                items: settingsHandler.map['galleryMode']!['options'],
-                onChanged: (String? newValue) {
+                items: ImageQuality.values,
+                onChanged: (ImageQuality? newValue) {
                   setState(() {
-                    galleryMode = newValue ?? settingsHandler.map['galleryMode']!['default'];
+                    galleryMode = newValue ?? ImageQuality.defaultValue;
                   });
                 },
-                title: 'Image quality',
+                title: context.loc.settings.viewer.imageQuality,
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<ScrollDirection>(
                 value: galleryScrollDirection,
-                items: settingsHandler.map['galleryScrollDirection']!['options'],
-                onChanged: (String? newValue) {
+                items: ScrollDirection.values,
+                onChanged: (ScrollDirection? newValue) {
                   setState(() {
-                    galleryScrollDirection = newValue ?? settingsHandler.map['galleryScrollDirection']!['default'];
+                    galleryScrollDirection = newValue ?? ScrollDirection.defaultValue;
                   });
                 },
-                title: 'Viewer scroll direction',
+                title: context.loc.settings.viewer.viewerScrollDirection,
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<VerticalPosition>(
                 value: galleryBarPosition,
-                items: settingsHandler.map['galleryBarPosition']!['options'],
-                onChanged: (String? newValue) {
+                items: VerticalPosition.values,
+                onChanged: (VerticalPosition? newValue) {
                   setState(() {
-                    galleryBarPosition = newValue ?? settingsHandler.map['galleryBarPosition']!['default'];
+                    galleryBarPosition = newValue ?? VerticalPosition.defaultValue;
                   });
                 },
-                title: 'Viewer toolbar position',
+                title: context.loc.settings.viewer.viewerToolbarPosition,
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<ButtonPosition>(
                 value: zoomButtonPosition,
-                items: settingsHandler.map['zoomButtonPosition']!['options'],
-                onChanged: (String? newValue) {
+                items: ButtonPosition.values,
+                onChanged: (ButtonPosition? newValue) {
                   setState(() {
-                    zoomButtonPosition = newValue ?? settingsHandler.map['zoomButtonPosition']!['default'];
+                    zoomButtonPosition = newValue ?? ButtonPosition.defaultValue;
                   });
                 },
-                title: 'Zoom button position',
+                title: context.loc.settings.viewer.zoomButtonPosition,
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
-              SettingsOptionsList(
+              SettingsOptionsList<ButtonPosition>(
                 value: changePageButtonsPosition,
-                items: settingsHandler.map['changePageButtonsPosition']!['options'],
-                onChanged: (String? newValue) {
+                items: ButtonPosition.values,
+                onChanged: (ButtonPosition? newValue) {
                   setState(() {
-                    changePageButtonsPosition =
-                        newValue ?? settingsHandler.map['changePageButtonsPosition']!['default'];
+                    changePageButtonsPosition = newValue ?? ButtonPosition.defaultValue;
                   });
                 },
-                title: 'Change page buttons position',
+                title: context.loc.settings.viewer.changePageButtonsPosition,
+                itemTitleBuilder: (e) => e?.locName ?? '',
               ),
               SettingsToggle(
                 value: autoHideImageBar,
@@ -244,7 +279,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     autoHideImageBar = newValue;
                   });
                 },
-                title: 'Hide toolbar when opening viewer',
+                title: context.loc.settings.viewer.hideToolbarWhenOpeningViewer,
               ),
               SettingsToggle(
                 value: settingsHandler.expandDetails,
@@ -253,7 +288,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     settingsHandler.expandDetails = newValue;
                   });
                 },
-                title: 'Expand details by default',
+                title: context.loc.settings.viewer.expandDetailsByDefault,
               ),
               SettingsToggle(
                 value: hideNotes,
@@ -262,7 +297,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     hideNotes = newValue;
                   });
                 },
-                title: 'Hide translation notes by default',
+                title: context.loc.settings.viewer.hideTranslationNotesByDefault,
               ),
               SettingsToggle(
                 value: allowRotation,
@@ -271,8 +306,8 @@ class _GalleryPageState extends State<GalleryPage> {
                     allowRotation = newValue;
                   });
                 },
-                title: 'Enable rotation',
-                subtitle: const Text('Double tap to reset (only works on images)'),
+                title: context.loc.settings.viewer.enableRotation,
+                subtitle: Text(context.loc.settings.viewer.enableRotationSubtitle),
               ),
 
               Material(
@@ -280,7 +315,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 child: ExpansionTile(
                   title: Row(
                     children: [
-                      const Expanded(child: Text('Toolbar buttons order')),
+                      Expanded(child: Text(context.loc.settings.viewer.toolbarButtonsOrder)),
                       IconButton(
                         icon: Icon(
                           Icons.refresh,
@@ -304,12 +339,12 @@ class _GalleryPageState extends State<GalleryPage> {
                           showDialog(
                             context: context,
                             builder: (context) {
-                              return const SettingsDialog(
-                                title: Text('Buttons order'),
+                              return SettingsDialog(
+                                title: Text(context.loc.settings.viewer.buttonsOrder),
                                 contentItems: [
-                                  Text('Long press to change item order.'),
-                                  Text('At least 4 buttons from this list will be always visible on Toolbar.'),
-                                  Text('Other buttons will go into overflow (three dots) menu.'),
+                                  Text(context.loc.settings.viewer.longPressToChangeItemOrder),
+                                  Text(context.loc.settings.viewer.atLeast4ButtonsVisibleOnToolbar),
+                                  Text(context.loc.settings.viewer.otherButtonsWillGoIntoOverflow),
                                 ],
                               );
                             },
@@ -344,30 +379,30 @@ class _GalleryPageState extends State<GalleryPage> {
                             index: index,
                             child: Builder(
                               builder: (context) {
-                                final name = buttonOrder[index];
-                                final title = SettingsHandler.buttonNames[name] ?? '';
+                                final button = buttonOrder[index];
+                                final title = button.locName;
 
-                                final bool isInfo = name == 'info';
+                                final bool isInfo = button.isInfo;
 
-                                final bool isActive = !disabledButtons.contains(name) || isInfo;
+                                final bool isActive = !disabledButtons.contains(button) || isInfo;
 
                                 return ListTile(
                                   onTap: () {
                                     if (!isInfo) {
                                       setState(() {
                                         if (isActive) {
-                                          disabledButtons.add(name);
+                                          disabledButtons.add(button);
                                         } else {
-                                          disabledButtons.remove(name);
+                                          disabledButtons.remove(button);
                                         }
                                       });
                                     }
 
                                     FlashElements.showSnackbar(
                                       context: context,
-                                      title: const Text(
-                                        'Long press to move items',
-                                        style: TextStyle(fontSize: 20),
+                                      title: Text(
+                                        context.loc.settings.viewer.longPressToMoveItems,
+                                        style: const TextStyle(fontSize: 20),
                                       ),
                                       key: 'toolbar-button-order',
                                       isKeyUnique: true,
@@ -376,25 +411,25 @@ class _GalleryPageState extends State<GalleryPage> {
                                       sideColor: Colors.yellow,
                                     );
                                   },
-                                  key: Key('item-$name'),
+                                  key: Key('item-${button.name}'),
                                   minTileHeight: 64,
                                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                                   title: Text(title),
-                                  subtitle: switch (name) {
-                                    'external_player' => const Text('Only for videos'),
+                                  subtitle: switch (button) {
+                                    .externalPlayer => Text(context.loc.settings.viewer.onlyForVideos),
                                     _ => null,
                                   },
                                   leading: Opacity(
                                     opacity: isInfo ? 0.5 : 1,
                                     child: Checkbox(
-                                      key: Key('checkbox-$name'),
+                                      key: Key('checkbox-${button.name}'),
                                       value: isActive,
                                       onChanged: (_) {
                                         if (isInfo) {
                                           FlashElements.showSnackbar(
-                                            title: const Text(
-                                              'This button cannot be disabled',
-                                              style: TextStyle(fontSize: 20),
+                                            title: Text(
+                                              context.loc.settings.viewer.thisButtonCannotBeDisabled,
+                                              style: const TextStyle(fontSize: 20),
                                             ),
                                           );
                                           return;
@@ -402,9 +437,9 @@ class _GalleryPageState extends State<GalleryPage> {
 
                                         setState(() {
                                           if (isActive) {
-                                            disabledButtons.add(name);
+                                            disabledButtons.add(button);
                                           } else {
-                                            disabledButtons.remove(name);
+                                            disabledButtons.remove(button);
                                           }
                                         });
                                       },
@@ -414,19 +449,18 @@ class _GalleryPageState extends State<GalleryPage> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(
-                                        switch (name) {
-                                          'snatch' => Icons.save,
-                                          'favourite' => Icons.favorite,
-                                          'info' => Icons.info,
-                                          'share' => Icons.share,
-                                          'select' => Icons.check_box,
-                                          'open' => Icons.public,
-                                          'autoscroll' => Icons.play_arrow,
-                                          'reloadnoscale' => Icons.refresh,
-                                          'toggle_quality' => Icons.high_quality,
-                                          'external_player' => Icons.exit_to_app,
-                                          'image_search' => Icons.image_search_rounded,
-                                          _ => null,
+                                        switch (button) {
+                                          .snatch => Icons.save,
+                                          .favourite => Icons.favorite,
+                                          .info => Icons.info,
+                                          .share => Icons.share,
+                                          .select => Icons.check_box,
+                                          .open => Icons.public,
+                                          .autoscroll => Icons.play_arrow,
+                                          .reloadnoscale => Icons.refresh,
+                                          .toggleQuality => Icons.high_quality,
+                                          .externalPlayer => Icons.exit_to_app,
+                                          .imageSearch => Icons.image_search_rounded,
                                         },
                                       ),
                                       ReorderableDragStartListener(
@@ -444,12 +478,9 @@ class _GalleryPageState extends State<GalleryPage> {
                             ),
                           ),
                       ],
-                      onReorder: (int oldIndex, int newIndex) {
+                      onReorderItem: (int oldIndex, int newIndex) {
                         setState(() {
-                          if (oldIndex < newIndex) {
-                            newIndex -= 1;
-                          }
-                          final String item = buttonOrder.removeAt(oldIndex);
+                          final item = buttonOrder.removeAt(oldIndex);
                           buttonOrder.insert(newIndex, item);
                         });
                       },
@@ -459,17 +490,16 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
               ),
 
-              SettingsDropdown(
+              SettingsDropdown<ShareAction>(
                 value: shareAction,
-                items: (settingsHandler.map['shareAction']!['options'] as List<String>)
-                    .where((element) => hasHydrus || element != 'Hydrus')
-                    .toList(),
-                onChanged: (String? newValue) {
+                items: ShareAction.values.where((element) => hasHydrus || !element.isHydrus).toList(),
+                onChanged: (ShareAction? newValue) {
                   setState(() {
-                    shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
+                    shareAction = newValue ?? ShareAction.defaultValue;
                   });
                 },
-                title: 'Default share action',
+                title: context.loc.settings.viewer.defaultShareAction,
+                itemTitleBuilder: (e) => e?.locName ?? '',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -477,26 +507,18 @@ class _GalleryPageState extends State<GalleryPage> {
                       context: context,
                       builder: (context) {
                         return SettingsDialog(
-                          title: const Text('Share actions'),
+                          title: Text(context.loc.settings.viewer.shareActions),
                           contentItems: [
-                            const Text('- Ask - always ask what to share'),
-                            const Text('- Post URL'),
-                            const Text(
-                              '- File URL - shares direct link to the original file (may not work with some sites)',
-                            ),
-                            const Text(
-                              '- Post URL/File URL/File with tags - shares url/file and tags which you select',
-                            ),
-                            const Text(
-                              '- File - shares the file itself, may take some time to load, progress will be shown on the Share button',
-                            ),
-                            if (hasHydrus) const Text('- Hydrus - sends the post url to Hydrus for import'),
+                            Text(context.loc.settings.viewer.shareActionsAsk),
+                            Text(context.loc.settings.viewer.shareActionsPostURL),
+                            Text(context.loc.settings.viewer.shareActionsFileURL),
+                            Text(context.loc.settings.viewer.shareActionsPostURLFileURLFileWithTags),
+                            Text(context.loc.settings.viewer.shareActionsFile),
+                            if (hasHydrus) Text(context.loc.settings.viewer.shareActionsHydrus),
                             const Text(''),
-                            const Text(
-                              '[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network.',
-                            ),
+                            Text(context.loc.settings.viewer.shareActionsNoteIfFileSavedInCache),
                             const Text(''),
-                            const Text('[Tip]: You can open Share actions menu by long pressing Share button.'),
+                            Text(context.loc.settings.viewer.shareActionsTip),
                           ],
                         );
                       },
@@ -511,24 +533,24 @@ class _GalleryPageState extends State<GalleryPage> {
                     useVolumeButtonsForScroll = newValue;
                   });
                 },
-                title: 'Use volume buttons for scrolling',
+                title: context.loc.settings.viewer.useVolumeButtonsForScrolling,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Volume buttons scrolling'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.viewer.volumeButtonsScrolling),
                           contentItems: [
-                            Text('Allows to scroll through previews grid and viewer items using volume buttons'),
-                            Text(''),
-                            Text(' - Volume Down - next item'),
-                            Text(' - Volume Up - previous item'),
-                            Text(''),
-                            Text('In viewer:'),
-                            Text(' - Toolbar visible - controls volume'),
-                            Text(' - Toolbar hidden - controls scrolling'),
+                            Text(context.loc.settings.viewer.volumeButtonsScrollingHelp),
+                            const Text(''),
+                            Text(context.loc.settings.viewer.volumeButtonsVolumeDown),
+                            Text(context.loc.settings.viewer.volumeButtonsVolumeUp),
+                            const Text(''),
+                            Text(context.loc.settings.viewer.volumeButtonsInViewer),
+                            Text(context.loc.settings.viewer.volumeButtonsToolbarVisible),
+                            Text(context.loc.settings.viewer.volumeButtonsToolbarHidden),
                           ],
                         );
                       },
@@ -538,7 +560,7 @@ class _GalleryPageState extends State<GalleryPage> {
               ),
               SettingsTextInput(
                 controller: scrollSpeedController,
-                title: 'Volume buttons scroll speed',
+                title: context.loc.settings.viewer.volumeButtonsScrollSpeed,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['volumeButtonsScrollSpeed']!['default']!.toString(),
@@ -549,11 +571,11 @@ class _GalleryPageState extends State<GalleryPage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else if (parse < 100) {
-                    return 'Please enter a value bigger than 100';
+                    return context.loc.validationErrors.biggerThan100;
                   } else {
                     return null;
                   }
@@ -562,7 +584,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
               SettingsTextInput(
                 controller: galleryAutoScrollController,
-                title: 'Slideshow duration (in ms)',
+                title: context.loc.settings.viewer.slideshowDurationInMs,
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['galleryAutoScrollTime']!['default']!.toString(),
@@ -573,9 +595,9 @@ class _GalleryPageState extends State<GalleryPage> {
                 validator: (String? value) {
                   final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
+                    return context.loc.validationErrors.required;
                   } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
+                    return context.loc.validationErrors.invalidNumericValue;
                   } else {
                     return null;
                   }
@@ -586,10 +608,10 @@ class _GalleryPageState extends State<GalleryPage> {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Slideshow'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.viewer.slideshow),
                           contentItems: [
-                            Text('[WIP] Videos and gifs must be scrolled manually for now.'),
+                            Text(context.loc.settings.viewer.slideshowWIPNote),
                           ],
                         );
                       },
@@ -604,7 +626,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     wakeLockEnabled = newValue;
                   });
                 },
-                title: 'Prevent device from sleeping',
+                title: context.loc.settings.viewer.preventDeviceFromSleeping,
               ),
               SettingsToggle(
                 value: enableHeroTransitions,
@@ -613,7 +635,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     enableHeroTransitions = newValue;
                   });
                 },
-                title: 'Viewer open/close animation',
+                title: context.loc.settings.viewer.viewerOpenCloseAnimation,
               ),
               SettingsToggle(
                 value: disableCustomPageTransitions,
@@ -622,9 +644,11 @@ class _GalleryPageState extends State<GalleryPage> {
                     disableCustomPageTransitions = newValue;
                   });
                 },
-                title: 'Viewer page change animation',
+                title: context.loc.settings.viewer.viewerPageChangeAnimation,
                 subtitle: Text(
-                  disableCustomPageTransitions ? 'Using default animation' : 'Using custom animation',
+                  disableCustomPageTransitions
+                      ? context.loc.settings.viewer.usingDefaultAnimation
+                      : context.loc.settings.viewer.usingCustomAnimation,
                 ),
               ),
 
@@ -636,7 +660,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     loadingGif = newValue;
                   });
                 },
-                title: 'Kanna loading Gif',
+                title: context.loc.settings.viewer.kannaLoadingGif,
               ),
             ],
           ),

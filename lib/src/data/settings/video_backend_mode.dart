@@ -1,10 +1,14 @@
-enum VideoBackendMode {
+import 'package:lolisnatcher/gen/strings.g.dart';
+import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
+
+enum VideoBackendMode with SettingsEnum<VideoBackendMode> {
   normal,
   mpv, // mediakit
-  mdk; // fvp
+  mdk, // fvp
+  ;
 
   @override
-  String toString() {
+  String toJson() {
     return name;
   }
 
@@ -18,7 +22,7 @@ enum VideoBackendMode {
       case 'mdk':
         return VideoBackendMode.mdk;
       default:
-        return VideoBackendMode.normal;
+        return defaultValue;
     }
   }
 
@@ -30,4 +34,16 @@ enum VideoBackendMode {
   bool get isNormal => this == VideoBackendMode.normal;
   bool get isMpv => this == VideoBackendMode.mpv;
   bool get isMdk => this == VideoBackendMode.mdk;
+
+  @override
+  String get locName {
+    switch (this) {
+      case VideoBackendMode.normal:
+        return loc.settings.video.videoBackendModeValues.normal;
+      case VideoBackendMode.mpv:
+        return loc.settings.video.videoBackendModeValues.mpv;
+      case VideoBackendMode.mdk:
+        return loc.settings.video.videoBackendModeValues.mdk;
+    }
+  }
 }

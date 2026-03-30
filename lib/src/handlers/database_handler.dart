@@ -9,6 +9,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
+import 'package:lolisnatcher/src/data/pinned_tag.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -27,14 +28,35 @@ class DBHandler {
   DBHandler();
   Database? db;
 
+  Future<void> closeDb() async {
+    await db?.close();
+    db = null;
+  }
+
   /// Connects to the database file and create the database if the tables dont exist
   Future<bool> dbConnect(
     String path, {
     ValueChanged<String>? onStatusUpdate,
   }) async {
-    // await Sqflite.devSetDebugModeOn(true);
     if (Platform.isAndroid || Platform.isIOS) {
-      db = await openDatabase('${path}store.db', version: 1, singleInstance: false);
+      db = await openDatabase(
+        '${path}store.db',
+        version: 1,
+        singleInstance: false,
+        onConfigure: (db) async {
+          try {
+            await db.rawQuery('PRAGMA journal_mode=WAL;');
+          } catch (e, s) {
+            Logger.Inst().log(
+              e.toString(),
+              'DBHandler',
+              'dbConnect',
+              LogTypes.exception,
+              s: s,
+            );
+          }
+        },
+      );
     } else if (Platform.isWindows || Platform.isLinux) {
       db = await databaseFactory.openDatabase('${path}store.db');
     }
@@ -85,6 +107,17 @@ class DBHandler {
       'CREATE TABLE IF NOT EXISTS TabRestore ( '
       'id INTEGER PRIMARY KEY, '
       'restore TEXT '
+      ')',
+    );
+    await db?.execute(
+      'CREATE TABLE IF NOT EXISTS PinnedTag ( '
+      'id INTEGER PRIMARY KEY, '
+      'tagName TEXT NOT NULL, '
+      'booruType TEXT, '
+      'booruName TEXT, '
+      'pinnedAt INTEGER NOT NULL, '
+      'sortOrder INTEGER DEFAULT 0, '
+      'label TEXT '
       ')',
     );
     try {
@@ -164,7 +197,7 @@ class DBHandler {
         ],
       );
       itemID = result?.toString();
-      await updateTags(item.tagsList, itemID);
+      await updateTags(item.tagsList.map((t) => t.fullString).toList(), itemID);
       resultStr = 'Inserted';
     } else if (mode == BooruUpdateMode.local) {
       await db?.rawUpdate(
@@ -213,7 +246,7 @@ class DBHandler {
           ],
         );
         itemID = result?.toString();
-        await updateTags(item.tagsList, itemID);
+        await updateTags(item.tagsList.map((t) => t.fullString).toList(), itemID);
         saved++;
       } else if (mode == BooruUpdateMode.local) {
         await db?.rawUpdate(
@@ -275,14 +308,16 @@ class DBHandler {
     bool idol = false,
   }) async {
     if (search.isNotEmpty) {
-      return searchDB(
+      final items = await searchDB(
         search,
         '0',
         '1000000',
-        'DESC',
-        'loliSyncFav',
         customConditions: ["bi.postURL like '%${idol ? "idol" : "chan"}.sankakucomplex%'"],
       );
+      for (final item in items) {
+        item.isSnatched.value = false;
+      }
+      return items;
     }
 
     final List? result = await db?.rawQuery(
@@ -304,150 +339,184 @@ class DBHandler {
     return items;
   }
 
-  /// Gets a list of BooruItem from the database
   Future<List<BooruItem>> searchDB(
     String searchTagsString,
     String offset,
-    String limit,
-    String order,
-    String mode, {
+    String limit, {
+    String? order,
     List<String> customConditions = const [],
     bool isDownloads = false,
   }) async {
-    List<String> searchTags = [], excludeTags = [];
-    List? result;
+    final db = this.db;
+    if (db == null) return [];
 
-    Logger.Inst().log('Searching DB for tags $searchTagsString', 'DBHandler', 'searchDB', LogTypes.booruHandlerInfo);
-
-    searchTags = searchTagsString.trim().split(' ').where((tag) => tag.isNotEmpty).toList();
-
-    // this adds support of filtering by posturls which have site:*some text* as their substring
-    String siteSearch = searchTags.firstWhere(
-      (tag) => tag.startsWith('site:') || tag.startsWith('-site:'),
-      orElse: () => '',
-    );
+    // --- 1. PARSE PARAMETERS ---
+    // Clean input tags and separate special commands
+    final List<String> rawTags = searchTagsString.trim().split(' ').where((t) => t.isNotEmpty).toList();
+    final List<String> andTags = [];
+    final List<String> orTags = [];
+    final List<String> excludeTags = [];
     String siteQuery = '';
-    if (siteSearch.isNotEmpty) {
-      searchTags.remove(siteSearch);
-      final bool isExclude = siteSearch.startsWith('-site:');
-      siteSearch = siteSearch.replaceAll('-site:', '').replaceAll('site:', '');
-      siteQuery = "bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$siteSearch%' ";
-    }
+    bool isRandomOrder = false;
+    bool isReverseOrder = false;
 
-    if (searchTags.where((element) => element.startsWith('-')).isNotEmpty) {
-      excludeTags = searchTags
-          .where((element) => element.startsWith('-'))
-          .map((tag) => tag.replaceAll(RegExp('^-'), ''))
-          .toList();
-      searchTags = searchTags.where((element) => !element.startsWith('-')).toList();
-    } else {
-      excludeTags = [];
-    }
+    for (final tag in rawTags) {
+      final lowerTag = tag.toLowerCase();
+      if (lowerTag.startsWith('site:') || lowerTag.startsWith('-site:')) {
+        final isExclude = lowerTag.startsWith('-site:');
+        final term = tag.replaceAll(RegExp('^-?site:', caseSensitive: false), '');
+        siteQuery =
+            "(bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$term%' OR bi.fileURL ${isExclude ? 'NOT' : ''} LIKE '%$term%') ";
+      } else if (lowerTag == 'sort:random') {
+        isRandomOrder = true;
+      } else if (lowerTag == 'sort:reverse') {
+        isReverseOrder = true;
+      } else {
+        // Replace booru wildcard '*' with SQLite wildcard '%'
+        final String sqlTag = tag.replaceAll('*', '%');
 
-    // benchmark reqest time
-    // final DateTime start = DateTime.now();
-
-    final String filterMode = isDownloads ? 'bi.isSnatched = 1' : 'bi.isFavourite = 1';
-
-    final bool isRandomOrder = searchTags.any((t) => t.toLowerCase() == 'sort:random');
-    if (isRandomOrder) {
-      searchTags.removeWhere((element) => element.toLowerCase() == 'sort:random');
-    }
-
-    if (searchTags.isNotEmpty || excludeTags.isNotEmpty) {
-      final String searchPart = searchTags.isNotEmpty
-          ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
-          : '';
-
-      final andStr1 = siteQuery.isNotEmpty || searchPart.isNotEmpty ? 'AND' : '';
-      final andStr2 = siteQuery.isNotEmpty && searchPart.isNotEmpty ? 'AND' : '';
-
-      final customConditionsStr = customConditions.isNotEmpty ? 'AND ${customConditions.join(' AND ')}' : '';
-
-      final String excludePart = excludeTags.isNotEmpty
-          ? 'LEFT JOIN ('
-                '  SELECT bi.id '
-                '  FROM BooruItem AS bi '
-                '  JOIN ImageTag AS it ON bi.id = it.booruItemID '
-                '  JOIN Tag AS t ON it.tagID = t.id '
-                "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
-                ') AS ei ON bi.id = ei.id '
-                'WHERE ei.id IS NULL AND $filterMode $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr '
-          : 'WHERE                   $filterMode $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr ';
-
-      final String havingPart = searchTags.isNotEmpty ? 'HAVING COUNT(DISTINCT t.id) = ${searchTags.length} ' : '';
-
-      result = await db?.rawQuery(
-        'SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite '
-        'FROM BooruItem AS bi '
-        'JOIN ImageTag AS it ON bi.id = it.booruItemID '
-        'JOIN Tag AS t ON it.tagID = t.id '
-        '$excludePart'
-        'GROUP BY bi.id '
-        '$havingPart'
-        'ORDER BY ${isRandomOrder ? 'RANDOM() ' : 'bi.id $order'} '
-        'LIMIT $limit '
-        'OFFSET $offset;',
-        [...excludeTags, ...searchTags],
-      );
-    } else {
-      final andStr1 = siteQuery.isNotEmpty ? 'AND' : '';
-
-      result = await db?.rawQuery(
-        'SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite '
-        'FROM BooruItem AS bi '
-        'WHERE $siteQuery $andStr1 $filterMode '
-        'GROUP BY bi.id '
-        'ORDER BY ${isRandomOrder ? 'RANDOM() ' : 'bi.id $order'} '
-        'LIMIT $limit '
-        'OFFSET $offset;',
-      );
-    }
-
-    // benchmark reqest time
-    // final DateTime end = DateTime.now();
-    // final Duration diff = end.difference(start);
-    // print('Searching DB took: ${diff.inMilliseconds} ms');
-
-    if (result != null && result.isNotEmpty) {
-      // start = DateTime.now();
-
-      // TODO can be improved?
-      final List<dynamic>? tags = await getTagsList(List<int>.from(result.map((e) => e['dbid'])));
-
-      final List<BooruItem> items = result.map((r) {
-        final List<String> itemTags = List<String>.from(
-          tags?.where((el) => el['booruItemID'] == r['dbid']).map((el) => el['name'].toString()) ?? [],
-        );
-        final BooruItem item = BooruItem.fromDBRow(r, itemTags);
-        if (mode == 'loliSyncFav') {
-          item.isSnatched.value = false;
+        if (sqlTag.startsWith('-')) {
+          excludeTags.add(sqlTag.substring(1));
+        } else if (sqlTag.startsWith('~')) {
+          orTags.add(sqlTag.substring(1));
+        } else {
+          andTags.add(sqlTag);
         }
-        return item;
-      }).toList();
-
-      // end = DateTime.now();
-      // diff = end.difference(start);
-      // print('Fetching tags took: ${diff.inMilliseconds} ms');
-
-      return items;
-    } else {
-      return [];
+      }
     }
-  }
 
-  /// Gets a list of tags related to given posts ids
-  Future<dynamic> getTagsList(List<int> postIDs) async {
-    final List<String> postIDsString = postIDs.map((id) => "'$id'").toList();
-    final List? result = await db?.rawQuery(
-      'SELECT ImageTag.booruItemID, Tag.name FROM Tag '
-      'INNER JOIN ImageTag on Tag.id = ImageTag.tagID '
-      "WHERE ImageTag.booruItemID IN (${postIDsString.join(',')})",
+    // --- 2. BUILD MAIN QUERY ---
+    final StringBuffer sql = StringBuffer(
+      'SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite '
+      'FROM BooruItem AS bi ',
     );
-    return result;
+    final List<String> whereClauses = [];
+    final List<dynamic> args = [];
+
+    // Only join if we need to filter by included tags
+    final bool hasIncludedTags = andTags.isNotEmpty || orTags.isNotEmpty;
+
+    if (hasIncludedTags) {
+      sql.write('JOIN ImageTag AS it ON bi.id = it.booruItemID ');
+      sql.write('JOIN Tag AS t ON it.tagID = t.id ');
+    }
+
+    // A. Base Filter
+    whereClauses.add(isDownloads ? 'bi.isSnatched = 1' : 'bi.isFavourite = 1');
+
+    // B. Site Filter
+    if (siteQuery.isNotEmpty) whereClauses.add(siteQuery);
+
+    // C. Custom Conditions
+    if (customConditions.isNotEmpty) {
+      whereClauses.add('(${customConditions.join(' AND ')})');
+    }
+
+    // D. Exclusions
+    if (excludeTags.isNotEmpty) {
+      final List<String> excludeConditions = [];
+      for (final ex in excludeTags) {
+        excludeConditions.add('t_ex.name LIKE ?');
+        args.add(ex);
+      }
+      final excludeSql = excludeConditions.join(' OR ');
+
+      whereClauses.add('''
+        bi.id NOT IN (
+          SELECT it_ex.booruItemID 
+          FROM ImageTag it_ex 
+          JOIN Tag t_ex ON it_ex.tagID = t_ex.id 
+          WHERE $excludeSql
+        )
+      ''');
+    }
+
+    // E. Inclusions
+    if (hasIncludedTags) {
+      final List<String> allSearchTags = [...andTags, ...orTags];
+      final List<String> likeConditions = [];
+
+      for (final tag in allSearchTags) {
+        likeConditions.add('t.name LIKE ?');
+        args.add(tag);
+      }
+      whereClauses.add('(${likeConditions.join(' OR ')})');
+    }
+
+    // Apply WHERE
+    if (whereClauses.isNotEmpty) {
+      sql.write('WHERE ${whereClauses.join(' AND ')} ');
+    }
+
+    // --- GROUPING & INTERSECTION LOGIC (AND / OR) ---
+    if (hasIncludedTags) {
+      sql.write('GROUP BY bi.id ');
+
+      final List<String> havingClauses = [];
+
+      // MUST satisfy EVERY individual AND tag
+      if (andTags.isNotEmpty) {
+        for (final andTag in andTags) {
+          havingClauses.add('MAX(CASE WHEN t.name LIKE ? THEN 1 ELSE 0 END) = 1');
+          args.add(andTag);
+        }
+      }
+
+      // MUST satisfy AT LEAST ONE of the OR tags
+      if (orTags.isNotEmpty) {
+        final List<String> orConditions = [];
+        for (final orTag in orTags) {
+          orConditions.add('t.name LIKE ?');
+          args.add(orTag);
+        }
+        havingClauses.add('MAX(CASE WHEN ${orConditions.join(' OR ')} THEN 1 ELSE 0 END) = 1');
+      }
+
+      if (havingClauses.isNotEmpty) {
+        sql.write('HAVING ${havingClauses.join(' AND ')} ');
+      }
+    }
+
+    // Ordering & Pagination
+    String orderByClause = 'bi.id ${order ?? (isReverseOrder ? 'ASC' : null) ?? 'DESC'}';
+    if (isRandomOrder) orderByClause = 'RANDOM()';
+    sql.write('ORDER BY $orderByClause LIMIT ? OFFSET ?');
+    args.add(limit);
+    args.add(offset);
+
+    // --- 3. EXECUTE MAIN SEARCH ---
+    final List<Map<String, dynamic>> results = await db.rawQuery(sql.toString(), args);
+
+    if (results.isEmpty) return [];
+
+    // --- 4. FETCH TAGS ---
+    final itemIDs = results.map((r) => r['dbid'] as int).toList();
+    final tagPlaceholders = List.filled(itemIDs.length, '?').join(',');
+    final tagsResult = await db.rawQuery(
+      'SELECT it.booruItemID, t.name '
+      'FROM Tag AS t '
+      'INNER JOIN ImageTag AS it ON t.id = it.tagID '
+      'WHERE it.booruItemID IN ($tagPlaceholders)',
+      itemIDs,
+    );
+
+    // --- 5. MAP RESULTS ---
+    final Map<int, List<String>> tagsMap = {};
+    for (final row in tagsResult) {
+      final id = row['booruItemID']! as int;
+      final tagName = row['name'].toString();
+      if (!tagsMap.containsKey(id)) tagsMap[id] = [];
+      tagsMap[id]!.add(tagName);
+    }
+
+    // Construct final objects using BooruItem.fromDBRow
+    return results.map((row) {
+      final id = row['dbid'] as int;
+      final itemTags = tagsMap[id] ?? [];
+      return BooruItem.fromDBRow(row, itemTags);
+    }).toList();
   }
 
-  /// Gets a list of tags related to given posts ids
   Future<List<Tag>> getAllTags() async {
     final List? result = await db?.rawQuery('SELECT name, tagType, updatedAt FROM Tag');
     final List<Tag> tags = [];
@@ -462,95 +531,144 @@ class DBHandler {
     return tags;
   }
 
-  /// Gets amount of BooruItems from the database
-  Future<int> searchDBCount(String searchTagsString, {bool isDownloads = false}) async {
-    List<String> searchTags = [], excludeTags = [];
-    List? result;
+  Future<int> searchDBCount(
+    String searchTagsString, {
+    List<String> customConditions = const [],
+    bool isDownloads = false,
+  }) async {
+    final db = this.db;
+    if (db == null) return 0;
 
-    searchTagsString = searchTagsString.trim();
-    searchTags = searchTagsString.split(' ').where((tag) => tag.isNotEmpty).toList();
-
-    // this adds support of filtering by posturls which have site:*some text* as their substring
-    String siteSearch = searchTags.firstWhere(
-      (tag) => tag.startsWith('site:') || tag.startsWith('-site:'),
-      orElse: () => '',
-    );
+    // --- 1. PARSE PARAMETERS ---
+    final List<String> rawTags = searchTagsString.trim().split(' ').where((t) => t.isNotEmpty).toList();
+    final List<String> andTags = [];
+    final List<String> orTags = [];
+    final List<String> excludeTags = [];
     String siteQuery = '';
-    if (siteSearch.isNotEmpty) {
-      searchTags.remove(siteSearch);
-      final bool isExclude = siteSearch.startsWith('-site:');
-      siteSearch = siteSearch.replaceAll('-site:', '').replaceAll('site:', '');
-      siteQuery = "bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$siteSearch%' ";
-    }
 
-    if (searchTags.where((element) => element.startsWith('-')).isNotEmpty) {
-      excludeTags = searchTags
-          .where((element) => element.startsWith('-'))
-          .map((tag) => tag.replaceAll(RegExp('^-'), ''))
-          .toList();
-      searchTags = searchTags.where((element) => !element.startsWith('-')).toList();
-    } else {
-      excludeTags = [];
-    }
+    for (final tag in rawTags) {
+      final lowerTag = tag.toLowerCase();
 
-    final filterMode = isDownloads ? 'bi.isSnatched = 1' : 'bi.isFavourite = 1';
-
-    if (searchTags.isNotEmpty || excludeTags.isNotEmpty) {
-      final String searchPart = searchTags.isNotEmpty
-          ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
-          : '';
-
-      final andStr1 = siteQuery.isNotEmpty || searchPart.isNotEmpty ? 'AND' : '';
-      final andStr2 = siteQuery.isNotEmpty && searchPart.isNotEmpty ? 'AND' : '';
-
-      final String excludePart = excludeTags.isNotEmpty
-          ? 'LEFT JOIN ('
-                '  SELECT bi.id '
-                '  FROM BooruItem AS bi '
-                '  JOIN ImageTag AS it ON bi.id = it.booruItemID '
-                '  JOIN Tag AS t ON it.tagID = t.id '
-                "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
-                ') AS ei ON bi.id = ei.id '
-                'WHERE ei.id IS NULL AND $filterMode $andStr1 $siteQuery $andStr2 $searchPart '
-          : 'WHERE                   $filterMode $andStr1 $siteQuery $andStr2 $searchPart ';
-
-      final String havingPart = searchTags.isNotEmpty ? 'HAVING COUNT(DISTINCT t.id) = ${searchTags.length} ' : '';
-
-      result = await db?.rawQuery(
-        'SELECT COUNT(*) as count '
-        'FROM BooruItem AS bi '
-        'JOIN ImageTag AS it ON bi.id = it.booruItemID '
-        'JOIN Tag AS t ON it.tagID = t.id '
-        '$excludePart'
-        'GROUP BY bi.id '
-        '$havingPart;',
-        [...excludeTags, ...searchTags],
-      );
-    } else {
-      final andStr1 = siteQuery.isNotEmpty ? 'AND' : '';
-
-      result = await db?.rawQuery(
-        'SELECT COUNT(*) as count '
-        'FROM BooruItem AS bi '
-        'WHERE $siteQuery $andStr1 $filterMode '
-        'GROUP BY bi.id;',
-      );
-    }
-
-    if (result != null && result.isNotEmpty) {
-      if (result.length > 1) {
-        return result.length;
-      } else if (result.length == 1) {
-        return result[0]['count'];
+      if (lowerTag.startsWith('site:') || lowerTag.startsWith('-site:')) {
+        final isExclude = lowerTag.startsWith('-site:');
+        final term = tag.replaceAll(RegExp('^-?site:', caseSensitive: false), '');
+        siteQuery =
+            "(bi.postURL ${isExclude ? 'NOT' : ''} LIKE '%$term%' OR bi.fileURL ${isExclude ? 'NOT' : ''} LIKE '%$term%')";
+      } else if (lowerTag == 'sort:random' || lowerTag == 'sort:reverse') {
+        // do nothing
       } else {
-        return 0;
+        // Replace booru wildcard '*' with SQLite wildcard '%'
+        final String sqlTag = tag.replaceAll('*', '%');
+
+        if (sqlTag.startsWith('-')) {
+          excludeTags.add(sqlTag.substring(1));
+        } else if (sqlTag.startsWith('~')) {
+          orTags.add(sqlTag.substring(1));
+        } else {
+          andTags.add(sqlTag);
+        }
       }
+    }
+
+    // --- 2. BUILD COUNT QUERY ---
+    final StringBuffer sql = StringBuffer('SELECT COUNT(*) as count FROM BooruItem AS bi ');
+    final List<String> whereClauses = [];
+    final List<dynamic> args = [];
+
+    // Join tables ONLY if filtering by included tags
+    final bool hasIncludedTags = andTags.isNotEmpty || orTags.isNotEmpty;
+
+    if (hasIncludedTags) {
+      sql.write('JOIN ImageTag AS it ON bi.id = it.booruItemID ');
+      sql.write('JOIN Tag AS t ON it.tagID = t.id ');
+    }
+
+    // --- 3. APPLY FILTERS ---
+
+    // A. Base Filter
+    whereClauses.add(isDownloads ? 'bi.isSnatched = 1' : 'bi.isFavourite = 1');
+
+    // B. Site Filter
+    if (siteQuery.isNotEmpty) whereClauses.add(siteQuery);
+
+    // C. Custom Conditions
+    if (customConditions.isNotEmpty) {
+      whereClauses.add('(${customConditions.join(' AND ')})');
+    }
+
+    // D. Exclusions
+    if (excludeTags.isNotEmpty) {
+      final List<String> excludeConditions = [];
+      for (final ex in excludeTags) {
+        excludeConditions.add('t_ex.name LIKE ?');
+        args.add(ex);
+      }
+      final excludeSql = excludeConditions.join(' OR ');
+
+      whereClauses.add('''
+        bi.id NOT IN (
+          SELECT it_ex.booruItemID 
+          FROM ImageTag it_ex 
+          JOIN Tag t_ex ON it_ex.tagID = t_ex.id 
+          WHERE $excludeSql
+        )
+      ''');
+    }
+
+    // E. Inclusions
+    if (hasIncludedTags) {
+      final List<String> allSearchTags = [...andTags, ...orTags];
+      final List<String> likeConditions = [];
+
+      for (final tag in allSearchTags) {
+        likeConditions.add('t.name LIKE ?');
+        args.add(tag);
+      }
+      whereClauses.add('(${likeConditions.join(' OR ')})');
+    }
+
+    // Apply WHERE
+    if (whereClauses.isNotEmpty) {
+      sql.write('WHERE ${whereClauses.join(' AND ')} ');
+    }
+
+    // --- 4. INTERSECTION LOGIC ---
+    if (hasIncludedTags) {
+      sql.write('GROUP BY bi.id ');
+
+      final List<String> havingClauses = [];
+
+      // MUST satisfy EVERY individual AND tag
+      if (andTags.isNotEmpty) {
+        for (final andTag in andTags) {
+          havingClauses.add('MAX(CASE WHEN t.name LIKE ? THEN 1 ELSE 0 END) = 1');
+          args.add(andTag);
+        }
+      }
+
+      // MUST satisfy AT LEAST ONE of the OR tags
+      if (orTags.isNotEmpty) {
+        final List<String> orConditions = [];
+        for (final orTag in orTags) {
+          orConditions.add('t.name LIKE ?');
+          args.add(orTag);
+        }
+        havingClauses.add('MAX(CASE WHEN ${orConditions.join(' OR ')} THEN 1 ELSE 0 END) = 1');
+      }
+
+      if (havingClauses.isNotEmpty) {
+        sql.write('HAVING ${havingClauses.join(' AND ')} ');
+      }
+
+      final fullSql = 'SELECT COUNT(*) as total FROM ($sql)';
+      final result = await db.rawQuery(fullSql, args);
+      return result.first['total'] as int? ?? 0;
     } else {
-      return 0;
+      final result = await db.rawQuery(sql.toString(), args);
+      return result.first['count'] as int? ?? 0;
     }
   }
 
-  /// Gets the favourites count from db
   Future<int> getFavouritesCount() async {
     List? result;
     result = await db?.rawQuery('SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1');
@@ -584,7 +702,7 @@ class DBHandler {
   }
 
   /// Adds tags for a BooruItem to the database
-  Future<void> updateTags(List tags, String? itemID) async {
+  Future<void> updateTags(List<String> tags, String? itemID) async {
     if (itemID == null) {
       return;
     }
@@ -644,6 +762,51 @@ class DBHandler {
     if (result != null && result.isNotEmpty) {
       for (int i = 0; i < result.length; i++) {
         tags.add(result[i]['name'].toString());
+      }
+    }
+    return tags;
+  }
+
+  /// Get tags sorted by usage count (how many items they're attached to)
+  /// If [queryStr] is provided, filters tags that start with the query
+  /// Returns a list of maps with 'name' and 'count' keys
+  Future<List<({String name, int count})>> getTagsByUsageCount(String? queryStr, int limit) async {
+    final List<({String name, int count})> tags = [];
+
+    String query;
+    List<Object?> args;
+
+    if (queryStr != null && queryStr.isNotEmpty) {
+      query = '''
+        SELECT t.name, COUNT(it.booruItemID) as count
+        FROM Tag t
+        LEFT JOIN ImageTag it ON t.id = it.tagID
+        WHERE lower(t.name) LIKE (?)
+        GROUP BY t.id
+        ORDER BY count DESC
+        LIMIT ?
+      ''';
+      args = ['${queryStr.toLowerCase()}%', limit];
+    } else {
+      query = '''
+        SELECT t.name, COUNT(it.booruItemID) as count
+        FROM Tag t
+        LEFT JOIN ImageTag it ON t.id = it.tagID
+        GROUP BY t.id
+        ORDER BY count DESC
+        LIMIT ?
+      ''';
+      args = [limit];
+    }
+
+    final result = await db?.rawQuery(query, args);
+    if (result != null && result.isNotEmpty) {
+      for (final row in result) {
+        final name = row['name']?.toString() ?? '';
+        final count = row['count'] as int? ?? 0;
+        if (name.isNotEmpty) {
+          tags.add((name: name, count: count));
+        }
       }
     }
     return tags;
@@ -786,6 +949,146 @@ class DBHandler {
   Future<void> setFavouriteSearchHistory(int id, bool isFavourite) async {
     await db?.rawUpdate('UPDATE SearchHistory SET isFavourite = ? WHERE id = ?', [Tools.boolToInt(isFavourite), id]);
     return;
+  }
+
+  ///////
+  /// Pinned Tags methods
+
+  /// Add a pinned tag (global or booru-specific)
+  Future<int?> addPinnedTag(
+    String tagName, {
+    String? booruType,
+    String? booruName,
+    List<String> labels = const [],
+  }) async {
+    // Check if already pinned with same scope
+    final existing = await db?.rawQuery(
+      'SELECT id FROM PinnedTag WHERE tagName = ? AND (booruName IS ? OR (booruName = ? AND booruType = ?))',
+      [tagName, booruName, booruName, booruType],
+    );
+    if (existing != null && existing.isNotEmpty) {
+      return null; // Already pinned
+    }
+
+    final pinnedAt = DateTime.now().millisecondsSinceEpoch;
+    final labelsString = labels.isNotEmpty ? labels.join(',') : null;
+    final result = await db?.rawInsert(
+      'INSERT INTO PinnedTag(tagName, booruType, booruName, pinnedAt, sortOrder, label) VALUES(?, ?, ?, ?, ?, ?)',
+      [tagName, booruType, booruName, pinnedAt, 0, labelsString],
+    );
+    return result;
+  }
+
+  /// Remove a pinned tag by id
+  Future<void> removePinnedTag(int id) async {
+    await db?.rawDelete('DELETE FROM PinnedTag WHERE id = ?', [id]);
+  }
+
+  /// Remove a pinned tag by tagName and scope
+  Future<void> removePinnedTagByName(String tagName, {String? booruType, String? booruName}) async {
+    if (booruName == null) {
+      await db?.rawDelete('DELETE FROM PinnedTag WHERE tagName = ? AND booruName IS NULL', [tagName]);
+    } else {
+      await db?.rawDelete(
+        'DELETE FROM PinnedTag WHERE tagName = ? AND booruName = ? AND booruType = ?',
+        [tagName, booruName, booruType],
+      );
+    }
+  }
+
+  /// Get all pinned tags (both global and booru-specific for the given booru)
+  Future<List<PinnedTag>> getPinnedTags({String? booruType, String? booruName}) async {
+    final List<Map<String, dynamic>>? result = await db?.rawQuery(
+      'SELECT * FROM PinnedTag WHERE booruName IS NULL OR (booruName = ? AND booruType = ?) ORDER BY sortOrder ASC, pinnedAt DESC',
+      [booruName, booruType],
+    );
+
+    if (result == null || result.isEmpty) {
+      return [];
+    }
+
+    return result.map(PinnedTag.fromMap).toList();
+  }
+
+  /// Get all pinned tags (regardless of booru)
+  Future<List<PinnedTag>> getAllPinnedTags() async {
+    final List<Map<String, dynamic>>? result = await db?.rawQuery(
+      'SELECT * FROM PinnedTag ORDER BY sortOrder ASC, pinnedAt DESC',
+    );
+
+    if (result == null || result.isEmpty) {
+      return [];
+    }
+
+    return result.map(PinnedTag.fromMap).toList();
+  }
+
+  /// Check if a tag is pinned (either globally or for specific booru)
+  Future<PinnedTag?> getPinnedTag(String tagName, {String? booruType, String? booruName}) async {
+    // First check for booru-specific pin
+    if (booruName != null) {
+      final booruSpecific = await db?.rawQuery(
+        'SELECT * FROM PinnedTag WHERE tagName = ? AND booruName = ? AND booruType = ?',
+        [tagName, booruName, booruType],
+      );
+      if (booruSpecific != null && booruSpecific.isNotEmpty) {
+        return PinnedTag.fromMap(booruSpecific.first);
+      }
+    }
+
+    // Then check for global pin
+    final global = await db?.rawQuery(
+      'SELECT * FROM PinnedTag WHERE tagName = ? AND booruName IS NULL',
+      [tagName],
+    );
+    if (global != null && global.isNotEmpty) {
+      return PinnedTag.fromMap(global.first);
+    }
+
+    return null;
+  }
+
+  /// Update sort order for pinned tags
+  Future<void> updatePinnedTagOrder(int id, int sortOrder) async {
+    await db?.rawUpdate('UPDATE PinnedTag SET sortOrder = ? WHERE id = ?', [sortOrder, id]);
+  }
+
+  /// Batch update sort order for multiple pinned tags
+  Future<void> updatePinnedTagsOrder(List<PinnedTag> tags) async {
+    final batch = db?.batch();
+    for (int i = 0; i < tags.length; i++) {
+      batch?.rawUpdate('UPDATE PinnedTag SET sortOrder = ? WHERE id = ?', [i, tags[i].id]);
+    }
+    await batch?.commit(noResult: true);
+  }
+
+  /// Update labels for a pinned tag (stored as comma-separated string)
+  Future<void> updatePinnedTagLabels(int id, List<String> labels) async {
+    final labelsString = labels.join(',');
+    await db?.rawUpdate('UPDATE PinnedTag SET label = ? WHERE id = ?', [labelsString, id]);
+  }
+
+  /// Get all unique labels from pinned tags (parses comma-separated labels)
+  Future<List<String>> getPinnedTagLabels({String? booruType, String? booruName}) async {
+    final List<Map<String, dynamic>>? result = await db?.rawQuery(
+      "SELECT DISTINCT label FROM PinnedTag WHERE label IS NOT NULL AND label != '' AND (booruName IS NULL OR (booruName = ? AND booruType = ?))",
+      [booruName, booruType],
+    );
+
+    if (result == null || result.isEmpty) {
+      return [];
+    }
+
+    // Parse comma-separated labels and collect unique ones
+    final Set<String> uniqueLabels = {};
+    for (final row in result) {
+      final labelString = row['label'] as String;
+      final labels = labelString.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty);
+      uniqueLabels.addAll(labels);
+    }
+
+    final labelsList = uniqueLabels.toList()..sort();
+    return labelsList;
   }
 
   /// Return a list of boolean for isSnatched and isFavourite
@@ -963,7 +1266,7 @@ class DBHandler {
 
     final List<Map<String, dynamic>> items =
         await db?.rawQuery(
-          'SELECT id, postURL FROM BooruItem WHERE postURL LIKE "%api.rule34.xxx%";',
+          "SELECT id, postURL FROM BooruItem WHERE postURL LIKE '%api.rule34.xxx%';",
         ) ??
         [];
 
@@ -980,6 +1283,118 @@ class DBHandler {
         );
       }
       await batch?.commit(noResult: true);
+    }
+  }
+
+  /// Scans for empty tags and direct duplicates, then deletes them.
+  Future<void> tagsCleanup() async {
+    if (db == null) return;
+
+    try {
+      final emptyTags = await db?.rawQuery("SELECT id FROM Tag WHERE trim(name) = '' OR name IS NULL") ?? [];
+
+      if (emptyTags.isNotEmpty) {
+        Logger.Inst().log(
+          '[TagCleanup] Found ${emptyTags.length} empty tags. Removing...',
+          'DBHandler',
+          'tagsCleanup',
+          LogTypes.booruHandlerInfo,
+        );
+
+        await db?.transaction((txn) async {
+          final ids = emptyTags.map((e) => e['id']! as int).toList();
+          final placeholders = List.filled(ids.length, '?').join(',');
+          await txn.rawDelete('DELETE FROM ImageTag WHERE tagID IN ($placeholders)', ids);
+          await txn.rawDelete('DELETE FROM Tag WHERE id IN ($placeholders)', ids);
+        });
+      }
+
+      //
+
+      final duplicateGroups =
+          await db?.rawQuery('''
+        SELECT name as cleanName, COUNT(*) as count 
+        FROM Tag 
+        GROUP BY name 
+        HAVING count > 1
+      ''') ??
+          [];
+
+      if (duplicateGroups.isEmpty) return;
+
+      Logger.Inst().log(
+        '[TagCleanup] Found ${duplicateGroups.length} duplicate tag groups.',
+        'DBHandler',
+        'tagsCleanup',
+        LogTypes.booruHandlerInfo,
+      );
+
+      for (final g in duplicateGroups) {
+        final String cleanName = g['cleanName'].toString();
+
+        final variants =
+            await db?.rawQuery('SELECT id, name FROM Tag WHERE name = ? ORDER BY id ASC', [cleanName]) ?? [];
+
+        if (variants.length < 2) continue;
+
+        int winnerId = -1;
+        int maxUsage = -1;
+
+        for (final v in variants) {
+          final int id = v['id']! as int;
+          final int count =
+              Sqflite.firstIntValue(await db?.rawQuery('SELECT COUNT(*) FROM ImageTag WHERE tagID = ?', [id]) ?? []) ??
+              0;
+
+          if (count > maxUsage) {
+            maxUsage = count;
+            winnerId = id;
+          }
+        }
+
+        await db?.transaction((txn) async {
+          for (final v in variants) {
+            final int id = v['id']! as int;
+            if (id == winnerId) continue;
+            await txn.rawUpdate(
+              '''
+              UPDATE ImageTag 
+              SET tagID = ? 
+              WHERE tagID = ? 
+              AND booruItemID NOT IN (
+                SELECT booruItemID FROM ImageTag WHERE tagID = ?
+              )
+            ''',
+              [winnerId, id, winnerId],
+            );
+            await txn.rawDelete('DELETE FROM ImageTag WHERE tagID = ?', [id]);
+            await txn.rawDelete('DELETE FROM Tag WHERE id = ?', [id]);
+          }
+        });
+        if (kDebugMode) {
+          Logger.Inst().log(
+            '[TagCleanup] Removed duplicate tags for "$cleanName".',
+            'DBHandler',
+            'tagsCleanup',
+            LogTypes.booruHandlerInfo,
+          );
+        }
+      }
+
+      Logger.Inst().log(
+        '[TagCleanup] Done.',
+        'DBHandler',
+        'tagsCleanup',
+        LogTypes.booruHandlerInfo,
+      );
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        s: s,
+        'DBHandler',
+        'deduplicateTags',
+        LogTypes.exception,
+      );
     }
   }
 }

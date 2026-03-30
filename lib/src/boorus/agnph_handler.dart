@@ -1,3 +1,4 @@
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -90,7 +91,7 @@ class AGNPHHandler extends BooruHandler {
           final String artist = post.getElement('artist')?.innerText ?? '';
           tagStr = "artist:$artist ${tagStr.replaceAll(artist, "")}";
         }
-        fetched.elementAt(fetchedIndex).tagsList = tagStr.split(' ');
+        fetched.elementAt(fetchedIndex).tagsList = tagStr.split(' ').map(Tag.new).toList();
       } else {
         Logger.Inst().log(
           'AGNPHHandler failed to get post',

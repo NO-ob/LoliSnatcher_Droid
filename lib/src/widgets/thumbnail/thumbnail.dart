@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -147,12 +148,12 @@ class _ThumbnailState extends State<Thumbnail> {
 
     // on desktop devicePixelRatio is not working?
     final bool shouldResize = (thumbWidth != null || thumbHeight != null) && !SettingsHandler.isDesktopPlatform;
-    final bool shouldPixelate = widget.item.isHated && settingsHandler.shitDevice;
+    final bool shouldPixelate = widget.item.isHidden && settingsHandler.shitDevice;
 
     if (shouldResize || shouldPixelate) {
       return ResizeImage(
         provider,
-        // when in low performance mode - resize hated images to 10px to simulate blur effect
+        // when in low performance mode - resize hidden images to 10px to simulate blur effect
         width: shouldPixelate ? 10 : thumbWidth?.round(),
         height: shouldPixelate ? 10 : thumbHeight?.round(),
         policy: ResizeImagePolicy.fit,
@@ -178,13 +179,13 @@ class _ThumbnailState extends State<Thumbnail> {
     }
 
     switch (settingsHandler.previewDisplay) {
-      case 'Rectangle':
+      case .rectangle:
         thumbRatio = 16 / 9;
         thumbWidth = widthLimit;
         thumbHeight = widthLimit * thumbRatio;
         break;
 
-      case 'Staggered':
+      case .staggered:
         if (hasSizeData) {
           thumbRatio = widget.item.fileAspectRatio!;
           if (thumbRatio < 1) {
@@ -201,8 +202,7 @@ class _ThumbnailState extends State<Thumbnail> {
         }
         break;
 
-      case 'Square':
-      default:
+      case .square:
         thumbWidth = widthLimit;
         thumbHeight = widthLimit;
         break;
@@ -214,19 +214,21 @@ class _ThumbnailState extends State<Thumbnail> {
     total.value = totalNew ?? 0;
   }
 
-  void onError(Object error, {bool delayed = false}) {
+  void onError(Object error) {
     if (error is DioException && CancelToken.isCancel(error)) {
       //
     } else {
-      if (restartedCount < (kDebugMode ? 1 : 3)) {
-        // attempt to reload 3 times with a 1s delay
+      final int retryLimit = (kDebugMode || settingsHandler.shitDevice) ? 4 : 8;
+
+      if (restartedCount < retryLimit) {
+        // attempt to reload N times with a 1s delay
         Debounce.debounce(
           tag: 'thumbnail_reload_${widget.item.hashCode}',
           callback: () async {
             await restartLoading();
             restartedCount++;
           },
-          duration: const Duration(seconds: 1),
+          duration: Duration(milliseconds: settingsHandler.shitDevice ? 1000 : 500),
         );
       } else {
         isFailed.value = true;
@@ -244,14 +246,14 @@ class _ThumbnailState extends State<Thumbnail> {
   }) {
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
-    // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
+    // if scaling is disabled - allow gifs as thumbnails, but only if they are not hidden (resize image doesnt work with gifs)
     final bool isSampleGif = widget.item.sampleURL.contains('.gif');
     final bool isGifSampleNotAllowed =
         widget.item.mediaType.value.isAnimation &&
-        ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated : true);
+        ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHidden : true);
 
     isThumbQuality =
-        settingsHandler.previewMode == 'Thumbnail' ||
+        settingsHandler.previewMode.isThumbnail ||
         (isGifSampleNotAllowed ||
             widget.item.mediaType.value.isVideo ||
             widget.item.mediaType.value.isNeedToGuess ||
@@ -273,7 +275,7 @@ class _ThumbnailState extends State<Thumbnail> {
   Future<void> startDownloading({
     bool withCaptchaCheck = false,
   }) async {
-    final bool useExtra = isThumbQuality == false && !widget.item.isHated && !settingsHandler.shitDevice;
+    final bool useExtra = isThumbQuality == false && !widget.item.isHidden && !settingsHandler.shitDevice;
 
     mainProvider.value = await getImageProvider(
       true,
@@ -299,7 +301,7 @@ class _ThumbnailState extends State<Thumbnail> {
           LogTypes.imageLoadingError,
           s: s,
         );
-        onError(e, delayed: true);
+        onError(e);
       },
     );
     mainImageStream!.addListener(mainImageListener!);
@@ -361,19 +363,29 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   Future<void> cleanProviderCache() async {
-    if (mainProvider.value != null) {
-      final CustomNetworkImage usedMainProvider =
-          (mainProvider.value is ResizeImage ? (mainProvider.value! as ResizeImage).imageProvider : mainProvider.value!)
-              as CustomNetworkImage;
-      await usedMainProvider.deleteCacheFile();
-    }
-    if (extraProvider.value != null) {
-      final CustomNetworkImage usedExtraProvider =
-          (extraProvider.value is ResizeImage
-                  ? (extraProvider.value! as ResizeImage).imageProvider
-                  : extraProvider.value!)
-              as CustomNetworkImage;
-      await usedExtraProvider.deleteCacheFile();
+    for (final provider in [
+      if (mainProvider.value != null && mainProvider.value is ResizeImage)
+        (mainProvider.value! as ResizeImage).imageProvider
+      else
+        mainProvider.value,
+      //
+      if (extraProvider.value != null && extraProvider.value is ResizeImage)
+        (extraProvider.value! as ResizeImage).imageProvider
+      else
+        extraProvider.value,
+    ]) {
+      if (provider == null) {
+        continue;
+      }
+
+      switch (provider) {
+        case CustomNetworkImage _:
+          await provider.deleteCacheFile();
+          break;
+        case CustomNetworkAvifImage _:
+          await provider.deleteCacheFile();
+          break;
+      }
     }
   }
 
@@ -435,11 +447,15 @@ class _ThumbnailState extends State<Thumbnail> {
           }
         });
 
-        // take smallest dimension for hated icon container
+        // take smallest dimension for hidden icon container
         final double iconSize =
             (constraints.maxHeight < constraints.maxWidth ? constraints.maxHeight : constraints.maxWidth) * 0.75;
 
-        final bool useExtra = isThumbQuality == false && !widget.item.isHated && !settingsHandler.shitDevice;
+        final bool useExtra = isThumbQuality == false && !widget.item.isHidden && !settingsHandler.shitDevice;
+
+        final double blurAmount = (settingsHandler.blurImages && !widget.isStandalone)
+            ? 40
+            : max(constraints.maxWidth * (widget.isStandalone ? 0.1 : 0.06), 10);
 
         return Stack(
           alignment: Alignment.center,
@@ -467,10 +483,10 @@ class _ThumbnailState extends State<Thumbnail> {
                   );
                 },
                 child: ImageFiltered(
-                  enabled: settingsHandler.blurImages || widget.item.isHated,
+                  enabled: settingsHandler.blurImages || widget.item.isHidden,
                   imageFilter: ImageFilter.blur(
-                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                    sigmaX: blurAmount,
+                    sigmaY: blurAmount,
                     tileMode: TileMode.decal,
                   ),
                   child: ValueListenableBuilder(
@@ -520,15 +536,19 @@ class _ThumbnailState extends State<Thumbnail> {
                 );
               },
               child: GestureDetector(
-                onTap: (widget.item.isHated && !settingsHandler.shitDevice && widget.isStandalone)
+                // TODO reenable after filters rework (when blur/hide will be separate for each filter)
+                // ignore: dead_code
+                onTap: false && (widget.item.isHidden && !settingsHandler.shitDevice && widget.isStandalone)
+                    // ignore: dead_code
                     ? () => setState(() => isBlurred = !isBlurred)
                     : null,
                 child: ImageFiltered(
                   enabled:
-                      isBlurred && (settingsHandler.blurImages || (widget.item.isHated && !settingsHandler.shitDevice)),
+                      isBlurred &&
+                      (settingsHandler.blurImages || (widget.item.isHidden && !settingsHandler.shitDevice)),
                   imageFilter: ImageFilter.blur(
-                    sigmaX: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
-                    sigmaY: (settingsHandler.blurImages && !widget.isStandalone) ? 30 : 10,
+                    sigmaX: blurAmount,
+                    sigmaY: blurAmount,
                     tileMode: TileMode.decal,
                   ),
                   child: ValueListenableBuilder(
@@ -569,30 +589,20 @@ class _ThumbnailState extends State<Thumbnail> {
             ),
             //
             if (widget.isStandalone && !settingsHandler.shitDevice)
-              ValueListenableBuilder(
-                valueListenable: isLoaded,
-                builder: (context, isLoaded, _) {
-                  return ValueListenableBuilder(
-                    valueListenable: isLoadedExtra,
-                    builder: (context, isLoadedExtra, _) {
-                      return ValueListenableBuilder(
-                        valueListenable: isFailed,
-                        builder: (context, isFailed, _) {
-                          final bool isAnyLoaded = isLoaded || isLoadedExtra;
-                          final bool showShimmer = !isAnyLoaded && !isFailed;
+              ListenableBuilder(
+                listenable: Listenable.merge([isLoaded, isLoadedExtra, isFailed]),
+                builder: (context, _) {
+                  final bool isAnyLoaded = isLoaded.value || isLoadedExtra.value;
+                  final bool showShimmer = !isAnyLoaded && !isFailed.value;
 
-                          return AnimatedSwitcher(
-                            duration: const Duration(milliseconds: 200),
-                            child: showShimmer ? const ShimmerCard() : const SizedBox.shrink(),
-                          );
-                        },
-                      );
-                    },
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 200),
+                    child: showShimmer ? const ShimmerCard() : const SizedBox.shrink(),
                   );
                 },
               ),
             //
-            if (widget.isStandalone && widget.item.isHated)
+            if (widget.isStandalone && widget.item.isHidden)
               Container(
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
@@ -609,67 +619,50 @@ class _ThumbnailState extends State<Thumbnail> {
             if (widget.isStandalone)
               ValueListenableBuilder(
                 valueListenable: isLoaded,
-                builder: (context, isLoaded, child) {
+                builder: (context, isLoadedVal, child) {
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 200),
-                    child: isLoaded ? const SizedBox.shrink() : child,
+                    child: isLoadedVal ? const SizedBox.shrink() : child,
                   );
                 },
-                child: ValueListenableBuilder(
-                  valueListenable: isLoaded,
-                  builder: (context, isLoaded, child) {
-                    return ValueListenableBuilder(
-                      valueListenable: isFromCache,
-                      builder: (context, isFromCache, child) {
-                        return ValueListenableBuilder(
-                          valueListenable: isFailed,
-                          builder: (context, isFailed, child) {
-                            return ValueListenableBuilder(
-                              valueListenable: errorCode,
-                              builder: (context, errorCode, child) {
-                                final bool isFavOrDlsOrHasLoad =
-                                    widget.booru.type?.isFavouritesOrDownloads == true ||
-                                    BooruHandlerFactory()
-                                        .getBooruHandler([widget.booru], null)
-                                        .booruHandler
-                                        .hasLoadItemSupport;
+                child: ListenableBuilder(
+                  listenable: Listenable.merge([isLoaded, isFromCache, isFailed, errorCode]),
+                  builder: (context, child) {
+                    final bool isFavOrDlsOrHasLoad =
+                        widget.booru.type?.isFavouritesOrDownloads == true ||
+                        BooruHandlerFactory().getBooruHandler([widget.booru], null).booruHandler.hasLoadItemSupport;
 
-                                return ThumbnailLoading(
-                                  item: widget.item,
-                                  hasProgress: true,
-                                  isFromCache: isFromCache,
-                                  isDone: isLoaded && !isFailed,
-                                  isFailed: isFailed,
-                                  total: total,
-                                  received: received,
-                                  startedAt: startedAt,
-                                  retryText: isFavOrDlsOrHasLoad ? 'Tap to update or retry' : null,
-                                  retryIcon: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    spacing: 4,
-                                    children: isFavOrDlsOrHasLoad
-                                        ? const [
-                                            Icon(Icons.download),
-                                            Text('/', style: TextStyle(fontSize: 20)),
-                                            Icon(Icons.refresh),
-                                          ]
-                                        : const [
-                                            Icon(Icons.refresh),
-                                          ],
-                                  ),
-                                  restartAction: () async {
-                                    restartedCount = 0;
+                    return ThumbnailLoading(
+                      item: widget.item,
+                      hasProgress: true,
+                      isFromCache: isFromCache.value,
+                      // if any of the thumbnails loaded - dont consider a failure
+                      isDone: isLoaded.value || (isFailed.value && isLoadedExtra.value),
+                      isFailed: isFailed.value && !isLoaded.value && !isLoadedExtra.value,
+                      total: total,
+                      received: received,
+                      startedAt: startedAt,
+                      retryText: isFavOrDlsOrHasLoad ? 'Tap to update or retry' : null,
+                      retryIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        spacing: 4,
+                        children: isFavOrDlsOrHasLoad
+                            ? const [
+                                Icon(Icons.download),
+                                Text('/', style: TextStyle(fontSize: 20)),
+                                Icon(Icons.refresh),
+                              ]
+                            : const [
+                                Icon(Icons.refresh),
+                              ],
+                      ),
+                      restartAction: () async {
+                        restartedCount = 0;
 
-                                    await restartLoading(withItemLoad: isFavOrDlsOrHasLoad);
-                                  },
-                                  errorCode: errorCode,
-                                );
-                              },
-                            );
-                          },
-                        );
+                        await restartLoading(withItemLoad: isFavOrDlsOrHasLoad);
                       },
+                      errorCode: errorCode.value,
                     );
                   },
                 ),
@@ -736,7 +729,9 @@ Future<bool?> tryToLoadAndUpdateItem(
           withCapcthaCheck: true,
         );
 
-        if (!result.failed && result.item != null) {
+        if (!result.failed &&
+            result.item != null &&
+            (result.item?.isSnatched.value == true || result.item?.isFavourite.value == true)) {
           unawaited(
             SettingsHandler.instance.dbHandler.updateBooruItem(
               result.item!,

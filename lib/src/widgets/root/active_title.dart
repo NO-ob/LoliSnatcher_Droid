@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
 class ActiveTitle extends StatelessWidget {
@@ -14,7 +15,7 @@ class ActiveTitle extends StatelessWidget {
       valueListenable: searchHandler.tabs,
       builder: (context, tabs, child) {
         if (tabs.isEmpty) {
-          return const Text('LoliSnatcher');
+          return Text(SettingsHandler.instance.appAlias.locName);
         }
 
         return child!;
@@ -25,6 +26,7 @@ class ActiveTitle extends StatelessWidget {
         ),
         child: TabSelector(
           withBorder: false,
+          countOnTop: true,
           color: Theme.of(context).appBarTheme.foregroundColor,
         ),
       ),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +11,8 @@ import 'package:app_links/app_links.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:get/get.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart' hide Translations;
 import 'package:lemberfpsmonitor/lemberfpsmonitor.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -23,6 +25,7 @@ import 'package:lolisnatcher/src/handlers/notify_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
@@ -42,7 +45,7 @@ import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  CustomWidgetsBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
@@ -69,12 +72,13 @@ void main() async {
   TagHandler.register();
   NotifyHandler.register();
   SecureStorageHandler.register();
+  initSettingsEnumRegistry();
   await SettingsHandler.register().initialize();
   LocalAuthHandler.register();
 
   await ServiceHandler.setSystemUiVisibility(true);
 
-  runApp(const MainApp());
+  runApp(TranslationProvider(child: const MainApp()));
 }
 
 class MainApp extends StatefulWidget {
@@ -105,10 +109,10 @@ class _MainAppState extends State<MainApp> {
     searchHandler.setRootRestate(updateState);
     settingsHandler.alice.setNavigatorKey(navigationHandler.navigatorKey);
     await settingsHandler.postInit(() async {
-      settingsHandler.postInitMessage.value = 'Loading tags...';
+      settingsHandler.postInitMessage.value = loc.init.loadingTags;
       // should init earlier than tabs so tags color properly on first render of search box
       await tagHandler.initialize();
-      settingsHandler.postInitMessage.value = 'Restoring tabs...';
+      settingsHandler.postInitMessage.value = loc.init.restoringTabs;
       await searchHandler.restoreTabs();
     });
 
@@ -178,11 +182,13 @@ class _MainAppState extends State<MainApp> {
         final ThemeMode themeMode = settingsHandler.themeMode.value;
         final bool useDynamicColor = settingsHandler.useDynamicColor.value;
         final bool isAmoled = settingsHandler.isAmoled.value;
+        final String fontFamily = settingsHandler.fontFamily.value;
 
         final ThemeHandler themeHandler = ThemeHandler(
           theme: theme,
           themeMode: themeMode,
           isAmoled: isAmoled,
+          fontFamily: fontFamily,
           context: context,
         );
 
@@ -198,7 +204,7 @@ class _MainAppState extends State<MainApp> {
                 valueListenable: settingsHandler.showPerf,
                 builder: (context, showPerf, _) {
                   return MaterialApp(
-                    title: 'LoliSnatcher',
+                    title: settingsHandler.appAlias.locName,
                     debugShowCheckedModeBanner: false,
                     showPerformanceOverlay: showPerf,
                     scrollBehavior: const CustomScrollBehavior(),
@@ -211,6 +217,9 @@ class _MainAppState extends State<MainApp> {
                       TalkerRouteObserver(Logger.talker),
                     ],
                     home: const Home(),
+                    locale: TranslationProvider.of(context).flutterLocale,
+                    supportedLocales: AppLocaleUtils.supportedLocales,
+                    localizationsDelegates: GlobalMaterialLocalizations.delegates,
                     builder: (_, child) => Stack(
                       children: [
                         Overlay(
@@ -277,6 +286,7 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
     super.initState();
 
     setMaxFPS();
+    getDeviceInfo();
   }
 
   Future<void> setMaxFPS() async {
@@ -295,6 +305,53 @@ class _DebuggingWidgetsState extends State<DebuggingWidgets> with WidgetsBinding
         maxFps.value = currentMode.refreshRate.round();
       }
       Logger.Inst().log('Set max fps to ${maxFps.value}', 'MainApp', 'setMaxFPS', null);
+    }
+  }
+
+  Future<void> getDeviceInfo() async {
+    try {
+      if (Platform.isAndroid) {
+        final deviceInfo = await DeviceInfoPlugin().androidInfo;
+        final version = deviceInfo.version;
+        Logger.Inst().log(
+          {
+            'name': deviceInfo.name,
+            'manufacturer': deviceInfo.manufacturer,
+            'brand': deviceInfo.brand,
+            'model': deviceInfo.model,
+            'device': deviceInfo.device,
+            'product': deviceInfo.product,
+            'board': deviceInfo.board,
+            'hardware': deviceInfo.hardware,
+            'supportedAbis': deviceInfo.supportedAbis,
+            'version': {
+              'baseOS': version.baseOS,
+              'sdkInt': version.sdkInt,
+              'release': version.release,
+              'codename': version.codename,
+              'incremental': version.incremental,
+              'previewSdkInt': version.previewSdkInt,
+              'securityPatch': version.securityPatch,
+            },
+            'isLowRamDevice': deviceInfo.isLowRamDevice,
+            'freeDiskSize': deviceInfo.freeDiskSize,
+            'totalDiskSize': deviceInfo.totalDiskSize,
+            'physicalRamSize': deviceInfo.physicalRamSize,
+            'availableRamSize': deviceInfo.availableRamSize,
+          }.toString(),
+          'MainApp',
+          'getDeviceInfo',
+          null,
+        );
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'MainApp',
+        'getDeviceInfo',
+        null,
+        s: s,
+      );
     }
   }
 
@@ -362,6 +419,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   Timer? backupTimer;
   Timer? cacheStaleTimer;
+  Timer? dbCleanupTimer;
   ImageWriter imageWriter = ImageWriter();
 
   AppLinks? appLinks;
@@ -386,14 +444,19 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       clearCache();
     });
 
+    dbCleanupTimer = Timer(
+      const Duration(minutes: kDebugMode ? 1 : 20),
+      // happens only once N minutes after start, to avoid long db lockup during early work
+      () => settingsHandler.dbHandler.tagsCleanup(),
+    );
+
     // consider app launch as return to the app
     WidgetsBinding.instance.addObserver(this);
     localAuthHandler.onReturn();
   }
 
   Future<void> clearCache() async {
-    await imageWriter.clearStaleCache();
-    await imageWriter.clearCacheOverflow();
+    await imageWriter.cleanupCache();
   }
 
   Future<void> initDeepLinks() async {
@@ -422,11 +485,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   Future<void> openAppLink(String url) async {
     Logger.Inst().log(url, 'AppLinks', 'openAppLink', LogTypes.settingsLoad);
-    // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
 
     if (url.contains('loli.snatcher')) {
       final Booru booru = Booru.fromLink(url);
-      if (booru.name != null && booru.name!.isNotEmpty) {
+      if (booru.name != null && booru.name!.isNotEmpty && booru.type!.isSaveable) {
         if (settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
           // Rename config if its already in the list
           booru.name = '${booru.name!} (duplicate)';
@@ -440,6 +502,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void dispose() {
     backupTimer?.cancel();
     cacheStaleTimer?.cancel();
+    dbCleanupTimer?.cancel();
     appLinksSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

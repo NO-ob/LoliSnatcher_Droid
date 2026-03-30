@@ -8,6 +8,9 @@ import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
+import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+
+// TODO redesign
 
 class MediaLoading extends StatefulWidget {
   const MediaLoading({
@@ -23,7 +26,8 @@ class MediaLoading extends StatefulWidget {
     required this.onRestart,
     required this.onStop,
     this.isTooBig = false,
-    this.stopReasons = const [],
+    this.stopReason,
+    this.stopDetails,
     super.key,
   });
 
@@ -35,7 +39,8 @@ class MediaLoading extends StatefulWidget {
 
   final bool isTooBig;
   final bool isStopped;
-  final List<String> stopReasons;
+  final ViewerStopReason? stopReason;
+  final String? stopDetails;
   final bool isViewed;
 
   final ValueNotifier<int> total;
@@ -51,6 +56,18 @@ class MediaLoading extends StatefulWidget {
 
 class _MediaLoadingState extends State<MediaLoading> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+
+  String _getStopReasonDescription(BuildContext context, ViewerStopReason? reason) {
+    if (reason == null) return '';
+    return switch (reason) {
+      ViewerStopReason.user => context.loc.media.loading.stopReasons.stoppedByUser,
+      ViewerStopReason.error => context.loc.media.loading.stopReasons.loadingError,
+      ViewerStopReason.tooBig => context.loc.media.loading.stopReasons.fileIsTooBig,
+      ViewerStopReason.hidden => context.loc.media.loading.stopReasons.hiddenByFilters,
+      ViewerStopReason.videoError => context.loc.media.loading.stopReasons.videoError,
+      ViewerStopReason.reset => '',
+    };
+  }
 
   bool isVisible = false;
   int _total = 0, _received = 0, _startedAt = 0;
@@ -181,12 +198,16 @@ class _MediaLoadingState extends State<MediaLoading> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: widget.isStopped
               ? [
-                  ...widget.stopReasons.map((String reason) {
-                    return LoadingText(
-                      text: reason,
+                  if (widget.stopReason != null)
+                    LoadingText(
+                      text: _getStopReasonDescription(context, widget.stopReason),
+                      fontSize: 20,
+                    ),
+                  if (widget.stopDetails != null)
+                    LoadingText(
+                      text: widget.stopDetails ?? '',
                       fontSize: 18,
-                    );
-                  }),
+                    ),
                   const SizedBox(height: 10),
                   ElevatedButton.icon(
                     icon: const Icon(
@@ -199,7 +220,9 @@ class _MediaLoadingState extends State<MediaLoading> {
                       fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
                     ),
                     label: LoadingText(
-                      text: (widget.isTooBig || widget.item.isHated) ? 'Load anyway' : 'Restart loading',
+                      text: (widget.isTooBig || widget.item.isHidden)
+                          ? context.loc.media.loading.loadAnyway
+                          : context.loc.media.loading.restartLoading,
                       fontSize: 16,
                       color: Colors.blue,
                     ),
@@ -250,7 +273,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                         fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
                       ),
                       label: LoadingText(
-                        text: 'Stop loading',
+                        text: context.loc.media.loading.stopLoading,
                         fontSize: 18,
                         color: Theme.of(context).colorScheme.error,
                       ),
@@ -280,17 +303,25 @@ class _MediaLoadingState extends State<MediaLoading> {
     String percentDoneText = '';
     if (hasProgressData) {
       if (isVideo) {
-        percentDoneText = (percentDone == 1) ? 'Rendering...' : '${(percentDone * 100).toStringAsFixed(2)}%';
+        percentDoneText = (percentDone == 1)
+            ? context.loc.media.loading.rendering
+            : '${(percentDone * 100).toStringAsFixed(2)}%';
       } else {
         percentDoneText = (percentDone == 1)
-            ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...'
+            ? (widget.isFromCache
+                  ? context.loc.media.loading.loadingAndRenderingFromCache
+                  : context.loc.media.loading.rendering)
             : '${(percentDone * 100).toStringAsFixed(2)}%';
       }
     } else {
       if (isVideo) {
-        percentDoneText = '${widget.isFromCache ? 'Loading from cache' : 'Buffering'}...';
+        percentDoneText = widget.isFromCache
+            ? context.loc.media.loading.loadingFromCache
+            : context.loc.media.loading.buffering;
       } else {
-        percentDoneText = widget.isDone ? 'Rendering...' : 'Loading${widget.isFromCache ? ' from cache' : ''}...';
+        percentDoneText = widget.isDone
+            ? context.loc.media.loading.rendering
+            : (widget.isFromCache ? context.loc.media.loading.loadingFromCache : context.loc.media.loading.loading);
       }
     }
 
@@ -313,9 +344,11 @@ class _MediaLoadingState extends State<MediaLoading> {
         : '';
 
     final int sinceStartSeconds = (sinceStart / 1000).floor();
-    final String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds}s ago' : '';
+    final String sinceStartText = (!widget.isDone && (percentDone < 1 || widget.isFromCache))
+        ? context.loc.media.loading.startedSecondsAgo(seconds: sinceStartSeconds)
+        : '';
 
-    final bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated;
+    final bool isMovedBelow = settingsHandler.previewMode.isSample && !widget.item.isHidden;
 
     // print('$percentDone | $percentDoneText');
 
@@ -327,12 +360,16 @@ class _MediaLoadingState extends State<MediaLoading> {
     List<Widget> children = [];
     if (widget.isStopped) {
       children = [
-        ...widget.stopReasons.map((String reason) {
-          return LoadingText(
-            text: reason,
+        if (widget.stopReason != null)
+          LoadingText(
+            text: _getStopReasonDescription(context, widget.stopReason),
+            fontSize: 20,
+          ),
+        if (widget.stopDetails != null)
+          LoadingText(
+            text: widget.stopDetails ?? '',
             fontSize: 18,
-          );
-        }),
+          ),
         const SizedBox(height: 10),
         ElevatedButton.icon(
           icon: const Icon(
@@ -345,7 +382,9 @@ class _MediaLoadingState extends State<MediaLoading> {
             fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
           ),
           label: LoadingText(
-            text: (widget.isTooBig || widget.item.isHated) ? 'Load anyway' : 'Restart loading',
+            text: (widget.isTooBig || widget.item.isHidden)
+                ? context.loc.media.loading.loadAnyway
+                : context.loc.media.loading.restartLoading,
             fontSize: 16,
             color: Colors.blue,
           ),
@@ -400,7 +439,7 @@ class _MediaLoadingState extends State<MediaLoading> {
                 fixedSize: const WidgetStatePropertyAll(Size(double.infinity, 54)),
               ),
               label: LoadingText(
-                text: 'Stop loading',
+                text: context.loc.media.loading.stopLoading,
                 fontSize: 18,
                 color: Theme.of(context).colorScheme.error,
               ),
@@ -439,7 +478,7 @@ class _MediaLoadingState extends State<MediaLoading> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
               child: Column(
-                // move loading info lower if preview is of sample quality (except when item is hated)
+                // move loading info lower if preview is of sample quality (except when item is hidden)
                 mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
                 children: children,
               ),
@@ -482,6 +521,7 @@ class LoadingText extends StatelessWidget {
       strokeWidth: 3,
       child: Text(
         text,
+        textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: fontSize,
           color: color,

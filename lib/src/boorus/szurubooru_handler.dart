@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -28,7 +29,7 @@ class SzurubooruHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as Map<String, dynamic>;
 
     final List<String> tags = [];
     for (int x = 0; x < current['tags'].length; x++) {
@@ -47,7 +48,7 @@ class SzurubooruHandler extends BooruHandler {
         fileHeight: current['canvasHeight'].toDouble(),
         sampleURL: "${booru.baseURL}/${current['contentUrl']}",
         thumbnailURL: "${booru.baseURL}/${current['thumbnailUrl']}",
-        tagsList: tags,
+        tagsList: tags.map(Tag.new).toList(),
         serverId: current['id'].toString(),
         score: current['score'].toString(),
         postURL: makePostURL(current['id'].toString()),

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -10,6 +11,9 @@ import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
+
+// TODO check what's wrong with booru.xxx
+// TODO handle auth logic?
 
 class ShimmieHandler extends BooruHandler {
   ShimmieHandler(super.booru, super.limit);
@@ -64,15 +68,15 @@ class ShimmieHandler extends BooruHandler {
         preURL = booru.baseURL!.split('/booru')[0];
       }
 
-      final String thumbnailUrl = preURL + current.getAttribute('preview_url')!,
-          fileUrl = preURL + current.getAttribute('file_url')!;
+      final String thumbnailUrl = preURL + current.getAttribute('preview_url')!;
+      final String fileUrl = preURL + current.getAttribute('file_url')!;
 
       final String dateString = current.getAttribute('date').toString();
       final BooruItem item = BooruItem(
         fileURL: fileUrl,
         sampleURL: fileUrl,
         thumbnailURL: thumbnailUrl,
-        tagsList: current.getAttribute('tags')!.split(' '),
+        tagsList: current.getAttribute('tags')!.split(' ').map(Tag.new).toList(),
         postURL: makePostURL(current.getAttribute('id')!),
         fileWidth: double.tryParse(current.getAttribute('width') ?? ''),
         fileHeight: double.tryParse(current.getAttribute('height') ?? ''),
@@ -222,7 +226,7 @@ class ShimmieHtmlHandler extends BooruHandler {
       final List<String> tags = current.attributes['data-tags']?.split(' ') ?? [];
 
       final BooruItem item = BooruItem(
-        thumbnailURL: booru.baseURL! + thumbURL,
+        thumbnailURL: thumbURL,
         sampleURL: fileURL,
         fileURL: fileURL,
         fileExt: fileExt,
@@ -231,7 +235,7 @@ class ShimmieHtmlHandler extends BooruHandler {
         previewHeight: thumbHeight,
         fileWidth: fileWidth,
         fileHeight: fileHeight,
-        tagsList: tags,
+        tagsList: tags.map(Tag.new).toList(),
         md5String: fileURL.split('/').last.split('?').first,
         postURL: makePostURL(id),
         serverId: id,

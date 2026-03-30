@@ -10,6 +10,66 @@
                 "close": true
             },
             "problemMatcher": []
+        },
+        {
+            "label": "Build runner",
+            "type": "shell",
+            "command": "dart run build_runner build --delete-conflicting-outputs",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build runner watch",
+            "type": "shell",
+            "command": "dart run build_runner watch --delete-conflicting-outputs",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Localization build",
+            "type": "shell",
+            "command": "dart run ./loc_build.dart",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Localization cleanup",
+            "type": "shell",
+            "command": "dart run ./loc_cleanup.dart",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Localization analyze",
+            "type": "shell",
+            "command": "dart run ./loc_analyze.dart",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Localization apply",
+            "type": "shell",
+            "command": "dart run ./loc_apply.dart",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
         }
     ]
 }

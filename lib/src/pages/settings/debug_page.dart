@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -12,10 +11,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/secure_storage_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
+import 'package:lolisnatcher/src/pages/settings/text_parser_test_page.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -34,10 +33,6 @@ class DebugPage extends StatefulWidget {
 class _DebugPageState extends State<DebugPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-  double vDuration = 0;
-  double vAmplitude = -1;
-  bool vFlutterway = false;
-
   final TextEditingController sessionStrController = TextEditingController();
 
   @override
@@ -53,28 +48,18 @@ class _DebugPageState extends State<DebugPage> {
     ).open();
   }
 
-  //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
-    final bool result = await settingsHandler.saveSettings(restate: true);
-
-    if (result) {
-      Navigator.of(context).pop();
-    }
+  Future<void> _onPopInvoked(_, _) async {
+    await settingsHandler.saveSettings(restate: true);
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: const Text('Debug'),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.debug.title,
         ),
         body: Center(
           child: ListView(
@@ -86,7 +71,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showPerf.value = newValue;
                   });
                 },
-                title: 'Show Performance graph',
+                title: context.loc.settings.debug.showPerformanceGraph,
               ),
               SettingsToggle(
                 value: settingsHandler.showFps.value,
@@ -95,7 +80,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showFps.value = newValue;
                   });
                 },
-                title: 'Show FPS graph',
+                title: context.loc.settings.debug.showFPSGraph,
               ),
               SettingsToggle(
                 value: settingsHandler.showImageStats.value,
@@ -104,7 +89,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showImageStats.value = newValue;
                   });
                 },
-                title: 'Show Image Stats',
+                title: context.loc.settings.debug.showImageStats,
               ),
               SettingsToggle(
                 value: settingsHandler.showVideoStats.value,
@@ -113,7 +98,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showVideoStats.value = newValue;
                   });
                 },
-                title: 'Show Video Stats',
+                title: context.loc.settings.debug.showVideoStats,
               ),
               if (kDebugMode)
                 SettingsToggle(
@@ -124,7 +109,7 @@ class _DebugPageState extends State<DebugPage> {
                       ViewerHandler.instance.videoAutoMute = newValue;
                     });
                   },
-                  title: 'Blur images + mute videos [DEV only]',
+                  title: context.loc.settings.debug.blurImagesAndMuteVideosDevOnly,
                 ),
               if (SettingsHandler.isDesktopPlatform)
                 SettingsToggle(
@@ -134,11 +119,11 @@ class _DebugPageState extends State<DebugPage> {
                       settingsHandler.desktopListsDrag = newValue;
                     });
                   },
-                  title: 'Enable drag scroll on lists [Desktop only]',
+                  title: context.loc.settings.debug.enableDragScrollOnListsDesktopOnly,
                 ),
 
               SettingsButton(
-                name: 'Animation speed ($timeDilation)',
+                name: context.loc.settings.debug.animationSpeed(speed: timeDilation),
                 icon: const Icon(Icons.timelapse),
                 action: () {
                   const List<double> speeds = [0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20];
@@ -153,152 +138,35 @@ class _DebugPageState extends State<DebugPage> {
               ),
 
               SettingsButton(
-                name: 'Tags Manager',
+                name: context.loc.settings.debug.tagsManager,
                 icon: const Icon(CupertinoIcons.tag),
                 action: () {
                   showTagsManager(context);
                 },
               ),
 
-              if (kDebugMode && (Platform.isAndroid || Platform.isIOS)) ...[
-                const SettingsButton(name: 'Vibration', enabled: false),
-                Column(
-                  children: [
-                    const SettingsButton(
-                      name: 'Vibration tests',
-                    ),
-                    SettingsButton(
-                      name: 'Duration',
-                      subtitle: Row(
-                        children: [
-                          ElevatedButton(
-                            child: const Text('-1'),
-                            onPressed: () {
-                              setState(() {
-                                if ((vDuration - 1) <= 0) {
-                                  vDuration = 0;
-                                } else {
-                                  vDuration -= 1;
-                                }
-                              });
-                            },
-                          ),
-                          Expanded(
-                            child: Slider(
-                              value: vDuration,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  vDuration = newValue;
-                                });
-                              },
-                              min: 0,
-                              max: 500,
-                              divisions: 500,
-                              label: '$vDuration',
-                            ),
-                          ),
-                          ElevatedButton(
-                            child: const Text('+1'),
-                            onPressed: () {
-                              setState(() {
-                                if ((vDuration + 1) >= 500) {
-                                  vDuration = 500;
-                                } else {
-                                  vDuration += 1;
-                                }
-                              });
-                            },
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text('$vDuration'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SettingsButton(
-                      name: 'Amplitude',
-                      subtitle: Row(
-                        children: [
-                          ElevatedButton(
-                            child: const Text('-1'),
-                            onPressed: () {
-                              setState(() {
-                                if ((vAmplitude - 1) <= -1) {
-                                  vAmplitude = -1;
-                                } else {
-                                  vAmplitude -= 1;
-                                }
-                              });
-                            },
-                          ),
-                          Expanded(
-                            child: Slider(
-                              value: vAmplitude,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  vAmplitude = newValue;
-                                });
-                              },
-                              min: -1,
-                              max: 255,
-                              divisions: 256,
-                              label: '$vAmplitude',
-                            ),
-                          ),
-                          ElevatedButton(
-                            child: const Text('+1'),
-                            onPressed: () {
-                              setState(() {
-                                if ((vAmplitude + 1) >= 255) {
-                                  vAmplitude = 255;
-                                } else {
-                                  vAmplitude += 1;
-                                }
-                              });
-                            },
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text('$vAmplitude'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SettingsToggle(
-                      value: vFlutterway,
-                      onChanged: (newValue) {
-                        setState(() {
-                          vFlutterway = newValue;
-                        });
-                      },
-                      title: 'Flutterway',
-                    ),
-                    SettingsButton(
-                      name: 'Vibrate',
-                      action: () {
-                        print('Vibrate $vDuration $vAmplitude');
-                        ServiceHandler.vibrate(
-                          flutterWay: vFlutterway,
-                          duration: vDuration.round(),
-                          amplitude: vAmplitude.round(),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
+              SettingsButton(
+                name: 'Text Parser Test',
+                icon: const Icon(Icons.text_fields),
+                page: () => const TextParserTestPage(),
+              ),
 
               SettingsButton(
-                name:
-                    'Res: ${MediaQuery.sizeOf(context).width.toPrecision(4)}x${MediaQuery.sizeOf(context).height.toPrecision(4)}',
+                name: context.loc.settings.debug.resolution(
+                  width: MediaQuery.sizeOf(context).width.toPrecision(4).toString(),
+                  height: MediaQuery.sizeOf(context).height.toPrecision(4).toString(),
+                ),
               ),
-              SettingsButton(name: 'Pixel Ratio: ${MediaQuery.devicePixelRatioOf(context).toPrecision(4)}'),
+              SettingsButton(
+                name: context.loc.settings.debug.pixelRatio(
+                  ratio: MediaQuery.devicePixelRatioOf(context).toPrecision(4).toString(),
+                ),
+              ),
 
               const SettingsButton(name: '', enabled: false),
 
               SettingsButton(
-                name: 'Logger',
+                name: context.loc.settings.debug.logger,
                 action: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -310,12 +178,12 @@ class _DebugPageState extends State<DebugPage> {
               ),
 
               SettingsButton(
-                name: 'Webview',
+                name: context.loc.settings.debug.webview,
                 icon: const Icon(Icons.public),
                 page: () => const InAppWebviewView(initialUrl: 'gelbooru.com'),
               ),
               SettingsButton(
-                name: 'Delete All Cookies',
+                name: context.loc.settings.debug.deleteAllCookies,
                 icon: const Icon(Icons.cookie_outlined),
                 action: () async {
                   await CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteAllCookies();
@@ -325,7 +193,7 @@ class _DebugPageState extends State<DebugPage> {
 
               if (kDebugMode)
                 SettingsButton(
-                  name: 'Clear secure storage',
+                  name: context.loc.settings.debug.clearSecureStorage,
                   action: () {
                     SecureStorageHandler.instance.deleteAll();
                   },
@@ -334,7 +202,7 @@ class _DebugPageState extends State<DebugPage> {
               const SettingsButton(name: '', enabled: false),
 
               SettingsButton(
-                name: 'Get Session String',
+                name: context.loc.settings.debug.getSessionString,
                 icon: const Icon(Icons.copy),
                 action: () async {
                   final str = SearchHandler.instance.generateBackupJson() ?? '';
@@ -342,7 +210,7 @@ class _DebugPageState extends State<DebugPage> {
                   FlashElements.showSnackbar(
                     context: context,
                     duration: const Duration(seconds: 2),
-                    title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
+                    title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
                     content: Text(
                       str,
                       style: const TextStyle(fontSize: 16),
@@ -353,7 +221,7 @@ class _DebugPageState extends State<DebugPage> {
                 },
               ),
               SettingsButton(
-                name: 'Set Session String',
+                name: context.loc.settings.debug.setSessionString,
                 icon: const Icon(Icons.restore),
                 action: () async {
                   await showDialog(
@@ -364,7 +232,7 @@ class _DebugPageState extends State<DebugPage> {
                           children: [
                             SettingsTextInput(
                               controller: sessionStrController,
-                              title: 'Session string',
+                              title: context.loc.settings.debug.sessionString,
                               onlyInput: true,
                               pasteable: true,
                             ),
@@ -380,7 +248,10 @@ class _DebugPageState extends State<DebugPage> {
                                 FlashElements.showSnackbar(
                                   context: context,
                                   duration: const Duration(seconds: 2),
-                                  title: const Text('Restored session from string!', style: TextStyle(fontSize: 20)),
+                                  title: Text(
+                                    context.loc.settings.debug.restoredSessionFromString,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
                                   content: Text(
                                     sessionStrController.text,
                                     style: const TextStyle(fontSize: 16),
@@ -390,7 +261,7 @@ class _DebugPageState extends State<DebugPage> {
                                 );
                               }
                             },
-                            child: const Text('OK'),
+                            child: Text(context.loc.ok),
                           ),
                         ],
                       );

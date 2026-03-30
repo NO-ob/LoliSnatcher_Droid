@@ -11,13 +11,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
 
-    <!-- <application ... android:enableOnBackInvokedCallback="true" - required for predictive back -->
     <application
         android:name="${applicationName}"
         android:label="LoliSnatcher"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
         android:resizeableActivity="true"
+        android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
@@ -25,13 +25,17 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
+            android:enabled="true"
             android:exported="true"
             android:windowSoftInputMode="stateVisible">
             <!-- android:launchMode="singleTop" - allows multiple instances of the app (i.e. - opened from a config link) -->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+            <!-- LAUNCHER intent is on activity-aliases for dynamic app name in release -->
+            <!-- Debug manifest adds LAUNCHER directly to MainActivity -->
+
+            <!-- <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter> -->
 
             <intent-filter>
               <action android:name="android.intent.action.VIEW" />
@@ -42,6 +46,98 @@
             </intent-filter>
         </activity>
 
+        <!-- Activity aliases for changing app display name in launcher -->
+        <activity-alias
+            android:name=".MainActivityAlias_LoliSnatcher"
+            android:targetActivity=".MainActivity"
+            android:label="LoliSnatcher"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_LoliSnatcherSpaced"
+            android:targetActivity=".MainActivity"
+            android:label="Loli Snatcher"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_LoSn"
+            android:targetActivity=".MainActivity"
+            android:label="LoSn"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_LS"
+            android:targetActivity=".MainActivity"
+            android:label="LS"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_BooruSnatcher"
+            android:targetActivity=".MainActivity"
+            android:label="BooruSnatcher"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_BooruSnatcherSpaced"
+            android:targetActivity=".MainActivity"
+            android:label="Booru Snatcher"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".MainActivityAlias_Booru"
+            android:targetActivity=".MainActivity"
+            android:label="Booru"
+            android:icon="@mipmap/ic_launcher"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+
         <provider
           android:name="androidx.core.content.FileProvider"
           android:authorities="${applicationId}.fileprovider"
@@ -51,17 +147,15 @@
               android:name="android.support.FILE_PROVIDER_PATHS"
               android:resource="@xml/provider_paths" />
         </provider>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- Disable Impeller -->
-        <!-- in 3.32 there is a noticeable performance drop, permanent 100% gpu use (at least on xiaomi devices) -->
-        <!-- Possibly need to do a global performance pass? (always scale images (aside from main in viewer), cache widgets...) -->
         <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
-            android:value="true" />
+            android:value="false" />
     </application>
 </manifest>

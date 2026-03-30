@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:fvp/fvp.dart' as fvp;
 
+import 'package:lolisnatcher/src/data/settings/mpv_hardware_decoding.dart';
+import 'package:lolisnatcher/src/data/settings/mpv_video_output.dart';
 import 'package:lolisnatcher/src/data/settings/video_backend_mode.dart';
+import 'package:lolisnatcher/src/data/settings/video_cache_mode.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
@@ -20,12 +23,13 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
   bool autoPlay = true;
   bool startVideosMuted = false;
   bool disableVideo = false;
-  bool longTapFastForwardVideo = false;
   bool altVideoPlayerHwAccel = true;
   VideoBackendMode videoBackendMode = SettingsHandler.isDesktopPlatform
       ? VideoBackendMode.mpv
       : VideoBackendMode.normal;
-  late String altVideoPlayerVO, altVideoPlayerHWDEC, videoCacheMode;
+  late MpvVideoOutput altVideoPlayerVO;
+  late MpvHardwareDecoding altVideoPlayerHWDEC;
+  late VideoCacheMode videoCacheMode;
 
   @override
   void initState() {
@@ -34,7 +38,6 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     autoPlay = settingsHandler.autoPlayEnabled;
     startVideosMuted = settingsHandler.startVideosMuted;
     disableVideo = settingsHandler.disableVideo;
-    longTapFastForwardVideo = settingsHandler.longTapFastForwardVideo;
     videoBackendMode = settingsHandler.videoBackendMode;
     altVideoPlayerHwAccel = settingsHandler.altVideoPlayerHwAccel;
     altVideoPlayerVO = settingsHandler.altVideoPlayerVO;
@@ -42,15 +45,10 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     videoCacheMode = settingsHandler.videoCacheMode;
   }
 
-  Future<void> _onPopInvoked(bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
+  Future<void> _onPopInvoked(_, _) async {
     settingsHandler.autoPlayEnabled = autoPlay;
     settingsHandler.startVideosMuted = startVideosMuted;
     settingsHandler.disableVideo = disableVideo;
-    settingsHandler.longTapFastForwardVideo = longTapFastForwardVideo;
     settingsHandler.videoBackendMode = SettingsHandler.isDesktopPlatform ? VideoBackendMode.mpv : videoBackendMode;
     settingsHandler.altVideoPlayerHwAccel = altVideoPlayerHwAccel;
     settingsHandler.altVideoPlayerVO = altVideoPlayerVO;
@@ -73,21 +71,17 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
       }
     }
 
-    final bool result = await settingsHandler.saveSettings(restate: false);
-    if (result) {
-      Navigator.of(context).pop();
-    }
+    await settingsHandler.saveSettings(restate: false);
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: const Text('Video'),
+        appBar: SettingsAppBar(
+          title: context.loc.settings.video.title,
         ),
         body: Center(
           child: ListView(
@@ -99,18 +93,18 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                     disableVideo = newValue;
                   });
                 },
-                title: 'Disable videos',
+                title: context.loc.settings.video.disableVideos,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Disable videos'),
+                        return SettingsDialog(
+                          title: Text(context.loc.settings.video.disableVideos),
                           contentItems: [
                             Text(
-                              'Useful on low end devices that crash when trying to load videos. Gives options to view video in external player or browser instead.',
+                              context.loc.settings.video.disableVideosHelp,
                             ),
                           ],
                         );
@@ -126,7 +120,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                     autoPlay = newValue;
                   });
                 },
-                title: 'Autoplay videos',
+                title: context.loc.settings.video.autoplayVideos,
               ),
               SettingsToggle(
                 value: startVideosMuted,
@@ -135,43 +129,28 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                     startVideosMuted = newValue;
                   });
                 },
-                title: 'Start videos muted',
+                title: context.loc.settings.video.startVideosMuted,
               ),
               //
               const SettingsButton(name: '', enabled: false),
-              const SettingsButton(
-                name: '[Experimental]',
-                icon: Icon(Icons.science),
-              ),
-              SettingsToggle(
-                value: longTapFastForwardVideo,
-                onChanged: (newValue) {
-                  setState(() {
-                    longTapFastForwardVideo = newValue;
-                  });
-                },
-                title: 'Long tap to fast forward video',
-                subtitle: const Text(
-                  'When this is enabled toolbar can be hidden with the tap when video controls are visible. [Experimental] May become default behavior in the future.',
-                ),
+              SettingsButton(
+                name: context.loc.settings.video.experimental,
+                icon: const Icon(Icons.science),
               ),
               if (!SettingsHandler.isDesktopPlatform)
                 SettingsDropdown(
                   value: videoBackendMode,
                   items: VideoBackendMode.values,
                   itemTitleBuilder: (item) => switch (item) {
-                    VideoBackendMode.normal => 'Default',
-                    VideoBackendMode.mpv => 'MPV',
-                    VideoBackendMode.mdk => 'MDK',
+                    VideoBackendMode.normal => context.loc.settings.video.backendDefault,
+                    VideoBackendMode.mpv => context.loc.settings.video.backendMPV,
+                    VideoBackendMode.mdk => context.loc.settings.video.backendMDK,
                     _ => '',
                   },
                   itemSubtitleBuilder: (item) => switch (item) {
-                    VideoBackendMode.normal =>
-                      'Based on exoplayer. Has best device compatibility, may have issues with 4K videos, some codecs or older devices',
-                    VideoBackendMode.mpv =>
-                      'Based on libmpv, has advanced settings which may help fix problems with some codecs/devices\n[MAY CAUSE CRASHES]',
-                    VideoBackendMode.mdk =>
-                      'Based on libmdk, may have better performance for some codecs/devices\n[MAY CAUSE CRASHES]',
+                    VideoBackendMode.normal => context.loc.settings.video.backendDefaultHelp,
+                    VideoBackendMode.mpv => context.loc.settings.video.backendMPVHelp,
+                    VideoBackendMode.mdk => context.loc.settings.video.backendMDKHelp,
                     _ => '',
                   },
                   onChanged: (newValue) {
@@ -179,7 +158,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                       videoBackendMode = newValue ?? VideoBackendMode.normal;
                     });
                   },
-                  title: 'Video player backend',
+                  title: context.loc.settings.video.videoPlayerBackend,
                 ),
 
               AnimatedSize(
@@ -188,10 +167,10 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                     ? Column(
                         children: [
                           if (videoBackendMode.isMpv) ...[
-                            const Padding(
-                              padding: EdgeInsets.only(left: 16, right: 16, top: 8),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
                               child: Text(
-                                "Try different values of 'MPV' settings below if videos don't work correctly or give codec errors:",
+                                context.loc.settings.video.mpvSettingsHelp,
                               ),
                             ),
                             SettingsToggle(
@@ -201,49 +180,51 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                                   altVideoPlayerHwAccel = newValue;
                                 });
                               },
-                              title: 'MPV: use hardware acceleration',
+                              title: context.loc.settings.video.mpvUseHardwareAcceleration,
                             ),
-                            SettingsDropdown(
+                            SettingsDropdown<MpvVideoOutput>(
                               value: altVideoPlayerVO,
-                              items: settingsHandler.map['altVideoPlayerVO']!['options'],
+                              items: MpvVideoOutput.values,
                               onReset: () {
                                 setState(() {
-                                  altVideoPlayerVO = settingsHandler.map['altVideoPlayerVO']!['default'];
+                                  altVideoPlayerVO = MpvVideoOutput.defaultValue;
                                 });
                               },
-                              onChanged: (String? newValue) {
+                              onChanged: (MpvVideoOutput? newValue) {
                                 setState(() {
-                                  altVideoPlayerVO = newValue ?? settingsHandler.map['altVideoPlayerVO']!['default'];
+                                  altVideoPlayerVO = newValue ?? MpvVideoOutput.defaultValue;
                                 });
                               },
-                              title: 'MPV: VO',
+                              title: context.loc.settings.video.mpvVO,
+                              itemTitleBuilder: (e) => e?.locName ?? '',
                             ),
-                            SettingsDropdown(
+                            SettingsDropdown<MpvHardwareDecoding>(
                               value: altVideoPlayerHWDEC,
-                              items: settingsHandler.map['altVideoPlayerHWDEC']!['options'],
+                              items: MpvHardwareDecoding.values,
                               onReset: () {
                                 setState(() {
-                                  altVideoPlayerHWDEC = settingsHandler.map['altVideoPlayerHWDEC']!['default'];
+                                  altVideoPlayerHWDEC = MpvHardwareDecoding.defaultValue;
                                 });
                               },
-                              onChanged: (String? newValue) {
+                              onChanged: (MpvHardwareDecoding? newValue) {
                                 setState(() {
-                                  altVideoPlayerHWDEC =
-                                      newValue ?? settingsHandler.map['altVideoPlayerHWDEC']!['default'];
+                                  altVideoPlayerHWDEC = newValue ?? MpvHardwareDecoding.defaultValue;
                                 });
                               },
-                              title: 'MPV: HWDEC',
+                              title: context.loc.settings.video.mpvHWDEC,
+                              itemTitleBuilder: (e) => e?.locName ?? '',
                             ),
                           ],
-                          SettingsOptionsList(
+                          SettingsOptionsList<VideoCacheMode>(
                             value: videoCacheMode,
-                            items: settingsHandler.map['videoCacheMode']!['options'],
-                            onChanged: (String? newValue) {
+                            items: VideoCacheMode.values,
+                            onChanged: (VideoCacheMode? newValue) {
                               setState(() {
-                                videoCacheMode = newValue ?? settingsHandler.map['videoCacheMode']!['default'];
+                                videoCacheMode = newValue ?? VideoCacheMode.defaultValue;
                               });
                             },
-                            title: 'Video cache mode',
+                            title: context.loc.settings.video.videoCacheMode,
+                            itemTitleBuilder: (e) => e?.locName ?? '',
                             subtitle: const Text(
                               '''Videos on some Boorus may not work correctly (i.e. endless loading) when using Stream video cache mode. In that case try using Cache mode. Otherwise player will retry with Cache mode automatically if video is in initial buffering state for 10+ seconds and video file size is less than 25mb''',
                             ),
@@ -254,22 +235,16 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                                   context: context,
                                   builder: (context) {
                                     return SettingsDialog(
-                                      title: const Text('Video cache modes'),
+                                      title: Text(context.loc.settings.video.cacheModes.title),
                                       contentItems: [
-                                        const Text("- Stream - Don't cache, start playing as soon as possible"),
-                                        const Text(
-                                          '- Cache - Saves the file to device storage, plays only when download is complete',
-                                        ),
-                                        const Text(
-                                          '- Stream+Cache - Mix of both, but currently leads to double download',
-                                        ),
+                                        Text(context.loc.settings.video.cacheModes.streamMode),
+                                        Text(context.loc.settings.video.cacheModes.cacheMode),
+                                        Text(context.loc.settings.video.cacheModes.streamCacheMode),
                                         const Text(''),
-                                        const Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
+                                        Text(context.loc.settings.video.cacheModes.cacheNote),
                                         const Text(''),
                                         if (SettingsHandler.isDesktopPlatform)
-                                          const Text(
-                                            '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
-                                          ),
+                                          Text(context.loc.settings.video.cacheModes.desktopWarning),
                                       ],
                                     );
                                   },

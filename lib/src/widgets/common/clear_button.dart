@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/gen/strings.g.dart';
+
 class ClearButton extends StatelessWidget {
   const ClearButton({
-    this.text = 'Clear',
     this.action,
     this.returnData = 'clear',
     this.withIcon = false,
     super.key,
   });
 
-  final String text;
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
@@ -31,8 +31,8 @@ class ClearButton extends StatelessWidget {
             Navigator.of(context).pop(returnData);
           }
         },
-        icon: Icon(withIcon ? Icons.delete_forever : null),
-        label: Text(text),
+        icon: const Icon(Icons.delete_forever),
+        label: Text(context.loc.clear),
       );
     }
 
@@ -50,7 +50,7 @@ class ClearButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(text),
+      child: Text(context.loc.clear),
     );
   }
 }

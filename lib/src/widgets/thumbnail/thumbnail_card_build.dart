@@ -44,7 +44,9 @@ class ThumbnailCardBuild extends StatelessWidget {
   Widget build(BuildContext context) {
     final snatchHandler = SnatchHandler.instance;
 
-    final isSelected = selectable && selectedIndex != null;
+    final bool isSelected = selectable && selectedIndex != null;
+    final bool showHighlightBorder = isHighlighted || isSelected;
+    final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
 
     return AutoScrollTag(
       highlightColor: Colors.red,
@@ -57,105 +59,63 @@ class ThumbnailCardBuild extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            ValueListenableBuilder(
-              valueListenable: snatchHandler.current,
-              builder: (_, current, child) {
-                return ValueListenableBuilder(
-                  valueListenable: snatchHandler.queueProgress,
-                  builder: (_, queueProgress, _) {
-                    return ValueListenableBuilder(
-                      valueListenable: snatchHandler.total,
-                      builder: (_, total, _) {
-                        return ValueListenableBuilder(
-                          valueListenable: snatchHandler.received,
-                          builder: (_, received, _) {
-                            final bool isCurrentlyBeingSnatched =
-                                current?.booruItems[queueProgress] == item && total != 0;
-
-                            final bool showBorder = isHighlighted || isSelected || isCurrentlyBeingSnatched;
-                            final Color borderColor = isCurrentlyBeingSnatched
-                                ? Colors.transparent
-                                : Theme.of(context).colorScheme.secondary;
-                            final double borderRadius = isCurrentlyBeingSnatched ? 10 : 4;
-                            final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
-                            final double borderWidth = defaultBorderWidth * (isCurrentlyBeingSnatched ? 3 : 1);
-
-                            return Ink(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(borderRadius),
-                                border: showBorder
-                                    ? Border.all(
-                                        color: borderColor,
-                                        width: borderWidth,
-                                      )
-                                    : null,
-                              ),
-                              child: child,
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-              child: RepaintBoundary(
-                child: InkWell(
-                  enableFeedback: true,
-                  borderRadius: BorderRadius.circular(4),
-                  highlightColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.4),
-                  splashColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
-                  onTap: onTap == null ? null : () => onTap?.call(index),
-                  onDoubleTap: onDoubleTap == null ? null : () => onDoubleTap?.call(index),
-                  onLongPress: onLongPress == null ? null : () => onLongPress?.call(index),
-                  onSecondaryTap: onSecondaryTap == null ? null : () => onSecondaryTap?.call(index),
-                  child: ThumbnailBuild(
-                    item: item,
-                    handler: handler,
-                    selectable: selectable,
-                    selectedIndex: isSelected ? selectedIndex : null,
-                    onSelected: onSelected == null ? null : () => onSelected!(index),
-                  ),
+            DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                border: showHighlightBorder
+                    ? Border.all(
+                        color: Theme.of(context).colorScheme.secondary,
+                        width: defaultBorderWidth,
+                      )
+                    : null,
+              ),
+              child: InkWell(
+                enableFeedback: true,
+                borderRadius: BorderRadius.circular(4),
+                highlightColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.4),
+                splashColor: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
+                onTap: onTap == null ? null : () => onTap?.call(index),
+                onDoubleTap: onDoubleTap == null ? null : () => onDoubleTap?.call(index),
+                onLongPress: onLongPress == null ? null : () => onLongPress?.call(index),
+                onSecondaryTap: onSecondaryTap == null ? null : () => onSecondaryTap?.call(index),
+                child: ThumbnailBuild(
+                  item: item,
+                  handler: handler,
+                  selectable: selectable,
+                  selectedIndex: isSelected ? selectedIndex : null,
+                  onSelected: onSelected == null ? null : () => onSelected!(index),
                 ),
               ),
             ),
+            //
             Positioned.fill(
-              child: ValueListenableBuilder(
-                valueListenable: snatchHandler.current,
-                builder: (_, current, _) {
-                  return ValueListenableBuilder(
-                    valueListenable: snatchHandler.queueProgress,
-                    builder: (_, queueProgress, _) {
-                      return ValueListenableBuilder(
-                        valueListenable: snatchHandler.total,
-                        builder: (_, total, _) {
-                          return ValueListenableBuilder(
-                            valueListenable: snatchHandler.received,
-                            builder: (_, _, _) {
-                              final bool isCurrentlyBeingSnatched =
-                                  current?.booruItems[queueProgress] == item && total != 0;
-                              final double borderRadius = isCurrentlyBeingSnatched ? 10 : 4;
-                              final double defaultBorderWidth = max(2, MediaQuery.devicePixelRatioOf(context));
-                              final double borderWidth = defaultBorderWidth * (isCurrentlyBeingSnatched ? 3 : 1);
+              child: ListenableBuilder(
+                listenable: Listenable.merge([
+                  snatchHandler.current,
+                  snatchHandler.queueProgress,
+                  snatchHandler.total,
+                  snatchHandler.received,
+                ]),
+                builder: (context, _) {
+                  final current = snatchHandler.current.value;
+                  final queueProgress = snatchHandler.queueProgress.value;
+                  final total = snatchHandler.total.value;
 
-                              if (isCurrentlyBeingSnatched) {
-                                return AnimatedProgressIndicator(
-                                  value: snatchHandler.currentProgress,
-                                  animationDuration: const Duration(milliseconds: 50),
-                                  indicatorStyle: IndicatorStyle.square,
-                                  valueColor: Theme.of(context).progressIndicatorTheme.color,
-                                  strokeWidth: borderWidth,
-                                  borderRadius: borderRadius,
-                                );
-                              }
+                  final bool isCurrentlyBeingSnatched = current?.booruItems[queueProgress] == item && total != 0;
 
-                              return const SizedBox.shrink();
-                            },
-                          );
-                        },
-                      );
-                    },
-                  );
+                  if (isCurrentlyBeingSnatched) {
+                    return AnimatedProgressIndicator(
+                      value: snatchHandler.currentProgress,
+                      animationDuration: const Duration(milliseconds: 50),
+                      indicatorStyle: IndicatorStyle.square,
+                      valueColor: Theme.of(context).progressIndicatorTheme.color,
+                      strokeWidth: defaultBorderWidth * 3,
+                      borderRadius: 10,
+                    );
+                  }
+
+                  return const SizedBox.shrink();
                 },
               ),
             ),

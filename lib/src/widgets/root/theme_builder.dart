@@ -31,6 +31,7 @@ class ThemeBuilder extends StatelessWidget {
         theme: theme,
         themeMode: settingsHandler.themeMode.value,
         isAmoled: settingsHandler.isAmoled.value,
+        fontFamily: settingsHandler.fontFamily.value,
         context: context,
       );
 

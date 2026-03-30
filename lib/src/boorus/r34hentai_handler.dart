@@ -2,10 +2,12 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
@@ -29,7 +31,7 @@ class R34HentaiHandler extends ShimmieHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as Element;
 
     final String id = current.attributes['data-post-id']!;
     final String fileExt = current.attributes['data-mime']?.split('/')[1] ?? 'png';
@@ -53,7 +55,7 @@ class R34HentaiHandler extends ShimmieHandler {
       previewHeight: thumbHeight,
       fileWidth: fileWidth,
       fileHeight: fileHeight,
-      tagsList: tags,
+      tagsList: tags.map(Tag.new).toList(),
       md5String: getHashFromURL(thumbURL),
       postURL: makePostURL(id),
       serverId: id,
@@ -216,7 +218,7 @@ class R34HentaiHandlerOld extends R34HentaiHandler {
       fileURL: imageUrl,
       sampleURL: sampleUrl,
       thumbnailURL: thumbnailUrl,
-      tagsList: current['tags'].split(' '),
+      tagsList: current['tags'].split(' ').map(Tag.new).toList(),
       postURL: makePostURL(current['id'].toString()),
     );
 

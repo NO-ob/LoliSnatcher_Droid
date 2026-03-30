@@ -15,7 +15,6 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/delete_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -23,7 +22,6 @@ import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/root/main_appbar.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
@@ -36,7 +34,8 @@ enum TabSortingMode {
   alphabet,
   alphabetReverse,
   booru,
-  booruReverse;
+  booruReverse,
+  ;
 
   bool get isNone => this == TabSortingMode.none;
   bool get isAlphabet => this == TabSortingMode.alphabet;
@@ -52,11 +51,13 @@ enum TabSortingMode {
 class TabSelector extends StatelessWidget {
   const TabSelector({
     this.withBorder = true,
+    this.countOnTop = false,
     this.color,
     super.key,
   });
 
   final bool withBorder;
+  final bool countOnTop;
   final Color? color;
 
   @override
@@ -68,8 +69,8 @@ class TabSelector extends StatelessWidget {
     return Obx(() {
       // no boorus
       if (settingsHandler.booruList.isEmpty) {
-        return const Center(
-          child: Text('Add Boorus in Settings'),
+        return Center(
+          child: Text(context.loc.tabs.addBoorusInSettings),
         );
       }
 
@@ -101,8 +102,12 @@ class TabSelector extends StatelessWidget {
           }
         },
         expandableByScroll: true,
+        searchable: settingsHandler.booruList.length > 5,
+        searchCheck: (searchText, item) =>
+            (item.name?.toLowerCase().contains(searchText) ?? true) ||
+            (item.type?.name.toLowerCase().contains(searchText) ?? true),
         items: settingsHandler.booruList,
-        itemExtent: kMinInteractiveDimension,
+        itemExtent: 54,
         itemBuilder: (item) {
           final bool isCurrent = currentTab.selectedBooru.value == item;
 
@@ -114,7 +119,7 @@ class TabSelector extends StatelessWidget {
             padding: settingsHandler.appMode.value.isDesktop
                 ? const EdgeInsets.all(5)
                 : const EdgeInsets.only(left: 16, right: 16),
-            height: kMinInteractiveDimension,
+            height: 54,
             decoration: isCurrent
                 ? BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
@@ -125,12 +130,12 @@ class TabSelector extends StatelessWidget {
         },
         selectedItemBuilder: (value) {
           if (value == null) {
-            return const Text('Select a Booru');
+            return Text(context.loc.tabs.selectABooru);
           }
 
           return TabBooruSelectorItem(booru: value);
         },
-        labelText: 'Booru',
+        labelText: context.loc.booru,
       );
 
       return Padding(
@@ -144,72 +149,116 @@ class TabSelector extends StatelessWidget {
               alignment: Alignment.centerLeft,
               children: [
                 Positioned.fill(
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      label: Obx(() {
-                        final totalCount = currentTab.booruHandler.totalCount.value;
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      InputDecorator(
+                        decoration: InputDecoration(
+                          label: Obx(() {
+                            final totalCount = currentTab.booruHandler.totalCount.value;
 
-                        return RichText(
-                          text: TextSpan(
-                            style: inputDecoration.labelStyle?.copyWith(
-                              color: color ?? inputDecoration.labelStyle?.color,
-                            ),
-                            children: [
-                              TextSpan(
-                                text:
-                                    'Tab | ${(currentTabIndex + 1).toFormattedString()}/${totalTabs.toFormattedString()}',
-                              ),
-                              if (totalCount > 0) ...[
-                                const TextSpan(text: ' | '),
-                                WidgetSpan(
-                                  alignment: PlaceholderAlignment.middle,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                                    child: Icon(
-                                      Icons.image,
-                                      size: inputDecoration.labelStyle?.fontSize ?? 12,
-                                      color: color ?? inputDecoration.labelStyle?.color,
-                                    ),
+                            return RichText(
+                              text: TextSpan(
+                                style: inputDecoration.labelStyle?.copyWith(
+                                  color: color ?? inputDecoration.labelStyle?.color,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text:
+                                        '${context.loc.tabs.tab} | ${(currentTabIndex + 1).toFormattedString()}/${totalTabs.toFormattedString()}',
                                   ),
-                                ),
-                                TextSpan(
-                                  text: totalCount.toFormattedString(),
-                                ),
-                              ],
-                            ],
+                                  if (totalCount > 0 && countOnTop) ...[
+                                    const TextSpan(text: ' | '),
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                                        child: Icon(
+                                          Icons.image,
+                                          size: inputDecoration.labelStyle?.fontSize ?? 12,
+                                          color: color ?? inputDecoration.labelStyle?.color,
+                                        ),
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: totalCount.toFormattedString(),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            );
+                          }),
+                          labelStyle: inputDecoration.labelStyle?.copyWith(
+                            color: color ?? inputDecoration.labelStyle?.color,
                           ),
-                        );
-                      }),
-                      labelStyle: inputDecoration.labelStyle?.copyWith(
-                        color: color ?? inputDecoration.labelStyle?.color,
-                      ),
-                      contentPadding: contentPadding,
-                      border: inputDecoration.border?.copyWith(
-                        borderSide: BorderSide(
-                          color: withBorder
-                              ? (inputDecoration.border?.borderSide.color ?? Colors.transparent)
-                              : Colors.transparent,
-                          width: 1,
+                          contentPadding: contentPadding,
+                          border: inputDecoration.border?.copyWith(
+                            borderSide: BorderSide(
+                              color: withBorder
+                                  ? (inputDecoration.border?.borderSide.color ?? Colors.transparent)
+                                  : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          enabledBorder: inputDecoration.enabledBorder?.copyWith(
+                            borderSide: BorderSide(
+                              color: withBorder
+                                  ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent)
+                                  : Colors.transparent,
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: inputDecoration.focusedBorder?.copyWith(
+                            borderSide: BorderSide(
+                              color: withBorder
+                                  ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent)
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
                         ),
+                        child: const SizedBox.expand(),
                       ),
-                      enabledBorder: inputDecoration.enabledBorder?.copyWith(
-                        borderSide: BorderSide(
-                          color: withBorder
-                              ? (inputDecoration.enabledBorder?.borderSide.color ?? Colors.transparent)
-                              : Colors.transparent,
-                          width: 1,
+                      //
+                      if (!countOnTop)
+                        Positioned(
+                          bottom: -8,
+                          left: 16,
+                          child: Obx(() {
+                            final totalCount = currentTab.booruHandler.totalCount.value;
+                            if (totalCount > 0) {
+                              final usedColor = (color ?? inputDecoration.labelStyle?.color)?.darken(0.2);
+                              return IgnorePointer(
+                                child: Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                                      child: Icon(
+                                        Icons.image,
+                                        size: 14,
+                                        color: usedColor,
+                                      ),
+                                    ),
+                                    //
+                                    Text(
+                                      totalCount.toFormattedString(),
+                                      style: inputDecoration.labelStyle?.copyWith(
+                                        fontSize: 12,
+                                        color: usedColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            return const SizedBox.shrink();
+                          }),
                         ),
-                      ),
-                      focusedBorder: inputDecoration.focusedBorder?.copyWith(
-                        borderSide: BorderSide(
-                          color: withBorder
-                              ? (inputDecoration.focusedBorder?.borderSide.color ?? Colors.transparent)
-                              : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    child: const SizedBox.expand(),
+                    ],
                   ),
                 ),
                 //
@@ -665,7 +714,8 @@ class _TabManagerPageState extends State<TabManagerPage> {
         children: [
           Expanded(
             child: SettingsTextInput(
-              title: 'Filter Tabs',
+              title: context.loc.search,
+              titleAsLabel: true,
               controller: filterTextController,
               inputType: TextInputType.text,
               clearable: true,
@@ -824,7 +874,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             FlashElements.showSnackbar(
               context: context,
               duration: const Duration(seconds: 2),
-              title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
+              title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
               content: Text(tab.tags, style: const TextStyle(fontSize: 16)),
               leadingIcon: Icons.copy,
               sideColor: Colors.green,
@@ -832,7 +882,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             Navigator.of(context).pop();
           },
           leading: const Icon(Icons.copy),
-          title: const Text('Copy'),
+          title: Text(context.loc.tabs.copy),
         ),
         const SizedBox(height: 10),
         ListTile(
@@ -856,7 +906,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             getTabs();
           },
           leading: const Icon(Icons.move_down_sharp),
-          title: const Text('Move'),
+          title: Text(context.loc.tabs.moveAction),
         ),
         const SizedBox(height: 10),
         ListTile(
@@ -870,7 +920,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             getTabs();
           },
           leading: const Icon(Icons.close, color: Colors.red),
-          title: const Text('Remove'),
+          title: Text(context.loc.tabs.remove),
         ),
         const SizedBox(height: 20),
         ListTile(
@@ -882,7 +932,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             Navigator.of(context).pop();
           },
           leading: const Icon(Icons.cancel_outlined),
-          title: const Text('Close'),
+          title: Text(context.loc.close),
         ),
         const SizedBox(height: 10),
         // TODO more stuff?
@@ -908,9 +958,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Delete Tabs'),
+          Text(context.loc.tabs.deleteTabs),
           Text(
-            'Are you sure you want to delete ${selectedTabs.length} ${Tools.pluralize('tab', selectedTabs.length)}?',
+            context.loc.tabs.areYouSureDeleteTabs(count: selectedTabs.length),
             style: const TextStyle(fontSize: 16),
           ),
         ],
@@ -966,142 +1016,142 @@ class _TabManagerPageState extends State<TabManagerPage> {
       context: context,
       builder: (context) {
         return SettingsDialog(
-          title: const Text('Tabs Manager'),
+          title: Text(context.loc.tabs.tabsManager),
           contentItems: [
-            const Text('Scrolling:'),
+            Text(context.loc.tabs.scrolling),
             const SizedBox(height: 6),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.subdirectory_arrow_left_outlined),
-                SizedBox(width: 10),
-                Expanded(child: Text('Scroll to current tab')),
+                const Icon(Icons.subdirectory_arrow_left_outlined),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.scrollToCurrent)),
               ],
             ),
             const SizedBox(height: 6),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.arrow_circle_up),
-                SizedBox(width: 10),
-                Expanded(child: Text('Scroll to top')),
+                const Icon(Icons.arrow_circle_up),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.scrollToTop)),
               ],
             ),
             const SizedBox(height: 6),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.arrow_circle_down),
-                SizedBox(width: 10),
-                Expanded(child: Text('Scroll to bottom')),
-              ],
-            ),
-            const Divider(),
-            const Row(
-              children: [
-                Icon(Icons.filter_alt),
-                SizedBox(width: 10),
-                Expanded(child: Text('Filter tabs by booru, loaded state, duplicates, etc.')),
+                const Icon(Icons.arrow_circle_down),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.scrollToBottom)),
               ],
             ),
             const Divider(),
-            const Text('Sorting:'),
-            const SizedBox(height: 6),
-            const Row(
+            Row(
               children: [
-                TabSortingIcon(TabSortingMode.none, withBorder: true),
-                SizedBox(width: 10),
-                Expanded(child: Text('Default tabs order')),
+                const Icon(Icons.filter_alt),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.filterTabsByBooru)),
               ],
             ),
-            const SizedBox(height: 6),
-            const Row(
-              children: [
-                TabSortingIcon(TabSortingMode.alphabet, withBorder: true),
-                SizedBox(width: 10),
-                Expanded(child: Text('Sort alphabetically')),
-              ],
-            ),
-            const SizedBox(height: 6),
-            const Row(
-              children: [
-                TabSortingIcon(TabSortingMode.alphabetReverse, withBorder: true),
-                SizedBox(width: 10),
-                Expanded(child: Text('Sort alphabetically (reversed)')),
-              ],
-            ),
-            const SizedBox(height: 6),
-            const Row(
-              children: [
-                TabSortingIcon(TabSortingMode.booru, withBorder: true),
-                SizedBox(width: 10),
-                Expanded(child: Text('Sort by booru name alphabetically')),
-              ],
-            ),
-            const SizedBox(height: 6),
-            const Row(
-              children: [
-                TabSortingIcon(TabSortingMode.booruReverse, withBorder: true),
-                SizedBox(width: 10),
-                Expanded(child: Text('Sort by booru name alphabetically (reversed)')),
-              ],
-            ),
-            const SizedBox(height: 6),
-            const Text('Long press on the sort button to save tabs in the current order'),
             const Divider(),
-            const Text('Select:'),
+            Text(context.loc.tabs.sorting),
             const SizedBox(height: 6),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.select_all),
-                SizedBox(width: 10),
-                Expanded(child: Text('Toggle select mode')),
+                const TabSortingIcon(TabSortingMode.none, withBorder: true),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.defaultTabsOrder)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const TabSortingIcon(TabSortingMode.alphabet, withBorder: true),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.sortAlphabetically)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const TabSortingIcon(TabSortingMode.alphabetReverse, withBorder: true),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.sortAlphabeticallyReversed)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const TabSortingIcon(TabSortingMode.booru, withBorder: true),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.sortByBooruName)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const TabSortingIcon(TabSortingMode.booruReverse, withBorder: true),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.sortByBooruNameReversed)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(context.loc.tabs.longPressSortToSave),
+            const Divider(),
+            Text(context.loc.tabs.select),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.select_all),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.toggleSelectMode)),
               ],
             ),
             const SizedBox(height: 12),
-            const Text('On the bottom of the page: '),
+            Text(context.loc.tabs.onTheBottomOfPage),
             const SizedBox(height: 6),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.select_all),
-                Text(' / '),
-                Icon(Icons.border_clear),
-                SizedBox(width: 10),
-                Expanded(child: Text('Select/deselect all tabs')),
+                const Icon(Icons.select_all),
+                const Text(' / '),
+                const Icon(Icons.border_clear),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.selectDeselectAll)),
               ],
             ),
             const SizedBox(height: 6),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.delete_forever),
-                SizedBox(width: 10),
-                Expanded(child: Text('Delete selected tabs')),
+                const Icon(Icons.delete_forever),
+                const SizedBox(width: 10),
+                Expanded(child: Text(context.loc.tabs.deleteSelectedTabs)),
               ],
             ),
             const Divider(),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.expand),
-                SizedBox(width: 10),
-                Text('Long press on a tab to move it'),
+                const Icon(Icons.expand),
+                const SizedBox(width: 10),
+                Text(context.loc.tabs.longPressToMove),
               ],
             ),
             const Divider(),
-            const Text('Numbers in the bottom right of the tab:'),
+            Text(context.loc.tabs.numbersInBottomRight),
             // TODO
-            const Text('First number - tab index in default list order'),
-            const Text('Second number - tab index in current list order, appears when filtering/sorting is active'),
+            Text(context.loc.tabs.firstNumberTabIndex),
+            Text(context.loc.tabs.secondNumberTabIndex),
             const Divider(),
-            const Text('Special filters:'),
-            const Text('"Loaded" - show tabs which have loaded items'),
-            const Text('"Not loaded" - show tabs which are not loaded and/or have zero items'),
+            Text(context.loc.tabs.specialFilters),
+            Text(context.loc.tabs.loadedFilter),
+            Text(context.loc.tabs.notLoadedFilter),
             RichText(
               text: TextSpan(
                 style: Theme.of(context).textTheme.bodyMedium,
-                children: const [
-                  TextSpan(text: 'Not loaded tabs have '),
-                  TextSpan(
+                children: [
+                  TextSpan(text: context.loc.tabs.notLoadedItalic.replaceAll('italic', '')),
+                  const TextSpan(
                     text: 'italic',
                     style: TextStyle(fontStyle: FontStyle.italic),
                   ),
-                  TextSpan(text: ' text'),
+                  const TextSpan(text: ' text'),
                 ],
               ),
             ),
@@ -1119,20 +1169,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            RichText(
-              text: TextSpan(
-                style: Theme.of(context).appBarTheme.titleTextStyle,
-                children: [
-                  const TextSpan(text: 'Tabs'),
-                  if (isFilterActive) ...[
-                    const TextSpan(text: ' | '),
-                    const WidgetSpan(
-                      alignment: PlaceholderAlignment.middle,
-                      child: Icon(Icons.filter_alt),
-                    ),
-                  ],
-                ],
-              ),
+            Text(
+              context.loc.tabs.tabsManager,
+              style: Theme.of(context).appBarTheme.titleTextStyle,
             ),
             RichText(
               text: TextSpan(
@@ -1158,7 +1197,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.select_all),
-            tooltip: 'Select mode',
+            tooltip: context.loc.tabs.selectMode,
             onPressed: () {
               setState(() {
                 selectMode = !selectMode;
@@ -1177,23 +1216,23 @@ class _TabManagerPageState extends State<TabManagerPage> {
                       context: context,
                       builder: (context) {
                         return SettingsDialog(
-                          title: Text(sortingMode.isNone ? 'Shuffle tabs' : 'Sort tabs'),
+                          title: Text(sortingMode.isNone ? context.loc.tabs.shuffleTabs : context.loc.tabs.sortMode),
                           contentItems: [
                             Text(
                               sortingMode.isNone
-                                  ? 'Shuffle tabs order randomly?'
-                                  : 'Save tabs in current sorting order?',
+                                  ? context.loc.tabs.shuffleTabsQuestion
+                                  : context.loc.tabs.saveTabsInCurrentOrder,
                             ),
                             if (!sortingMode.isNone)
                               Text(
-                                '${sortingMode.isAnyBooru ? 'By Booru' : ''} Alphabetically ${sortingMode.isAnyReverse ? '(reversed)' : ''}'
+                                '${sortingMode.isAnyBooru ? context.loc.tabs.byBooru : ''} ${context.loc.tabs.alphabetically} ${sortingMode.isAnyReverse ? context.loc.tabs.reversed : ''}'
                                     .trim(),
                               ),
                           ],
                           actionButtons: [
                             const CancelButton(withIcon: true),
                             ElevatedButton.icon(
-                              label: Text(sortingMode.isNone ? 'Shuffle' : 'Sort'),
+                              label: Text(sortingMode.isNone ? context.loc.tabs.shuffle : context.loc.tabs.sort),
                               icon: TabSortingIcon(sortingMode),
                               onPressed: () {
                                 Navigator.of(context).pop('allow');
@@ -1215,7 +1254,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: const Text('Tab randomly shuffled!', style: TextStyle(fontSize: 20)),
+                        title: Text(context.loc.tabs.tabRandomlyShuffled, style: const TextStyle(fontSize: 20)),
                         leadingIcon: Icons.sort_by_alpha,
                         sideColor: Colors.green,
                       );
@@ -1223,7 +1262,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: const Text('Tab order saved!', style: TextStyle(fontSize: 20)),
+                        title: Text(context.loc.tabs.tabOrderSaved, style: const TextStyle(fontSize: 20)),
                         leadingIcon: Icons.sort,
                         sideColor: Colors.green,
                       );
@@ -1238,7 +1277,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
                   },
             child: IconButton(
               icon: TabSortingIcon(sortingMode),
-              tooltip: 'Sort tabs',
+              tooltip: context.loc.tabs.sortMode,
               onPressed: () {
                 switch (sortingMode) {
                   case TabSortingMode.none:
@@ -1264,7 +1303,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
           const SizedBox(width: 8),
           IconButton(
             icon: const Icon(Icons.help_center_outlined),
-            tooltip: 'Help',
+            tooltip: context.loc.tabs.help,
             onPressed: showHelpDialog,
           ),
           const SizedBox(width: 8),
@@ -1283,43 +1322,37 @@ class _TabManagerPageState extends State<TabManagerPage> {
                   scrollbarOrientation: settingsHandler.handSide.value.isLeft
                       ? ScrollbarOrientation.left
                       : ScrollbarOrientation.right,
-                  child: DesktopScrollWrap(
-                    controller: scrollController,
-                    child: ReorderableListView.builder(
-                      scrollController: scrollController,
-                      itemExtent: tabHeight,
-                      onReorder: (oldIndex, newIndex) {
-                        if (oldIndex == newIndex) {
-                          return;
-                        } else if (oldIndex < newIndex) {
-                          newIndex -= 1;
-                        }
+                  child: ReorderableListView.builder(
+                    scrollController: scrollController,
+                    itemExtent: tabHeight,
+                    onReorderItem: (oldIndex, newIndex) {
+                      if (oldIndex == newIndex) {
+                        return;
+                      }
 
-                        searchHandler.moveTab(oldIndex, newIndex);
-                        getTabs();
-                      },
-                      physics: getListPhysics(),
-                      buildDefaultDragHandles: false,
-                      proxyDecorator: proxyDecorator,
-                      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                      itemCount: totalFilteredTabs,
-                      itemBuilder: itemBuilder,
-                    ),
+                      searchHandler.moveTab(oldIndex, newIndex);
+                      getTabs();
+                    },
+                    buildDefaultDragHandles: false,
+                    proxyDecorator: proxyDecorator,
+                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                    itemCount: totalFilteredTabs,
+                    itemBuilder: itemBuilder,
                   ),
                 ),
                 if (totalFilteredTabs == 0)
-                  const Center(
+                  Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Kaomoji(
-                          type: KaomojiType.shrug,
-                          style: TextStyle(fontSize: 40),
+                        const Kaomoji(
+                          category: KaomojiCategory.indifference,
+                          style: TextStyle(fontSize: 36),
                         ),
                         Text(
-                          'No tabs found',
-                          style: TextStyle(fontSize: 20),
+                          context.loc.tabs.noTabsFound,
+                          style: const TextStyle(fontSize: 20),
                         ),
                       ],
                     ),
@@ -1451,10 +1484,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
                           Icons.close,
                           size: iconSize,
                         ),
-                        label: const AutoSizeText(
-                          'Close',
+                        label: AutoSizeText(
+                          context.loc.close,
                           maxLines: 1,
-                          overflowReplacement: SizedBox.shrink(),
+                          overflowReplacement: const SizedBox.shrink(),
                         ),
                       ),
                     ),
@@ -1603,7 +1636,7 @@ class TabManagerItem extends StatelessWidget {
                                   else
                                     tab.booruHandler.booru.name ?? '',
                                   //
-                                  for (final booru in (tab.secondaryBoorus.value ?? [])) booru.name ?? '',
+                                  for (final Booru booru in (tab.secondaryBoorus.value ?? [])) booru.name ?? '',
                                 ];
                                 final String booruNamesStr = booruNames.join(', ');
 
@@ -1687,9 +1720,9 @@ class TabSortingIcon extends StatelessWidget {
             child: Icon(sortingMode.isNone ? Icons.sort_by_alpha : Icons.sort),
           ),
           if (sortingMode.isAnyBooru)
-            const Positioned(
+            Positioned(
               bottom: -10,
-              child: Text('Booru', style: TextStyle(fontSize: 12)),
+              child: Text(context.loc.tabs.byBooru, style: const TextStyle(fontSize: 12)),
             ),
         ],
       ),

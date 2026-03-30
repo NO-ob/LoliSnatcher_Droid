@@ -9,6 +9,7 @@ class TagSuggestion {
     this.count = 0,
     this.type = TagType.none,
     this.icon,
+    this.isPinned,
   });
 
   final String tag;
@@ -16,6 +17,7 @@ class TagSuggestion {
   final int count;
   final TagType type;
   final Widget? icon;
+  final bool? isPinned;
 
   @override
   String toString() => 'TagSuggestion(tag: $tag, description: $description, count: $count, type: $type)';
@@ -28,11 +30,13 @@ class TagSuggestion {
     int? count,
     TagType? type,
     Widget? icon,
+    bool? isPinned,
   }) => TagSuggestion(
     tag: tag ?? this.tag,
     description: description ?? this.description,
     count: count ?? this.count,
     type: type ?? this.type,
     icon: icon ?? this.icon,
+    isPinned: isPinned ?? this.isPinned,
   );
 }

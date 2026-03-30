@@ -2,8 +2,11 @@ import 'dart:developer' as dev;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
+
+import 'package:lolisnatcher/src/widgets/common/compact_error_widget.dart';
 import 'package:talker/talker.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
 // ignore: implementation_imports
@@ -44,8 +47,17 @@ class Logger {
         }
         FlutterError.presentError(details);
 
-        Logger.Inst().log('$details', 'FlutterError', 'onError', LogTypes.exception);
+        Logger.Inst().log(
+          '$details',
+          'FlutterError',
+          'onError',
+          LogTypes.exception,
+          s: details.stack,
+        );
       };
+
+      // Set custom compact ErrorWidget builder to prevent layout breakage
+      ErrorWidget.builder = CompactErrorWidget.builder;
 
       PlatformDispatcher.instance.onError = (error, stack) {
         Logger.Inst().log(
@@ -53,6 +65,7 @@ class Logger {
           'PlatformDispatcherError',
           'onError',
           LogTypes.exception,
+          s: stack,
         );
         return true;
       };
@@ -136,7 +149,8 @@ enum LogTypes {
   networkError,
   settingsError,
   settingsLoad,
-  tagHandlerInfo;
+  tagHandlerInfo,
+  ;
 
   @override
   String toString() {

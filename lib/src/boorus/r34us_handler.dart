@@ -3,6 +3,7 @@ import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -36,7 +37,7 @@ class R34USHandler extends BooruHandler {
 
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
-    final current = responseItem.children[0];
+    final current = (responseItem as Element).children[0];
     if (current.firstChild!.attributes['src'] != null) {
       final String id = current.attributes['id']!;
       final String thumbURL = current.firstChild!.attributes['src']!;
@@ -61,7 +62,7 @@ class R34USHandler extends BooruHandler {
         fileURL: fullURL,
         sampleURL: fullURL,
         thumbnailURL: thumbURL,
-        tagsList: tags,
+        tagsList: tags.map(Tag.new).toList(),
         md5String: getHashFromURL(thumbURL),
         postURL: makePostURL(id),
       );
@@ -82,7 +83,14 @@ class R34USHandler extends BooruHandler {
     bool withCapcthaCheck = false,
   }) async {
     try {
-      final response = await DioNetwork.get(item.postURL, headers: getHeaders());
+      final String cookies = await getCookies() ?? '';
+      final response = await DioNetwork.get(
+        item.postURL,
+        headers: {
+          ...getHeaders(),
+          if (cookies.isNotEmpty) 'Cookie': cookies,
+        },
+      );
       if (response.statusCode != 200) {
         return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
       } else {

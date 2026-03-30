@@ -14,6 +14,8 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/pages/loli_sync_page.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
@@ -207,7 +209,7 @@ class LoliSync {
         final String content = await utf8.decoder.bind(req).join(); /*2*/
         final Booru booru = Booru.fromJSON(content);
 
-        if (booru.name != 'Favourites') {
+        if (booru.type?.isSaveable == true) {
           // Remove existing booru if base url is the same
           // TODO merge their data (i.e. api keys) or don't do anything if they have the same name+base url instead
           // for (int i=0; i < settingsHandler.booruList.length; i++){
@@ -256,15 +258,18 @@ class LoliSync {
       try {
         Logger.Inst().log('request to update tabs recieved', 'LoliSync', 'storeTabs', LogTypes.loliSyncInfo);
         final String content = await utf8.decoder.bind(req).join(); /*2*/
-        final String mode = req.uri.queryParameters['mode']!;
+        final TabsMode mode = TabsMode.fromString(req.uri.queryParameters['mode']!);
         final String? tabsString = jsonDecode(content)?['tabs'];
         // print('tabsString: $tabsString');
         // print('mode: $mode');
         if (tabsString != null && tabsString.isNotEmpty) {
-          if (mode == 'Merge') {
-            searchHandler.mergeTabs(tabsString);
-          } else if (mode == 'Replace') {
-            searchHandler.replaceTabs(tabsString);
+          switch (mode) {
+            case TabsMode.merge:
+              searchHandler.mergeTabs(tabsString);
+              break;
+            case TabsMode.replace:
+              searchHandler.replaceTabs(tabsString);
+              break;
           }
         }
 
@@ -297,14 +302,17 @@ class LoliSync {
       try {
         Logger.Inst().log('request to update tags recieved', 'LoliSync', 'storeTags', LogTypes.loliSyncInfo);
         final String content = await utf8.decoder.bind(req).join(); /*2*/
-        final String mode = req.uri.queryParameters['mode']!;
+        final TagsMode mode = TagsMode.fromString(req.uri.queryParameters['mode']!);
         final List<dynamic> tags = jsonDecode(content);
         Logger.Inst().log('Received ${tags.length} tags', 'LoliSync', 'storeTags', LogTypes.loliSyncInfo);
         if (tags.isNotEmpty) {
-          if (mode == 'Overwrite') {
-            unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: false));
-          } else if (mode == 'PreferTypeIfNone') {
-            unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: true));
+          switch (mode) {
+            case TagsMode.overwrite:
+              unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: false));
+              break;
+            case TagsMode.preferTypeIfNone:
+              unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: true));
+              break;
           }
         }
 
@@ -332,10 +340,11 @@ class LoliSync {
 
   Future<void> killServer() async {
     await server?.close();
+    final context = NavigationHandler.instance.navContext;
     FlashElements.showSnackbar(
-      title: const Text(
-        'LoliSync server killed!',
-        style: TextStyle(fontSize: 20),
+      title: Text(
+        context.loc.loliSync.serverKilled,
+        style: const TextStyle(fontSize: 20),
       ),
       leadingIcon: Icons.warning_amber,
       leadingIconColor: Colors.yellow,
@@ -420,13 +429,17 @@ class LoliSync {
   // TODO add timeout
   Future<String> sendTest() async {
     Logger.Inst().log('Sending test', 'LoliSync', 'sendTest', LogTypes.loliSyncInfo);
+    final context = NavigationHandler.instance.navContext;
     try {
       final HttpClientRequest request = await HttpClient().post(ip, port, '/lolisync/test');
       final HttpClientResponse response = await request.close();
       if (response.statusCode != 200) {
         FlashElements.showSnackbar(
           title: Text(
-            'Test error: ${response.statusCode} ${response.reasonPhrase}',
+            context.loc.loliSync.testError(
+              statusCode: response.statusCode,
+              reasonPhrase: response.reasonPhrase,
+            ),
             style: const TextStyle(fontSize: 20),
           ),
           leadingIcon: Icons.warning_amber,
@@ -436,13 +449,13 @@ class LoliSync {
         return 'Test error';
       } else {
         FlashElements.showSnackbar(
-          title: const Text(
-            'Test request received a positive response',
-            style: TextStyle(fontSize: 20),
+          title: Text(
+            context.loc.loliSync.testSuccess,
+            style: const TextStyle(fontSize: 20),
           ),
-          content: const Text(
-            "There should be a 'Test' message on the other device",
-            style: TextStyle(fontSize: 20),
+          content: Text(
+            context.loc.loliSync.testSuccessMessage,
+            style: const TextStyle(fontSize: 20),
           ),
           leadingIcon: Icons.warning_amber,
           leadingIconColor: Colors.green,
@@ -460,7 +473,7 @@ class LoliSync {
       );
       FlashElements.showSnackbar(
         title: Text(
-          'Test error: $e',
+          context.loc.loliSync.testErrorException(error: e.toString()),
           style: const TextStyle(fontSize: 20),
         ),
         leadingIcon: Icons.warning_amber,
@@ -495,8 +508,8 @@ class LoliSync {
     List<String> toSync,
     int favSkip,
     int snatchedSkip,
-    String tabsMode,
-    String tagsMode,
+    TabsMode tabsMode,
+    TagsMode tagsMode,
   ) async* {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
@@ -535,10 +548,14 @@ class LoliSync {
                   '',
                   offset.toString(),
                   limit.toString(),
-                  'ASC',
-                  isSnatched ? 'loliSyncSnatch' : 'loliSyncFav',
+                  order: 'ASC',
                   isDownloads: isSnatched,
                 );
+                if (!isSnatched) {
+                  for (final item in fetched) {
+                    item.isSnatched.value = false;
+                  }
+                }
                 Logger.Inst().log(
                   'fetched is ${fetched.length} i is $i',
                   'LoliSync',
@@ -576,9 +593,11 @@ class LoliSync {
                   '',
                   offset.toString(),
                   limit.toString(),
-                  'ASC',
-                  'loliSyncFav',
+                  order: 'ASC',
                 );
+                for (final item in fetched) {
+                  item.isSnatched.value = false;
+                }
                 yield 'Fetched ${fetched.length} favourites';
                 Logger.Inst().log(
                   'fetched is ${fetched.length} i is $i',
@@ -638,7 +657,7 @@ class LoliSync {
         case 'Tabs':
           yield 'Sync Starting $address';
           yield 'Preparing tabs data';
-          final String resp = await sendTabs(searchHandler.generateBackupJson(), tabsMode);
+          final String resp = await sendTabs(searchHandler.generateBackupJson(), tabsMode.value);
           yield resp;
           break;
         case 'Test':
@@ -650,7 +669,7 @@ class LoliSync {
         case 'Tags':
           yield 'Sync Starting $address';
           yield 'Preparing tag data';
-          final String resp = await sendTags(tagHandler.toList(), tagsMode);
+          final String resp = await sendTags(tagHandler.toList(), tagsMode.value);
           yield resp;
           break;
       }

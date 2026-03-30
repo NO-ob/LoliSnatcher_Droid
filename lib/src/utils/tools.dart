@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -127,6 +126,8 @@ class Tools {
       'sankakuapi.com',
     ].any(uri.host.contains)) {
       headers['User-Agent'] = Constants.sankakuAppUserAgent;
+    } else if (uri.host.contains('rule34.us')) {
+      headers['LS-IGNORE-REDIRECT'] = '1';
     }
 
     if (!isTestMode) {
@@ -148,6 +149,8 @@ class Tools {
         headers['Referer'] = 'https://rule34storage.b-cdn.net';
       } else if (uri.host.contains('gelbooru.com')) {
         headers['Referer'] = 'https://gelbooru.com';
+      } else if (uri.host.contains('rule34.us')) {
+        headers['Referer'] = 'https://rule34.us';
       }
     }
 
@@ -175,10 +178,6 @@ class Tools {
     if (withLive) {
       PaintingBinding.instance.imageCache.clearLiveImages();
     }
-  }
-
-  static String pluralize(String str, int count) {
-    return count == 1 ? str : '${str}s';
   }
 
   static bool isGoodStatusCode(int? statusCode) {
@@ -255,9 +254,8 @@ class Tools {
           builder: (context) => InAppWebviewView(
             initialUrl: '${uri.scheme}://$host${uri.hasPort && uri.port != 80 ? ':${uri.port}' : ''}',
             userAgent: customUserAgent,
-            title: 'Captcha check',
-            subtitle:
-                "Possible captcha detected, please solve it and press back after that. If there is no captcha then it's probably some other authentication issue.",
+            title: context.loc.webview.captcha,
+            subtitle: context.loc.webview.captchaCheckDescription,
           ),
         ),
       );

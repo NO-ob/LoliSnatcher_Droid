@@ -1,9 +1,13 @@
-enum HandSide {
+import 'package:lolisnatcher/gen/strings.g.dart';
+import 'package:lolisnatcher/src/data/settings/settings_enum.dart';
+
+enum HandSide with SettingsEnum<HandSide> {
   left,
-  right;
+  right,
+  ;
 
   @override
-  String toString() {
+  String toJson() {
     switch (this) {
       case HandSide.left:
         return 'Left';
@@ -23,18 +27,23 @@ enum HandSide {
       case 'r':
         return HandSide.right;
     }
-    return HandSide.right;
-  }
-
-  bool get isLeft {
-    return this == HandSide.left;
-  }
-
-  bool get isRight {
-    return this == HandSide.right;
+    return defaultValue;
   }
 
   static HandSide get defaultValue {
     return HandSide.right;
+  }
+
+  bool get isLeft => this == HandSide.left;
+  bool get isRight => this == HandSide.right;
+
+  @override
+  String get locName {
+    switch (this) {
+      case HandSide.left:
+        return loc.settings.interface.handSideValues.left;
+      case HandSide.right:
+        return loc.settings.interface.handSideValues.right;
+    }
   }
 }

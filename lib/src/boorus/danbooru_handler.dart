@@ -1,13 +1,17 @@
 import 'package:dio/dio.dart';
+import 'package:html/dom.dart';
+import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -89,7 +93,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as Map<String, dynamic>;
     /**
      * This check is needed as danbooru will return items which have been banned or deleted and will not have any image urls
      * to go with the rest of the data so cannot be displayed and are pointless for the app
@@ -126,7 +130,7 @@ class DanbooruHandler extends BooruHandler {
           fileURL: isZip ? current['large_file_url'].toString() : current['file_url'].toString(),
           sampleURL: current['large_file_url'].toString(),
           thumbnailURL: current['preview_file_url'].toString(),
-          tagsList: current['tag_string'].toString().split(' '),
+          tagsList: current['tag_string'].toString().split(' ').map(Tag.new).toList(),
           postURL: makePostURL(current['id'].toString()),
           fileSize: int.tryParse(current['file_size'].toString()),
           fileHeight: double.tryParse(current['image_height'].toString()),
@@ -186,7 +190,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   TagSuggestion? parseTagSuggestion(dynamic responseItem, int index) {
-    final String tagStr = (responseItem['antecedent'] ?? responseItem['value'])?.toString() ?? '';
+    final String tagStr = responseItem['value']?.toString() ?? '';
     if (tagStr.isEmpty) {
       return null;
     }
@@ -245,6 +249,7 @@ class DanbooruHandler extends BooruHandler {
   @override
   NoteItem? parseNote(dynamic responseItem, int index) {
     final current = responseItem;
+    if (current['is_active'] == false) return null;
     return NoteItem(
       id: current['id'].toString(),
       postID: current['post_id'].toString(),
@@ -453,4 +458,137 @@ class DanbooruHandler extends BooruHandler {
       ),
     ];
   }
+
+  //
+
+  @override
+  bool get hasLoadItemSupport => true;
+
+  @override
+  bool get shouldUpdateIteminTagView => true;
+
+  @override
+  Future<({BooruItem? item, bool failed, String? error})> loadItem({
+    required BooruItem item,
+    CancelToken? cancelToken,
+    bool withCapcthaCheck = false,
+  }) async {
+    try {
+      final response = await DioNetwork.get(
+        item.postURL,
+        headers: {
+          ...getHeaders(),
+        },
+        options: Options(
+          sendTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+        cancelToken: cancelToken,
+        customInterceptor: withCapcthaCheck ? DioNetwork.captchaInterceptor : null,
+      );
+
+      if (response.statusCode != 200) {
+        return (item: null, failed: true, error: 'Invalid status code ${response.statusCode}');
+      } else {
+        final html = parse(response.data);
+
+        Element? source = html.getElementById('gelcomVideoPlayer');
+        if (source != null) {
+          // video
+          item.thumbnailURL = source.attributes['poster'] ?? item.thumbnailURL;
+          item.sampleURL = source.attributes['poster'] ?? item.sampleURL;
+          item.fileURL =
+              html.querySelector('meta[property="og:video"]')?.attributes['content'] ??
+              source.attributes['src'] ??
+              source.children.firstOrNull?.attributes['src'] ??
+              item.fileURL;
+        } else {
+          // image
+          source = html.getElementById('image');
+          if (source != null) {
+            final String? src = source.attributes['src'];
+            final isSample = src?.contains('sample') ?? false;
+            if (isSample) {
+              item.sampleURL = src ?? item.sampleURL;
+              item.fileURL = html.querySelector('meta[property="og:image"]')?.attributes['content'] ?? item.fileURL;
+            } else {
+              item.fileURL = src ?? item.fileURL;
+            }
+            item.thumbnailURL = isSample ? item.sampleURL : item.thumbnailURL;
+          }
+        }
+
+        final sidebar = html.getElementById('tag-list');
+        final copyrightTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-3'));
+        addTagsWithType(copyrightTags.map((t) => t.tag).toList(), TagType.copyright);
+        final characterTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-4'));
+        addTagsWithType(characterTags.map((t) => t.tag).toList(), TagType.character);
+        final artistTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-1'));
+        addTagsWithType(artistTags.map((t) => t.tag).toList(), TagType.artist);
+        final generalTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-0'));
+        addTagsWithType(generalTags.map((t) => t.tag).toList(), TagType.none);
+        final metaTags = _tagsFromHtml(sidebar?.getElementsByClassName('tag-type-5'));
+        addTagsWithType(metaTags.map((t) => t.tag).toList(), TagType.meta);
+
+        for (final t in [...copyrightTags, ...characterTags, ...artistTags, ...generalTags, ...metaTags]) {
+          final tagIndex = item.tagsList.indexWhere((tt) => tt.fullString == t.tag);
+          if (tagIndex != -1) {
+            item.tagsList[tagIndex].count = t.count;
+          }
+        }
+        item.isUpdated = true;
+        return (item: item, failed: false, error: null);
+      }
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'loadItem',
+        LogTypes.exception,
+        s: s,
+      );
+      return (item: null, failed: true, error: e.toString());
+    }
+  }
+}
+
+List<({String tag, int count})> _tagsFromHtml(List<Element>? elements) {
+  if (elements == null || elements.isEmpty) {
+    return [];
+  }
+
+  final List<({String tag, int count})> tagsWithCount = [];
+  for (final element in elements) {
+    final String? tag = element
+        .getElementsByTagName('a')
+        .firstWhereOrNull((e) => e.text.isNotEmpty && e.text != '?')
+        ?.text;
+    final String? countRawText = element.getElementsByTagName('span').lastWhereOrNull((e) => e.text.isNotEmpty)?.text;
+    final int count = int.tryParse(countRawText ?? '') ?? _parseFormattedNumber(countRawText);
+    if (tag != null) {
+      tagsWithCount.add((
+        tag: tag.replaceAll(' ', '_'),
+        count: count,
+      ));
+    }
+  }
+  return tagsWithCount;
+}
+
+int _parseFormattedNumber(String? text) {
+  if (text == null) {
+    return 0;
+  }
+  final regExp = RegExp(r'(\d+(?:\.\d+)?)([k|K|m|M]?)');
+  final match = regExp.firstMatch(text);
+  if (match != null) {
+    final number = double.parse(match.group(1) ?? '0');
+    final suffix = match.group(2);
+    if (suffix == 'K' || suffix == 'k') {
+      return (number * 1000).toInt();
+    } else if (suffix == 'M' || suffix == 'm') {
+      return (number * 1000000).toInt();
+    }
+  }
+  return 0;
 }

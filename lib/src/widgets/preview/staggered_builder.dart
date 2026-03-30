@@ -48,6 +48,7 @@ class StaggeredBuilder extends StatelessWidget {
         ),
         delegate: SliverChildBuilderDelegate(
           addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false, // ThumbnailCardBuild has its own RepaintBoundary
           childCount: currentFetched.length,
           (context, index) => LayoutBuilder(
             builder: (context, constraints) {
@@ -77,22 +78,21 @@ class StaggeredBuilder extends StatelessWidget {
                 return SizedBox(
                   height: possibleHeight,
                   width: possibleWidth,
-                  // constraints: hasSizeData
-                  //     ? BoxConstraints(minHeight: possibleHeight, maxHeight: possibleHeight, minWidth: possibleWidth, maxWidth: possibleWidth)
-                  //     : BoxConstraints(minHeight: possibleWidth, maxHeight: double.infinity, minWidth: possibleWidth, maxWidth: possibleWidth),
-                  child: ThumbnailCardBuild(
-                    index: index,
-                    item: item,
-                    handler: tab.booruHandler,
-                    scrollController: scrollController,
-                    isHighlighted: ViewerHandler.instance.current.value?.key == item.key,
-                    selectable: true,
-                    selectedIndex: isSelected ? selectedIndex : null,
-                    onSelected: hasSelected ? onSelected : null,
-                    onTap: onTap,
-                    onDoubleTap: onDoubleTap,
-                    onLongPress: onLongPress,
-                    onSecondaryTap: onSecondaryTap,
+                  child: Obx(
+                    () => ThumbnailCardBuild(
+                      index: index,
+                      item: item,
+                      handler: tab.booruHandler,
+                      scrollController: scrollController,
+                      isHighlighted: ViewerHandler.instance.current.value?.key == item.key,
+                      selectable: true,
+                      selectedIndex: isSelected ? selectedIndex : null,
+                      onSelected: hasSelected ? onSelected : null,
+                      onTap: onTap,
+                      onDoubleTap: onDoubleTap,
+                      onLongPress: onLongPress,
+                      onSecondaryTap: onSecondaryTap,
+                    ),
                   ),
                 );
               });

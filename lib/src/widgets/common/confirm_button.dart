@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/gen/strings.g.dart';
+
 class ConfirmButton extends StatelessWidget {
   const ConfirmButton({
-    this.text = 'Confirm',
     this.action,
     this.returnData = true,
     this.withIcon = false,
-    this.customIcon,
     super.key,
   });
 
-  final String text;
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
-  final IconData? customIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +31,8 @@ class ConfirmButton extends StatelessWidget {
             Navigator.of(context).pop(returnData);
           }
         },
-        icon: Icon(withIcon ? (customIcon ?? Icons.check) : null),
-        label: Text(text),
+        icon: const Icon(Icons.check),
+        label: Text(context.loc.confirm),
       );
     }
 
@@ -52,7 +50,7 @@ class ConfirmButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(text),
+      child: Text(context.loc.confirm),
     );
   }
 }

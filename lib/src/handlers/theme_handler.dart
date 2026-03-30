@@ -4,15 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/widgets/root/predictive_back_transition.dart';
 
 class ThemeHandler {
   ThemeHandler({
     required this.theme,
     required this.themeMode,
     required this.isAmoled,
+    required this.fontFamily,
     required this.context,
   }) {
     final platformBrigtness = MediaQuery.platformBrightnessOf(context);
@@ -31,6 +34,7 @@ class ThemeHandler {
   final ThemeItem theme;
   final ThemeMode themeMode;
   final bool isAmoled;
+  final String fontFamily;
   final BuildContext context;
   ColorScheme? lightDynamic;
   ColorScheme? darkDynamic;
@@ -70,6 +74,7 @@ class ThemeHandler {
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(lightColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(lightColorScheme),
+      outlinedButtonTheme: outlinedButtonTheme(lightColorScheme),
       splashFactory: InkSparkle.splashFactory,
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(lightColorScheme),
@@ -107,6 +112,7 @@ class ThemeHandler {
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(darkColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(darkColorScheme),
+      outlinedButtonTheme: outlinedButtonTheme(darkColorScheme),
       splashFactory: InkSparkle.splashFactory,
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(darkColorScheme),
@@ -167,8 +173,21 @@ class ThemeHandler {
     );
   }
 
-  TextTheme textTheme() =>
-      GoogleFonts.notoSansTextTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme);
+  TextTheme textTheme() {
+    final baseTheme = isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme;
+
+    if (fontFamily == 'System') {
+      return baseTheme;
+    }
+
+    try {
+      return baseTheme.apply(
+        fontFamily: GoogleFonts.getFont(fontFamily).fontFamily,
+      );
+    } catch (_) {
+      return baseTheme;
+    }
+  }
 
   TextSelectionThemeData textSelectionTheme(ColorScheme colorScheme) => TextSelectionThemeData(
     cursorColor: colorScheme.secondary,
@@ -185,24 +204,54 @@ class ThemeHandler {
       disabledBackgroundColor: Colors.grey,
       disabledIconColor: Colors.black,
       textStyle: TextStyle(
+        fontFamily: textTheme().bodyMedium!.fontFamily,
         color: accentIsDark ? Colors.white : Colors.black,
         fontSize: 16,
         fontWeight: FontWeight.w600,
       ),
-      fixedSize: const Size(double.infinity, 44),
+      minimumSize: const Size(48, 44),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       splashFactory: InkSparkle.splashFactory,
     ),
   );
 
+  OutlinedButtonThemeData outlinedButtonTheme(ColorScheme colorScheme) => OutlinedButtonThemeData(
+    style:
+        OutlinedButton.styleFrom(
+          side: BorderSide(color: colorScheme.secondary, width: 2.5),
+          foregroundColor: colorScheme.secondary,
+          textStyle: TextStyle(
+            fontFamily: textTheme().bodyMedium!.fontFamily,
+            color: colorScheme.secondary,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          minimumSize: const Size(48, 44),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ).copyWith(
+          side: WidgetStateProperty.resolveWith<BorderSide>(
+            (states) {
+              if (states.contains(WidgetState.disabled)) {
+                return const BorderSide(color: Colors.grey, width: 2.5);
+              }
+
+              return BorderSide(color: colorScheme.secondary, width: 2.5);
+            },
+          ),
+        ),
+  );
+
   AppBarTheme appBarTheme(ColorScheme colorScheme) => AppBarTheme(
     titleTextStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
       color: primaryIsDark ? Colors.white : Colors.black,
       fontSize: 18,
       fontWeight: FontWeight.w600,
     ),
     toolbarTextStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
       color: primaryIsDark ? Colors.white : Colors.black,
       fontSize: 18,
       fontWeight: FontWeight.w600,
@@ -246,11 +295,13 @@ class ThemeHandler {
     fillColor: colorScheme.surfaceContainerHigh,
     filled: true,
     labelStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
       color: isDark ? Colors.white : Colors.black,
       fontSize: 18,
       fontWeight: FontWeight.w500,
     ),
     hintStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
       color: isDark ? Colors.grey[300] : Colors.grey[900],
       fontSize: 18,
       fontWeight: FontWeight.w500,
@@ -283,9 +334,12 @@ class ThemeHandler {
     ),
   );
 
-  MaterialBannerThemeData bannerTheme() => const MaterialBannerThemeData(
+  MaterialBannerThemeData bannerTheme() => MaterialBannerThemeData(
     backgroundColor: Colors.red,
-    contentTextStyle: TextStyle(color: Colors.white),
+    contentTextStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
+      color: Colors.white,
+    ),
   );
 
   CardThemeData cardTheme(ColorScheme colorScheme) => CardThemeData(
@@ -294,17 +348,19 @@ class ThemeHandler {
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   );
 
-  PageTransitionsTheme pageTransitionsTheme() => const PageTransitionsTheme(
+  PageTransitionsTheme pageTransitionsTheme() => PageTransitionsTheme(
     // ZoomPageTransitionsBuilder alternatives:
     // PredictiveBackPageTransitionsBuilder - android only, requires predictive back enabled, still wip
     // FadeForwardsPageTransitionsBuilder - latest material3 spec animation, currently conflicts with modal routes (and stuttering if there is a global restate?)
     builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: ZoomPageTransitionsBuilder(),
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
-      TargetPlatform.linux: ZoomPageTransitionsBuilder(),
-      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+      TargetPlatform.android: SettingsHandler.instance.usePredictiveBack
+          ? const CustomPredictiveBackPageTransitionsBuilder()
+          : const ZoomPageTransitionsBuilder(),
+      TargetPlatform.iOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.fuchsia: const ZoomPageTransitionsBuilder(),
+      TargetPlatform.linux: const ZoomPageTransitionsBuilder(),
+      TargetPlatform.macOS: const CupertinoPageTransitionsBuilder(),
+      TargetPlatform.windows: const ZoomPageTransitionsBuilder(),
     },
   );
 
@@ -413,8 +469,14 @@ class ThemeHandler {
   TabBarThemeData tabBarTheme(ColorScheme colorScheme) => TabBarThemeData(
     labelColor: colorScheme.secondary,
     unselectedLabelColor: isDark ? Colors.grey[300]! : Colors.grey[900]!,
-    labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-    unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+    labelStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
+      fontWeight: FontWeight.w600,
+    ),
+    unselectedLabelStyle: TextStyle(
+      fontFamily: textTheme().bodyMedium!.fontFamily,
+      fontWeight: FontWeight.w400,
+    ),
     indicatorSize: TabBarIndicatorSize.tab,
   );
 

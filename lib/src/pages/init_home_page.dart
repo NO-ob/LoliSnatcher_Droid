@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class InitHomePage extends StatefulWidget {
   const InitHomePage({super.key});
@@ -15,8 +16,8 @@ class _InitHomePageState extends State<InitHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('LoliSnatcher'),
+      appBar: SettingsAppBar(
+        title: settingsHandler.appAlias.locName,
         leading: const Icon(null),
       ),
       body: Center(

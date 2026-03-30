@@ -91,6 +91,7 @@ class ViewerHandler {
   final RxBool displayAppbar = true.obs; // is viewer toolbar visible
   final RxBool isZoomed = false.obs; // is current item zoomed in
   final RxBool isLoaded = false.obs; // is current item loaded
+  final RxBool isStopped = false.obs; // is current item stopped
   final Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view controller value (used by notes renderer)
   final RxBool isFullscreen = false.obs; // is viewing video in fullscreen (mobile app mode)
   final RxBool isDesktopFullscreen = false.obs; // is viewing video in fullscreen (desktop app mode)
@@ -101,6 +102,7 @@ class ViewerHandler {
     displayAppbar.value = true;
     isZoomed.value = false;
     isLoaded.value = false;
+    isStopped.value = false;
     setFullScreenState(false);
     isDesktopFullscreen.value = false;
     viewState.value = null;
@@ -119,6 +121,7 @@ class ViewerHandler {
           final widgetState = state! as ImageViewerState;
           isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isLoaded.value;
+          isStopped.value = widgetState.isStopped.value;
           setFullScreenState(false);
           viewState.value = widgetState.viewController.value;
           break;
@@ -126,12 +129,14 @@ class ViewerHandler {
           final widgetState = state! as VideoViewerState;
           isZoomed.value = widgetState.isZoomed.value;
           isLoaded.value = widgetState.isVideoInited;
+          isStopped.value = widgetState.isStopped.value;
           setFullScreenState(widgetState.chewieController.value?.isFullScreen ?? false);
           viewState.value = widgetState.viewController.value;
           break;
         default:
           isZoomed.value = false;
           isLoaded.value = true;
+          isStopped.value = false;
           setFullScreenState(false);
           viewState.value = null;
           break;
@@ -207,6 +212,20 @@ class ViewerHandler {
     }
   }
 
+  void forceLoadCurrentItem() {
+    final state = (current.value?.key as GlobalKey?)?.currentState;
+    switch (state?.widget) {
+      case ImageViewer():
+        (state as ImageViewerState?)?.forceLoad();
+        break;
+      case VideoViewer():
+        (state as VideoViewerState?)?.forceLoad();
+        break;
+      default:
+        break;
+    }
+  }
+
   void setFullScreenState(bool value) {
     isFullscreen.value = value;
   }
@@ -261,6 +280,18 @@ class ViewerHandler {
     }
 
     isLoaded.value = value;
+
+    if (value) {
+      setStopped(key, false);
+    }
+  }
+
+  void setStopped(Key? key, bool value) {
+    if (key == null || current.value?.key != key || isStopped.value == value) {
+      return;
+    }
+
+    isStopped.value = value;
   }
 
   void toggleToolbar(
@@ -293,10 +324,12 @@ class ViewerHandler {
   Map<String, List<List<MapEntry<String, String>>>> tagPreviewsHistory = {};
 
   void addTagPreview(
-    String tabId,
+    String? tabId,
     String previewId,
     String tag,
   ) {
+    if (tabId == null) return;
+
     if (tagPreviews[tabId] == null) {
       tagPreviews[tabId] = [];
     }
@@ -305,22 +338,28 @@ class ViewerHandler {
   }
 
   void removeTagPreview(
-    String tabId,
+    String? tabId,
     String previewId,
   ) {
+    if (tabId == null) return;
+
     tagPreviews[tabId]?.removeWhere((e) => e.key == previewId);
     updateTagPreviewHistory(tabId);
   }
 
   List<MapEntry<String, String>> currentTagPreviewState(
-    String tabId,
+    String? tabId,
   ) {
+    if (tabId == null) return [];
+
     return tagPreviews[tabId] ?? [];
   }
 
   void updateTagPreviewHistory(
-    String tabId,
+    String? tabId,
   ) {
+    if (tabId == null) return;
+
     // debounce to ignore multiple page pops affecting history more than needed
     Debounce.debounce(
       tag: 'tag_previews_history_update',

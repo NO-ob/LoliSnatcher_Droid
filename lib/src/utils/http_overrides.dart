@@ -4,15 +4,15 @@ import 'dart:io';
 import 'package:flutter_socks_proxy/socks_proxy.dart';
 import 'package:http_proxy/http_proxy.dart';
 
+import 'package:lolisnatcher/src/data/settings/proxy_type.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/pages/settings/network_page.dart';
 
 String systemProxyAddress = '';
 bool addedRootCert = false;
 
 Future<void> initProxy() async {
   final settingsHandler = SettingsHandler.instance;
-  final proxyType = ProxyType.fromName(settingsHandler.proxyType);
+  final proxyType = settingsHandler.proxyType;
 
   if (proxyType.isSystem && (Platform.isAndroid || Platform.isIOS)) {
     final HttpProxy httpProxy = await HttpProxy.createHttpProxy();

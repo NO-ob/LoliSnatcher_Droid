@@ -205,7 +205,6 @@ class TagHandler {
     if (SettingsHandler.instance.path.isNotEmpty) {
       await loadTags();
     }
-    return;
   }
 
   Future<bool> loadTags() async {
