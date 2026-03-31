@@ -33,7 +33,7 @@ class ToolbarAction extends StatelessWidget {
               icon: icon,
               color: onTap != null ? Colors.white : Theme.of(context).colorScheme.onSurface,
               onPressed: onTap,
-              tooltip: tooltip,
+              tooltip: onLongTap != null ? null : tooltip,
             ),
             ?subIcon,
           ],
