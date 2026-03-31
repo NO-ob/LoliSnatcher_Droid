@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/response_error.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
@@ -24,6 +25,36 @@ class InkBunnyHandler extends BooruHandler {
 
   @override
   bool get hasTagSuggestions => true;
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    return [
+      StringMetaTag(name: 'Artist', keyName: 'artist'),
+      StringMetaTag(name: 'Pool', keyName: 'pool'),
+      OrderMetaTag(
+        values: [
+          MetaTagValue(name: 'Creation date', value: 'create_datetime'),
+          MetaTagValue(name: 'Last updated', value: 'last_file_update_datetime'),
+          MetaTagValue(name: 'Views', value: 'views'),
+          MetaTagValue(name: 'Sales (total)', value: 'total_sales'),
+          MetaTagValue(name: 'Sales (print)', value: 'total_print_sales'),
+          MetaTagValue(name: 'Sales (digital)', value: 'total_digital_sales'),
+          MetaTagValue(name: 'Artist name', value: 'username'),
+          MetaTagValue(name: 'Fav date', value: 'fav_datetime'),
+          MetaTagValue(name: 'Fav stars', value: 'fav_stars'),
+          MetaTagValue(name: 'Pool order', value: 'pool_order'),
+          MetaTagValue(name: 'Unread (newest first)', value: 'unread_datetime'),
+          MetaTagValue(name: 'Unread (oldest first)', value: 'unread_datetime_reverse'),
+          MetaTagValue(name: 'Random', value: 'random'),
+        ],
+      ),
+    ];
+  }
+
+  @override
+  String validateTags(String tags) {
+    return tags.trim().split(' ').map(Uri.encodeComponent).join(' ');
+  }
 
   Future<bool> setSessionToken() async {
     //https://inkbunny.net/api_login.php?output_mode=xml&username=guest
@@ -107,7 +138,7 @@ class InkBunnyHandler extends BooruHandler {
     Logger.Inst().log('Got submission ids: $ids', className, 'getSubmissionResponse', LogTypes.booruHandlerInfo);
     try {
       final Uri uri = Uri.parse(
-        "${booru.baseURL}/api_submissions.php?output_mode=json&sid=$sessionToken&submission_ids=${ids.join(",")}",
+        "${booru.baseURL}/api_submissions.php?output_mode=json&sid=$sessionToken&submission_ids=${ids.join(",")}&show_pools=yes",
       );
       final response = await fetchSearch(uri, '');
       Logger.Inst().log(
@@ -178,10 +209,18 @@ class InkBunnyHandler extends BooruHandler {
       for (int i = 0; i < tags.length; i++) {
         currentTags.add(tags[i]['keyword_name'].replaceAll(' ', '_'));
       }
+
+      final pools = current['pools'] ?? [];
+      for (int i = 0; i < pools.length; i++) {
+        final poolId = pools[i]['pool_id'].toString();
+        final poolName = (pools[i]['name'] as String)
+            .replaceAll(RegExp(r'[ \\^$.*+?()\[\]{}|:]'), '_');
+        currentTags.add('pool:$poolId:$poolName');
+      }
       // A submission can have multiple files so a booru item must be made for each of them
       final files = current['files'];
 
-      for (int i = 0; i < files.length; i++) {
+      for (int i = files.length - 1; i >= 0; i--) {
         String sampleURL = files[i]['file_url_screen'],
             thumbURL = files[i]['file_url_preview'],
             fileURL = files[i]['file_url_full'];
@@ -207,7 +246,7 @@ class InkBunnyHandler extends BooruHandler {
           md5String: files[i]['full_file_md5'],
           tagsList: currentTags.map(Tag.new).toList(),
           postURL: getPostURL(current['submission_id'].toString(), i),
-          serverId: current['submission_id'].toString(),
+          serverId: '${current['submission_id']}_$i',
           score: current['favorites_count'],
           postDate: current['create_datetime'].split('.')[0],
           rating: current['rating_name'],
@@ -236,9 +275,10 @@ class InkBunnyHandler extends BooruHandler {
   String makeURL(String tags) {
     String order = '';
     String artist = '';
+    String poolId = '';
     bool random = false;
     final List<String> tagList = tags.split(' ');
-    String tagStr = '';
+    final List<String> textTags = [];
 
     for (int i = 0; i < tagList.length; i++) {
       if (tagList[i].contains('artist%3A')) {
@@ -252,17 +292,22 @@ class InkBunnyHandler extends BooruHandler {
             order = tagList[i].split('%3A')[1];
           }
         }
+      } else if (tagList[i].contains('pool%3A')) {
+        final parts = tagList[i].split('%3A');
+        if (parts.length > 1) poolId = parts[1];
       } else {
-        tagStr += '${tagList[i]}${i < tagList.length - 1 ? ',' : ''}';
+        textTags.add(tagList[i]);
       }
     }
+
+    final String tagStr = textTags.join(',');
 
     //Each search generates a results id, this is then needed to page through the results without running the search again every time because its faster,
     //You can go through the results without a results id like normal but this is how they show it on their api docs: https://wiki.inkbunny.net/wiki/API
     //I have removed the code that was using the results id before we will see how this is without using that.
 
     //The type variable filters by file type so we only fetch those that are supported by the app
-    return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr${artist.isEmpty ? '' : '&username=$artist'}&get_rid=yes&type=1,2,3,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes${order.isEmpty ? '' : '&orderby=$order'}&page=$pageNum";
+    return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr${artist.isEmpty ? '' : '&username=$artist'}${poolId.isEmpty ? '' : '&pool_id=$poolId'}&get_rid=yes&type=1,2,3,4,5,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes${order.isEmpty ? '' : '&orderby=$order'}&page=$pageNum";
   }
 
   @override
