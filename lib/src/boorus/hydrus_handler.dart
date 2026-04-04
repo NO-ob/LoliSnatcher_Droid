@@ -288,22 +288,23 @@ class HydrusHandler extends BooruHandler {
     if (tags.trim().isEmpty) {
       tags = '*';
     }
-    final List<String> tagList = tags.split(',');
+    final List<String> tagList = tags.split(',').map((tag) => tag.trim()).toList();
     int sortType = -1;
     bool ascending = false;
     for (int i = tagList.length - 1; i >= 0; i--) {
       if (tagList[i].contains('sort:')) {
-        sortType = getSortType(tagList[i].split(':')[1]);
-        tagList.remove(tagList[i].trim().toLowerCase());
+        sortType = getSortType(tagList[i].split(':')[1].trim());
+        tagList.removeAt(i);
       } else if (tagList[i].contains('order:asc')) {
         ascending = true;
-        tagList.remove(tagList[i].trim().toLowerCase());
+        tagList.removeAt(i);
       } else if (tagList[i].contains('order:desc')) {
         ascending = false;
-        tagList.remove(tagList[i].trim().toLowerCase());
+        tagList.removeAt(i);
       }
     }
-    return "${booru.baseURL}/get_files/search_files?tags=${jsonEncode(tagList).replaceAll("%22", "'")}${sortType > -1 ? "&file_sort_type=$sortType" : ""}&file_sort_asc=$ascending";
+    final String encodedTags = Uri.encodeComponent(jsonEncode(tagList));
+    return "${booru.baseURL}/get_files/search_files?tags=$encodedTags${sortType > -1 ? "&file_sort_type=$sortType" : ""}&file_sort_asc=$ascending";
   }
 
   int getSortType(String orderString) {
