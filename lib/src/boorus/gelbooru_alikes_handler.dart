@@ -443,6 +443,14 @@ class GelbooruAlikesHandler extends BooruHandler {
             item.tagsList[tagIndex].count = t.count;
           }
         }
+
+        final uploaderElem = html.getElementById('stats')?.getElementsByTagName('a').firstOrNull;
+        if (uploaderElem != null &&
+            uploaderElem.attributes['href']?.isNotEmpty == true &&
+            uploaderElem.attributes['href'] != '#') {
+          item.uploaderName = uploaderElem.text.trim();
+        }
+
         item.isUpdated = true;
         return (item: item, failed: false, error: null);
       }
@@ -494,7 +502,7 @@ class GelbooruAlikesHandler extends BooruHandler {
       ),
       ComparableNumberMetaTag(name: 'Score', keyName: 'score'),
       StringMetaTag(name: 'ID', keyName: 'id'),
-      StringMetaTag(name: 'User', keyName: 'user'),
+      UserMetaTag(),
       // StringMetaTag(name: 'Favourites of user ID (fav:{id})', keyName: 'fav'),
       StringMetaTag(name: 'Parent ID', keyName: 'parent'),
       StringMetaTag(name: 'MD5', keyName: 'md5'),

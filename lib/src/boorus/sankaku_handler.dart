@@ -131,6 +131,7 @@ class SankakuHandler extends BooruHandler {
         rating: current['rating'],
         score: current['total_score'].toString(),
         md5String: current['md5'],
+        uploaderName: current['author']['name'].toString(),
         postDate: postDate,
         postDateFormat: postDateFormat,
       );
@@ -408,7 +409,7 @@ class SankakuHandler extends BooruHandler {
           MetaTagValue(name: 'Unquality', value: 'unquality'),
         ],
       ),
-      StringMetaTag(name: 'User', keyName: 'user'),
+      UserMetaTag(),
       StringMetaTag(name: 'Threshold', keyName: 'threshold'),
       DateMetaTag(
         name: 'Date',

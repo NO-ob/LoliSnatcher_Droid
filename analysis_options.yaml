@@ -71,6 +71,7 @@ linter:
     dangling_library_doc_comments: true
     depend_on_referenced_packages: true
     deprecated_consistency: true
+    deprecated_member_use_from_same_package: true
     empty_catches: true
     empty_constructor_bodies: true
     empty_statements: true

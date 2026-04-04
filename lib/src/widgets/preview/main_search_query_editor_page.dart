@@ -1259,6 +1259,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
               color: context.theme.colorScheme.surfaceContainer,
             ),
             child: Column(
+              crossAxisAlignment: .start,
               children: [
                 Row(
                   children: [
@@ -1284,7 +1285,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
             child: InkWell(
               onTap: () async {
                 switch (tag.type) {
-                  case MetaTagType.date:
+                  case .date:
                     final metaTag = tag as DateMetaTag;
                     final res = await showSingleDatePicker(
                       context,
@@ -1345,7 +1346,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
                                 child: Text(
                                   context.loc.searchBar.free,
                                   style: context.theme.textTheme.bodySmall?.copyWith(
-                                    color: context.theme.colorScheme.primary,
+                                    color: context.theme.colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                               ),
@@ -1356,7 +1357,7 @@ class AddMetatagBottomSheet extends StatelessWidget {
                       ),
                       //
                       switch (tag.type) {
-                        MetaTagType.date => Builder(
+                        .date => Builder(
                           builder: (context) {
                             final metaTag = tag as DateMetaTag;
                             return Row(
@@ -1409,8 +1410,9 @@ class AddMetatagBottomSheet extends StatelessWidget {
                             );
                           },
                         ),
-                        MetaTagType.sort => const Icon(Icons.sort_rounded),
-                        MetaTagType.comparableNumber => Row(
+                        .sort => const Icon(Icons.sort_rounded),
+                        .user => const Icon(Icons.person_outline_rounded),
+                        .comparableNumber => Row(
                           spacing: 2,
                           children: [
                             for (final mode in (tag as MetaTagWithCompareModes).compareModes)
@@ -2075,19 +2077,23 @@ class _MetatagsBlockState extends State<MetatagsBlock> {
                     child: ActionChip(
                       label: Text(tag.name),
                       avatar: switch (tag.type) {
-                        MetaTagType.date => Icon(
+                        .date => Icon(
                           Icons.calendar_month_rounded,
                           color: context.theme.colorScheme.onSurface,
                         ),
-                        MetaTagType.sort => Icon(
+                        .sort => Icon(
                           Icons.sort_rounded,
+                          color: context.theme.colorScheme.onSurface,
+                        ),
+                        .user => Icon(
+                          Icons.person_outline_rounded,
                           color: context.theme.colorScheme.onSurface,
                         ),
                         _ => null,
                       },
                       onPressed: () async {
                         switch (tag.type) {
-                          case MetaTagType.date:
+                          case .date:
                             final metaTag = tag as DateMetaTag;
                             final res = await showSingleDatePicker(
                               context,

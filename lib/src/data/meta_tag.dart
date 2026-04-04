@@ -15,15 +15,17 @@ enum MetaTagType {
   sort,
   string,
   stringFromList,
+  user,
   ;
 
-  bool get isBool => this == MetaTagType.boolean;
-  bool get isComparableNumber => this == MetaTagType.comparableNumber;
-  bool get isDate => this == MetaTagType.date;
-  bool get isNumber => this == MetaTagType.number;
-  bool get isSort => this == MetaTagType.sort;
-  bool get isString => this == MetaTagType.string;
-  bool get isStringFromList => this == MetaTagType.stringFromList;
+  bool get isBool => this == .boolean;
+  bool get isComparableNumber => this == .comparableNumber;
+  bool get isDate => this == .date;
+  bool get isNumber => this == .number;
+  bool get isSort => this == .sort;
+  bool get isString => this == .string;
+  bool get isStringFromList => this == .stringFromList;
+  bool get isUser => this == .user;
 }
 
 abstract class MetaTag {
@@ -34,7 +36,7 @@ abstract class MetaTag {
     this.isFree = false,
   });
 
-  MetaTagType get type => MetaTagType.string;
+  MetaTagType get type => .string;
 
   final String name;
 
@@ -250,7 +252,7 @@ class SortMetaTag extends MetaTagWithValues {
        );
 
   @override
-  MetaTagType get type => MetaTagType.sort;
+  MetaTagType get type => .sort;
 
   // values - score, score:desc, score:asc, date, date:desc, date:asc...
 }
@@ -265,7 +267,7 @@ class OrderMetaTag extends MetaTagWithValues {
        );
 
   @override
-  MetaTagType get type => MetaTagType.sort;
+  MetaTagType get type => .sort;
 }
 
 //
@@ -302,7 +304,7 @@ class DateMetaTag extends MetaTagWithCompareModes {
   final bool supportsRange;
 
   @override
-  MetaTagType get type => MetaTagType.date;
+  MetaTagType get type => .date;
 }
 
 class ComparableNumberMetaTag extends MetaTagWithCompareModes {
@@ -316,7 +318,7 @@ class ComparableNumberMetaTag extends MetaTagWithCompareModes {
   final String valuesDivider;
 
   @override
-  MetaTagType get type => MetaTagType.comparableNumber;
+  MetaTagType get type => .comparableNumber;
 }
 
 //
@@ -329,7 +331,7 @@ class NumberMetaTag extends BasicMetaTag {
   });
 
   @override
-  MetaTagType get type => MetaTagType.number;
+  MetaTagType get type => .number;
 }
 
 class BoolMetaTag extends BasicMetaTag {
@@ -340,7 +342,7 @@ class BoolMetaTag extends BasicMetaTag {
   });
 
   @override
-  MetaTagType get type => MetaTagType.boolean;
+  MetaTagType get type => .boolean;
 }
 
 class StringMetaTag extends BasicMetaTag {
@@ -351,7 +353,7 @@ class StringMetaTag extends BasicMetaTag {
   });
 
   @override
-  MetaTagType get type => MetaTagType.string;
+  MetaTagType get type => .string;
 }
 
 /// Special tag, only used when booru has no metatags data.
@@ -406,6 +408,17 @@ class DanbooruGelbooruRatingMetaTag extends MetaTagWithValues {
            MetaTagValue(name: 'Explicit', value: 'explicit'),
          ],
        );
+}
+
+class UserMetaTag extends StringMetaTag {
+  UserMetaTag({
+    super.name = 'User',
+    super.keyName = 'user',
+    super.isFree = false,
+  });
+
+  @override
+  MetaTagType get type => .user;
 }
 
 class LocalDbSiteMetaTag extends MetaTagWithValues {

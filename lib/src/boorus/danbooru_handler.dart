@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
@@ -142,6 +144,7 @@ class DanbooruHandler extends BooruHandler {
           score: current['score'].toString(),
           sources: (current['source'] != null && current['source'] is String) ? [current['source']] : null,
           md5String: current['md5'].toString(),
+          uploaderName: current['uploader_id'].toString(),
           postDate: dateStr, // 2021-06-17T16:27:45.743-04:00
           postDateFormat: 'iso',
         );
@@ -261,6 +264,35 @@ class DanbooruHandler extends BooruHandler {
     );
   }
 
+  Map<String, String> uploaderNameCache = {};
+  Future<String?> getUploaderName(BooruItem item) async {
+    if (item.uploaderName?.isNotEmpty != true) return null;
+
+    if (uploaderNameCache.containsKey(item.uploaderName)) {
+      return uploaderNameCache[item.uploaderName!];
+    } else if (uploaderNameCache.containsValue(item.uploaderName)) {
+      return item.uploaderName;
+    }
+
+    try {
+      final res = await DioNetwork.get(
+        '${booru.baseURL}/users.json',
+        queryParameters: {
+          'search[id]': item.uploaderName,
+        },
+      );
+      if (res.statusCode != HttpStatus.ok) return null;
+
+      final String? name = (res.data as List).firstOrNull?['name'];
+      if (name?.isNotEmpty == true) {
+        uploaderNameCache[item.uploaderName!] = name!;
+      }
+      return name;
+    } catch (_) {
+      return null;
+    }
+  }
+
   @override
   String? get metatagsCheatSheetLink => 'https://danbooru.donmai.us/wiki_pages/help:cheatsheet';
 
@@ -314,7 +346,7 @@ class DanbooruHandler extends BooruHandler {
         keyName: 'id',
         isFree: true,
       ),
-      StringMetaTag(name: 'User', keyName: 'user'),
+      UserMetaTag(),
       DateMetaTag(
         name: 'Date',
         keyName: 'date',

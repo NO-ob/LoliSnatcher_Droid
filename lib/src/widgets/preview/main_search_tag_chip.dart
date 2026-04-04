@@ -219,12 +219,17 @@ class MainSearchTagChip extends StatelessWidget {
                                       ),
                                       child: Center(
                                         child: switch (metaTag?.type) {
-                                          MetaTagType.sort => Icon(
+                                          .sort => Icon(
                                             Icons.sort,
                                             color: tagColor,
                                             size: 20,
                                           ),
-                                          MetaTagType.date =>
+                                          .user => Icon(
+                                            Icons.person_outline_rounded,
+                                            color: tagColor,
+                                            size: 20,
+                                          ),
+                                          .date =>
                                             metaTag?.keyName == 'date'
                                                 ? Icon(
                                                     Icons.calendar_month,

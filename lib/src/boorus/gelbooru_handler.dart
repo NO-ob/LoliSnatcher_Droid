@@ -125,6 +125,7 @@ class GelbooruHandler extends BooruHandler {
         score: current['score']?.toString(),
         sources: (current['source'] != null && current['source'] is String) ? [current['source']] : null,
         md5String: current['md5']?.toString(),
+        uploaderName: current['owner'],
         postDate: current['created_at']?.toString(), // Fri Jun 18 02:13:45 -0500 2021
         postDateFormat: 'EEE MMM dd HH:mm:ss  yyyy', // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
       );
@@ -386,7 +387,7 @@ class GelbooruHandler extends BooruHandler {
       ),
       ComparableNumberMetaTag(name: 'Score', keyName: 'score'),
       StringMetaTag(name: 'ID', keyName: 'id'),
-      StringMetaTag(name: 'User', keyName: 'user'),
+      UserMetaTag(),
       // StringMetaTag(name: 'Favourites of user ID (fav:{id})', keyName: 'fav'),
       StringMetaTag(name: 'MD5', keyName: 'md5'),
       ComparableNumberMetaTag(name: 'Width', keyName: 'width'),

@@ -71,6 +71,9 @@ extension StringExtras on String {
   String toPascalCase() => toTitleCase().replaceAll(' ', '');
 
   bool toBool() => this == 'true' || this == '1';
+
+  @Deprecated('MOVE THIS TO LOCALIZATION')
+  String get temploc => this;
 }
 
 extension IntExtras on int {

@@ -13,6 +13,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:fpdart/fpdart.dart' show FpdartOnIterable;
 import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/boorus/danbooru_handler.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/pinned_tag.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/preview/main_search_query_editor_page.dart';
@@ -259,6 +261,10 @@ class _TagViewState extends State<TagView> {
             ),
           );
         }
+
+        if (!res.failed) {
+          await getUploaderName();
+        }
       } catch (e) {
         failedUpdate = true;
       }
@@ -267,6 +273,13 @@ class _TagViewState extends State<TagView> {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => parseSortGroupTags(),
       );
+    }
+  }
+
+  Future<void> getUploaderName() async {
+    final usedHandler = possibleBooruHandler ?? handler;
+    if (usedHandler is DanbooruHandler && item.uploaderName?.isNotEmpty == true) {
+      item.uploaderName = await usedHandler.getUploaderName(item) ?? item.uploaderName;
     }
   }
 
@@ -632,28 +645,34 @@ class _TagViewState extends State<TagView> {
     String data, {
     bool canCopy = true,
     bool isLink = false,
+    VoidCallback? onTap,
+    VoidCallback? onLongPress,
+    Widget? trailing,
   }) {
     if (data.isNotEmpty) {
       return ListTile(
-        onTap: canCopy
-            ? () {
-                Clipboard.setData(ClipboardData(text: data));
-                FlashElements.showSnackbar(
-                  context: context,
-                  duration: const Duration(seconds: 2),
-                  title: Text(
-                    'Copied $title to clipboard!',
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  content: Text(
-                    data,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  leadingIcon: Icons.copy,
-                  sideColor: Colors.green,
-                );
-              }
-            : null,
+        onTap:
+            onTap ??
+            (canCopy
+                ? () {
+                    Clipboard.setData(ClipboardData(text: data));
+                    FlashElements.showSnackbar(
+                      context: context,
+                      duration: const Duration(seconds: 2),
+                      title: Text(
+                        context.loc.copiedToClipboard,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      content: Text(
+                        '$title: $data',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      leadingIcon: Icons.copy,
+                      sideColor: Colors.green,
+                    );
+                  }
+                : null),
+        onLongPress: onLongPress,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -693,15 +712,17 @@ class _TagViewState extends State<TagView> {
                 style: const TextStyle(fontSize: 14),
               )
             : null,
-        trailing: isLink
-            ? IconButton(
-                icon: const Icon(Icons.exit_to_app),
-                onPressed: () => launchUrlString(
-                  data,
-                  mode: LaunchMode.externalApplication,
-                ),
-              )
-            : null,
+        trailing:
+            trailing ??
+            (isLink
+                ? IconButton(
+                    icon: const Icon(Icons.exit_to_app),
+                    onPressed: () => launchUrlString(
+                      data,
+                      mode: LaunchMode.externalApplication,
+                    ),
+                  )
+                : null),
       );
     }
 
@@ -1011,7 +1032,52 @@ class _TagViewState extends State<TagView> {
                 const SizedBox(height: kMinInteractiveDimension),
                 infoText(context.loc.tagView.id, itemId),
                 infoText(context.loc.tagView.postURL, item.postURL, isLink: true),
+                //
+                if (item.uploaderName?.isNotEmpty == true)
+                  infoText(
+                    context.loc.tagView.uploader,
+                    item.uploaderName!,
+                    trailing: IgnorePointer(
+                      child: IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {},
+                      ),
+                    ),
+                    onTap: () {
+                      final userMetaTag = searchHandler.currentBooruHandler.availableMetaTags().firstWhereOrNull(
+                        (t) => t is UserMetaTag,
+                      );
+                      if (userMetaTag == null) return;
+
+                      final String tag = userMetaTag.tagBuilder(null, null, item.uploaderName);
+
+                      searchHandler.addTagToSearch(tag);
+                      FlashElements.showSnackbar(
+                        context: context,
+                        duration: const Duration(seconds: 2),
+                        title: Text(context.loc.tagView.addedToCurrentSearch, style: const TextStyle(fontSize: 20)),
+                        content: Text(tag, style: const TextStyle(fontSize: 16)),
+                        leadingIcon: Icons.add,
+                        sideColor: Colors.green,
+                      );
+                    },
+                    onLongPress: () {
+                      if (item.uploaderName?.isNotEmpty != true) return;
+
+                      Clipboard.setData(ClipboardData(text: item.uploaderName!));
+                      FlashElements.showSnackbar(
+                        context: context,
+                        duration: const Duration(seconds: 2),
+                        title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
+                        content: Text(item.uploaderName!, style: const TextStyle(fontSize: 16)),
+                        leadingIcon: Icons.copy,
+                        sideColor: Colors.green,
+                      );
+                    },
+                  ),
+                //
                 infoText(context.loc.tagView.posted, formattedDate, canCopy: false),
+                //
                 ExpansionTile(
                   title: Text(
                     context.loc.tagView.details,
