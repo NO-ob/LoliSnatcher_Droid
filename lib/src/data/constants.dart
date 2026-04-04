@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:lolisnatcher/src/data/update_info.dart';
 
 class Constants {
@@ -22,8 +24,15 @@ class Constants {
   static const String poeditorApiKey = 'e2449bca7b8fb820c96b1b643f2b3553'; // read-only key
 
   // TODO update to newer versions from time to time
-  static const String defaultBrowserUserAgent =
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36';
+  static const String defaultMobileBrowserUserAgent =
+      'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Mobile Safari/537.36';
+  static const String defaultDesktopBrowserUserAgent =
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36';
+  static String get defaultBrowserUserAgent => switch (Platform.operatingSystem) {
+    'android' => defaultMobileBrowserUserAgent,
+    'ios' => defaultMobileBrowserUserAgent,
+    _ => defaultDesktopBrowserUserAgent,
+  };
 
   static const String sankakuAppUserAgent = 'SCChannelApp/4.12 (RNAndroid; black)';
 

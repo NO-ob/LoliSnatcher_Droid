@@ -514,12 +514,16 @@ Future<bool?> askToChangePrefBooru(
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   WidgetSpan(
-                    child: BooruFavicon(selectedBooru),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: BooruFavicon(selectedBooru),
+                    ),
                   ),
                   const TextSpan(text: '?'),
                 ],
               ),
             ),
+            const SizedBox(height: 12),
             RichText(
               text: TextSpan(
                 children: [
@@ -528,10 +532,16 @@ Future<bool?> askToChangePrefBooru(
                     text: initBooru.name,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  WidgetSpan(child: BooruFavicon(initBooru)),
+                  WidgetSpan(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: BooruFavicon(initBooru),
+                    ),
+                  ),
                 ],
               ),
             ),
+            const SizedBox(height: 12),
             RichText(
               text: TextSpan(
                 children: [
@@ -541,23 +551,37 @@ Future<bool?> askToChangePrefBooru(
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   WidgetSpan(
-                    child: BooruFavicon(selectedBooru),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 4),
+                      child: BooruFavicon(selectedBooru),
+                    ),
                   ),
                 ],
               ),
             ),
           ],
           actionButtons: [
-            const CancelButton(withIcon: true),
             ElevatedButton.icon(
-              icon: const Icon(Icons.cancel_outlined),
+              icon: Row(
+                children: [
+                  const Icon(Icons.cancel_outlined),
+                  const SizedBox(width: 4),
+                  BooruFavicon(initBooru),
+                ],
+              ),
               label: Text(context.loc.no),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
             ),
             ElevatedButton.icon(
-              icon: const Icon(Icons.check_circle_outline_rounded),
+              icon: Row(
+                children: [
+                  const Icon(Icons.check_circle_outline_rounded),
+                  const SizedBox(width: 4),
+                  BooruFavicon(selectedBooru),
+                ],
+              ),
               label: Text(context.loc.yes),
               onPressed: () {
                 Navigator.of(context).pop(true);

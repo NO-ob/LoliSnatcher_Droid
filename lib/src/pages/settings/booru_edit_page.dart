@@ -24,6 +24,7 @@ import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/html.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
@@ -196,16 +197,10 @@ class _BooruEditState extends State<BooruEdit> {
               trailingIcon: SizedBox(
                 height: 24,
                 width: 24,
-                child: Image(
-                  image: NetworkImage(booruFaviconController.text),
-                  fit: BoxFit.fill,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.error,
-                    size: 24,
-                    color: Colors.redAccent,
-                  ),
-                  loadingBuilder: (context, child, loadingProgress) =>
-                      loadingProgress == null ? child : const CircularProgressIndicator(),
+                child: BooruFavicon(
+                  null,
+                  customFaviconUrl: booruFaviconController.text,
+                  size: 24,
                 ),
               ),
             ),
@@ -561,28 +556,32 @@ class _BooruEditState extends State<BooruEdit> {
               return AlertDialog(
                 title: Text(context.loc.settings.booruEditor.booruConfigShouldSave),
                 content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: .min,
+                  crossAxisAlignment: .stretch,
+                  spacing: 8,
                   children: [
                     Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: .min,
                       children: [
-                        Image(
-                          image: NetworkImage(booruFaviconController.text),
-                          fit: BoxFit.fill,
-                          errorBuilder: (context, error, stackTrace) => const Icon(
-                            Icons.error,
-                            size: 24,
-                            color: Colors.redAccent,
-                          ),
-                          loadingBuilder: (context, child, loadingProgress) =>
-                              loadingProgress == null ? child : const CircularProgressIndicator(),
+                        BooruFavicon(
+                          null,
+                          customFaviconUrl: booruFaviconController.text,
+                          size: 24,
                         ),
                         const SizedBox(width: 10),
-                        Text('${newBooru.name} (${newBooru.baseURL})'),
+                        Text(
+                          '${newBooru.name} (${newBooru.baseURL})',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
-                    Text(context.loc.settings.booruEditor.booruConfigSelectedType(booruType: newBooru.type!.name)),
+                    Text(
+                      context.loc.settings.booruEditor.booruConfigSelectedType(booruType: newBooru.type!.name),
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ],
                 ),
                 actions: const [
