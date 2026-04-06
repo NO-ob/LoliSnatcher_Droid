@@ -2023,7 +2023,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                     ? null
                     : Container(
                         width: context.mediaSize.width,
-                        height: 50,
+                        height: 52,
                         margin: const EdgeInsets.only(top: 8),
                         child: SettingsBooruDropdown(
                           title: context.loc.booru,
@@ -2203,7 +2203,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                         const SizedBox(height: 8),
                         SizedBox(
                           width: context.mediaSize.width,
-                          height: 50,
+                          height: 52,
                           child: SettingsBooruDropdown(
                             title: context.loc.booru,
                             placeholder: context.loc.tagView.selectBooruToLoad,

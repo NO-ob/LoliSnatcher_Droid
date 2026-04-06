@@ -42,7 +42,7 @@ class MainDrawer extends StatelessWidget {
               children: [
                 SizedBox(
                   width: MediaQuery.sizeOf(context).width,
-                  height: 50,
+                  height: 52,
                   child: SettingsBooruDropdown(
                     value: null,
                     items: boorus,
