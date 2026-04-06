@@ -113,6 +113,7 @@ class GelbooruAlikesHandler extends BooruHandler {
         score: getAttrOrElem(current, 'score')?.toString(),
         sources: getAttrOrElem(current, 'source') != null ? [getAttrOrElem(current, 'source')!] : null,
         md5String: getAttrOrElem(current, 'md5')?.toString(),
+        uploaderName: getAttrOrElem(current, 'creator_id')?.toString(),
         postDate: getAttrOrElem(current, 'created_at')?.toString(), // Fri Jun 18 02:13:45 -0500 2021
         postDateFormat: 'EEE MMM dd HH:mm:ss  yyyy', // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
       );
