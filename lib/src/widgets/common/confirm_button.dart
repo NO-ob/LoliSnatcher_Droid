@@ -7,12 +7,14 @@ class ConfirmButton extends StatelessWidget {
     this.action,
     this.returnData = true,
     this.withIcon = false,
+    this.label,
     super.key,
   });
 
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class ConfirmButton extends StatelessWidget {
           }
         },
         icon: const Icon(Icons.check),
-        label: Text(context.loc.confirm),
+        label: Text(label ?? context.loc.confirm),
       );
     }
 
@@ -50,7 +52,7 @@ class ConfirmButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(context.loc.confirm),
+      child: Text(label ?? context.loc.confirm),
     );
   }
 }

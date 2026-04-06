@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -124,14 +125,24 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
     // TODO doesn't work? maybe something related to android 12?
     final Uri url = await controller.getUrl() ?? WebUri('https://flutter.dev');
     print('Clearing cookies for $url');
-    await cookieManager.deleteCookies(
+    final bool res = await cookieManager.deleteCookies(
       url: WebUri.uri(url),
       webViewController: controller,
     );
+    if (!res) {
+      Logger.Inst().log(
+        'Failed to delete cookies',
+        'WebviewNavigationMenu',
+        'onClearCookies',
+        LogTypes.exception,
+        s: StackTrace.current,
+      );
+    }
+
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(context.loc.webview.navigation.cookiesGone),
+        content: Text(res ? context.loc.webview.navigation.cookiesGone : context.loc.error),
       ),
     );
   }

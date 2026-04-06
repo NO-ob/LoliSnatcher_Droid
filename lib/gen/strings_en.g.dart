@@ -264,6 +264,22 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   /// en: 'Downloads'
   String get downloads => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'Downloads';
 
+  /// en: 's'
+  String get secondsShort => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? 's';
+
+  /// en: 'Leave this page?'
+  String get leaveThisPageQuestion => TranslationOverrides.string(_root.$meta, 'leaveThisPageQuestion', {}) ?? 'Leave this page?';
+
+  /// en: 'This page will close automatically now'
+  String get pageWillCloseAutomatically =>
+      TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'This page will close automatically now';
+
+  /// en: 'Stay'
+  String get stay => TranslationOverrides.string(_root.$meta, 'stay', {}) ?? 'Stay';
+
+  /// en: 'Leave now'
+  String get leave => TranslationOverrides.string(_root.$meta, 'leave', {}) ?? 'Leave now';
+
   late final TranslationsValidationErrorsEn validationErrors = TranslationsValidationErrorsEn.internal(_root);
   late final TranslationsInitEn init = TranslationsInitEn.internal(_root);
   late final TranslationsPermissionsEn permissions = TranslationsPermissionsEn.internal(_root);
@@ -1028,6 +1044,9 @@ class TranslationsWebviewEn {
   String get captchaCheckDescription =>
       TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
       'Possible captcha detected, please solve it and return after you are done';
+
+  /// en: 'Captcha completed'
+  String get captchaCompleted => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? 'Captcha completed';
 
   late final TranslationsWebviewNavigationEn navigation = TranslationsWebviewNavigationEn.internal(_root);
 }
@@ -4907,6 +4926,12 @@ extension on Translations {
           'username' => TranslationOverrides.string(_root.$meta, 'username', {}) ?? 'Username',
           'favourites' => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? 'Favourites',
           'downloads' => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'Downloads',
+          'secondsShort' => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? 's',
+          'leaveThisPageQuestion' => TranslationOverrides.string(_root.$meta, 'leaveThisPageQuestion', {}) ?? 'Leave this page?',
+          'pageWillCloseAutomatically' =>
+            TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'This page will close automatically now',
+          'stay' => TranslationOverrides.string(_root.$meta, 'stay', {}) ?? 'Stay',
+          'leave' => TranslationOverrides.string(_root.$meta, 'leave', {}) ?? 'Leave now',
           'validationErrors.required' => TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? 'Please enter a value',
           'validationErrors.invalid' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? 'Please enter a valid value',
           'validationErrors.invalidNumber' =>
@@ -5272,6 +5297,7 @@ extension on Translations {
           'webview.captchaCheckDescription' =>
             TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
                 'Possible captcha detected, please solve it and return after you are done',
+          'webview.captchaCompleted' => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? 'Captcha completed',
           'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Enter a URL',
           'webview.navigation.enterCustomUrl' =>
             TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Enter custom URL',
@@ -5724,6 +5750,9 @@ extension on Translations {
           'settings.video.mpvHWDEC' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvHWDEC', {}) ?? 'MPV: HWDEC',
           'settings.video.videoCacheMode' => TranslationOverrides.string(_root.$meta, 'settings.video.videoCacheMode', {}) ?? 'Video cache mode',
           'settings.video.cacheModes.title' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.title', {}) ?? 'Video cache modes',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModes.streamMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamMode', {}) ??
                 '- Stream - Don\'t cache, start playing as soon as possible',
@@ -5741,9 +5770,6 @@ extension on Translations {
                 '[Warning]: On desktop Stream mode can work incorrectly for some Boorus.',
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Stream',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Cache',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Stream+Cache',
@@ -6647,6 +6673,9 @@ extension on Translations {
           'mediaPreviews.copiedFileURL' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.copiedFileURL', {}) ?? 'Copied file URL to clipboard!',
           'viewer.tutorial.images' => TranslationOverrides.string(_root.$meta, 'viewer.tutorial.images', {}) ?? 'Images',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.tutorial.tapLongTapToggleImmersive' =>
             TranslationOverrides.string(_root.$meta, 'viewer.tutorial.tapLongTapToggleImmersive', {}) ?? 'Tap/Long tap: toggle immersive mode',
           'viewer.tutorial.doubleTapFitScreen' =>
@@ -6658,9 +6687,6 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reachedLastLoadedItem', {}) ?? 'Reached the Last loaded Item',
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Pause',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Start',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Unfavourite',
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Deselect',
           'viewer.appBar.reloadWithScaling' =>

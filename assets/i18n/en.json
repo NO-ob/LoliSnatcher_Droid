@@ -71,6 +71,14 @@
     "username": "Username",
     "favourites": "Favourites",
     "downloads": "Downloads",
+    "secondsShort": "s",
+    "minutesShort": "m",
+    "hoursShort": "h",
+    "daysShort": "d",
+    "leaveThisPageQuestion": "Leave this page?",
+    "pageWillCloseAutomatically": "This page will close automatically",
+    "stay": "Stay",
+    "leaveNow": "Leave now",
     "validationErrors": {
         "required": "Please enter a value",
         "invalid": "Please enter a valid value",
@@ -338,6 +346,7 @@
         "notSupportedOnDevice": "Not supported on this device",
         "captcha": "Captcha",
         "captchaCheckDescription": "Possible captcha detected, please solve it and return after you are done",
+        "captchaCompleted": "Captcha completed",
         "navigation": {
             "enterUrlLabel": "Enter a URL",
             "enterCustomUrl": "Enter custom URL",

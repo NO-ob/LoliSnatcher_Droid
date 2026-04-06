@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/widgets/dialogs/timed_leave_dialog.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class Tools {
@@ -220,6 +221,21 @@ class Tools {
 
   static const String captchaCheckHeader = 'LSCaptchaCheck';
 
+  static bool hasCaptchaStrings(String host, String content) {
+    final Map<String, List<String>> knownCaptchaStrings = {
+      // TODO add multiple strings for each, then try to find as much as possible and decide if it's a captcha based on the ratio of found/total
+      'booru.allthefallen.moe': ['processChallenge'],
+      'derpibooru.org': ['derpi-challenge'],
+    };
+
+    final List<String>? stringsToFind = knownCaptchaStrings.entries
+        .firstWhereOrNull((e) => host.contains(e.key))
+        ?.value;
+
+    if (stringsToFind == null) return false;
+    return stringsToFind.any((t) => content.contains(t));
+  }
+
   static Future<bool> checkForCaptcha(Response? response, Uri uri, {String? customUserAgent}) async {
     if (captchaScreenActive || isTestMode || response?.requestOptions.headers.containsKey(captchaCheckHeader) == true) {
       return false;
@@ -227,26 +243,31 @@ class Tools {
 
     final String host = uri.host;
 
-    final Map<String, List<String>> knownCaptchaStrings = {
-      // TODO add multiple strings for each, then try to find as much as possible and decide if it's a captcha based on the ratio of found/total
-      'booru.allthefallen.moe': [
-        'processChallenge',
-      ],
-      'derpibooru.org': [
-        'derpi-challenge',
-      ],
-    };
-    final List<String>? stringsToFind = knownCaptchaStrings.entries
-        .firstWhereOrNull((e) => host.contains(e.key))
-        ?.value;
-    final bool hasCaptchaContent = (stringsToFind == null || response?.data is! String)
-        ? false
-        : stringsToFind.any((t) => response?.data.toString().contains(t) ?? false);
+    final bool hasCaptchaContent = hasCaptchaStrings(host, response?.data.toString() ?? '');
 
     if (isOnPlatformWithWebviewSupport &&
         (response?.statusCode == HttpStatus.forbidden ||
             response?.statusCode == HttpStatus.serviceUnavailable ||
             hasCaptchaContent)) {
+      // delete invalid cloudflare cookie
+      final webUri = WebUri('${uri.scheme}://$host');
+      final bool res =
+          await CookieManager.instance(
+            webViewEnvironment: webViewEnvironment,
+          ).deleteCookie(
+            url: webUri,
+            name: 'cf_clearance',
+          );
+      if (!res) {
+        Logger.Inst().log(
+          'Failed to delete cookie',
+          'Tools',
+          'checkForCaptcha',
+          LogTypes.exception,
+          s: StackTrace.current,
+        );
+      }
+
       captchaScreenActive = true;
       await Navigator.push(
         NavigationHandler.instance.navContext,
@@ -256,6 +277,41 @@ class Tools {
             userAgent: customUserAgent,
             title: context.loc.webview.captcha,
             subtitle: context.loc.webview.captchaCheckDescription,
+            onLoadStop: (context, controller, url) async {
+              // close cloudflare captcha automatically
+              if (url == null) return;
+
+              await Future.delayed(const Duration(milliseconds: 500));
+
+              final CookieManager cookieManager = CookieManager.instance(webViewEnvironment: webViewEnvironment);
+              final List<Cookie> cookies = await cookieManager.getCookies(url: url);
+              final bool hasClearanceCookie = [
+                ...cookies,
+                ...?globalWindowsCookies[url.host],
+              ].any((c) => c.name == 'cf_clearance');
+
+              final String? htmlContent = await controller.evaluateJavascript(
+                source: 'window.document.documentElement.outerHTML;',
+              );
+
+              if (htmlContent == null) return;
+
+              final bool isCloudflareChallengeActive =
+                  htmlContent.contains('/cdn-cgi/challenge-platform/') ||
+                  htmlContent.contains('id="cf-challenge-') ||
+                  htmlContent.contains('cf-browser-verification');
+              final bool isKnownCaptchaRunning = hasCaptchaStrings(url.host, htmlContent);
+              if (context.mounted && hasClearanceCookie && !isCloudflareChallengeActive && !isKnownCaptchaRunning) {
+                // allow user to stay in webview through a dialog, in case of false positives, otherwise leave after a few seconds
+                final bool res = await showTimedLeaveDialog(
+                  context,
+                  title: context.loc.webview.captchaCompleted,
+                  icon: const Icon(Icons.thumb_up_alt_rounded),
+                  duration: const Duration(seconds: 4),
+                );
+                if (res) Navigator.of(context).pop();
+              }
+            },
           ),
         ),
       );

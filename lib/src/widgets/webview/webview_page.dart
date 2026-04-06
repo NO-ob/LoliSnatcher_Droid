@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -19,6 +20,7 @@ class InAppWebviewView extends StatefulWidget {
     this.userAgent,
     this.title,
     this.subtitle,
+    this.onLoadStop,
     super.key,
   });
 
@@ -26,6 +28,7 @@ class InAppWebviewView extends StatefulWidget {
   final String? userAgent;
   final String? title;
   final String? subtitle;
+  final void Function(BuildContext context, InAppWebViewController controller, WebUri? url)? onLoadStop;
 
   @override
   State<InAppWebviewView> createState() => _InAppWebviewViewState();
@@ -53,6 +56,8 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
       useHybridComposition: true,
       allowsInlineMediaPlayback: true,
       useShouldInterceptAjaxRequest: false,
+      thirdPartyCookiesEnabled: true,
+      javaScriptCanOpenWindowsAutomatically: true,
     );
 
     if (Platform.isAndroid || Platform.isIOS) {
@@ -148,6 +153,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
                   loadingPercentage = 100;
                   saveCookiesOnWidnows(controller, url);
                 });
+                widget.onLoadStop?.call(context, controller, url);
               },
               onUpdateVisitedHistory: (controller, url, isReload) {
                 setState(() {
@@ -168,7 +174,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
               value: loadingPercentage / 100.0,
             ),
           //
-          if (Platform.isWindows && !hideSubtitle)
+          if (kDebugMode && !hideSubtitle)
             Positioned(
               top: MediaQuery.paddingOf(context).top + 8,
               left: 8,
@@ -225,10 +231,10 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
             ),
           if (widget.subtitle != null && !hideSubtitle)
             Positioned(
-              bottom: MediaQuery.paddingOf(context).bottom + 8,
-              left: 8,
+              bottom: MediaQuery.paddingOf(context).bottom,
               child: Container(
                 width: MediaQuery.sizeOf(context).width - 16,
+                margin: const EdgeInsets.all(8),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
@@ -243,12 +249,13 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
                   ],
                 ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: .min,
+                  mainAxisAlignment: .start,
+                  spacing: 8,
                   children: [
-                    Flexible(
+                    Expanded(
                       child: Text(
-                        widget.subtitle!,
+                        widget.subtitle ?? '',
                         style: TextStyle(
                           fontSize: 14,
                           color: Theme.of(context).colorScheme.onSurface,
@@ -266,6 +273,20 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
                     ),
                   ],
                 ),
+              ),
+            ),
+          //
+          if (widget.subtitle != null && hideSubtitle)
+            Positioned(
+              bottom: MediaQuery.paddingOf(context).bottom + 20,
+              right: 20,
+              child: IconButton.filled(
+                icon: const Icon(Icons.info_outline),
+                onPressed: () {
+                  setState(() {
+                    hideSubtitle = false;
+                  });
+                },
               ),
             ),
         ],

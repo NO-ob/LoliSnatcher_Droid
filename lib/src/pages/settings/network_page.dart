@@ -9,6 +9,7 @@ import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/settings/proxy_type.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -198,12 +199,29 @@ class _NetworkPageState extends State<NetworkPage> {
                   SettingsButton(
                     name:
                         '${cookie.name} = ${cookie.value}${cookie.expiresDate != null ? '\nExpires: ${DateTime.fromMillisecondsSinceEpoch(cookie.expiresDate!)}' : ''}',
-                    action: () {
-                      CookieManager.instance(webViewEnvironment: webViewEnvironment).deleteCookie(
-                        url: WebUri(selectedBooru!.baseURL!),
-                        name: cookie.name,
-                      );
+                    action: () async {
+                      final bool res = await CookieManager.instance(webViewEnvironment: webViewEnvironment)
+                          .deleteCookie(
+                            url: WebUri(selectedBooru!.baseURL!),
+                            name: cookie.name,
+                          );
                       globalWindowsCookies[selectedBooru!.baseURL!]?.remove(cookie);
+
+                      if (!res) {
+                        Logger.Inst().log(
+                          'Failed to delete cookie',
+                          'NetworkPage',
+                          'deleteCookie',
+                          LogTypes.exception,
+                          s: StackTrace.current,
+                        );
+                        FlashElements.showSnackbar(
+                          context: context,
+                          title: Text(context.loc.error),
+                        );
+                        return;
+                      }
+
                       selectedBooruCookies.removeAt(selectedBooruCookies.indexOf(cookie));
                       setState(() {});
                       FlashElements.showSnackbar(
@@ -224,10 +242,26 @@ class _NetworkPageState extends State<NetworkPage> {
                 ),
                 action: () async {
                   if (selectedBooru != null) {
-                    await CookieManager.instance(
+                    final bool res = await CookieManager.instance(
                       webViewEnvironment: webViewEnvironment,
                     ).deleteCookies(url: WebUri(selectedBooru!.baseURL!));
                     globalWindowsCookies[selectedBooru!.baseURL!]?.clear();
+
+                    if (!res) {
+                      Logger.Inst().log(
+                        'Failed to delete cookies',
+                        'NetworkPage',
+                        'deleteCookies',
+                        LogTypes.exception,
+                        s: StackTrace.current,
+                      );
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(context.loc.error),
+                      );
+                      return;
+                    }
+
                     FlashElements.showSnackbar(
                       context: context,
                       title: Text(

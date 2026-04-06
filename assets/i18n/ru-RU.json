@@ -71,6 +71,14 @@
     "username": "Имя пользователя",
     "favourites": "Избранное",
     "downloads": "Скачанное",
+    "secondsShort": "с",
+    "minutesShort": "м",
+    "hoursShort": "ч",
+    "daysShort": "д",
+    "leaveThisPageQuestion": "Покинуть эту страницу?",
+    "pageWillCloseAutomatically": "Страница закроется автоматически",
+    "stay": "Остаться",
+    "leaveNow": "Покинуть сейчас",
     "validationErrors": {
         "required": "Введи значение",
         "invalid": "Введи валидное значение",
@@ -338,6 +346,7 @@
         "notSupportedOnDevice": "Не поддерживается на этом устройстве",
         "captcha": "Капча",
         "captchaCheckDescription": "Обнаружена возможная капча. Пожалуйста реши ее и вернись обратно после выполнения",
+        "captchaCompleted": "Капча выполнена",
         "navigation": {
             "enterUrlLabel": "Ввести ссылку",
             "enterCustomUrl": "Ввести ссылку",

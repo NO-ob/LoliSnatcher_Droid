@@ -7,12 +7,14 @@ class CancelButton extends StatelessWidget {
     this.action,
     this.returnData,
     this.withIcon = false,
+    this.label,
     super.key,
   });
 
   final VoidCallback? action;
   final dynamic returnData;
   final bool withIcon;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class CancelButton extends StatelessWidget {
           }
         },
         icon: const Icon(Icons.keyboard_return_rounded),
-        label: Text(context.loc.cancel),
+        label: Text(label ?? context.loc.cancel),
       );
     }
 
@@ -56,7 +58,7 @@ class CancelButton extends StatelessWidget {
           Navigator.of(context).pop(returnData);
         }
       },
-      child: Text(context.loc.cancel),
+      child: Text(label ?? context.loc.cancel),
     );
   }
 }

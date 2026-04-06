@@ -192,6 +192,8 @@ class TranslationsRuRu extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get downloads => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'Скачанное';
   @override
+  String get secondsShort => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? 'с';
+  @override
   late final _TranslationsValidationErrorsRuRu validationErrors = _TranslationsValidationErrorsRuRu._(_root);
   @override
   late final _TranslationsInitRuRu init = _TranslationsInitRuRu._(_root);
@@ -3938,6 +3940,7 @@ extension on TranslationsRuRu {
           'username' => TranslationOverrides.string(_root.$meta, 'username', {}) ?? 'Имя пользователя',
           'favourites' => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? 'Избранное',
           'downloads' => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'Скачанное',
+          'secondsShort' => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? 'с',
           'validationErrors.required' => TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? 'Введи значение',
           'validationErrors.invalid' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? 'Введи валидное значение',
           'validationErrors.invalidNumber' =>
@@ -4808,11 +4811,11 @@ extension on TranslationsRuRu {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
-          'settings.video.cacheModeValues.stream' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.cacheModeValues.stream' =>
+            TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Потоковый+Кэш',
@@ -5766,10 +5769,10 @@ extension on TranslationsRuRu {
           'viewer.appBar.reachedLastLoadedItem' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reachedLastLoadedItem', {}) ?? 'Достигнут последний загруженный элемент',
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Пауза',
-          'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Старт',
           _ => null,
         } ??
         switch (path) {
+          'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Старт',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Удалить из избранного',
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',
           'viewer.appBar.reloadWithScaling' =>
