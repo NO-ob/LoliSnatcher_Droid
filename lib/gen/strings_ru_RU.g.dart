@@ -194,6 +194,21 @@ class TranslationsRuRu extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get secondsShort => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? 'с';
   @override
+  String get minutesShort => TranslationOverrides.string(_root.$meta, 'minutesShort', {}) ?? 'м';
+  @override
+  String get hoursShort => TranslationOverrides.string(_root.$meta, 'hoursShort', {}) ?? 'ч';
+  @override
+  String get daysShort => TranslationOverrides.string(_root.$meta, 'daysShort', {}) ?? 'д';
+  @override
+  String get leaveThisPageQuestion => TranslationOverrides.string(_root.$meta, 'leaveThisPageQuestion', {}) ?? 'Покинуть эту страницу?';
+  @override
+  String get pageWillCloseAutomatically =>
+      TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'Страница закроется автоматически';
+  @override
+  String get stay => TranslationOverrides.string(_root.$meta, 'stay', {}) ?? 'Остаться';
+  @override
+  String get leaveNow => TranslationOverrides.string(_root.$meta, 'leaveNow', {}) ?? 'Покинуть сейчас';
+  @override
   late final _TranslationsValidationErrorsRuRu validationErrors = _TranslationsValidationErrorsRuRu._(_root);
   @override
   late final _TranslationsInitRuRu init = _TranslationsInitRuRu._(_root);
@@ -842,6 +857,8 @@ class _TranslationsWebviewRuRu extends TranslationsWebviewEn {
   String get captchaCheckDescription =>
       TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
       'Обнаружена возможная капча. Пожалуйста реши ее и вернись обратно после выполнения';
+  @override
+  String get captchaCompleted => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? 'Капча выполнена';
   @override
   late final _TranslationsWebviewNavigationRuRu navigation = _TranslationsWebviewNavigationRuRu._(_root);
 }
@@ -3941,6 +3958,14 @@ extension on TranslationsRuRu {
           'favourites' => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? 'Избранное',
           'downloads' => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'Скачанное',
           'secondsShort' => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? 'с',
+          'minutesShort' => TranslationOverrides.string(_root.$meta, 'minutesShort', {}) ?? 'м',
+          'hoursShort' => TranslationOverrides.string(_root.$meta, 'hoursShort', {}) ?? 'ч',
+          'daysShort' => TranslationOverrides.string(_root.$meta, 'daysShort', {}) ?? 'д',
+          'leaveThisPageQuestion' => TranslationOverrides.string(_root.$meta, 'leaveThisPageQuestion', {}) ?? 'Покинуть эту страницу?',
+          'pageWillCloseAutomatically' =>
+            TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'Страница закроется автоматически',
+          'stay' => TranslationOverrides.string(_root.$meta, 'stay', {}) ?? 'Остаться',
+          'leaveNow' => TranslationOverrides.string(_root.$meta, 'leaveNow', {}) ?? 'Покинуть сейчас',
           'validationErrors.required' => TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? 'Введи значение',
           'validationErrors.invalid' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? 'Введи валидное значение',
           'validationErrors.invalidNumber' =>
@@ -4323,6 +4348,7 @@ extension on TranslationsRuRu {
           'webview.captchaCheckDescription' =>
             TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
                 'Обнаружена возможная капча. Пожалуйста реши ее и вернись обратно после выполнения',
+          'webview.captchaCompleted' => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? 'Капча выполнена',
           'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Ввести ссылку',
           'webview.navigation.enterCustomUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Ввести ссылку',
           'webview.navigation.navigateTo' =>
@@ -4791,6 +4817,9 @@ extension on TranslationsRuRu {
           'settings.video.mpvUseHardwareAcceleration' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.mpvUseHardwareAcceleration', {}) ?? 'MPV: использовать аппаратное ускорение',
           'settings.video.mpvVO' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvVO', {}) ?? 'MPV: VO',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.mpvHWDEC' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvHWDEC', {}) ?? 'MPV: HWDEC',
           'settings.video.videoCacheMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoCacheMode', {}) ?? 'Режим кэширования видео',
@@ -4811,9 +4840,6 @@ extension on TranslationsRuRu {
           'settings.video.cacheModes.desktopWarning' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Предупреждение]: На компьютерах потоковый режим может работать некорректно для некоторых сайтов.',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModeValues.stream' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Потоковый',
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Кэш',
@@ -5753,6 +5779,9 @@ extension on TranslationsRuRu {
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Добавить новый сайт',
           'mediaPreviews.help' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.help', {}) ?? 'Помощь',
           'mediaPreviews.settings' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? 'Настройки',
+          _ => null,
+        } ??
+        switch (path) {
           'mediaPreviews.restoringPreviousSession' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? 'Восстановление предыдущей сессии…',
           'mediaPreviews.copiedFileURL' =>
@@ -5769,9 +5798,6 @@ extension on TranslationsRuRu {
           'viewer.appBar.reachedLastLoadedItem' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reachedLastLoadedItem', {}) ?? 'Достигнут последний загруженный элемент',
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Пауза',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Старт',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Удалить из избранного',
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Снять выбор',

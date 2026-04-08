@@ -165,7 +165,7 @@ class _TimedLeaveDialogContentState extends State<_TimedLeaveDialogContent> with
                 ConfirmButton(
                   withIcon: true,
                   action: () => Navigator.of(context).pop(true),
-                  label: context.loc.leave,
+                  label: context.loc.leaveNow,
                 ),
               ],
             ),

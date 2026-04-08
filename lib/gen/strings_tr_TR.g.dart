@@ -146,7 +146,7 @@ class TranslationsTrTr extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get discord => TranslationOverrides.string(_root.$meta, 'discord', {}) ?? 'Discord';
   @override
-  String get visitOurDiscord => TranslationOverrides.string(_root.$meta, 'visitOurDiscord', {}) ?? 'Discord sunucumuzu ziyaret edin';
+  String get visitOurDiscord => TranslationOverrides.string(_root.$meta, 'visitOurDiscord', {}) ?? 'Discord sunucumuzu ziyaret et';
   @override
   String get item => TranslationOverrides.string(_root.$meta, 'item', {}) ?? 'Öge';
   @override
@@ -826,6 +826,12 @@ class _TranslationsWebviewTrTr extends TranslationsWebviewEn {
   @override
   String get notSupportedOnDevice => TranslationOverrides.string(_root.$meta, 'webview.notSupportedOnDevice', {}) ?? 'Bu cihazda desteklenmiyor';
   @override
+  String get captcha => TranslationOverrides.string(_root.$meta, 'webview.captcha', {}) ?? 'Captcha';
+  @override
+  String get captchaCheckDescription =>
+      TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
+      'Olası bir captcha algılandı, lütfen bunu çöz ve bitirdikten sonra geri dön';
+  @override
   late final _TranslationsWebviewNavigationTrTr navigation = _TranslationsWebviewNavigationTrTr._(_root);
 }
 
@@ -1136,6 +1142,11 @@ class _TranslationsTagViewTrTr extends TranslationsTagViewEn {
   String get addToSearch => TranslationOverrides.string(_root.$meta, 'tagView.addToSearch', {}) ?? 'Aramaya ekle';
   @override
   String get addedToSearchBar => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Arama çubuğuna eklendi:';
+  @override
+  String get excludeFromSearch => TranslationOverrides.string(_root.$meta, 'tagView.excludeFromSearch', {}) ?? 'Aramadan Hariç Tut';
+  @override
+  String get exclusionAddedToSearchBar =>
+      TranslationOverrides.string(_root.$meta, 'tagView.exclusionAddedToSearchBar', {}) ?? 'Arama çubuğuna hariç tutma eklendi:';
   @override
   String get addToMarked => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'İşaretlenenlere ekle';
   @override
@@ -1551,7 +1562,7 @@ class _TranslationsTagTypeTrTr extends TranslationsTagTypeEn {
   @override
   String get species => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? 'Tür';
   @override
-  String get none => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'Yok (Genel)';
+  String get none => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'Yok/Genel';
 }
 
 // Path: tabs.filters
@@ -1952,7 +1963,7 @@ class _TranslationsSettingsInterfaceTrTr extends TranslationsSettingsInterfaceEn
   @override
   String get previewDisplayFallbackHelp =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayFallbackHelp', {}) ??
-      'Kademeli (Staggered) seçeneği mümkün olmadığında bu kullanılacaktır';
+      'Kademeli seçeneği mümkün olmadığında bu kullanılacaktır';
   @override
   String get dontScaleImages => TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImages', {}) ?? 'Görselleri ölçeklendirme';
   @override
@@ -2430,7 +2441,7 @@ class _TranslationsSettingsDatabaseTrTr extends TranslationsSettingsDatabaseEn {
       TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ?? 'Desteklenen booru\'lardan etiket türlerini çeker';
   @override
   String get tagTypeFetchingWarning =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'İstek sınırı (rate limit) aşımına neden olabilir';
+      TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'İstek sınırı aşımına neden olabilir';
   @override
   String get deleteDatabase => TranslationOverrides.string(_root.$meta, 'settings.database.deleteDatabase', {}) ?? 'Veritabanını sil';
   @override
@@ -2762,7 +2773,7 @@ class _TranslationsSettingsPrivacyTrTr extends TranslationsSettingsPrivacyEn {
       TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
       'Klavyenin yazma geçmişini kaydetmesini engeller.\nÇoğu metin girişi için geçerlidir';
   @override
-  String get appDisplayName => TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'Uygulama görünen adı';
+  String get appDisplayName => TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'Uygulamanın görünen adı';
   @override
   String get appDisplayNameDescription =>
       TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayNameDescription', {}) ??
@@ -2975,7 +2986,7 @@ class _TranslationsSettingsItemFiltersTrTr extends TranslationsSettingsItemFilte
   @override
   String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'İndirilen ögeleri kaldır';
   @override
-  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Yapay zeka (AI) ögelerini kaldır';
+  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'AI ögelerini kaldır';
 }
 
 // Path: settings.sync
@@ -3156,7 +3167,7 @@ class _TranslationsSettingsAboutTrTr extends TranslationsSettingsAboutEn {
   @override
   String get appDescription =>
       TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ??
-      'LoliSnatcher açık kaynaklıdır ve GPLv3 ile lisanslanmıştır: Kaynak kodu GitHub\'da mevcuttur. Lütfen karşılaştığın sorunları veya özellik isteklerini deponun (repo) \'issues\' (sorunlar) kısmından bildir.';
+      'LoliSnatcher açık kaynaklıdır ve GPLv3 ile lisanslanmıştır: Kaynak kodu GitHub\'da mevcuttur. Lütfen karşılaştığın sorunları veya özellik isteklerini repo\'nun issues kısmından bildir.';
   @override
   String get appOnGitHub => TranslationOverrides.string(_root.$meta, 'settings.about.appOnGitHub', {}) ?? 'GitHub\'da LoliSnatcher';
   @override
@@ -3176,7 +3187,7 @@ class _TranslationsSettingsAboutTrTr extends TranslationsSettingsAboutEn {
   @override
   String get releasesMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ??
-      'En güncel sürümü ve tüm sürüm notlarını GitHub Sürümler (Releases) sayfasında bulabilirsin:';
+      'En güncel sürümü ve tüm sürüm notlarını GitHub Releases sayfasında bulabilirsin:';
   @override
   String get licenses => TranslationOverrides.string(_root.$meta, 'settings.about.licenses', {}) ?? 'Lisanslar';
 }
@@ -3208,7 +3219,7 @@ class _TranslationsSettingsCheckForUpdatesTrTr extends TranslationsSettingsCheck
   @override
   String get currentVersion => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.currentVersion', {}) ?? 'Mevcut sürüm';
   @override
-  String get changelog => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.changelog', {}) ?? 'Sürüm Günlüğü (Changelog)';
+  String get changelog => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.changelog', {}) ?? 'Sürüm Günlüğü';
   @override
   String get visitPlayStore => TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitPlayStore', {}) ?? 'Play Store\'u ziyaret et';
   @override
@@ -3886,7 +3897,7 @@ extension on TranslationsTrTr {
           'pause' => TranslationOverrides.string(_root.$meta, 'pause', {}) ?? 'Duraklat',
           'resume' => TranslationOverrides.string(_root.$meta, 'resume', {}) ?? 'Devam',
           'discord' => TranslationOverrides.string(_root.$meta, 'discord', {}) ?? 'Discord',
-          'visitOurDiscord' => TranslationOverrides.string(_root.$meta, 'visitOurDiscord', {}) ?? 'Discord sunucumuzu ziyaret edin',
+          'visitOurDiscord' => TranslationOverrides.string(_root.$meta, 'visitOurDiscord', {}) ?? 'Discord sunucumuzu ziyaret et',
           'item' => TranslationOverrides.string(_root.$meta, 'item', {}) ?? 'Öge',
           'select' => TranslationOverrides.string(_root.$meta, 'select', {}) ?? 'Seç',
           'selectAll' => TranslationOverrides.string(_root.$meta, 'selectAll', {}) ?? 'Tümünü seç',
@@ -4283,6 +4294,10 @@ extension on TranslationsTrTr {
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Webview',
           'webview.notSupportedOnDevice' =>
             TranslationOverrides.string(_root.$meta, 'webview.notSupportedOnDevice', {}) ?? 'Bu cihazda desteklenmiyor',
+          'webview.captcha' => TranslationOverrides.string(_root.$meta, 'webview.captcha', {}) ?? 'Captcha',
+          'webview.captchaCheckDescription' =>
+            TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
+                'Olası bir captcha algılandı, lütfen bunu çöz ve bitirdikten sonra geri dön',
           'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Bir URL gir',
           'webview.navigation.enterCustomUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Özel URL gir',
           'webview.navigation.navigateTo' =>
@@ -4491,7 +4506,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayFallback', {}) ?? 'Yedek önizleme görünümü',
           'settings.interface.previewDisplayFallbackHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayFallbackHelp', {}) ??
-                'Kademeli (Staggered) seçeneği mümkün olmadığında bu kullanılacaktır',
+                'Kademeli seçeneği mümkün olmadığında bu kullanılacaktır',
           'settings.interface.dontScaleImages' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImages', {}) ?? 'Görselleri ölçeklendirme',
           'settings.interface.dontScaleImagesSubtitle' =>
@@ -4772,13 +4787,13 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[Uyarı]: Masaüstünde Akış modu bazı Booru\'lar için hatalı çalışabilir.',
           'settings.video.cacheModeValues.stream' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'Akış',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.cacheModeValues.cache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'Önbellek',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'Akış+Önbellek',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.videoBackendModeValues.normal' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoBackendModeValues.normal', {}) ?? 'Varsayılan',
           'settings.video.videoBackendModeValues.mpv' =>
@@ -4861,8 +4876,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingInfo', {}) ??
                 'Desteklenen booru\'lardan etiket türlerini çeker',
           'settings.database.tagTypeFetchingWarning' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ??
-                'İstek sınırı (rate limit) aşımına neden olabilir',
+            TranslationOverrides.string(_root.$meta, 'settings.database.tagTypeFetchingWarning', {}) ?? 'İstek sınırı aşımına neden olabilir',
           'settings.database.deleteDatabase' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.deleteDatabase', {}) ?? 'Veritabanını sil',
           'settings.database.deleteDatabaseConfirm' =>
@@ -5108,7 +5122,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.privacy.incognitoKeyboardMsg', {}) ??
                 'Klavyenin yazma geçmişini kaydetmesini engeller.\nÇoğu metin girişi için geçerlidir',
           'settings.privacy.appDisplayName' =>
-            TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'Uygulama görünen adı',
+            TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'Uygulamanın görünen adı',
           'settings.privacy.appDisplayNameDescription' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayNameDescription', {}) ??
                 'Uygulama adının başlatıcıda nasıl görüneceğini değiştir',
@@ -5245,8 +5259,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? 'Favoriye alınan ögeleri kaldır',
           'settings.itemFilters.removeSnatched' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'İndirilen ögeleri kaldır',
-          'settings.itemFilters.removeAI' =>
-            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Yapay zeka (AI) ögelerini kaldır',
+          'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'AI ögelerini kaldır',
           'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync',
           'settings.sync.dbError' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'LoliSync kullanmak için veritabanı etkinleştirilmelidir',
@@ -5364,7 +5377,7 @@ extension on TranslationsTrTr {
           'settings.about.title' => TranslationOverrides.string(_root.$meta, 'settings.about.title', {}) ?? 'Hakkında',
           'settings.about.appDescription' =>
             TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ??
-                'LoliSnatcher açık kaynaklıdır ve GPLv3 ile lisanslanmıştır: Kaynak kodu GitHub\'da mevcuttur. Lütfen karşılaştığın sorunları veya özellik isteklerini deponun (repo) \'issues\' (sorunlar) kısmından bildir.',
+                'LoliSnatcher açık kaynaklıdır ve GPLv3 ile lisanslanmıştır: Kaynak kodu GitHub\'da mevcuttur. Lütfen karşılaştığın sorunları veya özellik isteklerini repo\'nun issues kısmından bildir.',
           'settings.about.appOnGitHub' => TranslationOverrides.string(_root.$meta, 'settings.about.appOnGitHub', {}) ?? 'GitHub\'da LoliSnatcher',
           'settings.about.contact' => TranslationOverrides.string(_root.$meta, 'settings.about.contact', {}) ?? 'İletişim',
           'settings.about.emailCopied' => TranslationOverrides.string(_root.$meta, 'settings.about.emailCopied', {}) ?? 'E-mail panoya kopyalandı',
@@ -5376,7 +5389,7 @@ extension on TranslationsTrTr {
           'settings.about.releases' => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'Sürümler',
           'settings.about.releasesMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ??
-                'En güncel sürümü ve tüm sürüm notlarını GitHub Sürümler (Releases) sayfasında bulabilirsin:',
+                'En güncel sürümü ve tüm sürüm notlarını GitHub Releases sayfasında bulabilirsin:',
           'settings.about.licenses' => TranslationOverrides.string(_root.$meta, 'settings.about.licenses', {}) ?? 'Lisanslar',
           'settings.checkForUpdates.title' =>
             TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.title', {}) ?? 'Güncellemeleri denetle',
@@ -5394,7 +5407,7 @@ extension on TranslationsTrTr {
           'settings.checkForUpdates.currentVersion' =>
             TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.currentVersion', {}) ?? 'Mevcut sürüm',
           'settings.checkForUpdates.changelog' =>
-            TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.changelog', {}) ?? 'Sürüm Günlüğü (Changelog)',
+            TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.changelog', {}) ?? 'Sürüm Günlüğü',
           'settings.checkForUpdates.visitPlayStore' =>
             TranslationOverrides.string(_root.$meta, 'settings.checkForUpdates.visitPlayStore', {}) ?? 'Play Store\'u ziyaret et',
           'settings.checkForUpdates.visitReleases' =>
@@ -5582,6 +5595,9 @@ extension on TranslationsTrTr {
           'tagView.removeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromSearch', {}) ?? 'Aramadan kaldır',
           'tagView.addToSearch' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearch', {}) ?? 'Aramaya ekle',
           'tagView.addedToSearchBar' => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Arama çubuğuna eklendi:',
+          'tagView.excludeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.excludeFromSearch', {}) ?? 'Aramadan Hariç Tut',
+          'tagView.exclusionAddedToSearchBar' =>
+            TranslationOverrides.string(_root.$meta, 'tagView.exclusionAddedToSearchBar', {}) ?? 'Arama çubuğuna hariç tutma eklendi:',
           'tagView.addToMarked' => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'İşaretlenenlere ekle',
           'tagView.addToHidden' => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? 'Gizlenenlere ekle',
           'tagView.removeFromMarked' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromMarked', {}) ?? 'İşaretlenenlerden kaldır',
@@ -5728,15 +5744,15 @@ extension on TranslationsTrTr {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? 'Duraklat',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? 'Başlat',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'Favorilerden çıkar',
+          _ => null,
+        } ??
+        switch (path) {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? 'Seçimi kaldır',
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Ölçeklendirme ile yeniden yükle',
           'viewer.appBar.loadSampleQuality' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Örnek kalitesinde yükle',
           'viewer.appBar.loadHighQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Yüksek kalitede yükle',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'İndirildi durumunu kaldır',
           'viewer.appBar.setSnatchedStatus' =>
@@ -5909,7 +5925,7 @@ extension on TranslationsTrTr {
           'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Telif Hakkı',
           'tagType.meta' => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'Meta',
           'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? 'Tür',
-          'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'Yok (Genel)',
+          'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'Yok/Genel',
           _ => null,
         };
   }

@@ -267,18 +267,27 @@ class Translations with BaseTranslations<AppLocale, Translations> {
   /// en: 's'
   String get secondsShort => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? 's';
 
+  /// en: 'm'
+  String get minutesShort => TranslationOverrides.string(_root.$meta, 'minutesShort', {}) ?? 'm';
+
+  /// en: 'h'
+  String get hoursShort => TranslationOverrides.string(_root.$meta, 'hoursShort', {}) ?? 'h';
+
+  /// en: 'd'
+  String get daysShort => TranslationOverrides.string(_root.$meta, 'daysShort', {}) ?? 'd';
+
   /// en: 'Leave this page?'
   String get leaveThisPageQuestion => TranslationOverrides.string(_root.$meta, 'leaveThisPageQuestion', {}) ?? 'Leave this page?';
 
-  /// en: 'This page will close automatically now'
+  /// en: 'This page will close automatically'
   String get pageWillCloseAutomatically =>
-      TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'This page will close automatically now';
+      TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'This page will close automatically';
 
   /// en: 'Stay'
   String get stay => TranslationOverrides.string(_root.$meta, 'stay', {}) ?? 'Stay';
 
   /// en: 'Leave now'
-  String get leave => TranslationOverrides.string(_root.$meta, 'leave', {}) ?? 'Leave now';
+  String get leaveNow => TranslationOverrides.string(_root.$meta, 'leaveNow', {}) ?? 'Leave now';
 
   late final TranslationsValidationErrorsEn validationErrors = TranslationsValidationErrorsEn.internal(_root);
   late final TranslationsInitEn init = TranslationsInitEn.internal(_root);
@@ -4927,11 +4936,14 @@ extension on Translations {
           'favourites' => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? 'Favourites',
           'downloads' => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'Downloads',
           'secondsShort' => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? 's',
+          'minutesShort' => TranslationOverrides.string(_root.$meta, 'minutesShort', {}) ?? 'm',
+          'hoursShort' => TranslationOverrides.string(_root.$meta, 'hoursShort', {}) ?? 'h',
+          'daysShort' => TranslationOverrides.string(_root.$meta, 'daysShort', {}) ?? 'd',
           'leaveThisPageQuestion' => TranslationOverrides.string(_root.$meta, 'leaveThisPageQuestion', {}) ?? 'Leave this page?',
           'pageWillCloseAutomatically' =>
-            TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'This page will close automatically now',
+            TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'This page will close automatically',
           'stay' => TranslationOverrides.string(_root.$meta, 'stay', {}) ?? 'Stay',
-          'leave' => TranslationOverrides.string(_root.$meta, 'leave', {}) ?? 'Leave now',
+          'leaveNow' => TranslationOverrides.string(_root.$meta, 'leaveNow', {}) ?? 'Leave now',
           'validationErrors.required' => TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? 'Please enter a value',
           'validationErrors.invalid' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? 'Please enter a valid value',
           'validationErrors.invalidNumber' =>
@@ -5747,12 +5759,12 @@ extension on Translations {
           'settings.video.mpvUseHardwareAcceleration' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.mpvUseHardwareAcceleration', {}) ?? 'MPV: use hardware acceleration',
           'settings.video.mpvVO' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvVO', {}) ?? 'MPV: VO',
-          'settings.video.mpvHWDEC' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvHWDEC', {}) ?? 'MPV: HWDEC',
-          'settings.video.videoCacheMode' => TranslationOverrides.string(_root.$meta, 'settings.video.videoCacheMode', {}) ?? 'Video cache mode',
-          'settings.video.cacheModes.title' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.title', {}) ?? 'Video cache modes',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.mpvHWDEC' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvHWDEC', {}) ?? 'MPV: HWDEC',
+          'settings.video.videoCacheMode' => TranslationOverrides.string(_root.$meta, 'settings.video.videoCacheMode', {}) ?? 'Video cache mode',
+          'settings.video.cacheModes.title' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.title', {}) ?? 'Video cache modes',
           'settings.video.cacheModes.streamMode' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.streamMode', {}) ??
                 '- Stream - Don\'t cache, start playing as soon as possible',
@@ -6668,14 +6680,14 @@ extension on Translations {
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Add new Booru',
           'mediaPreviews.help' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.help', {}) ?? 'Help',
           'mediaPreviews.settings' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? 'Settings',
+          _ => null,
+        } ??
+        switch (path) {
           'mediaPreviews.restoringPreviousSession' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? 'Restoring previous session…',
           'mediaPreviews.copiedFileURL' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.copiedFileURL', {}) ?? 'Copied file URL to clipboard!',
           'viewer.tutorial.images' => TranslationOverrides.string(_root.$meta, 'viewer.tutorial.images', {}) ?? 'Images',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.tutorial.tapLongTapToggleImmersive' =>
             TranslationOverrides.string(_root.$meta, 'viewer.tutorial.tapLongTapToggleImmersive', {}) ?? 'Tap/Long tap: toggle immersive mode',
           'viewer.tutorial.doubleTapFitScreen' =>
