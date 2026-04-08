@@ -19,7 +19,6 @@
     "enable": "Etkinleştir",
     "disable": "Devre Dışı Bırak",
     "add": "Ekle",
-    "exclude": "Hariç tut",
     "edit": "Düzenle",
     "remove": "Kaldır",
     "save": "Kaydet",
@@ -48,7 +47,7 @@
     "pause": "Duraklat",
     "resume": "Devam",
     "discord": "Discord",
-    "visitOurDiscord": "Discord sunucumuzu ziyaret edin",
+    "visitOurDiscord": "Discord sunucumuzu ziyaret et",
     "item": "Öge",
     "select": "Seç",
     "selectAll": "Tümünü seç",
@@ -118,8 +117,6 @@
         "tabsRestored": "Sekmeler geri yüklendi",
         "restoredTabsCount(param=count)": {
             "one": "Önceki oturumdan ${count} sekme geri yüklendi",
-            "few": "Önceki oturumdan ${count} sekme geri yüklendi",
-            "many": "Önceki oturumdan ${count} sekme geri yüklendi",
             "other": "Önceki oturumdan ${count} sekme geri yüklendi"
         },
         "someRestoredTabsHadIssues": "Geri yüklenen bazı sekmelerde bilinmeyen booru'lar veya bozuk karakterler vardı.",
@@ -128,15 +125,11 @@
         "tabsMerged": "Sekmeler birleştirildi",
         "addedTabsCount(param=count)": {
             "one": "${count} yeni sekme eklendi",
-            "few": "${count} yeni sekme eklendi",
-            "many": "${count} yeni sekme eklendi",
             "other": "${count} yeni sekme eklendi"
         },
         "tabsReplaced": "Sekmeler değiştirildi",
         "receivedTabsCount(param=count)": {
             "one": "${count} sekme alındı",
-            "few": "${count} sekme alındı",
-            "many": "${count} sekme alındı",
             "other": "${count} sekme alındı"
         }
     },
@@ -156,26 +149,18 @@
         "itemsSnatched": "İndirilen ögeler",
         "snatchedCount(param=count)": {
             "one": "İndirilen: ${count} öge",
-            "few": "İndirilen: ${count} öge",
-            "many": "İndirilen: ${count} öge",
             "other": "İndirilen: ${count} öge"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} dosya zaten indirilmiş",
-            "few": "${count} dosya zaten indirilmiş",
-            "many": "${count} dosya zaten indirilmiş",
             "other": "${count} dosya zaten indirilmiş"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "${count} dosya indirilemedi",
-            "few": "${count} dosya indirilemedi",
-            "many": "${count} dosya indirilemedi",
             "other": "${count} dosya indirilemedi"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} dosya iptal edildi",
-            "few": "${count} dosya iptal edildi",
-            "many": "${count} dosya iptal edildi",
             "other": "${count} dosya iptal edildi"
         },
         "snatchingImages": "Görseller indiriliyor",
@@ -183,8 +168,6 @@
         "addedItemToQueue": "Öge İndirme kuyruğuna eklendi",
         "addedItemsToQueue(param=count)": {
             "one": "${count} öge indirme kuyruğuna eklendi",
-            "few": "${count} öge indirme kuyruğuna eklendi",
-            "many": "${count} öge indirme kuyruğuna eklendi",
             "other": "${count} öge indirme kuyruğuna eklendi"
         }
     },
@@ -270,8 +253,6 @@
         "reversed": "(tersten)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "${count} sekmeyi silmek istediğine emin misin?",
-            "few": "${count} sekmeyi silmek istediğine emin misin?",
-            "many": "${count} sekmeyi silmek istediğine emin misin?",
             "other": "${count} sekmeyi silmek istediğine emin misin?"
         },
         "filters": {
@@ -321,15 +302,11 @@
         "deleteHistoryEntries": "Geçmiş girdilerini sil",
         "deleteItemsConfirm(param=count)": {
             "one": "${count} ögeyi silmek istediğine emin misin?",
-            "few": "${count} ögeyi silmek istediğine emin misin?",
-            "many": "${count} ögeyi silmek istediğine emin misin?",
             "other": "${count} ögeyi silmek istediğine emin misin?"
         },
         "clearSelection": "Seçimi temizle",
         "deleteItems(param=count)": {
             "one": "${count} ögeyi sil",
-            "few": "${count} ögeyi sil",
-            "many": "${count} ögeyi sil",
             "other": "${count} ögeyi sil"
         }
     },
@@ -354,7 +331,10 @@
             "history": "Geçmiş",
             "noBackHistoryItem": "Geri gidilecek geçmiş ögesi yok",
             "noForwardHistoryItem": "İleri gidilecek geçmiş ögesi yok"
-        }
+        },
+        "captcha": "Captcha",
+        "captchaCheckDescription": "Olası bir captcha algılandı, lütfen bunu çöz ve bitirdikten sonra geri dön",
+        "captchaCompleted": ""
     },
     "settings": {
         "title": "Ayarlar",
@@ -451,7 +431,7 @@
             "previewQualityHelpNote": "[Not]: Örnek kalitesi performansı gözle görülür şekilde düşürebilir: özellikle önizleme ızgarasında çok fazla sütun varsa",
             "previewDisplay": "Önizleme görünümü",
             "previewDisplayFallback": "Yedek önizleme görünümü",
-            "previewDisplayFallbackHelp": "Kademeli (Staggered) seçeneği mümkün olmadığında bu kullanılacaktır",
+            "previewDisplayFallbackHelp": "Kademeli seçeneği mümkün olmadığında bu kullanılacaktır",
             "dontScaleImages": "Görselleri ölçeklendirme",
             "dontScaleImagesSubtitle": "Performansı düşürebilir",
             "dontScaleImagesWarningTitle": "Uyarı",
@@ -674,7 +654,7 @@
             "searchHistoryTapInfo": "Eylemler için girişe dokun (Sil, Favorilere Ekle…)",
             "searchHistoryFavouritesInfo": "Favoriye alınan sorgular listenin en üstüne sabitlenir ve sınıra dahil edilmez.",
             "tagTypeFetchingInfo": "Desteklenen booru'lardan etiket türlerini çeker",
-            "tagTypeFetchingWarning": "İstek sınırı (rate limit) aşımına neden olabilir",
+            "tagTypeFetchingWarning": "İstek sınırı aşımına neden olabilir",
             "deleteDatabase": "Veritabanını sil",
             "deleteDatabaseConfirm": "Veritabanı silinsin mi?",
             "databaseDeleted": "Veritabanı silindi!",
@@ -784,7 +764,7 @@
             "bluronLeaveMsg": "Sistem kısıtlamaları nedeniyle bazı cihazlarda çalışmayabilir",
             "incognitoKeyboard": "Gizli klavye",
             "incognitoKeyboardMsg": "Klavyenin yazma geçmişini kaydetmesini engeller.\nÇoğu metin girişi için geçerlidir",
-            "appDisplayName": "Uygulama görünen adı",
+            "appDisplayName": "Uygulamanın görünen adı",
             "appDisplayNameDescription": "Uygulama adının başlatıcıda nasıl görüneceğini değiştir",
             "appAliasChanged": "Uygulama adı değiştirildi",
             "appAliasRestartHint": "Uygulama adı değişikliği uygulama yeniden başlatıldıktan sonra geçerli olacaktır. Bazı başlatıcılar için ek süre veya sistemin yeniden başlatılması gerekebilir.",
@@ -860,7 +840,7 @@
             "removeMarked": "İşaretli filtrelerle eşleşen ögeleri tamamen gizle",
             "removeFavourited": "Favoriye alınan ögeleri kaldır",
             "removeSnatched": "İndirilen ögeleri kaldır",
-            "removeAI": "Yapay zeka (AI) ögelerini kaldır"
+            "removeAI": "AI ögelerini kaldır"
         },
         "sync": {
             "title": "LoliSync",
@@ -923,7 +903,7 @@
         },
         "about": {
             "title": "Hakkında",
-            "appDescription": "LoliSnatcher açık kaynaklıdır ve GPLv3 ile lisanslanmıştır: Kaynak kodu GitHub'da mevcuttur. Lütfen karşılaştığın sorunları veya özellik isteklerini deponun (repo) 'issues' (sorunlar) kısmından bildir.",
+            "appDescription": "LoliSnatcher açık kaynaklıdır ve GPLv3 ile lisanslanmıştır: Kaynak kodu GitHub'da mevcuttur. Lütfen karşılaştığın sorunları veya özellik isteklerini repo'nun issues kısmından bildir.",
             "appOnGitHub": "GitHub'da LoliSnatcher",
             "contact": "İletişim",
             "emailCopied": "E-mail panoya kopyalandı",
@@ -931,7 +911,7 @@
             "developers": "Geliştiriciler",
             "localizers": "Yerelleştirme Uzmanları",
             "releases": "Sürümler",
-            "releasesMsg": "En güncel sürümü ve tüm sürüm notlarını GitHub Sürümler (Releases) sayfasında bulabilirsin:",
+            "releasesMsg": "En güncel sürümü ve tüm sürüm notlarını GitHub Releases sayfasında bulabilirsin:",
             "licenses": "Lisanslar"
         },
         "checkForUpdates": {
@@ -943,7 +923,7 @@
             "youHaveLatestVersion": "En güncel sürümü kullanıyorsun",
             "viewLatestChangelog": "En son sürüm günlüğünü görüntüle",
             "currentVersion": "Mevcut sürüm",
-            "changelog": "Sürüm Günlüğü (Changelog)",
+            "changelog": "Sürüm Günlüğü",
             "visitPlayStore": "Play Store'u ziyaret et",
             "visitReleases": "Sürümlere göz at"
         },
@@ -1040,8 +1020,6 @@
         "makeUnstaleable": "Eskimez yap",
         "deleteTags(param=count)": {
             "one": "${count} etiketi sil",
-            "few": "${count} etiketi sil",
-            "many": "${count} etiketi sil",
             "other": "${count} etiketi sil"
         },
         "deleteTagsTitle": "Etiketleri sil",
@@ -1095,6 +1073,8 @@
         "removeFromSearch": "Aramadan kaldır",
         "addToSearch": "Aramaya ekle",
         "addedToSearchBar": "Arama çubuğuna eklendi:",
+        "addToSearchExclude": "Aramaya Ekle (Hariç Tut)",
+        "addedToSearchBarExclude": "Arama çubuğuna eklendi (Hariç Tut):",
         "addToMarked": "İşaretlenenlere ekle",
         "addToHidden": "Gizlenenlere ekle",
         "removeFromMarked": "İşaretlenenlerden kaldır",
@@ -1116,7 +1096,10 @@
         "relatedTabs": "İlgili sekmeler",
         "tabsWithOnlyTag": "Sadece bu etiketi içeren sekmeler",
         "tabsWithOnlyTagDifferentBooru": "Sadece bu etiketi içeren ama farklı booru'daki sekmeler",
-        "tabsContainingTag": "Bu etiketi kapsayan sekmeler"
+        "tabsContainingTag": "Bu etiketi kapsayan sekmeler",
+        "excludeFromSearch": "Aramadan Hariç Tut",
+        "exclusionAddedToSearchBar": "Arama çubuğuna hariç tutma eklendi:",
+        "uploader": ""
     },
     "pinnedTags": {
         "pinnedTags": "Sabitlenmiş etiketler",
@@ -1260,8 +1243,6 @@
         "loadingFileMessage": "Bu biraz zaman alabilir, lütfen bekle…",
         "sources(param=count)": {
             "one": "Kaynak",
-            "few": "Kaynaklar",
-            "many": "Kaynaklar",
             "other": "Kaynaklar"
         }
     },
@@ -1330,8 +1311,6 @@
             "loadingPage(param=pageNum)": "Sayfa #${pageNum: int} yükleniyor…",
             "startedAgo(param=seconds)": {
                 "one": "${seconds} saniye önce başladı",
-                "few": "${seconds} saniye önce başladı",
-                "many": "${seconds} saniye önce başladı",
                 "other": "${seconds} saniye önce başladı"
             },
             "tapToRetryIfStuck": "İstek takılmış veya çok uzun sürmüş gibi görünüyorsa tekrar denemek için dokun",
@@ -1347,6 +1326,15 @@
         "copyright": "Telif Hakkı",
         "meta": "Meta",
         "species": "Tür",
-        "none": "Yok (Genel)"
-    }
+        "none": "Yok/Genel"
+    },
+    "exclude": "Hariç tut",
+    "secondsShort": "",
+    "minutesShort": "",
+    "hoursShort": "",
+    "daysShort": "",
+    "leaveThisPageQuestion": "",
+    "pageWillCloseAutomatically": "",
+    "stay": "",
+    "leaveNow": ""
 }
