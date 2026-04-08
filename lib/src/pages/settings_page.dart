@@ -37,12 +37,7 @@ class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   Future<void> _onPopInvoked(BuildContext context, bool didPop, _) async {
-    if (didPop) {
-      return;
-    }
-
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    await settingsHandler.saveSettings(restate: true);
+    await SettingsHandler.instance.saveSettings(restate: true);
   }
 
   @override
