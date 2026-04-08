@@ -6,8 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FirstWhereOrNullExt;
 import 'package:get_it/get_it.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 
@@ -295,7 +296,7 @@ class SearchHandler {
   void removeTagFromSearch(String tag) {
     if (tag.isNotEmpty) {
       searchTextController.text = searchTextController.text
-          .replaceAll(RegExp(r'(?:-|~)?\d+#(?:-|~)?' + tag), '')
+          .replaceAll(RegExp(r'(?:-|~)?\d+#(?:-|~)?' + tag.regexpEscape()), '')
           .replaceAll('-$tag', '')
           .replaceAll('~$tag', '')
           .replaceAll(tag, '');

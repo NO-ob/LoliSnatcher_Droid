@@ -72,6 +72,8 @@ extension StringExtras on String {
 
   bool toBool() => this == 'true' || this == '1';
 
+  String regexpEscape() => RegExp.escape(this);
+
   @Deprecated('MOVE THIS TO LOCALIZATION')
   String get temploc => this;
 }

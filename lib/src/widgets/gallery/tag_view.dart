@@ -746,7 +746,7 @@ class _TagViewState extends State<TagView> {
                   t == currentTag.toLowerCase() ||
                   t == '-${currentTag.toLowerCase()}' ||
                   t == '~${currentTag.toLowerCase()}' ||
-                  RegExp(r'^(?:-|~)?\d+#(?:-|~)?' + currentTag + r'$').hasMatch(t),
+                  RegExp(r'^(?:-|~)?\d+#(?:-|~)?' + currentTag.regexpEscape() + r'$').hasMatch(t),
             ) !=
         -1;
     final HasTabWithTagResult hasTabWithTag = tabMatchesMap.containsKey(currentTag)
@@ -1040,14 +1040,14 @@ class _TagViewState extends State<TagView> {
                       final String text = item.uploaderName ?? item.uploaderId ?? '';
 
                       return infoText(
-                    context.loc.tagView.uploader,
+                        context.loc.tagView.uploader,
                         text,
                         trailing: hasUploaderName
                             ? IgnorePointer(
-                      child: IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {},
-                      ),
+                                child: IconButton(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () {},
+                                ),
                               )
                             : null,
                         onTap: hasUploaderName
@@ -1055,36 +1055,36 @@ class _TagViewState extends State<TagView> {
                                 final userMetaTag = searchHandler.currentBooruHandler
                                     .availableMetaTags()
                                     .firstWhereOrNull(
-                        (t) => t is UserMetaTag,
-                      );
-                      if (userMetaTag == null) return;
+                                      (t) => t is UserMetaTag,
+                                    );
+                                if (userMetaTag == null) return;
 
-                      final String tag = userMetaTag.tagBuilder(null, null, item.uploaderName);
+                                final String tag = userMetaTag.tagBuilder(null, null, item.uploaderName);
 
-                      searchHandler.addTagToSearch(tag);
-                      FlashElements.showSnackbar(
-                        context: context,
-                        duration: const Duration(seconds: 2),
+                                searchHandler.addTagToSearch(tag);
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  duration: const Duration(seconds: 2),
                                   title: Text(
                                     context.loc.tagView.addedToCurrentSearch,
                                     style: const TextStyle(fontSize: 20),
                                   ),
-                        content: Text(tag, style: const TextStyle(fontSize: 16)),
-                        leadingIcon: Icons.add,
-                        sideColor: Colors.green,
-                      );
+                                  content: Text(tag, style: const TextStyle(fontSize: 16)),
+                                  leadingIcon: Icons.add,
+                                  sideColor: Colors.green,
+                                );
                               }
                             : null,
                         onLongPress: hasUploaderName
                             ? () {
                                 Clipboard.setData(ClipboardData(text: text));
-                      FlashElements.showSnackbar(
-                        context: context,
-                        duration: const Duration(seconds: 2),
-                        title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  duration: const Duration(seconds: 2),
+                                  title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
                                   content: Text(text, style: const TextStyle(fontSize: 16)),
-                        leadingIcon: Icons.copy,
-                        sideColor: Colors.green,
+                                  leadingIcon: Icons.copy,
+                                  sideColor: Colors.green,
                                 );
                               }
                             : null,
@@ -2491,7 +2491,9 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                                             t == tag.toLowerCase() ||
                                                             t == '-${tag.toLowerCase()}' ||
                                                             t == '~${tag.toLowerCase()}' ||
-                                                            RegExp(r'^(?:-|~)?\d+#(?:-|~)?' + tag + r'$').hasMatch(t),
+                                                            RegExp(
+                                                              r'^(?:-|~)?\d+#(?:-|~)?' + tag.regexpEscape() + r'$',
+                                                            ).hasMatch(t),
                                                       ) !=
                                                   -1,
                                               hasTabWithTag: searchHandler.hasTabWithTag(tag),
@@ -2553,7 +2555,9 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                                                     t == '-${tag.toLowerCase()}' ||
                                                                     t == '~${tag.toLowerCase()}' ||
                                                                     RegExp(
-                                                                      r'^(?:-|~)?\d+#(?:-|~)?' + tag + r'$',
+                                                                      r'^(?:-|~)?\d+#(?:-|~)?' +
+                                                                          tag.regexpEscape() +
+                                                                          r'$',
                                                                     ).hasMatch(t),
                                                               ) !=
                                                           -1,
