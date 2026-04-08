@@ -44,7 +44,7 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.5.0',
-    buildNumber: 5209,
+    buildNumber: 5210,
     title: '2.5.0 - Localization, fonts, optimization, pinned tags and more',
     isInStore: true,
     isImportant: false,
@@ -58,13 +58,28 @@ If you encounter any issues or have suggestions, please post them in GitHub issu
 
 -------------------
 
-Hotfix 1 - 2.5.0+5209:
+Hotfix 2 - 2.5.0+5210 (09.04.2026):
+
+- Added uploader name in item info drawer for danbooru, gelbooru, sankaku
+- Fixed favicons not loading for some sites in booru create/edit dialogs
+- Added logic that attempts to close webview automatically if it detects that cloudflare captcha was completed
+- Fixed some tags (i.e. ???) breaking the item tags list
+- Fixed some settings not applying correctly after leaving the settings page (mostly related to tag filters)
+- Added simple confirmation dialog before restoring data from backup to avoid accidental data loss
+- Fixed a bunch of small layout issues
+- Inkbunny fixes (Thanks to Split50)
+- Hydrus fixes (Thanks to hekate)
+- Changed build settings to decrease app installer size by ~half (only applies to non-play store builds, please report if you notice any issues with app performance, memory usage or startup time)
+
+-------------------
+
+Hotfix 1 - 2.5.0+5209 (31.03.2026):
 
 - Fixed long tap actions on viewer toolbar buttons
 
 -------------------
 
-Release - 2.5.0+5208:
+Release - 2.5.0+5208 (30.03.2026):
 
 Main in this update:
 - Localization (Russian, Turkish, Japanese)
