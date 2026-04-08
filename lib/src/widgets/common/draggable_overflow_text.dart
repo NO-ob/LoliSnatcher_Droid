@@ -73,7 +73,7 @@ class _DraggableOverflowTextState extends State<DraggableOverflowText> {
               alignment: Alignment.centerLeft,
               children: [
                 Opacity(
-                  opacity: _isInteracting ? 1.0 : 0.0,
+                  opacity: _isInteracting ? 1 : 0,
                   child: FadingEdgeScrollView.fromSingleChildScrollView(
                     child: SingleChildScrollView(
                       controller: _scrollController,
@@ -82,7 +82,7 @@ class _DraggableOverflowTextState extends State<DraggableOverflowText> {
                       child: Text(
                         widget.text,
                         style: textStyle,
-                        softWrap: false, // Force single line
+                        softWrap: false,
                       ),
                     ),
                   ),

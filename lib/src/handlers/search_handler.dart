@@ -268,10 +268,10 @@ class SearchHandler {
       AutoScrollController(); // will be overwritten on the first render because there is hasClients check
   RxDouble scrollOffset = 0.0.obs;
   // stream that will notify it's listeners about scroll events of the grid controller
-  StreamController<ScrollUpdateNotification>? _scrollStream;
-  Stream<ScrollUpdateNotification>? get scrollStream => _scrollStream?.stream;
+  StreamController<ScrollNotification>? _scrollStream;
+  Stream<ScrollNotification>? get scrollStream => _scrollStream?.stream;
 
-  void sendToScrollStream(ScrollUpdateNotification notification) {
+  void sendToScrollStream(ScrollNotification notification) {
     _scrollStream?.sink.add(notification);
 
     scrollOffset.value = gridScrollController.offset;

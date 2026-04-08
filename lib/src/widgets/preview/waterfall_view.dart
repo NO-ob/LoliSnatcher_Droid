@@ -377,7 +377,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
-        NotificationListener<ScrollUpdateNotification>(
+        NotificationListener<ScrollNotification>(
           child: Scrollbar(
             controller: searchHandler.gridScrollController,
             interactive: true,
@@ -435,7 +435,11 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                       return CustomScrollView(
                         key: ValueKey('CustomScrollView-${searchHandler.currentTabId}'),
                         controller: searchHandler.gridScrollController,
-                        physics: isLoadingAndNoItems ? const NeverScrollableScrollPhysics() : null,
+                        physics: isLoadingAndNoItems
+                            ? const NeverScrollableScrollPhysics()
+                            : AlwaysScrollableScrollPhysics(
+                                parent: ScrollConfiguration.of(context).getScrollPhysics(context),
+                              ),
                         shrinkWrap: false,
                         cacheExtent: 300 * MediaQuery.devicePixelRatioOf(context),
                         slivers: [
@@ -529,26 +533,28 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
             ),
           ),
           onNotification: (notif) {
-            searchHandler.sendToScrollStream(notif);
+            if (notif is ScrollUpdateNotification || notif is OverscrollNotification) {
+              searchHandler.sendToScrollStream(notif);
 
-            // print('SCROLL NOTIFICATION');
-            // print(searchHandler.gridScrollController.position.maxScrollExtent);
-            // print(notif.metrics); // pixels before viewport, in viewport, after viewport
+              // print('SCROLL NOTIFICATION');
+              // print(searchHandler.gridScrollController.position.maxScrollExtent);
+              // print(notif.metrics); // pixels before viewport, in viewport, after viewport
 
-            final bool isNotAtStart = notif.metrics.pixels > 0;
-            final bool isAtOrNearEdge =
-                notif.metrics.atEdge ||
-                notif.metrics.pixels >
-                    (notif.metrics.maxScrollExtent -
-                        (notif.metrics.extentInside *
-                            2)); // trigger new page when at edge or scroll position is less than 2 viewports
-            final bool isScreenFilled =
-                notif.metrics.extentBefore != 0 ||
-                notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
+              final bool isNotAtStart = notif.metrics.pixels > 0;
+              final bool isAtOrNearEdge =
+                  notif.metrics.atEdge ||
+                  notif.metrics.pixels >
+                      (notif.metrics.maxScrollExtent -
+                          (notif.metrics.extentInside *
+                              2)); // trigger new page when at edge or scroll position is less than 2 viewports
+              final bool isScreenFilled =
+                  notif.metrics.extentBefore != 0 ||
+                  notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
 
-            if (!searchHandler.isLoading.value) {
-              if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
-                searchHandler.runSearch();
+              if (!searchHandler.isLoading.value) {
+                if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
+                  searchHandler.runSearch();
+                }
               }
             }
             return true;
