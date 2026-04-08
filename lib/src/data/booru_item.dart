@@ -32,6 +32,7 @@ class BooruItem extends Equatable {
     this.serverId,
     this.rating, // safe, explicit...
     this.score,
+    this.uploaderId,
     this.uploaderName,
     this.description,
     this.sources,
@@ -76,6 +77,7 @@ class BooruItem extends Equatable {
   String? serverId;
   String? rating;
   String? score;
+  String? uploaderId;
   String? uploaderName;
   String? description;
   String? md5String;
@@ -160,6 +162,7 @@ class BooruItem extends Equatable {
     serverId,
     rating,
     score,
+    uploaderId,
     uploaderName,
     description,
     md5String,

@@ -144,7 +144,7 @@ class DanbooruHandler extends BooruHandler {
           score: current['score'].toString(),
           sources: (current['source'] != null && current['source'] is String) ? [current['source']] : null,
           md5String: current['md5'].toString(),
-          uploaderName: current['uploader_id'].toString(),
+          uploaderId: current['uploader_id'].toString(),
           postDate: dateStr, // 2021-06-17T16:27:45.743-04:00
           postDateFormat: 'iso',
         );
@@ -266,26 +266,24 @@ class DanbooruHandler extends BooruHandler {
 
   Map<String, String> uploaderNameCache = {};
   Future<String?> getUploaderName(BooruItem item) async {
-    if (item.uploaderName?.isNotEmpty != true) return null;
+    if (item.uploaderId?.isNotEmpty != true) return null;
 
-    if (uploaderNameCache.containsKey(item.uploaderName)) {
-      return uploaderNameCache[item.uploaderName!];
-    } else if (uploaderNameCache.containsValue(item.uploaderName)) {
-      return item.uploaderName;
+    if (uploaderNameCache.containsKey(item.uploaderId)) {
+      return uploaderNameCache[item.uploaderId!];
     }
 
     try {
       final res = await DioNetwork.get(
         '${booru.baseURL}/users.json',
         queryParameters: {
-          'search[id]': item.uploaderName,
+          'search[id]': item.uploaderId,
         },
       );
       if (res.statusCode != HttpStatus.ok) return null;
 
       final String? name = (res.data as List).firstOrNull?['name'];
       if (name?.isNotEmpty == true) {
-        uploaderNameCache[item.uploaderName!] = name!;
+        uploaderNameCache[item.uploaderId!] = name!;
       }
       return name;
     } catch (_) {

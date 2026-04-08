@@ -278,8 +278,8 @@ class _TagViewState extends State<TagView> {
 
   Future<void> getUploaderName() async {
     final usedHandler = possibleBooruHandler ?? handler;
-    if (usedHandler is DanbooruHandler && item.uploaderName?.isNotEmpty == true) {
-      item.uploaderName = await usedHandler.getUploaderName(item) ?? item.uploaderName;
+    if (usedHandler is DanbooruHandler && item.uploaderId?.isNotEmpty == true) {
+      item.uploaderName = await usedHandler.getUploaderName(item);
     }
   }
 
@@ -1033,18 +1033,28 @@ class _TagViewState extends State<TagView> {
                 infoText(context.loc.tagView.id, itemId),
                 infoText(context.loc.tagView.postURL, item.postURL, isLink: true),
                 //
-                if (item.uploaderName?.isNotEmpty == true)
-                  infoText(
+                if (item.uploaderId?.isNotEmpty == true || item.uploaderName?.isNotEmpty == true)
+                  Builder(
+                    builder: (context) {
+                      final bool hasUploaderName = item.uploaderName?.isNotEmpty == true;
+                      final String text = item.uploaderName ?? item.uploaderId ?? '';
+
+                      return infoText(
                     context.loc.tagView.uploader,
-                    item.uploaderName!,
-                    trailing: IgnorePointer(
+                        text,
+                        trailing: hasUploaderName
+                            ? IgnorePointer(
                       child: IconButton(
                         icon: const Icon(Icons.add),
                         onPressed: () {},
                       ),
-                    ),
-                    onTap: () {
-                      final userMetaTag = searchHandler.currentBooruHandler.availableMetaTags().firstWhereOrNull(
+                              )
+                            : null,
+                        onTap: hasUploaderName
+                            ? () {
+                                final userMetaTag = searchHandler.currentBooruHandler
+                                    .availableMetaTags()
+                                    .firstWhereOrNull(
                         (t) => t is UserMetaTag,
                       );
                       if (userMetaTag == null) return;
@@ -1055,23 +1065,29 @@ class _TagViewState extends State<TagView> {
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: Text(context.loc.tagView.addedToCurrentSearch, style: const TextStyle(fontSize: 20)),
+                                  title: Text(
+                                    context.loc.tagView.addedToCurrentSearch,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
                         content: Text(tag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.add,
                         sideColor: Colors.green,
                       );
-                    },
-                    onLongPress: () {
-                      if (item.uploaderName?.isNotEmpty != true) return;
-
-                      Clipboard.setData(ClipboardData(text: item.uploaderName!));
+                              }
+                            : null,
+                        onLongPress: hasUploaderName
+                            ? () {
+                                Clipboard.setData(ClipboardData(text: text));
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
                         title: Text(context.loc.copiedToClipboard, style: const TextStyle(fontSize: 20)),
-                        content: Text(item.uploaderName!, style: const TextStyle(fontSize: 16)),
+                                  content: Text(text, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.copy,
                         sideColor: Colors.green,
+                                );
+                              }
+                            : null,
                       );
                     },
                   ),
