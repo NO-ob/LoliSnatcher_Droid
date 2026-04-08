@@ -569,11 +569,13 @@ class _BooruEditState extends State<BooruEdit> {
                           size: 24,
                         ),
                         const SizedBox(width: 10),
-                        Text(
-                          '${newBooru.name} (${newBooru.baseURL})',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            '${newBooru.name} (${newBooru.baseURL})',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
