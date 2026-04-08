@@ -96,6 +96,8 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
         }
 
         debug {
@@ -104,6 +106,15 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+        }
+    }
+
+    packagingOptions {
+        jniLibs {
+            // decreases APK size by ~40-50%, but maybe conflicts with 16KB page size devices?
+            // possibly increases install and startup time
+            // not used on play store builds
+            useLegacyPackaging = dartEnvVars["LS_IS_STORE"] != "true"
         }
     }
 
