@@ -19,6 +19,7 @@
     "enable": "有効化",
     "disable": "無効化",
     "add": "追加",
+    "exclude": "除外",
     "edit": "編集",
     "remove": "削除",
     "save": "保存",
@@ -70,6 +71,14 @@
     "username": "ユーザー名",
     "favourites": "お気に入り",
     "downloads": "ダウンロード",
+    "secondsShort": "秒",
+    "minutesShort": "分",
+    "hoursShort": "時",
+    "daysShort": "日",
+    "leaveThisPageQuestion": "ページを離れますか？",
+    "pageWillCloseAutomatically": "ページは自動で閉じられます",
+    "stay": "ページにとどまる",
+    "leaveNow": "今すぐ離れる",
     "validationErrors": {
         "required": "値を入力",
         "invalid": "有効な値を入力してください",
@@ -116,6 +125,9 @@
         "appFixedRatingAutomatically": "レーティングは自動で修正されました。今後は正しいレーティングを使用して検索してみてください",
         "tabsRestored": "タブを復元",
         "restoredTabsCount(param=count)": {
+            "one": "以前のセッションから${count}個のタブを復元しました",
+            "few": "以前のセッションから${count}個のタブを復元しました",
+            "many": "以前のセッションから${count}個のタブを復元しました",
             "other": "以前のセッションから${count}個のタブを復元しました"
         },
         "someRestoredTabsHadIssues": "復元されたタブには、不明なBooruや壊れた文字が含まれているものがありました。",
@@ -123,11 +135,16 @@
         "listOfBrokenTabs": "壊れたタブのリスト:",
         "tabsMerged": "タブが結合されました",
         "addedTabsCount(param=count)": {
-            "other": "${count}個の新しいタブを追加",
-            "one": "${count}個の新しいタブを追加"
+            "one": "${count}個の新しいタブを追加",
+            "few": "${count}個の新しいタブを追加",
+            "many": "${count}個の新しいタブを追加",
+            "other": "${count}個の新しいタブを追加"
         },
         "tabsReplaced": "タブを置き換えました",
         "receivedTabsCount(param=count)": {
+            "one": "${count}個のタブを受け取りました",
+            "few": "${count}個のタブを受け取りました",
+            "many": "${count}個のタブを受け取りました",
             "other": "${count}個のタブを受け取りました"
         }
     },
@@ -146,21 +163,36 @@
         "startingNextQueueItem": "次のキューを開始中…",
         "itemsSnatched": "ダウンロード完了",
         "snatchedCount(param=count)": {
+            "one": "ダウンロード済み: ${count}個",
+            "few": "ダウンロード済み: ${count}個",
+            "many": "ダウンロード済み: ${count}個",
             "other": "ダウンロード済み: ${count}個"
         },
         "filesAlreadySnatched(param=count)": {
+            "one": "${count} 個のファイルがすでに保存済みです",
+            "few": "${count} 個のファイルがすでに保存済みです",
+            "many": "${count} 個のファイルがすでに保存済みです",
             "other": "${count} 個のファイルがすでに保存済みです"
         },
         "failedToSnatchFiles(param=count)": {
+            "one": "${count} 個のファイルの保存に失敗",
+            "few": "${count} 個のファイルの保存に失敗",
+            "many": "${count} 個のファイルの保存に失敗",
             "other": "${count} 個のファイルの保存に失敗"
         },
         "cancelledFiles(param=count)": {
+            "one": "${count} 個のファイルがキャンセルされました",
+            "few": "${count} 個のファイルがキャンセルされました",
+            "many": "${count} 個のファイルがキャンセルされました",
             "other": "${count} 個のファイルがキャンセルされました"
         },
         "snatchingImages": "画像を保存中",
         "doNotCloseApp": "アプリを終了しないでください！",
         "addedItemToQueue": "ダウンロードキューに追加",
         "addedItemsToQueue(param=count)": {
+            "one": "${count} 個のアイテムをキューに追加しました",
+            "few": "${count} 個のアイテムをキューに追加しました",
+            "many": "${count} 個のアイテムをキューに追加しました",
             "other": "${count} 個のアイテムをキューに追加しました"
         }
     },
@@ -245,6 +277,9 @@
         "alphabetically": "アルファベット順",
         "reversed": "(降順)",
         "areYouSureDeleteTabs(param=count)": {
+            "one": "${count} 個のタブを削除してよろしいですか？",
+            "few": "${count} 個のタブを削除してよろしいですか？",
+            "many": "${count} 個のタブを削除してよろしいですか？",
             "other": "${count} 個のタブを削除してよろしいですか？"
         },
         "filters": {
@@ -293,16 +328,25 @@
         "delete": "削除",
         "deleteHistoryEntries": "履歴エントリーを削除",
         "deleteItemsConfirm(param=count)": {
+            "one": "${count} 個のアイテムを削除してよろしいですか？",
+            "few": "${count} 個のアイテムを削除してよろしいですか？",
+            "many": "${count} 個のアイテムを削除してよろしいですか？",
             "other": "${count} 個のアイテムを削除してよろしいですか？"
         },
         "clearSelection": "選択を解除",
         "deleteItems(param=count)": {
+            "one": "${count} 個のアイテムを削除",
+            "few": "${count} 個のアイテムを削除",
+            "many": "${count} 個のアイテムを削除",
             "other": "${count} 個のアイテムを削除"
         }
     },
     "webview": {
         "title": "Webview",
         "notSupportedOnDevice": "このデバイスではサポートされていません",
+        "captcha": "キャプチャ",
+        "captchaCheckDescription": "キャプチャが検出されました。完了してから戻って続行できます",
+        "captchaCompleted": "認証完了",
         "navigation": {
             "enterUrlLabel": "URLを入力",
             "enterCustomUrl": "カスタムURLを入力",
@@ -321,10 +365,7 @@
             "history": "履歴",
             "noBackHistoryItem": "戻る履歴はありません",
             "noForwardHistoryItem": "進む履歴はありません"
-        },
-        "captcha": "キャプチャ",
-        "captchaCheckDescription": "キャプチャが検出されました。完了してから戻って続行できます",
-        "captchaCompleted": "認証完了"
+        }
     },
     "settings": {
         "title": "設定",
@@ -1009,6 +1050,9 @@
         "resetStale": "期限をリセット",
         "makeUnstaleable": "レガシー化を無効にする",
         "deleteTags(param=count)": {
+            "one": "${count} 個のタグを削除",
+            "few": "${count} 個のタグを削除",
+            "many": "${count} 個のタグを削除",
             "other": "${count} 個のタグを削除"
         },
         "deleteTagsTitle": "タグの削除",
@@ -1047,6 +1091,7 @@
         "addedNewTab": "新規タブに追加:",
         "id": "ID",
         "postURL": "投稿URL",
+        "uploader": "アップローダー",
         "posted": "投稿日時",
         "details": "詳細",
         "filename": "ファイル名",
@@ -1062,8 +1107,8 @@
         "removeFromSearch": "現在の検索から削除",
         "addToSearch": "検索に追加",
         "addedToSearchBar": "検索バーに追加:",
-        "addToSearchExclude": "現在の検索に追加 (除外)",
-        "addedToSearchBarExclude": "除外として検索バーに追加:",
+        "excludeFromSearch": "検索から除外",
+        "exclusionAddedToSearchBar": "除外として検索に追加:",
         "addToMarked": "お気に入りタグに追加",
         "addToHidden": "非表示タグに追加",
         "removeFromMarked": "お気に入りタグから削除",
@@ -1085,10 +1130,7 @@
         "relatedTabs": "関連タブ",
         "tabsWithOnlyTag": "このタグのみのタブ",
         "tabsWithOnlyTagDifferentBooru": "このタグのみで、違うBooruのタブ",
-        "tabsContainingTag": "このタグを含むタブ",
-        "excludeFromSearch": "検索から除外",
-        "exclusionAddedToSearchBar": "除外として検索に追加:",
-        "uploader": "アップローダー"
+        "tabsContainingTag": "このタグを含むタブ"
     },
     "pinnedTags": {
         "pinnedTags": "ピン留めされたタグ",
@@ -1231,6 +1273,9 @@
         "loadingFile": "ファイルの読み込み中…",
         "loadingFileMessage": "これには少し時間がかかる場合があります。お待ちください…",
         "sources(param=count)": {
+            "one": "ソース",
+            "few": "ソース",
+            "many": "ソース",
             "other": "ソース"
         }
     },
@@ -1298,6 +1343,9 @@
             "reachedEndSubtitle(param=pageNum)": "読み込まれたページ数: ${pageNum: int}\nここをタップして最後のページを再読み込み",
             "loadingPage(param=pageNum)": "ページ #${pageNum: int} の読み込み中…",
             "startedAgo(param=seconds)": {
+                "one": "${seconds} 秒前から開始",
+                "few": "${seconds} 秒前から開始",
+                "many": "${seconds} 秒前から開始",
                 "other": "${seconds} 秒前から開始"
             },
             "tapToRetryIfStuck": "リクエストが停止しているか時間がかかりすぎている場合は、ここをタップして再試行できます",
@@ -1314,14 +1362,5 @@
         "meta": "メタ",
         "species": "種",
         "none": "なし/一般"
-    },
-    "exclude": "除外",
-    "secondsShort": "秒",
-    "minutesShort": "分",
-    "hoursShort": "時",
-    "daysShort": "日",
-    "leaveThisPageQuestion": "ページを離れますか？",
-    "pageWillCloseAutomatically": "ページは自動で閉じられます",
-    "stay": "ページにとどまる",
-    "leaveNow": "今すぐ離れる"
+    }
 }

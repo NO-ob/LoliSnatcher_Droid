@@ -192,6 +192,22 @@ class TranslationsJaJp extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get downloads => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'ダウンロード';
   @override
+  String get secondsShort => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? '秒';
+  @override
+  String get minutesShort => TranslationOverrides.string(_root.$meta, 'minutesShort', {}) ?? '分';
+  @override
+  String get hoursShort => TranslationOverrides.string(_root.$meta, 'hoursShort', {}) ?? '時';
+  @override
+  String get daysShort => TranslationOverrides.string(_root.$meta, 'daysShort', {}) ?? '日';
+  @override
+  String get leaveThisPageQuestion => TranslationOverrides.string(_root.$meta, 'leaveThisPageQuestion', {}) ?? 'ページを離れますか？';
+  @override
+  String get pageWillCloseAutomatically => TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'ページは自動で閉じられます';
+  @override
+  String get stay => TranslationOverrides.string(_root.$meta, 'stay', {}) ?? 'ページにとどまる';
+  @override
+  String get leaveNow => TranslationOverrides.string(_root.$meta, 'leaveNow', {}) ?? '今すぐ離れる';
+  @override
   late final _TranslationsValidationErrorsJaJp validationErrors = _TranslationsValidationErrorsJaJp._(_root);
   @override
   late final _TranslationsInitJaJp init = _TranslationsInitJaJp._(_root);
@@ -807,6 +823,8 @@ class _TranslationsWebviewJaJp extends TranslationsWebviewEn {
   String get captchaCheckDescription =>
       TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ?? 'キャプチャが検出されました。完了してから戻って続行できます';
   @override
+  String get captchaCompleted => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? '認証完了';
+  @override
   late final _TranslationsWebviewNavigationJaJp navigation = _TranslationsWebviewNavigationJaJp._(_root);
 }
 
@@ -1079,6 +1097,8 @@ class _TranslationsTagViewJaJp extends TranslationsTagViewEn {
   String get id => TranslationOverrides.string(_root.$meta, 'tagView.id', {}) ?? 'ID';
   @override
   String get postURL => TranslationOverrides.string(_root.$meta, 'tagView.postURL', {}) ?? '投稿URL';
+  @override
+  String get uploader => TranslationOverrides.string(_root.$meta, 'tagView.uploader', {}) ?? 'アップローダー';
   @override
   String get posted => TranslationOverrides.string(_root.$meta, 'tagView.posted', {}) ?? '投稿日時';
   @override
@@ -3685,6 +3705,14 @@ extension on TranslationsJaJp {
           'username' => TranslationOverrides.string(_root.$meta, 'username', {}) ?? 'ユーザー名',
           'favourites' => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? 'お気に入り',
           'downloads' => TranslationOverrides.string(_root.$meta, 'downloads', {}) ?? 'ダウンロード',
+          'secondsShort' => TranslationOverrides.string(_root.$meta, 'secondsShort', {}) ?? '秒',
+          'minutesShort' => TranslationOverrides.string(_root.$meta, 'minutesShort', {}) ?? '分',
+          'hoursShort' => TranslationOverrides.string(_root.$meta, 'hoursShort', {}) ?? '時',
+          'daysShort' => TranslationOverrides.string(_root.$meta, 'daysShort', {}) ?? '日',
+          'leaveThisPageQuestion' => TranslationOverrides.string(_root.$meta, 'leaveThisPageQuestion', {}) ?? 'ページを離れますか？',
+          'pageWillCloseAutomatically' => TranslationOverrides.string(_root.$meta, 'pageWillCloseAutomatically', {}) ?? 'ページは自動で閉じられます',
+          'stay' => TranslationOverrides.string(_root.$meta, 'stay', {}) ?? 'ページにとどまる',
+          'leaveNow' => TranslationOverrides.string(_root.$meta, 'leaveNow', {}) ?? '今すぐ離れる',
           'validationErrors.required' => TranslationOverrides.string(_root.$meta, 'validationErrors.required', {}) ?? '値を入力',
           'validationErrors.invalid' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalid', {}) ?? '有効な値を入力してください',
           'validationErrors.invalidNumber' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalidNumber', {}) ?? '数字を入力',
@@ -4015,6 +4043,7 @@ extension on TranslationsJaJp {
           'webview.captcha' => TranslationOverrides.string(_root.$meta, 'webview.captcha', {}) ?? 'キャプチャ',
           'webview.captchaCheckDescription' =>
             TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ?? 'キャプチャが検出されました。完了してから戻って続行できます',
+          'webview.captchaCompleted' => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? '認証完了',
           'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'URLを入力',
           'webview.navigation.enterCustomUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'カスタムURLを入力',
           'webview.navigation.navigateTo' =>
@@ -4425,6 +4454,9 @@ extension on TranslationsJaJp {
           'settings.video.mpvUseHardwareAcceleration' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.mpvUseHardwareAcceleration', {}) ?? 'MPV: ハードウェアアクセラレーションを使用',
           'settings.video.mpvVO' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvVO', {}) ?? 'MPV: VO',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.mpvHWDEC' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvHWDEC', {}) ?? 'MPV: HWDEC',
           'settings.video.videoCacheMode' => TranslationOverrides.string(_root.$meta, 'settings.video.videoCacheMode', {}) ?? 'ビデオキャッシュモード',
           'settings.video.cacheModes.title' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.title', {}) ?? 'ビデオキャッシュモード',
@@ -4440,9 +4472,6 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.desktopWarning', {}) ??
                 '[警告]: デスクトップ版では、一部のBooruで ストリーム モードが正しく動作しない場合があります。',
           'settings.video.cacheModeValues.stream' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.stream', {}) ?? 'ストリーム',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.cacheModeValues.cache' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.cache', {}) ?? 'キャッシュ',
           'settings.video.cacheModeValues.streamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.cacheModeValues.streamCache', {}) ?? 'ストリーム+キャッシュ',
@@ -5131,6 +5160,7 @@ extension on TranslationsJaJp {
           'tagView.addedNewTab' => TranslationOverrides.string(_root.$meta, 'tagView.addedNewTab', {}) ?? '新規タブに追加:',
           'tagView.id' => TranslationOverrides.string(_root.$meta, 'tagView.id', {}) ?? 'ID',
           'tagView.postURL' => TranslationOverrides.string(_root.$meta, 'tagView.postURL', {}) ?? '投稿URL',
+          'tagView.uploader' => TranslationOverrides.string(_root.$meta, 'tagView.uploader', {}) ?? 'アップローダー',
           'tagView.posted' => TranslationOverrides.string(_root.$meta, 'tagView.posted', {}) ?? '投稿日時',
           'tagView.details' => TranslationOverrides.string(_root.$meta, 'tagView.details', {}) ?? '詳細',
           'tagView.filename' => TranslationOverrides.string(_root.$meta, 'tagView.filename', {}) ?? 'ファイル名',
@@ -5260,6 +5290,9 @@ extension on TranslationsJaJp {
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Booruを新規追加',
           'mediaPreviews.help' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.help', {}) ?? 'ヘルプ (英語)',
           'mediaPreviews.settings' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? '設定',
+          _ => null,
+        } ??
+        switch (path) {
           'mediaPreviews.restoringPreviousSession' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? '以前のセッションを復元中…',
           'mediaPreviews.copiedFileURL' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.copiedFileURL', {}) ?? 'ファイルURLをクリップボードにコピーしました！',
@@ -5274,9 +5307,6 @@ extension on TranslationsJaJp {
           'viewer.appBar.pause' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.pause', {}) ?? '一時停止',
           'viewer.appBar.start' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.start', {}) ?? '開始',
           'viewer.appBar.unfavourite' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.unfavourite', {}) ?? 'お気に入り解除',
-          _ => null,
-        } ??
-        switch (path) {
           'viewer.appBar.deselect' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.deselect', {}) ?? '選択解除',
           'viewer.appBar.reloadWithScaling' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'スケーリングして再読み込み',
           'viewer.appBar.loadSampleQuality' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'サンプル品質の読み込み',
