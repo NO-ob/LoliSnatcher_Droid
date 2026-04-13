@@ -71,7 +71,7 @@ class _LongPressRepeaterState extends State<LongPressRepeater> {
       );
       await widget.onStart();
       if (repeatCount > 0) {
-        await ServiceHandler.vibrate(duration: 2);
+        await ServiceHandler.vibrate();
       }
       repeatCount++;
 

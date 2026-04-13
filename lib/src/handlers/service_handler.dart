@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:vibration/vibration.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/saf_file_cache.dart';
@@ -523,22 +522,14 @@ class ServiceHandler {
     return result;
   }
 
-  static Future<void> vibrate({
-    int duration = 10,
-    int amplitude = -1,
-  }) async {
+  static Future<void> vibrate() async {
     if (SettingsHandler.instance.disableVibration) {
       return;
     }
 
     try {
       if (Platform.isAndroid || Platform.isIOS) {
-        if (await Vibration.hasVibrator()) {
-          await Vibration.vibrate(
-            duration: duration,
-            amplitude: amplitude,
-          );
-        }
+        await HapticFeedback.lightImpact();
       }
     } catch (e, s) {
       log(e, s: s);
