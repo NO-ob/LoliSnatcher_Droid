@@ -1644,10 +1644,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3
-      sha256: b3fe250b4ebd681a8ba20b12794c42b00c1375e5b51005568f0b8731265beb03
+      sha256: "56da3e13ed7d28a66f930aa2b2b29db6736a233f08283326e96321dd812030f5"
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.0"
+    version: "3.3.1"
   stack_trace:
     dependency: transitive
     description:
