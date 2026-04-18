@@ -283,28 +283,41 @@ class HydrusHandler extends BooruHandler {
     return '';
   }
 
-  @override
+@override
   String makeURL(String tags) {
     if (tags.trim().isEmpty) {
       tags = '*';
     }
-    final List<String> tagList = tags.split(',').map((tag) => tag.trim()).toList();
+
     int sortType = -1;
     bool ascending = false;
-    for (int i = tagList.length - 1; i >= 0; i--) {
-      if (tagList[i].contains('sort:')) {
-        sortType = getSortType(tagList[i].split(':')[1].trim());
-        tagList.removeAt(i);
-      } else if (tagList[i].contains('order:asc')) {
+
+    final List<String> parts = tags.split(',').map((t) => t.trim()).toList();
+
+    final List<String> filteredParts = [];
+    for (final part in parts) {
+      if (part.startsWith('sort:')) {
+        sortType = getSortType(part.substring(5).trim());
+      } else if (part == 'order:asc') {
         ascending = true;
-        tagList.removeAt(i);
-      } else if (tagList[i].contains('order:desc')) {
+      } else if (part == 'order:desc') {
         ascending = false;
-        tagList.removeAt(i);
+      } else {
+        filteredParts.add(part);
       }
     }
+
+    final List<dynamic> tagList = filteredParts.map((part) {
+      if (part.contains(' OR ')) {
+        return part.split(' OR ').map((t) => t.trim()).toList();
+      }
+      return part;
+    }).toList();
+
     final String encodedTags = Uri.encodeComponent(jsonEncode(tagList));
-    return "${booru.baseURL}/get_files/search_files?tags=$encodedTags${sortType > -1 ? "&file_sort_type=$sortType" : ""}&file_sort_asc=$ascending";
+    return '${booru.baseURL}/get_files/search_files?tags=$encodedTags'
+        '${sortType > -1 ? "&file_sort_type=$sortType" : ""}'
+        '&file_sort_asc=$ascending';
   }
 
   int getSortType(String orderString) {
