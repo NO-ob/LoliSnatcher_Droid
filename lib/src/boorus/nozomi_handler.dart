@@ -106,10 +106,6 @@ class NozomiHandler extends BooruHandler {
     final List<Map<String, dynamic>> allJsonPosts = [];
     for (final postData in postDataList.whereType<Map<String, dynamic>>()) {
       final List<dynamic> imageUrls = postData['imageurls'] ?? [];
-      if (imageUrls.isEmpty) {
-        allJsonPosts.add(postData);
-        continue;
-      }
       for (int i = 0; i < imageUrls.length; i++) {
         final Map<String, dynamic> newPost = Map<String, dynamic>.from(postData);
         newPost['postid'] = imageUrls.length > 1 ? '${postData['postid']}.$i' : postData['postid'];
@@ -202,7 +198,7 @@ class NozomiHandler extends BooruHandler {
         ...metaTags,
         ...generalTags,
       ],
-      postURL: makePostURL((data['postid'] as String).split('.').first),
+      postURL: makePostURL(data['postid'].toString().split('.').first),
       fileExt: data['type'] as String?,
       fileWidth: (data['width'] as num?)?.toDouble(),
       fileHeight: (data['height'] as num?)?.toDouble(),
