@@ -112,7 +112,7 @@ class NozomiHandler extends BooruHandler {
       }
       for (int i = 0; i < imageUrls.length; i++) {
         final Map<String, dynamic> newPost = Map<String, dynamic>.from(postData);
-        newPost['postid'] = '${postData['postid']}.$i';
+        newPost['postid'] = imageUrls.length > 1 ? '${postData['postid']}.$i' : postData['postid'];
         newPost['imageurls'] = [imageUrls[i]];
         newPost['height'] = imageUrls[i]['height'];
         newPost['width'] = imageUrls[i]['width'];
