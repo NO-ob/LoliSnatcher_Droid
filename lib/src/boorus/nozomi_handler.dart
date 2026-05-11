@@ -202,7 +202,7 @@ class NozomiHandler extends BooruHandler {
         ...metaTags,
         ...generalTags,
       ],
-      postURL: makePostURL(data['postid'].toString()),
+      postURL: makePostURL((data['postid'] as String).split('.').first),
       fileExt: data['type'] as String?,
       fileWidth: (data['width'] as num?)?.toDouble(),
       fileHeight: (data['height'] as num?)?.toDouble(),
