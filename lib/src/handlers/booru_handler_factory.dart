@@ -14,6 +14,7 @@ import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/ink_bunny_handler.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/nozomi_handler.dart';
 import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
 import 'package:lolisnatcher/src/boorus/r34hentai_handler.dart';
@@ -140,6 +141,10 @@ class BooruHandlerFactory {
         case BooruType.AGNPH:
           pageNum = 0;
           booruHandler = AGNPHHandler(booru, limit);
+          break;
+        case BooruType.Nozomi:
+          pageNum = 0;
+          booruHandler = NozomiHandler(booru, limit);
           break;
         case BooruType.NyanPals:
           pageNum = 0;

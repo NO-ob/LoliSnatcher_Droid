@@ -15,6 +15,7 @@ enum BooruType {
   Hydrus,
   InkBunny,
   Moebooru,
+  Nozomi,
   NyanPals,
   Philomena,
   Rainbooru,
