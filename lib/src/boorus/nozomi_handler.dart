@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/data/meta_tag.dart';
 import 'package:lolisnatcher/src/data/tag_suggestion.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -21,6 +22,13 @@ class NozomiHandler extends BooruHandler {
   late String lastTagInput;
 
   // ----------------- Booru handler overrides
+
+  @override
+  List<MetaTag> availableMetaTags() {
+    return [
+      OrderMetaTag(values: [MetaTagValue(name: 'Popularity', value: 'popular')]),
+    ];
+  }
 
   @override
   String validateTags(String tags) {
