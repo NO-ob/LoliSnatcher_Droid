@@ -94,6 +94,7 @@ enum BooruType {
   bool get isHydrus => this == BooruType.Hydrus;
   bool get isInkBunny => this == BooruType.InkBunny;
   bool get isMoebooru => this == BooruType.Moebooru;
+  bool get isNozomi => this == BooruType.Nozomi;
   bool get isNyanPals => this == BooruType.NyanPals;
   bool get isPhilomena => this == BooruType.Philomena;
   bool get isRainbooru => this == BooruType.Rainbooru;

@@ -34,6 +34,39 @@ class ImageWriterIsolate {
     return image;
   }
 
+  Future<File?> writeCacheFromStream(
+    String fileURL,
+    Stream<List<int>> stream,
+    String typeFolder, {
+    required String fileNameExtras,
+    bool clearName = true,
+  }) async {
+    try {
+      final String cachePath = '$cacheRootPath$typeFolder/';
+      await Directory(cachePath).create(recursive: true);
+
+      final String fileName = sanitizeName(
+        clearName ? parseThumbUrlToName(fileURL) : fileURL,
+        fileNameExtras: fileNameExtras,
+      );
+
+      final File finalFile = File(cachePath + fileName);
+      final File partialFile = File('${finalFile.path}.partial');
+
+      final IOSink sink = partialFile.openWrite();
+
+      await stream.pipe(sink);
+      await sink.close();
+
+      await partialFile.rename(finalFile.path);
+
+      return finalFile;
+    } catch (e) {
+      print('Image Writer Isolate Exception :: cache write stream :: $e');
+      return null;
+    }
+  }
+
   Future<File?> readFileFromCache(
     String fileURL,
     String typeFolder, {
@@ -90,6 +123,61 @@ class ImageWriterIsolate {
     return imageBytes;
   }
 
+  Stream<List<int>> readBytesStreamFromCache(
+    String fileURL,
+    String typeFolder, {
+    required String fileNameExtras,
+    bool clearName = true,
+    int? start,
+    int? end,
+  }) async* {
+    try {
+      final String cachePath = '$cacheRootPath$typeFolder/';
+
+      final String fileName = sanitizeName(
+        clearName ? parseThumbUrlToName(fileURL) : fileURL,
+        fileNameExtras: fileNameExtras,
+      );
+
+      final File file = File(cachePath + fileName);
+
+      if (!await file.exists()) {
+        print('Cache miss: ${file.path}');
+        return;
+      }
+
+      final int fileLength = await file.length();
+
+      final int startByte = start ?? 0;
+      final int endByte = end ?? (fileLength - 1);
+
+      if (startByte < 0 || endByte >= fileLength || startByte > endByte) {
+        throw RangeError('Invalid byte range');
+      }
+
+      final RandomAccessFile raf = await file.open();
+
+      await raf.setPosition(startByte);
+
+      int remaining = endByte - startByte + 1;
+      const int chunkSize = 64 * 1024; // 64KB chunks
+
+      while (remaining > 0) {
+        final int readSize = remaining > chunkSize ? chunkSize : remaining;
+        final Uint8List chunk = await raf.read(readSize);
+
+        if (chunk.isEmpty) break;
+
+        remaining -= chunk.length;
+        yield chunk;
+      }
+
+      await raf.close();
+    } catch (e) {
+      print('Cache stream read error: $e');
+    }
+  }
+
   String parseThumbUrlToName(String thumbURL) {
     final int queryLastIndex = thumbURL.lastIndexOf('?'); // Sankaku fix
     final int lastIndex = queryLastIndex != -1 ? queryLastIndex : thumbURL.length;
@@ -134,5 +222,26 @@ class ImageWriterIsolate {
 
   String sanitizeName(String fileName, {required String fileNameExtras}) {
     return '${Tools.sanitize(fileNameExtras)}${Tools.sanitize(fileName)}';
+  }
+
+  Future<int?> getCacheFileSize(
+    String fileURL,
+    String typeFolder, {
+    required String fileNameExtras,
+    bool clearName = true,
+  }) async {
+    try {
+      final String cachePath = '$cacheRootPath$typeFolder/';
+      final String fileName = sanitizeName(
+        clearName ? parseThumbUrlToName(fileURL) : fileURL,
+        fileNameExtras: fileNameExtras,
+      );
+      final File file = File(cachePath + fileName);
+      if (!await file.exists()) return null;
+      return await file.length();
+    } catch (e) {
+      print('Cache file size check error: $e');
+      return null;
+    }
   }
 }
