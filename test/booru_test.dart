@@ -121,6 +121,7 @@ Future<void> main() async {
     test('NozomiHandler', () async {
       final BooruHandler booruHandler = await testBooru(
         Booru('nozomi', BooruType.Nozomi, '', 'https://nozomi.la', ''),
+        hardFetchedLength: false,
       );
       expect(booruHandler, isA<NozomiHandler>());
     });
