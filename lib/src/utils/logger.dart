@@ -86,6 +86,7 @@ class Logger {
     String callerFunction,
     LogTypes? logType, {
     StackTrace? s,
+    LogLevel? overrideLevel,
   }) {
     String logStr = '';
     try {
@@ -98,7 +99,7 @@ class Logger {
       logStr = '${logStr.substring(0, 10000)}...';
     }
 
-    final logLevel = logType?.logLevel ?? LogLevel.wtf;
+    final logLevel = overrideLevel ?? logType?.logLevel ?? LogLevel.wtf;
     if (logLevel == LogLevel.info) {
       _talkerInstance?.info(logStr, null, s);
     } else if (logLevel == LogLevel.error) {

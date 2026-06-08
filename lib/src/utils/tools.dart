@@ -152,6 +152,8 @@ class Tools {
         headers['Referer'] = 'https://gelbooru.com';
       } else if (uri.host.contains('rule34.us')) {
         headers['Referer'] = 'https://rule34.us';
+      } else if (uri.host.contains('nozomi.la')) {
+        headers['Referer'] = 'https://nozomi.la/';
       }
     }
 
