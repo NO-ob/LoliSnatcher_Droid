@@ -11,9 +11,11 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
 import 'package:lolisnatcher/src/utils/clipboard.dart';
+import 'package:lolisnatcher/src/utils/content_policy.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
@@ -72,7 +74,12 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Future<void> _onPopInvoked(_, _) async {
-    settingsHandler.defTags = defaultTagsController.text;
+    settingsHandler.defTags = selectedBooru == null
+        ? defaultTagsController.text
+        : ContentPolicy.safeSearchTagsFor(
+            selectedBooru!,
+            defaultTagsController.text,
+          );
     if (int.parse(limitController.text) > 100) {
       limitController.text = '100';
     } else if (int.parse(limitController.text) < 10) {
@@ -102,6 +109,79 @@ class _BooruPageState extends State<BooruPage> {
       name: context.loc.settings.booru.addBooru,
       icon: const Icon(Icons.add),
       page: () => BooruEdit(Booru('New', null, '', '', '')),
+    );
+  }
+
+  Widget sourceLimitNotice() {
+    if (!ContentPolicy.isLocked) {
+      return const SizedBox.shrink();
+    }
+
+    return SettingsButton(
+      name: context.loc.settings.booru.sourceLimitNotice,
+      icon: const Icon(Icons.tune),
+      enabled: false,
+      dense: true,
+    );
+  }
+
+  Widget expandedSourceCompatibilityToggle() {
+    if (!ContentPolicy.isFromStore) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      children: [
+        const SettingsButton(name: '', enabled: false, drawBottomBorder: false),
+        const SettingsButton(name: '', enabled: false, drawBottomBorder: false),
+        SettingsToggle(
+          value: settingsHandler.expandedSourceCompatibilityEnabled,
+          title: context.loc.settings.booru.expandedSourceCompatibility,
+          subtitle: Text(context.loc.settings.booru.expandedSourceCompatibilitySubtitle),
+          drawTopBorder: true,
+          onChanged: (value) async {
+            if (value) {
+              final bool confirm =
+                  await showDialog<bool>(
+                    context: context,
+                    builder: (context) {
+                      return SettingsDialog(
+                        title: Text(context.loc.settings.booru.expandedSourceCompatibility),
+                        contentItems: [
+                          Text(context.loc.settings.booru.expandedSourceCompatibilityConfirm),
+                        ],
+                        actionButtons: const [
+                          CancelButton(returnData: false, withIcon: true),
+                          ConfirmButton(
+                            returnData: true,
+                            withIcon: true,
+                          ),
+                        ],
+                      );
+                    },
+                  ) ??
+                  false;
+              if (!confirm) {
+                return;
+              }
+            }
+
+            setState(() {
+              settingsHandler.expandedSourceCompatibilityEnabled = value;
+              if (selectedBooru != null && !ContentPolicy.isBooruAllowed(selectedBooru)) {
+                selectedBooru = null;
+              }
+            });
+            await settingsHandler.saveSettings(restate: true);
+            await settingsHandler.loadBoorus();
+            setState(() {
+              if (selectedBooru == null && settingsHandler.booruList.isNotEmpty) {
+                selectedBooru = settingsHandler.booruList[0];
+              }
+            });
+          },
+        ),
+      ],
     );
   }
 
@@ -342,7 +422,9 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Widget webviewButton() {
-    if (BooruType.saveable.contains(selectedBooru?.type) && PlatformExt.hasWebviewSupport) {
+    if (BooruType.saveable.contains(selectedBooru?.type) &&
+        PlatformExt.hasWebviewSupport &&
+        ContentPolicy.canOpenWebview) {
       // TODO add help button and explain how to properly setup cookies?
       return SettingsButton(
         name: context.loc.settings.webview.openWebview,
@@ -372,6 +454,19 @@ class _BooruPageState extends State<BooruPage> {
           if (url.contains('loli.snatcher')) {
             final Booru booru = Booru.fromLink(url);
             if (booru.name != null && booru.name!.isNotEmpty && booru.type!.isSaveable) {
+              if (!ContentPolicy.isBooruAllowed(booru)) {
+                FlashElements.showSnackbar(
+                  context: context,
+                  title: Text(
+                    context.loc.settings.booru.sourceUnavailableCurrentSettings,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  leadingIcon: Icons.warning_amber,
+                  leadingIconColor: Colors.yellow,
+                  sideColor: Colors.yellow,
+                );
+                return;
+              }
               if (settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
                 // Rename config if its already in the list
                 booru.name = '${booru.name!} (duplicate)';
@@ -426,6 +521,7 @@ class _BooruPageState extends State<BooruPage> {
         body: Center(
           child: ListView(
             children: [
+              sourceLimitNotice(),
               TagSearchBox(
                 controller: defaultTagsController,
                 title: context.loc.settings.booru.defaultTags,
@@ -475,6 +571,7 @@ class _BooruPageState extends State<BooruPage> {
                   deleteButton(),
                 ],
               ],
+              expandedSourceCompatibilityToggle(),
             ],
           ),
         ),

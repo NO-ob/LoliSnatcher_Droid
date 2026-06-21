@@ -22,6 +22,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/content_policy.dart';
 import 'package:lolisnatcher/src/utils/ordered_selection_index.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -82,6 +83,7 @@ class SearchHandler {
     int? customPage,
   }) {
     final Booru booru = customBooru ?? currentBooru;
+    searchText = ContentPolicy.safeSearchTagsFor(booru, searchText);
 
     // Add new tab depending on the add mode
     final SearchTab newTab = SearchTab(
@@ -492,6 +494,12 @@ class SearchHandler {
 
     // Remove extra spaces
     text = text.trim();
+    final Booru targetBooru =
+        newBooru ??
+        (tabs.isNotEmpty
+            ? currentBooru
+            : (settingsHandler.booruList.isNotEmpty ? settingsHandler.booruList[0] : Booru.unknown()));
+    text = ContentPolicy.safeSearchTagsFor(targetBooru, text);
 
     // clear image memory cache
     Tools.forceClearMemoryCache(withLive: true);
@@ -508,7 +516,7 @@ class SearchHandler {
       }
     } else {
       final SearchTab newTab = SearchTab(
-        newBooru ?? currentBooru,
+        targetBooru,
         currentSecondaryBoorus.value,
         text,
       );
@@ -634,8 +642,10 @@ class SearchHandler {
       pageNum++;
     }
 
+    final String requestTags = ContentPolicy.safeSearchTagsFor(currentBooru, currentTab.tags);
+
     // fetch new items, but get results from booruHandler and not search itself
-    await currentBooruHandler.search(currentTab.tags, null);
+    await currentBooruHandler.search(requestTags, null);
     // print('FINISHED SEARCH: ${booruhandler.filteredFetched.length}');
 
     // lock new loads if handler detected last page
@@ -650,7 +660,7 @@ class SearchHandler {
 
     // request total image count if not already loaded
     if (currentBooruHandler.totalCount.value == 0) {
-      unawaited(currentBooruHandler.searchCount(currentTab.tags));
+      unawaited(currentBooruHandler.searchCount(requestTags));
     }
 
     // check to avoid requests from old tab instances resetting loading state
@@ -1239,7 +1249,7 @@ class SearchTab {
   }
   // unique id to use for booru controller
   final String id = uuid.v4();
-  String tags = '';
+  String tags;
 
   late final Rx<Booru> selectedBooru;
   late final Rxn<List<Booru>?> secondaryBoorus;

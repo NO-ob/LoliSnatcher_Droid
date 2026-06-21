@@ -45,6 +45,7 @@ import 'package:lolisnatcher/src/pages/settings/language_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/services/saf_file_cache.dart';
 import 'package:lolisnatcher/src/utils/clipboard.dart';
+import 'package:lolisnatcher/src/utils/content_policy.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -201,6 +202,7 @@ class SettingsHandler {
   bool autofocusSearchbar = true;
   bool expandDetails = false;
   bool usePredictiveBack = true;
+  bool expandedSourceCompatibilityEnabled = false;
   final RxBool useLockscreen = false.obs;
   final RxBool blurOnLeave = false.obs;
   final RxList<Booru> booruList = RxList<Booru>([]);
@@ -286,6 +288,7 @@ class SettingsHandler {
     'autofocusSearchbar',
     'expandDetails',
     'usePredictiveBack',
+    'expandedSourceCompatibilityEnabled',
     'useLockscreen',
     'blurOnLeave',
   ];
@@ -701,6 +704,10 @@ class SettingsHandler {
     'usePredictiveBack': {
       'type': 'bool',
       'default': true,
+    },
+    'expandedSourceCompatibilityEnabled': {
+      'type': 'bool',
+      'default': false,
     },
     'useLockscreen': {
       'type': 'bool',
@@ -1158,6 +1165,8 @@ class SettingsHandler {
         return expandDetails;
       case 'usePredictiveBack':
         return usePredictiveBack;
+      case 'expandedSourceCompatibilityEnabled':
+        return expandedSourceCompatibilityEnabled;
       case 'useLockscreen':
         return useLockscreen;
       case 'blurOnLeave':
@@ -1508,6 +1517,9 @@ class SettingsHandler {
       case 'usePredictiveBack':
         usePredictiveBack = validatedValue;
         break;
+      case 'expandedSourceCompatibilityEnabled':
+        expandedSourceCompatibilityEnabled = validatedValue;
+        break;
       case 'useLockscreen':
         useLockscreen.value = validatedValue;
         break;
@@ -1751,6 +1763,11 @@ class SettingsHandler {
       });
     }
 
+    // if store user imported with defTags without safe rating - treat him as user who is allowed to view content from any site
+    if (ContentPolicy.isFromStore && _isImportedFullUserSettings(json)) {
+      expandedSourceCompatibilityEnabled = true;
+    }
+
     try {
       final List<String> legacyKeys = [];
       for (final String key in legacyKeys) {
@@ -1775,6 +1792,15 @@ class SettingsHandler {
     appMode.value = AppMode.Mobile;
 
     return true;
+  }
+
+  bool _isImportedFullUserSettings(Map<String, dynamic> json) {
+    if (!json.containsKey('defTags')) {
+      return false;
+    }
+
+    final String importedDefTags = json['defTags']?.toString().toLowerCase() ?? '';
+    return !RegExp(r'(^|\s)rating:safe(\s|$)').hasMatch(importedDefTags);
   }
 
   Future<bool> saveSettings({required bool restate}) async {
@@ -1820,8 +1846,8 @@ class SettingsHandler {
             // print(files[i].toString());
             final File booruFile = files[i] as File;
             final Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
-            final bool isAllowed = BooruType.saveable.contains(booruFromFile.type);
-            if (isAllowed) {
+            final bool isSaveable = BooruType.saveable.contains(booruFromFile.type);
+            if (isSaveable) {
               tempList.add(booruFromFile);
             } else {
               await booruFile.delete();
@@ -1906,6 +1932,10 @@ class SettingsHandler {
   }
 
   Future saveBooru(Booru booru, {bool onlySave = false}) async {
+    if (!ContentPolicy.isBooruAllowed(booru)) {
+      return false;
+    }
+
     if (path == '') {
       await setConfigDir();
     }

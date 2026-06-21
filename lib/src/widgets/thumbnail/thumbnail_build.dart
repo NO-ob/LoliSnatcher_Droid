@@ -15,6 +15,7 @@ import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/utils/clipboard.dart';
+import 'package:lolisnatcher/src/utils/content_policy.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/pulse_widget.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
@@ -203,7 +204,7 @@ class ThumbnailBuild extends StatelessWidget {
 
                         widgets.add(
                           GestureDetector(
-                            onTap: possibleBooru != null
+                            onTap: possibleBooru != null && ContentPolicy.canOpenWebview
                                 ? () {
                                     final String? url = possibleBooru.baseURL;
                                     if (url == null || url.isEmpty) {

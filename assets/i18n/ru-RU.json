@@ -407,7 +407,12 @@
             "booruConfigLinkCopied": "Конфиг в виде ссылки скопирован",
             "noBooruSelected": "Сайт не выбран!",
             "cantDeleteThisBooru": "Нельзя удалить этот сайт!",
-            "removeRelatedTabsFirst": "Сначала удалите связанные вкладки"
+            "removeRelatedTabsFirst": "Сначала удалите связанные вкладки",
+            "sourceLimitNotice": "Некоторые источники и результаты ограничены. Дополнительные параметры совместимости доступны в расширенных настройках.",
+            "expandedSourceCompatibility": "Расширенная совместимость источников",
+            "expandedSourceCompatibilitySubtitle": "Показывать дополнительные параметры источников",
+            "expandedSourceCompatibilityConfirm": "Дополнительные источники могут не соблюдать стандартные ограничения контента. Продолжить?",
+            "sourceUnavailableCurrentSettings": "Этот источник недоступен с текущими настройками источников."
         },
         "booruEditor": {
             "title": "Редактор конфига сайта",
