@@ -51,7 +51,7 @@ class ContentPolicy {
   };
 
   static bool get isFromStore {
-    return EnvironmentConfig.isFromStore || true;
+    return EnvironmentConfig.isFromStore;
   }
 
   static bool get isLocked {
