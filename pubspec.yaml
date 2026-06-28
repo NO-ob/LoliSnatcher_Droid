@@ -6,7 +6,7 @@ version: 2.5.1+5214 # remember to update the values in constants.dart->updateInf
 
 environment:
   sdk: ">=3.12.2 <4.0.0"
-  flutter: 3.44.2
+  flutter: 3.44.4
 
 dependencies:
   flutter:
@@ -14,7 +14,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   alice_lightweight: ^3.10.0
-  app_links: ^7.1.2
+  app_links: ^7.2.0
   auto_size_text_plus: ^3.0.2
   calendar_date_picker2: ^3.0.0
   chewie: ^1.14.1

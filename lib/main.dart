@@ -459,7 +459,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     backupTimer = Timer.periodic(const Duration(seconds: kDebugMode ? 10 : 30), (timer) {
       // TODO rework so it happens on every tab change/addition, NOT on timer
       searchHandler.backupTabs();
-      if (!tagHandler.tagSaveActive) {
+      if (searchHandler.canBackup.value && !tagHandler.tagSaveActive) {
         tagHandler.saveTags();
       }
     });
@@ -472,7 +472,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     dbCleanupTimer = Timer(
       const Duration(minutes: kDebugMode ? 1 : 20),
       // happens only once N minutes after start, to avoid long db lockup during early work
-      () => settingsHandler.dbHandler.tagsCleanup(),
+      () {
+        if (searchHandler.canBackup.value) {
+          settingsHandler.dbHandler.tagsCleanup();
+        }
+      },
     );
 
     // consider app launch as return to the app

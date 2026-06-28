@@ -93,6 +93,9 @@ class ImageViewerState extends State<ImageViewer> {
   final ValueNotifier<ImageProvider?> mainProvider = ValueNotifier(null);
   ImageStreamListener? imageListener;
   ImageStream? imageStream;
+  StreamSubscription<PhotoViewControllerValue>? viewStateSubscription;
+  StreamSubscription<PhotoViewScaleState>? scaleStateSubscription;
+  int _loadGeneration = 0;
 
   String imageFolder = 'media';
   int? widthLimit;
@@ -197,8 +200,8 @@ class ImageViewerState extends State<ImageViewer> {
     viewerHandler.addViewed(widget.key);
 
     // debug output
-    viewController.outputStateStream.listen(onViewStateChanged);
-    scaleController.outputScaleStateStream.listen(onScaleStateChanged);
+    viewStateSubscription = viewController.outputStateStream.listen(onViewStateChanged);
+    scaleStateSubscription = scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
     calcWidthLimit(MediaQuery.sizeOf(NavigationHandler.instance.navContext).width);
 
@@ -210,9 +213,12 @@ class ImageViewerState extends State<ImageViewer> {
 
   @override
   void didUpdateWidget(ImageViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
     // force redraw on item data change
     if (oldWidget.booruItem != widget.booruItem) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
         stopLoading(reason: .reset);
         initViewer(false);
       });
@@ -225,8 +231,6 @@ class ImageViewerState extends State<ImageViewer> {
         resetZoom();
       }
     }
-
-    super.didUpdateWidget(oldWidget);
   }
 
   bool get useFullImage => settingsHandler.galleryMode.isFullRes
@@ -237,6 +241,7 @@ class ImageViewerState extends State<ImageViewer> {
     bool ignoreTagsCheck, {
     bool withCaptchaCheck = false,
   }) async {
+    final int loadGeneration = ++_loadGeneration;
     widget.booruItem.isNoScale.addListener(noScaleListener);
 
     widget.booruItem.toggleQuality.addListener(toggleQualityListener);
@@ -259,6 +264,8 @@ class ImageViewerState extends State<ImageViewer> {
 
     isStopped.value = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isCurrentLoad(loadGeneration)) return;
+
       viewerHandler.setStopped(widget.key, false);
     });
 
@@ -267,23 +274,35 @@ class ImageViewerState extends State<ImageViewer> {
     final mQuery = MediaQuery.of(NavigationHandler.instance.navContext);
     widthLimit = settingsHandler.disableImageScaling ? null : (mQuery.size.width * mQuery.devicePixelRatio * 2).round();
 
-    mainProvider.value ??= await getImageProvider(
+    final ImageProvider newProvider = await getImageProvider(
+      loadGeneration: loadGeneration,
       withCaptchaCheck: withCaptchaCheck,
     );
 
-    imageStream?.removeListener(imageListener!);
+    if (!_isCurrentLoad(loadGeneration)) {
+      return;
+    }
+
+    mainProvider.value = newProvider;
+    _removeImageStreamListener();
     imageStream = mainProvider.value!.resolve(ImageConfiguration.empty);
     imageListener = ImageStreamListener(
       (imageInfo, syncCall) async {
+        if (!_isCurrentLoad(loadGeneration)) return;
+
         if (imageInfo.image.height >= settingsHandler.preloadHeight) {
-          await checkAndPrepareTiles();
+          await checkAndPrepareTiles(loadGeneration: loadGeneration);
         } else {
           isTilingProcessing.value = false;
         }
 
+        if (!_isCurrentLoad(loadGeneration)) return;
+
         final prevIsLoaded = isLoaded.value;
         isLoaded.value = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!_isCurrentLoad(loadGeneration)) return;
+
           // without this check gifs will keep resetting zoom on every frame change
           // because every frame is considered as new image
           if (prevIsLoaded == false) {
@@ -293,9 +312,15 @@ class ImageViewerState extends State<ImageViewer> {
         });
       },
       onChunk: (event) {
+        if (!_isCurrentLoad(loadGeneration)) return;
+
         onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
       },
-      onError: (e, stack) => onError(e),
+      onError: (e, stack) {
+        if (_isCurrentLoad(loadGeneration)) {
+          onError(e);
+        }
+      },
     );
     imageStream!.addListener(imageListener!);
   }
@@ -327,6 +352,7 @@ class ImageViewerState extends State<ImageViewer> {
   }
 
   Future<ImageProvider> getImageProvider({
+    required int loadGeneration,
     bool withCaptchaCheck = false,
   }) async {
     if ((settingsHandler.galleryMode.isSample &&
@@ -368,9 +394,15 @@ class ImageViewerState extends State<ImageViewer> {
             withCache: settingsHandler.mediaCache,
             cacheFolder: imageFolder,
             fileNameExtras: widget.booruItem.fileNameExtras,
-            onError: onError,
+            onError: (error) {
+              if (_isCurrentLoad(loadGeneration)) {
+                onError(error);
+              }
+            },
             onCacheDetected: (bool didDetectCache) {
-              isFromCache.value = didDetectCache;
+              if (_isCurrentLoad(loadGeneration)) {
+                isFromCache.value = didDetectCache;
+              }
             },
             withCaptchaCheck: withCaptchaCheck,
           )
@@ -385,9 +417,15 @@ class ImageViewerState extends State<ImageViewer> {
             withCache: settingsHandler.mediaCache,
             cacheFolder: imageFolder,
             fileNameExtras: widget.booruItem.fileNameExtras,
-            onError: onError,
+            onError: (error) {
+              if (_isCurrentLoad(loadGeneration)) {
+                onError(error);
+              }
+            },
             onCacheDetected: (bool didDetectCache) {
-              isFromCache.value = didDetectCache;
+              if (_isCurrentLoad(loadGeneration)) {
+                isFromCache.value = didDetectCache;
+              }
             },
             withCaptchaCheck: withCaptchaCheck,
           );
@@ -432,6 +470,8 @@ class ImageViewerState extends State<ImageViewer> {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       viewerHandler.setStopped(widget.key, true);
       viewerHandler.setLoaded(widget.key, false);
     });
@@ -441,14 +481,19 @@ class ImageViewerState extends State<ImageViewer> {
   void dispose() {
     disposables();
 
+    viewStateSubscription?.cancel();
+    scaleStateSubscription?.cancel();
+    scaleController.dispose();
+    viewController.dispose();
+    disposeNotifiers();
+
     viewerHandler.removeViewed(widget.key);
     super.dispose();
   }
 
   void disposables() {
-    imageStream?.removeListener(imageListener!);
-    imageStream = null;
-    imageListener = null;
+    _loadGeneration++;
+    _removeImageStreamListener();
 
     if (!(cancelToken?.isCancelled ?? true)) {
       cancelToken?.cancel();
@@ -481,6 +526,36 @@ class ImageViewerState extends State<ImageViewer> {
 
     widget.booruItem.isNoScale.removeListener(noScaleListener);
     widget.booruItem.toggleQuality.removeListener(toggleQualityListener);
+  }
+
+  bool _isCurrentLoad(int loadGeneration) {
+    return mounted && loadGeneration == _loadGeneration;
+  }
+
+  void _removeImageStreamListener() {
+    final ImageStreamListener? listener = imageListener;
+    if (listener != null) {
+      imageStream?.removeListener(listener);
+    }
+    imageStream = null;
+    imageListener = null;
+  }
+
+  void disposeNotifiers() {
+    total.dispose();
+    received.dispose();
+    startedAt.dispose();
+    isFirstBuild.dispose();
+    isLoaded.dispose();
+    isViewed.dispose();
+    isFromCache.dispose();
+    isZoomed.dispose();
+    isStopped.dispose();
+    showLoading.dispose();
+    stopReason.dispose();
+    stopDetails.dispose();
+    mainProvider.dispose();
+    isTilingProcessing.dispose();
   }
 
   // debug functions
@@ -527,12 +602,15 @@ class ImageViewerState extends State<ImageViewer> {
   }
 
   Future<void> onManualRestart() async {
+    final int loadGeneration = ++_loadGeneration;
     if (blockPreloadState.isTooBig) {
       blockPreloadState = .ignore;
     }
 
     isStopped.value = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isCurrentLoad(loadGeneration)) return;
+
       viewerHandler.setStopped(widget.key, false);
     });
 
@@ -544,10 +622,18 @@ class ImageViewerState extends State<ImageViewer> {
     };
     bool shouldDoCaptchaCheck = false;
     if (shouldUpdate) {
+      loadItemCancelToken = CancelToken();
+      final CancelToken itemLoadCancelToken = loadItemCancelToken!;
       final updateRes = await tryToLoadAndUpdateItem(
         widget.booruItem,
-        loadItemCancelToken,
+        itemLoadCancelToken,
       );
+
+      if (!_isCurrentLoad(loadGeneration) ||
+          itemLoadCancelToken.isCancelled ||
+          !identical(loadItemCancelToken, itemLoadCancelToken)) {
+        return;
+      }
 
       shouldDoCaptchaCheck = updateRes != true;
 
@@ -564,6 +650,7 @@ class ImageViewerState extends State<ImageViewer> {
             customUserAgent: Tools.appUserAgent,
           ),
         );
+        if (!_isCurrentLoad(loadGeneration)) return;
       }
     }
 
@@ -577,7 +664,9 @@ class ImageViewerState extends State<ImageViewer> {
     stopLoading(reason: .user);
   }
 
-  Future<void> checkAndPrepareTiles() async {
+  Future<void> checkAndPrepareTiles({
+    required int loadGeneration,
+  }) async {
     if (isTiled || isTilingProcessing.value == true) return;
 
     try {
@@ -592,9 +681,15 @@ class ImageViewerState extends State<ImageViewer> {
 
       final File file = File(cachePath);
       if (!await file.exists()) return;
+      if (!_isCurrentLoad(loadGeneration)) return;
 
       final buffer = await ImmutableBuffer.fromFilePath(cachePath);
       final descriptor = await ImageDescriptor.encoded(buffer);
+      if (!_isCurrentLoad(loadGeneration)) {
+        descriptor.dispose();
+        buffer.dispose();
+        return;
+      }
 
       final size = Size(descriptor.width.toDouble(), descriptor.height.toDouble());
 
@@ -646,7 +741,7 @@ class ImageViewerState extends State<ImageViewer> {
               },
             );
 
-        if (mounted) {
+        if (_isCurrentLoad(loadGeneration)) {
           // Adaptive tile width: cap total GPU texture memory at kMaxTileMemoryBudget
           // Each tile decoded as: tileWidth × kMaxTextureHeight × 4 bytes (RGBA)
           final int adaptiveWidth = kMaxTileMemoryBudget ~/ (kMaxTextureHeight * 4 * slices.length);
@@ -667,6 +762,11 @@ class ImageViewerState extends State<ImageViewer> {
           isTilingProcessing.value = false;
         }
       } else {
+        if (!_isCurrentLoad(loadGeneration)) {
+          descriptor.dispose();
+          buffer.dispose();
+          return;
+        }
         isTiled = false;
         isTilingProcessing.value = false;
       }
@@ -841,7 +941,9 @@ class ImageViewerState extends State<ImageViewer> {
                                     },
                                     errorBuilder: (_, error, _) {
                                       WidgetsBinding.instance.addPostFrameCallback((_) {
-                                        onError(error);
+                                        if (mounted) {
+                                          onError(error);
+                                        }
                                       });
                                       return const SizedBox.shrink();
                                     },

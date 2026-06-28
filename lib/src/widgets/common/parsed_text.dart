@@ -34,6 +34,7 @@ class ParsedText extends StatefulWidget {
     this.maxLines,
     this.overflow,
     this.textAlign,
+    this.scrollPhysics,
     super.key,
   });
 
@@ -90,6 +91,9 @@ class ParsedText extends StatefulWidget {
 
   /// Text alignment
   final TextAlign? textAlign;
+
+  /// Scroll physics for selectable text.
+  final ScrollPhysics? scrollPhysics;
 
   @override
   State<ParsedText> createState() => _ParsedTextState();
@@ -272,6 +276,7 @@ class _ParsedTextState extends State<ParsedText> {
         textSpan,
         maxLines: widget.maxLines,
         textAlign: widget.textAlign,
+        scrollPhysics: widget.scrollPhysics,
       );
     }
 

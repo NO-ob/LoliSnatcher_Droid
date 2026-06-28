@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
+import 'package:lolisnatcher/src/widgets/common/loading_progress.dart';
 
 class ThumbnailLoading extends StatefulWidget {
   const ThumbnailLoading({
@@ -44,43 +43,26 @@ class ThumbnailLoading extends StatefulWidget {
 }
 
 class _ThumbnailLoadingState extends State<ThumbnailLoading> {
-  final SettingsHandler settingsHandler = SettingsHandler.instance;
-
-  bool isVisible = false;
-  int _total = 0, _received = 0, _startedAt = 0;
+  late LoadingProgressTracker _progressTracker;
 
   @override
   void initState() {
     super.initState();
 
-    _total = widget.total.value;
-    _received = widget.received.value;
-    _startedAt = widget.startedAt.value;
-
-    widget.total.addListener(onTotalChanged);
-    widget.received.addListener(onReceivedChanged);
-    widget.startedAt.addListener(onStartedAtChanged);
+    _progressTracker = _createProgressTracker();
   }
 
-  void onTotalChanged() => _onBytesAdded(null, widget.total.value);
-  void onReceivedChanged() => _onBytesAdded(widget.received.value, null);
-  void onStartedAtChanged() {
-    _total = 0;
-    _received = 0;
-    _startedAt = widget.startedAt.value;
-  }
-
-  void _onBytesAdded(int? received, int? total) {
-    // always save incoming bytes, but restate only after a small delay
-
-    _received = received ?? _received;
-    _total = total ?? _total;
-
-    final bool isDone = _total > 0 && _received >= _total;
-    Debounce.delay(
-      tag: 'loading_thumbnail_progress_${widget.item.hashCode}',
-      callback: updateState,
-      duration: Duration(milliseconds: isDone ? 0 : 250),
+  LoadingProgressTracker _createProgressTracker() {
+    return LoadingProgressTracker(
+      total: widget.total,
+      received: widget.received,
+      startedAt: widget.startedAt,
+      debounceTag: 'loading_thumbnail_progress_${widget.item.hashCode}',
+      onChanged: updateState,
+      progressDebounceDuration: const Duration(milliseconds: 250),
+      completedDebounceDuration: Duration.zero,
+      periodicRefreshInterval: const Duration(milliseconds: 500),
+      shouldRefresh: () => !widget.isDone && !widget.isFailed,
     );
   }
 
@@ -90,27 +72,36 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
     }
   }
 
-  void disposables() {
-    _total = 0;
-    _received = 0;
-    _startedAt = 0;
+  @override
+  void didUpdateWidget(covariant ThumbnailLoading oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.item, widget.item)) {
+      _progressTracker.dispose();
+      _progressTracker = _createProgressTracker();
+      return;
+    }
 
-    widget.total.removeListener(onTotalChanged);
-    widget.received.removeListener(onReceivedChanged);
-    widget.startedAt.removeListener(onStartedAtChanged);
-    Debounce.cancel('loading_thumbnail_progress_${widget.item.hashCode}');
+    _progressTracker.updateSources(
+      total: widget.total,
+      received: widget.received,
+      startedAt: widget.startedAt,
+    );
   }
 
   @override
   void dispose() {
-    disposables();
+    _progressTracker.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final int nowMils = DateTime.now().millisecondsSinceEpoch;
-    final int sinceStart = _startedAt == 0 ? 0 : nowMils - _startedAt;
+    final LoadingProgressSnapshot progress = _progressTracker.snapshot(
+      hasProgress: widget.hasProgress,
+      nowMillis: nowMils,
+    );
+    final int sinceStart = progress.sinceStartMillis;
     final bool showLoading = !widget.isDone && (widget.isFailed || (sinceStart > 499));
     // bool showLoading = !widget.isDone || widget.isFailed;
     // delay showing loading info a bit, so we don't clutter interface for fast loading files
@@ -123,16 +114,13 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.linear,
         opacity: showLoading ? 1 : 0,
-        onEnd: () {
-          isVisible = showLoading;
-          updateState();
-        },
-        child: buildElement(context),
+        onEnd: updateState,
+        child: buildElement(context, progress),
       ),
     );
   }
 
-  Widget buildElement(BuildContext context) {
+  Widget buildElement(BuildContext context, LoadingProgressSnapshot progress) {
     if (widget.isDone) {
       return const SizedBox.shrink();
     }
@@ -195,16 +183,12 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
       );
     }
 
-    final bool hasProgressData = widget.hasProgress && (_total > 0);
-    final int expectedBytes = hasProgressData ? _received : 0;
-    final int totalBytes = hasProgressData ? _total : 0;
-
-    final double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
+    final double percentDone = progress.percentDone;
     // String? percentDoneText = hasProgressData
     //     ? ((percentDone ?? 0) == 1 ? null : '${(percentDone! * 100).toStringAsFixed(2)}%')
     //     : (isFromCache == true ? '...' : null);
 
-    if (widget.isFromCache != false) {
+    if (widget.isFromCache == true) {
       return const SizedBox.shrink();
     }
 

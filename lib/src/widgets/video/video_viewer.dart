@@ -77,21 +77,26 @@ class VideoViewerState extends State<VideoViewer> {
   DioDownloader? client, sizeClient;
   File? video;
   StreamSubscription? viewStateSubscription, scaleStateSubscription;
+  int _loadGeneration = 0;
 
   bool get isVideoInited => videoController.value?.value.isInitialized ?? false;
 
-  Future<void> downloadVideo() async {
+  Future<void> downloadVideo({
+    required int loadGeneration,
+  }) async {
     isStopped.value = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isCurrentLoad(loadGeneration)) return;
+
       viewerHandler.setStopped(widget.key, false);
     });
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
-    unawaited(getSize());
+    unawaited(getSize(loadGeneration: loadGeneration));
 
     if (!settingsHandler.mediaCache) {
       // Media caching disabled - don't cache videos
-      unawaited(initPlayer());
+      unawaited(initPlayer(loadGeneration: loadGeneration));
       return;
     }
 
@@ -105,17 +110,18 @@ class VideoViewerState extends State<VideoViewer> {
       // Load and stream from default player network request, cache to device from custom request
       // TODO: change video handler to allow viewing and caching from single network request
       case .streamCache:
-        unawaited(initPlayer());
+        unawaited(initPlayer(loadGeneration: loadGeneration));
         break;
 
       // Only stream, notice the return
       case .stream:
-        unawaited(initPlayer());
+        unawaited(initPlayer(loadGeneration: loadGeneration));
         return;
     }
 
     cancelToken?.cancel();
     cancelToken = CancelToken();
+    final CancelToken currentCancelToken = cancelToken!;
     client = DioDownloader(
       widget.booruItem.fileURL,
       headers: await Tools.getFileCustomHeaders(
@@ -123,15 +129,29 @@ class VideoViewerState extends State<VideoViewer> {
         item: widget.booruItem,
         checkForReferer: true,
       ),
-      cancelToken: cancelToken,
-      onProgress: onBytesAdded,
-      onEvent: onEvent,
-      onError: onError,
+      cancelToken: currentCancelToken,
+      onProgress: (receivedNew, totalNew) {
+        if (_isCurrentLoad(loadGeneration)) {
+          onBytesAdded(receivedNew, totalNew);
+        }
+      },
+      onEvent: (event, data) {
+        if (_isCurrentLoad(loadGeneration)) {
+          onEvent(event, data);
+        }
+      },
+      onError: (error) {
+        if (_isCurrentLoad(loadGeneration)) {
+          onError(error);
+        }
+      },
       onDoneFile: (File file) async {
+        if (!_isCurrentLoad(loadGeneration)) return;
+
         video = file;
         // save video from cache, but restate only if player is not initialized yet
         if (!isVideoInited) {
-          unawaited(initPlayer());
+          unawaited(initPlayer(loadGeneration: loadGeneration));
           updateState();
         }
       },
@@ -143,9 +163,12 @@ class VideoViewerState extends State<VideoViewer> {
     return;
   }
 
-  Future<void> getSize() async {
+  Future<void> getSize({
+    required int loadGeneration,
+  }) async {
     sizeCancelToken?.cancel();
     sizeCancelToken = CancelToken();
+    final CancelToken currentSizeCancelToken = sizeCancelToken!;
     sizeClient = DioDownloader(
       widget.booruItem.fileURL,
       headers: await Tools.getFileCustomHeaders(
@@ -153,8 +176,12 @@ class VideoViewerState extends State<VideoViewer> {
         item: widget.booruItem,
         checkForReferer: true,
       ),
-      cancelToken: sizeCancelToken,
-      onEvent: onEvent,
+      cancelToken: currentSizeCancelToken,
+      onEvent: (event, data) {
+        if (_isCurrentLoad(loadGeneration)) {
+          onEvent(event, data);
+        }
+      },
       fileNameExtras: widget.booruItem.fileNameExtras,
     );
     unawaited(sizeClient!.runRequestSize());
@@ -257,9 +284,12 @@ class VideoViewerState extends State<VideoViewer> {
 
   @override
   void didUpdateWidget(VideoViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
     // force redraw on item data change
     if (oldWidget.booruItem != widget.booruItem) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
         stopLoading(reason: ViewerStopReason.reset);
         initVideo(false);
         updateState();
@@ -282,8 +312,6 @@ class VideoViewerState extends State<VideoViewer> {
         resetZoom();
       }
     }
-
-    super.didUpdateWidget(oldWidget);
   }
 
   void updateState() {
@@ -293,6 +321,7 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   Future<void> initVideo(bool ignoreTagsCheck) async {
+    final int loadGeneration = ++_loadGeneration;
     if (widget.booruItem.isHidden && !ignoreTagsCheck) {
       final tagsData = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       stopLoading(
@@ -300,7 +329,7 @@ class VideoViewerState extends State<VideoViewer> {
         details: tagsData.hiddenTags.join('\n'),
       );
     } else {
-      await downloadVideo();
+      await downloadVideo(loadGeneration: loadGeneration);
     }
   }
 
@@ -324,6 +353,8 @@ class VideoViewerState extends State<VideoViewer> {
     stopDetails.value = '${title != null ? '$title\n' : ''}${details ?? ''}';
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       viewerHandler.setStopped(widget.key, true);
       viewerHandler.setLoaded(widget.key, false);
     });
@@ -349,6 +380,7 @@ class VideoViewerState extends State<VideoViewer> {
     pauseCheckTimer?.cancel();
 
     viewerHandler.removeViewed(widget.key);
+    disposeNotifiers();
 
     super.dispose();
   }
@@ -361,6 +393,7 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   void disposables() {
+    _loadGeneration++;
     videoController.value?.setVolume(0);
     videoController.value?.pause();
     videoController.value?.removeListener(updateVideoState);
@@ -385,6 +418,26 @@ class VideoViewerState extends State<VideoViewer> {
     loadItemCancelToken = null;
 
     disposeClient();
+  }
+
+  bool _isCurrentLoad(int loadGeneration) {
+    return mounted && loadGeneration == _loadGeneration;
+  }
+
+  void disposeNotifiers() {
+    videoController.dispose();
+    chewieController.dispose();
+    total.dispose();
+    received.dispose();
+    startedAt.dispose();
+    isFromCache.dispose();
+    isStopped.dispose();
+    isViewed.dispose();
+    isZoomed.dispose();
+    showControls.dispose();
+    forceCache.dispose();
+    stopReason.dispose();
+    stopDetails.dispose();
   }
 
   // debug functions
@@ -445,6 +498,8 @@ class VideoViewerState extends State<VideoViewer> {
     if (isVideoInited) {
       bufferingTimer?.cancel();
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+
         viewerHandler.setLoaded(widget.key, true);
       });
     }
@@ -469,9 +524,11 @@ class VideoViewerState extends State<VideoViewer> {
     }
   }
 
-  Future<void> initPlayer() async {
+  Future<void> initPlayer({
+    required int loadGeneration,
+  }) async {
     // ignore if player is already inited (i.e. stream+cache mode)
-    if (isVideoInited) return;
+    if (!_isCurrentLoad(loadGeneration) || isVideoInited) return;
 
     if (video != null) {
       // Start from cache if was already cached or only caching is allowed
@@ -491,6 +548,8 @@ class VideoViewerState extends State<VideoViewer> {
         ),
       );
     }
+    if (!_isCurrentLoad(loadGeneration)) return;
+
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
     videoController.value!.addListener(updateVideoState);
 
@@ -571,9 +630,13 @@ class VideoViewerState extends State<VideoViewer> {
         () {
           // force restart with cache mode, but only if file size isn't loaded yet or it's small enough (<25mb) (big videos may take a while to buffer)
           const int maxForceCacheSize = 1024 * 1024 * 25;
-          if (!isVideoInited && (total.value == 0 || total.value < maxForceCacheSize)) {
+          if (_isCurrentLoad(loadGeneration) &&
+              !isVideoInited &&
+              (total.value == 0 || total.value < maxForceCacheSize)) {
             forceCache.value = true;
             WidgetsBinding.instance.addPostFrameCallback((_) async {
+              if (!_isCurrentLoad(loadGeneration)) return;
+
               stopLoading(reason: ViewerStopReason.reset);
               await initVideo(false);
               updateState();
@@ -584,6 +647,7 @@ class VideoViewerState extends State<VideoViewer> {
     }
 
     await Future.wait([videoController.value!.initialize()]);
+    if (!_isCurrentLoad(loadGeneration)) return;
 
     if (settingsHandler.autoPlayEnabled) {
       await videoController.value!.play();
@@ -666,6 +730,8 @@ class VideoViewerState extends State<VideoViewer> {
     }
     isStopped.value = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       viewerHandler.setStopped(widget.key, false);
     });
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
@@ -676,10 +742,16 @@ class VideoViewerState extends State<VideoViewer> {
       _ => false,
     };
     if (shouldUpdate) {
+      loadItemCancelToken = CancelToken();
+      final CancelToken itemLoadCancelToken = loadItemCancelToken!;
       final bool? updateRes = await tryToLoadAndUpdateItem(
         widget.booruItem,
-        loadItemCancelToken,
+        itemLoadCancelToken,
       );
+      if (!mounted || itemLoadCancelToken.isCancelled || !identical(loadItemCancelToken, itemLoadCancelToken)) {
+        return;
+      }
+
       forceCache.value = false;
       updateState();
 
@@ -696,6 +768,7 @@ class VideoViewerState extends State<VideoViewer> {
             customUserAgent: Tools.appUserAgent,
           ),
         );
+        if (!mounted) return;
       }
     }
 
@@ -818,13 +891,17 @@ class VideoViewerState extends State<VideoViewer> {
                                 builder: (context, isAuthenticated, child) {
                                   if (isAuthenticated != false) {
                                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                                      pauseCheckTimer?.cancel();
+                                      if (mounted) {
+                                        pauseCheckTimer?.cancel();
+                                      }
                                     });
 
                                     return child!;
                                   } else {
                                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                                      pauseOnAppLock();
+                                      if (mounted) {
+                                        pauseOnAppLock();
+                                      }
                                     });
 
                                     return const Center(child: CircularProgressIndicator());

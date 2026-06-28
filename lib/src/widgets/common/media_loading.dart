@@ -1,13 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
+import 'package:lolisnatcher/src/widgets/common/loading_progress.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 
 // TODO redesign
@@ -70,63 +68,25 @@ class _MediaLoadingState extends State<MediaLoading> {
   }
 
   bool isVisible = false;
-  int _total = 0, _received = 0, _startedAt = 0;
-  Timer? _checkInterval;
-
-  int _prevAmount = 0, _lastAmount = 0, _prevTime = 0, _lastTime = 0;
+  late LoadingProgressTracker _progressTracker;
 
   @override
   void initState() {
     super.initState();
-    start();
+    _progressTracker = _createProgressTracker();
   }
 
-  void start() {
-    _total = widget.total.value;
-    _received = widget.received.value;
-    _startedAt = widget.startedAt.value;
-
-    widget.total.addListener(onTotalChanged);
-    widget.received.addListener(onReceivedChanged);
-    widget.startedAt.addListener(onStartedAtChanged);
-
-    _checkInterval?.cancel();
-    _checkInterval = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      // force restate every second to refresh all timers/indicators, even when loading has stopped/stalled/etc.
-      if (!widget.isDone) {
-        updateState();
-      }
-    });
-
-    _prevTime = DateTime.now().millisecondsSinceEpoch - 1;
-    _lastTime = _prevTime + 1;
-  }
-
-  void onTotalChanged() => _onBytesAdded(null, widget.total.value);
-  void onReceivedChanged() => _onBytesAdded(widget.received.value, null);
-  void onStartedAtChanged() {
-    _total = 0;
-    _received = 0;
-    _startedAt = widget.startedAt.value;
-  }
-
-  void _onBytesAdded(int? received, int? total) {
-    // always save incoming bytes, but restate only after a small delay
-
-    _received = received ?? _received;
-    _total = total ?? _total;
-
-    final bool isDone = _total > 0 && _received >= _total;
-    Debounce.delay(
-      tag: 'loading_media_progress_${widget.item.hashCode}',
-      callback: () {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          updateState();
-        });
-      },
-      // triiger restate only after a small delay, so we don't spam restate on every single byte
-      // if done - send immediately (but still with a delay to let flutter build the parent)
-      duration: Duration(milliseconds: isDone ? 0 : 200),
+  LoadingProgressTracker _createProgressTracker() {
+    return LoadingProgressTracker(
+      total: widget.total,
+      received: widget.received,
+      startedAt: widget.startedAt,
+      debounceTag: 'loading_media_progress_${widget.item.hashCode}',
+      onChanged: updateState,
+      progressDebounceDuration: const Duration(milliseconds: 200),
+      completedDebounceDuration: Duration.zero,
+      periodicRefreshInterval: const Duration(milliseconds: 500),
+      shouldRefresh: () => !widget.isDone,
     );
   }
 
@@ -136,33 +96,36 @@ class _MediaLoadingState extends State<MediaLoading> {
     }
   }
 
-  void disposables() {
-    _total = 0;
-    _received = 0;
-    _startedAt = 0;
+  @override
+  void didUpdateWidget(covariant MediaLoading oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.item, widget.item)) {
+      _progressTracker.dispose();
+      _progressTracker = _createProgressTracker();
+      return;
+    }
 
-    _prevAmount = 0;
-    _lastAmount = 0;
-    _prevTime = 0;
-    _lastTime = 0;
-
-    widget.total.removeListener(onTotalChanged);
-    widget.received.removeListener(onReceivedChanged);
-    widget.startedAt.removeListener(onStartedAtChanged);
-    _checkInterval?.cancel();
-    Debounce.cancel('loading_media_progress_${widget.item.hashCode}');
+    _progressTracker.updateSources(
+      total: widget.total,
+      received: widget.received,
+      startedAt: widget.startedAt,
+    );
   }
 
   @override
   void dispose() {
-    disposables();
+    _progressTracker.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final int nowMils = DateTime.now().millisecondsSinceEpoch;
-    final int sinceStart = _startedAt == 0 ? 0 : nowMils - _startedAt;
+    final LoadingProgressSnapshot progress = _progressTracker.snapshot(
+      hasProgress: widget.hasProgress,
+      nowMillis: nowMils,
+    );
+    final int sinceStart = progress.sinceStartMillis;
     final bool showLoading = !widget.isDone && (widget.isStopped || (widget.isViewed && sinceStart > 999));
     // delay showing loading info a bit, so we don't clutter interface for fast loading files
 
@@ -176,20 +139,20 @@ class _MediaLoadingState extends State<MediaLoading> {
         isVisible = showLoading;
         updateState();
       },
-      child: buildElement(context, nowMils, sinceStart),
+      child: buildElement(context, progress),
     );
   }
 
-  Widget buildElement(BuildContext context, int nowMils, int sinceStart) {
+  Widget buildElement(BuildContext context, LoadingProgressSnapshot progress) {
     if (widget.isDone && !isVisible) {
       //  Don't do or render anything after file is loaded and widget faded out
       return const SizedBox.shrink();
     }
 
-    final bool hasProgressData = widget.hasProgress && (_total > 0);
-    final int expectedBytes = hasProgressData ? _received : 0;
-    final int totalBytes = hasProgressData ? _total : 0;
-    final double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
+    final bool hasProgressData = progress.hasProgressData;
+    final int expectedBytes = progress.receivedBytes;
+    final int totalBytes = progress.totalBytes;
+    final double percentDone = progress.percentDone;
 
     if (settingsHandler.shitDevice) {
       return Center(
@@ -286,15 +249,6 @@ class _MediaLoadingState extends State<MediaLoading> {
       );
     }
 
-    const double speedCheckInterval = 1000 / 4;
-    if (hasProgressData && (nowMils - _lastTime) > speedCheckInterval) {
-      _prevAmount = _lastAmount;
-      _lastAmount = expectedBytes;
-
-      _prevTime = _lastTime;
-      _lastTime = nowMils;
-    }
-
     final String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
     final String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
 
@@ -327,23 +281,17 @@ class _MediaLoadingState extends State<MediaLoading> {
 
     final String filesizeText = (hasProgressData && percentDone < 1) ? '$loadedSize / $expectedSize' : '';
 
-    int expectedSpeed = 0;
-    if (hasProgressData && _prevAmount > 0 && _lastAmount > 0) {
-      expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / (nowMils - _prevTime))).round();
-      // expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / speedCheckInterval)).round();
-    }
+    final int expectedSpeed = progress.speedBytesPerSecond;
     final String expectedSpeedText = (hasProgressData && percentDone < 1)
         ? '${Tools.formatBytes(expectedSpeed, 1)}/s'
         : '';
 
-    final double expectedTime = hasProgressData
-        ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed))
-        : 0;
+    final double expectedTime = hasProgressData ? progress.estimatedSecondsRemaining : 0;
     final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1)
         ? '~${expectedTime.toStringAsFixed(1)} s'
         : '';
 
-    final int sinceStartSeconds = (sinceStart / 1000).floor();
+    final int sinceStartSeconds = (progress.sinceStartMillis / 1000).floor();
     final String sinceStartText = (!widget.isDone && (percentDone < 1 || widget.isFromCache))
         ? context.loc.media.loading.startedSecondsAgo(seconds: sinceStartSeconds)
         : '';
