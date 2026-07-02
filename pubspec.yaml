@@ -52,7 +52,7 @@ dependencies:
       ref: 52759af6c6b245db4ba5bfa9ccc64d74f3ceb2fb
   font_awesome_flutter: ^11.0.0
   fpdart: ^1.2.0
-  fvp: ^0.37.2
+  fvp: ^0.37.3
   get_it: ^9.2.1
   get: # ^5.0.0-release-candidate-9.3.2 # TODO - MOVE TO A DIFFERENT STATE MANAGEMENT SOLUTIONS
     git:
@@ -92,11 +92,11 @@ dependencies:
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
   share_plus: ^13.2.0 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
-  slang_flutter: ^4.17.0
-  slang: ^4.17.0
+  slang_flutter: ^4.18.0
+  slang: ^4.18.0
   sqflite_common_ffi: ^2.4.2
   sqflite: ^2.4.3
-  sqlite3: ^3.3.3
+  sqlite3: ^3.3.4
   talker_dio_logger: ^5.1.17
   talker_flutter: ^5.1.17
   talker_logger: ^5.1.17
@@ -113,7 +113,7 @@ dependency_overrides:
   android_intent_plus: ^6.0.0
   material_color_utilities: ^0.13.0 # flutter_test conflict
   meta: ^1.18.3 # flutter_test and image conflict
-  share_plus: ^13.1.0 # alice conflict
+  share_plus: ^13.2.0 # alice conflict
   xml: ^7.0.1 # image conflict
 
 

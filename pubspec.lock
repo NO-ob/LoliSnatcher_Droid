@@ -262,10 +262,10 @@ packages:
     dependency: transitive
     description:
       name: cross_file
-      sha256: "28bb3ae56f117b5aec029d702a90f57d285cd975c3c5c281eaca38dbc47c5937"
+      sha256: "92c9c43c383bfa1c32079d3bc492d55d6d4318044b7b47edaff8971cbb555c51"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.5+2"
+    version: "0.3.5+4"
   crypto:
     dependency: "direct main"
     description:
@@ -828,10 +828,10 @@ packages:
     dependency: "direct main"
     description:
       name: fvp
-      sha256: "0f147516a2520bb37efc9027bce1f20a0aa4487428e9f1437ad7dfa449aa93bd"
+      sha256: ac06c5ecdf65abb2ce413c9ca6c73fd74bff7c394879c17a98d6b94056b71c52
       url: "https://pub.dev"
     source: hosted
-    version: "0.37.2"
+    version: "0.37.3"
   get:
     dependency: "direct main"
     description:
@@ -1598,18 +1598,18 @@ packages:
     dependency: "direct main"
     description:
       name: slang
-      sha256: a7a92404b928844cf7930986b6f4f1976b72f7dd1f2bcb0a6a7a1186c071ab40
+      sha256: "76dbf1f8e87ed1c417026e93a57512f6b6b597104ce72eed99b24a3ed08f0ba2"
       url: "https://pub.dev"
     source: hosted
-    version: "4.17.0"
+    version: "4.18.0"
   slang_flutter:
     dependency: "direct main"
     description:
       name: slang_flutter
-      sha256: "28701299849da54e9e9a54bbc9729f4196c20bfd2202221fbe35ae5f7d74d931"
+      sha256: "7523a9389b44210eabcfd58412d9131f284b9b3c22d731614f0016e9582ee996"
       url: "https://pub.dev"
     source: hosted
-    version: "4.17.0"
+    version: "4.18.0"
   source_span:
     dependency: transitive
     description:
@@ -1678,10 +1678,10 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3
-      sha256: "37356bcb56ce0d9404d602c41e4bdb7765e7e9732a3e47adb3d98c556a6abdad"
+      sha256: "752d9d746052359a2022f588bb979f2e7c4e0f9e4b6a1c3121f7626a1574974b"
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.3"
+    version: "3.3.4"
   stack_trace:
     dependency: transitive
     description:
@@ -1886,10 +1886,10 @@ packages:
     dependency: transitive
     description:
       name: video_player_android
-      sha256: "8401adac6f33e78a0f255a75a7e7c9e2f9713ffcd87ff4e6c00d9bd92b5d99db"
+      sha256: "15bfd0598f8d8946bf0e2d50e2ca1a0db9491589a8bb7f6f9a388c0b48aef764"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.7"
+    version: "2.10.0"
   video_player_avfoundation:
     dependency: transitive
     description:
