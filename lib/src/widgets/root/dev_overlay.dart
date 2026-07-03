@@ -7,6 +7,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/pages/settings_page.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class OverlayScreen {
@@ -113,7 +114,8 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
     );
   }
 
-  double get totalHeight => ((btnSize + btnPadding) * (isOpen ? (kDebugMode ? 5 : 4) : 1)) + 2;
+  double get totalHeight =>
+      ((btnSize + btnPadding) * (isOpen ? (4 + (kDebugMode ? (PlatformExt.isDesktop ? 2 : 1) : 0)) : 1)) + 2;
 
   @override
   Widget build(BuildContext context) {
@@ -214,7 +216,7 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
                         },
                       ),
                       //
-                      if (kDebugMode)
+                      if (kDebugMode) ...[
                         buildButton(
                           Icons.deblur,
                           settingsHandler.blurImages ? 'Unblur' : 'Blur',
@@ -223,6 +225,14 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
                             searchHandler.rootRestate?.call();
                           },
                         ),
+                        // To mimic the android back button
+                        if (PlatformExt.isDesktop)
+                          buildButton(
+                            Icons.arrow_back,
+                            'Back',
+                            () => Navigator.of(NavigationHandler.instance.navContext).pop(),
+                          ),
+                      ],
                     ],
                   ],
                 ),

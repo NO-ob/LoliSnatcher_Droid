@@ -22,10 +22,12 @@ import 'package:lolisnatcher/src/utils/extensions.dart';
 class LoliControls extends StatefulWidget {
   const LoliControls({
     this.useLongTapFastForward = true,
+    this.onControlsVisibilityChanged,
     super.key,
   });
 
   final bool useLongTapFastForward;
+  final ValueChanged<bool>? onControlsVisibilityChanged;
 
   @override
   State<StatefulWidget> createState() {
@@ -146,6 +148,13 @@ class _LoliControlsState extends State<LoliControls> {
   }
 
   @override
+  void setState(VoidCallback fn) {
+    final bool wasVisible = !_hideStuff;
+    super.setState(fn);
+    notifyControlsVisibilityChanged(previousVisible: wasVisible);
+  }
+
+  @override
   void dispose() {
     _dispose();
     super.dispose();
@@ -194,6 +203,16 @@ class _LoliControlsState extends State<LoliControls> {
     if (oldWidget.useLongTapFastForward != widget.useLongTapFastForward) {
       _dispose();
       _initialize();
+    }
+  }
+
+  void notifyControlsVisibilityChanged({
+    bool? previousVisible,
+    bool force = false,
+  }) {
+    final bool isVisible = !_hideStuff;
+    if (force || previousVisible != isVisible) {
+      widget.onControlsVisibilityChanged?.call(isVisible);
     }
   }
 
@@ -731,6 +750,7 @@ class _LoliControlsState extends State<LoliControls> {
     controller.addListener(_updateState);
 
     _updateState();
+    notifyControlsVisibilityChanged(force: true);
 
     if (controller.value.isPlaying || chewieController.autoPlay) {
       _startHideTimer();

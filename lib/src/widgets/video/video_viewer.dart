@@ -56,6 +56,8 @@ class VideoViewerState extends State<VideoViewer> {
 
   final PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   final PhotoViewController viewController = PhotoViewController();
+  final PhotoViewScaleStateController fullscreenScaleController = PhotoViewScaleStateController();
+  final PhotoViewController fullscreenViewController = PhotoViewController();
   final ValueNotifier<VideoPlayerController?> videoController = ValueNotifier(null);
   final ValueNotifier<ChewieController?> chewieController = ValueNotifier(null);
 
@@ -67,6 +69,7 @@ class VideoViewerState extends State<VideoViewer> {
   final ValueNotifier<bool> isViewed = ValueNotifier(false);
   final ValueNotifier<bool> isZoomed = ValueNotifier(false);
   final ValueNotifier<bool> showControls = ValueNotifier(true);
+  final ValueNotifier<bool> fullscreenControlsVisible = ValueNotifier(true);
   final ValueNotifier<bool> forceCache = ValueNotifier(false);
   final ValueNotifier<ViewerStopReason?> stopReason = ValueNotifier(null);
   final ValueNotifier<String?> stopDetails = ValueNotifier(null);
@@ -77,9 +80,18 @@ class VideoViewerState extends State<VideoViewer> {
   DioDownloader? client, sizeClient;
   File? video;
   StreamSubscription? viewStateSubscription, scaleStateSubscription;
+  StreamSubscription? fullscreenViewStateSubscription, fullscreenScaleStateSubscription;
   int _loadGeneration = 0;
+  bool _fullscreenZoomResetQueued = false;
+  bool _fullscreenDismissThresholdReached = false;
 
   bool get isVideoInited => videoController.value?.value.isInitialized ?? false;
+  bool get isVideoFullscreen => chewieController.value?.isFullScreen ?? false;
+  PhotoViewScaleStateController get activeScaleController =>
+      isVideoFullscreen ? fullscreenScaleController : scaleController;
+  PhotoViewController get activeViewController => isVideoFullscreen ? fullscreenViewController : viewController;
+  String get imageHeroTag => 'imageHero${widget.booruItem.hashCode}';
+  String get ignoredImageHeroTag => 'imageHero-ignore-${widget.booruItem.hashCode}';
 
   Future<void> downloadVideo({
     required int loadGeneration,
@@ -278,6 +290,8 @@ class VideoViewerState extends State<VideoViewer> {
 
     viewStateSubscription = viewController.outputStateStream.listen(onViewStateChanged);
     scaleStateSubscription = scaleController.outputScaleStateStream.listen(onScaleStateChanged);
+    fullscreenViewStateSubscription = fullscreenViewController.outputStateStream.listen(onViewStateChanged);
+    fullscreenScaleStateSubscription = fullscreenScaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
     initVideo(false);
   }
@@ -372,9 +386,13 @@ class VideoViewerState extends State<VideoViewer> {
 
     viewStateSubscription?.cancel();
     scaleStateSubscription?.cancel();
+    fullscreenViewStateSubscription?.cancel();
+    fullscreenScaleStateSubscription?.cancel();
 
     scaleController.dispose();
     viewController.dispose();
+    fullscreenScaleController.dispose();
+    fullscreenViewController.dispose();
 
     bufferingTimer?.cancel();
     pauseCheckTimer?.cancel();
@@ -435,6 +453,7 @@ class VideoViewerState extends State<VideoViewer> {
     isViewed.dispose();
     isZoomed.dispose();
     showControls.dispose();
+    fullscreenControlsVisible.dispose();
     forceCache.dispose();
     stopReason.dispose();
     stopDetails.dispose();
@@ -464,11 +483,13 @@ class VideoViewerState extends State<VideoViewer> {
   void resetZoom() {
     if (!isVideoInited) return;
     scaleController.scaleState = PhotoViewScaleState.initial;
+    fullscreenScaleController.scaleState = PhotoViewScaleState.initial;
+    isZoomed.value = false;
     viewerHandler.setZoomed(widget.key, false);
   }
 
   void scrollZoomImage(double value) {
-    final double upperLimit = min(8, (viewController.scale ?? 1) + (value / 200));
+    final double upperLimit = min(8, (activeViewController.scale ?? 1) + (value / 200));
     // zoom on which image fits to container can be less than limit
     // therefore don't clump the value to lower limit if we are zooming in to avoid unnecessary zoom jumps
     final double lowerLimit = value > 0 ? upperLimit : max(0.75, upperLimit);
@@ -477,9 +498,9 @@ class VideoViewerState extends State<VideoViewer> {
     // if zooming out and zoom is smaller than limit - reset to container size
     // TODO minimal scale to fit can be different from limit
     if (lowerLimit == 0.75 && value < 0) {
-      scaleController.scaleState = PhotoViewScaleState.initial;
+      activeScaleController.scaleState = PhotoViewScaleState.initial;
     } else {
-      viewController.scale = lowerLimit;
+      activeViewController.scale = lowerLimit;
     }
   }
 
@@ -487,13 +508,99 @@ class VideoViewerState extends State<VideoViewer> {
     if (!isVideoInited) return;
     // viewController.scale = 2;
     // viewController.updateMultiple(scale: 2);
-    scaleController.scaleState = PhotoViewScaleState.covering;
+    activeScaleController.scaleState = PhotoViewScaleState.covering;
+  }
+
+  Size getVideoChildSize(BuildContext context) {
+    final double aspectRatio = videoController.value?.value.aspectRatio ?? 16 / 9;
+    final screenSize = MediaQuery.sizeOf(context);
+    final double screenRatio = screenSize.width / screenSize.height;
+
+    return Size(
+      aspectRatio > screenRatio ? screenSize.width : screenSize.height * aspectRatio,
+      aspectRatio < screenRatio ? screenSize.height : screenSize.width / aspectRatio,
+    );
+  }
+
+  Widget buildZoomableVideo({
+    required BuildContext context,
+    required Widget child,
+    PhotoViewController? controller,
+    PhotoViewScaleStateController? scaleStateController,
+  }) {
+    return PhotoView.customChild(
+      childSize: getVideoChildSize(context),
+      customSize: MediaQuery.sizeOf(context),
+      backgroundDecoration: const BoxDecoration(
+        color: Colors.transparent,
+      ),
+      minScale: PhotoViewComputedScale.contained,
+      maxScale: PhotoViewComputedScale.covered * 8,
+      initialScale: PhotoViewComputedScale.contained,
+      basePosition: Alignment.center,
+      controller: controller ?? viewController,
+      scaleStateController: scaleStateController ?? scaleController,
+      enableRotation: settingsHandler.allowRotation,
+      child: child,
+    );
+  }
+
+  Widget buildFullscreenResetZoomButton() {
+    return ListenableBuilder(
+      listenable: Listenable.merge([isZoomed, fullscreenControlsVisible]),
+      builder: (context, child) {
+        final shouldShow = isZoomed.value && fullscreenControlsVisible.value;
+
+        return Positioned(
+          bottom: MediaQuery.paddingOf(context).bottom + 92,
+          right: 12,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: shouldShow ? child : const SizedBox.shrink(),
+          ),
+        );
+      },
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.black38,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: IconButton(
+          tooltip: context.loc.reset,
+          onPressed: resetZoom,
+          icon: const Icon(Icons.zoom_out, color: Colors.white),
+        ),
+      ),
+    );
+  }
+
+  void exitFullscreen() {
+    if (chewieController.value?.isFullScreen != true) {
+      return;
+    }
+
+    _fullscreenDismissThresholdReached = false;
+    chewieController.value?.toggleFullScreen();
+    viewerHandler.setFullScreenState(false);
+
+    if (!settingsHandler.wakeLockEnabled) {
+      ServiceHandler.enableSleep();
+    }
+    ServiceHandler.setSystemUiVisibility(viewerHandler.displayAppbar.value);
+  }
+
+  void onFullscreenControlsVisibilityChanged(bool isVisible) {
+    fullscreenControlsVisible.value = isVisible;
   }
 
   void updateVideoState() {
     // print(videoController?.value);
 
     if (chewieController.value == null) return;
+
+    if (!chewieController.value!.isFullScreen) {
+      _fullscreenZoomResetQueued = false;
+    }
 
     if (isVideoInited) {
       bufferingTimer?.cancel();
@@ -681,13 +788,112 @@ class VideoViewerState extends State<VideoViewer> {
     });
   }
 
+  Widget buildFullscreenMedia(
+    BuildContext context,
+    ChewieControllerProvider controllerProvider,
+  ) {
+    return Hero(
+      tag: imageHeroTag,
+      child: Listener(
+        onPointerSignal: (pointerSignal) {
+          if (PlatformExt.isDesktop && pointerSignal is PointerScrollEvent) {
+            scrollZoomImage(pointerSignal.scrollDelta.dy);
+          }
+        },
+        child: PhotoViewGestureDetectorScope(
+          axis: Axis.values,
+          child: ImageFiltered(
+            enabled: settingsHandler.blurImages,
+            imageFilter: ImageFilter.blur(
+              sigmaX: 40,
+              sigmaY: 40,
+              tileMode: TileMode.decal,
+            ),
+            child: buildZoomableVideo(
+              context: context,
+              controller: fullscreenViewController,
+              scaleStateController: fullscreenScaleController,
+              child: controllerProvider,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildFullscreenContent(
+    BuildContext context,
+    ChewieControllerProvider controllerProvider,
+  ) {
+    return Stack(
+      children: [
+        buildFullscreenDismissible(context, controllerProvider),
+        ChewieControllerProvider(
+          controller: chewieController.value!,
+          child: TransparentPointer(
+            child: SafeArea(
+              top: false,
+              child: ValueListenableBuilder(
+                valueListenable: isZoomed,
+                builder: (context, isZoomedVal, _) {
+                  return LoliControls(
+                    useLongTapFastForward: !isZoomedVal,
+                    onControlsVisibilityChanged: onFullscreenControlsVisibilityChanged,
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+        buildFullscreenResetZoomButton(),
+      ],
+    );
+  }
+
+  Widget buildFullscreenDismissible(
+    BuildContext context,
+    ChewieControllerProvider controllerProvider,
+  ) {
+    return ValueListenableBuilder(
+      valueListenable: isZoomed,
+      builder: (context, isZoomedVal, _) {
+        const dismissThreshold = 0.18;
+        return Dismissible(
+          key: const Key('fullscreenVideoDismissibleKey'),
+          direction: isZoomedVal ? DismissDirection.none : DismissDirection.down,
+          resizeDuration: null,
+          dismissThresholds: const {
+            DismissDirection.down: dismissThreshold,
+          },
+          onUpdate: (dismissUpdateDetails) {
+            final reachedThreshold = dismissUpdateDetails.progress >= dismissThreshold;
+            if (!_fullscreenDismissThresholdReached && reachedThreshold) {
+              ServiceHandler.vibrate();
+            }
+            _fullscreenDismissThresholdReached = reachedThreshold;
+          },
+          onDismissed: (_) => exitFullscreen(),
+          child: buildFullscreenMedia(context, controllerProvider),
+        );
+      },
+    );
+  }
+
   AnimatedWidget fullscreenRoutePageBuilder(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     ChewieControllerProvider controllerProvider,
   ) {
-    resetZoom();
+    if (!_fullscreenZoomResetQueued) {
+      _fullscreenZoomResetQueued = true;
+      fullscreenControlsVisible.value = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          resetZoom();
+        }
+      });
+    }
 
     return AnimatedBuilder(
       animation: animation,
@@ -697,28 +903,7 @@ class VideoViewerState extends State<VideoViewer> {
         body: Container(
           alignment: Alignment.center,
           color: Colors.black,
-          child: Stack(
-            children: [
-              ImageFiltered(
-                enabled: settingsHandler.blurImages,
-                imageFilter: ImageFilter.blur(
-                  sigmaX: 40,
-                  sigmaY: 40,
-                  tileMode: TileMode.decal,
-                ),
-                child: controllerProvider,
-              ),
-              ChewieControllerProvider(
-                controller: chewieController.value!,
-                child: const TransparentPointer(
-                  child: SafeArea(
-                    top: false,
-                    child: LoliControls(),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          child: buildFullscreenContent(context, controllerProvider),
         ),
       ),
     );
@@ -782,14 +967,6 @@ class VideoViewerState extends State<VideoViewer> {
 
   @override
   Widget build(BuildContext context) {
-    final double aspectRatio = videoController.value?.value.aspectRatio ?? 16 / 9;
-    final screenSize = MediaQuery.sizeOf(context);
-    final double screenRatio = screenSize.width / screenSize.height;
-    final Size childSize = Size(
-      aspectRatio > screenRatio ? screenSize.width : screenSize.height * aspectRatio,
-      aspectRatio < screenRatio ? screenSize.height : screenSize.width / aspectRatio,
-    );
-
     return Material(
       color: Colors.transparent,
       child: Stack(
@@ -803,7 +980,7 @@ class VideoViewerState extends State<VideoViewer> {
               valueListenable: isViewed,
               builder: (context, isViewed, child) {
                 return Hero(
-                  tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
+                  tag: isViewed ? imageHeroTag : ignoredImageHeroTag,
                   child: child!,
                 );
               },
@@ -873,19 +1050,8 @@ class VideoViewerState extends State<VideoViewer> {
                               sigmaY: 40,
                               tileMode: TileMode.decal,
                             ),
-                            child: PhotoView.customChild(
-                              childSize: childSize,
-                              customSize: MediaQuery.sizeOf(context),
-                              backgroundDecoration: const BoxDecoration(
-                                color: Colors.transparent,
-                              ),
-                              minScale: PhotoViewComputedScale.contained,
-                              maxScale: PhotoViewComputedScale.covered * 8,
-                              initialScale: PhotoViewComputedScale.contained,
-                              basePosition: Alignment.center,
-                              controller: viewController,
-                              scaleStateController: scaleController,
-                              enableRotation: settingsHandler.allowRotation,
+                            child: buildZoomableVideo(
+                              context: context,
                               child: ValueListenableBuilder(
                                 valueListenable: localAuthHandler.isAuthenticated,
                                 builder: (context, isAuthenticated, child) {
