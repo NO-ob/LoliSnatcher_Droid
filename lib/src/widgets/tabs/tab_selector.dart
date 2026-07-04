@@ -98,7 +98,12 @@ class TabSelector extends StatelessWidget {
         );
       }
 
-      final currentTab = searchHandler.currentTab;
+      final currentTab = searchHandler.currentTabOrNull;
+      if (currentTab == null) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
       final totalTabs = searchHandler.total;
       final currentTabIndex = searchHandler.currentIndex;
 
@@ -113,7 +118,7 @@ class TabSelector extends StatelessWidget {
       final dropdown = LoliDropdown(
         value: currentTab.selectedBooru.value,
         onChanged: (Booru? newValue) {
-          if (searchHandler.currentBooru != newValue) {
+          if (searchHandler.currentBooruOrNull != newValue) {
             // if not already selected
             searchHandler.searchAction(searchHandler.searchTextController.text, newValue);
           }
@@ -303,7 +308,7 @@ class TabSelector extends StatelessWidget {
                             child: Column(
                               mainAxisSize: MainAxisSize.max,
                               children: [
-                                BooruFavicon(searchHandler.currentBooru),
+                                BooruFavicon(currentTab.selectedBooru.value),
                                 Icon(
                                   Icons.arrow_drop_down,
                                   color: color ?? theme.iconTheme.color,
@@ -429,7 +434,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
   int get totalTabs => searchHandler.total;
   int get totalFilteredTabs => filteredTabs.length;
   bool get isFilterActive => totalFilteredTabs != totalTabs || filterTextController.text.isNotEmpty || filtersCount > 0;
-  int get currentTabIndex => filteredTabs.indexOf(searchHandler.currentTab);
+  int get currentTabIndex {
+    final currentTab = searchHandler.currentTabOrNull;
+    return currentTab == null ? -1 : filteredTabs.indexOf(currentTab);
+  }
 
   int get filtersCount {
     int count = 0;
@@ -698,7 +706,8 @@ class _TabManagerPageState extends State<TabManagerPage> {
         await showDuplicateTabsDialog();
       }
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (filteredTabs.contains(searchHandler.currentTab) && !duplicateFilter) {
+        final currentTab = searchHandler.currentTabOrNull;
+        if (currentTab != null && filteredTabs.contains(currentTab) && !duplicateFilter) {
           jumpToCurrent();
         } else {
           scrollToTop();
@@ -855,7 +864,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
     // print('itemBuilder $index');
 
-    final bool isCurrent = tab == searchHandler.currentTab;
+    final bool isCurrent = tab == searchHandler.currentTabOrNull;
     final bool isSelected = selectedTabs.contains(tab);
 
     return ReorderableDelayedDragStartListener(
@@ -1275,7 +1284,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
             onLongPress: isFilterActive
                 ? null
                 : () async {
-                    final currentTab = searchHandler.currentTab;
+                    final currentTab = searchHandler.currentTabOrNull;
+                    if (currentTab == null) {
+                      return;
+                    }
 
                     final res = await showDialog(
                       context: context,
@@ -1437,7 +1449,11 @@ class _TabManagerPageState extends State<TabManagerPage> {
                 ),
               );
 
-              final filteredTabsMinusCurrent = [...filteredTabs]..remove(searchHandler.currentTab);
+              final currentTab = searchHandler.currentTabOrNull;
+              final filteredTabsMinusCurrent = [...filteredTabs];
+              if (currentTab != null) {
+                filteredTabsMinusCurrent.remove(currentTab);
+              }
               final selectedAll = selectedTabs.length == filteredTabsMinusCurrent.length;
 
               final selectAllBtn = ElevatedButton(
@@ -1446,7 +1462,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
                     selectedTabs.clear();
                   } else {
                     selectedTabs = [...filteredTabs];
-                    selectedTabs.remove(searchHandler.currentTab);
+                    final currentTab = searchHandler.currentTabOrNull;
+                    if (currentTab != null) {
+                      selectedTabs.remove(currentTab);
+                    }
                   }
                   setState(() {});
                 },
@@ -1902,7 +1921,7 @@ class _DuplicateTabsDeleteDialogState extends State<_DuplicateTabsDeleteDialog> 
                           child: TabManagerItem(
                             tab: tab,
                             index: index,
-                            isCurrent: tab == widget.searchHandler.currentTab,
+                            isCurrent: tab == widget.searchHandler.currentTabOrNull,
                             isFiltered: true,
                             originalIndex: tabIndexes[tab] ?? -1,
                             onTap: toggleTab,

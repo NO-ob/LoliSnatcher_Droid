@@ -104,7 +104,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
     return Obx(() {
       final bool isLastPage = searchHandler.isLastPage.value;
       final int pageNum = searchHandler.pageNum.value;
-      final bool isEmpty = searchHandler.currentFetched.isEmpty;
+      final bool isEmpty = searchHandler.currentFetchedOrNull?.isEmpty ?? true;
       final bool isLoading = searchHandler.isLoading.value;
       final bool hasError = searchHandler.errorString.isNotEmpty;
 

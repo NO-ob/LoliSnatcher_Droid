@@ -342,7 +342,7 @@ class _TagViewState extends State<TagView> {
   }
 
   Future<void> cacheTabMatchData() async {
-    final currentBooru = searchHandler.currentBooru;
+    final currentBooru = searchHandler.currentBooruOrNull;
     final Set<String> onlyTagCurrentBooru = {};
     final Set<String> onlyTagOtherBooru = {};
     final Set<String> containsTag = {};
@@ -1039,8 +1039,8 @@ class _TagViewState extends State<TagView> {
                             : null,
                         onTap: hasUploaderName
                             ? () {
-                                final userMetaTag = searchHandler.currentBooruHandler
-                                    .availableMetaTags()
+                                final userMetaTag = searchHandler.currentBooruHandlerOrNull
+                                    ?.availableMetaTags()
                                     .firstWhereOrNull(
                                       (t) => t is UserMetaTag,
                                     );
@@ -1337,7 +1337,7 @@ Future<void> showTagDialog({
                                   ...(handler as MergebooruHandler).booruHandlers.map((e) => e.booru),
                                 ]
                               : [handler.booru],
-                          parentTab: searchHandler.currentTab,
+                          parentTab: searchHandler.currentTabOrNull,
                         ),
                         //
                         ListTile(
@@ -1470,8 +1470,8 @@ Future<void> showTagDialog({
                         FutureBuilder<PinnedTag?>(
                           future: settingsHandler.dbHandler.getPinnedTag(
                             tag,
-                            booruType: searchHandler.currentBooru.type?.name,
-                            booruName: searchHandler.currentBooru.name,
+                            booruType: searchHandler.currentBooruOrNull?.type?.name,
+                            booruName: searchHandler.currentBooruOrNull?.name,
                           ),
                           builder: (_, snapshot) {
                             final isPinned = snapshot.data != null;
@@ -1506,7 +1506,7 @@ Future<void> showTagDialog({
                                   await showPinTagDialog(
                                     context,
                                     tag,
-                                    searchHandler.currentBooru,
+                                    searchHandler.currentBooruOrNull ?? handler.booru,
                                     () {},
                                   );
                                 }
@@ -2477,14 +2477,15 @@ class _TagPreviewsListDialog extends StatelessWidget {
 
                                       entry.forEachIndexed((index, e) async {
                                         final tag = e.value;
+                                        final currentHandler = searchHandler.currentBooruHandlerOrNull;
 
                                         // skip if tag already in stack
-                                        if (state.all((e) => e.value != tag)) {
+                                        if (currentHandler != null && state.all((e) => e.value != tag)) {
                                           unawaited(
                                             showTagDialog(
                                               context: context,
                                               tag: tag,
-                                              handler: searchHandler.currentBooruHandler,
+                                              handler: currentHandler,
                                               isHidden: settingsHandler.hiddenTags.contains(tag),
                                               isMarked: settingsHandler.markedTags.contains(tag),
                                               isInSearch:
@@ -2529,7 +2530,7 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                           children: [
                                             MainSearchTagChip(
                                               tag: tag,
-                                              booru: searchHandler.currentBooru,
+                                              booru: searchHandler.currentBooruOrNull,
                                               isSelected: isActive && isLast,
                                               onTap: () {
                                                 if (isActive) {
@@ -2542,12 +2543,17 @@ class _TagPreviewsListDialog extends StatelessWidget {
                                                   });
                                                 } else {
                                                   // open dialog for this tag
+                                                  final currentHandler = searchHandler.currentBooruHandlerOrNull;
+                                                  if (currentHandler == null) {
+                                                    return;
+                                                  }
+
                                                   Navigator.of(context).pop();
                                                   unawaited(
                                                     showTagDialog(
                                                       context: context,
                                                       tag: tag,
-                                                      handler: searchHandler.currentBooruHandler,
+                                                      handler: currentHandler,
                                                       isHidden: settingsHandler.hiddenTags.contains(tag),
                                                       isMarked: settingsHandler.markedTags.contains(tag),
                                                       isInSearch:

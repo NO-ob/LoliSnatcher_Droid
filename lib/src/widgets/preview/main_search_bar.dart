@@ -72,7 +72,7 @@ class MainSearchBarWithActions extends StatelessWidget {
   }
 
   void onResetTap() {
-    searchHandler.searchTextController.text = searchHandler.currentTab.tags.trim();
+    searchHandler.searchTextController.text = searchHandler.currentTabOrNull?.tags.trim() ?? '';
   }
 
   void onSearchTap() {
@@ -287,7 +287,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
                                       children: [
                                         MainSearchTagChip(
                                           tag: tags[i],
-                                          tab: searchHandler.currentTab,
+                                          tab: searchHandler.currentTabOrNull,
                                           onTap: () => widget.onChipTap(tags[i], i),
                                           onLongTap: widget.onChipLongTap == null
                                               ? null
@@ -326,7 +326,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
                     if (searchHandler.searchTextController.text.isNotEmpty)
                       Obx(
                         () {
-                          if (searchHandler.currentTab.tags.trim() == tags.join(' ')) {
+                          if (searchHandler.currentTabOrNull?.tags.trim() == tags.join(' ')) {
                             return Material(
                               key: const Key('clear-button'),
                               color: Colors.transparent,
@@ -349,7 +349,7 @@ class _MainSearchBarState extends State<MainSearchBar> {
                     //
                     Obx(
                       () {
-                        if (searchHandler.currentTab.tags.trim() != tags.join(' ')) {
+                        if (searchHandler.currentTabOrNull?.tags.trim() != tags.join(' ')) {
                           return Material(
                             key: const Key('reset-button'),
                             color: Colors.transparent,

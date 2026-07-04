@@ -30,8 +30,8 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
         children: [
           SettingsToggle(
             title: context.loc.multibooru.multibooruMode,
-            value: searchHandler.currentSecondaryBoorus.value?.isNotEmpty ?? false,
-            drawBottomBorder: searchHandler.currentSecondaryBoorus.value?.isEmpty ?? true,
+            value: searchHandler.currentSecondaryBoorusOrNull?.value?.isNotEmpty ?? false,
+            drawBottomBorder: searchHandler.currentSecondaryBoorusOrNull?.value?.isEmpty ?? true,
             onChanged: (newValue) {
               if (settingsHandler.booruList.length < 2) {
                 FlashElements.showSnackbar(
@@ -100,7 +100,8 @@ class MergeBooruToggleAndSelector extends StatelessWidget {
           ),
           Obx(() {
             final bool hasTabsAndTabHasSecondaryBoorus =
-                searchHandler.tabs.isNotEmpty && (searchHandler.currentSecondaryBoorus.value?.isNotEmpty ?? false);
+                searchHandler.tabs.isNotEmpty &&
+                (searchHandler.currentSecondaryBoorusOrNull?.value?.isNotEmpty ?? false);
 
             return AnimatedSize(
               duration: const Duration(milliseconds: 200),

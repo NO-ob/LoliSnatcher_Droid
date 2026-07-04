@@ -34,7 +34,7 @@ class TabBooruSelector extends StatelessWidget {
         );
       }
 
-      Booru? selectedBooru = searchHandler.currentBooru;
+      Booru? selectedBooru = searchHandler.currentBooruOrNull;
       // protection from exceptions when somehow selected booru is not on the list
       if (!settingsHandler.booruList.contains(selectedBooru)) {
         selectedBooru = null;
@@ -50,7 +50,7 @@ class TabBooruSelector extends StatelessWidget {
         child: LoliDropdown(
           value: selectedBooru,
           onChanged: (Booru? newValue) {
-            if (searchHandler.currentBooru != newValue) {
+            if (searchHandler.currentBooruOrNull != newValue) {
               // if not already selected
               searchHandler.searchAction(searchHandler.searchTextController.text, newValue);
             }

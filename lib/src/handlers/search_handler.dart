@@ -475,6 +475,13 @@ class SearchHandler {
   int get currentIndex => index.value;
   String? get currentTabId => tabId.value;
   int get total => tabs.length;
+  bool get hasCurrentTab => tabs.isNotEmpty && currentIndex >= 0 && currentIndex < tabs.length;
+  SearchTab? get currentTabOrNull => hasCurrentTab ? tabs[currentIndex] : null;
+  BooruHandler? get currentBooruHandlerOrNull => currentTabOrNull?.booruHandler;
+  Booru? get currentBooruOrNull => currentTabOrNull?.selectedBooru.value;
+  Rxn<List<Booru>?>? get currentSecondaryBoorusOrNull => currentTabOrNull?.secondaryBoorus;
+  RxList<BooruItem>? get currentSelectedOrNull => currentTabOrNull?.selected;
+  RxList<BooruItem>? get currentFetchedOrNull => currentBooruHandlerOrNull?.filteredFetched;
   SearchTab get currentTab => tabs[currentIndex];
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   Booru get currentBooru => currentTab.selectedBooru.value;

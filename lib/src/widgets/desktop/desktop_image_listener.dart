@@ -43,11 +43,17 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
       return null;
     }
 
+    final currentBooru = searchHandler.currentBooruOrNull;
+    final currentHandler = searchHandler.currentBooruHandlerOrNull;
+    if (currentBooru == null || currentHandler == null) {
+      return null;
+    }
+
     if (item.mediaType.value.isImageOrAnimation) {
       return Obx(
         () => ImageViewer(
           item,
-          booru: searchHandler.currentBooru,
+          booru: currentBooru,
           isViewed: ViewerHandler.instance.current.value?.key == item.key,
           key: item.key,
         ),
@@ -56,7 +62,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
       return Obx(
         () => VideoViewer(
           item,
-          booru: searchHandler.currentBooru,
+          booru: currentBooru,
           isViewed: ViewerHandler.instance.current.value?.key == item.key,
           enableFullscreen: true,
           key: item.key,
@@ -66,7 +72,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
       return Obx(
         () => GuessExtensionViewer(
           item: item,
-          booru: searchHandler.currentBooru,
+          booru: currentBooru,
           onMediaTypeGuessed: (MediaType mediaType) {
             item.mediaType.value = mediaType;
             item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
@@ -75,15 +81,16 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
           key: item.key,
         ),
       );
-    } else if (item.mediaType.value.isNeedToGuess && searchHandler.currentBooruHandler.hasLoadItemSupport) {
+    } else if (item.mediaType.value.isNeedToGuess && currentHandler.hasLoadItemSupport) {
       return Obx(
         () => LoadItemViewer(
           item: item,
-          handler: searchHandler.currentBooruHandler,
+          handler: currentHandler,
           onItemLoaded: (newItem) {
-            final index = searchHandler.currentFetched.indexOf(newItem);
-            if (index != -1) {
-              searchHandler.currentFetched[index] = newItem;
+            final currentFetched = searchHandler.currentFetchedOrNull;
+            final index = currentFetched?.indexOf(newItem) ?? -1;
+            if (currentFetched != null && index != -1) {
+              currentFetched[index] = newItem;
               updateState();
             }
           },
@@ -94,7 +101,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
       return Obx(
         () => GuessExtensionViewer(
           item: item,
-          booru: searchHandler.currentBooru,
+          booru: currentBooru,
           onMediaTypeGuessed: (MediaType mediaType) {
             item.mediaType.value = mediaType;
             item.possibleMediaType.value = mediaType.isUnknown ? item.possibleMediaType.value : null;
@@ -125,7 +132,14 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
         return const SizedBox.shrink();
       }
 
-      final item = searchHandler.currentTab.itemWithKey(viewerHandler.current.value?.key);
+      final currentTab = searchHandler.currentTabOrNull;
+      final currentBooru = searchHandler.currentBooruOrNull;
+      final currentHandler = searchHandler.currentBooruHandlerOrNull;
+      if (currentTab == null || currentBooru == null || currentHandler == null) {
+        return const SizedBox.shrink();
+      }
+
+      final item = currentTab.itemWithKey(viewerHandler.current.value?.key);
       final Widget? itemWidget = getImageWidget(item);
       if (itemWidget == null || item == null) {
         return const SizedBox.shrink();
@@ -137,7 +151,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
           if (!viewerHandler.isDesktopFullscreen.value)
             NotesRenderer(
               item: item,
-              handler: searchHandler.currentBooruHandler,
+              handler: currentHandler,
               pageController: null,
             ),
           Container(
@@ -152,7 +166,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                     onPressed: () {
                       snatchHandler.queue(
                         [item],
-                        searchHandler.currentBooru,
+                        currentBooru,
                         0,
                         false,
                       );
@@ -201,7 +215,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                               ),
                               NotesRenderer(
                                 item: item,
-                                handler: searchHandler.currentBooruHandler,
+                                handler: currentHandler,
                                 pageController: null,
                               ),
                               Container(

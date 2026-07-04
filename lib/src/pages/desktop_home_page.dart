@@ -87,7 +87,7 @@ class DesktopHome extends StatelessWidget {
             page: () => const SettingsPage(),
           ),
           Obx(() {
-            if (searchHandler.tabs.isNotEmpty && searchHandler.currentSelected.isNotEmpty) {
+            if (searchHandler.tabs.isNotEmpty && searchHandler.currentSelectedOrNull?.isNotEmpty == true) {
               return Stack(
                 alignment: Alignment.center,
                 children: [
@@ -99,21 +99,26 @@ class DesktopHome extends StatelessWidget {
                       if (!await setPermissions()) return;
 
                       // call a function to save the currently viewed image when the save button is pressed
-                      if (searchHandler.currentSelected.isNotEmpty) {
+                      final currentTab = searchHandler.currentTabOrNull;
+                      final currentBooru = searchHandler.currentBooruOrNull;
+                      final currentSelected = searchHandler.currentSelectedOrNull;
+                      if (currentTab == null || currentBooru == null || currentSelected == null) return;
+
+                      if (currentSelected.isNotEmpty) {
                         snatchHandler.queue(
-                          searchHandler.currentSelected,
-                          searchHandler.currentBooru,
+                          currentSelected,
+                          currentBooru,
                           settingsHandler.snatchCooldown,
                           false,
                         );
                         if (settingsHandler.favouriteOnSnatch) {
-                          await searchHandler.currentTab.updateFavForMultipleItems(
-                            searchHandler.currentSelected,
+                          await currentTab.updateFavForMultipleItems(
+                            currentSelected,
                             newValue: true,
                             skipSnatching: true,
                           );
                         }
-                        searchHandler.currentTab.selected.clear();
+                        currentTab.selected.clear();
                       } else {
                         FlashElements.showSnackbar(
                           context: context,
@@ -126,7 +131,7 @@ class DesktopHome extends StatelessWidget {
                       }
                     },
                   ),
-                  if (searchHandler.currentSelected.isNotEmpty)
+                  if (searchHandler.currentSelectedOrNull?.isNotEmpty == true)
                     Positioned(
                       right: 2,
                       bottom: 5,
@@ -141,7 +146,7 @@ class DesktopHome extends StatelessWidget {
                         child: Center(
                           child: FittedBox(
                             child: Text(
-                              '${searchHandler.currentSelected.length}',
+                              '${searchHandler.currentSelectedOrNull!.length}',
                               style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
                             ),
                           ),
@@ -176,11 +181,10 @@ class DesktopHome extends StatelessWidget {
                 },
               ),
               secondChild: Obx(
-                () => searchHandler.tabs.isEmpty
-                    ? const SizedBox.shrink()
-                    : DesktopImageListener(
-                        searchHandler.currentTab,
-                      ),
+                () {
+                  final currentTab = searchHandler.currentTabOrNull;
+                  return currentTab == null ? const SizedBox.shrink() : DesktopImageListener(currentTab);
+                },
               ),
               startRatio: 0.33,
               minRatio: 0.2,
@@ -215,15 +219,17 @@ class DesktopTagListener extends StatelessWidget {
         ),
         child: Obx(
           () {
-            final item = searchHandler.currentTab.itemWithKey(ViewerHandler.instance.current.value?.key);
+            final currentTab = searchHandler.currentTabOrNull;
+            final handler = searchHandler.currentBooruHandlerOrNull;
+            final item = currentTab?.itemWithKey(ViewerHandler.instance.current.value?.key);
 
-            if (item == null) {
+            if (item == null || handler == null) {
               return const SizedBox.shrink();
             }
 
             return TagView(
               item: item,
-              handler: searchHandler.currentBooruHandler,
+              handler: handler,
             );
           },
         ),

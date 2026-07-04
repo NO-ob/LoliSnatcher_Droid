@@ -73,7 +73,16 @@ class MainSearchTagChip extends StatelessWidget {
 
           final String rawTag = formattedTag;
 
-          final metaTags = searchHandler.currentBooruHandler.availableMetaTags();
+          final hasCurrentTab =
+              searchHandler.tabs.isNotEmpty &&
+              searchHandler.currentIndex >= 0 &&
+              searchHandler.currentIndex < searchHandler.tabs.length;
+          final metaTags = hasCurrentTab
+              ? searchHandler.currentBooruHandlerOrNull?.availableMetaTags() ?? <MetaTag>[]
+              : <MetaTag>[
+                  GenericRatingMetaTag(),
+                  GenericMetaTag(),
+                ];
           final MetaTag? metaTag = metaTags.firstWhereOrNull((p) => p.tagParser(formattedTag).isNotEmpty);
           final Map<String, dynamic>? metaTagParseData = metaTag?.tagParser(formattedTag);
           final bool isMetaTag = metaTagParseData != null && metaTagParseData.isNotEmpty;

@@ -53,13 +53,14 @@ class QueryEditorController {
 
   String _lastSuggestionText = '';
 
-  Booru? get currentBooru => _currentBooru ?? searchHandler.currentBooru;
+  Booru? get currentBooru => _currentBooru ?? searchHandler.currentBooruOrNull;
 
   BooruHandler _getBooruHandler() {
     if (_currentBooru != null) {
       return BooruHandlerFactory().getBooruHandler([_currentBooru!], null).booruHandler;
     }
-    return searchHandler.currentBooruHandler;
+    return searchHandler.currentBooruHandlerOrNull ??
+        BooruHandlerFactory().getBooruHandler([Booru.unknown()], null).booruHandler;
   }
 
   void setBooru(Booru? booru) {

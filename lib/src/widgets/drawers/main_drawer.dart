@@ -129,9 +129,12 @@ class MainDrawer extends StatelessWidget {
                         searchHandler.tabs.isNotEmpty &&
                         PlatformExt.hasWebviewSupport &&
                         ContentPolicy.canOpenWebview) {
+                      final currentBooru = searchHandler.currentBooruOrNull;
+                      if (currentBooru == null) return const SizedBox.shrink();
+
                       final List<Booru> boorus = [
-                        searchHandler.currentBooru,
-                        ...searchHandler.currentSecondaryBoorus.value ?? <Booru>[],
+                        currentBooru,
+                        ...searchHandler.currentSecondaryBoorusOrNull?.value ?? <Booru>[],
                       ].where((b) => b.baseURL?.isNotEmpty == true && BooruType.saveable.contains(b.type)).toList();
 
                       if (boorus.isEmpty) return const SizedBox.shrink();

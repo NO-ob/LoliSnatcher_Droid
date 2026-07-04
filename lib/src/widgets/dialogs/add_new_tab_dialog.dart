@@ -53,7 +53,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   void initState() {
     super.initState();
     customTagsController.text = usedQuery;
-    secondaryBoorus = searchHandler.currentSecondaryBoorus.value ?? <Booru>[];
+    secondaryBoorus = searchHandler.currentSecondaryBoorusOrNull?.value ?? <Booru>[];
   }
 
   @override
@@ -64,7 +64,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
   }
 
   String get usedQuery {
-    final usedBooru = booru ?? searchHandler.currentBooru;
+    final usedBooru = booru ?? searchHandler.currentBooruOrNull ?? Booru.unknown();
     switch (queryMode) {
       case _Querymode.defaultTags:
         return usedBooru.defTags?.isNotEmpty == true ? usedBooru.defTags! : settingsHandler.defTags;
@@ -157,7 +157,7 @@ class _AddNewTabDialogState extends State<AddNewTabDialog> {
                     _Querymode.currentInput => context.loc.tabs.empty,
                     _Querymode.custom => context.loc.snatcher.enterTags,
                   },
-                  booru: booru ?? searchHandler.currentBooru,
+                  booru: booru ?? searchHandler.currentBooruOrNull,
                   allowMultipleTags: true,
                   showBooruSelector: true,
                   clearable: true,

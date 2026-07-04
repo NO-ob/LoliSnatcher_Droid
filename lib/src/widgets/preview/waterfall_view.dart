@@ -67,7 +67,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
     // tabChanged(0);
     // TODO reset the controller when appMode changes
     searchHandler.gridScrollController = AutoScrollController(
-      initialScrollOffset: searchHandler.currentTab.scrollPosition,
+      initialScrollOffset: searchHandler.currentTabOrNull?.scrollPosition ?? 0,
       viewportBoundaryGetter: () => Rect.fromLTRB(
         0,
         isMobile ? (MediaQuery.paddingOf(context).top + kToolbarHeight + 4) : 0,
@@ -76,7 +76,8 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       ),
     );
 
-    isStaggered = settingsHandler.previewDisplay.isStaggered && searchHandler.currentBooruHandler.hasSizeData;
+    isStaggered =
+        settingsHandler.previewDisplay.isStaggered && (searchHandler.currentBooruHandlerOrNull?.hasSizeData ?? false);
   }
 
   @override
@@ -110,18 +111,23 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   void tabIndexListener() {
-    // print('tabChanged: ${searchHandler.currentTab.scrollPosition} ${searchHandler.gridScrollController.hasClients}');
+    // print('tabChanged: ${searchHandler.currentTabOrNull?.scrollPosition} ${searchHandler.gridScrollController.hasClients}');
 
     // postpone scroll updates until the current render is done, since this is called after the global restate after exiting settings
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final currentTab = searchHandler.currentTabOrNull;
+      if (currentTab == null) {
+        return;
+      }
+
       // restore scroll position on tab change
       if (searchHandler.gridScrollController.hasClients) {
-        searchHandler.gridScrollController.jumpTo(searchHandler.currentTab.scrollPosition);
+        searchHandler.gridScrollController.jumpTo(currentTab.scrollPosition);
       } else {
-        // if (searchHandler.currentTab.scrollPosition != 0) {
+        // if (currentTab.scrollPosition != 0) {
         // TODO reset the controller when appMode changes
         searchHandler.gridScrollController = AutoScrollController(
-          initialScrollOffset: searchHandler.currentTab.scrollPosition,
+          initialScrollOffset: currentTab.scrollPosition,
           viewportBoundaryGetter: () => Rect.fromLTRB(
             0,
             isMobile ? (MediaQuery.paddingOf(context).top + kToolbarHeight + 4) : 0,
@@ -134,7 +140,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
 
     // check if grid type changed when changing tab
     final bool newIsStaggered =
-        settingsHandler.previewDisplay.isStaggered && searchHandler.currentBooruHandler.hasSizeData;
+        settingsHandler.previewDisplay.isStaggered && (searchHandler.currentBooruHandlerOrNull?.hasSizeData ?? false);
     if (isStaggered != newIsStaggered) {
       isStaggered = newIsStaggered;
       setState(() {});
@@ -212,10 +218,12 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       return;
     }
 
+    final currentFetched = searchHandler.currentFetchedOrNull;
     if (viewerHandler.current.value == null &&
-        searchHandler.currentFetched.isNotEmpty &&
-        searchHandler.currentFetched.length < (settingsHandler.itemLimit + 1)) {
-      viewerHandler.setCurrent(searchHandler.currentFetched.first);
+        currentFetched != null &&
+        currentFetched.isNotEmpty &&
+        currentFetched.length < (settingsHandler.itemLimit + 1)) {
+      viewerHandler.setCurrent(currentFetched.first);
     }
   }
 
@@ -232,7 +240,9 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   void onViewerPageChanged(int index) {
-    viewedItems.add(searchHandler.currentFetched[index]);
+    final currentFetched = searchHandler.currentFetchedOrNull;
+    if (currentFetched == null || index >= currentFetched.length) return;
+    viewedItems.add(currentFetched[index]);
     if (isMobile) {
       jumpTo(index);
     } else {
@@ -250,10 +260,14 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
 
       viewedItemCleanupTimer?.cancel();
       viewedItemCleanupCount = 0;
+      final currentFetched = searchHandler.currentFetchedOrNull;
+      final currentTab = searchHandler.currentTabOrNull;
+      if (currentFetched == null || currentTab == null || index >= currentFetched.length) return;
+
       viewedItems
         ..clear()
-        ..add(searchHandler.currentFetched[index]);
-      viewerHandler.setCurrent(searchHandler.currentFetched[index]);
+        ..add(currentFetched[index]);
+      viewerHandler.setCurrent(currentFetched[index]);
 
       isActive.value = false;
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
@@ -264,7 +278,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
         PageRouteBuilder(
           pageBuilder: (_, _, _) => GalleryViewPage(
             key: viewerKey,
-            tab: searchHandler.currentTab,
+            tab: currentTab,
             initialIndex: index,
             onPageChanged: onViewerPageChanged,
           ),
@@ -316,27 +330,38 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
         navigationHandler.bottomBarKey.currentState?.show();
       });
     } else {
-      viewerHandler.setCurrent(searchHandler.currentFetched[index]);
+      final currentFetched = searchHandler.currentFetchedOrNull;
+      if (currentFetched == null || index >= currentFetched.length) return;
+      viewerHandler.setCurrent(currentFetched[index]);
     }
   }
 
   Future<void> onDoubleTap(int index) async {
-    await searchHandler.currentTab.toggleItemFavourite(index);
+    await searchHandler.currentTabOrNull?.toggleItemFavourite(index);
   }
 
   Future<void> onLongPress(int index) async {
-    final BooruItem item = searchHandler.currentFetched[index];
+    final currentFetched = searchHandler.currentFetchedOrNull;
+    final currentTab = searchHandler.currentTabOrNull;
+    final currentSelected = searchHandler.currentSelectedOrNull;
+    if (currentFetched == null || currentTab == null || currentSelected == null || index >= currentFetched.length) {
+      return;
+    }
+
+    final BooruItem item = currentFetched[index];
     await ServiceHandler.vibrate();
 
-    if (searchHandler.currentSelected.contains(item)) {
-      searchHandler.currentTab.selected.remove(item);
+    if (currentSelected.contains(item)) {
+      currentTab.selected.remove(item);
     } else {
-      searchHandler.currentTab.selected.add(item);
+      currentTab.selected.add(item);
     }
   }
 
   Future<void> onSecondaryTap(int index, BuildContext context) async {
-    final BooruItem item = searchHandler.currentFetched[index];
+    final currentFetched = searchHandler.currentFetchedOrNull;
+    if (currentFetched == null || index >= currentFetched.length) return;
+    final BooruItem item = currentFetched[index];
     await ClipboardUtils.copyImageToClipboard(item);
   }
 
@@ -344,7 +369,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   Widget build(BuildContext context) {
     // check if grid type changed when rebuilding the widget (must happen only on start and when saving settings)
     final bool newIsStaggered =
-        settingsHandler.previewDisplay.isStaggered && searchHandler.currentBooruHandler.hasSizeData;
+        settingsHandler.previewDisplay.isStaggered && (searchHandler.currentBooruHandlerOrNull?.hasSizeData ?? false);
     if (isStaggered != newIsStaggered) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         isStaggered = newIsStaggered;
@@ -358,7 +383,10 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       currentOrientation = context.orientation;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final itemIndex = searchHandler.currentFetched.indexWhere(
+        final currentFetched = searchHandler.currentFetchedOrNull;
+        if (currentFetched == null) return;
+
+        final itemIndex = currentFetched.indexWhere(
           (item) => item.key == viewerHandler.current.value?.key,
         );
         if (itemIndex != -1) {
@@ -390,7 +418,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
               strokeWidth: 4,
               color: Theme.of(context).colorScheme.secondary,
               onRefresh: () => searchHandler.searchAction(
-                searchHandler.currentTab.tags,
+                searchHandler.currentTabOrNull?.tags ?? '',
                 null,
               ),
               child: Stack(
@@ -404,8 +432,10 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                       );
                     },
                     child: Obx(() {
+                      final currentFetched = searchHandler.currentFetchedOrNull;
+                      final currentTab = searchHandler.currentTabOrNull;
                       final bool isLoadingAndNoItems =
-                          searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
+                          searchHandler.isLoading.value && (currentFetched?.isEmpty ?? true);
 
                       if (isLoadingAndNoItems) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -416,7 +446,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
 
                       // If loading just finished but content doesn't fill the viewport,
                       // the NotificationListener won't fire (no scroll possible), so trigger next page here with a small delay.
-                      if (!searchHandler.isLoading.value && searchHandler.currentFetched.isNotEmpty) {
+                      if (!searchHandler.isLoading.value && (currentFetched?.isNotEmpty ?? false)) {
                         WidgetsBinding.instance.addPostFrameCallback((_) async {
                           if (searchHandler.gridScrollController.hasClients && !searchHandler.isLoading.value) {
                             final pos = searchHandler.gridScrollController.position;
@@ -457,11 +487,15 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                   return const ThumbnailsShimmerList();
                                 }
 
+                                if (currentTab == null) {
+                                  return const SliverToBoxAdapter(child: SizedBox.shrink());
+                                }
+
                                 if (isStaggered) {
                                   return Obx(
                                     () => StaggeredBuilder(
                                       key: ValueKey('StaggeredBuilder-${searchHandler.currentTabId}'),
-                                      tab: searchHandler.currentTab,
+                                      tab: currentTab,
                                       scrollController: searchHandler.gridScrollController,
                                       onTap: onTap,
                                       onDoubleTap: onDoubleTap,
@@ -475,7 +509,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                                 return Obx(
                                   () => GridBuilder(
                                     key: ValueKey('GridBuilder-${searchHandler.currentTabId}'),
-                                    tab: searchHandler.currentTab,
+                                    tab: currentTab,
                                     scrollController: searchHandler.gridScrollController,
                                     onTap: onTap,
                                     onDoubleTap: onDoubleTap,
@@ -501,7 +535,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                         : null,
                     child: Obx(() {
                       final bool isLoadingAndNoItems =
-                          searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
+                          searchHandler.isLoading.value && (searchHandler.currentFetchedOrNull?.isEmpty ?? true);
 
                       return AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),

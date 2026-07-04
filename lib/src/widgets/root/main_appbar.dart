@@ -124,7 +124,7 @@ class _MainAppBarState extends State<MainAppBar> {
                     ],
                   ),
                 ),
-                if (searchHandler.currentSelected.isNotEmpty)
+                if (searchHandler.currentSelectedOrNull?.isNotEmpty == true)
                   Positioned(
                     right: -6,
                     top: 8,
@@ -140,7 +140,7 @@ class _MainAppBarState extends State<MainAppBar> {
                         child: Center(
                           child: FittedBox(
                             child: Text(
-                              searchHandler.currentSelected.length.toFormattedString(),
+                              searchHandler.currentSelectedOrNull!.length.toFormattedString(),
                               style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
                             ),
                           ),
