@@ -83,7 +83,6 @@ class SearchHandler {
     int? customPage,
   }) {
     final Booru booru = customBooru ?? currentBooru;
-    searchText = ContentPolicy.safeSearchTagsFor(booru, searchText);
 
     // Add new tab depending on the add mode
     final SearchTab newTab = SearchTab(
@@ -499,7 +498,6 @@ class SearchHandler {
         (tabs.isNotEmpty
             ? currentBooru
             : (settingsHandler.booruList.isNotEmpty ? settingsHandler.booruList[0] : Booru.unknown()));
-    text = ContentPolicy.safeSearchTagsFor(targetBooru, text);
 
     // clear image memory cache
     Tools.forceClearMemoryCache(withLive: true);

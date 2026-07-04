@@ -1029,7 +1029,7 @@ class _Translations$loliSync$ja_JP extends Translations$loliSync$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'LoliSync';
+  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'Sync';
   @override
   String get stopSyncingQuestion => TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? '同期を停止しますか？';
   @override
@@ -1043,7 +1043,7 @@ class _Translations$loliSync$ja_JP extends Translations$loliSync$en {
   @override
   String get keepScreenAwake => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'スクリーンを点灯したままにする';
   @override
-  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'LoliSync サーバーを終了';
+  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Sync サーバーを終了';
   @override
   String testError({required int statusCode, required String reasonPhrase}) =>
       TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
@@ -2829,9 +2829,9 @@ class _Translations$settings$sync$ja_JP extends Translations$settings$sync$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync';
   @override
-  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'LoliSyncを使用するにはデータベースを有効にする必要があります';
+  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Syncを使用するにはデータベースを有効にする必要があります';
   @override
   String get errorTitle => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? 'エラー！';
   @override
@@ -4877,8 +4877,8 @@ extension on TranslationsJaJp {
           'settings.itemFilters.removeSnatched' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'ダウンロードしたアイテムを削除',
           'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'AIを使用したアイテムを非表示',
-          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync',
-          'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'LoliSyncを使用するにはデータベースを有効にする必要があります',
+          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync',
+          'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Syncを使用するにはデータベースを有効にする必要があります',
           'settings.sync.errorTitle' => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? 'エラー！',
           'settings.sync.pleaseEnterIPAndPort' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.pleaseEnterIPAndPort', {}) ?? 'IPアドレスとポートを入力してください。',
@@ -5126,14 +5126,14 @@ extension on TranslationsJaJp {
           'lockscreen.testingMessage' =>
             TranslationOverrides.string(_root.$meta, 'lockscreen.testingMessage', {}) ??
                 '[TESTING]: 通常の方法でアプリのロックを解除できない場合はこのボタンを押してください。デバイスの詳細を開発者に報告してください。',
-          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'LoliSync',
+          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'Sync',
           'loliSync.stopSyncingQuestion' => TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? '同期を停止しますか？',
           'loliSync.stopServerQuestion' => TranslationOverrides.string(_root.$meta, 'loliSync.stopServerQuestion', {}) ?? 'サーバーを停止しますか？',
           'loliSync.noConnection' => TranslationOverrides.string(_root.$meta, 'loliSync.noConnection', {}) ?? '接続なし',
           'loliSync.waitingForConnection' => TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? '接続を待機中…',
           'loliSync.startingServer' => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? 'サーバーの開始…',
           'loliSync.keepScreenAwake' => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'スクリーンを点灯したままにする',
-          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'LoliSync サーバーを終了',
+          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Sync サーバーを終了',
           'loliSync.testError' =>
             ({required int statusCode, required String reasonPhrase}) =>
                 TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??

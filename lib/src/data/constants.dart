@@ -15,6 +15,10 @@ class Constants {
 
   static const String wikiURL = 'https://github.com/NO-ob/LoliSnatcher_Droid/wiki';
 
+  static const String booruSourcesWikiURL = '$wikiURL/Booru-sources';
+
+  static const String backupRestoreWikiURL = '$wikiURL/Data-backups';
+
   static const String email = 'no.aisu@protonmail.com';
 
   static const String translationURL = 'https://poeditor.com/join/project/RgscnzeWts';
@@ -48,7 +52,7 @@ class Constants {
     title: '2.5.1 - Chinese and German localization, fixes',
     isInStore: true,
     isImportant: false,
-    storePackage: 'com.noaisu.play.loliSnatcher',
+    storePackage: 'com.noaisu.play.losn',
     githubURL: 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
     changelog: '''
 If you encounter any issues or have suggestions, please post them in GitHub issues or in our Discord server.

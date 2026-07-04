@@ -1297,8 +1297,8 @@ class Translations$loliSync$en {
 
   // Translations
 
-  /// en: 'LoliSync'
-  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'LoliSync';
+  /// en: 'Sync'
+  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'Sync';
 
   /// en: 'Do you want to stop syncing?'
   String get stopSyncingQuestion => TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? 'Do you want to stop syncing?';
@@ -1318,8 +1318,8 @@ class Translations$loliSync$en {
   /// en: 'Keep the screen awake'
   String get keepScreenAwake => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'Keep the screen awake';
 
-  /// en: 'LoliSync server killed'
-  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'LoliSync server killed';
+  /// en: 'Sync server killed'
+  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Sync server killed';
 
   /// en: 'Test error: ${statusCode: int} ${reasonPhrase: String}'
   String testError({required int statusCode, required String reasonPhrase}) =>
@@ -1789,6 +1789,56 @@ class Translations$mediaPreviews$en {
   /// en: 'Settings'
   String get settings => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? 'Settings';
 
+  /// en: 'Set up your first source'
+  String get onboardingTitle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingTitle', {}) ?? 'Set up your first source';
+
+  /// en: 'Add a booru config or restore a backup to start browsing'
+  String get onboardingSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingSubtitle', {}) ?? 'Add a booru config or restore a backup to start browsing';
+
+  /// en: 'Add new booru'
+  String get addBooruAction => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruAction', {}) ?? 'Add new booru';
+
+  /// en: 'Connect a site by adding its URL and search settings'
+  String get addBooruActionSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruActionSubtitle', {}) ?? 'Connect a site by adding its URL and search settings';
+
+  /// en: 'Restore or manage backups'
+  String get restoreBackupAction => TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ?? 'Restore or manage backups';
+
+  /// en: 'Bring back settings, boorus, tabs, and saved data'
+  String get restoreBackupActionSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupActionSubtitle', {}) ??
+      'Bring back settings, boorus, tabs, and saved data';
+
+  /// en: 'Open settings'
+  String get openSettingsAction => TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsAction', {}) ?? 'Open settings';
+
+  /// en: 'Adjust app behavior before setting up sources'
+  String get openSettingsActionSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsActionSubtitle', {}) ?? 'Adjust app behavior before setting up sources';
+
+  /// en: 'Need help?'
+  String get helpSectionTitle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.helpSectionTitle', {}) ?? 'Need help?';
+
+  /// en: 'How to add a booru config and how they work'
+  String get booruSourcesArticle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticle', {}) ?? 'How to add a booru config and how they work';
+
+  /// en: 'Instructions for users setting up their first booru config'
+  String get booruSourcesArticleSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticleSubtitle', {}) ??
+      'Instructions for users setting up their first booru config';
+
+  /// en: 'Restoring data from a backup'
+  String get backupRestoreArticle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticle', {}) ?? 'Restoring data from a backup';
+
+  /// en: 'Instructions for users migrating from a previous app/version'
+  String get backupRestoreArticleSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticleSubtitle', {}) ??
+      'Instructions for users migrating from a previous app/version';
+
   /// en: 'Restoring previous session…'
   String get restoringPreviousSession =>
       TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? 'Restoring previous session…';
@@ -2163,8 +2213,8 @@ class Translations$settings$booru$en {
 
   // Translations
 
-  /// en: 'Boorus & Search'
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus & Search';
+  /// en: 'Boorus and search'
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus and search';
 
   /// en: 'Default tags'
   String get defaultTags => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Default tags';
@@ -2260,6 +2310,9 @@ class Translations$settings$booru$en {
   String get sourceLimitNotice =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
       'Some source and result options are limited. More compatibility options are available in advanced settings.';
+
+  /// en: 'Advanced'
+  String get advanced => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Advanced';
 
   /// en: 'Expanded source compatibility'
   String get expandedSourceCompatibility =>
@@ -2358,11 +2411,11 @@ class Translations$settings$booruEditor$en {
   /// en: 'Get Hydrus API key'
   String get getHydrusApiKey => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.getHydrusApiKey', {}) ?? 'Get Hydrus API key';
 
-  /// en: 'Booru Name'
-  String get booruName => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Booru Name';
+  /// en: 'Booru name'
+  String get booruName => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Booru name';
 
-  /// en: 'Booru Name is required!'
-  String get booruNameRequired => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruNameRequired', {}) ?? 'Booru Name is required!';
+  /// en: 'Booru name is required!'
+  String get booruNameRequired => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruNameRequired', {}) ?? 'Booru name is required!';
 
   /// en: 'Booru URL'
   String get booruUrl => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrl', {}) ?? 'Booru URL';
@@ -2370,8 +2423,8 @@ class Translations$settings$booruEditor$en {
   /// en: 'Booru URL is required!'
   String get booruUrlRequired => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrlRequired', {}) ?? 'Booru URL is required!';
 
-  /// en: 'Booru Type'
-  String get booruType => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru Type';
+  /// en: 'Booru type'
+  String get booruType => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru type';
 
   /// en: 'Favicon URL'
   String get booruFavicon => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFavicon', {}) ?? 'Favicon URL';
@@ -3251,8 +3304,8 @@ class Translations$settings$backupAndRestore$en {
 
   // Translations
 
-  /// en: 'Backup & Restore'
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.title', {}) ?? 'Backup & Restore';
+  /// en: 'Backup and restore'
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.title', {}) ?? 'Backup and restore';
 
   /// en: 'Duplicate file detected!'
   String get duplicateFileDetectedTitle =>
@@ -3617,8 +3670,8 @@ class Translations$settings$cache$en {
 
   // Translations
 
-  /// en: 'Snatching & Caching'
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Snatching & Caching';
+  /// en: 'Snatching and caching'
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Snatching and caching';
 
   /// en: 'Snatch quality'
   String get snatchQuality => TranslationOverrides.string(_root.$meta, 'settings.cache.snatchQuality', {}) ?? 'Snatch quality';
@@ -3832,11 +3885,11 @@ class Translations$settings$sync$en {
 
   // Translations
 
-  /// en: 'LoliSync'
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync';
+  /// en: 'Sync'
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync';
 
-  /// en: 'Database must be enabled to use LoliSync'
-  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Database must be enabled to use LoliSync';
+  /// en: 'Database must be enabled to use Sync'
+  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Database must be enabled to use Sync';
 
   /// en: 'Error!'
   String get errorTitle => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? 'Error!';
@@ -5401,7 +5454,7 @@ extension on Translations {
           'settings.language.visitForDetails' =>
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
                 'Visit <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> for details or tap on the image below to go to POEditor',
-          'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus & Search',
+          'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus and search',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Default tags',
           'settings.booru.itemsPerPage' => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Items fetched per page',
           'settings.booru.itemsPerPageTip' =>
@@ -5453,6 +5506,7 @@ extension on Translations {
           'settings.booru.sourceLimitNotice' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
                 'Some source and result options are limited. More compatibility options are available in advanced settings.',
+          'settings.booru.advanced' => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Advanced',
           'settings.booru.expandedSourceCompatibility' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Expanded source compatibility',
           'settings.booru.expandedSourceCompatibilitySubtitle' =>
@@ -5503,13 +5557,13 @@ extension on Translations {
                 'To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client API > Add > From API request',
           'settings.booruEditor.getHydrusApiKey' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.getHydrusApiKey', {}) ?? 'Get Hydrus API key',
-          'settings.booruEditor.booruName' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Booru Name',
+          'settings.booruEditor.booruName' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Booru name',
           'settings.booruEditor.booruNameRequired' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruNameRequired', {}) ?? 'Booru Name is required!',
+            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruNameRequired', {}) ?? 'Booru name is required!',
           'settings.booruEditor.booruUrl' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrl', {}) ?? 'Booru URL',
           'settings.booruEditor.booruUrlRequired' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrlRequired', {}) ?? 'Booru URL is required!',
-          'settings.booruEditor.booruType' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru Type',
+          'settings.booruEditor.booruType' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru type',
           'settings.booruEditor.booruFavicon' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFavicon', {}) ?? 'Favicon URL',
           'settings.booruEditor.booruFaviconPlaceholder' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruFaviconPlaceholder', {}) ?? '(Autofills if blank)',
@@ -5808,10 +5862,10 @@ extension on Translations {
           'settings.video.autoplayVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.autoplayVideos', {}) ?? 'Autoplay videos',
           'settings.video.startVideosMuted' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.startVideosMuted', {}) ?? 'Start videos muted',
-          'settings.video.experimental' => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '[Experimental]',
           _ => null,
         } ??
         switch (path) {
+          'settings.video.experimental' => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '[Experimental]',
           'settings.video.videoPlayerBackend' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? 'Video player backend',
           'settings.video.backendDefault' => TranslationOverrides.string(_root.$meta, 'settings.video.backendDefault', {}) ?? 'Default',
@@ -6004,7 +6058,8 @@ extension on Translations {
           'settings.database.retryFailedItems' =>
             ({required int count}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.database.retryFailedItems', {'count': count}) ?? 'Retry failed items (${count})',
-          'settings.backupAndRestore.title' => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.title', {}) ?? 'Backup & Restore',
+          'settings.backupAndRestore.title' =>
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.title', {}) ?? 'Backup and restore',
           'settings.backupAndRestore.duplicateFileDetectedTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedTitle', {}) ?? 'Duplicate file detected!',
           'settings.backupAndRestore.duplicateFileDetectedMsg' =>
@@ -6197,7 +6252,7 @@ extension on Translations {
           'settings.performance.disableVideosHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.disableVideosHelp', {}) ??
                 'Useful on low end devices that crash when trying to load videos. Gives options to view video in external player or browser instead.',
-          'settings.cache.title' => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Snatching & Caching',
+          'settings.cache.title' => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'Snatching and caching',
           'settings.cache.snatchQuality' => TranslationOverrides.string(_root.$meta, 'settings.cache.snatchQuality', {}) ?? 'Snatch quality',
           'settings.cache.snatchCooldown' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.snatchCooldown', {}) ?? 'Snatch cooldown (in ms)',
@@ -6297,9 +6352,8 @@ extension on Translations {
           'settings.itemFilters.removeSnatched' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'Remove snatched items',
           'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Remove AI items',
-          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync',
-          'settings.sync.dbError' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Database must be enabled to use LoliSync',
+          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync',
+          'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Database must be enabled to use Sync',
           'settings.sync.errorTitle' => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? 'Error!',
           'settings.sync.pleaseEnterIPAndPort' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.pleaseEnterIPAndPort', {}) ?? 'Please enter IP address and port.',
@@ -6579,7 +6633,7 @@ extension on Translations {
           'lockscreen.testingMessage' =>
             TranslationOverrides.string(_root.$meta, 'lockscreen.testingMessage', {}) ??
                 '[TESTING]: Press this if you cannot unlock the app through normal means. Report to developer with details about your device.',
-          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'LoliSync',
+          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'Sync',
           'loliSync.stopSyncingQuestion' =>
             TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? 'Do you want to stop syncing?',
           'loliSync.stopServerQuestion' =>
@@ -6589,7 +6643,7 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? 'Waiting for connection…',
           'loliSync.startingServer' => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? 'Starting server…',
           'loliSync.keepScreenAwake' => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'Keep the screen awake',
-          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'LoliSync server killed',
+          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Sync server killed',
           'loliSync.testError' =>
             ({required int statusCode, required String reasonPhrase}) =>
                 TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
@@ -6739,11 +6793,11 @@ extension on Translations {
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'Skip',
           'mobileHome.retryAll' =>
             ({required int count}) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Retry all (${count})',
-          'mobileHome.existingFailedOrCancelledItems' =>
-            TranslationOverrides.string(_root.$meta, 'mobileHome.existingFailedOrCancelledItems', {}) ?? 'Existing, failed or cancelled items',
           _ => null,
         } ??
         switch (path) {
+          'mobileHome.existingFailedOrCancelledItems' =>
+            TranslationOverrides.string(_root.$meta, 'mobileHome.existingFailedOrCancelledItems', {}) ?? 'Existing, failed or cancelled items',
           'mobileHome.clearAllRetryableItems' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.clearAllRetryableItems', {}) ?? 'Clear all retryable items',
           'desktopHome.snatcher' => TranslationOverrides.string(_root.$meta, 'desktopHome.snatcher', {}) ?? 'Snatcher',
@@ -6760,6 +6814,35 @@ extension on Translations {
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Add new Booru',
           'mediaPreviews.help' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.help', {}) ?? 'Help',
           'mediaPreviews.settings' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? 'Settings',
+          'mediaPreviews.onboardingTitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingTitle', {}) ?? 'Set up your first source',
+          'mediaPreviews.onboardingSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingSubtitle', {}) ??
+                'Add a booru config or restore a backup to start browsing',
+          'mediaPreviews.addBooruAction' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruAction', {}) ?? 'Add new booru',
+          'mediaPreviews.addBooruActionSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruActionSubtitle', {}) ??
+                'Connect a site by adding its URL and search settings',
+          'mediaPreviews.restoreBackupAction' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ?? 'Restore or manage backups',
+          'mediaPreviews.restoreBackupActionSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupActionSubtitle', {}) ??
+                'Bring back settings, boorus, tabs, and saved data',
+          'mediaPreviews.openSettingsAction' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsAction', {}) ?? 'Open settings',
+          'mediaPreviews.openSettingsActionSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsActionSubtitle', {}) ??
+                'Adjust app behavior before setting up sources',
+          'mediaPreviews.helpSectionTitle' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.helpSectionTitle', {}) ?? 'Need help?',
+          'mediaPreviews.booruSourcesArticle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticle', {}) ?? 'How to add a booru config and how they work',
+          'mediaPreviews.booruSourcesArticleSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticleSubtitle', {}) ??
+                'Instructions for users setting up their first booru config',
+          'mediaPreviews.backupRestoreArticle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticle', {}) ?? 'Restoring data from a backup',
+          'mediaPreviews.backupRestoreArticleSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticleSubtitle', {}) ??
+                'Instructions for users migrating from a previous app/version',
           'mediaPreviews.restoringPreviousSession' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? 'Restoring previous session…',
           'mediaPreviews.copiedFileURL' =>

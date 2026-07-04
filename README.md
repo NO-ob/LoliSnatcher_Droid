@@ -5,7 +5,7 @@
 
   [![GitHub Release](https://img.shields.io/github/v/release/NO-ob/LoliSnatcher_Droid)](https://github.com/NO-ob/LoliSnatcher_Droid/releases)
   [![GitHub Downloads](https://img.shields.io/github/downloads/NO-ob/LoliSnatcher_Droid/total)](https://github.com/NO-ob/LoliSnatcher_Droid/releases)
-  [![Google Play](https://img.shields.io/badge/Google%20Play-Available-green?logo=google-play)](https://play.google.com/store/apps/details?id=com.noaisu.play.loliSnatcher)
+  [![Google Play](https://img.shields.io/badge/Google%20Play-Available-green?logo=google-play)](https://play.google.com/store/apps/details?id=com.noaisu.play.losn)
   [![Discord](https://img.shields.io/badge/Discord-Join-blue?logo=discord&logoColor=white)](https://discord.gg/yD47ANdEXW)
   [![License](https://img.shields.io/github/license/NO-ob/LoliSnatcher_Droid)](https://www.gnu.org/licenses/agpl-3.0.html)
 </div>
@@ -78,7 +78,7 @@
 
 ### Android
 
-[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="90">](https://play.google.com/store/apps/details?id=com.noaisu.play.loliSnatcher)
+[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="90">](https://play.google.com/store/apps/details?id=com.noaisu.play.losn)
 [<img src="https://raw.githubusercontent.com/Kunzisoft/Github-badge/refs/heads/main/get-it-on-github.png" alt="Get it on Github" height="90">](https://github.com/NO-ob/LoliSnatcher_Droid/releases)
 [<img src="assets/images/izzyondroid_badge_padded.png" alt="Get it at IzzyOnDroid" height="90">](https://apt.izzysoft.de/packages/com.noaisu.loliSnatcher)
 

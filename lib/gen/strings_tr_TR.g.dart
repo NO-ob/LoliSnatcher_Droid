@@ -1059,7 +1059,7 @@ class _Translations$loliSync$tr_TR extends Translations$loliSync$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'LoliSync';
+  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'Sync';
   @override
   String get stopSyncingQuestion =>
       TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? 'Senkronizasyonu durdurmak istiyor musun?';
@@ -1074,7 +1074,7 @@ class _Translations$loliSync$tr_TR extends Translations$loliSync$en {
   @override
   String get keepScreenAwake => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'Ekranı uyanık tut';
   @override
-  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'LoliSync sunucusu kapatıldı';
+  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Sync sunucusu kapatıldı';
   @override
   String testError({required int statusCode, required String reasonPhrase}) =>
       TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
@@ -3017,10 +3017,10 @@ class _Translations$settings$sync$tr_TR extends Translations$settings$sync$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync';
   @override
   String get dbError =>
-      TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'LoliSync kullanmak için veritabanı etkinleştirilmelidir';
+      TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Sync kullanmak için veritabanı etkinleştirilmelidir';
   @override
   String get errorTitle => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? 'Hata!';
   @override
@@ -5290,9 +5290,9 @@ extension on TranslationsTrTr {
           'settings.itemFilters.removeSnatched' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'İndirilen ögeleri kaldır',
           'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'AI ögelerini kaldır',
-          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync',
+          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync',
           'settings.sync.dbError' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'LoliSync kullanmak için veritabanı etkinleştirilmelidir',
+            TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Sync kullanmak için veritabanı etkinleştirilmelidir',
           'settings.sync.errorTitle' => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? 'Hata!',
           'settings.sync.pleaseEnterIPAndPort' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.pleaseEnterIPAndPort', {}) ?? 'Lütfen IP adresini ve portu gir.',
@@ -5575,7 +5575,7 @@ extension on TranslationsTrTr {
           'lockscreen.testingMessage' =>
             TranslationOverrides.string(_root.$meta, 'lockscreen.testingMessage', {}) ??
                 '[TEST]: Uygulamanın kilidini normal yollarla açamıyorsan buraya bas. Cihazınla ilgili detayları geliştiriciye bildir.',
-          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'LoliSync',
+          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'Sync',
           'loliSync.stopSyncingQuestion' =>
             TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? 'Senkronizasyonu durdurmak istiyor musun?',
           'loliSync.stopServerQuestion' =>
@@ -5584,7 +5584,7 @@ extension on TranslationsTrTr {
           'loliSync.waitingForConnection' => TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? 'Bağlantı bekleniyor…',
           'loliSync.startingServer' => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? 'Sunucu başlatılıyor…',
           'loliSync.keepScreenAwake' => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'Ekranı uyanık tut',
-          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'LoliSync sunucusu kapatıldı',
+          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Sync sunucusu kapatıldı',
           'loliSync.testError' =>
             ({required int statusCode, required String reasonPhrase}) =>
                 TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??

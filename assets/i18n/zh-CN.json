@@ -874,8 +874,8 @@
             "removeAI": "隐藏AI生成的项目"
         },
         "sync": {
-            "title": "LoliSync",
-            "dbError": "使用LoliSync必须启用数据库",
+            "title": "Sync",
+            "dbError": "使用Sync必须启用数据库",
             "errorTitle": "错误！",
             "pleaseEnterIPAndPort": "请输入IP地址和端口。",
             "selectWhatYouWantToDo": "选择你想做的事",

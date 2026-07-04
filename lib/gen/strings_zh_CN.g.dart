@@ -2739,9 +2739,9 @@ class _Translations$settings$sync$zh_CN extends Translations$settings$sync$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync';
   @override
-  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '使用LoliSync必须启用数据库';
+  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '使用Sync必须启用数据库';
   @override
   String get errorTitle => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? '错误！';
   @override
@@ -4687,8 +4687,8 @@ extension on TranslationsZhCn {
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? '隐藏已收藏的项目',
           'settings.itemFilters.removeSnatched' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? '隐藏已下载的项目',
           'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? '隐藏AI生成的项目',
-          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'LoliSync',
-          'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '使用LoliSync必须启用数据库',
+          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync',
+          'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '使用Sync必须启用数据库',
           'settings.sync.errorTitle' => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? '错误！',
           'settings.sync.pleaseEnterIPAndPort' => TranslationOverrides.string(_root.$meta, 'settings.sync.pleaseEnterIPAndPort', {}) ?? '请输入IP地址和端口。',
           'settings.sync.selectWhatYouWantToDo' => TranslationOverrides.string(_root.$meta, 'settings.sync.selectWhatYouWantToDo', {}) ?? '选择你想做的事',

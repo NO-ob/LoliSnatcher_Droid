@@ -874,8 +874,8 @@
             "removeAI": "KI-Posts ausblenden"
         },
         "sync": {
-            "title": "LoliSync",
-            "dbError": "Um LoliSync zu nutzen, muss die Datenbank aktiviert sein.",
+            "title": "Sync",
+            "dbError": "Um Sync zu nutzen, muss die Datenbank aktiviert sein.",
             "errorTitle": "Fehler!",
             "pleaseEnterIPAndPort": "Bitte IP-Adresse und Port eingeben.",
             "selectWhatYouWantToDo": "Auswählen, was gemacht werden soll",
@@ -1064,14 +1064,14 @@
         "testingMessage": "[Testen]: Hier tippen, wenn die App nicht auf normalem Wege entsperrt werden kann. Informiere den Entwickler mit Details zu dem Gerät."
     },
     "loliSync": {
-        "title": "LoliSync",
+        "title": "Sync",
         "stopSyncingQuestion": "Soll die Synchronisierung gestoppt werden?",
         "stopServerQuestion": "Soll der Server gestoppt werden?",
         "noConnection": "Keine Verbindung",
         "waitingForConnection": "Warten auf Verbindung...",
         "startingServer": "Starten des Servers...",
         "keepScreenAwake": "Bildschirm aktiv halten",
-        "serverKilled": "LoliSync-Server abgeschaltet",
+        "serverKilled": "Sync-Server abgeschaltet",
         "testError(param=statusCode, param=reasonPhrase)": "Testfehler: ${statusCode: int} ${reasonPhrase: String}",
         "testErrorException(param=error)": "Testfehler: ${error: String}",
         "testSuccess": "Testanfrage wurde positiv beantwortet",

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:get/get.dart';
+
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
@@ -28,6 +30,10 @@ class _MobileHomeState extends State<MobileHome> {
   bool isDrawerOpened = false;
 
   void _toggleDrawer(InnerDrawerDirection? dir) {
+    if (settingsHandler.booruList.isEmpty) {
+      return;
+    }
+
     final state = searchHandler.mainDrawerKey.currentState;
     if (state is! InnerDrawerState) {
       return;
@@ -94,66 +100,74 @@ class _MobileHomeState extends State<MobileHome> {
   Widget build(BuildContext context) {
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
-        return InnerDrawer(
-          key: searchHandler.mainDrawerKey,
-          onTapClose: true,
-          swipe: true,
-          swipeChild: true,
+        return Obx(() {
+          final bool sidebarsEnabled = settingsHandler.booruList.isNotEmpty;
 
-          //When setting the vertical offset, be sure to use only top or bottom
-          offset: IDOffset.only(
-            bottom: 0,
-            right: orientation.isLandscape ? 0 : 0.5,
-            left: orientation.isLandscape ? 0 : 0.5,
-          ),
-          scale: const IDOffset.horizontal(1),
+          return InnerDrawer(
+            key: searchHandler.mainDrawerKey,
+            onTapClose: sidebarsEnabled,
+            swipe: sidebarsEnabled,
+            swipeChild: sidebarsEnabled,
 
-          proportionalChildArea: true,
-          borderRadius: 10,
-          leftAnimationType: InnerDrawerAnimation.quadratic,
-          rightAnimationType: InnerDrawerAnimation.quadratic,
-          backgroundDecoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),
+            //When setting the vertical offset, be sure to use only top or bottom
+            offset: IDOffset.only(
+              bottom: 0,
+              right: orientation.isLandscape ? 0 : 0.5,
+              left: orientation.isLandscape ? 0 : 0.5,
+            ),
+            scale: const IDOffset.horizontal(1),
 
-          //when a pointer that is in contact with the screen and moves to the right or left
-          onDragUpdate: (double val, InnerDrawerDirection? direction) {
-            // return values between 1 and 0
-            // print(val);
-            // check if the swipe is to the right or to the left
-            // print(direction==InnerDrawerDirection.start);
-          },
+            proportionalChildArea: true,
+            borderRadius: 10,
+            leftAnimationType: InnerDrawerAnimation.quadratic,
+            rightAnimationType: InnerDrawerAnimation.quadratic,
+            backgroundDecoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),
 
-          innerDrawerCallback: (bool isOpen, InnerDrawerDirection? direction) {
-            isDrawerOpened = isOpen;
-          }, // return  true (open) or false (close)
+            //when a pointer that is in contact with the screen and moves to the right or left
+            onDragUpdate: (double val, InnerDrawerDirection? direction) {
+              // return values between 1 and 0
+              // print(val);
+              // check if the swipe is to the right or to the left
+              // print(direction==InnerDrawerDirection.start);
+            },
 
-          leftChild: RepaintBoundary(
-            child: settingsHandler.handSide.value.isLeft
-                ? const MainDrawer()
-                : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
-          ),
-          rightChild: RepaintBoundary(
-            child: settingsHandler.handSide.value.isRight
-                ? const MainDrawer()
-                : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null)),
-          ),
+            innerDrawerCallback: (bool isOpen, InnerDrawerDirection? direction) {
+              isDrawerOpened = isOpen;
+            }, // return  true (open) or false (close)
 
-          // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
-          scaffold: Scaffold(
-            key: mainScaffoldKey,
-            resizeToAvoidBottomInset: false,
-            extendBody: true,
-            extendBodyBehindAppBar: true,
-            body: SafeArea(
-              top: false,
-              bottom: false,
-              child: PopScope(
-                canPop: false,
-                onPopInvokedWithResult: _onPopInvoked,
-                child: const RepaintBoundary(child: MediaPreviews()),
+            leftChild: RepaintBoundary(
+              child: sidebarsEnabled
+                  ? settingsHandler.handSide.value.isLeft
+                        ? const MainDrawer()
+                        : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null))
+                  : const SizedBox.shrink(),
+            ),
+            rightChild: RepaintBoundary(
+              child: sidebarsEnabled
+                  ? settingsHandler.handSide.value.isRight
+                        ? const MainDrawer()
+                        : DownloadsDrawer(toggleDrawer: () => _toggleDrawer(null))
+                  : const SizedBox.shrink(),
+            ),
+
+            // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
+            scaffold: Scaffold(
+              key: mainScaffoldKey,
+              resizeToAvoidBottomInset: false,
+              extendBody: true,
+              extendBodyBehindAppBar: true,
+              body: SafeArea(
+                top: false,
+                bottom: false,
+                child: PopScope(
+                  canPop: false,
+                  onPopInvokedWithResult: _onPopInvoked,
+                  child: const RepaintBoundary(child: MediaPreviews()),
+                ),
               ),
             ),
-          ),
-        );
+          );
+        });
       },
     );
   }

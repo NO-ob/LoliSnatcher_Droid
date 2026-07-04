@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -28,6 +29,7 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/image/booru_favicon.dart';
 import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class BooruEdit extends StatefulWidget {
   const BooruEdit(
@@ -99,13 +101,40 @@ class _BooruEditState extends State<BooruEdit> {
   void showSourceUnavailableMessage() {
     FlashElements.showSnackbar(
       context: context,
+      key: 'sourceUnavailableCurrentSettings',
+      isKeyUnique: true,
       title: Text(
         context.loc.settings.booru.sourceUnavailableCurrentSettings,
         style: const TextStyle(fontSize: 20),
       ),
+      duration: null,
+      tapToClose: false,
       leadingIcon: Icons.warning_amber,
       leadingIconColor: Colors.yellow,
       sideColor: Colors.yellow,
+      actionsBuilder: (context, controller) {
+        final colorScheme = Theme.of(context).colorScheme;
+
+        return [
+          TextButton.icon(
+            style: TextButton.styleFrom(
+              foregroundColor: colorScheme.onPrimaryContainer,
+              backgroundColor: colorScheme.primaryContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () async {
+              await launchUrlString(
+                Constants.booruSourcesWikiURL,
+                mode: LaunchMode.externalApplication,
+              );
+            },
+            icon: const Icon(Icons.open_in_new),
+            label: Text(context.loc.mediaPreviews.booruSourcesArticle),
+          ),
+        ];
+      },
     );
   }
 
@@ -139,16 +168,27 @@ class _BooruEditState extends State<BooruEdit> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: SettingsAppBar(title: context.loc.settings.booruEditor.title),
+      floatingActionButton: GestureDetector(
+        onLongPress: settingsHandler.isDebug.value ? () => onSave(force: true) : null,
+        child: FloatingActionButton.extended(
+          onPressed: onSave,
+          icon: isTesting
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                )
+              : const Icon(Icons.save),
+          label: Text(context.loc.settings.booruEditor.saveBooru),
+        ),
+      ),
       body: Center(
         child: ListView(
+          padding: const EdgeInsets.only(bottom: 96),
           children: [
-            SettingsButton(
-              name: context.loc.settings.booruEditor.saveBooru,
-              icon: isTesting ? const CircularProgressIndicator() : const Icon(Icons.save),
-              action: onSave,
-              onLongPress: settingsHandler.isDebug.value ? () => onSave(force: true) : null,
-            ),
-            const SettingsButton(name: '', enabled: false),
             SettingsTextInput(
               controller: booruNameController,
               title: context.loc.settings.booruEditor.booruName,
@@ -249,13 +289,14 @@ class _BooruEditState extends State<BooruEdit> {
                 );
               },
             ),
-            Container(
-              margin: const EdgeInsets.fromLTRB(10, 16, 10, 16),
-              width: double.infinity,
-              child: LoliHtml(
-                getInstructions(),
+            if (shouldShowInstructions())
+              Container(
+                margin: const EdgeInsets.fromLTRB(10, 16, 10, 16),
+                width: double.infinity,
+                child: LoliHtml(
+                  getInstructions(),
+                ),
               ),
-            ),
             //
             if (selectedBooruType == BooruType.Hydrus)
               _HydrusAccessKeyWidget(
@@ -327,6 +368,27 @@ class _BooruEditState extends State<BooruEdit> {
     }
 
     return context.loc.settings.booruEditor.booruDefaultInstructions;
+  }
+
+  Booru getDraftBooru() {
+    return Booru.withKey(
+      booruNameController.text,
+      selectedBooruType,
+      booruFaviconController.text,
+      booruURLController.text,
+      booruDefTagsController.text,
+      booruAPIKeyController.text.isEmpty ? null : booruAPIKeyController.text,
+      booruUserIDController.text.isEmpty ? null : booruUserIDController.text,
+    );
+  }
+
+  bool shouldShowInstructions() {
+    final String instructions = getInstructions();
+    if (instructions.trim().isEmpty) {
+      return false;
+    }
+
+    return ContentPolicy.isBooruAllowed(getDraftBooru());
   }
 
   bool shouldObscureApiKey() {

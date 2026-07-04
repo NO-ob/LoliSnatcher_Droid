@@ -65,21 +65,33 @@ class ContentPolicy {
       return true;
     }
 
-    if (booru.type == null) {
+    return !isRestrictedSource(booru);
+  }
+
+  static bool isRestrictedSource(Booru? booru) {
+    if (booru == null || booru.type?.isFavouritesOrDownloads == true) {
       return false;
     }
 
-    if (booru.type?.isFavouritesOrDownloads == true) {
+    if (booru.type == null) {
       return true;
     }
 
-    if (blockedSourceHostsAndTypes.contains(booru.type)) {
+    return isKnownRestrictedSource(booru);
+  }
+
+  static bool isKnownRestrictedSource(Booru? booru) {
+    if (booru == null || booru.type?.isFavouritesOrDownloads == true || booru.type == null) {
       return false;
+    }
+
+    if (blockedSourceHostsAndTypes.contains(booru.type)) {
+      return true;
     }
 
     final String host = _hostOf(booru.baseURL);
     if (_blockedSourceHosts.any((blocked) => host == blocked || host.endsWith('.$blocked'))) {
-      return false;
+      return true;
     }
 
     final String sourceText = [
@@ -88,7 +100,7 @@ class ContentPolicy {
       host,
     ].join(' ');
 
-    return !blockedSourceNamePattern.hasMatch(sourceText);
+    return blockedSourceNamePattern.hasMatch(sourceText);
   }
 
   static bool isBooruTypeAllowed(BooruType? type) {

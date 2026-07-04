@@ -134,6 +134,7 @@ class _BooruPageState extends State<BooruPage> {
       children: [
         const SettingsButton(name: '', enabled: false, drawBottomBorder: false),
         const SettingsButton(name: '', enabled: false, drawBottomBorder: false),
+        SettingsButton(name: context.loc.settings.booru.advanced, enabled: false, drawBottomBorder: false),
         SettingsToggle(
           value: settingsHandler.expandedSourceCompatibilityEnabled,
           title: context.loc.settings.booru.expandedSourceCompatibility,

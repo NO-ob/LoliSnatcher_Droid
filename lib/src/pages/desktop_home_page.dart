@@ -157,30 +157,38 @@ class DesktopHome extends StatelessWidget {
         ],
       ),
       body: Center(
-        child: ResizableSplitView(
-          firstChild: ResizableSplitView(
-            firstChild: const MediaPreviews(),
-            secondChild: const DesktopTagListener(),
-            startRatio: 0.66,
-            minRatio: 0.33,
-            maxRatio: 1,
-            direction: SplitDirection.vertical,
-            onRatioChange: (double newRatio) {
-              // TODO save to settings, but debounce the saving to file
-            },
-          ),
-          secondChild: Obx(
-            () => searchHandler.tabs.isEmpty
-                ? const SizedBox.shrink()
-                : DesktopImageListener(
-                    searchHandler.currentTab,
-                  ),
-          ),
-          startRatio: 0.33,
-          minRatio: 0.2,
-          maxRatio: 0.8,
-          onRatioChange: (double newRatio) {
-            // TODO save to settings, but debounce the saving to file
+        child: Obx(
+          () {
+            if (settingsHandler.booruList.isEmpty) {
+              return const MediaPreviews();
+            }
+
+            return ResizableSplitView(
+              firstChild: ResizableSplitView(
+                firstChild: const MediaPreviews(),
+                secondChild: const DesktopTagListener(),
+                startRatio: 0.66,
+                minRatio: 0.33,
+                maxRatio: 1,
+                direction: SplitDirection.vertical,
+                onRatioChange: (double newRatio) {
+                  // TODO save to settings, but debounce the saving to file
+                },
+              ),
+              secondChild: Obx(
+                () => searchHandler.tabs.isEmpty
+                    ? const SizedBox.shrink()
+                    : DesktopImageListener(
+                        searchHandler.currentTab,
+                      ),
+              ),
+              startRatio: 0.33,
+              minRatio: 0.2,
+              maxRatio: 0.8,
+              onRatioChange: (double newRatio) {
+                // TODO save to settings, but debounce the saving to file
+              },
+            );
           },
         ),
       ),

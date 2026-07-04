@@ -1763,11 +1763,6 @@ class SettingsHandler {
       });
     }
 
-    // if store user imported with defTags without safe rating - treat him as user who is allowed to view content from any site
-    if (ContentPolicy.isFromStore && _isImportedFullUserSettings(json)) {
-      expandedSourceCompatibilityEnabled = true;
-    }
-
     try {
       final List<String> legacyKeys = [];
       for (final String key in legacyKeys) {
@@ -1792,15 +1787,6 @@ class SettingsHandler {
     appMode.value = AppMode.Mobile;
 
     return true;
-  }
-
-  bool _isImportedFullUserSettings(Map<String, dynamic> json) {
-    if (!json.containsKey('defTags')) {
-      return false;
-    }
-
-    final String importedDefTags = json['defTags']?.toString().toLowerCase() ?? '';
-    return !RegExp(r'(^|\s)rating:safe(\s|$)').hasMatch(importedDefTags);
   }
 
   Future<bool> saveSettings({required bool restate}) async {
@@ -2083,7 +2069,7 @@ class SettingsHandler {
     // const Map<String, dynamic> = {}; // for tests // full json here
 
     try {
-      const String updateFileName = EnvironmentConfig.isFromStore ? 'update_store.json' : 'update.json';
+      const String updateFileName = EnvironmentConfig.isFromStore ? 'update_store_losn.json' : 'update.json';
       final response = await DioNetwork.get(
         'https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName',
       );

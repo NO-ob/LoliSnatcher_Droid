@@ -874,8 +874,8 @@
             "removeAI": "AI ögelerini kaldır"
         },
         "sync": {
-            "title": "LoliSync",
-            "dbError": "LoliSync kullanmak için veritabanı etkinleştirilmelidir",
+            "title": "Sync",
+            "dbError": "Sync kullanmak için veritabanı etkinleştirilmelidir",
             "errorTitle": "Hata!",
             "pleaseEnterIPAndPort": "Lütfen IP adresini ve portu gir.",
             "selectWhatYouWantToDo": "Ne yapmak istediğini seç",
@@ -1064,14 +1064,14 @@
         "testingMessage": "[TEST]: Uygulamanın kilidini normal yollarla açamıyorsan buraya bas. Cihazınla ilgili detayları geliştiriciye bildir."
     },
     "loliSync": {
-        "title": "LoliSync",
+        "title": "Sync",
         "stopSyncingQuestion": "Senkronizasyonu durdurmak istiyor musun?",
         "stopServerQuestion": "Sunucuyu durdurmak istiyor musun?",
         "noConnection": "Bağlantı yok",
         "waitingForConnection": "Bağlantı bekleniyor…",
         "startingServer": "Sunucu başlatılıyor…",
         "keepScreenAwake": "Ekranı uyanık tut",
-        "serverKilled": "LoliSync sunucusu kapatıldı",
+        "serverKilled": "Sync sunucusu kapatıldı",
         "testError(param=statusCode, param=reasonPhrase)": "Test hatası: ${statusCode: int} ${reasonPhrase: String}",
         "testErrorException(param=error)": "Test hatası: ${error: String}",
         "testSuccess": "Test isteği olumlu yanıt aldı",

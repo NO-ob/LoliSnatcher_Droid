@@ -381,7 +381,7 @@
             "visitForDetails": "Visit <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> for details or tap on the image below to go to POEditor"
         },
         "booru": {
-            "title": "Boorus & Search",
+            "title": "Boorus and search",
             "defaultTags": "Default tags",
             "itemsPerPage": "Items fetched per page",
             "itemsPerPageTip": "Some boorus may ignore this",
@@ -409,6 +409,7 @@
             "cantDeleteThisBooru": "Can't delete this Booru!",
             "removeRelatedTabsFirst": "Remove related tabs first",
             "sourceLimitNotice": "Some source and result options are limited. More compatibility options are available in advanced settings.",
+            "advanced": "Advanced",
             "expandedSourceCompatibility": "Expanded source compatibility",
             "expandedSourceCompatibilitySubtitle": "Show additional source options",
             "expandedSourceCompatibilityConfirm": "Additional sources may not follow the default content limits. Continue?",
@@ -433,11 +434,11 @@
             "accessKeyFailedMsg": "Do you have the request window open in Hydrus?",
             "hydrusInstructions": "To get the Hydrus key you need to open the request dialog in the Hydrus client. Services > Review services > Client API > Add > From API request",
             "getHydrusApiKey": "Get Hydrus API key",
-            "booruName": "Booru Name",
-            "booruNameRequired": "Booru Name is required!",
+            "booruName": "Booru name",
+            "booruNameRequired": "Booru name is required!",
             "booruUrl": "Booru URL",
             "booruUrlRequired": "Booru URL is required!",
-            "booruType": "Booru Type",
+            "booruType": "Booru type",
             "booruFavicon": "Favicon URL",
             "booruFaviconPlaceholder": "(Autofills if blank)",
             "booruDefTags": "Default tags",
@@ -731,7 +732,7 @@
             "retryFailedItems(param=count)": "Retry failed items (${count: int})"
         },
         "backupAndRestore": {
-            "title": "Backup & Restore",
+            "title": "Backup and restore",
             "duplicateFileDetectedTitle": "Duplicate file detected!",
             "duplicateFileDetectedMsg(param=fileName)": "The file ${fileName: String} already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.",
             "androidOnlyFeatureMsg": "This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app's data folder, respective to your system",
@@ -825,7 +826,7 @@
             "disableVideosHelp": "Useful on low end devices that crash when trying to load videos. Gives options to view video in external player or browser instead."
         },
         "cache": {
-            "title": "Snatching & Caching",
+            "title": "Snatching and caching",
             "snatchQuality": "Snatch quality",
             "snatchCooldown": "Snatch cooldown (in ms)",
             "pleaseEnterAValidTimeout": "Please enter a valid timeout value",
@@ -885,8 +886,8 @@
             "removeAI": "Remove AI items"
         },
         "sync": {
-            "title": "LoliSync",
-            "dbError": "Database must be enabled to use LoliSync",
+            "title": "Sync",
+            "dbError": "Database must be enabled to use Sync",
             "errorTitle": "Error!",
             "pleaseEnterIPAndPort": "Please enter IP address and port.",
             "selectWhatYouWantToDo": "Select what you want to do",
@@ -1077,14 +1078,14 @@
         "testingMessage": "[TESTING]: Press this if you cannot unlock the app through normal means. Report to developer with details about your device."
     },
     "loliSync": {
-        "title": "LoliSync",
+        "title": "Sync",
         "stopSyncingQuestion": "Do you want to stop syncing?",
         "stopServerQuestion": "Do you want to stop the server?",
         "noConnection": "No connection",
         "waitingForConnection": "Waiting for connection…",
         "startingServer": "Starting server…",
         "keepScreenAwake": "Keep the screen awake",
-        "serverKilled": "LoliSync server killed",
+        "serverKilled": "Sync server killed",
         "testError(param=statusCode, param=reasonPhrase)": "Test error: ${statusCode: int} ${reasonPhrase: String}",
         "testErrorException(param=error)": "Test error: ${error: String}",
         "testSuccess": "Test request received a positive response",
@@ -1225,6 +1226,19 @@
         "addNewBooru": "Add new Booru",
         "help": "Help",
         "settings": "Settings",
+        "onboardingTitle": "Set up your first source",
+        "onboardingSubtitle": "Add a booru config or restore a backup to start browsing",
+        "addBooruAction": "Add new booru",
+        "addBooruActionSubtitle": "Connect a site by adding its URL and search settings",
+        "restoreBackupAction": "Restore or manage backups",
+        "restoreBackupActionSubtitle": "Bring back settings, boorus, tabs, and saved data",
+        "openSettingsAction": "Open settings",
+        "openSettingsActionSubtitle": "Adjust app behavior before setting up sources",
+        "helpSectionTitle": "Need help?",
+        "booruSourcesArticle": "How to add a booru config and how they work",
+        "booruSourcesArticleSubtitle": "Instructions for users setting up their first booru config",
+        "backupRestoreArticle": "Restoring data from a backup",
+        "backupRestoreArticleSubtitle": "Instructions for users migrating from a previous app/version",
         "restoringPreviousSession": "Restoring previous session…",
         "copiedFileURL": "Copied file URL to clipboard!"
     },

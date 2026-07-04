@@ -44,7 +44,7 @@ if (project.hasProperty("dart-defines")) {
 }
 println("LS_IS_STORE=${dartEnvVars["LS_IS_STORE"]}")
 val packageName = if (dartEnvVars["LS_IS_STORE"] == "true") {
-    "com.noaisu.play.loliSnatcher"
+    "com.noaisu.play.losn"
 } else {
     "com.noaisu.loliSnatcher"
 }

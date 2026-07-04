@@ -874,8 +874,8 @@
             "removeAI": "AIを使用したアイテムを非表示"
         },
         "sync": {
-            "title": "LoliSync",
-            "dbError": "LoliSyncを使用するにはデータベースを有効にする必要があります",
+            "title": "Sync",
+            "dbError": "Syncを使用するにはデータベースを有効にする必要があります",
             "errorTitle": "エラー！",
             "pleaseEnterIPAndPort": "IPアドレスとポートを入力してください。",
             "selectWhatYouWantToDo": "何をしたいか選択してください",
@@ -1064,14 +1064,14 @@
         "testingMessage": "[TESTING]: 通常の方法でアプリのロックを解除できない場合はこのボタンを押してください。デバイスの詳細を開発者に報告してください。"
     },
     "loliSync": {
-        "title": "LoliSync",
+        "title": "Sync",
         "stopSyncingQuestion": "同期を停止しますか？",
         "stopServerQuestion": "サーバーを停止しますか？",
         "noConnection": "接続なし",
         "waitingForConnection": "接続を待機中…",
         "startingServer": "サーバーの開始…",
         "keepScreenAwake": "スクリーンを点灯したままにする",
-        "serverKilled": "LoliSync サーバーを終了",
+        "serverKilled": "Sync サーバーを終了",
         "testError(param=statusCode, param=reasonPhrase)": "テスト時エラー: ${statusCode: int} ${reasonPhrase: String}",
         "testErrorException(param=error)": "テスト時エラー: ${error: String}",
         "testSuccess": "テストリクエストは正常な返答を受け取りました",

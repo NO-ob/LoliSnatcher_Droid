@@ -14,7 +14,12 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class LanguageSettingsPage extends StatelessWidget {
-  const LanguageSettingsPage({super.key});
+  const LanguageSettingsPage({
+    this.openSelectorOnStart = false,
+    super.key,
+  });
+
+  final bool openSelectorOnStart;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +31,7 @@ class LanguageSettingsPage extends StatelessWidget {
       body: Center(
         child: ListView(
           children: [
-            const LanguageDropdown(),
+            LanguageDropdown(openSelectorOnStart: openSelectorOnStart),
             const SizedBox(height: 24),
             SettingsButton(name: context.loc.settings.language.helpUsTranslate),
             SettingsButton(
@@ -47,7 +52,12 @@ class LanguageSettingsPage extends StatelessWidget {
 }
 
 class LanguageDropdown extends StatefulWidget {
-  const LanguageDropdown({super.key});
+  const LanguageDropdown({
+    this.openSelectorOnStart = false,
+    super.key,
+  });
+
+  final bool openSelectorOnStart;
 
   @override
   State<LanguageDropdown> createState() => _LanguageDropdownState();
@@ -79,6 +89,7 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
             null,
             ...AppLocaleExt.allowedValues,
           ],
+          autoOpen: widget.openSelectorOnStart,
           onChanged: (newValue) async {
             locale = newValue;
             setState(() {});
