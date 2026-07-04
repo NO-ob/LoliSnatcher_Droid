@@ -71,6 +71,7 @@ class VideoViewerState extends State<VideoViewer> {
   final ValueNotifier<bool> showControls = ValueNotifier(true);
   final ValueNotifier<bool> fullscreenControlsVisible = ValueNotifier(true);
   final ValueNotifier<bool> forceCache = ValueNotifier(false);
+  final ValueNotifier<double> fullscreenDismissProgress = ValueNotifier(0);
   final ValueNotifier<ViewerStopReason?> stopReason = ValueNotifier(null);
   final ValueNotifier<String?> stopDetails = ValueNotifier(null);
   Timer? bufferingTimer, pauseCheckTimer;
@@ -455,6 +456,7 @@ class VideoViewerState extends State<VideoViewer> {
     showControls.dispose();
     fullscreenControlsVisible.dispose();
     forceCache.dispose();
+    fullscreenDismissProgress.dispose();
     stopReason.dispose();
     stopDetails.dispose();
   }
@@ -580,6 +582,7 @@ class VideoViewerState extends State<VideoViewer> {
     }
 
     _fullscreenDismissThresholdReached = false;
+    fullscreenDismissProgress.value = 0;
     chewieController.value?.toggleFullScreen();
     viewerHandler.setFullScreenState(false);
 
@@ -854,10 +857,12 @@ class VideoViewerState extends State<VideoViewer> {
     BuildContext context,
     ChewieControllerProvider controllerProvider,
   ) {
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+
     return ValueListenableBuilder(
       valueListenable: isZoomed,
       builder: (context, isZoomedVal, _) {
-        const dismissThreshold = 0.18;
+        const dismissThreshold = 0.45;
         return Dismissible(
           key: const Key('fullscreenVideoDismissibleKey'),
           direction: isZoomedVal ? DismissDirection.none : DismissDirection.down,
@@ -866,6 +871,7 @@ class VideoViewerState extends State<VideoViewer> {
             DismissDirection.down: dismissThreshold,
           },
           onUpdate: (dismissUpdateDetails) {
+            fullscreenDismissProgress.value = dismissUpdateDetails.progress;
             final reachedThreshold = dismissUpdateDetails.progress >= dismissThreshold;
             if (!_fullscreenDismissThresholdReached && reachedThreshold) {
               ServiceHandler.vibrate();
@@ -873,7 +879,18 @@ class VideoViewerState extends State<VideoViewer> {
             _fullscreenDismissThresholdReached = reachedThreshold;
           },
           onDismissed: (_) => exitFullscreen(),
-          child: buildFullscreenMedia(context, controllerProvider),
+          child: ValueListenableBuilder(
+            valueListenable: fullscreenDismissProgress,
+            builder: (context, dismissProgress, child) {
+              final double overflowProgress = max(0, dismissProgress - dismissThreshold);
+
+              return Transform.translate(
+                offset: Offset(0, -screenHeight * overflowProgress),
+                child: child,
+              );
+            },
+            child: buildFullscreenMedia(context, controllerProvider),
+          ),
         );
       },
     );
@@ -888,6 +905,7 @@ class VideoViewerState extends State<VideoViewer> {
     if (!_fullscreenZoomResetQueued) {
       _fullscreenZoomResetQueued = true;
       fullscreenControlsVisible.value = true;
+      fullscreenDismissProgress.value = 0;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           resetZoom();

@@ -31,7 +31,7 @@ echo
 
 build_arg="LS_IS_TESTING=true"
 build_desc="Testing"
-build_mode="apk --split-per-abi"
+build_modes=("apk --split-per-abi")
 build_extras="--dart-define-from-file=./config/secrets.json"
 suffix="test"
 case "$menu_result"
@@ -39,48 +39,52 @@ in
     0)
         build_arg="LS_IS_TESTING=true"
         build_desc="Testing"
+        build_modes=("apk --split-per-abi")
         suffix="test"
         ;;
     1)
         build_arg="LS_IS_STORE=false"
         build_desc="Github"
+        build_modes=("apk --split-per-abi")
         suffix="github"
         ;;
     2)
         build_arg="LS_IS_STORE=true"
         build_desc="Store"
-        build_mode="appbundle"
+        build_modes=("appbundle" "apk --split-per-abi")
         suffix="store"
         ;;
 esac
 
 clear
 
-echo "Doing a ["$build_desc"] build - [flutter build $build_mode --dart-define=$build_arg $build_extras]"
+echo "Doing a ["$build_desc"] build"
 # Generate empty secret vars config if it's not there
 sh gen_config.sh
 
-# Check if fvm is installed
-fvmAvailalble=false
-if command -v fvm &> /dev/null; then
-    fvmAvailalble=true
+# Prefer the project-pinned FVM SDK, then fall back to fvm/global flutter.
+if [ -x "./.fvm/flutter_sdk/bin/flutter" ]; then
+    flutter_cmd="./.fvm/flutter_sdk/bin/flutter"
+elif command -v fvm &> /dev/null; then
+    flutter_cmd="fvm flutter"
+else
+    flutter_cmd="flutter"
 fi
 
-if [ "$fvmAvailalble" = true ]; then
-    if fvm flutter pub get && fvm flutter build $build_mode --release --dart-define=$build_arg $build_extras ; then
-        echo "Build succeeded"
-    else
-        echo "Build failed"
-        exit 1
-    fi
-else
-    if flutter pub get && flutter build $build_mode --release --dart-define=$build_arg $build_extras ; then
-        echo "Build succeeded"
-    else
-        echo "Build failed"
-        exit 1
-    fi
+if ! $flutter_cmd pub get ; then
+    echo "Build failed"
+    exit 1
 fi
+
+for mode in "${build_modes[@]}"; do
+    echo "Running [flutter build $mode --release --dart-define=$build_arg $build_extras]"
+    if $flutter_cmd build $mode --release --dart-define=$build_arg $build_extras ; then
+        echo "Build succeeded: $mode"
+    else
+        echo "Build failed: $mode"
+        exit 1
+    fi
+done
 
 get_version_and_build() {
     version_and_build=$(grep "version:" pubspec.yaml | awk '{print $2}')
@@ -90,14 +94,16 @@ get_version_and_build() {
 }
 get_version_and_build
 
-if [ "$build_mode" = "appbundle" ]; then
+if [[ " ${build_modes[*]} " == *" appbundle "* ]]; then
     src_aab="build/app/outputs/bundle/release/app-release.aab"
     dest_aab="build/app/outputs/bundle/release/LoliSnatcher_${version}_${build}_appbundle_${suffix}.aab"
     cp "$src_aab" "$dest_aab"
 
     echo
     echo "=> Built AAB: LoliSnatcher_${version}_${build}_appbundle_${suffix}.aab"
-else
+fi
+
+if [[ " ${build_modes[*]} " == *" apk --split-per-abi "* ]]; then
     srcv8_apk="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
     destv8_apk="build/app/outputs/flutter-apk/LoliSnatcher_${version}_${build}_arm64-v8a_${suffix}.apk"
     cp "$srcv8_apk" "$destv8_apk"

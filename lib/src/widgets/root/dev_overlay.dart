@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -56,19 +59,27 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
   double left = 0;
   double top = 0;
   bool isOpen = false;
+  Size? lastScreenSize;
+  EdgeInsets? lastScreenPadding;
+  bool isPositionInitialized = false;
 
   static const double btnSize = 34;
   static const double btnPadding = 4;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        top = MediaQuery.sizeOf(context).height / 2;
-      });
-    });
+    syncPositionWithScreen();
+  }
+
+  void handleBackAction() {
+    final navigator = NavigationHandler.instance.navigatorKey.currentState;
+    if (navigator == null) {
+      return;
+    }
+
+    unawaited(navigator.maybePop());
   }
 
   Widget buildButton(
@@ -117,8 +128,76 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
   double get totalHeight =>
       ((btnSize + btnPadding) * (isOpen ? (4 + (kDebugMode ? (PlatformExt.isDesktop ? 2 : 1) : 0)) : 1)) + 2;
 
+  double maxLeft(Size size) => max(0, size.width - btnSize).toDouble();
+
+  double minTop(EdgeInsets padding) => padding.top;
+
+  double maxTop(Size size, EdgeInsets padding) => max(minTop(padding), size.height - totalHeight - padding.bottom);
+
+  void syncPositionWithScreen() {
+    final size = MediaQuery.sizeOf(context);
+    final padding = MediaQuery.paddingOf(context);
+    final previousSize = lastScreenSize;
+    final previousPadding = lastScreenPadding;
+
+    if (!isPositionInitialized) {
+      top = clampDouble(
+        size.height / 2,
+        minTop(padding),
+        maxTop(size, padding),
+      );
+      isPositionInitialized = true;
+    } else if (previousSize != null && previousPadding != null && previousSize != size) {
+      final previousMaxLeft = maxLeft(previousSize);
+      final currentMaxLeft = maxLeft(size);
+      final previousMinTop = minTop(previousPadding);
+      final currentMinTop = minTop(padding);
+      final previousMaxTop = maxTop(previousSize, previousPadding);
+      final currentMaxTop = maxTop(size, padding);
+      final previousTopRange = max(1, previousMaxTop - previousMinTop);
+      final currentTopRange = currentMaxTop - currentMinTop;
+
+      left = previousMaxLeft == 0 ? 0 : (left / previousMaxLeft) * currentMaxLeft;
+      top = currentMinTop + (((top - previousMinTop) / previousTopRange) * currentTopRange);
+    }
+
+    left = clampDouble(left, 0, maxLeft(size));
+    top = clampDouble(top, minTop(padding), maxTop(size, padding));
+    lastScreenSize = size;
+    lastScreenPadding = padding;
+  }
+
+  void updatePosition(Offset globalPosition) {
+    final size = MediaQuery.sizeOf(context);
+    final padding = MediaQuery.paddingOf(context);
+
+    setState(() {
+      left = clampDouble(
+        globalPosition.dx - btnSize / 2,
+        0,
+        maxLeft(size),
+      );
+      top = clampDouble(
+        globalPosition.dy - (btnSize + btnPadding) / 2,
+        minTop(padding),
+        maxTop(size, padding),
+      );
+      lastScreenSize = size;
+      lastScreenPadding = padding;
+    });
+  }
+
+  void toggleOpen() {
+    setState(() {
+      isOpen = !isOpen;
+      syncPositionWithScreen();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    syncPositionWithScreen();
+
     return Positioned(
       top: top,
       left: left,
@@ -148,32 +227,11 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          left = clampDouble(
-                            details.globalPosition.dx - btnSize / 2,
-                            0,
-                            MediaQuery.sizeOf(context).width - btnSize,
-                          );
-                          top = clampDouble(
-                            details.globalPosition.dy - (btnSize + btnPadding) / 2,
-                            0 + MediaQuery.paddingOf(context).top,
-                            MediaQuery.sizeOf(context).height - totalHeight - MediaQuery.paddingOf(context).bottom,
-                          );
-                        });
-                      },
+                      onPanUpdate: (d) => updatePosition(d.globalPosition),
                       child: buildButton(
                         isOpen ? Icons.close : Icons.add,
                         isOpen ? 'Close' : '',
-                        () => setState(() {
-                          isOpen = !isOpen;
-
-                          top = clampDouble(
-                            top,
-                            0 + MediaQuery.paddingOf(context).top,
-                            MediaQuery.sizeOf(context).height - totalHeight - MediaQuery.paddingOf(context).bottom,
-                          );
-                        }),
+                        toggleOpen,
                       ),
                     ),
                     if (isOpen) ...[
@@ -230,7 +288,7 @@ class __DevOverlayContentState extends State<DevOverlayContent> {
                           buildButton(
                             Icons.arrow_back,
                             'Back',
-                            () => Navigator.of(NavigationHandler.instance.navContext).pop(),
+                            handleBackAction,
                           ),
                       ],
                     ],
