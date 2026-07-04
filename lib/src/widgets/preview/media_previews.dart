@@ -7,10 +7,11 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/pages/settings/backup_restore_page.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
 import 'package:lolisnatcher/src/pages/settings/language_page.dart';
-import 'package:lolisnatcher/src/pages/settings_page.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/preview/waterfall_view.dart';
 
 class MediaPreviews extends StatefulWidget {
@@ -77,126 +78,129 @@ class _MediaPreviewsState extends State<MediaPreviews> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return SafeArea(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final bool wide = constraints.maxWidth >= 640;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool wide = constraints.maxWidth >= 640;
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 32),
-            children: [
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 720),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Center(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer,
-                            borderRadius: BorderRadius.circular(8),
+        return ListView(
+          padding: EdgeInsets.fromLTRB(
+            16,
+            24 + context.padding.top,
+            16,
+            96 + context.padding.bottom,
+          ),
+          children: [
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Icon(
+                            Icons.image_search_rounded,
+                            size: 40,
+                            color: colorScheme.onPrimaryContainer,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Icon(
-                              Icons.image_search_rounded,
-                              size: 40,
-                              color: colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      loc.onboardingTitle,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      loc.onboardingSubtitle,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _ThemeModeToggle(
+                      onChanged: setThemeMode,
+                    ),
+                    const SizedBox(height: 12),
+                    _LanguageSettingsTile(
+                      onTap: () => openPage(const LanguageSettingsPage(openSelectorOnStart: true)),
+                    ),
+                    const SizedBox(height: 28),
+                    _OnboardingActionGrid(
+                      wide: wide,
+                      children: [
+                        _OnboardingActionTile(
+                          title: loc.addBooruAction,
+                          subtitle: loc.addBooruActionSubtitle,
+                          icon: Icons.add_photo_alternate_outlined,
+                          filled: true,
+                          onTap: () => openPage(BooruEdit(Booru('New', null, '', '', ''))),
+                        ),
+                        _OnboardingActionTile(
+                          title: loc.restoreBackupAction,
+                          subtitle: loc.restoreBackupActionSubtitle,
+                          icon: Icons.restore_page_outlined,
+                          onTap: () => openPage(const BackupRestorePage()),
+                        ),
+                        _OnboardingActionTile(
+                          title: loc.openSettingsAction,
+                          subtitle: loc.openSettingsActionSubtitle,
+                          icon: Icons.settings_outlined,
+                          onTap: () => openPage(const SettingsPage()),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: theme.dividerColor),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                            child: Text(
+                              loc.helpSectionTitle,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        loc.onboardingTitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        loc.onboardingSubtitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      _ThemeModeToggle(
-                        onChanged: setThemeMode,
-                      ),
-                      const SizedBox(height: 12),
-                      _LanguageSettingsTile(
-                        onTap: () => openPage(const LanguageSettingsPage(openSelectorOnStart: true)),
-                      ),
-                      const SizedBox(height: 28),
-                      _OnboardingActionGrid(
-                        wide: wide,
-                        children: [
-                          _OnboardingActionTile(
-                            title: loc.addBooruAction,
-                            subtitle: loc.addBooruActionSubtitle,
-                            icon: Icons.add_photo_alternate_outlined,
-                            filled: true,
-                            onTap: () => openPage(BooruEdit(Booru('New', null, '', '', ''))),
+                          const SizedBox(height: 12),
+                          _ArticleLinkTile(
+                            title: loc.booruSourcesArticle,
+                            subtitle: loc.booruSourcesArticleSubtitle,
+                            onTap: () => openArticle(Constants.booruSourcesWikiURL),
                           ),
-                          _OnboardingActionTile(
-                            title: loc.restoreBackupAction,
-                            subtitle: loc.restoreBackupActionSubtitle,
-                            icon: Icons.restore_page_outlined,
-                            onTap: () => openPage(const BackupRestorePage()),
-                          ),
-                          _OnboardingActionTile(
-                            title: loc.openSettingsAction,
-                            subtitle: loc.openSettingsActionSubtitle,
-                            icon: Icons.settings_outlined,
-                            onTap: () => openPage(const SettingsPage()),
+                          const Divider(height: 1, indent: 16, endIndent: 16),
+                          _ArticleLinkTile(
+                            title: loc.backupRestoreArticle,
+                            subtitle: loc.backupRestoreArticleSubtitle,
+                            onTap: () => openArticle(Constants.backupRestoreWikiURL),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 28),
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: theme.dividerColor),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                              child: Text(
-                                loc.helpSectionTitle,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            _ArticleLinkTile(
-                              title: loc.booruSourcesArticle,
-                              subtitle: loc.booruSourcesArticleSubtitle,
-                              onTap: () => openArticle(Constants.booruSourcesWikiURL),
-                            ),
-                            const Divider(height: 1, indent: 16, endIndent: 16),
-                            _ArticleLinkTile(
-                              title: loc.backupRestoreArticle,
-                              subtitle: loc.backupRestoreArticleSubtitle,
-                              onTap: () => openArticle(Constants.backupRestoreWikiURL),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          );
-        },
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -330,36 +334,45 @@ class _ThemeModeToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final settingsHandler = SettingsHandler.instance;
     final loc = context.loc.settings.theme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Center(
       child: Obx(
-        () => SizedBox(
-          height: kMinInteractiveDimension,
-          child: SegmentedButton<ThemeMode>(
-            style: const ButtonStyle(
-              fixedSize: WidgetStatePropertyAll(Size.fromHeight(kMinInteractiveDimension)),
-              minimumSize: WidgetStatePropertyAll(Size(0, kMinInteractiveDimension)),
+        () => Material(
+          color: colorScheme.surfaceContainerHighest,
+          clipBehavior: .antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(color: colorScheme.outline),
+          ),
+          child: SizedBox(
+            height: kMinInteractiveDimension,
+            child: Row(
+              mainAxisSize: .min,
+              children: [
+                _ThemeModeSegmentButton(
+                  icon: Icons.brightness_auto_outlined,
+                  text: loc.system,
+                  selected: settingsHandler.themeMode.value.isSystem,
+                  onTap: () => onChanged(.system),
+                ),
+                _ThemeModeDivider(color: colorScheme.outline),
+                _ThemeModeSegmentButton(
+                  icon: Icons.light_mode_outlined,
+                  text: loc.light,
+                  selected: settingsHandler.themeMode.value.isLight,
+                  onTap: () => onChanged(.light),
+                ),
+                _ThemeModeDivider(color: colorScheme.outline),
+                _ThemeModeSegmentButton(
+                  icon: Icons.dark_mode_outlined,
+                  text: loc.dark,
+                  selected: settingsHandler.themeMode.value.isDark,
+                  onTap: () => onChanged(.dark),
+                ),
+              ],
             ),
-            showSelectedIcon: false,
-            selected: {settingsHandler.themeMode.value},
-            onSelectionChanged: (selection) => onChanged(selection.first),
-            segments: [
-              ButtonSegment(
-                value: ThemeMode.system,
-                icon: const Icon(Icons.brightness_auto_outlined),
-                label: _SegmentLabel(loc.system),
-              ),
-              ButtonSegment(
-                value: ThemeMode.light,
-                icon: const Icon(Icons.light_mode_outlined),
-                label: _SegmentLabel(loc.light),
-              ),
-              ButtonSegment(
-                value: ThemeMode.dark,
-                icon: const Icon(Icons.dark_mode_outlined),
-                label: _SegmentLabel(loc.dark),
-              ),
-            ],
           ),
         ),
       ),
@@ -367,18 +380,91 @@ class _ThemeModeToggle extends StatelessWidget {
   }
 }
 
-class _SegmentLabel extends StatelessWidget {
-  const _SegmentLabel(this.text);
+class _ThemeModeSegmentButton extends StatelessWidget {
+  const _ThemeModeSegmentButton({
+    required this.icon,
+    required this.text,
+    required this.selected,
+    required this.onTap,
+  });
 
+  final IconData icon;
+  final String text;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final Color foreground = selected ? colorScheme.onSecondaryContainer : colorScheme.onSurfaceVariant;
+
+    return InkWell(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        height: kMinInteractiveDimension,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        color: selected ? colorScheme.secondaryContainer : Colors.transparent,
+        child: IconTheme(
+          data: IconThemeData(color: foreground),
+          child: DefaultTextStyle.merge(
+            style: TextStyle(
+              color: foreground,
+              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+            ),
+            child: _ThemeModeSegmentLabel(
+              icon: icon,
+              text: text,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeModeDivider extends StatelessWidget {
+  const _ThemeModeDivider({
+    required this.color,
+  });
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: kMinInteractiveDimension,
+      child: VerticalDivider(
+        width: 1,
+        thickness: 1,
+        color: color,
+      ),
+    );
+  }
+}
+
+class _ThemeModeSegmentLabel extends StatelessWidget {
+  const _ThemeModeSegmentLabel({
+    required this.icon,
+    required this.text,
+  });
+
+  final IconData icon;
   final String text;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: kMinInteractiveDimension,
-      child: Align(
-        alignment: Alignment.center,
-        child: Text(text),
+      child: Row(
+        mainAxisSize: .min,
+        mainAxisAlignment: .center,
+        crossAxisAlignment: .center,
+        children: [
+          Icon(icon, size: 18),
+          const SizedBox(width: 6),
+          Text(text),
+        ],
       ),
     );
   }
@@ -438,7 +524,7 @@ class _OnboardingActionTile extends StatelessWidget {
     final Color foreground = filled ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant;
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 110),
+      constraints: const BoxConstraints(minHeight: 72),
       child: SizedBox(
         width: double.infinity,
         child: Material(
@@ -449,35 +535,34 @@ class _OnboardingActionTile extends StatelessWidget {
             onTap: onTap,
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    children: [
-                      Icon(icon, color: foreground, size: 24),
-                      const Spacer(),
-                      Icon(Icons.chevron_right, color: foreground),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: foreground,
-                      fontWeight: FontWeight.w600,
+                  Icon(icon, color: foreground, size: 26),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          title,
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: foreground,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (subtitle != null)
+                          Text(
+                            subtitle ?? '',
+                            style: theme.textTheme.bodySmall?.copyWith(color: foreground),
+                          ),
+                      ],
                     ),
                   ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle ?? '',
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(color: foreground),
-                    ),
-                  ],
+                  const SizedBox(width: 12),
+                  Icon(Icons.chevron_right, color: foreground),
                 ],
               ),
             ),
