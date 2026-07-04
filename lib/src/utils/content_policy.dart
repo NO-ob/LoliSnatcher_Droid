@@ -8,46 +8,67 @@ class ContentPolicy {
 
   static const Set<BooruType> blockedSourceHostsAndTypes = {
     .AGNPH,
+    .IdolSankaku,
+    .InkBunny,
     .NyanPals,
-    .Realbooru,
     .R34Hentai,
     .R34US,
-    .IdolSankaku,
+    .Realbooru,
     .WildCritters,
     .World,
   };
 
   static final RegExp blockedSourceNamePattern = RegExp(
-    r'(^|[^a-z0-9])(?:rule[\W_]*34|r34|porn|hentai|xxx|e[\W_]*hentai|xbooru|rule34hentai|paheal)([^a-z0-9]|$)',
+    r'(^|[^a-z0-9])(?:rule[\W_]*34|r34|r34[\W_]*xxx|rule[\W_]*34[\W_]*xxx|porn|hentai|xxx|e[\W_]*hentai|xbooru|rule34hentai|rule34vault|paheal|ink[\W_]*bunny|yiff|nsfw)([^a-z0-9]|$)',
     caseSensitive: false,
   );
 
+  static const Set<String> _blockedCompactSourceTerms = {
+    'hentai',
+    'inkbunny',
+    'nsfw',
+    'paheal',
+    'porn',
+    'r34',
+    'rule34',
+    'xbooru',
+    'xxx',
+    'yiff',
+  };
+
   static const Set<String> _blockedSourceHosts = {
+    'agn.ph',
     'booru.allthefallen.moe',
+    'booru.xxx',
     'e-hentai.org',
     'exhentai.org',
+    'inkbunny.net',
+    'realbooru.com',
     'rule34.paheal.net',
     'rule34.us',
     'rule34.world',
     'rule34.xxx',
     'rule34.xyz',
     'rule34hentai.net',
+    'rule34vault.com',
     'xbooru.com',
   };
 
   static final RegExp _blockedItemTagPattern = RegExp(
-    r'(^|_)(?:sex|cum|penis|vagina|pussy|nude|naked|nipples|breasts|boobs|areola|masturbation|fellatio|blowjob|handjob|paizuri|anal|rape|incest|bdsm|bondage|explicit|questionable|nsfw|porn|hentai|rule_?34)(_|$)',
+    r'(^|_)(?:anal|anus|areola|ass|balls|bdsm|blowjob|bondage|boobs|breast|breasts|clitoris|consanguinity|crotch|cum|cunnilingus|dildo|ejaculation|erection|explicit|fellatio|genitals|handjob|hentai|incest|masturbation|naked|nipple|nipples|nsfw|nude|orgasm|paizuri|penetration|penis|porn|pubic|pussy|questionable|rape|rule_?34|scrotum|semen|sex|sex_?toy|testicles|vagina|vibrator|violation)(_|$)',
     caseSensitive: false,
   );
 
   static const Set<String> blockedItemRatings = {
+    'adult',
     'e',
     'explicit',
+    'm',
+    'mature',
+    'nsfw',
     'q',
     'questionable',
     'sensitive',
-    'nsfw',
-    'adult',
   };
 
   static bool get isFromStore {
@@ -100,7 +121,7 @@ class ContentPolicy {
       host,
     ].join(' ');
 
-    return blockedSourceNamePattern.hasMatch(sourceText);
+    return _hasBlockedSourceName(sourceText);
   }
 
   static bool isBooruTypeAllowed(BooruType? type) {
@@ -181,10 +202,12 @@ class ContentPolicy {
   }
 
   static bool _supportsSafeRatingTag(Booru booru) {
-    return booru.type?.isGelbooru == true ||
-        booru.type?.isDanbooru == true ||
+    return booru.type?.isDanbooru == true ||
+        booru.type?.isE621 == true ||
+        booru.type?.isGelbooruV1 == true ||
+        booru.type?.isMoebooru == true ||
         booru.type?.isSankaku == true ||
-        booru.type?.isFavouritesOrDownloads == true;
+        booru.type?.isGelbooru == true;
   }
 
   static bool _isSafeRatingTag(String tag) {
@@ -194,6 +217,15 @@ class ContentPolicy {
   static bool _isBlockedSearchTag(String tag) {
     final String clean = tag.replaceFirst(RegExp('^[-~]'), '');
     return blockedItemRatings.contains(clean) || _blockedItemTagPattern.hasMatch(clean);
+  }
+
+  static bool _hasBlockedSourceName(String sourceText) {
+    if (blockedSourceNamePattern.hasMatch(sourceText)) {
+      return true;
+    }
+
+    final compact = sourceText.toLowerCase().replaceAll(RegExp('[^a-z0-9]+'), '');
+    return _blockedCompactSourceTerms.any(compact.contains);
   }
 
   static String _hostOf(String? input) {

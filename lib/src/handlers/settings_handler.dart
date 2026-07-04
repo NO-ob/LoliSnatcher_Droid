@@ -202,7 +202,7 @@ class SettingsHandler {
   bool autofocusSearchbar = true;
   bool expandDetails = false;
   bool usePredictiveBack = true;
-  bool expandedSourceCompatibilityEnabled = false;
+  bool expandedSourceCompatibilityEnabled = !EnvironmentConfig.isFromStore;
   final RxBool useLockscreen = false.obs;
   final RxBool blurOnLeave = false.obs;
   final RxList<Booru> booruList = RxList<Booru>([]);
