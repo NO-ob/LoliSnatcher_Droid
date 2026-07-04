@@ -116,7 +116,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
   void initState() {
     super.initState();
 
-    selectedBooru = widget.initialBooru ?? SearchHandler.instance.currentBooru;
+    selectedBooru = widget.initialBooru ?? SearchHandler.instance.currentBooruOrNull;
     if (widget.initialTags != null && widget.initialTags!.isNotEmpty) {
       tags = widget.initialTags!.trim().split(' ').where((t) => t.isNotEmpty).toList();
     }
@@ -591,7 +591,7 @@ class _TagSearchQueryEditorPageState extends State<TagSearchQueryEditorPage> {
           ),
         ),
       // Booru selector (if enabled)
-      if (widget.showBooruSelector)
+      if (widget.showBooruSelector && SearchHandler.instance.currentTabOrNull != null)
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(

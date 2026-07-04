@@ -2640,7 +2640,7 @@ class _PinnedTagsBlockState extends State<PinnedTagsBlock> {
 
   @override
   Widget build(BuildContext context) {
-    if (!settingsHandler.dbEnabled) {
+    if (!settingsHandler.dbEnabled || searchHandler.currentBooruOrNull == null) {
       return const SizedBox.shrink();
     }
 
