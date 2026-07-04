@@ -51,7 +51,7 @@ in
     2)
         build_arg="LS_IS_STORE=true"
         build_desc="Store"
-        build_modes=("appbundle" "apk --split-per-abi")
+        build_modes=("appbundle" "apk")
         suffix="store"
         ;;
 esac
@@ -118,5 +118,14 @@ if [[ " ${build_modes[*]} " == *" apk --split-per-abi "* ]]; then
 
     echo
     echo "=> Built APKs: LoliSnatcher_${version}_${build}_[arch]_${suffix}.apk"
+fi
+
+if [[ " ${build_modes[*]} " == *" apk "* ]]; then
+    src_apk="build/app/outputs/flutter-apk/app-release.apk"
+    dest_apk="build/app/outputs/flutter-apk/LoliSnatcher_${version}_${build}_${suffix}.apk"
+    cp "$src_apk" "$dest_apk"
+
+    echo
+    echo "=> Built APK: LoliSnatcher_${version}_${build}_${suffix}.apk"
 fi
 
