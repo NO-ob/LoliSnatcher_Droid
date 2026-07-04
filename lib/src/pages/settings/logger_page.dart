@@ -222,36 +222,39 @@ class _LogFilesPageState extends State<LogFilesPage> {
                           final details = stat == null
                               ? null
                               : '${DateFormat.yMMMd().add_Hm().format(stat.modified)} - ${Tools.formatBytes(stat.size, 1)}';
-                          return ListTile(
-                            tileColor: isLatest
-                                ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.35)
-                                : null,
-                            leading: Icon(
-                              isLatest ? Icons.description : Icons.description_outlined,
-                              color: isLatest ? Theme.of(context).colorScheme.primary : null,
-                            ),
-                            title: Text(name),
-                            subtitle: details == null ? null : Text(details),
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => LogFileViewPage(file: file),
-                                ),
-                              );
-                            },
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.share_outlined),
-                                  onPressed: () => _share(context, file),
-                                ),
-                                IconButton(
-                                  color: Theme.of(context).colorScheme.error,
-                                  icon: const Icon(Icons.delete_outline),
-                                  onPressed: () => _delete(file),
-                                ),
-                              ],
+                          return Material(
+                            color: Colors.transparent,
+                            child: ListTile(
+                              tileColor: isLatest
+                                  ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.35)
+                                  : null,
+                              leading: Icon(
+                                isLatest ? Icons.description : Icons.description_outlined,
+                                color: isLatest ? Theme.of(context).colorScheme.primary : null,
+                              ),
+                              title: Text(name),
+                              subtitle: details == null ? null : Text(details),
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => LogFileViewPage(file: file),
+                                  ),
+                                );
+                              },
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.share_outlined),
+                                    onPressed: () => _share(context, file),
+                                  ),
+                                  IconButton(
+                                    color: Theme.of(context).colorScheme.error,
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: () => _delete(file),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
