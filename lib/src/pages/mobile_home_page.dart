@@ -9,7 +9,6 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/inner_drawer.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/drawers/downloads/downloads_drawer.dart';
 import 'package:lolisnatcher/src/widgets/drawers/main_drawer.dart';
 import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
@@ -68,29 +67,10 @@ class _MobileHomeState extends State<MobileHome> {
     }
 
     // ... otherwise, ask to close the app
-    final bool? shouldPop = await showDialog(
+    final bool? shouldPop = await showModalBottomSheet<bool>(
       context: context,
-      builder: (context) {
-        return SettingsDialog(
-          title: Text(context.loc.exitTheAppQuestion),
-          actionButtons: [
-            ElevatedButton.icon(
-              label: Text(context.loc.no),
-              icon: const Icon(Icons.cancel),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-            ElevatedButton.icon(
-              label: Text(context.loc.yes),
-              icon: const Icon(Icons.exit_to_app_sharp),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
+      showDragHandle: true,
+      builder: (_) => const _ExitAppBottomSheet(),
     );
 
     return shouldPop ?? false;
@@ -169,6 +149,83 @@ class _MobileHomeState extends State<MobileHome> {
           );
         });
       },
+    );
+  }
+}
+
+class _ExitAppBottomSheet extends StatelessWidget {
+  const _ExitAppBottomSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        0,
+        20,
+        20 + context.padding.bottom,
+      ),
+      child: Column(
+        mainAxisSize: .min,
+        crossAxisAlignment: .stretch,
+        children: [
+          Align(
+            alignment: .centerLeft,
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: colorScheme.secondaryContainer,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                Icons.exit_to_app_rounded,
+                color: colorScheme.onSecondaryContainer,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            context.loc.exitTheAppQuestion,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.close_rounded),
+                    label: Text(context.loc.no),
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.exit_to_app_rounded),
+                    label: Text(context.loc.yes),
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
