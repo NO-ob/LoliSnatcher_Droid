@@ -490,6 +490,7 @@ class _BooruEditState extends State<BooruEdit> {
           selectedBooruType = BooruType.IdolSankaku;
           break;
         case 'e621.net':
+        case 'e926.net':
           selectedBooruType = BooruType.e621;
           break;
         case 'rule34.paheal.net':
