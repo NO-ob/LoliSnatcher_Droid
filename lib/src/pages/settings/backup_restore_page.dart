@@ -475,6 +475,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     SettingsButton(
                       name: context.loc.settings.backupAndRestore.restoreSettings,
                       icon: const Icon(Icons.settings_backup_restore),
+                      trailingIcon: const Icon(Icons.looks_one),
                       subtitle: const Text('settings.json'),
                       action: () async {
                         final bool res = await confirmRestore(context.loc.settings.backupAndRestore.restoreSettings);
@@ -528,6 +529,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     SettingsButton(
                       name: context.loc.settings.backupAndRestore.restoreBoorus,
                       icon: const Icon(Icons.image_search),
+                      trailingIcon: const Icon(Icons.looks_two),
                       subtitle: const Text('boorus.json'),
                       action: () async {
                         final bool res = await confirmRestore(context.loc.settings.backupAndRestore.restoreBoorus);
@@ -612,6 +614,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     SettingsButton(
                       name: context.loc.settings.backupAndRestore.restoreDatabase,
                       icon: const Icon(Icons.list_alt),
+                      trailingIcon: const Icon(Icons.looks_3),
                       subtitle: Text('store.db (${context.loc.settings.backupAndRestore.restoreDatabaseInfo})'),
                       action: () async {
                         final bool res = await confirmRestore(context.loc.settings.backupAndRestore.restoreDatabase);
