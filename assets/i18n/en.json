@@ -408,7 +408,7 @@
             "noBooruSelected": "No Booru selected!",
             "cantDeleteThisBooru": "Can't delete this Booru!",
             "removeRelatedTabsFirst": "Remove related tabs first",
-            "sourceLimitNotice": "Some source and result options are limited. More compatibility options are available in advanced settings.",
+            "sourceLimitNotice": "Some source and result options are limited. More compatibility options are available in advanced settings below.",
             "advanced": "Advanced",
             "expandedSourceCompatibility": "Expanded source compatibility",
             "expandedSourceCompatibilitySubtitle": "Show additional source options",

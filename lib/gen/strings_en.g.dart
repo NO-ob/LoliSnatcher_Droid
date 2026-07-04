@@ -2306,10 +2306,10 @@ class Translations$settings$booru$en {
   String get removeRelatedTabsFirst =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Remove related tabs first';
 
-  /// en: 'Some source and result options are limited. More compatibility options are available in advanced settings.'
+  /// en: 'Some source and result options are limited. More compatibility options are available in advanced settings below.'
   String get sourceLimitNotice =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
-      'Some source and result options are limited. More compatibility options are available in advanced settings.';
+      'Some source and result options are limited. More compatibility options are available in advanced settings below.';
 
   /// en: 'Advanced'
   String get advanced => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Advanced';
@@ -5505,7 +5505,7 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Remove related tabs first',
           'settings.booru.sourceLimitNotice' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
-                'Some source and result options are limited. More compatibility options are available in advanced settings.',
+                'Some source and result options are limited. More compatibility options are available in advanced settings below.',
           'settings.booru.advanced' => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Advanced',
           'settings.booru.expandedSourceCompatibility' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Expanded source compatibility',

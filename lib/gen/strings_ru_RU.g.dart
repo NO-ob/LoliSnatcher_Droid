@@ -1862,7 +1862,7 @@ class _Translations$settings$booru$ru_RU extends Translations$settings$booru$en 
   @override
   String get sourceLimitNotice =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
-      'Некоторые источники и результаты ограничены. Дополнительные параметры совместимости доступны в расширенных настройках.';
+      'Некоторые источники и результаты ограничены. Дополнительные параметры совместимости доступны в расширенных настройках ниже.';
   @override
   String get advanced => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Расширенные настройки';
   @override
@@ -4519,7 +4519,7 @@ extension on TranslationsRuRu {
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Сначала удалите связанные вкладки',
           'settings.booru.sourceLimitNotice' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
-                'Некоторые источники и результаты ограничены. Дополнительные параметры совместимости доступны в расширенных настройках.',
+                'Некоторые источники и результаты ограничены. Дополнительные параметры совместимости доступны в расширенных настройках ниже.',
           'settings.booru.advanced' => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Расширенные настройки',
           'settings.booru.expandedSourceCompatibility' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Расширенная совместимость источников',

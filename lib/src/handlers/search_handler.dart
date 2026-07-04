@@ -565,39 +565,6 @@ class SearchHandler {
         sideColor: Colors.pink,
       );
     }
-
-    // Notify about ratings change on gelbooru and danbooru
-    if (text.contains('rating:safe')) {
-      final bool isOnBooruWhereRatingsChanged =
-          (booru.type?.isGelbooru == true && booru.baseURL!.contains('gelbooru.com')) ||
-          (booru.type?.isDanbooru == true && booru.baseURL!.contains('danbooru.donmai.us'));
-      if (isOnBooruWhereRatingsChanged) {
-        await FlashElements.showSnackbar(
-          duration: null,
-          title: Text(
-            context.loc.searchHandler.ratingsChanged,
-            style: const TextStyle(fontSize: 20),
-          ),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.loc.searchHandler.ratingsChangedMessage(booruType: booru.type?.name ?? ''),
-                style: const TextStyle(fontSize: 16),
-              ),
-              const Text(''),
-              Text(
-                context.loc.searchHandler.appFixedRatingAutomatically,
-                style: const TextStyle(fontSize: 18),
-              ),
-            ],
-          ),
-          leadingIcon: Icons.warning_amber,
-          leadingIconColor: Colors.yellow,
-          sideColor: Colors.red,
-        );
-      }
-    }
   }
 
   //
