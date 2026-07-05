@@ -212,7 +212,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String makePostURL(String id) {
-    return 'https://chan.sankakucomplex.com/post/show/$id';
+    return 'https://sankaku.app/posts/$id';
   }
 
   static List<String> knownUrls = [
