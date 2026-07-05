@@ -120,6 +120,9 @@ class ThumbnailBuild extends StatelessWidget {
                   if (settingsHandler.isDebug.value == true)
                     InkWell(
                       onTap: () {
+                        // FlashElements.showSnackbar(
+                        //   title: Text(ContentPolicy.isItemAllowed(handler!.booru, item).toString()),
+                        // );
                         ClipboardUtils.copyTextToClipboard(
                           item.toString(),
                           subtitle: context.loc.common.booruItemCopiedToClipboard,

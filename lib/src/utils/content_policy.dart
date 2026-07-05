@@ -6,7 +6,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 class ContentPolicy {
   const ContentPolicy._();
 
-  static const Set<BooruType> blockedSourceHostsAndTypes = {
+  static Set<BooruType> get blockedSourceHostsAndTypes => {
     .AGNPH,
     .IdolSankaku,
     .InkBunny,
@@ -18,12 +18,12 @@ class ContentPolicy {
     .World,
   };
 
-  static final RegExp blockedSourceNamePattern = RegExp(
+  static RegExp get blockedSourceNamePattern => RegExp(
     r'(^|[^a-z0-9])(?:rule[\W_]*34|r34|r34[\W_]*xxx|rule[\W_]*34[\W_]*xxx|porn|hentai|xxx|e[\W_]*hentai|xbooru|rule34hentai|rule34vault|paheal|ink[\W_]*bunny|yiff|nsfw)([^a-z0-9]|$)',
     caseSensitive: false,
   );
 
-  static const Set<String> _blockedCompactSourceTerms = {
+  static Set<String> get _blockedCompactSourceTerms => {
     'hentai',
     'inkbunny',
     'nsfw',
@@ -36,7 +36,7 @@ class ContentPolicy {
     'yiff',
   };
 
-  static const Set<String> _blockedSourceHosts = {
+  static Set<String> get _blockedSourceHosts => {
     'agn.ph',
     'booru.allthefallen.moe',
     'booru.xxx',
@@ -52,14 +52,15 @@ class ContentPolicy {
     'rule34hentai.net',
     'rule34vault.com',
     'xbooru.com',
+    'xivbooru.com',
   };
 
-  static final RegExp _blockedItemTagPattern = RegExp(
-    r'(^|_)(?:anal|anus|areola|ass|balls|bdsm|blowjob|bondage|boobs|breast|breasts|clitoris|consanguinity|crotch|cum|cunnilingus|dildo|ejaculation|erection|explicit|fellatio|genitals|handjob|hentai|incest|masturbation|naked|nipple|nipples|nsfw|nude|orgasm|paizuri|penetration|penis|porn|pubic|pussy|questionable|rape|rule_?34|scrotum|semen|sex|sex_?toy|testicles|vagina|vibrator|violation)(_|$)',
+  static RegExp get _blockedItemTagPattern => RegExp(
+    r'(^|_)(?:ai-created|ai_created|anal|anus|areola|ass|balls|bdsm|blowjob|bondage|boobs|bottomless|clitoris|cock|consanguinity|crotch|cum|cunnilingus|dildo|ejaculation|erection|explicit|flashing|fellatio|genitals|handjob|hentai|incest|masturbation|naked|naizuri|nipple|nipples|nsfw|nude|orgasm|paizuri|penetration|penis|porn|pubic|pussy|questionable|rape|rule_?34|scrotum|semen|sex|sex_?toy|testicles|vagina|vaginal|vibrator|violation)(_|$)',
     caseSensitive: false,
   );
 
-  static const Set<String> blockedItemRatings = {
+  static Set<String> get blockedItemRatings => {
     'adult',
     'e',
     'explicit',
@@ -202,12 +203,11 @@ class ContentPolicy {
   }
 
   static bool _supportsSafeRatingTag(Booru booru) {
-    return booru.type?.isDanbooru == true ||
-        booru.type?.isE621 == true ||
-        booru.type?.isGelbooruV1 == true ||
-        booru.type?.isMoebooru == true ||
-        booru.type?.isSankaku == true ||
-        booru.type?.isGelbooru == true;
+    final type = booru.type;
+    if (type == null) {
+      return false;
+    }
+    return type.isDanbooru || type.isE621 || type.isGelbooru || type.isGelbooruV1 || type.isMoebooru || type.isSankaku;
   }
 
   static bool _isSafeRatingTag(String tag) {
