@@ -38,6 +38,7 @@ class _BooruPageState extends State<BooruPage> {
   final defaultTagsController = TextEditingController();
   final limitController = TextEditingController();
   Booru? selectedBooru, initPrefBooru;
+  bool _currentPrefBooruWasDeleted = false;
 
   @override
   void initState() {
@@ -90,14 +91,18 @@ class _BooruPageState extends State<BooruPage> {
       selectedBooru = settingsHandler.booruList[0];
     }
     if (selectedBooru != null) {
-      await Future.delayed(const Duration(milliseconds: 100));
-      final res = await askToChangePrefBooru(
-        NavigationHandler.instance.navContext,
-        initPrefBooru,
-        selectedBooru!,
-      );
+      if (_currentPrefBooruWasDeleted) {
+        settingsHandler.prefBooru = selectedBooru?.name ?? '';
+      } else {
+        await Future.delayed(const Duration(milliseconds: 100));
+        final res = await askToChangePrefBooru(
+          NavigationHandler.instance.navContext,
+          initPrefBooru,
+          selectedBooru!,
+        );
 
-      settingsHandler.prefBooru = (res == true ? selectedBooru?.name : initPrefBooru?.name) ?? '';
+        settingsHandler.prefBooru = (res == true ? selectedBooru?.name : initPrefBooru?.name) ?? '';
+      }
     }
     settingsHandler.itemLimit = int.parse(limitController.text);
     await settingsHandler.saveSettings(restate: false);
@@ -363,13 +368,10 @@ class _BooruPageState extends State<BooruPage> {
                   onPressed: () async {
                     // save current and select next available booru to avoid exception after deletion
                     final Booru tempSelected = selectedBooru!;
-                    if (settingsHandler.booruList.isNotEmpty && settingsHandler.booruList.length > 1) {
-                      selectedBooru = settingsHandler.booruList[1];
-                    } else {
-                      selectedBooru = null;
-                    }
+                    selectedBooru = settingsHandler.booruList.firstWhereOrNull((booru) => booru != tempSelected);
                     // set new prefbooru if it is a deleted one
                     if (tempSelected.name == settingsHandler.prefBooru) {
+                      _currentPrefBooruWasDeleted = true;
                       settingsHandler.prefBooru = selectedBooru?.name ?? '';
                     }
                     // restate to avoid an exception due to changed booru list
@@ -389,6 +391,7 @@ class _BooruPageState extends State<BooruPage> {
                     } else {
                       // restore selected and prefbooru if something went wrong
                       selectedBooru = tempSelected;
+                      _currentPrefBooruWasDeleted = false;
                       settingsHandler.prefBooru = tempSelected.name ?? '';
                       await settingsHandler.sortBooruList();
 
