@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide ContextExt;
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -14,6 +14,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
 import 'package:lolisnatcher/src/utils/clipboard.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 import 'package:lolisnatcher/src/widgets/preview/grid_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
@@ -224,6 +225,31 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
         currentFetched.isNotEmpty &&
         currentFetched.length < (settingsHandler.itemLimit + 1)) {
       viewerHandler.setCurrent(currentFetched.first);
+    }
+  }
+
+  void syncFloatingBarsWithScroll(ScrollNotification notification) {
+    if (!PlatformExt.isDesktop) {
+      return;
+    }
+
+    double? scrollDelta;
+    if (notification is ScrollUpdateNotification) {
+      scrollDelta = notification.scrollDelta;
+    } else if (notification is OverscrollNotification) {
+      scrollDelta = notification.overscroll;
+    }
+
+    if (scrollDelta == null || scrollDelta == 0) {
+      return;
+    }
+
+    if (scrollDelta > 0) {
+      navigationHandler.floatingHeaderKey.currentState?.hide();
+      navigationHandler.bottomBarKey.currentState?.hide();
+    } else {
+      navigationHandler.floatingHeaderKey.currentState?.show();
+      navigationHandler.bottomBarKey.currentState?.show();
     }
   }
 
@@ -565,6 +591,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
           ),
           onNotification: (notif) {
             if (notif is ScrollUpdateNotification || notif is OverscrollNotification) {
+              syncFloatingBarsWithScroll(notif);
               searchHandler.sendToScrollStream(notif);
 
               // print('SCROLL NOTIFICATION');

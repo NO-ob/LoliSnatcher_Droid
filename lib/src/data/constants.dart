@@ -78,6 +78,8 @@ Release - 2.5.2+5216 (xx.07.2026):
 - Loading progress text now updates smooother
 - Enabled zoom in fullscreen video
 - Fullscreen video can now be closed by dragging down
+- Added scrollbar label in tab manager, text changes depending on sorting type
+- Fixed main app bar not snapping to full height once it entered the view
 - Fixed booru test not running again if user changed input fields after test was completed
 - Updated sankaku post url format
 - Possible fix for border appearing over the app when hardware keyboard is used (#392)
