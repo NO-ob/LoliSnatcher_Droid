@@ -48,7 +48,7 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.5.2',
-    buildNumber: 5215,
+    buildNumber: 5216,
     title: '2.5.2 - New onboarding and small fixes',
     isInStore: true,
     isImportant: false,
@@ -71,15 +71,17 @@ A minor update to add new onboarding screen and fix some issues.
 
 -------------------
 
-Release - 2.5.1+5212 (28.05.2026):
+Release - 2.5.2+5216 (xx.07.2026):
 
 - New onboarding screen
 - Fixed thumbnail loading progress not updating correctly
 - Loading progress text now updates smooother
-- Possible fix for border appearing over the app when hardware keyboard is used (#392)
-- Possible fix for app restarting afte bluetooth mouse is connected
 - Enabled zoom in fullscreen video
 - Fullscreen video can now be closed by dragging down
+- Fixed booru test not running again if user changed input fields after test was completed
+- Updated sankaku post url format
+- Possible fix for border appearing over the app when hardware keyboard is used (#392)
+- Possible fix for app restarting afte bluetooth mouse is connected
 - Fixed some layout issues
 
 
