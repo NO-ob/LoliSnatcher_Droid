@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 import 'package:external_video_player_launcher/external_video_player_launcher.dart';
-import 'package:get/get.dart' hide FirstWhereOrNullExt;
+import 'package:get/get.dart' hide ContextExt, FirstWhereOrNullExt;
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -257,6 +257,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
       actions.add(
         PopupMenuButton(
+          constraints: BoxConstraints(
+            minWidth: 100,
+            maxWidth: min(300, context.width - 32),
+          ),
           icon: Stack(
             alignment: Alignment.center,
             children: [
@@ -286,21 +290,38 @@ class _HideableAppBarState extends State<HideableAppBar> {
               return PopupMenuItem(
                 padding: EdgeInsets.zero,
                 value: button,
-                child: SizedBox(
-                  width: double.infinity, // force button to take full width
-                  child: ListTile(
-                    onLongPress: buttonHold(button),
-                    onTap: () async {
-                      Navigator.of(context).pop(); // remove overflow menu
-                      await buttonClick(button)?.call();
-                    },
-                    leading: ToolbarAction(
-                      key: ValueKey(button.name),
-                      icon: buttonIcon(button),
-                      subIcon: buttonSubicon(button),
-                      stackWidget: buttonStackWidget(button),
+                child: InkWell(
+                  onLongPress: buttonHold(button),
+                  onTap: () async {
+                    Navigator.of(context).pop(); // remove overflow menu
+                    await buttonClick(button)?.call();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: kMinInteractiveDimension,
+                          height: kMinInteractiveDimension,
+                          child: Center(
+                            child: ToolbarAction(
+                              key: ValueKey(button.name),
+                              icon: buttonIcon(button),
+                              subIcon: buttonSubicon(button),
+                              stackWidget: buttonStackWidget(button),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            buttonText(button),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                    title: Text(buttonText(button)),
                   ),
                 ),
               );
