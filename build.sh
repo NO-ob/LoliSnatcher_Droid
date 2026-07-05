@@ -94,7 +94,18 @@ get_version_and_build() {
 }
 get_version_and_build
 
-if [[ " ${build_modes[*]} " == *" appbundle "* ]]; then
+has_build_mode() {
+    local expected="$1"
+    local mode
+    for mode in "${build_modes[@]}"; do
+        if [ "$mode" = "$expected" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+if has_build_mode "appbundle"; then
     src_aab="build/app/outputs/bundle/release/app-release.aab"
     dest_aab="build/app/outputs/bundle/release/LoliSnatcher_${version}_${build}_appbundle_${suffix}.aab"
     cp "$src_aab" "$dest_aab"
@@ -103,7 +114,7 @@ if [[ " ${build_modes[*]} " == *" appbundle "* ]]; then
     echo "=> Built AAB: LoliSnatcher_${version}_${build}_appbundle_${suffix}.aab"
 fi
 
-if [[ " ${build_modes[*]} " == *" apk --split-per-abi "* ]]; then
+if has_build_mode "apk --split-per-abi"; then
     srcv8_apk="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
     destv8_apk="build/app/outputs/flutter-apk/LoliSnatcher_${version}_${build}_arm64-v8a_${suffix}.apk"
     cp "$srcv8_apk" "$destv8_apk"
@@ -120,7 +131,7 @@ if [[ " ${build_modes[*]} " == *" apk --split-per-abi "* ]]; then
     echo "=> Built APKs: LoliSnatcher_${version}_${build}_[arch]_${suffix}.apk"
 fi
 
-if [[ " ${build_modes[*]} " == *" apk "* ]]; then
+if has_build_mode "apk"; then
     src_apk="build/app/outputs/flutter-apk/app-release.apk"
     dest_apk="build/app/outputs/flutter-apk/LoliSnatcher_${version}_${build}_${suffix}.apk"
     cp "$src_apk" "$dest_apk"
@@ -128,4 +139,3 @@ if [[ " ${build_modes[*]} " == *" apk "* ]]; then
     echo
     echo "=> Built APK: LoliSnatcher_${version}_${build}_${suffix}.apk"
 fi
-

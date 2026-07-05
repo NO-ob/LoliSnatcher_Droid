@@ -30,7 +30,7 @@ dependencies:
   dio_http2_adapter: ^2.7.1
   duration: ^4.0.3
   dynamic_color: ^1.8.1
-  equatable: ^2.0.8
+  equatable: ^2.1.0
   external_video_player_launcher: ^0.0.3
   fading_edge_scrollview: ^4.1.1
   fast_marquee:

@@ -308,12 +308,19 @@ class DBHandler {
     String search = '',
     bool idol = false,
   }) async {
+    final String postURLCondition = idol
+        ? "postURL like '%idol.sankakucomplex%'"
+        : "(postURL like '%chan.sankakucomplex%' OR postURL like '%sankaku.app%')";
+    final String aliasedPostURLCondition = idol
+        ? "bi.postURL like '%idol.sankakucomplex%'"
+        : "(bi.postURL like '%chan.sankakucomplex%' OR bi.postURL like '%sankaku.app%')";
+
     if (search.isNotEmpty) {
       final items = await searchDB(
         search,
         '0',
         '1000000',
-        customConditions: ["bi.postURL like '%${idol ? "idol" : "chan"}.sankakucomplex%'"],
+        customConditions: [aliasedPostURLCondition],
       );
       for (final item in items) {
         item.isSnatched.value = false;
@@ -324,7 +331,7 @@ class DBHandler {
     final List? result = await db?.rawQuery(
       'SELECT BooruItem.id as ItemID, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite '
       'FROM BooruItem '
-      "WHERE postURL like '%${idol ? "idol" : "chan"}.sankakucomplex%' "
+      'WHERE $postURLCondition '
       'ORDER BY BooruItem.id DESC;',
     );
     final List<BooruItem> items = [];
@@ -1190,6 +1197,7 @@ class DBHandler {
         onStatusUpdate,
       ); // latest change i4->2, v3->4, ~early-mid December 25
       await fixR34XXXPostUrls(onStatusUpdate);
+      await fixSankakuPostUrls(onStatusUpdate);
     } catch (e, s) {
       Logger.Inst().log(
         e.toString(),
@@ -1275,6 +1283,34 @@ class DBHandler {
       onStatusUpdate?.call('R34XXX: ${i * chunkSize}/${items.length}');
       for (final Map<String, dynamic> item in chunk) {
         final String newPostURL = item['postURL'].toString().replaceAll('api.rule34.xxx', 'rule34.xxx');
+        batch?.rawUpdate(
+          'UPDATE BooruItem SET postURL = ? WHERE id = ?;',
+          [newPostURL, item['id']],
+        );
+      }
+      await batch?.commit(noResult: true);
+    }
+  }
+
+  Future<void> fixSankakuPostUrls(ValueChanged<String>? onStatusUpdate) async {
+    // update Sankaku post URLs from chan.sankakucomplex.com/post/show/$id to sankaku.app/posts/$id
+
+    final List<Map<String, dynamic>> items =
+        await db?.rawQuery(
+          "SELECT id, postURL FROM BooruItem WHERE postURL LIKE 'https://chan.sankakucomplex.com/post/show/%';",
+        ) ??
+        [];
+
+    const int chunkSize = 1000;
+    for (int i = 0; i < (items.length / chunkSize).ceil(); i++) {
+      final batch = db?.batch();
+      final chunk = items.sublist(i * chunkSize, min(items.length, (i + 1) * chunkSize));
+      onStatusUpdate?.call('Sankaku: ${i * chunkSize}/${items.length}');
+      for (final Map<String, dynamic> item in chunk) {
+        final String newPostURL = item['postURL'].toString().replaceAll(
+          'https://chan.sankakucomplex.com/post/show/',
+          'https://sankaku.app/posts/',
+        );
         batch?.rawUpdate(
           'UPDATE BooruItem SET postURL = ? WHERE id = ?;',
           [newPostURL, item['id']],
