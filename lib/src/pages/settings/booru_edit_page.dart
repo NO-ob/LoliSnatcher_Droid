@@ -56,6 +56,116 @@ class _BooruEditState extends State<BooruEdit> {
 
   BooruType? booruType;
   BooruType selectedBooruType = BooruType.Autodetect;
+  String? _lastSuccessfulTestSignature;
+
+  String _testSignature({
+    String? url,
+    BooruType? type,
+  }) {
+    return [
+      (url ?? booruURLController.text).trim(),
+      type?.name ?? selectedBooruType.name,
+      booruAPIKeyController.text.trim(),
+      booruUserIDController.text.trim(),
+    ].join('|');
+  }
+
+  void _invalidateTestResult() {
+    if (_lastSuccessfulTestSignature == null || _lastSuccessfulTestSignature == _testSignature()) {
+      return;
+    }
+
+    booruType = null;
+    _lastSuccessfulTestSignature = null;
+  }
+
+  String _normalizedHostOf(String input) {
+    final normalized = input.trim().contains('://') ? input.trim() : 'https://${input.trim()}';
+    return Uri.tryParse(normalized)?.host.toLowerCase().replaceFirst(RegExp(r'^www\.'), '') ?? '';
+  }
+
+  BooruType? _knownBooruTypeForHost(String host) {
+    switch (host) {
+      case 'furry.booru.org':
+      case 'gelbooru.com':
+      case 'rule34.xxx':
+      case 'safebooru.org':
+      case 'tbib.org':
+        return BooruType.Gelbooru;
+
+      case 'xbooru.com':
+        return BooruType.GelbooruV1;
+
+      case 'konachan.com':
+      case 'konachan.net':
+      case 'lolibooru.moe':
+      case 'yande.re':
+        return BooruType.Moebooru;
+
+      case 'bleachbooru.org':
+      case 'booru.allthefallen.moe':
+      case 'danbooru.donmai.us':
+      case 'safebooru.donmai.us':
+      case 'sonohara.donmai.us':
+        return BooruType.Danbooru;
+
+      case 'e621.net':
+      case 'e926.net':
+        return BooruType.e621;
+
+      case 'derpibooru.org':
+      case 'furbooru.org':
+      case 'ponybooru.org':
+      case 'tantabus.ai':
+        return BooruType.Philomena;
+
+      case 'twibooru.org':
+      case 'manebooru.art':
+        return BooruType.BooruOnRails;
+
+      case 'sankaku.app':
+      case 'sankakucomplex.com':
+      case 'chan.sankakucomplex.com':
+        return BooruType.Sankaku;
+
+      case 'idol.sankakucomplex.com':
+        return BooruType.IdolSankaku;
+
+      case 'rule34.paheal.net':
+        return BooruType.Shimmie;
+
+      case 'rule34hentai.net':
+        return BooruType.R34Hentai;
+
+      case 'realbooru.com':
+        return BooruType.Realbooru;
+
+      case 'rule34.us':
+        return BooruType.R34US;
+
+      case 'rule34.world':
+      case 'rule34.xyz':
+      case 'rule34vault.com':
+        return BooruType.World;
+
+      case 'agn.ph':
+        return BooruType.AGNPH;
+
+      case 'inkbunny.net':
+        return BooruType.InkBunny;
+
+      case 'nyanpals.com':
+        return BooruType.NyanPals;
+
+      case 'wildcritters.ws':
+        return BooruType.WildCritters;
+
+      case 'rainbooru.org':
+        return BooruType.Rainbooru;
+    }
+
+    return null;
+  }
 
   // TODO make standalone / move to handlers themselves
   String convertSiteUrlToApiUrl() {
@@ -201,6 +311,7 @@ class _BooruEditState extends State<BooruEdit> {
               controller: booruURLController,
               title: context.loc.settings.booruEditor.booruUrl,
               onChanged: (_) {
+                _invalidateTestResult();
                 if (booruURLController.text.isEmpty) {
                   booruFaviconController.text = widget.booru.type == null ? '' : widget.booru.faviconURL ?? '';
                   booruType = widget.booru.type;
@@ -240,6 +351,7 @@ class _BooruEditState extends State<BooruEdit> {
               onChanged: (BooruType? newValue) {
                 setState(() {
                   selectedBooruType = newValue ?? BooruType.values.first;
+                  _invalidateTestResult();
                 });
               },
               title: context.loc.settings.booruEditor.booruType,
@@ -306,7 +418,10 @@ class _BooruEditState extends State<BooruEdit> {
             //
             SettingsTextInput(
               controller: booruUserIDController,
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) {
+                _invalidateTestResult();
+                setState(() {});
+              },
               title: getUserIDTitle(),
               hintText: getUserIdPlaceholder(),
               clearable: true,
@@ -316,7 +431,10 @@ class _BooruEditState extends State<BooruEdit> {
             ),
             SettingsTextInput(
               controller: booruAPIKeyController,
-              onChanged: (_) => setState(() {}),
+              onChanged: (_) {
+                _invalidateTestResult();
+                setState(() {});
+              },
               title: getApiKeyTitle(),
               pasteable: true,
               hintText: getApiKeyPlaceholder(),
@@ -469,36 +587,9 @@ class _BooruEditState extends State<BooruEdit> {
 
     // pre-select booru type for popular sites to avoid false positives for autodetect
     if (selectedBooruType.isAutodetect) {
-      final String host = Uri.parse(booruURLController.text).host;
-      switch (host) {
-        case 'gelbooru.com':
-        case 'rule34.xxx':
-        case 'safebooru.org':
-          selectedBooruType = BooruType.Gelbooru;
-          break;
-        case 'danbooru.donmai.us':
-        case 'bleachbooru.org':
-        case 'booru.allthefallen.moe':
-          selectedBooruType = BooruType.Danbooru;
-          break;
-        case 'sankaku.app':
-        case 'sankakucomplex.com':
-        case 'chan.sankakucomplex.com':
-          selectedBooruType = BooruType.Sankaku;
-          break;
-        case 'idol.sankakucomplex.com':
-          selectedBooruType = BooruType.IdolSankaku;
-          break;
-        case 'e621.net':
-        case 'e926.net':
-          selectedBooruType = BooruType.e621;
-          break;
-        case 'rule34.paheal.net':
-          selectedBooruType = BooruType.Shimmie;
-          break;
-        case 'rule34hentai.net':
-          selectedBooruType = BooruType.R34Hentai;
-          break;
+      final knownType = _knownBooruTypeForHost(_normalizedHostOf(booruURLController.text));
+      if (knownType != null) {
+        selectedBooruType = knownType;
       }
       setState(() {});
     }
@@ -542,6 +633,7 @@ class _BooruEditState extends State<BooruEdit> {
     if (testBooruType != null) {
       booruType = testBooruType;
       selectedBooruType = testBooruType;
+      _lastSuccessfulTestSignature = _testSignature(type: testBooruType);
       return true;
     } else {
       FlashElements.showSnackbar(
@@ -590,6 +682,11 @@ class _BooruEditState extends State<BooruEdit> {
       if (booruType!.isAutodetect) {
         return;
       }
+    }
+
+    if (booruType != null && _lastSuccessfulTestSignature != _testSignature()) {
+      booruType = null;
+      _lastSuccessfulTestSignature = null;
     }
 
     if (booruType == null && !force) {
