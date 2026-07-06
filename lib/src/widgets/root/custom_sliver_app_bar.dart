@@ -110,7 +110,7 @@ class _CustomSliverAppBarState extends State<CustomSliverAppBar> with TickerProv
     if (widget.snap && widget.floating) {
       _snapConfiguration = FloatingHeaderSnapConfiguration(
         curve: Curves.easeOut,
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 350),
       );
     } else {
       _snapConfiguration = null;

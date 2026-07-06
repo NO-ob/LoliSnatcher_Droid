@@ -96,7 +96,7 @@ class CustomFloatingHeader extends StatefulWidget {
 
 class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
   static const int _directionChangeDebounceMs = 120;
-  static const Duration _deferredSnapDelay = Duration(milliseconds: 180);
+  static const Duration _snapSettleDelay = Duration(milliseconds: 180);
 
   ScrollPosition? _position;
   ScrollDirection _lastUserScrollDirection = ScrollDirection.idle;
@@ -168,15 +168,14 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
     header?.maybeStartSnapAnimation(direction);
   }
 
-  void _scheduleDeferredSnap(ScrollDirection direction) {
+  void _scheduleSnap(ScrollDirection direction) {
     _deferredSnapTimer?.cancel();
-    _deferredSnapTimer = Timer(_deferredSnapDelay, () {
+    _deferredSnapTimer = Timer(_snapSettleDelay, () {
       if (!mounted) {
         return;
       }
 
       if (_position?.isScrollingNotifier.value == true) {
-        _scheduleDeferredSnap(direction);
         return;
       }
 
@@ -191,7 +190,7 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
 
     if (_position?.isScrollingNotifier.value == true) {
       header?.maybeStopSnapAnimation(direction);
-      _scheduleDeferredSnap(direction);
+      _scheduleSnap(direction);
     } else {
       _startSnap(direction);
     }
@@ -204,15 +203,19 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
 
     final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
     header?.updateScrollStartDirection(direction);
+    header?.maybeStopSnapAnimation(direction);
 
-    if (_position?.isScrollingNotifier.value == true) {
-      header?.maybeStopSnapAnimation(direction);
-      _scheduleDeferredSnap(direction);
-    } else {
-      _startSnap(direction);
-    }
+    _scheduleSnap(direction);
 
     widget.onVisibilityChanged?.call(direction == ScrollDirection.forward);
+  }
+
+  void settleUserScrollDirection() {
+    if (_lastUserScrollDirection == ScrollDirection.idle) {
+      return;
+    }
+
+    _scheduleSnap(_lastUserScrollDirection);
   }
 
   void show() {
@@ -242,11 +245,10 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
       _setLastUserScrollDirection(direction);
       header?.updateScrollStartDirection(_lastUserScrollDirection);
       header?.maybeStopSnapAnimation(_lastUserScrollDirection);
-      _scheduleDeferredSnap(_lastUserScrollDirection);
+      _deferredSnapTimer?.cancel();
       // widget.onVisibilityChanged?.call(_position!.userScrollDirection == ScrollDirection.forward);
     } else if (_lastUserScrollDirection != ScrollDirection.idle) {
-      _deferredSnapTimer?.cancel();
-      _startSnap(_lastUserScrollDirection);
+      _scheduleSnap(_lastUserScrollDirection);
       // widget.onVisibilityChanged?.call(_position!.userScrollDirection == ScrollDirection.forward);
     }
   }

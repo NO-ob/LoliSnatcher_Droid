@@ -270,6 +270,14 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
     }
   }
 
+  void settleFloatingBarsAfterScroll() {
+    if (!PlatformExt.isDesktop) {
+      return;
+    }
+
+    navigationHandler.floatingHeaderKey.currentState?.settleUserScrollDirection();
+  }
+
   void viewerCallback() {
     // do cleanup after a delay to avoid animation stutter when leaving the viewer (especially when there are thousands of items)
     Future.delayed(const Duration(milliseconds: 500), () {
@@ -631,6 +639,10 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                   searchHandler.runSearch();
                 }
               }
+            }
+            if (notif is ScrollEndNotification) {
+              settleFloatingBarsAfterScroll();
+              searchHandler.sendToScrollStream(notif);
             }
             return true;
           },
