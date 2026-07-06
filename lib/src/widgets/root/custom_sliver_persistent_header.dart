@@ -132,10 +132,31 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
     return context.findAncestorRenderObjectOfType<RenderSliverFloatingPersistentHeader>();
   }
 
+  bool _setLastUserScrollDirection(
+    ScrollDirection direction, {
+    bool debounce = true,
+  }) {
+    if (direction == ScrollDirection.idle) {
+      return false;
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final bool directionChanged = _lastUserScrollDirection != direction;
+    final bool shouldIgnoreDirectionChange =
+        debounce && directionChanged && now - _lastUserScrollDirectionChangedAt < _directionChangeDebounceMs;
+
+    if (shouldIgnoreDirectionChange) {
+      return false;
+    }
+
+    _lastUserScrollDirection = direction;
+    _lastUserScrollDirectionChangedAt = now;
+    return true;
+  }
+
   void _snapOrDefer(ScrollDirection direction) {
     final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
-    _lastUserScrollDirection = direction;
-    _lastUserScrollDirectionChangedAt = DateTime.now().millisecondsSinceEpoch;
+    _setLastUserScrollDirection(direction, debounce: false);
     header?.updateScrollStartDirection(direction);
 
     if (_position?.isScrollingNotifier.value == true) {
@@ -143,6 +164,23 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
     } else {
       header?.maybeStartSnapAnimation(direction);
     }
+  }
+
+  void handleUserScrollDirection(ScrollDirection direction) {
+    if (!_setLastUserScrollDirection(direction)) {
+      return;
+    }
+
+    final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
+    header?.updateScrollStartDirection(direction);
+
+    if (_position?.isScrollingNotifier.value == true) {
+      header?.maybeStopSnapAnimation(direction);
+    } else {
+      header?.maybeStartSnapAnimation(direction);
+    }
+
+    widget.onVisibilityChanged?.call(direction == ScrollDirection.forward);
   }
 
   void show() {
@@ -169,17 +207,7 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
     final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
     if (_position!.isScrollingNotifier.value) {
       final direction = _position!.userScrollDirection;
-      if (direction != ScrollDirection.idle) {
-        final now = DateTime.now().millisecondsSinceEpoch;
-        final bool directionChanged = _lastUserScrollDirection != direction;
-        final bool shouldIgnoreDirectionChange =
-            directionChanged && now - _lastUserScrollDirectionChangedAt < _directionChangeDebounceMs;
-
-        if (!shouldIgnoreDirectionChange) {
-          _lastUserScrollDirection = direction;
-          _lastUserScrollDirectionChangedAt = now;
-        }
-      }
+      _setLastUserScrollDirection(direction);
       header?.updateScrollStartDirection(_lastUserScrollDirection);
       header?.maybeStopSnapAnimation(_lastUserScrollDirection);
       // widget.onVisibilityChanged?.call(_position!.userScrollDirection == ScrollDirection.forward);

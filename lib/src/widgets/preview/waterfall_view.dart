@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:get/get.dart' hide ContextExt;
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -31,6 +32,8 @@ class WaterfallView extends StatefulWidget {
 
 class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+  static const int _floatingBarsDirectionDebounceMs = 120;
+
   final SearchHandler searchHandler = SearchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
   final NavigationHandler navigationHandler = NavigationHandler.instance;
@@ -45,6 +48,8 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   bool get isMobile => settingsHandler.appMode.value.isMobile;
 
   final ValueNotifier<bool> isActive = ValueNotifier(true);
+  ScrollDirection lastFloatingBarsDirection = ScrollDirection.idle;
+  int lastFloatingBarsDirectionChangedAt = 0;
 
   Timer? viewedItemCleanupTimer;
   int viewedItemCleanupCount = 0;
@@ -244,11 +249,23 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
       return;
     }
 
-    if (scrollDelta > 0) {
-      navigationHandler.floatingHeaderKey.currentState?.hide();
+    final direction = scrollDelta > 0 ? ScrollDirection.reverse : ScrollDirection.forward;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final bool directionChanged = lastFloatingBarsDirection != direction;
+    final bool shouldIgnoreDirectionChange =
+        directionChanged && now - lastFloatingBarsDirectionChangedAt < _floatingBarsDirectionDebounceMs;
+
+    if (shouldIgnoreDirectionChange) {
+      return;
+    }
+
+    lastFloatingBarsDirection = direction;
+    lastFloatingBarsDirectionChangedAt = now;
+    navigationHandler.floatingHeaderKey.currentState?.handleUserScrollDirection(direction);
+
+    if (direction == ScrollDirection.reverse) {
       navigationHandler.bottomBarKey.currentState?.hide();
     } else {
-      navigationHandler.floatingHeaderKey.currentState?.show();
       navigationHandler.bottomBarKey.currentState?.show();
     }
   }
