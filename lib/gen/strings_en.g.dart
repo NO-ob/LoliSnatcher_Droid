@@ -2306,31 +2306,32 @@ class Translations$settings$booru$en {
   String get removeRelatedTabsFirst =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Remove related tabs first';
 
-  /// en: 'Some source and result options are limited. More compatibility options are available in advanced settings below.'
+  /// en: 'Some source setup behavior may depend on the compatibility settings below. Source content is provided by external sites and is not controlled by the app.'
   String get sourceLimitNotice =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
-      'Some source and result options are limited. More compatibility options are available in advanced settings below.';
+      'Some source setup behavior may depend on the compatibility settings below. Source content is provided by external sites and is not controlled by the app.';
 
   /// en: 'Advanced'
   String get advanced => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Advanced';
 
-  /// en: 'Expanded source compatibility'
+  /// en: 'Source setup compatibility'
   String get expandedSourceCompatibility =>
-      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Expanded source compatibility';
+      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Source setup compatibility';
 
-  /// en: 'Show additional source options'
+  /// en: 'Adjust how source setup compatibility is handled'
   String get expandedSourceCompatibilitySubtitle =>
-      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ?? 'Show additional source options';
+      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ??
+      'Adjust how source setup compatibility is handled';
 
-  /// en: 'Additional sources may not follow the default content limits. Continue?'
+  /// en: 'Changing this may affect how source setup works. Source content is provided by external sites and is not controlled by the app. Continue?'
   String get expandedSourceCompatibilityConfirm =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ??
-      'Additional sources may not follow the default content limits. Continue?';
+      'Changing this may affect how source setup works. Source content is provided by external sites and is not controlled by the app. Continue?';
 
-  /// en: 'This source is not available with the current source settings.'
+  /// en: 'This source is not available or doesn't provide API access.'
   String get sourceUnavailableCurrentSettings =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.sourceUnavailableCurrentSettings', {}) ??
-      'This source is not available with the current source settings.';
+      'This source is not available or doesn\'t provide API access.';
 }
 
 // Path: settings.booruEditor
@@ -5505,18 +5506,19 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Remove related tabs first',
           'settings.booru.sourceLimitNotice' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
-                'Some source and result options are limited. More compatibility options are available in advanced settings below.',
+                'Some source setup behavior may depend on the compatibility settings below. Source content is provided by external sites and is not controlled by the app.',
           'settings.booru.advanced' => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Advanced',
           'settings.booru.expandedSourceCompatibility' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Expanded source compatibility',
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Source setup compatibility',
           'settings.booru.expandedSourceCompatibilitySubtitle' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ?? 'Show additional source options',
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ??
+                'Adjust how source setup compatibility is handled',
           'settings.booru.expandedSourceCompatibilityConfirm' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ??
-                'Additional sources may not follow the default content limits. Continue?',
+                'Changing this may affect how source setup works. Source content is provided by external sites and is not controlled by the app. Continue?',
           'settings.booru.sourceUnavailableCurrentSettings' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.sourceUnavailableCurrentSettings', {}) ??
-                'This source is not available with the current source settings.',
+                'This source is not available or doesn\'t provide API access.',
           'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Booru Editor',
           'settings.booruEditor.testBooruFailedTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booru test failed',

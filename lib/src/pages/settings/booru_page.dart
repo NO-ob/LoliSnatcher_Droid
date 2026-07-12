@@ -118,7 +118,7 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Widget sourceLimitNotice() {
-    if (!ContentPolicy.isLocked) {
+    if (!ContentPolicy.isFromStore) {
       return const SizedBox.shrink();
     }
 

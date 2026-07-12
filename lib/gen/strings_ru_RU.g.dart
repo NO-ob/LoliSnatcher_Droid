@@ -1862,24 +1862,24 @@ class _Translations$settings$booru$ru_RU extends Translations$settings$booru$en 
   @override
   String get sourceLimitNotice =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
-      'Некоторые источники и результаты ограничены. Дополнительные параметры совместимости доступны в расширенных настройках ниже.';
+      'Некоторые действия при настройке сайтов могут зависеть от параметров совместимости ниже. Содержимое предоставляется внешними сайтами и не контролируется приложением.';
   @override
   String get advanced => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Расширенные настройки';
   @override
   String get expandedSourceCompatibility =>
-      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Расширенная совместимость источников';
+      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Совместимость настройки сайтов';
   @override
   String get expandedSourceCompatibilitySubtitle =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ??
-      'Показывать дополнительные параметры источников';
+      'Настроить обработку совместимости при добавлении сайтов';
   @override
   String get expandedSourceCompatibilityConfirm =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ??
-      'Дополнительные источники могут не соблюдать стандартные ограничения контента. Продолжить?';
+      'Изменение этого параметра может повлиять на настройку сайтов. Содержимое предоставляется внешними сайтами и не контролируется приложением. Продолжить?';
   @override
   String get sourceUnavailableCurrentSettings =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.sourceUnavailableCurrentSettings', {}) ??
-      'Этот источник недоступен с текущими настройками источников.';
+      'Этот сайт недоступен или не предоставляет доступ к API.';
 }
 
 // Path: settings.booruEditor
@@ -4519,19 +4519,19 @@ extension on TranslationsRuRu {
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Сначала удалите связанные вкладки',
           'settings.booru.sourceLimitNotice' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
-                'Некоторые источники и результаты ограничены. Дополнительные параметры совместимости доступны в расширенных настройках ниже.',
+                'Некоторые действия при настройке сайтов могут зависеть от параметров совместимости ниже. Содержимое предоставляется внешними сайтами и не контролируется приложением.',
           'settings.booru.advanced' => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Расширенные настройки',
           'settings.booru.expandedSourceCompatibility' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Расширенная совместимость источников',
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Совместимость настройки сайтов',
           'settings.booru.expandedSourceCompatibilitySubtitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ??
-                'Показывать дополнительные параметры источников',
+                'Настроить обработку совместимости при добавлении сайтов',
           'settings.booru.expandedSourceCompatibilityConfirm' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ??
-                'Дополнительные источники могут не соблюдать стандартные ограничения контента. Продолжить?',
+                'Изменение этого параметра может повлиять на настройку сайтов. Содержимое предоставляется внешними сайтами и не контролируется приложением. Продолжить?',
           'settings.booru.sourceUnavailableCurrentSettings' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.sourceUnavailableCurrentSettings', {}) ??
-                'Этот источник недоступен с текущими настройками источников.',
+                'Этот сайт недоступен или не предоставляет доступ к API.',
           'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Редактор конфига сайта',
           'settings.booruEditor.testBooruFailedTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Проверка сайта не удалась',
