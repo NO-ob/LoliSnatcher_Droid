@@ -37,6 +37,7 @@ class ContentPolicy {
   };
 
   static Set<String> get _blockedSourceHosts => {
+    'aibooru.online',
     'agn.ph',
     'booru.allthefallen.moe',
     'booru.xxx',
@@ -55,10 +56,133 @@ class ContentPolicy {
     'xivbooru.com',
   };
 
-  static RegExp get _blockedItemTagPattern => RegExp(
-    r'(^|_)(?:ai-created|ai_created|anal|anus|areola|ass|balls|bdsm|blowjob|bondage|boobs|bottomless|clitoris|cock|consanguinity|crotch|cum|cunnilingus|dildo|ejaculation|erection|explicit|flashing|fellatio|genitals|handjob|hentai|incest|masturbation|naked|naizuri|nipple|nipples|nsfw|nude|orgasm|paizuri|penetration|penis|porn|pubic|pussy|questionable|rape|rule_?34|scrotum|semen|sex|sex_?toy|testicles|vagina|vaginal|vibrator|violation)(_|$)',
-    caseSensitive: false,
-  );
+  static List<String> get _blockedItemTagTerms {
+    final terms = <String>{
+      ...SettingsHandler.aiTags,
+      ..._blockedAdultItemTags,
+      ..._blockedMetadataItemTags,
+      ..._blockedViolenceItemTags,
+    }.toList()..sort();
+
+    return terms;
+  }
+
+  static RegExp get _blockedItemTagPattern {
+    final alternatives = _blockedItemTagTerms.map(RegExp.escape).join('|');
+    return RegExp(
+      '(^|_)(?:$alternatives)(_|${r'$'})',
+      caseSensitive: false,
+    );
+  }
+
+  static const List<String> _blockedAdultItemTags = [
+    'anal',
+    'anus',
+    'areola',
+    'ass',
+    'babydoll',
+    'balls',
+    'bdsm',
+    'blowjob',
+    'bondage',
+    'boobs',
+    'bottomless',
+    'bra',
+    'clitoris',
+    'cock',
+    'consanguinity',
+    'crotch',
+    'cum',
+    'cunnilingus',
+    'dildo',
+    'ejaculation',
+    'erection',
+    'explicit',
+    'fellatio',
+    'flashing',
+    'garter_belt',
+    'garter_straps',
+    'garter',
+    'garterbelt',
+    'genitals',
+    'handjob',
+    'hentai',
+    'incest',
+    'lingerie',
+    'masturbation',
+    'naizuri',
+    'naked',
+    'nipple',
+    'nipples',
+    'nsfw',
+    'nude',
+    'orgasm',
+    'paizuri',
+    'panties',
+    'pantyshot',
+    'penetration',
+    'penis',
+    'porn',
+    'pubic',
+    'pussy',
+    'questionable',
+    'rape',
+    'rule_34',
+    'rule34',
+    'scrotum',
+    'semen',
+    'sex_toy',
+    'sex',
+    'sextoy',
+    'testicles',
+    'thong',
+    'underwear',
+    'vagina',
+    'vaginal',
+    'vibrator',
+    'violation',
+  ];
+
+  static const List<String> _blockedMetadataItemTags = [
+    'tagme',
+    'untagged',
+  ];
+
+  static const List<String> _blockedViolenceItemTags = [
+    'abuse',
+    'amputation',
+    'asphyxiation',
+    'beating',
+    'blood',
+    'bloody',
+    'body_horror',
+    'bruise',
+    'bruises',
+    'cannibalism',
+    'choking',
+    'corpse',
+    'death',
+    'decapitation',
+    'disembowelment',
+    'dismemberment',
+    'fighting',
+    'gore',
+    'guro',
+    'guts',
+    'injury',
+    'murder',
+    'mutilation',
+    'ryona',
+    'self_harm',
+    'severed_limb',
+    'snuff',
+    'strangulation',
+    'suicide',
+    'torture',
+    'violence',
+    'violent',
+    'wound',
+  ];
 
   static Set<String> get blockedItemRatings => {
     'adult',
@@ -192,6 +316,9 @@ class ContentPolicy {
       return false;
     }
 
+    if (item.tagsList.isEmpty) {
+      return false;
+    }
     for (final tag in item.tagsList) {
       final String tagText = tag.fullString.toLowerCase();
       if (_isBlockedSearchTag(tagText) || _blockedItemTagPattern.hasMatch(tagText)) {

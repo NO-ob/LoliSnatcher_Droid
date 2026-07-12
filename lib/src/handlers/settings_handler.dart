@@ -1964,12 +1964,15 @@ class SettingsHandler {
   ];
 
   static const List<String> aiTags = [
+    'ai_art',
+    'ai-art',
     'ai_assisted',
     'ai-assisted',
     'ai_created',
     'ai-created',
     'ai_generated',
     'ai-generated',
+    'generated_by_ai',
     'novelai',
     'stable_diffusion',
     'stable-diffusion',
