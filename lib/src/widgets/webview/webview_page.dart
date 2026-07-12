@@ -106,6 +106,10 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
     }
   }
 
+  Future<void> stopLoading(InAppWebViewController controller) async {
+    await controller.stopLoading();
+  }
+
   @override
   void dispose() {
     pullToRefreshController?.dispose();
@@ -136,8 +140,15 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
       appBar: AppBar(
         title: Text(widget.title ?? context.loc.webview.title),
         actions: [
-          WebviewNavigationControls(controller: controller),
-          WebviewNavigationMenu(initialUrl: widget.initialUrl, controller: controller),
+          WebviewNavigationControls(
+            controller: controller,
+            isLoading: loadingPercentage < 100,
+            onStopLoading: stopLoading,
+          ),
+          WebviewNavigationMenu(
+            initialUrl: widget.initialUrl,
+            controller: controller,
+          ),
         ],
       ),
       body: Stack(
@@ -188,10 +199,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
               ),
             ),
           //
-          if (loadingPercentage < 100)
-            LinearProgressIndicator(
-              value: loadingPercentage / 100.0,
-            ),
+          if (loadingPercentage < 100) LinearProgressIndicator(value: loadingPercentage / 100),
           //
           if (kDebugMode && !hideSubtitle)
             Positioned(

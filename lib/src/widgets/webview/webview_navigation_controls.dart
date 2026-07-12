@@ -7,9 +7,16 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 class WebviewNavigationControls extends StatelessWidget {
-  const WebviewNavigationControls({required this.controller, super.key});
+  const WebviewNavigationControls({
+    required this.controller,
+    required this.isLoading,
+    required this.onStopLoading,
+    super.key,
+  });
 
   final Completer<InAppWebViewController> controller;
+  final bool isLoading;
+  final Future<void> Function(InAppWebViewController controller) onStopLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +76,8 @@ class WebviewNavigationControls extends StatelessWidget {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.replay),
-              onPressed: controller.reload,
+              icon: Icon(isLoading ? Icons.close : Icons.replay),
+              onPressed: isLoading ? () => onStopLoading(controller) : controller.reload,
             ),
           ],
         );
