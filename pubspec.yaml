@@ -14,7 +14,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   alice_lightweight: ^3.10.0
-  app_links: ^7.2.0
+  app_links: ^7.2.1
   auto_size_text_plus: ^3.0.2
   calendar_date_picker2: ^3.0.0
   chewie: ^1.14.1
@@ -72,7 +72,7 @@ dependencies:
       url: https://github.com/EdgarJan/flutter_keyboard_actions.git
       ref: 561a1e3b59691b1323ac104462e76216274d6bf5 # master - fork with a fix for f3.38
   lemberfpsmonitor: ^0.0.3+6
-  local_auth: ^3.0.1
+  local_auth: ^3.0.2
   material_color_utilities: ^0.13.0
   media_kit: ^1.2.6
   media_kit_video: ^2.0.1
@@ -103,7 +103,7 @@ dependencies:
   talker: ^5.1.17
   url_launcher: ^6.3.2
   uuid: ^4.5.3
-  video_player: ^2.11.1
+  video_player: ^2.12.0
   waterfall_flow: ^3.1.1
   xml: ^7.0.1
 
@@ -112,7 +112,7 @@ dependencies:
 dependency_overrides:
   android_intent_plus: ^6.0.0
   material_color_utilities: ^0.13.0 # flutter_test conflict
-  meta: ^1.18.3 # flutter_test and image conflict
+  meta: ^1.19.0 # flutter_test and image conflict
   share_plus: ^13.2.0 # alice conflict
   xml: ^7.0.1 # image conflict
 
@@ -121,7 +121,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^2.15.0
+  build_runner: ^2.15.1
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
 
