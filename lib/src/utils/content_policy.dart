@@ -60,7 +60,6 @@ class ContentPolicy {
     final terms = <String>{
       ...SettingsHandler.aiTags,
       ..._blockedAdultItemTags,
-      ..._blockedMetadataItemTags,
       ..._blockedViolenceItemTags,
     }.toList()..sort();
 
@@ -91,7 +90,6 @@ class ContentPolicy {
     'bondage',
     'boobs',
     'bottomless',
-    'bra',
     'buttjob',
     'clitoris',
     'cock',
@@ -128,7 +126,6 @@ class ContentPolicy {
     'lgbtq+',
     'lgbtqia',
     'lingerie',
-    'loli',
     'lube',
     'masturbation',
     'naizuri',
@@ -158,7 +155,6 @@ class ContentPolicy {
     'sex_toy',
     'sex',
     'sextoy',
-    'shota',
     'squirt',
     'squirting',
     'testicles',
@@ -174,11 +170,6 @@ class ContentPolicy {
     'vaginal',
     'vibrator',
     'violation',
-  ];
-
-  static const List<String> _blockedMetadataItemTags = [
-    'tagme',
-    'untagged',
   ];
 
   static const List<String> _blockedViolenceItemTags = [
