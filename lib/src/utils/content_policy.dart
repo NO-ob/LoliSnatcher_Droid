@@ -70,7 +70,9 @@ class ContentPolicy {
   static RegExp get _blockedItemTagPattern {
     final alternatives = _blockedItemTagTerms.map(RegExp.escape).join('|');
     return RegExp(
-      '(^|_)(?:$alternatives)(_|${r'$'})',
+      r'(^|_|\(|\d)'
+      '(?:$alternatives)'
+      r'(\d|\)|_|$)',
       caseSensitive: false,
     );
   }
@@ -80,35 +82,54 @@ class ContentPolicy {
     'anus',
     'areola',
     'ass',
+    'assjob',
     'babydoll',
     'balls',
     'bdsm',
+    'bisexual',
     'blowjob',
     'bondage',
     'boobs',
     'bottomless',
     'bra',
+    'buttjob',
     'clitoris',
     'cock',
     'consanguinity',
     'crotch',
     'cum',
     'cunnilingus',
+    'diaper',
     'dildo',
     'ejaculation',
     'erection',
     'explicit',
+    'feetjob',
     'fellatio',
+    'fetish',
     'flashing',
+    'footjob',
+    'futanari',
     'garter_belt',
     'garter_straps',
     'garter',
     'garterbelt',
+    'gay',
     'genitals',
+    'glansjob',
     'handjob',
     'hentai',
     'incest',
+    'intersex',
+    'kink',
+    'lesbian',
+    'lgbt',
+    'lgbtq',
+    'lgbtq+',
+    'lgbtqia',
     'lingerie',
+    'loli',
+    'lube',
     'masturbation',
     'naizuri',
     'naked',
@@ -125,18 +146,30 @@ class ContentPolicy {
     'porn',
     'pubic',
     'pussy',
+    'pussyjob',
+    'queer',
     'questionable',
     'rape',
     'rule_34',
     'rule34',
+    'scat',
     'scrotum',
     'semen',
     'sex_toy',
     'sex',
     'sextoy',
+    'shota',
+    'squirt',
+    'squirting',
     'testicles',
+    'thighjob',
     'thong',
+    'transgender',
     'underwear',
+    'urethra',
+    'urinating',
+    'urination',
+    'urine',
     'vagina',
     'vaginal',
     'vibrator',
@@ -172,6 +205,7 @@ class ContentPolicy {
     'injury',
     'murder',
     'mutilation',
+    'necrophilia',
     'ryona',
     'self_harm',
     'severed_limb',
@@ -316,7 +350,7 @@ class ContentPolicy {
       return false;
     }
 
-    if (item.tagsList.isEmpty) {
+    if (item.tagsList.length < 10) {
       return false;
     }
     for (final tag in item.tagsList) {
@@ -327,6 +361,15 @@ class ContentPolicy {
     }
 
     return true;
+  }
+
+  static bool isTagAllowed(String tag) {
+    if (!isLocked) {
+      return true;
+    }
+
+    final normalized = tag.toLowerCase();
+    return !_isBlockedSearchTag(normalized) && !_blockedItemTagPattern.hasMatch(normalized);
   }
 
   static bool _supportsSafeRatingTag(Booru booru) {

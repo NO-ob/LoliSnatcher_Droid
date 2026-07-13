@@ -12,6 +12,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:lolisnatcher/src/utils/clipboard.dart';
+import 'package:lolisnatcher/src/utils/content_policy.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll.dart';
 import 'package:lolisnatcher/src/widgets/preview/tag_search_query_editor_page.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
@@ -253,7 +254,7 @@ class _MainSearchQueryEditorPageState extends State<MainSearchQueryEditorPage> {
               loading = false;
               failed = false;
               failedMsg = null;
-              suggestedTags = data;
+              suggestedTags = data.where((t) => ContentPolicy.isTagAllowed(t.tag)).toList();
               if (mounted) {
                 setState(() {});
               }
@@ -2197,7 +2198,7 @@ class _PopularTagsBlockState extends State<PopularTagsBlock> {
       (data) {
         loading = false;
         failed = false;
-        popularTags = data;
+        popularTags = data.where((t) => ContentPolicy.isTagAllowed(t.tag)).toList();
         if (mounted) setState(() {});
 
         for (final tag in popularTags.where((t) => !t.type.isNone)) {

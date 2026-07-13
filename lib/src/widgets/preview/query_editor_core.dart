@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
+import 'package:lolisnatcher/src/utils/content_policy.dart';
 import 'package:rich_text_controller/rich_text_controller.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -181,7 +182,7 @@ class QueryEditorController {
               loading = false;
               failed = false;
               failedMsg = null;
-              suggestedTags = data;
+              suggestedTags = data.where((t) => ContentPolicy.isTagAllowed(t.tag)).toList();
               onUpdate();
 
               for (final tag in suggestedTags.where((t) => !t.type.isNone)) {
