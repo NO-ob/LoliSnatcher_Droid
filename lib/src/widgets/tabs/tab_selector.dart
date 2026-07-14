@@ -443,6 +443,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
   bool? isMultiBooruMode;
   bool selectMode = false;
   bool showScrollbarContext = false;
+  bool isScrollbarContextHeld = false;
   int scrollbarContextIndex = 0;
   Timer? scrollbarContextTimer;
 
@@ -508,14 +509,11 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
     final int newIndex = (scrollController.offset / tabHeight).floor().clamp(0, filteredTabs.length - 1);
 
-    scrollbarContextTimer?.cancel();
-    scrollbarContextTimer = Timer(const Duration(milliseconds: 900), () {
-      if (mounted) {
-        setState(() {
-          showScrollbarContext = false;
-        });
-      }
-    });
+    if (isScrollbarContextHeld) {
+      scrollbarContextTimer?.cancel();
+    } else {
+      startScrollbarContextTimer();
+    }
 
     if (!showScrollbarContext || scrollbarContextIndex != newIndex) {
       setState(() {
@@ -523,6 +521,57 @@ class _TabManagerPageState extends State<TabManagerPage> {
         scrollbarContextIndex = newIndex;
       });
     }
+  }
+
+  void startScrollbarContextTimer() {
+    scrollbarContextTimer?.cancel();
+    scrollbarContextTimer = Timer(const Duration(milliseconds: 900), () {
+      if (mounted && !isScrollbarContextHeld) {
+        setState(() {
+          showScrollbarContext = false;
+        });
+      }
+    });
+  }
+
+  void holdScrollbarContext() {
+    scrollbarContextTimer?.cancel();
+    if (!isScrollbarContextHeld || !showScrollbarContext) {
+      setState(() {
+        isScrollbarContextHeld = true;
+        showScrollbarContext = true;
+      });
+    }
+  }
+
+  void releaseScrollbarContext() {
+    if (!isScrollbarContextHeld) {
+      return;
+    }
+
+    setState(() {
+      isScrollbarContextHeld = false;
+    });
+    startScrollbarContextTimer();
+  }
+
+  void dragScrollbarContext(double delta, double height) {
+    if (!scrollController.hasClients || height <= 0) {
+      return;
+    }
+
+    final position = scrollController.position;
+    if (position.maxScrollExtent <= 0) {
+      return;
+    }
+
+    final double offsetDelta = delta / height * position.maxScrollExtent;
+    final double newOffset = (scrollController.offset + offsetDelta).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+
+    scrollController.jumpTo(newOffset);
   }
 
   String _firstTabLetter(SearchTab tab) {
@@ -1493,7 +1542,8 @@ class _TabManagerPageState extends State<TabManagerPage> {
                     scrollController.hasClients && scrollController.position.maxScrollExtent > 0
                     ? (scrollController.offset / scrollController.position.maxScrollExtent).clamp(0.0, 1.0)
                     : 0;
-                final double scrollLabelTop = (constraints.maxHeight - 40) * scrollProgress;
+                final double scrollLabelDragHeight = max(0, constraints.maxHeight - 40);
+                final double scrollLabelTop = scrollLabelDragHeight * scrollProgress;
 
                 return Stack(
                   children: [
@@ -1545,22 +1595,38 @@ class _TabManagerPageState extends State<TabManagerPage> {
                         left: isScrollbarLeft ? 16 : null,
                         right: isScrollbarLeft ? null : 16,
                         child: IgnorePointer(
-                          child: AnimatedOpacity(
-                            duration: const Duration(milliseconds: 150),
-                            opacity: showScrollbarContext ? 1 : 0,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.4),
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                child: Text(
-                                  scrollbarContextTitle(),
-                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 16),
+                          ignoring: !showScrollbarContext && !isScrollbarContextHeld,
+                          child: Listener(
+                            onPointerDown: (_) => holdScrollbarContext(),
+                            onPointerUp: (_) => releaseScrollbarContext(),
+                            onPointerCancel: (_) => releaseScrollbarContext(),
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onVerticalDragStart: (_) => holdScrollbarContext(),
+                              onVerticalDragUpdate: (details) {
+                                holdScrollbarContext();
+                                dragScrollbarContext(details.delta.dy, scrollLabelDragHeight);
+                              },
+                              onVerticalDragEnd: (_) => releaseScrollbarContext(),
+                              onVerticalDragCancel: releaseScrollbarContext,
+                              child: AnimatedOpacity(
+                                duration: const Duration(milliseconds: 150),
+                                opacity: showScrollbarContext ? 1 : 0,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.66),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.4),
+                                    ),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                    child: Text(
+                                      scrollbarContextTitle(),
+                                      style: Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 16),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
