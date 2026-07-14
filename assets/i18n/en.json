@@ -408,12 +408,12 @@
             "noBooruSelected": "No Booru selected!",
             "cantDeleteThisBooru": "Can't delete this Booru!",
             "removeRelatedTabsFirst": "Remove related tabs first",
-            "sourceLimitNotice": "Some source setup behavior may depend on the compatibility settings below. Source content is provided by external sites and is not controlled by the app.",
+            "sourceLimitNotice": "Some source setup behavior may depend on the compatibility settings below. Content is hosted and provided by external sites and is not controlled by the app.",
             "advanced": "Advanced",
             "expandedSourceCompatibility": "Source setup compatibility",
-            "expandedSourceCompatibilitySubtitle": "Adjust how source setup compatibility is handled",
-            "expandedSourceCompatibilityConfirm": "Changing this may affect how source setup works. Source content is provided by external sites and is not controlled by the app. Continue?",
-            "sourceUnavailableCurrentSettings": "This source is not available or doesn't provide API access."
+            "expandedSourceCompatibilitySubtitle": "Adjust how source compatibility settings are handled",
+            "expandedSourceCompatibilityConfirm": "Changing this may affect how sources work. Content is hosted and provided by external sites and is not controlled by the app. Continue?",
+            "sourceUnavailableCurrentSettings": "This site is not available."
         },
         "booruEditor": {
             "title": "Booru Editor",

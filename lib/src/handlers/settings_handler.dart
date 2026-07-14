@@ -2405,7 +2405,13 @@ class SettingsHandler {
         leadingIconColor: Colors.red,
       );
     }
-    print('isFromStore: ${EnvironmentConfig.isFromStore}');
+
+    Logger.Inst().log(
+      'isFromStore(losn): ${EnvironmentConfig.isFromStore}',
+      'SettingsHandler',
+      'initialize',
+      null,
+    );
 
     // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
     // print(toJSON());

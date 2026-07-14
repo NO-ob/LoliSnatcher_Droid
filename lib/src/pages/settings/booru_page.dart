@@ -137,14 +137,16 @@ class _BooruPageState extends State<BooruPage> {
 
     return Column(
       children: [
-        const SettingsButton(name: '', enabled: false, drawBottomBorder: false),
-        const SettingsButton(name: '', enabled: false, drawBottomBorder: false),
-        SettingsButton(name: context.loc.settings.booru.advanced, enabled: false, drawBottomBorder: false),
+        SettingsButton(
+          name: context.loc.settings.booru.advanced,
+          icon: const Icon(Icons.tune),
+          enabled: false,
+          drawTopBorder: true,
+        ),
         SettingsToggle(
           value: settingsHandler.expandedSourceCompatibilityEnabled,
           title: context.loc.settings.booru.expandedSourceCompatibility,
           subtitle: Text(context.loc.settings.booru.expandedSourceCompatibilitySubtitle),
-          drawTopBorder: true,
           onChanged: (value) async {
             if (value) {
               final bool confirm =
@@ -515,6 +517,59 @@ class _BooruPageState extends State<BooruPage> {
 
   @override
   Widget build(BuildContext context) {
+    final settingsChildren = <Widget>[
+      sourceLimitNotice(),
+      TagSearchBox(
+        controller: defaultTagsController,
+        title: context.loc.settings.booru.defaultTags,
+        hintText: context.loc.snatcher.enterTags,
+        booru: selectedBooru,
+        allowMultipleTags: true,
+        showBooruSelector: true,
+        clearable: true,
+        // resetText: () => 'rating:safe', // TODO
+      ),
+      SettingsTextInput(
+        controller: limitController,
+        title: context.loc.settings.booru.itemsPerPage,
+        hintText: context.loc.settings.booru.itemsPerPagePlaceholder,
+        subtitle: Text(context.loc.settings.booru.itemsPerPageTip),
+        inputType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+        resetText: () => settingsHandler.map['limit']!['default']!.toString(),
+        numberButtons: true,
+        numberStep: 10,
+        numberMin: 10,
+        numberMax: 100,
+        validator: (String? value) {
+          final int? parse = int.tryParse(value ?? '');
+          if (value == null || value.isEmpty) {
+            return context.loc.validationErrors.required;
+          } else if (parse == null) {
+            return context.loc.validationErrors.invalid;
+          } else if (parse < 10) {
+            return context.loc.validationErrors.tooSmall(min: 10);
+          } else if (parse > 100) {
+            return context.loc.validationErrors.tooBig(max: 100);
+          } else {
+            return null;
+          }
+        },
+      ),
+      const SettingsButton(name: '', enabled: false),
+      addFromClipboardButton(),
+      addButton(),
+      if (settingsHandler.booruList.isNotEmpty) ...[
+        booruSelector(),
+        if (selectedBooru != null) ...[
+          editButton(),
+          shareButton(),
+          webviewButton(),
+          deleteButton(),
+        ],
+      ],
+    ];
+
     return PopScope(
       onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
@@ -522,62 +577,36 @@ class _BooruPageState extends State<BooruPage> {
         appBar: SettingsAppBar(
           title: context.loc.settings.booru.title,
         ),
-        body: Center(
-          child: ListView(
-            children: [
-              sourceLimitNotice(),
-              TagSearchBox(
-                controller: defaultTagsController,
-                title: context.loc.settings.booru.defaultTags,
-                hintText: context.loc.snatcher.enterTags,
-                booru: selectedBooru,
-                allowMultipleTags: true,
-                showBooruSelector: true,
-                clearable: true,
-                // resetText: () => 'rating:safe', // TODO
-              ),
-              SettingsTextInput(
-                controller: limitController,
-                title: context.loc.settings.booru.itemsPerPage,
-                hintText: context.loc.settings.booru.itemsPerPagePlaceholder,
-                subtitle: Text(context.loc.settings.booru.itemsPerPageTip),
-                inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
-                resetText: () => settingsHandler.map['limit']!['default']!.toString(),
-                numberButtons: true,
-                numberStep: 10,
-                numberMin: 10,
-                numberMax: 100,
-                validator: (String? value) {
-                  final int? parse = int.tryParse(value ?? '');
-                  if (value == null || value.isEmpty) {
-                    return context.loc.validationErrors.required;
-                  } else if (parse == null) {
-                    return context.loc.validationErrors.invalid;
-                  } else if (parse < 10) {
-                    return context.loc.validationErrors.tooSmall(min: 10);
-                  } else if (parse > 100) {
-                    return context.loc.validationErrors.tooBig(max: 100);
-                  } else {
-                    return null;
-                  }
-                },
-              ),
-              const SettingsButton(name: '', enabled: false),
-              addFromClipboardButton(),
-              addButton(),
-              if (settingsHandler.booruList.isNotEmpty) ...[
-                booruSelector(),
-                if (selectedBooru != null) ...[
-                  editButton(),
-                  shareButton(),
-                  webviewButton(),
-                  deleteButton(),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return Center(
+              child: ListView(
+                children: [
+                  if (ContentPolicy.isFromStore) ...[
+                    ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: constraints.maxHeight + 1),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: settingsChildren,
+                      ),
+                    ),
+                    ...List.generate(
+                      constraints.maxHeight < 800 ? 2 : 1,
+                      (_) => const SettingsButton(
+                        name: '',
+                        enabled: false,
+                        drawBottomBorder: false,
+                      ),
+                    ),
+                    //
+                    expandedSourceCompatibilityToggle(),
+                  ] else ...[
+                    ...settingsChildren,
+                  ],
                 ],
-              ],
-              expandedSourceCompatibilityToggle(),
-            ],
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

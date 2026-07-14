@@ -222,7 +222,7 @@ class _VersionButtonState extends State<VersionButton> {
         '${context.loc.settings.version}: ${Constants.updateInfo.versionName} (${Constants.updateInfo.buildNumber})';
 
     const String buildTypeText = EnvironmentConfig.isFromStore
-        ? '/ Play'
+        ? '/ Play-losn'
         : (EnvironmentConfig.isTesting ? '/ Test' : (kDebugMode ? '/ Debug' : ''));
 
     return SettingsButton(

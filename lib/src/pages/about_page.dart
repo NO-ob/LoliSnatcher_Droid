@@ -1,6 +1,7 @@
 import 'dart:core';
 
 import 'package:flutter/material.dart';
+import 'package:lolisnatcher/src/utils/content_policy.dart';
 
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -55,7 +56,7 @@ class AboutPage extends StatelessWidget {
               },
             ),
             //
-            if (!EnvironmentConfig.isFromStore) ...[
+            if (!ContentPolicy.isFromStore) ...[
               const SizedBox(height: kMinInteractiveDimension),
               Container(
                 margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
