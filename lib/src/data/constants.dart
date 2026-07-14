@@ -48,42 +48,42 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.5.2',
-    buildNumber: 5216,
+    buildNumber: 5217,
     title: '2.5.2 - New onboarding and small fixes',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.losn',
     githubURL: 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
     changelog: '''
-If you encounter any issues or have suggestions, please post them in GitHub issues or in our Discord server.
+If you encounter any issues or have suggestions, please post them in GitHub Issues or on our Discord server.
 
 
-[WE NEED YOUR HELP]: We are looking for volunteers to help us translate the app into other languages. For details, visit our GitHub page or ask in Discord server.
+[WE NEED YOUR HELP]: We are looking for volunteers to help translate the app into other languages. For details, visit our GitHub page or ask on our Discord server.
 
 
-A minor update to add new onboarding screen and fix some issues.
+A minor update that adds a new onboarding screen, adds fullscreen video zooming and fixes some issues.
 
 -------------------
 
 [Known issues]:
-- on Gelbooru images may blink/flicker and/or fail with various error codes (503, 429, 404...), which may be fixed after retrying to load the image. This is probably caused by them enabling aggressive rate limiting rules, as a temporary workaround until they lift the resctrictions - set [Interface - Preview quality] to [Thumbnail] and [Boorus and Search - Items fetched per page] to 20 to reduce flicker and chance of being rate limited
-- German translations are incorrect, will be fixed in the future release after new contributor will be able to update them
+- On Gelbooru, images may blink/flicker and/or fail with various error codes (503, 429, 404...), which may be fixed by trying to load the image again. This is probably caused by their aggressive rate limiting rules. As a temporary workaround until they lift the restrictions, set [Interface - Preview quality] to [Thumbnail] and [Boorus and Search - Items fetched per page] to 20 to reduce flicker and the chance of being rate limited
+- German translations are incorrect and will be fixed in a future release after a new contributor is able to update them
 
 -------------------
 
-Release - 2.5.2+5216 (xx.07.2026):
+Release - 2.5.2+5217 (??.07.2026):
 
 - New onboarding screen
 - Fixed thumbnail loading progress not updating correctly
-- Loading progress text now updates smooother
-- Enabled zoom in fullscreen video
-- Fullscreen video can now be closed by dragging down
-- Added scrollbar label in tab manager, text changes depending on sorting type
+- Loading progress text now updates in smoother intervals
+- Enabled zooming in fullscreen video
+- Fullscreen video can now be closed by dragging down (similar to YouTube)
+- Added a scrollbar label in the tab manager; the text changes depending on the sorting type
 - Fixed main app bar not snapping to full height once it entered the view
-- Fixed booru test not running again if user changed input fields after test was completed
-- Updated sankaku post url format
-- Possible fix for border appearing over the app when hardware keyboard is used (#392)
-- Possible fix for app restarting afte bluetooth mouse is connected
+- Fixed Booru test not running again if the user changed input fields after the test was completed
+- Updated Sankaku post URL format
+- Possible fix for a border appearing over the app when a hardware keyboard is used
+- Possible fix for the app restarting after a Bluetooth mouse is connected
 - Fixed some layout issues
 
 
