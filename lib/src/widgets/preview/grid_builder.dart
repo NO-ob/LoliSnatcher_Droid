@@ -52,10 +52,11 @@ class GridBuilder extends StatelessWidget {
           crossAxisSpacing: 4,
         ),
         itemBuilder: (BuildContext context, int index) {
-          return GridTile(
-            child: Obx(() {
-              final BooruItem item = currentFetched[index];
+          final BooruItem item = currentFetched[index];
 
+          return GridTile(
+            key: ValueKey(item.key),
+            child: Obx(() {
               final bool hasSelected = tab.selected.isNotEmpty && tab.hasSelectedItems;
               final selectedIndex = tab.selectedIndexOf(item);
               final bool isSelected = selectedIndex != null;

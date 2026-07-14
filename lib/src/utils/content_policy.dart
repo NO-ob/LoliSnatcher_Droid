@@ -56,25 +56,18 @@ class ContentPolicy {
     'xivbooru.com',
   };
 
-  static List<String> get _blockedItemTagTerms {
-    final terms = <String>{
-      ...SettingsHandler.aiTags,
-      ..._blockedAdultItemTags,
-      ..._blockedViolenceItemTags,
-    }.toList()..sort();
+  static final List<String> _blockedItemTagTerms = (<String>{
+    ...SettingsHandler.aiTags,
+    ..._blockedAdultItemTags,
+    ..._blockedViolenceItemTags,
+  }.toList()..sort());
 
-    return terms;
-  }
-
-  static RegExp get _blockedItemTagPattern {
-    final alternatives = _blockedItemTagTerms.map(RegExp.escape).join('|');
-    return RegExp(
-      r'(^|_|\(|\d)'
-      '(?:$alternatives)'
-      r'(\d|\)|_|$)',
-      caseSensitive: false,
-    );
-  }
+  static final RegExp _blockedItemTagPattern = RegExp(
+    r'(^|_|\(|\d)'
+    '(?:${_blockedItemTagTerms.map(RegExp.escape).join('|')})'
+    r'(\d|\)|_|$)',
+    caseSensitive: false,
+  );
 
   static const List<String> _blockedAdultItemTags = [
     'anal',
@@ -346,7 +339,7 @@ class ContentPolicy {
     }
     for (final tag in item.tagsList) {
       final String tagText = tag.fullString.toLowerCase();
-      if (_isBlockedSearchTag(tagText) || _blockedItemTagPattern.hasMatch(tagText)) {
+      if (_isBlockedSearchTag(tagText)) {
         return false;
       }
     }
@@ -360,7 +353,7 @@ class ContentPolicy {
     }
 
     final normalized = tag.toLowerCase();
-    return !_isBlockedSearchTag(normalized) && !_blockedItemTagPattern.hasMatch(normalized);
+    return !_isBlockedSearchTag(normalized);
   }
 
   static bool _supportsSafeRatingTag(Booru booru) {
