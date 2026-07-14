@@ -421,7 +421,7 @@ class SearchHandler {
 
     final onlyTagMatches = tabs.where((tab) => tab.tags.toLowerCase().trim() == tag);
     if (onlyTagMatches.isNotEmpty) {
-      if (onlyTagMatches.any((tab) => tab.selectedBooru.value == targetBooru)) {
+      if (onlyTagMatches.any((tab) => tab.selectedBooru.value.matchesIdentity(targetBooru))) {
         return HasTabWithTagResult.onlyTag;
       }
       return HasTabWithTagResult.onlyTagDifferentBooru;
@@ -440,7 +440,7 @@ class SearchHandler {
     for (int i = 0; i < tabs.length; i++) {
       final tab = tabs[i];
       final parts = tab.tags.toLowerCase().trim().split(' ');
-      if (parts.length == 1 && parts[0] == tag && tab.selectedBooru.value == currentBooru) {
+      if (parts.length == 1 && parts[0] == tag && tab.selectedBooru.value.matchesIdentity(currentBooru)) {
         result.add((i, tab));
       }
     }
@@ -453,7 +453,7 @@ class SearchHandler {
     for (int i = 0; i < tabs.length; i++) {
       final tab = tabs[i];
       final parts = tab.tags.toLowerCase().trim().split(' ');
-      if (parts.length == 1 && parts[0] == tag && tab.selectedBooru.value != currentBooru) {
+      if (parts.length == 1 && parts[0] == tag && !tab.selectedBooru.value.matchesIdentity(currentBooru)) {
         result.add((i, tab));
       }
     }

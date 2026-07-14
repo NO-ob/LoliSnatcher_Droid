@@ -349,7 +349,7 @@ class _TagViewState extends State<TagView> {
 
     for (final tab in searchHandler.tabs) {
       final parts = tab.tags.toLowerCase().trim().split(' ');
-      final isCurrentBooru = tab.selectedBooru.value == currentBooru;
+      final isCurrentBooru = tab.selectedBooru.value.matchesIdentity(currentBooru);
 
       if (parts.length == 1 && parts[0].isNotEmpty) {
         if (isCurrentBooru) {

@@ -79,6 +79,33 @@ class Booru {
     return 'Name: $name, Type: $type, BaseURL: $baseURL, FaviconURL: $faviconURL, APIKey: $apiKey, UserID: $userID';
   }
 
+  bool matchesIdentity(Booru? other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other == null) {
+      return false;
+    }
+
+    final thisName = name?.trim();
+    final otherName = other.name?.trim();
+    if (thisName?.isNotEmpty == true && otherName?.isNotEmpty == true) {
+      return thisName == otherName;
+    }
+
+    final thisBaseUrl = _normalizedBaseURL(baseURL);
+    final otherBaseUrl = _normalizedBaseURL(other.baseURL);
+    return type != null && type == other.type && thisBaseUrl != null && thisBaseUrl == otherBaseUrl;
+  }
+
+  static String? _normalizedBaseURL(String? value) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+    return trimmed.endsWith('/') ? trimmed.substring(0, trimmed.length - 1) : trimmed;
+  }
+
   Booru copyWith({
     String? name,
     BooruType? type,

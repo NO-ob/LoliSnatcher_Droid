@@ -6,7 +6,7 @@ version: 2.5.2+5216 # remember to update the values in constants.dart->updateInf
 
 environment:
   sdk: ">=3.12.2 <4.0.0"
-  flutter: 3.44.4
+  flutter: 3.44.6
 
 dependencies:
   flutter:
@@ -96,14 +96,14 @@ dependencies:
   slang: ^4.18.0
   sqflite_common_ffi: ^2.4.2
   sqflite: ^2.4.3
-  sqlite3: ^3.3.4
-  talker_dio_logger: ^5.1.17
-  talker_flutter: ^5.1.17
-  talker_logger: ^5.1.17
-  talker: ^5.1.17
+  sqlite3: ^3.4.0
+  talker_dio_logger: ^5.1.19
+  talker_flutter: ^5.1.19
+  talker_logger: ^5.1.19
+  talker: ^5.1.19
   url_launcher: ^6.3.2
   uuid: ^4.5.3
-  video_player: ^2.12.0
+  video_player: ^2.13.0
   waterfall_flow: ^3.1.1
   xml: ^7.0.1
 
@@ -121,7 +121,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^2.15.1
+  build_runner: ^2.15.2
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
 
