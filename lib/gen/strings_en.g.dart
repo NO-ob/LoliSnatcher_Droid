@@ -2018,6 +2018,9 @@ class Translations$tagType$en {
   /// en: 'Species'
   String get species => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? 'Species';
 
+  /// en: 'Lore'
+  String get lore => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? 'Lore';
+
   /// en: 'None/General'
   String get none => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'None/General';
 }
@@ -7028,6 +7031,7 @@ extension on Translations {
           'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Copyright',
           'tagType.meta' => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'Meta',
           'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? 'Species',
+          'tagType.lore' => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? 'Lore',
           'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'None/General',
           _ => null,
         };

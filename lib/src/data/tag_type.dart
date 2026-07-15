@@ -8,30 +8,22 @@ enum TagType {
   copyright,
   meta,
   species,
-  none
-  ;
+  lore,
+  none;
 
   bool get isArtist => this == TagType.artist;
   bool get isCharacter => this == TagType.character;
   bool get isCopyright => this == TagType.copyright;
   bool get isMeta => this == TagType.meta;
   bool get isSpecies => this == TagType.species;
+  bool get isLore => this == TagType.lore;
   bool get isNone => this == TagType.none;
 
   static TagType fromString(String string) {
-    switch (string) {
-      case 'artist':
-        return TagType.artist;
-      case 'character':
-        return TagType.character;
-      case 'copyright':
-        return TagType.copyright;
-      case 'meta':
-        return TagType.meta;
-      case 'species':
-        return TagType.species;
-      default:
-        return TagType.none;
+    try {
+      return TagType.values.byName(string);
+    } catch (e) {
+      return TagType.none;
     }
   }
 
@@ -52,6 +44,8 @@ enum TagType {
         return Colors.orange;
       case species:
         return Colors.brown;
+      case lore:
+        return Colors.lightGreen;
       default:
         return null;
     }
@@ -70,6 +64,8 @@ enum TagType {
         return ctx.loc.tagType.meta;
       case species:
         return ctx.loc.tagType.species;
+      case lore:
+        return ctx.loc.tagType.lore;
       case none:
         return ctx.loc.tagType.none;
     }

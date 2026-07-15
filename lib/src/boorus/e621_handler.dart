@@ -29,94 +29,84 @@ class e621Handler extends BooruHandler {
 
   @override
   List parseListFromResponse(dynamic response) {
-    final Map<String, dynamic> parsedResponse = response.data;
-    return (parsedResponse['posts'] ?? []) as List;
+    return response.data ?? [];
   }
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final dynamic current = responseItem as Map<String, dynamic>;
 
-    if (current['file']['md5'] != null) {
-      String fileURL = '';
-      String sampleURL = '';
-      String thumbURL = '';
-      if (current['file']['url'] == null) {
-        final String md5FirstSplit = current['file']['md5'].toString().substring(0, 2);
-        final String md5SecondSplit = current['file']['md5'].toString().substring(2, 4);
-        fileURL =
-            "https://static1.e621.net/data/$md5FirstSplit/$md5SecondSplit/${current['file']['md5']}.${current['file']['ext']}";
-        sampleURL = fileURL.replaceFirst('data', 'data/sample').replaceFirst(current['file']['ext'], 'jpg');
-        thumbURL = sampleURL.replaceFirst('data/sample', 'data/preview');
-        if (current['file']['size'] <= 2694254) {
-          sampleURL = fileURL;
-        }
-      } else {
-        fileURL = current['file']['url'];
-        sampleURL = current['sample']?['url'] ?? current['preview']['url'];
-        thumbURL = current['preview']['url'];
-      }
+    final bool hasSample = current['has']['sample'];
 
-      final List<String> characterTags = (current['tags']?['character'] ?? []).cast<String>();
-      final List<String> copyrightTags = (current['tags']?['copyright'] ?? []).cast<String>();
-      final List<String> franchiseTags = (current['tags']?['franchise'] ?? []).cast<String>();
-      final List<String> artistTags = (current['tags']?['artist'] ?? []).cast<String>();
-      final List<String> directorTags = (current['tags']?['director'] ?? []).cast<String>();
-      final List<String> metaTags = (current['tags']?['meta'] ?? []).cast<String>();
-      final List<String> generalTags = (current['tags']?['general'] ?? []).cast<String>();
-      final List<String> speciesTags = (current['tags']?['species'] ?? []).cast<String>();
+    final String fileURL = current['files']['original']['url'];
 
-      addTagsWithType([...characterTags], TagType.character);
-      addTagsWithType([...copyrightTags], TagType.copyright);
-      addTagsWithType([...franchiseTags], TagType.copyright);
-      addTagsWithType([...artistTags], TagType.artist);
-      addTagsWithType([...directorTags], TagType.artist);
-      addTagsWithType([...metaTags], TagType.meta);
-      addTagsWithType([...generalTags], TagType.none);
-      addTagsWithType([...speciesTags], TagType.species);
+    final String previewURL = current['files']['preview']['jpg'];
+    final String sampleURL = hasSample ? current['files']['sample']['jpg'] : previewURL;
 
-      final String? dateStr = current['created_at']?.toString().substring(
-        0,
-        current['created_at']!.toString().length - 6,
-      );
+    final List<String> characterTags = (current['tags']?['character'] ?? []).cast<String>();
+    final List<String> copyrightTags = (current['tags']?['copyright'] ?? []).cast<String>();
+    final List<String> franchiseTags = (current['tags']?['franchise'] ?? []).cast<String>();
+    final List<String> artistTags = (current['tags']?['artist'] ?? []).cast<String>();
+    final List<String> directorTags = (current['tags']?['director'] ?? []).cast<String>();
+    final List<String> metaTags = (current['tags']?['meta'] ?? []).cast<String>();
+    final List<String> generalTags = (current['tags']?['general'] ?? []).cast<String>();
+    final List<String> speciesTags = (current['tags']?['species'] ?? []).cast<String>();
+    final List<String> loreTags = (current['tags']?['lore'] ?? []).cast<String>();
 
-      final BooruItem item = BooruItem(
-        fileURL: fileURL,
-        sampleURL: sampleURL,
-        thumbnailURL: thumbURL,
-        tagsList: [
-          ...characterTags.map(Tag.new),
-          ...copyrightTags.map(Tag.new),
-          ...franchiseTags.map(Tag.new),
-          ...artistTags.map(Tag.new),
-          ...directorTags.map(Tag.new),
-          ...metaTags.map(Tag.new),
-          ...generalTags.map(Tag.new),
-          ...speciesTags.map(Tag.new),
-        ],
-        postURL: makePostURL(current['id'].toString()),
-        fileExt: current['file']['ext'],
-        fileSize: current['file']['size'],
-        fileWidth: current['file']['width']?.toDouble(),
-        fileHeight: current['file']['height']?.toDouble(),
-        sampleWidth: current['sample']?['width']?.toDouble() ?? current['preview']['width']?.toDouble(),
-        sampleHeight: current['sample']?['height']?.toDouble() ?? current['preview']['height']?.toDouble(),
-        previewWidth: current['preview']['width']?.toDouble(),
-        previewHeight: current['preview']['height']?.toDouble(),
-        hasNotes: current['has_notes'],
-        serverId: current['id']?.toString(),
-        rating: current['rating'],
-        score: current['score']['total']?.toString(),
-        sources: List<String>.from(current['sources'] ?? []),
-        md5String: current['file']['md5'],
-        postDate: dateStr, // 2021-06-13t02:09:45.138-04:00
-        postDateFormat: 'iso',
-      );
+    addTagsWithType([...characterTags], TagType.character);
+    addTagsWithType([...copyrightTags], TagType.copyright);
+    addTagsWithType([...franchiseTags], TagType.copyright);
+    addTagsWithType([...artistTags], TagType.artist);
+    addTagsWithType([...directorTags], TagType.artist);
+    addTagsWithType([...metaTags], TagType.meta);
+    addTagsWithType([...generalTags], TagType.none);
+    addTagsWithType([...speciesTags], TagType.species);
+    addTagsWithType([...loreTags], TagType.lore);
 
-      return item;
-    } else {
-      return null;
-    }
+    final String? dateStr = current['created_at']?.toString().substring(
+      0,
+      current['created_at']!.toString().length - 6,
+    );
+
+    final BooruItem item = BooruItem(
+      fileURL: fileURL,
+      sampleURL: sampleURL,
+      thumbnailURL: previewURL,
+      tagsList: [
+        ...characterTags.map(Tag.new),
+        ...copyrightTags.map(Tag.new),
+        ...franchiseTags.map(Tag.new),
+        ...artistTags.map(Tag.new),
+        ...directorTags.map(Tag.new),
+        ...metaTags.map(Tag.new),
+        ...generalTags.map(Tag.new),
+        ...speciesTags.map(Tag.new),
+        ...loreTags.map(Tag.new),
+      ],
+      postURL: makePostURL(current['id'].toString()),
+      fileExt: current['files']['meta']['ext'],
+      fileSize: current['files']['meta']['size'],
+      fileWidth: current['files']['original']['width']?.toDouble(),
+      fileHeight: current['files']['original']['height']?.toDouble(),
+      sampleWidth: hasSample
+          ? current['files']['sample']['width'].toDouble()
+          : current['files']['preview']['width']?.toDouble(),
+      sampleHeight: hasSample
+          ? current['files']['sample']['height'].toDouble()
+          : current['files']['preview']['height']?.toDouble(),
+      previewWidth: current['files']['preview']['width']?.toDouble(),
+      previewHeight: current['files']['preview']['height']?.toDouble(),
+      hasNotes: current['has']['notes'],
+      serverId: current['id']?.toString(),
+      rating: current['rating'],
+      score: current['stats']['score']['total']?.toString(),
+      sources: List<String>.from(current['sources'] ?? []),
+      md5String: current['files']['meta']['md5'],
+      postDate: dateStr, // 2021-06-13t02:09:45.138-04:00
+      postDateFormat: 'iso',
+    );
+
+    return item;
   }
 
   @override
@@ -126,7 +116,7 @@ class e621Handler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    return '${booru.baseURL}/posts.json?tags=$tags&limit=$limit&page=$pageNum';
+    return '${booru.baseURL}/posts.json?v2=true&mode=extended&tags=$tags&limit=$limit&page=$pageNum';
   }
 
   @override
