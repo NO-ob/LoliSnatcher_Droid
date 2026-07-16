@@ -128,6 +128,7 @@ class ContentPolicy {
     'nsfw',
     'nude',
     'orgasm',
+    'orgy',
     'paizuri',
     'panties',
     'pantyshot',
@@ -199,6 +200,7 @@ class ContentPolicy {
     'torture',
     'violence',
     'violent',
+    'vore',
     'wound',
   ];
 

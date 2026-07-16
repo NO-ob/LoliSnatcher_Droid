@@ -58,7 +58,7 @@ dependencies:
     git:
       url: https://github.com/NANI-SORE/getx.git
       ref: 1c5917ce8bd4aa024e83ff2c52d4b19ba6c1a29e # master - forked to fix import error
-  google_fonts: ^8.1.0
+  google_fonts: ^8.2.0
   html: ^0.15.6
   http_proxy: # ^1.2.2
     git:
@@ -91,7 +91,7 @@ dependencies:
       ref: b84b371347ab4f13374c2709becaf247aec354e4 # master - forked to change IME composing style
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
-  share_plus: ^13.2.0 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
+  share_plus: ^13.2.1 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
   slang_flutter: ^4.18.0
   slang: ^4.18.0
   sqflite_common_ffi: ^2.4.2
@@ -102,7 +102,7 @@ dependencies:
   talker_logger: ^5.1.19
   talker: ^5.1.19
   url_launcher: ^6.3.2
-  uuid: ^4.5.3
+  uuid: ^4.6.0
   video_player: ^2.13.0
   waterfall_flow: ^3.1.1
   xml: ^7.0.1
@@ -113,7 +113,7 @@ dependency_overrides:
   android_intent_plus: ^6.0.0
   material_color_utilities: ^0.13.0 # flutter_test conflict
   meta: ^1.19.0 # flutter_test and image conflict
-  share_plus: ^13.2.0 # alice conflict
+  share_plus: ^13.2.1 # alice conflict
   xml: ^7.0.1 # image conflict
 
 
