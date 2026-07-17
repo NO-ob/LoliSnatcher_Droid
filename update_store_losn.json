@@ -1,11 +1,11 @@
 {
-	"version_name": "2.5.1",
-	"build_number": 5212,
-	"title": "2.5.1",
+	"version_name": "2.5.2",
+	"build_number": 5218,
+	"title": "2.5.2",
 	"changelog": "Initial release",
 	"is_in_store": true,
 	"is_important": false,
 	"store_package": "com.noaisu.play.losn",
-	"github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/tag/2.5.1",
+	"github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/tag/2.5.2",
 	"discord_url": "https://discord.gg/r9E4HDx9dz"
 }

@@ -48,14 +48,15 @@ class Constants {
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.5.2',
-    buildNumber: 5217,
+    buildNumber: 5218,
     title: '2.5.2 - New onboarding and small fixes',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.losn',
     githubURL: 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
+    // TODO add separate changelog for store version, where we won't mention any of the boorus
     changelog: '''
-If you encounter any issues or have suggestions, please post them in GitHub Issues or on our Discord server.
+If you encounter any issues or have suggestions, please post them on GitHub Issues or on our Discord server.
 
 
 [WE NEED YOUR HELP]: We are looking for volunteers to help translate the app into other languages. For details, visit our GitHub page or ask on our Discord server.
@@ -71,17 +72,16 @@ A minor update that adds a new onboarding screen, adds fullscreen video zooming 
 
 -------------------
 
-Release - 2.5.2+5217 (??.07.2026):
+Release - 2.5.2+5218 (18.07.2026):
 
 - New onboarding screen
 - Fixed thumbnail loading progress not updating correctly
-- Loading progress text now updates in smoother intervals
+- Loading progress text now updates at smoother intervals
 - Enabled zooming in fullscreen video
 - Fullscreen video can now be closed by dragging down (similar to YouTube)
 - Added a scrollbar label in the tab manager; the text changes depending on the sorting type
-- Fixed main app bar not snapping to full height once it entered the view
+- Fixed the main app bar not snapping to full height once it entered the view
 - Fixed Booru test not running again if the user changed input fields after the test was completed
-- Updated Sankaku post URL format
 - Possible fix for a border appearing over the app when a hardware keyboard is used
 - Possible fix for the app restarting after a Bluetooth mouse is connected
 - Fixed some layout issues

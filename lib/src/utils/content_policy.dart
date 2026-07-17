@@ -164,7 +164,6 @@ class ContentPolicy {
     'vaginal',
     'vibrator',
     'violation',
-    'vore',
   ];
 
   static const List<String> _blockedViolenceItemTags = [
