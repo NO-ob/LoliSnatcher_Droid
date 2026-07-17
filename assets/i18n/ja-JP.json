@@ -19,7 +19,6 @@
     "enable": "有効化",
     "disable": "無効化",
     "add": "追加",
-    "exclude": "除外",
     "edit": "編集",
     "remove": "削除",
     "save": "保存",
@@ -71,14 +70,6 @@
     "username": "ユーザー名",
     "favourites": "お気に入り",
     "downloads": "ダウンロード",
-    "secondsShort": "秒",
-    "minutesShort": "分",
-    "hoursShort": "時",
-    "daysShort": "日",
-    "leaveThisPageQuestion": "ページを離れますか？",
-    "pageWillCloseAutomatically": "ページは自動で閉じられます",
-    "stay": "ページにとどまる",
-    "leaveNow": "今すぐ離れる",
     "validationErrors": {
         "required": "値を入力",
         "invalid": "有効な値を入力してください",
@@ -125,9 +116,6 @@
         "appFixedRatingAutomatically": "レーティングは自動で修正されました。今後は正しいレーティングを使用して検索してみてください",
         "tabsRestored": "タブを復元",
         "restoredTabsCount(param=count)": {
-            "one": "以前のセッションから${count}個のタブを復元しました",
-            "few": "以前のセッションから${count}個のタブを復元しました",
-            "many": "以前のセッションから${count}個のタブを復元しました",
             "other": "以前のセッションから${count}個のタブを復元しました"
         },
         "someRestoredTabsHadIssues": "復元されたタブには、不明なBooruや壊れた文字が含まれているものがありました。",
@@ -135,16 +123,11 @@
         "listOfBrokenTabs": "壊れたタブのリスト:",
         "tabsMerged": "タブが結合されました",
         "addedTabsCount(param=count)": {
-            "one": "${count}個の新しいタブを追加",
-            "few": "${count}個の新しいタブを追加",
-            "many": "${count}個の新しいタブを追加",
-            "other": "${count}個の新しいタブを追加"
+            "other": "${count}個の新しいタブを追加",
+            "one": "${count}個の新しいタブを追加"
         },
         "tabsReplaced": "タブを置き換えました",
         "receivedTabsCount(param=count)": {
-            "one": "${count}個のタブを受け取りました",
-            "few": "${count}個のタブを受け取りました",
-            "many": "${count}個のタブを受け取りました",
             "other": "${count}個のタブを受け取りました"
         }
     },
@@ -163,36 +146,21 @@
         "startingNextQueueItem": "次のキューを開始中…",
         "itemsSnatched": "ダウンロード完了",
         "snatchedCount(param=count)": {
-            "one": "ダウンロード済み: ${count}個",
-            "few": "ダウンロード済み: ${count}個",
-            "many": "ダウンロード済み: ${count}個",
             "other": "ダウンロード済み: ${count}個"
         },
         "filesAlreadySnatched(param=count)": {
-            "one": "${count} 個のファイルがすでに保存済みです",
-            "few": "${count} 個のファイルがすでに保存済みです",
-            "many": "${count} 個のファイルがすでに保存済みです",
             "other": "${count} 個のファイルがすでに保存済みです"
         },
         "failedToSnatchFiles(param=count)": {
-            "one": "${count} 個のファイルの保存に失敗",
-            "few": "${count} 個のファイルの保存に失敗",
-            "many": "${count} 個のファイルの保存に失敗",
             "other": "${count} 個のファイルの保存に失敗"
         },
         "cancelledFiles(param=count)": {
-            "one": "${count} 個のファイルがキャンセルされました",
-            "few": "${count} 個のファイルがキャンセルされました",
-            "many": "${count} 個のファイルがキャンセルされました",
             "other": "${count} 個のファイルがキャンセルされました"
         },
         "snatchingImages": "画像を保存中",
         "doNotCloseApp": "アプリを終了しないでください！",
         "addedItemToQueue": "ダウンロードキューに追加",
         "addedItemsToQueue(param=count)": {
-            "one": "${count} 個のアイテムをキューに追加しました",
-            "few": "${count} 個のアイテムをキューに追加しました",
-            "many": "${count} 個のアイテムをキューに追加しました",
             "other": "${count} 個のアイテムをキューに追加しました"
         }
     },
@@ -200,7 +168,7 @@
         "title": "Multibooru",
         "multibooruMode": "Multibooruモード",
         "multibooruRequiresAtLeastTwoBoorus": "少なくとも2つのBooruが設定されている必要があります",
-        "selectSecondaryBoorus": "追加するbooruを選択:",
+        "selectSecondaryBoorus": "追加するBooruを選択:",
         "akaMultibooruMode": "Multibooruモード",
         "labelSecondaryBoorusToInclude": "追加するBooru"
     },
@@ -277,17 +245,14 @@
         "alphabetically": "アルファベット順",
         "reversed": "(降順)",
         "areYouSureDeleteTabs(param=count)": {
-            "one": "${count} 個のタブを削除してよろしいですか？",
-            "few": "${count} 個のタブを削除してよろしいですか？",
-            "many": "${count} 個のタブを削除してよろしいですか？",
             "other": "${count} 個のタブを削除してよろしいですか？"
         },
         "filters": {
             "loaded": "ロード済み",
             "tagType": "タグのタイプ",
             "multibooru": "Multibooru",
-            "duplicates": "重複タブ",
-            "checkDuplicatesOnSameBooru": "同じBooruでの重複のみを確認",
+            "duplicates": "重複しているタブ",
+            "checkDuplicatesOnSameBooru": "同じBooruでの重複のみを検出",
             "emptySearchQuery": "検索クエリが未指定のタブのみ",
             "title": "タブフィルター",
             "all": "すべて",
@@ -309,7 +274,12 @@
             "pleaseEnterValidTabNumber": "有効なタブ番号を入力してください",
             "moveTo(param=formattedNumber)": "#${formattedNumber: String} に移動",
             "preview": "プレビュー:"
-        }
+        },
+        "deleteDuplicateTabs": "重複タブの削除",
+        "deleteDuplicateTabsQuestion": "重複するタブが見つかりました。グループを選択したあと、どれを保持するか選択してください:",
+        "keepFirstDuplicateTabs": "最初のタブを保持",
+        "keepLastDuplicateTabs": "最後のタブを保持",
+        "skipDuplicateTabDelete": "スキップ"
     },
     "history": {
         "searchHistory": "検索履歴",
@@ -328,25 +298,16 @@
         "delete": "削除",
         "deleteHistoryEntries": "履歴エントリーを削除",
         "deleteItemsConfirm(param=count)": {
-            "one": "${count} 個のアイテムを削除してよろしいですか？",
-            "few": "${count} 個のアイテムを削除してよろしいですか？",
-            "many": "${count} 個のアイテムを削除してよろしいですか？",
             "other": "${count} 個のアイテムを削除してよろしいですか？"
         },
         "clearSelection": "選択を解除",
         "deleteItems(param=count)": {
-            "one": "${count} 個のアイテムを削除",
-            "few": "${count} 個のアイテムを削除",
-            "many": "${count} 個のアイテムを削除",
             "other": "${count} 個のアイテムを削除"
         }
     },
     "webview": {
         "title": "ウェブモード",
         "notSupportedOnDevice": "このデバイスではサポートされていません",
-        "captcha": "キャプチャ",
-        "captchaCheckDescription": "キャプチャが検出されました。完了してから戻って続行できます",
-        "captchaCompleted": "認証完了",
         "navigation": {
             "enterUrlLabel": "URLを入力",
             "enterCustomUrl": "カスタムURLを入力",
@@ -365,18 +326,21 @@
             "history": "履歴",
             "noBackHistoryItem": "戻る履歴はありません",
             "noForwardHistoryItem": "進む履歴はありません"
-        }
+        },
+        "captcha": "キャプチャ",
+        "captchaCheckDescription": "キャプチャが検出されました。完了してから戻って続行できます",
+        "captchaCompleted": "認証完了"
     },
     "settings": {
         "title": "設定",
         "language": {
             "title": "言語",
             "system": "システム",
-            "helpUsTranslate": "翻訳に協力する",
+            "helpUsTranslate": "翻訳に協力",
             "visitForDetails": "詳細については、 <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>GitHub</a> を確認するか、下の画像をタップしてPOEditorにアクセスできます"
         },
         "booru": {
-            "title": "Booru & 検索",
+            "title": "Booruと検索",
             "defaultTags": "デフォルトのタグ",
             "itemsPerPage": "ページごとに取得される項目数",
             "itemsPerPageTip": "いくつかのBooruでは設定が無視される場合があります",
@@ -402,12 +366,18 @@
             "booruConfigLinkCopied": "Booruの設定リンクがクリップボードにコピーされました",
             "noBooruSelected": "Booruが未選択です！",
             "cantDeleteThisBooru": "このBooruは削除できません！",
-            "removeRelatedTabsFirst": "関連するタブを先に削除してください"
+            "removeRelatedTabsFirst": "関連するタブを先に削除してください",
+            "sourceLimitNotice": "設定の下部で変更できる互換性設定によって、ソース設定の動作が異なる場合があります。コンテンツは外部サイトによってホストおよび提供されており、アプリによって制御されていません。",
+            "advanced": "高度な設定",
+            "expandedSourceCompatibility": "ソース設定の互換性",
+            "expandedSourceCompatibilitySubtitle": "ソースの互換性に関する処理方法を調整します",
+            "expandedSourceCompatibilityConfirm": "この設定を変更すると、ソースの動作が変更され、影響が出る場合があります。コンテンツは外部サイトによってホストおよび提供されており、アプリによって制御されていません。続行しますか？",
+            "sourceUnavailableCurrentSettings": "このサイトは現在利用できません。"
         },
         "booruEditor": {
             "title": "Booru エディター",
             "testBooruFailedTitle": "Booruのテストに失敗",
-            "testBooruFailedMsg": "構成パラメータが正しくない、booruがAPIアクセスを許可していない、リクエストがデータを返さない、またはネットワークエラーが発生しました。",
+            "testBooruFailedMsg": "構成パラメータが正しくない、BooruがAPIアクセスを許可していない、リクエストがデータを返さない、またはネットワークエラーが発生しました。",
             "saveBooru": "Booruを保存",
             "runningTest": "テストの実行中…",
             "booruConfigExistsError": "このBooruの設定は既に存在しています",
@@ -496,7 +466,7 @@
             "themeMode": "テーマモード",
             "blackBg": "黒の背景",
             "useDynamicColor": "ダイナミックカラーを使用",
-            "android12PlusOnly": "Android 12+ が必要",
+            "android12PlusOnly": "Android 12 以降が必要です",
             "theme": "テーマ",
             "primaryColor": "プライマリカラー",
             "secondaryColor": "セカンダリカラー",
@@ -540,7 +510,7 @@
             "viewerToolbarPosition": "ビューアーのツールバー位置",
             "zoomButtonPosition": "ズームボタンの位置",
             "changePageButtonsPosition": "ページ変更ボタンの位置",
-            "hideToolbarWhenOpeningViewer": "ビューアーを開いたときにツールバーを非表示にする",
+            "hideToolbarWhenOpeningViewer": "ビューアーを開いたときにツールバーを非表示",
             "expandDetailsByDefault": "デフォルトで情報の詳細を展開",
             "hideTranslationNotesByDefault": "翻訳ノートをデフォルトで非表示",
             "enableRotation": "画像の回転を有効化",
@@ -580,7 +550,7 @@
             "viewerPageChangeAnimation": "ビューアーページ変更アニメーション",
             "usingDefaultAnimation": "デフォルトのアニメーションを使用",
             "usingCustomAnimation": "カスタムのアニメーションを使用",
-            "kannaLoadingGif": "読み込み時にカンナのGIFを表示",
+            "kannaLoadingGif": "読み込み中にカンナのGIFを表示",
             "imageQualityValues": {
                 "sample": "サンプル",
                 "fullRes": "オリジナル (フル)"
@@ -682,7 +652,7 @@
             "dropIndexesDebug": "インデックスの削除 [デバッグ]",
             "searchHistoryInfo": "データベースが有効になっている必要があります。",
             "searchHistoryRecords(param=limit)": "過去 ${limit: int}件の検索を保存します",
-            "searchHistoryTapInfo": "エントリーをタップしてアクションを実行できます (削除、お気に入り...)",
+            "searchHistoryTapInfo": "エントリーをタップしてアクションを実行できます (削除、お気に入り…)",
             "searchHistoryFavouritesInfo": "お気に入りのクエリはリストの上部に固定され、制限にカウントされません。",
             "tagTypeFetchingInfo": "サポートされているBooruからタグタイプを取得します",
             "tagTypeFetchingWarning": "レート制限が発生する可能性があります",
@@ -808,7 +778,7 @@
             "lowPerformanceModeSubtitle": "古いデバイスやメモリの少ないデバイスに推奨",
             "lowPerformanceModeDialogTitle": "低パフォーマンスモード",
             "lowPerformanceModeDialogDisablesDetailed": "- 読み込み中の詳細情報を無効にします",
-            "lowPerformanceModeDialogDisablesResourceIntensive": "- リソースを大量に消費する要素を無効にします (ぼかし、アニメーション化された不透明度、一部アニメーションなど...)",
+            "lowPerformanceModeDialogDisablesResourceIntensive": "- リソースを大量に消費する要素を無効にします (ぼかし、アニメーション化された不透明度、一部アニメーションなど…)",
             "lowPerformanceModeDialogSetsOptimal": "以下のオプションに最適な設定を設定します (後で個別に変更できます):",
             "autoplayVideos": "動画の自動再生",
             "disableVideos": "動画の無効化",
@@ -857,7 +827,8 @@
             "clearedCacheCompletely": "キャッシュを完全にクリアしました",
             "appRestartRequired": "アプリの再起動が必要な可能性があります！",
             "errorExclamation": "エラー！",
-            "notAvailableForPlatform": "現在このプラットフォームでは使用できません"
+            "notAvailableForPlatform": "現在このプラットフォームでは使用できません",
+            "neverDeleteDuration": "しない"
         },
         "itemFilters": {
             "title": "フィルター",
@@ -874,18 +845,18 @@
             "removeAI": "AIを使用したアイテムを非表示"
         },
         "sync": {
-            "title": "Sync",
-            "dbError": "Syncを使用するにはデータベースを有効にする必要があります",
+            "title": "同期",
+            "dbError": "同期機能を使用するにはデータベースを有効にする必要があります",
             "errorTitle": "エラー！",
             "pleaseEnterIPAndPort": "IPアドレスとポートを入力してください。",
             "selectWhatYouWantToDo": "何をしたいか選択してください",
             "sendDataToDevice": "他のデバイスにデータを送信",
             "receiveDataFromDevice": "他のデバイスからデータを引き継ぎ",
-            "senderInstructions": "もう一方のデバイスでサーバーを起動し、IP/ポートを入力して、Syncを開始 をタップします",
+            "senderInstructions": "もう一方のデバイスでサーバーを起動し、IP/ポートを入力して、同期を開始 をタップします",
             "ipAddress": "IPアドレス",
-            "ipAddressPlaceholder": "ホストIPアドレス (192.168.1.1 など)",
+            "ipAddressPlaceholder": "ホストのIPアドレス (例: 192.168.1.1)",
             "port": "ポート",
-            "portPlaceholder": "ホストのポート (7777 など)",
+            "portPlaceholder": "ホストのポート (例: 7777)",
             "sendFavourites": "お気に入りを送信",
             "favouritesCount(param=count)": "お気に入り: ${count: String}",
             "sendFavouritesLegacy": "お気に入りを送信 (レガシー)",
@@ -899,8 +870,8 @@
             "syncSnatchedFrom": "#... からダウンロードを同期",
             "syncSnatchedFromHelpText1": "同期を開始する場所を設定できます。これは、以前のダウンロード履歴を既に同期していて、最近のアイテムを同期したい場合に便利です",
             "syncSnatchedFromHelpText2": "最初からすべて同期する場合はこのフィールドを空白のままにしておいてください",
-            "syncSnatchedFromHelpText3": "例: お気に入りの数がXの場合、このフィールドを100に設定すると、 アイテム #100 から X まで同期されます",
-            "syncSnatchedFromHelpText4": "お気に入りの順序: 古いもの (0) から新しい順 (X)",
+            "syncSnatchedFromHelpText3": "例: ダウンロード履歴の数がXの場合、このフィールドを100に設定すると、 アイテム #100 から X まで同期されます",
+            "syncSnatchedFromHelpText4": "履歴の順序: 古いもの (0) から新しい順 (X)",
             "sendSettings": "設定を送信",
             "sendBooruConfigs": "Booru 設定を送信",
             "configsCount(param=count)": "設定: ${count: String}",
@@ -921,7 +892,7 @@
             "testConnection": "接続テスト",
             "testConnectionHelpText1": "先のデバイスにテストを送信します。",
             "testConnectionHelpText2": "成功/失敗の通知を表示します。",
-            "startSync": "Syncを開始",
+            "startSync": "同期を開始",
             "portAndIPCannotBeEmpty": "ポートとIPのフィールドは空にできません！",
             "nothingSelectedToSync": "同期する項目が選択されていません！",
             "statsOfThisDevice": "このデバイスの統計情報:",
@@ -992,7 +963,9 @@
             "restoredSessionFromString": "セッションを文字列から復元しました"
         },
         "logging": {
-            "logger": "Logger"
+            "logger": "ロガー",
+            "captureLogcat": "Android logcatをキャプチャ",
+            "captureLogcatDescription": "このアプリのAndroidプロセスからの警告とエラーメッセージを記録"
         },
         "webview": {
             "openWebview": "アプリ内ブラウザを開く",
@@ -1050,9 +1023,6 @@
         "resetStale": "期限をリセット",
         "makeUnstaleable": "期限切れにならないようにする",
         "deleteTags(param=count)": {
-            "one": "${count} 個のタグを削除",
-            "few": "${count} 個のタグを削除",
-            "many": "${count} 個のタグを削除",
             "other": "${count} 個のタグを削除"
         },
         "deleteTagsTitle": "タグの削除",
@@ -1064,14 +1034,14 @@
         "testingMessage": "[TESTING]: 通常の方法でアプリのロックを解除できない場合はこのボタンを押してください。デバイスの詳細を開発者に報告してください。"
     },
     "loliSync": {
-        "title": "Sync",
+        "title": "同期",
         "stopSyncingQuestion": "同期を停止しますか？",
         "stopServerQuestion": "サーバーを停止しますか？",
         "noConnection": "接続なし",
         "waitingForConnection": "接続を待機中…",
         "startingServer": "サーバーの開始…",
         "keepScreenAwake": "スクリーンを点灯したままにする",
-        "serverKilled": "Sync サーバーを終了",
+        "serverKilled": "同期サーバーを終了",
         "testError(param=statusCode, param=reasonPhrase)": "テスト時エラー: ${statusCode: int} ${reasonPhrase: String}",
         "testErrorException(param=error)": "テスト時エラー: ${error: String}",
         "testSuccess": "テストリクエストは正常な返答を受け取りました",
@@ -1091,7 +1061,6 @@
         "addedNewTab": "新規タブに追加:",
         "id": "ID",
         "postURL": "投稿URL",
-        "uploader": "アップローダー",
         "posted": "投稿日時",
         "details": "詳細",
         "filename": "ファイル名",
@@ -1107,8 +1076,8 @@
         "removeFromSearch": "現在の検索から削除",
         "addToSearch": "検索に追加",
         "addedToSearchBar": "検索バーに追加:",
-        "excludeFromSearch": "検索から除外",
-        "exclusionAddedToSearchBar": "除外として検索に追加:",
+        "addToSearchExclude": "現在の検索に追加 (除外)",
+        "addedToSearchBarExclude": "除外として検索バーに追加:",
         "addToMarked": "お気に入りタグに追加",
         "addToHidden": "非表示タグに追加",
         "removeFromMarked": "お気に入りタグから削除",
@@ -1130,7 +1099,10 @@
         "relatedTabs": "関連タブ",
         "tabsWithOnlyTag": "このタグのみのタブ",
         "tabsWithOnlyTagDifferentBooru": "このタグのみで、違うBooruのタブ",
-        "tabsContainingTag": "このタグを含むタブ"
+        "tabsContainingTag": "このタグを含むタブ",
+        "excludeFromSearch": "検索から除外",
+        "exclusionAddedToSearchBar": "除外として検索に追加:",
+        "uploader": "アップローダー"
     },
     "pinnedTags": {
         "pinnedTags": "ピン留めされたタグ",
@@ -1213,7 +1185,20 @@
         "help": "ヘルプ (英語)",
         "settings": "設定",
         "restoringPreviousSession": "以前のセッションを復元中…",
-        "copiedFileURL": "ファイルURLをクリップボードにコピーしました！"
+        "copiedFileURL": "ファイルURLをクリップボードにコピーしました！",
+        "onboardingTitle": "最初のソースを設定しましょう",
+        "onboardingSubtitle": "Booruの設定を追加するか、バックアップを復元して閲覧を開始",
+        "addBooruAction": "Booruを追加",
+        "addBooruActionSubtitle": "URLと検索設定を追加してサイトに接続します",
+        "restoreBackupAction": "バックアップの復元または管理",
+        "restoreBackupActionSubtitle": "設定、Booru、タブ、保存されたデータを復元します",
+        "openSettingsAction": "設定",
+        "openSettingsActionSubtitle": "ソースを追加する前に設定を調整します",
+        "helpSectionTitle": "ヘルプが必要ですか？",
+        "booruSourcesArticle": "Booruの追加方法と設定",
+        "booruSourcesArticleSubtitle": "初めてBooru設定を追加するユーザー向けの説明です",
+        "backupRestoreArticle": "データをバックアップから復元する",
+        "backupRestoreArticleSubtitle": "以前のアプリ/バージョンから移行するユーザー向けの手順です"
     },
     "viewer": {
         "tutorial": {
@@ -1273,9 +1258,6 @@
         "loadingFile": "ファイルの読み込み中…",
         "loadingFileMessage": "これには少し時間がかかる場合があります。お待ちください…",
         "sources(param=count)": {
-            "one": "ソース",
-            "few": "ソース",
-            "many": "ソース",
             "other": "ソース"
         }
     },
@@ -1294,8 +1276,8 @@
     },
     "media": {
         "loading": {
-            "rendering": "ロード中…",
-            "loadingAndRenderingFromCache": "キャッシュから読み込み中…",
+            "rendering": "描画中…",
+            "loadingAndRenderingFromCache": "キャッシュから読み込み・描画中…",
             "loadingFromCache": "キャッシュから読み込み中…",
             "buffering": "バッファリング中…",
             "loading": "読み込み中…",
@@ -1343,9 +1325,6 @@
             "reachedEndSubtitle(param=pageNum)": "読み込まれたページ数: ${pageNum: int}\nここをタップして最後のページを再読み込み",
             "loadingPage(param=pageNum)": "ページ #${pageNum: int} の読み込み中…",
             "startedAgo(param=seconds)": {
-                "one": "${seconds} 秒前から開始",
-                "few": "${seconds} 秒前から開始",
-                "many": "${seconds} 秒前から開始",
                 "other": "${seconds} 秒前から開始"
             },
             "tapToRetryIfStuck": "リクエストが停止しているか時間がかかりすぎている場合は、ここをタップして再試行できます",
@@ -1361,6 +1340,16 @@
         "copyright": "コピーライト / シリーズ",
         "meta": "メタ",
         "species": "種",
-        "none": "なし/一般"
-    }
+        "none": "なし/一般",
+        "lore": "伝承"
+    },
+    "exclude": "除外",
+    "secondsShort": "秒",
+    "minutesShort": "分",
+    "hoursShort": "時",
+    "daysShort": "日",
+    "leaveThisPageQuestion": "ページを離れますか？",
+    "pageWillCloseAutomatically": "ページは自動で閉じられます",
+    "stay": "ページにとどまる",
+    "leaveNow": "今すぐ離れる"
 }
