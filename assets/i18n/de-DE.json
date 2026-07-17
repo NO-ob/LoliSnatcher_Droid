@@ -4,8 +4,8 @@
     "appName": "LoliSnatcher",
     "error": "Fehler",
     "errorExclamation": "Fehler!",
-    "success": "Erfolg",
-    "successExclamation": "Erfolg!",
+    "success": "Erfolgreich",
+    "successExclamation": "Erfolgreich!",
     "cancel": "Abbrechen",
     "return": "Zurück",
     "later": "Später",
@@ -21,7 +21,7 @@
     "add": "Hinzufügen",
     "exclude": "Ausschließen",
     "edit": "Bearbeiten",
-    "remove": "Löschen",
+    "remove": "Entfernen",
     "save": "Speichern",
     "delete": "Löschen",
     "confirm": "Bestätigen",
@@ -56,7 +56,7 @@
     "open": "Öffnen",
     "openInNewTab": "In neuem Tab öffnen",
     "move": "Verschieben",
-    "shuffle": "Mischen",
+    "shuffle": "Zufall",
     "sort": "Sortieren",
     "go": "Start",
     "search": "Suche",
@@ -237,6 +237,11 @@
         "sortMode": "Tabs sortieren",
         "help": "Hilfe",
         "deleteTabs": "Tabs löschen",
+        "deleteDuplicateTabs": "Tab-Duplikate löschen",
+        "deleteDuplicateTabsQuestion": "Tab-Duplikate gefunden. Tabs auswählen, welche behalten werden sollen:",
+        "keepFirstDuplicateTabs": "Ersten behalten",
+        "keepLastDuplicateTabs": "Letzten behalten",
+        "skipDuplicateTabDelete": "Überspringen",
         "shuffleTabs": "Tabs zufällig anordnen",
         "tabRandomlyShuffled": "Tabs zufällig angeordnet",
         "tabOrderSaved": "Tabreihenfolge gespeichert",
@@ -271,7 +276,7 @@
         "remove": "Entfernen",
         "shuffle": "Mischen",
         "sort": "Sortieren",
-        "shuffleTabsQuestion": "Mische Tabs zufällig?",
+        "shuffleTabsQuestion": "Tabs zufällig mischen?",
         "saveTabsInCurrentOrder": "Speichere Tabs in dieser Sortierfolge?",
         "byBooru": "Nach Booru",
         "alphabetically": "Alphabetisch",
@@ -287,7 +292,7 @@
             "tagType": "Tag Typ",
             "multibooru": "Multibooru",
             "duplicates": "Duplikate",
-            "checkDuplicatesOnSameBooru": "Suchen auf dem gleichen Booru nach Duplikaten",
+            "checkDuplicatesOnSameBooru": "Auf dem gleichen Booru nach Duplikaten suchen",
             "emptySearchQuery": "Leeres Suchfeld",
             "title": "Tab Filter",
             "all": "Alle",
@@ -345,7 +350,7 @@
         "title": "Webansicht",
         "notSupportedOnDevice": "Auf diesem Gerät nicht unterstützt",
         "captcha": "Captcha",
-        "captchaCheckDescription": "Mögliches Captcha detektiert: Bitte lösen und nach Abschluss zurückkehren",
+        "captchaCheckDescription": "Mögliches Captcha detektiert, Bitte lösen und nach Abschluss zurückkehren",
         "captchaCompleted": "Captcha durchgeführt",
         "navigation": {
             "enterUrlLabel": "URL eingeben",
@@ -376,7 +381,7 @@
             "visitForDetails": "Für mehr Infos besuche <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> oder tippe auf das Bild unten um zum POEditor zu gelangen"
         },
         "booru": {
-            "title": "Boorus & Suche",
+            "title": "Boorus und Suche",
             "defaultTags": "Standard-Tags",
             "itemsPerPage": "Geladene Posts pro Seite",
             "itemsPerPageTip": "Einige Boorus können das ignorieren",
@@ -402,7 +407,13 @@
             "booruConfigLinkCopied": "Booru-Konfigurationslink in die Zwischenablage kopiert",
             "noBooruSelected": "Kein Booru ausgewählt!",
             "cantDeleteThisBooru": "Kann dieses Booru nicht löschen!",
-            "removeRelatedTabsFirst": "Entferne zuerst alle verwandten Tabs"
+            "removeRelatedTabsFirst": "Entferne zuerst alle verwandten Tabs",
+            "sourceLimitNotice": "Das Verhalten beim Einrichten der Boorus kann von den unten aufgeführten Kompatibiltätseinstellungen abhängen. Der Inhalt wird von externen Websites zur Verfügung gestellt und nicht von dieser App.",
+            "advanced": "Erweitert",
+            "expandedSourceCompatibility": "Kompatibilität bei der Booru-Einrichtung",
+            "expandedSourceCompatibilitySubtitle": "Ändere wie die Kompatibilitätseinstellungen angewendet werden",
+            "expandedSourceCompatibilityConfirm": "Dies zu ändern kann die Funktion der Boorus beeinflussen. Der Inhalt wird von externen Websites zur Verfügung gestellt und nicht von dieser App. Fortfahren?",
+            "sourceUnavailableCurrentSettings": "Diese Seite ist nicht verfügbar."
         },
         "booruEditor": {
             "title": "Booru Einstellungen",
@@ -721,7 +732,7 @@
             "retryFailedItems(param=count)": "Erneuter Versuch bei (${count: int}) fehlgeschlagenen Posts"
         },
         "backupAndRestore": {
-            "title": "Sichern & Wiederherstellen",
+            "title": "Sichern und Wiederherstellen",
             "duplicateFileDetectedTitle": "Datei bereits vorhanden!",
             "duplicateFileDetectedMsg(param=fileName)": "Die Datei ${fileName: String} exisitiert bereits. Soll sie überschrieben werden? Wenn nein, wird die Sicherung abgebrochen.",
             "androidOnlyFeatureMsg": "Diese Funktion ist nur auf Android verfügbar. In Desktop Umgebungen können die Dateien einfach vom/zum Installationsordner des Programms kopiert/eingefügt werden.",
@@ -815,7 +826,7 @@
             "disableVideosHelp": "Nützlich auf leistungsschwachen Geräten, welche beim Laden von Videos abstürzen. Blendet Optionen ein, das Video im externen Player oder Browser abzuspielen."
         },
         "cache": {
-            "title": "Download & Cache",
+            "title": "Download und Cache",
             "snatchQuality": "Download-Qualität",
             "snatchCooldown": "Download-Verzögerung (in ms)",
             "pleaseEnterAValidTimeout": "Bitte einen gültigen Wert für das Time-Out eingeben",
@@ -838,6 +849,7 @@
             "videoCacheNoteEnable": "[Anmerkung]: Videos werden nur gecached, wenn \"Medien Caching\" aktiviert ist",
             "videoCacheWarningDesktop": "[Warnung]: Auf dem Desktop kann der Stream-Modus auf manchen Boorus nicht richtig funktionieren",
             "deleteCacheAfter": "Lösche Cache nach:",
+            "neverDeleteDuration": "Niemals",
             "cacheSizeLimit": "Cache-Größenlimit (in GB)",
             "maximumTotalCacheSize": "Maximale Cache-Größe",
             "cacheStats": "Cache-Statistik:",
@@ -992,7 +1004,9 @@
             "restoredSessionFromString": "Sitzung aus Zeichenfolge wiederhergestellt"
         },
         "logging": {
-            "logger": "Protokollierung"
+            "logger": "Protokollierung",
+            "captureLogcat": "Android Logcat aufzeichnen",
+            "captureLogcatDescription": "Warnungen und Fehler vom Android-Prozess der App loggen"
         },
         "webview": {
             "openWebview": "Webansicht öffnen",
@@ -1212,6 +1226,19 @@
         "addNewBooru": "Neues Booru hinzufügen",
         "help": "Hilfe",
         "settings": "Einstellungen",
+        "onboardingTitle": "Richte dein erstes Booru ein",
+        "onboardingSubtitle": "Um mit dem Browsen zu beginnen, füge eine Booru Konfiguration hinzu oder lade eine Sicherung",
+        "addBooruAction": "Booru hinzufügen",
+        "addBooruActionSubtitle": "Füge mittels URL und Sucheinstellungen eine Seite hinzu",
+        "restoreBackupAction": "Sicherung laden und verwalten",
+        "restoreBackupActionSubtitle": "Wiederherstellung von Einstellungen, Boorus, Tabs und Daten",
+        "openSettingsAction": "Einstellungen öffnen",
+        "openSettingsActionSubtitle": "App-Verhalten vor Einrichtung der Boorus verändern",
+        "helpSectionTitle": "Hilfe nötig?",
+        "booruSourcesArticle": "Wie eine Booru Konfiguration funktioniert und eingerichtet wird",
+        "booruSourcesArticleSubtitle": "Anleitung zur erstmaligen Einrichtung einer Booru Konfiguration",
+        "backupRestoreArticle": "Daten aus einer Sicherung wiederherstellen",
+        "backupRestoreArticleSubtitle": "Anleitung zum Wechsel von einer früheren App-Version",
         "restoringPreviousSession": "Vorherige Sitzung wiederherstellen...",
         "copiedFileURL": "Datei-URL in Zwischenablage kopiert!"
     },
@@ -1361,6 +1388,7 @@
         "copyright": "Urheberrecht",
         "meta": "Meta",
         "species": "Spezies",
+        "lore": "Hintergrundwissen",
         "none": "Kein/Allgemein"
     }
 }

@@ -237,6 +237,11 @@
         "sortMode": "标签页排序",
         "help": "帮助",
         "deleteTabs": "删除标签页",
+        "deleteDuplicateTabs": "删除重复的标签页",
+        "deleteDuplicateTabsQuestion": "存在重复的标签页。请选择您想保留在组中的页面：",
+        "keepFirstDuplicateTabs": "保留最早的",
+        "keepLastDuplicateTabs": "保留最晚的",
+        "skipDuplicateTabDelete": "跳过",
         "shuffleTabs": "随机排序标签页",
         "tabRandomlyShuffled": "已随机排序标签页",
         "tabOrderSaved": "已保存标签页顺序",
@@ -402,7 +407,13 @@
             "booruConfigLinkCopied": "已将Booru配置链接复制到剪贴板",
             "noBooruSelected": "未选择Booru！",
             "cantDeleteThisBooru": "无法删除此Booru！",
-            "removeRelatedTabsFirst": "请先删除相关的标签页"
+            "removeRelatedTabsFirst": "请先删除相关的标签页",
+            "sourceLimitNotice": "添加某些网站来源可能需要开启下方的兼容性设置。网站内容由外部托管和提供，不受本应用控制。",
+            "advanced": "进阶选项",
+            "expandedSourceCompatibility": "来源配置兼容性",
+            "expandedSourceCompatibilitySubtitle": "调整对于一些来源的兼容处理方式",
+            "expandedSourceCompatibilityConfirm": "改变此设置可能会影响网站来源显示的内容。内容由外部网站托管和提供，不受本应用控制。要继续吗？",
+            "sourceUnavailableCurrentSettings": "此站点不可用。"
         },
         "booruEditor": {
             "title": "Booru编辑器",
@@ -838,6 +849,7 @@
             "videoCacheNoteEnable": "[注意]：只有在'缓存媒体'启用时，视频才会被缓存。",
             "videoCacheWarningDesktop": "[警告]：在桌面模式下某些网站不支持流式加载。",
             "deleteCacheAfter": "缓存保留时间：",
+            "neverDeleteDuration": "永不删除",
             "cacheSizeLimit": "缓存体积限制（GB）",
             "maximumTotalCacheSize": "总缓存上限",
             "cacheStats": "缓存统计：",
@@ -874,8 +886,8 @@
             "removeAI": "隐藏AI生成的项目"
         },
         "sync": {
-            "title": "Sync",
-            "dbError": "使用Sync必须启用数据库",
+            "title": "同步",
+            "dbError": "使用同步必须启用数据库",
             "errorTitle": "错误！",
             "pleaseEnterIPAndPort": "请输入IP地址和端口。",
             "selectWhatYouWantToDo": "选择你想做的事",
@@ -992,7 +1004,9 @@
             "restoredSessionFromString": "从字符串中恢复了session"
         },
         "logging": {
-            "logger": "日志记录"
+            "logger": "日志记录",
+            "captureLogcat": "记录Android logcat",
+            "captureLogcatDescription": "记录此应用的Android进程出现的警告与错误"
         },
         "webview": {
             "openWebview": "打开网页浏览",
@@ -1064,14 +1078,14 @@
         "testingMessage": "[仅供测试]：若通常方式解锁都失败请点此处。并将您设备的详细情况报告给开发者。"
     },
     "loliSync": {
-        "title": "LoliSync",
+        "title": "同步",
         "stopSyncingQuestion": "要停止同步吗？",
         "stopServerQuestion": "要停止服务器吗？",
         "noConnection": "无连接",
         "waitingForConnection": "等待连接…",
         "startingServer": "正在启动服务器…",
         "keepScreenAwake": "屏幕常亮",
-        "serverKilled": "已结束LoliSync服务器",
+        "serverKilled": "已结束同步服务器",
         "testError(param=statusCode, param=reasonPhrase)": "测试失败: ${statusCode: int} ${reasonPhrase: String}",
         "testErrorException(param=error)": "测试失败: ${error: String}",
         "testSuccess": "测试请求返回了积极的回应",
@@ -1212,6 +1226,19 @@
         "addNewBooru": "添加新Booru",
         "help": "帮助",
         "settings": "设置",
+        "onboardingTitle": "添加第一个图源",
+        "onboardingSubtitle": "要开始浏览，请添加一个图站配置或从备份中恢复",
+        "addBooruAction": "添加新的图站",
+        "addBooruActionSubtitle": "通过添加站点的地址和搜索设置以连接图站",
+        "restoreBackupAction": "备份管理与恢复",
+        "restoreBackupActionSubtitle": "恢复设置，图站，标签页和其他保存的数据",
+        "openSettingsAction": "打开设置页面",
+        "openSettingsActionSubtitle": "在添加图源前先调整一下应用的行为",
+        "helpSectionTitle": "需要帮助吗？",
+        "booruSourcesArticle": "添加图站的方法与应用的工作原理",
+        "booruSourcesArticleSubtitle": "为第一次添加图站的用户提供的说明",
+        "backupRestoreArticle": "从备份文件恢复",
+        "backupRestoreArticleSubtitle": "为使用过之前版本应用的老用户提供的说明",
         "restoringPreviousSession": "正在恢复到之前的会话…",
         "copiedFileURL": "已复制文件链接到剪贴板！"
     },
@@ -1361,6 +1388,7 @@
         "copyright": "版权",
         "meta": "元数据",
         "species": "物种",
+        "lore": "背景故事",
         "none": "无/通常的"
     }
 }

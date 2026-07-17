@@ -237,6 +237,11 @@
         "sortMode": "Sekmeleri sırala",
         "help": "Yardım",
         "deleteTabs": "Sekmeleri sil",
+        "deleteDuplicateTabs": "Kopya sekmeleri sil",
+        "deleteDuplicateTabsQuestion": "Kopya sekmeler bulundu. Her grupta kalmasını istediğin sekmeleri seç:",
+        "keepFirstDuplicateTabs": "İlki kalsın",
+        "keepLastDuplicateTabs": "Sonuncu kalsın",
+        "skipDuplicateTabDelete": "Atla",
         "shuffleTabs": "Sekmeleri karıştır",
         "tabRandomlyShuffled": "Sekmeler rastgele karıştırıldı",
         "tabOrderSaved": "Sekme sırası kaydedildi",
@@ -376,7 +381,7 @@
             "visitForDetails": "Detaylar için <a href='https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations'>github</a> adresini ziyaret et veya POEditor'e gitmek için aşağıdaki görsele dokun"
         },
         "booru": {
-            "title": "Booru'lar ve Arama",
+            "title": "Booru'lar ve arama",
             "defaultTags": "Varsayılan etiketler",
             "itemsPerPage": "Sayfa başına getirilen öge sayısı",
             "itemsPerPageTip": "Bazı booru'lar bunu yok sayabilir",
@@ -402,7 +407,13 @@
             "booruConfigLinkCopied": "Booru yapılandırma bağlantısı panoya kopyalandı",
             "noBooruSelected": "Hiçbir Booru seçilmedi!",
             "cantDeleteThisBooru": "Bu Booru silinemez!",
-            "removeRelatedTabsFirst": "Önce ilgili sekmeleri kaldır"
+            "removeRelatedTabsFirst": "Önce ilgili sekmeleri kaldır",
+            "sourceLimitNotice": "Kaynak kurulumunun işleyişi aşağıdaki uyumluluk ayarlarına bağlı olarak değişebilir. İçerikler harici siteler tarafından sağlanır ve uygulamanın kontrolü dışındadır.",
+            "advanced": "Gelişmiş",
+            "expandedSourceCompatibility": "Kaynak kurulum uyumluluğu",
+            "expandedSourceCompatibilitySubtitle": "Kaynak uyumluluk ayarlarının işleyişini düzenle",
+            "expandedSourceCompatibilityConfirm": "Bunu değiştirmek kaynakların çalışma şeklini etkileyebilir. İçerikler harici siteler tarafından barındırılıp sağlanır ve uygulamanın kontrolünde değildir. Devam edilsin mi?",
+            "sourceUnavailableCurrentSettings": "Bu site kullanılamıyor."
         },
         "booruEditor": {
             "title": "Booru Düzenleyici",
@@ -423,11 +434,11 @@
             "accessKeyFailedMsg": "Hydrus'ta istek penceresi açık mı?",
             "hydrusInstructions": "Hydrus anahtarını almak için Hydrus istemcisinde istek penceresini açman gerekir: Hizmetler > Hizmetleri incele > İstemci API > Ekle > API isteğinden (Services > Review services > Client API > Add > From API request)",
             "getHydrusApiKey": "Hydrus API anahtarını al",
-            "booruName": "Booru Adı",
-            "booruNameRequired": "Booru Adı gerekli!",
+            "booruName": "Booru adı",
+            "booruNameRequired": "Booru adı gerekli!",
             "booruUrl": "Booru URL'si",
             "booruUrlRequired": "Booru URL'si gerekli!",
-            "booruType": "Booru Türü",
+            "booruType": "Booru türü",
             "booruFavicon": "Favicon URL'si",
             "booruFaviconPlaceholder": "(Boş bırakılırsa otomatik doldurulur)",
             "booruDefTags": "Varsayılan etiketler",
@@ -721,7 +732,7 @@
             "retryFailedItems(param=count)": "Başarısız ögeleri tekrar dene (${count: int})"
         },
         "backupAndRestore": {
-            "title": "Yedekle ve Geri Yükle",
+            "title": "Yedekle ve geri yükle",
             "duplicateFileDetectedTitle": "Kopya dosya tespit edildi!",
             "duplicateFileDetectedMsg(param=fileName)": "${fileName: String} dosyası zaten mevcut. Üzerine yazmak istiyor musun? Hayır dersen yedekleme iptal edilecek.",
             "androidOnlyFeatureMsg": "Bu özellik yalnızca Android'de mevcuttur. Masaüstü sürümlerinde dosyaları sistemine göre uygulamanın veri klasörüne kopyalayıp yapıştırabilirsin",
@@ -815,7 +826,7 @@
             "disableVideosHelp": "Videoları yüklemeye çalışırken çöken düşük donanımlı cihazlar için kullanışlıdır: Bunun yerine videoyu harici bir oynatıcıda veya tarayıcıda izleme seçeneği sunar."
         },
         "cache": {
-            "title": "İndirme ve Önbelleğe Alma",
+            "title": "İndirme ve önbelleğe alma",
             "snatchQuality": "İndirme kalitesi",
             "snatchCooldown": "İndirme bekleme süresi (ms)",
             "pleaseEnterAValidTimeout": "Lütfen geçerli bir zaman aşımı değeri gir",
@@ -838,6 +849,7 @@
             "videoCacheNoteEnable": "[Not]: Videolar yalnızca 'Medyayı Önbelleğe Al' etkinleştirilirse önbelleğe alınır.",
             "videoCacheWarningDesktop": "[Uyarı]: Masaüstünde Akış modu bazı Booru'lar için hatalı çalışabilir.",
             "deleteCacheAfter": "Şu süreden sonra önbelleği sil:",
+            "neverDeleteDuration": "Asla",
             "cacheSizeLimit": "Önbellek boyutu sınırı (GB)",
             "maximumTotalCacheSize": "Maksimum toplam önbellek boyutu",
             "cacheStats": "Önbellek istatistikleri:",
@@ -874,8 +886,8 @@
             "removeAI": "AI ögelerini kaldır"
         },
         "sync": {
-            "title": "Sync",
-            "dbError": "Sync kullanmak için veritabanı etkinleştirilmelidir",
+            "title": "Senkronize et",
+            "dbError": "Senkronizasyonu kullanmak için veritabanı etkinleştirilmelidir",
             "errorTitle": "Hata!",
             "pleaseEnterIPAndPort": "Lütfen IP adresini ve portu gir.",
             "selectWhatYouWantToDo": "Ne yapmak istediğini seç",
@@ -992,7 +1004,9 @@
             "restoredSessionFromString": "Oturum dizeden geri yüklendi"
         },
         "logging": {
-            "logger": "Kayıtlar"
+            "logger": "Kayıtlar",
+            "captureLogcat": "Sistem günlüklerini kaydet",
+            "captureLogcatDescription": "Bu uygulamanın Android sürecindeki uyarı ve hata mesajlarını kaydet"
         },
         "webview": {
             "openWebview": "Web görünümünü aç",
@@ -1064,14 +1078,14 @@
         "testingMessage": "[TEST]: Uygulamanın kilidini normal yollarla açamıyorsan buraya bas. Cihazınla ilgili detayları geliştiriciye bildir."
     },
     "loliSync": {
-        "title": "Sync",
+        "title": "Senkronize et",
         "stopSyncingQuestion": "Senkronizasyonu durdurmak istiyor musun?",
         "stopServerQuestion": "Sunucuyu durdurmak istiyor musun?",
         "noConnection": "Bağlantı yok",
         "waitingForConnection": "Bağlantı bekleniyor…",
         "startingServer": "Sunucu başlatılıyor…",
         "keepScreenAwake": "Ekranı uyanık tut",
-        "serverKilled": "Sync sunucusu kapatıldı",
+        "serverKilled": "Senkronizasyon sunucusu kapatıldı",
         "testError(param=statusCode, param=reasonPhrase)": "Test hatası: ${statusCode: int} ${reasonPhrase: String}",
         "testErrorException(param=error)": "Test hatası: ${error: String}",
         "testSuccess": "Test isteği olumlu yanıt aldı",
@@ -1212,6 +1226,19 @@
         "addNewBooru": "Yeni Booru ekle",
         "help": "Yardım",
         "settings": "Ayarlar",
+        "onboardingTitle": "İlk kaynağını ayarla",
+        "onboardingSubtitle": "Gezinmeye başlamak için bir booru yapılandırması ekle veya bir yedeği geri yükle",
+        "addBooruAction": "Yeni booru ekle",
+        "addBooruActionSubtitle": "URL ve arama ayarlarını ekleyerek bir site bağla",
+        "restoreBackupAction": "Yedekleri geri yükle veya yönet",
+        "restoreBackupActionSubtitle": "Ayarları, booru'ları, sekmeleri ve kaydedilen veriyi geri yükle",
+        "openSettingsAction": "Ayarları aç",
+        "openSettingsActionSubtitle": "Kaynakları kurmadan önce uygulamanın işleyişini ayarla",
+        "helpSectionTitle": "Yardım?",
+        "booruSourcesArticle": "Booru yapılandırması nasıl eklenir ve nasıl çalışır",
+        "booruSourcesArticleSubtitle": "İlk booru yapılandırmasını kuran kullanıcılar için talimatlar",
+        "backupRestoreArticle": "Yedekten veri geri yükleme",
+        "backupRestoreArticleSubtitle": "Önceki bir uygulamadan/sürümden geçiş yapan kullanıcılar için talimatlar",
         "restoringPreviousSession": "Önceki oturum geri yükleniyor…",
         "copiedFileURL": "Dosya URL'si panoya kopyalandı!"
     },
@@ -1361,6 +1388,7 @@
         "copyright": "Telif Hakkı",
         "meta": "Meta",
         "species": "Tür",
+        "lore": "Bilgi",
         "none": "Yok/Genel"
     }
 }
