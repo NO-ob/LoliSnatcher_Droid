@@ -560,7 +560,7 @@ class _Translations$multibooru$ja_JP extends Translations$multibooru$en {
   String get multibooruRequiresAtLeastTwoBoorus =>
       TranslationOverrides.string(_root.$meta, 'multibooru.multibooruRequiresAtLeastTwoBoorus', {}) ?? '少なくとも2つのBooruが設定されている必要があります';
   @override
-  String get selectSecondaryBoorus => TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? '追加するbooruを選択:';
+  String get selectSecondaryBoorus => TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? '追加するBooruを選択:';
   @override
   String get akaMultibooruMode => TranslationOverrides.string(_root.$meta, 'multibooru.akaMultibooruMode', {}) ?? 'Multibooruモード';
   @override
@@ -645,6 +645,17 @@ class _Translations$tabs$ja_JP extends Translations$tabs$en {
   String get help => TranslationOverrides.string(_root.$meta, 'tabs.help', {}) ?? 'ヘルプ';
   @override
   String get deleteTabs => TranslationOverrides.string(_root.$meta, 'tabs.deleteTabs', {}) ?? 'タブを削除';
+  @override
+  String get deleteDuplicateTabs => TranslationOverrides.string(_root.$meta, 'tabs.deleteDuplicateTabs', {}) ?? '重複タブの削除';
+  @override
+  String get deleteDuplicateTabsQuestion =>
+      TranslationOverrides.string(_root.$meta, 'tabs.deleteDuplicateTabsQuestion', {}) ?? '重複するタブが見つかりました。グループを選択したあと、どれを保持するか選択してください:';
+  @override
+  String get keepFirstDuplicateTabs => TranslationOverrides.string(_root.$meta, 'tabs.keepFirstDuplicateTabs', {}) ?? '最初のタブを保持';
+  @override
+  String get keepLastDuplicateTabs => TranslationOverrides.string(_root.$meta, 'tabs.keepLastDuplicateTabs', {}) ?? '最後のタブを保持';
+  @override
+  String get skipDuplicateTabDelete => TranslationOverrides.string(_root.$meta, 'tabs.skipDuplicateTabDelete', {}) ?? 'スキップ';
   @override
   String get shuffleTabs => TranslationOverrides.string(_root.$meta, 'tabs.shuffleTabs', {}) ?? 'タブをシャッフル';
   @override
@@ -1029,7 +1040,7 @@ class _Translations$loliSync$ja_JP extends Translations$loliSync$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'Sync';
+  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? '同期';
   @override
   String get stopSyncingQuestion => TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? '同期を停止しますか？';
   @override
@@ -1043,7 +1054,7 @@ class _Translations$loliSync$ja_JP extends Translations$loliSync$en {
   @override
   String get keepScreenAwake => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'スクリーンを点灯したままにする';
   @override
-  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Sync サーバーを終了';
+  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? '同期サーバーを終了';
   @override
   String testError({required int statusCode, required String reasonPhrase}) =>
       TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
@@ -1379,6 +1390,38 @@ class _Translations$mediaPreviews$ja_JP extends Translations$mediaPreviews$en {
   @override
   String get settings => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? '設定';
   @override
+  String get onboardingTitle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingTitle', {}) ?? '最初のソースを設定しましょう';
+  @override
+  String get onboardingSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingSubtitle', {}) ?? 'Booruの設定を追加するか、バックアップを復元して閲覧を開始';
+  @override
+  String get addBooruAction => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruAction', {}) ?? 'Booruを追加';
+  @override
+  String get addBooruActionSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruActionSubtitle', {}) ?? 'URLと検索設定を追加してサイトに接続します';
+  @override
+  String get restoreBackupAction => TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ?? 'バックアップの復元または管理';
+  @override
+  String get restoreBackupActionSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupActionSubtitle', {}) ?? '設定、Booru、タブ、保存されたデータを復元します';
+  @override
+  String get openSettingsAction => TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsAction', {}) ?? '設定';
+  @override
+  String get openSettingsActionSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsActionSubtitle', {}) ?? 'ソースを追加する前に設定を調整します';
+  @override
+  String get helpSectionTitle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.helpSectionTitle', {}) ?? 'ヘルプが必要ですか？';
+  @override
+  String get booruSourcesArticle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticle', {}) ?? 'Booruの追加方法と設定';
+  @override
+  String get booruSourcesArticleSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticleSubtitle', {}) ?? '初めてBooru設定を追加するユーザー向けの説明です';
+  @override
+  String get backupRestoreArticle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticle', {}) ?? 'データをバックアップから復元する';
+  @override
+  String get backupRestoreArticleSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticleSubtitle', {}) ?? '以前のアプリ/バージョンから移行するユーザー向けの手順です';
+  @override
   String get restoringPreviousSession => TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? '以前のセッションを復元中…';
   @override
   String get copiedFileURL => TranslationOverrides.string(_root.$meta, 'mediaPreviews.copiedFileURL', {}) ?? 'ファイルURLをクリップボードにコピーしました！';
@@ -1532,6 +1575,8 @@ class _Translations$tagType$ja_JP extends Translations$tagType$en {
   @override
   String get species => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '種';
   @override
+  String get lore => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? '伝承';
+  @override
   String get none => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'なし/一般';
 }
 
@@ -1549,10 +1594,10 @@ class _Translations$tabs$filters$ja_JP extends Translations$tabs$filters$en {
   @override
   String get multibooru => TranslationOverrides.string(_root.$meta, 'tabs.filters.multibooru', {}) ?? 'Multibooru';
   @override
-  String get duplicates => TranslationOverrides.string(_root.$meta, 'tabs.filters.duplicates', {}) ?? '重複タブ';
+  String get duplicates => TranslationOverrides.string(_root.$meta, 'tabs.filters.duplicates', {}) ?? '重複しているタブ';
   @override
   String get checkDuplicatesOnSameBooru =>
-      TranslationOverrides.string(_root.$meta, 'tabs.filters.checkDuplicatesOnSameBooru', {}) ?? '同じBooruでの重複のみを確認';
+      TranslationOverrides.string(_root.$meta, 'tabs.filters.checkDuplicatesOnSameBooru', {}) ?? '同じBooruでの重複のみを検出';
   @override
   String get emptySearchQuery => TranslationOverrides.string(_root.$meta, 'tabs.filters.emptySearchQuery', {}) ?? '検索クエリが未指定のタブのみ';
   @override
@@ -1658,7 +1703,7 @@ class _Translations$settings$language$ja_JP extends Translations$settings$langua
   @override
   String get system => TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'システム';
   @override
-  String get helpUsTranslate => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? '翻訳に協力する';
+  String get helpUsTranslate => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? '翻訳に協力';
   @override
   String get visitForDetails =>
       TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
@@ -1673,7 +1718,7 @@ class _Translations$settings$booru$ja_JP extends Translations$settings$booru$en 
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Booru & 検索';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Booruと検索';
   @override
   String get defaultTags => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'デフォルトのタグ';
   @override
@@ -1736,6 +1781,24 @@ class _Translations$settings$booru$ja_JP extends Translations$settings$booru$en 
   String get cantDeleteThisBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.cantDeleteThisBooru', {}) ?? 'このBooruは削除できません！';
   @override
   String get removeRelatedTabsFirst => TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? '関連するタブを先に削除してください';
+  @override
+  String get sourceLimitNotice =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
+      '設定の下部で変更できる互換性設定によって、ソース設定の動作が異なる場合があります。コンテンツは外部サイトによってホストおよび提供されており、アプリによって制御されていません。';
+  @override
+  String get advanced => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? '高度な設定';
+  @override
+  String get expandedSourceCompatibility => TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'ソース設定の互換性';
+  @override
+  String get expandedSourceCompatibilitySubtitle =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ?? 'ソースの互換性に関する処理方法を調整します';
+  @override
+  String get expandedSourceCompatibilityConfirm =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ??
+      'この設定を変更すると、ソースの動作が変更され、影響が出る場合があります。コンテンツは外部サイトによってホストおよび提供されており、アプリによって制御されていません。続行しますか？';
+  @override
+  String get sourceUnavailableCurrentSettings =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.sourceUnavailableCurrentSettings', {}) ?? 'このサイトは現在利用できません。';
 }
 
 // Path: settings.booruEditor
@@ -1752,7 +1815,7 @@ class _Translations$settings$booruEditor$ja_JP extends Translations$settings$boo
   @override
   String get testBooruFailedMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
-      '構成パラメータが正しくない、booruがAPIアクセスを許可していない、リクエストがデータを返さない、またはネットワークエラーが発生しました。';
+      '構成パラメータが正しくない、BooruがAPIアクセスを許可していない、リクエストがデータを返さない、またはネットワークエラーが発生しました。';
   @override
   String get saveBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Booruを保存';
   @override
@@ -1952,7 +2015,7 @@ class _Translations$settings$theme$ja_JP extends Translations$settings$theme$en 
   @override
   String get useDynamicColor => TranslationOverrides.string(_root.$meta, 'settings.theme.useDynamicColor', {}) ?? 'ダイナミックカラーを使用';
   @override
-  String get android12PlusOnly => TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Android 12+ が必要';
+  String get android12PlusOnly => TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Android 12 以降が必要です';
   @override
   String get theme => TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'テーマ';
   @override
@@ -2049,7 +2112,7 @@ class _Translations$settings$viewer$ja_JP extends Translations$settings$viewer$e
   String get changePageButtonsPosition => TranslationOverrides.string(_root.$meta, 'settings.viewer.changePageButtonsPosition', {}) ?? 'ページ変更ボタンの位置';
   @override
   String get hideToolbarWhenOpeningViewer =>
-      TranslationOverrides.string(_root.$meta, 'settings.viewer.hideToolbarWhenOpeningViewer', {}) ?? 'ビューアーを開いたときにツールバーを非表示にする';
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.hideToolbarWhenOpeningViewer', {}) ?? 'ビューアーを開いたときにツールバーを非表示';
   @override
   String get expandDetailsByDefault => TranslationOverrides.string(_root.$meta, 'settings.viewer.expandDetailsByDefault', {}) ?? 'デフォルトで情報の詳細を展開';
   @override
@@ -2150,7 +2213,7 @@ class _Translations$settings$viewer$ja_JP extends Translations$settings$viewer$e
   @override
   String get usingCustomAnimation => TranslationOverrides.string(_root.$meta, 'settings.viewer.usingCustomAnimation', {}) ?? 'カスタムのアニメーションを使用';
   @override
-  String get kannaLoadingGif => TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? '読み込み時にカンナのGIFを表示';
+  String get kannaLoadingGif => TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? '読み込み中にカンナのGIFを表示';
   @override
   late final _Translations$settings$viewer$imageQualityValues$ja_JP imageQualityValues = _Translations$settings$viewer$imageQualityValues$ja_JP._(
     _root,
@@ -2320,7 +2383,7 @@ class _Translations$settings$database$ja_JP extends Translations$settings$databa
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryRecords', {'limit': limit}) ?? '過去 ${limit}件の検索を保存します';
   @override
   String get searchHistoryTapInfo =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ?? 'エントリーをタップしてアクションを実行できます (削除、お気に入り...)';
+      TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ?? 'エントリーをタップしてアクションを実行できます (削除、お気に入り…)';
   @override
   String get searchHistoryFavouritesInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ?? 'お気に入りのクエリはリストの上部に固定され、制限にカウントされません。';
@@ -2661,7 +2724,7 @@ class _Translations$settings$performance$ja_JP extends Translations$settings$per
   @override
   String get lowPerformanceModeDialogDisablesResourceIntensive =>
       TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDisablesResourceIntensive', {}) ??
-      '- リソースを大量に消費する要素を無効にします (ぼかし、アニメーション化された不透明度、一部アニメーションなど...)';
+      '- リソースを大量に消費する要素を無効にします (ぼかし、アニメーション化された不透明度、一部アニメーションなど…)';
   @override
   String get lowPerformanceModeDialogSetsOptimal =>
       TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
@@ -2740,6 +2803,8 @@ class _Translations$settings$cache$ja_JP extends Translations$settings$cache$en 
       '[警告]: デスクトップ版では、一部のBooruで ストリーム モードが正しく動作しない場合があります。';
   @override
   String get deleteCacheAfter => TranslationOverrides.string(_root.$meta, 'settings.cache.deleteCacheAfter', {}) ?? 'キャッシュを次の期間後に削除:';
+  @override
+  String get neverDeleteDuration => TranslationOverrides.string(_root.$meta, 'settings.cache.neverDeleteDuration', {}) ?? 'しない';
   @override
   String get cacheSizeLimit => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheSizeLimit', {}) ?? 'キャッシュサイズの制限 (GB)';
   @override
@@ -2829,9 +2894,9 @@ class _Translations$settings$sync$ja_JP extends Translations$settings$sync$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? '同期';
   @override
-  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Syncを使用するにはデータベースを有効にする必要があります';
+  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '同期機能を使用するにはデータベースを有効にする必要があります';
   @override
   String get errorTitle => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? 'エラー！';
   @override
@@ -2844,16 +2909,16 @@ class _Translations$settings$sync$ja_JP extends Translations$settings$sync$en {
   String get receiveDataFromDevice => TranslationOverrides.string(_root.$meta, 'settings.sync.receiveDataFromDevice', {}) ?? '他のデバイスからデータを引き継ぎ';
   @override
   String get senderInstructions =>
-      TranslationOverrides.string(_root.$meta, 'settings.sync.senderInstructions', {}) ?? 'もう一方のデバイスでサーバーを起動し、IP/ポートを入力して、Syncを開始 をタップします';
+      TranslationOverrides.string(_root.$meta, 'settings.sync.senderInstructions', {}) ?? 'もう一方のデバイスでサーバーを起動し、IP/ポートを入力して、同期を開始 をタップします';
   @override
   String get ipAddress => TranslationOverrides.string(_root.$meta, 'settings.sync.ipAddress', {}) ?? 'IPアドレス';
   @override
   String get ipAddressPlaceholder =>
-      TranslationOverrides.string(_root.$meta, 'settings.sync.ipAddressPlaceholder', {}) ?? 'ホストIPアドレス (192.168.1.1 など)';
+      TranslationOverrides.string(_root.$meta, 'settings.sync.ipAddressPlaceholder', {}) ?? 'ホストのIPアドレス (例: 192.168.1.1)';
   @override
   String get port => TranslationOverrides.string(_root.$meta, 'settings.sync.port', {}) ?? 'ポート';
   @override
-  String get portPlaceholder => TranslationOverrides.string(_root.$meta, 'settings.sync.portPlaceholder', {}) ?? 'ホストのポート (7777 など)';
+  String get portPlaceholder => TranslationOverrides.string(_root.$meta, 'settings.sync.portPlaceholder', {}) ?? 'ホストのポート (例: 7777)';
   @override
   String get sendFavourites => TranslationOverrides.string(_root.$meta, 'settings.sync.sendFavourites', {}) ?? 'お気に入りを送信';
   @override
@@ -2894,10 +2959,10 @@ class _Translations$settings$sync$ja_JP extends Translations$settings$sync$en {
   @override
   String get syncSnatchedFromHelpText3 =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText3', {}) ??
-      '例: お気に入りの数がXの場合、このフィールドを100に設定すると、 アイテム #100 から X まで同期されます';
+      '例: ダウンロード履歴の数がXの場合、このフィールドを100に設定すると、 アイテム #100 から X まで同期されます';
   @override
   String get syncSnatchedFromHelpText4 =>
-      TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText4', {}) ?? 'お気に入りの順序: 古いもの (0) から新しい順 (X)';
+      TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText4', {}) ?? '履歴の順序: 古いもの (0) から新しい順 (X)';
   @override
   String get sendSettings => TranslationOverrides.string(_root.$meta, 'settings.sync.sendSettings', {}) ?? '設定を送信';
   @override
@@ -2947,7 +3012,7 @@ class _Translations$settings$sync$ja_JP extends Translations$settings$sync$en {
   @override
   String get testConnectionHelpText2 => TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText2', {}) ?? '成功/失敗の通知を表示します。';
   @override
-  String get startSync => TranslationOverrides.string(_root.$meta, 'settings.sync.startSync', {}) ?? 'Syncを開始';
+  String get startSync => TranslationOverrides.string(_root.$meta, 'settings.sync.startSync', {}) ?? '同期を開始';
   @override
   String get portAndIPCannotBeEmpty =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.portAndIPCannotBeEmpty', {}) ?? 'ポートとIPのフィールドは空にできません！';
@@ -3137,7 +3202,12 @@ class _Translations$settings$logging$ja_JP extends Translations$settings$logging
 
   // Translations
   @override
-  String get logger => TranslationOverrides.string(_root.$meta, 'settings.logging.logger', {}) ?? 'Logger';
+  String get logger => TranslationOverrides.string(_root.$meta, 'settings.logging.logger', {}) ?? 'ロガー';
+  @override
+  String get captureLogcat => TranslationOverrides.string(_root.$meta, 'settings.logging.captureLogcat', {}) ?? 'Android logcatをキャプチャ';
+  @override
+  String get captureLogcatDescription =>
+      TranslationOverrides.string(_root.$meta, 'settings.logging.captureLogcatDescription', {}) ?? 'このアプリのAndroidプロセスからの警告とエラーメッセージを記録';
 }
 
 // Path: settings.webview
@@ -3305,10 +3375,10 @@ class _Translations$media$loading$ja_JP extends Translations$media$loading$en {
 
   // Translations
   @override
-  String get rendering => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'ロード中…';
+  String get rendering => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? '描画中…';
   @override
   String get loadingAndRenderingFromCache =>
-      TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'キャッシュから読み込み中…';
+      TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'キャッシュから読み込み・描画中…';
   @override
   String get loadingFromCache => TranslationOverrides.string(_root.$meta, 'media.loading.loadingFromCache', {}) ?? 'キャッシュから読み込み中…';
   @override
@@ -3879,7 +3949,7 @@ extension on TranslationsJaJp {
           'multibooru.multibooruMode' => TranslationOverrides.string(_root.$meta, 'multibooru.multibooruMode', {}) ?? 'Multibooruモード',
           'multibooru.multibooruRequiresAtLeastTwoBoorus' =>
             TranslationOverrides.string(_root.$meta, 'multibooru.multibooruRequiresAtLeastTwoBoorus', {}) ?? '少なくとも2つのBooruが設定されている必要があります',
-          'multibooru.selectSecondaryBoorus' => TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? '追加するbooruを選択:',
+          'multibooru.selectSecondaryBoorus' => TranslationOverrides.string(_root.$meta, 'multibooru.selectSecondaryBoorus', {}) ?? '追加するBooruを選択:',
           'multibooru.akaMultibooruMode' => TranslationOverrides.string(_root.$meta, 'multibooru.akaMultibooruMode', {}) ?? 'Multibooruモード',
           'multibooru.labelSecondaryBoorusToInclude' =>
             TranslationOverrides.string(_root.$meta, 'multibooru.labelSecondaryBoorusToInclude', {}) ?? '追加するBooru',
@@ -3915,6 +3985,12 @@ extension on TranslationsJaJp {
           'tabs.sortMode' => TranslationOverrides.string(_root.$meta, 'tabs.sortMode', {}) ?? 'タブをソート',
           'tabs.help' => TranslationOverrides.string(_root.$meta, 'tabs.help', {}) ?? 'ヘルプ',
           'tabs.deleteTabs' => TranslationOverrides.string(_root.$meta, 'tabs.deleteTabs', {}) ?? 'タブを削除',
+          'tabs.deleteDuplicateTabs' => TranslationOverrides.string(_root.$meta, 'tabs.deleteDuplicateTabs', {}) ?? '重複タブの削除',
+          'tabs.deleteDuplicateTabsQuestion' =>
+            TranslationOverrides.string(_root.$meta, 'tabs.deleteDuplicateTabsQuestion', {}) ?? '重複するタブが見つかりました。グループを選択したあと、どれを保持するか選択してください:',
+          'tabs.keepFirstDuplicateTabs' => TranslationOverrides.string(_root.$meta, 'tabs.keepFirstDuplicateTabs', {}) ?? '最初のタブを保持',
+          'tabs.keepLastDuplicateTabs' => TranslationOverrides.string(_root.$meta, 'tabs.keepLastDuplicateTabs', {}) ?? '最後のタブを保持',
+          'tabs.skipDuplicateTabDelete' => TranslationOverrides.string(_root.$meta, 'tabs.skipDuplicateTabDelete', {}) ?? 'スキップ',
           'tabs.shuffleTabs' => TranslationOverrides.string(_root.$meta, 'tabs.shuffleTabs', {}) ?? 'タブをシャッフル',
           'tabs.tabRandomlyShuffled' => TranslationOverrides.string(_root.$meta, 'tabs.tabRandomlyShuffled', {}) ?? 'タブはシャッフルされました',
           'tabs.tabOrderSaved' => TranslationOverrides.string(_root.$meta, 'tabs.tabOrderSaved', {}) ?? 'タブの順番を保存しました',
@@ -3968,9 +4044,9 @@ extension on TranslationsJaJp {
           'tabs.filters.loaded' => TranslationOverrides.string(_root.$meta, 'tabs.filters.loaded', {}) ?? 'ロード済み',
           'tabs.filters.tagType' => TranslationOverrides.string(_root.$meta, 'tabs.filters.tagType', {}) ?? 'タグのタイプ',
           'tabs.filters.multibooru' => TranslationOverrides.string(_root.$meta, 'tabs.filters.multibooru', {}) ?? 'Multibooru',
-          'tabs.filters.duplicates' => TranslationOverrides.string(_root.$meta, 'tabs.filters.duplicates', {}) ?? '重複タブ',
+          'tabs.filters.duplicates' => TranslationOverrides.string(_root.$meta, 'tabs.filters.duplicates', {}) ?? '重複しているタブ',
           'tabs.filters.checkDuplicatesOnSameBooru' =>
-            TranslationOverrides.string(_root.$meta, 'tabs.filters.checkDuplicatesOnSameBooru', {}) ?? '同じBooruでの重複のみを確認',
+            TranslationOverrides.string(_root.$meta, 'tabs.filters.checkDuplicatesOnSameBooru', {}) ?? '同じBooruでの重複のみを検出',
           'tabs.filters.emptySearchQuery' => TranslationOverrides.string(_root.$meta, 'tabs.filters.emptySearchQuery', {}) ?? '検索クエリが未指定のタブのみ',
           'tabs.filters.title' => TranslationOverrides.string(_root.$meta, 'tabs.filters.title', {}) ?? 'タブフィルター',
           'tabs.filters.all' => TranslationOverrides.string(_root.$meta, 'tabs.filters.all', {}) ?? 'すべて',
@@ -4069,11 +4145,11 @@ extension on TranslationsJaJp {
           'settings.title' => TranslationOverrides.string(_root.$meta, 'settings.title', {}) ?? '設定',
           'settings.language.title' => TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? '言語',
           'settings.language.system' => TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'システム',
-          'settings.language.helpUsTranslate' => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? '翻訳に協力する',
+          'settings.language.helpUsTranslate' => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? '翻訳に協力',
           'settings.language.visitForDetails' =>
             TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
                 '詳細については、 <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>GitHub</a> を確認するか、下の画像をタップしてPOEditorにアクセスできます',
-          'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Booru & 検索',
+          'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Booruと検索',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'デフォルトのタグ',
           'settings.booru.itemsPerPage' => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'ページごとに取得される項目数',
           'settings.booru.itemsPerPageTip' =>
@@ -4118,12 +4194,25 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.booru.cantDeleteThisBooru', {}) ?? 'このBooruは削除できません！',
           'settings.booru.removeRelatedTabsFirst' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? '関連するタブを先に削除してください',
+          'settings.booru.sourceLimitNotice' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
+                '設定の下部で変更できる互換性設定によって、ソース設定の動作が異なる場合があります。コンテンツは外部サイトによってホストおよび提供されており、アプリによって制御されていません。',
+          'settings.booru.advanced' => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? '高度な設定',
+          'settings.booru.expandedSourceCompatibility' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'ソース設定の互換性',
+          'settings.booru.expandedSourceCompatibilitySubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ?? 'ソースの互換性に関する処理方法を調整します',
+          'settings.booru.expandedSourceCompatibilityConfirm' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ??
+                'この設定を変更すると、ソースの動作が変更され、影響が出る場合があります。コンテンツは外部サイトによってホストおよび提供されており、アプリによって制御されていません。続行しますか？',
+          'settings.booru.sourceUnavailableCurrentSettings' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.sourceUnavailableCurrentSettings', {}) ?? 'このサイトは現在利用できません。',
           'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Booru エディター',
           'settings.booruEditor.testBooruFailedTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booruのテストに失敗',
           'settings.booruEditor.testBooruFailedMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
-                '構成パラメータが正しくない、booruがAPIアクセスを許可していない、リクエストがデータを返さない、またはネットワークエラーが発生しました。',
+                '構成パラメータが正しくない、BooruがAPIアクセスを許可していない、リクエストがデータを返さない、またはネットワークエラーが発生しました。',
           'settings.booruEditor.saveBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Booruを保存',
           'settings.booruEditor.runningTest' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'テストの実行中…',
           'settings.booruEditor.booruConfigExistsError' =>
@@ -4262,7 +4351,8 @@ extension on TranslationsJaJp {
           'settings.theme.themeMode' => TranslationOverrides.string(_root.$meta, 'settings.theme.themeMode', {}) ?? 'テーマモード',
           'settings.theme.blackBg' => TranslationOverrides.string(_root.$meta, 'settings.theme.blackBg', {}) ?? '黒の背景',
           'settings.theme.useDynamicColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.useDynamicColor', {}) ?? 'ダイナミックカラーを使用',
-          'settings.theme.android12PlusOnly' => TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Android 12+ が必要',
+          'settings.theme.android12PlusOnly' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Android 12 以降が必要です',
           'settings.theme.theme' => TranslationOverrides.string(_root.$meta, 'settings.theme.theme', {}) ?? 'テーマ',
           'settings.theme.primaryColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.primaryColor', {}) ?? 'プライマリカラー',
           'settings.theme.secondaryColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.secondaryColor', {}) ?? 'セカンダリカラー',
@@ -4314,7 +4404,7 @@ extension on TranslationsJaJp {
           'settings.viewer.changePageButtonsPosition' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.changePageButtonsPosition', {}) ?? 'ページ変更ボタンの位置',
           'settings.viewer.hideToolbarWhenOpeningViewer' =>
-            TranslationOverrides.string(_root.$meta, 'settings.viewer.hideToolbarWhenOpeningViewer', {}) ?? 'ビューアーを開いたときにツールバーを非表示にする',
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.hideToolbarWhenOpeningViewer', {}) ?? 'ビューアーを開いたときにツールバーを非表示',
           'settings.viewer.expandDetailsByDefault' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.expandDetailsByDefault', {}) ?? 'デフォルトで情報の詳細を展開',
           'settings.viewer.hideTranslationNotesByDefault' =>
@@ -4391,7 +4481,7 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.viewer.usingDefaultAnimation', {}) ?? 'デフォルトのアニメーションを使用',
           'settings.viewer.usingCustomAnimation' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.usingCustomAnimation', {}) ?? 'カスタムのアニメーションを使用',
-          'settings.viewer.kannaLoadingGif' => TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? '読み込み時にカンナのGIFを表示',
+          'settings.viewer.kannaLoadingGif' => TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? '読み込み中にカンナのGIFを表示',
           'settings.viewer.imageQualityValues.sample' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? 'サンプル',
           'settings.viewer.imageQualityValues.fullRes' =>
@@ -4432,6 +4522,9 @@ extension on TranslationsJaJp {
                 '動画の読み込み時にクラッシュするローエンドデバイスに便利です。代わりに外部プレイヤーやブラウザで視聴するオプションを提供します。',
           'settings.video.autoplayVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.autoplayVideos', {}) ?? '動画の自動再生',
           'settings.video.startVideosMuted' => TranslationOverrides.string(_root.$meta, 'settings.video.startVideosMuted', {}) ?? '動画をミュート状態で開始',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.experimental' => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '[実験的機能]',
           'settings.video.videoPlayerBackend' => TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? 'プレーヤーのバックエンド',
           'settings.video.backendDefault' => TranslationOverrides.string(_root.$meta, 'settings.video.backendDefault', {}) ?? 'デフォルト',
@@ -4452,9 +4545,6 @@ extension on TranslationsJaJp {
           'settings.video.mpvUseHardwareAcceleration' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.mpvUseHardwareAcceleration', {}) ?? 'MPV: ハードウェアアクセラレーションを使用',
           'settings.video.mpvVO' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvVO', {}) ?? 'MPV: VO',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.mpvHWDEC' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvHWDEC', {}) ?? 'MPV: HWDEC',
           'settings.video.videoCacheMode' => TranslationOverrides.string(_root.$meta, 'settings.video.videoCacheMode', {}) ?? 'ビデオキャッシュモード',
           'settings.video.cacheModes.title' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.title', {}) ?? 'ビデオキャッシュモード',
@@ -4537,7 +4627,7 @@ extension on TranslationsJaJp {
             ({required int limit}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryRecords', {'limit': limit}) ?? '過去 ${limit}件の検索を保存します',
           'settings.database.searchHistoryTapInfo' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ?? 'エントリーをタップしてアクションを実行できます (削除、お気に入り...)',
+            TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryTapInfo', {}) ?? 'エントリーをタップしてアクションを実行できます (削除、お気に入り…)',
           'settings.database.searchHistoryFavouritesInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryFavouritesInfo', {}) ?? 'お気に入りのクエリはリストの上部に固定され、制限にカウントされません。',
           'settings.database.tagTypeFetchingInfo' =>
@@ -4778,7 +4868,7 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDisablesDetailed', {}) ?? '- 読み込み中の詳細情報を無効にします',
           'settings.performance.lowPerformanceModeDialogDisablesResourceIntensive' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogDisablesResourceIntensive', {}) ??
-                '- リソースを大量に消費する要素を無効にします (ぼかし、アニメーション化された不透明度、一部アニメーションなど...)',
+                '- リソースを大量に消費する要素を無効にします (ぼかし、アニメーション化された不透明度、一部アニメーションなど…)',
           'settings.performance.lowPerformanceModeDialogSetsOptimal' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
                 '以下のオプションに最適な設定を設定します (後で個別に変更できます):',
@@ -4826,6 +4916,7 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.cache.videoCacheWarningDesktop', {}) ??
                 '[警告]: デスクトップ版では、一部のBooruで ストリーム モードが正しく動作しない場合があります。',
           'settings.cache.deleteCacheAfter' => TranslationOverrides.string(_root.$meta, 'settings.cache.deleteCacheAfter', {}) ?? 'キャッシュを次の期間後に削除:',
+          'settings.cache.neverDeleteDuration' => TranslationOverrides.string(_root.$meta, 'settings.cache.neverDeleteDuration', {}) ?? 'しない',
           'settings.cache.cacheSizeLimit' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheSizeLimit', {}) ?? 'キャッシュサイズの制限 (GB)',
           'settings.cache.maximumTotalCacheSize' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.maximumTotalCacheSize', {}) ?? '最大合計キャッシュサイズ',
@@ -4877,8 +4968,8 @@ extension on TranslationsJaJp {
           'settings.itemFilters.removeSnatched' =>
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'ダウンロードしたアイテムを削除',
           'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'AIを使用したアイテムを非表示',
-          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync',
-          'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Syncを使用するにはデータベースを有効にする必要があります',
+          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? '同期',
+          'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '同期機能を使用するにはデータベースを有効にする必要があります',
           'settings.sync.errorTitle' => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? 'エラー！',
           'settings.sync.pleaseEnterIPAndPort' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.pleaseEnterIPAndPort', {}) ?? 'IPアドレスとポートを入力してください。',
@@ -4888,12 +4979,12 @@ extension on TranslationsJaJp {
           'settings.sync.receiveDataFromDevice' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.receiveDataFromDevice', {}) ?? '他のデバイスからデータを引き継ぎ',
           'settings.sync.senderInstructions' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.senderInstructions', {}) ?? 'もう一方のデバイスでサーバーを起動し、IP/ポートを入力して、Syncを開始 をタップします',
+            TranslationOverrides.string(_root.$meta, 'settings.sync.senderInstructions', {}) ?? 'もう一方のデバイスでサーバーを起動し、IP/ポートを入力して、同期を開始 をタップします',
           'settings.sync.ipAddress' => TranslationOverrides.string(_root.$meta, 'settings.sync.ipAddress', {}) ?? 'IPアドレス',
           'settings.sync.ipAddressPlaceholder' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.ipAddressPlaceholder', {}) ?? 'ホストIPアドレス (192.168.1.1 など)',
+            TranslationOverrides.string(_root.$meta, 'settings.sync.ipAddressPlaceholder', {}) ?? 'ホストのIPアドレス (例: 192.168.1.1)',
           'settings.sync.port' => TranslationOverrides.string(_root.$meta, 'settings.sync.port', {}) ?? 'ポート',
-          'settings.sync.portPlaceholder' => TranslationOverrides.string(_root.$meta, 'settings.sync.portPlaceholder', {}) ?? 'ホストのポート (7777 など)',
+          'settings.sync.portPlaceholder' => TranslationOverrides.string(_root.$meta, 'settings.sync.portPlaceholder', {}) ?? 'ホストのポート (例: 7777)',
           'settings.sync.sendFavourites' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendFavourites', {}) ?? 'お気に入りを送信',
           'settings.sync.favouritesCount' =>
             ({required String count}) =>
@@ -4923,9 +5014,9 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText2', {}) ?? '最初からすべて同期する場合はこのフィールドを空白のままにしておいてください',
           'settings.sync.syncSnatchedFromHelpText3' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText3', {}) ??
-                '例: お気に入りの数がXの場合、このフィールドを100に設定すると、 アイテム #100 から X まで同期されます',
+                '例: ダウンロード履歴の数がXの場合、このフィールドを100に設定すると、 アイテム #100 から X まで同期されます',
           'settings.sync.syncSnatchedFromHelpText4' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText4', {}) ?? 'お気に入りの順序: 古いもの (0) から新しい順 (X)',
+            TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText4', {}) ?? '履歴の順序: 古いもの (0) から新しい順 (X)',
           'settings.sync.sendSettings' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendSettings', {}) ?? '設定を送信',
           'settings.sync.sendBooruConfigs' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendBooruConfigs', {}) ?? 'Booru 設定を送信',
           'settings.sync.configsCount' =>
@@ -4957,7 +5048,7 @@ extension on TranslationsJaJp {
             TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText1', {}) ?? '先のデバイスにテストを送信します。',
           'settings.sync.testConnectionHelpText2' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.testConnectionHelpText2', {}) ?? '成功/失敗の通知を表示します。',
-          'settings.sync.startSync' => TranslationOverrides.string(_root.$meta, 'settings.sync.startSync', {}) ?? 'Syncを開始',
+          'settings.sync.startSync' => TranslationOverrides.string(_root.$meta, 'settings.sync.startSync', {}) ?? '同期を開始',
           'settings.sync.portAndIPCannotBeEmpty' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.portAndIPCannotBeEmpty', {}) ?? 'ポートとIPのフィールドは空にできません！',
           'settings.sync.nothingSelectedToSync' =>
@@ -5051,7 +5142,11 @@ extension on TranslationsJaJp {
           'settings.debug.sessionString' => TranslationOverrides.string(_root.$meta, 'settings.debug.sessionString', {}) ?? 'セッション文字列',
           'settings.debug.restoredSessionFromString' =>
             TranslationOverrides.string(_root.$meta, 'settings.debug.restoredSessionFromString', {}) ?? 'セッションを文字列から復元しました',
-          'settings.logging.logger' => TranslationOverrides.string(_root.$meta, 'settings.logging.logger', {}) ?? 'Logger',
+          'settings.logging.logger' => TranslationOverrides.string(_root.$meta, 'settings.logging.logger', {}) ?? 'ロガー',
+          'settings.logging.captureLogcat' =>
+            TranslationOverrides.string(_root.$meta, 'settings.logging.captureLogcat', {}) ?? 'Android logcatをキャプチャ',
+          'settings.logging.captureLogcatDescription' =>
+            TranslationOverrides.string(_root.$meta, 'settings.logging.captureLogcatDescription', {}) ?? 'このアプリのAndroidプロセスからの警告とエラーメッセージを記録',
           'settings.webview.openWebview' => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? 'アプリ内ブラウザを開く',
           'settings.webview.openWebviewTip' => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? 'ログインまたはCookieの取得用',
           'settings.dirPicker.directoryName' => TranslationOverrides.string(_root.$meta, 'settings.dirPicker.directoryName', {}) ?? 'ディレクトリ名',
@@ -5126,14 +5221,14 @@ extension on TranslationsJaJp {
           'lockscreen.testingMessage' =>
             TranslationOverrides.string(_root.$meta, 'lockscreen.testingMessage', {}) ??
                 '[TESTING]: 通常の方法でアプリのロックを解除できない場合はこのボタンを押してください。デバイスの詳細を開発者に報告してください。',
-          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'Sync',
+          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? '同期',
           'loliSync.stopSyncingQuestion' => TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? '同期を停止しますか？',
           'loliSync.stopServerQuestion' => TranslationOverrides.string(_root.$meta, 'loliSync.stopServerQuestion', {}) ?? 'サーバーを停止しますか？',
           'loliSync.noConnection' => TranslationOverrides.string(_root.$meta, 'loliSync.noConnection', {}) ?? '接続なし',
           'loliSync.waitingForConnection' => TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? '接続を待機中…',
           'loliSync.startingServer' => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? 'サーバーの開始…',
           'loliSync.keepScreenAwake' => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'スクリーンを点灯したままにする',
-          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Sync サーバーを終了',
+          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? '同期サーバーを終了',
           'loliSync.testError' =>
             ({required int statusCode, required String reasonPhrase}) =>
                 TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
@@ -5272,6 +5367,9 @@ extension on TranslationsJaJp {
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'スキップ',
           'mobileHome.retryAll' =>
             ({required int count}) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'すべて再試行 (${count})',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.existingFailedOrCancelledItems' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.existingFailedOrCancelledItems', {}) ?? '既に存在、失敗またはキャンセルされたアイテム',
           'mobileHome.clearAllRetryableItems' => TranslationOverrides.string(_root.$meta, 'mobileHome.clearAllRetryableItems', {}) ?? 'すべてクリア',
@@ -5288,9 +5386,27 @@ extension on TranslationsJaJp {
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'Booruを新規追加',
           'mediaPreviews.help' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.help', {}) ?? 'ヘルプ (英語)',
           'mediaPreviews.settings' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? '設定',
-          _ => null,
-        } ??
-        switch (path) {
+          'mediaPreviews.onboardingTitle' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingTitle', {}) ?? '最初のソースを設定しましょう',
+          'mediaPreviews.onboardingSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingSubtitle', {}) ?? 'Booruの設定を追加するか、バックアップを復元して閲覧を開始',
+          'mediaPreviews.addBooruAction' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruAction', {}) ?? 'Booruを追加',
+          'mediaPreviews.addBooruActionSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruActionSubtitle', {}) ?? 'URLと検索設定を追加してサイトに接続します',
+          'mediaPreviews.restoreBackupAction' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ?? 'バックアップの復元または管理',
+          'mediaPreviews.restoreBackupActionSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupActionSubtitle', {}) ?? '設定、Booru、タブ、保存されたデータを復元します',
+          'mediaPreviews.openSettingsAction' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsAction', {}) ?? '設定',
+          'mediaPreviews.openSettingsActionSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsActionSubtitle', {}) ?? 'ソースを追加する前に設定を調整します',
+          'mediaPreviews.helpSectionTitle' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.helpSectionTitle', {}) ?? 'ヘルプが必要ですか？',
+          'mediaPreviews.booruSourcesArticle' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticle', {}) ?? 'Booruの追加方法と設定',
+          'mediaPreviews.booruSourcesArticleSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticleSubtitle', {}) ?? '初めてBooru設定を追加するユーザー向けの説明です',
+          'mediaPreviews.backupRestoreArticle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticle', {}) ?? 'データをバックアップから復元する',
+          'mediaPreviews.backupRestoreArticleSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticleSubtitle', {}) ?? '以前のアプリ/バージョンから移行するユーザー向けの手順です',
           'mediaPreviews.restoringPreviousSession' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? '以前のセッションを復元中…',
           'mediaPreviews.copiedFileURL' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.copiedFileURL', {}) ?? 'ファイルURLをクリップボードにコピーしました！',
@@ -5374,9 +5490,9 @@ extension on TranslationsJaJp {
           'galleryButtons.toggleQuality' => TranslationOverrides.string(_root.$meta, 'galleryButtons.toggleQuality', {}) ?? '画質の切り替え',
           'galleryButtons.externalPlayer' => TranslationOverrides.string(_root.$meta, 'galleryButtons.externalPlayer', {}) ?? '外部プレイヤー',
           'galleryButtons.imageSearch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.imageSearch', {}) ?? '画像検索',
-          'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? 'ロード中…',
+          'media.loading.rendering' => TranslationOverrides.string(_root.$meta, 'media.loading.rendering', {}) ?? '描画中…',
           'media.loading.loadingAndRenderingFromCache' =>
-            TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'キャッシュから読み込み中…',
+            TranslationOverrides.string(_root.$meta, 'media.loading.loadingAndRenderingFromCache', {}) ?? 'キャッシュから読み込み・描画中…',
           'media.loading.loadingFromCache' => TranslationOverrides.string(_root.$meta, 'media.loading.loadingFromCache', {}) ?? 'キャッシュから読み込み中…',
           'media.loading.buffering' => TranslationOverrides.string(_root.$meta, 'media.loading.buffering', {}) ?? 'バッファリング中…',
           'media.loading.loading' => TranslationOverrides.string(_root.$meta, 'media.loading.loading', {}) ?? '読み込み中…',
@@ -5464,6 +5580,7 @@ extension on TranslationsJaJp {
           'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'コピーライト / シリーズ',
           'tagType.meta' => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'メタ',
           'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '種',
+          'tagType.lore' => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? '伝承',
           'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'なし/一般',
           _ => null,
         };

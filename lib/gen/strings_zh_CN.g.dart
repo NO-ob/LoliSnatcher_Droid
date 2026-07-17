@@ -639,6 +639,17 @@ class _Translations$tabs$zh_CN extends Translations$tabs$en {
   @override
   String get deleteTabs => TranslationOverrides.string(_root.$meta, 'tabs.deleteTabs', {}) ?? '删除标签页';
   @override
+  String get deleteDuplicateTabs => TranslationOverrides.string(_root.$meta, 'tabs.deleteDuplicateTabs', {}) ?? '删除重复的标签页';
+  @override
+  String get deleteDuplicateTabsQuestion =>
+      TranslationOverrides.string(_root.$meta, 'tabs.deleteDuplicateTabsQuestion', {}) ?? '存在重复的标签页。请选择您想保留在组中的页面：';
+  @override
+  String get keepFirstDuplicateTabs => TranslationOverrides.string(_root.$meta, 'tabs.keepFirstDuplicateTabs', {}) ?? '保留最早的';
+  @override
+  String get keepLastDuplicateTabs => TranslationOverrides.string(_root.$meta, 'tabs.keepLastDuplicateTabs', {}) ?? '保留最晚的';
+  @override
+  String get skipDuplicateTabDelete => TranslationOverrides.string(_root.$meta, 'tabs.skipDuplicateTabDelete', {}) ?? '跳过';
+  @override
   String get shuffleTabs => TranslationOverrides.string(_root.$meta, 'tabs.shuffleTabs', {}) ?? '随机排序标签页';
   @override
   String get tabRandomlyShuffled => TranslationOverrides.string(_root.$meta, 'tabs.tabRandomlyShuffled', {}) ?? '已随机排序标签页';
@@ -1017,7 +1028,7 @@ class _Translations$loliSync$zh_CN extends Translations$loliSync$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'LoliSync';
+  String get title => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? '同步';
   @override
   String get stopSyncingQuestion => TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? '要停止同步吗？';
   @override
@@ -1031,7 +1042,7 @@ class _Translations$loliSync$zh_CN extends Translations$loliSync$en {
   @override
   String get keepScreenAwake => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? '屏幕常亮';
   @override
-  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? '已结束LoliSync服务器';
+  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? '已结束同步服务器';
   @override
   String testError({required int statusCode, required String reasonPhrase}) =>
       TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
@@ -1364,6 +1375,36 @@ class _Translations$mediaPreviews$zh_CN extends Translations$mediaPreviews$en {
   @override
   String get settings => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? '设置';
   @override
+  String get onboardingTitle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingTitle', {}) ?? '添加第一个图源';
+  @override
+  String get onboardingSubtitle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingSubtitle', {}) ?? '要开始浏览，请添加一个图站配置或从备份中恢复';
+  @override
+  String get addBooruAction => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruAction', {}) ?? '添加新的图站';
+  @override
+  String get addBooruActionSubtitle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruActionSubtitle', {}) ?? '通过添加站点的地址和搜索设置以连接图站';
+  @override
+  String get restoreBackupAction => TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ?? '备份管理与恢复';
+  @override
+  String get restoreBackupActionSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupActionSubtitle', {}) ?? '恢复设置，图站，标签页和其他保存的数据';
+  @override
+  String get openSettingsAction => TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsAction', {}) ?? '打开设置页面';
+  @override
+  String get openSettingsActionSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsActionSubtitle', {}) ?? '在添加图源前先调整一下应用的行为';
+  @override
+  String get helpSectionTitle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.helpSectionTitle', {}) ?? '需要帮助吗？';
+  @override
+  String get booruSourcesArticle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticle', {}) ?? '添加图站的方法与应用的工作原理';
+  @override
+  String get booruSourcesArticleSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticleSubtitle', {}) ?? '为第一次添加图站的用户提供的说明';
+  @override
+  String get backupRestoreArticle => TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticle', {}) ?? '从备份文件恢复';
+  @override
+  String get backupRestoreArticleSubtitle =>
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticleSubtitle', {}) ?? '为使用过之前版本应用的老用户提供的说明';
+  @override
   String get restoringPreviousSession => TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? '正在恢复到之前的会话…';
   @override
   String get copiedFileURL => TranslationOverrides.string(_root.$meta, 'mediaPreviews.copiedFileURL', {}) ?? '已复制文件链接到剪贴板！';
@@ -1515,6 +1556,8 @@ class _Translations$tagType$zh_CN extends Translations$tagType$en {
   String get meta => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? '元数据';
   @override
   String get species => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '物种';
+  @override
+  String get lore => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? '背景故事';
   @override
   String get none => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? '无/通常的';
 }
@@ -1717,6 +1760,23 @@ class _Translations$settings$booru$zh_CN extends Translations$settings$booru$en 
   String get cantDeleteThisBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.cantDeleteThisBooru', {}) ?? '无法删除此Booru！';
   @override
   String get removeRelatedTabsFirst => TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? '请先删除相关的标签页';
+  @override
+  String get sourceLimitNotice =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ?? '添加某些网站来源可能需要开启下方的兼容性设置。网站内容由外部托管和提供，不受本应用控制。';
+  @override
+  String get advanced => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? '进阶选项';
+  @override
+  String get expandedSourceCompatibility => TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? '来源配置兼容性';
+  @override
+  String get expandedSourceCompatibilitySubtitle =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ?? '调整对于一些来源的兼容处理方式';
+  @override
+  String get expandedSourceCompatibilityConfirm =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ??
+      '改变此设置可能会影响网站来源显示的内容。内容由外部网站托管和提供，不受本应用控制。要继续吗？';
+  @override
+  String get sourceUnavailableCurrentSettings =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.sourceUnavailableCurrentSettings', {}) ?? '此站点不可用。';
 }
 
 // Path: settings.booruEditor
@@ -2653,6 +2713,8 @@ class _Translations$settings$cache$zh_CN extends Translations$settings$cache$en 
   @override
   String get deleteCacheAfter => TranslationOverrides.string(_root.$meta, 'settings.cache.deleteCacheAfter', {}) ?? '缓存保留时间：';
   @override
+  String get neverDeleteDuration => TranslationOverrides.string(_root.$meta, 'settings.cache.neverDeleteDuration', {}) ?? '永不删除';
+  @override
   String get cacheSizeLimit => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheSizeLimit', {}) ?? '缓存体积限制（GB）';
   @override
   String get maximumTotalCacheSize => TranslationOverrides.string(_root.$meta, 'settings.cache.maximumTotalCacheSize', {}) ?? '总缓存上限';
@@ -2739,9 +2801,9 @@ class _Translations$settings$sync$zh_CN extends Translations$settings$sync$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync';
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? '同步';
   @override
-  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '使用Sync必须启用数据库';
+  String get dbError => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '使用同步必须启用数据库';
   @override
   String get errorTitle => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? '错误！';
   @override
@@ -3032,6 +3094,11 @@ class _Translations$settings$logging$zh_CN extends Translations$settings$logging
   // Translations
   @override
   String get logger => TranslationOverrides.string(_root.$meta, 'settings.logging.logger', {}) ?? '日志记录';
+  @override
+  String get captureLogcat => TranslationOverrides.string(_root.$meta, 'settings.logging.captureLogcat', {}) ?? '记录Android logcat';
+  @override
+  String get captureLogcatDescription =>
+      TranslationOverrides.string(_root.$meta, 'settings.logging.captureLogcatDescription', {}) ?? '记录此应用的Android进程出现的警告与错误';
 }
 
 // Path: settings.webview
@@ -3791,6 +3858,12 @@ extension on TranslationsZhCn {
           'tabs.sortMode' => TranslationOverrides.string(_root.$meta, 'tabs.sortMode', {}) ?? '标签页排序',
           'tabs.help' => TranslationOverrides.string(_root.$meta, 'tabs.help', {}) ?? '帮助',
           'tabs.deleteTabs' => TranslationOverrides.string(_root.$meta, 'tabs.deleteTabs', {}) ?? '删除标签页',
+          'tabs.deleteDuplicateTabs' => TranslationOverrides.string(_root.$meta, 'tabs.deleteDuplicateTabs', {}) ?? '删除重复的标签页',
+          'tabs.deleteDuplicateTabsQuestion' =>
+            TranslationOverrides.string(_root.$meta, 'tabs.deleteDuplicateTabsQuestion', {}) ?? '存在重复的标签页。请选择您想保留在组中的页面：',
+          'tabs.keepFirstDuplicateTabs' => TranslationOverrides.string(_root.$meta, 'tabs.keepFirstDuplicateTabs', {}) ?? '保留最早的',
+          'tabs.keepLastDuplicateTabs' => TranslationOverrides.string(_root.$meta, 'tabs.keepLastDuplicateTabs', {}) ?? '保留最晚的',
+          'tabs.skipDuplicateTabDelete' => TranslationOverrides.string(_root.$meta, 'tabs.skipDuplicateTabDelete', {}) ?? '跳过',
           'tabs.shuffleTabs' => TranslationOverrides.string(_root.$meta, 'tabs.shuffleTabs', {}) ?? '随机排序标签页',
           'tabs.tabRandomlyShuffled' => TranslationOverrides.string(_root.$meta, 'tabs.tabRandomlyShuffled', {}) ?? '已随机排序标签页',
           'tabs.tabOrderSaved' => TranslationOverrides.string(_root.$meta, 'tabs.tabOrderSaved', {}) ?? '已保存标签页顺序',
@@ -3985,6 +4058,18 @@ extension on TranslationsZhCn {
           'settings.booru.cantDeleteThisBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.cantDeleteThisBooru', {}) ?? '无法删除此Booru！',
           'settings.booru.removeRelatedTabsFirst' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? '请先删除相关的标签页',
+          'settings.booru.sourceLimitNotice' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ?? '添加某些网站来源可能需要开启下方的兼容性设置。网站内容由外部托管和提供，不受本应用控制。',
+          'settings.booru.advanced' => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? '进阶选项',
+          'settings.booru.expandedSourceCompatibility' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? '来源配置兼容性',
+          'settings.booru.expandedSourceCompatibilitySubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ?? '调整对于一些来源的兼容处理方式',
+          'settings.booru.expandedSourceCompatibilityConfirm' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ??
+                '改变此设置可能会影响网站来源显示的内容。内容由外部网站托管和提供，不受本应用控制。要继续吗？',
+          'settings.booru.sourceUnavailableCurrentSettings' =>
+            TranslationOverrides.string(_root.$meta, 'settings.booru.sourceUnavailableCurrentSettings', {}) ?? '此站点不可用。',
           'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Booru编辑器',
           'settings.booruEditor.testBooruFailedTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booru测试失败',
@@ -4284,6 +4369,9 @@ extension on TranslationsZhCn {
             TranslationOverrides.string(_root.$meta, 'settings.video.disableVideosHelp', {}) ?? '针对低端设备播放视频崩溃的问题。提供在外部播放器或浏览器中播放的选项。',
           'settings.video.autoplayVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.autoplayVideos', {}) ?? '自动播放视频',
           'settings.video.startVideosMuted' => TranslationOverrides.string(_root.$meta, 'settings.video.startVideosMuted', {}) ?? '播放时静音',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.experimental' => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '[实验性]',
           'settings.video.videoPlayerBackend' => TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? '视频播放后端',
           'settings.video.backendDefault' => TranslationOverrides.string(_root.$meta, 'settings.video.backendDefault', {}) ?? '默认',
@@ -4300,9 +4388,6 @@ extension on TranslationsZhCn {
           'settings.video.mpvUseHardwareAcceleration' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.mpvUseHardwareAcceleration', {}) ?? 'MPV：使用硬件加速',
           'settings.video.mpvVO' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvVO', {}) ?? 'MPV：视频输出',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.mpvHWDEC' => TranslationOverrides.string(_root.$meta, 'settings.video.mpvHWDEC', {}) ?? 'MPV：硬解模式',
           'settings.video.videoCacheMode' => TranslationOverrides.string(_root.$meta, 'settings.video.videoCacheMode', {}) ?? '视频缓存模式',
           'settings.video.cacheModes.title' => TranslationOverrides.string(_root.$meta, 'settings.video.cacheModes.title', {}) ?? '视频缓存模式',
@@ -4643,6 +4728,7 @@ extension on TranslationsZhCn {
           'settings.cache.videoCacheWarningDesktop' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.videoCacheWarningDesktop', {}) ?? '[警告]：在桌面模式下某些网站不支持流式加载。',
           'settings.cache.deleteCacheAfter' => TranslationOverrides.string(_root.$meta, 'settings.cache.deleteCacheAfter', {}) ?? '缓存保留时间：',
+          'settings.cache.neverDeleteDuration' => TranslationOverrides.string(_root.$meta, 'settings.cache.neverDeleteDuration', {}) ?? '永不删除',
           'settings.cache.cacheSizeLimit' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheSizeLimit', {}) ?? '缓存体积限制（GB）',
           'settings.cache.maximumTotalCacheSize' => TranslationOverrides.string(_root.$meta, 'settings.cache.maximumTotalCacheSize', {}) ?? '总缓存上限',
           'settings.cache.cacheStats' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheStats', {}) ?? '缓存统计：',
@@ -4687,8 +4773,8 @@ extension on TranslationsZhCn {
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? '隐藏已收藏的项目',
           'settings.itemFilters.removeSnatched' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? '隐藏已下载的项目',
           'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? '隐藏AI生成的项目',
-          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sync',
-          'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '使用Sync必须启用数据库',
+          'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? '同步',
+          'settings.sync.dbError' => TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? '使用同步必须启用数据库',
           'settings.sync.errorTitle' => TranslationOverrides.string(_root.$meta, 'settings.sync.errorTitle', {}) ?? '错误！',
           'settings.sync.pleaseEnterIPAndPort' => TranslationOverrides.string(_root.$meta, 'settings.sync.pleaseEnterIPAndPort', {}) ?? '请输入IP地址和端口。',
           'settings.sync.selectWhatYouWantToDo' => TranslationOverrides.string(_root.$meta, 'settings.sync.selectWhatYouWantToDo', {}) ?? '选择你想做的事',
@@ -4843,6 +4929,9 @@ extension on TranslationsZhCn {
           'settings.debug.restoredSessionFromString' =>
             TranslationOverrides.string(_root.$meta, 'settings.debug.restoredSessionFromString', {}) ?? '从字符串中恢复了session',
           'settings.logging.logger' => TranslationOverrides.string(_root.$meta, 'settings.logging.logger', {}) ?? '日志记录',
+          'settings.logging.captureLogcat' => TranslationOverrides.string(_root.$meta, 'settings.logging.captureLogcat', {}) ?? '记录Android logcat',
+          'settings.logging.captureLogcatDescription' =>
+            TranslationOverrides.string(_root.$meta, 'settings.logging.captureLogcatDescription', {}) ?? '记录此应用的Android进程出现的警告与错误',
           'settings.webview.openWebview' => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebview', {}) ?? '打开网页浏览',
           'settings.webview.openWebviewTip' => TranslationOverrides.string(_root.$meta, 'settings.webview.openWebviewTip', {}) ?? '用于登录或获取cookies',
           'settings.dirPicker.directoryName' => TranslationOverrides.string(_root.$meta, 'settings.dirPicker.directoryName', {}) ?? '目录名称',
@@ -4915,14 +5004,14 @@ extension on TranslationsZhCn {
           'lockscreen.devUnlock' => TranslationOverrides.string(_root.$meta, 'lockscreen.devUnlock', {}) ?? 'DEV UNLOCK',
           'lockscreen.testingMessage' =>
             TranslationOverrides.string(_root.$meta, 'lockscreen.testingMessage', {}) ?? '[仅供测试]：若通常方式解锁都失败请点此处。并将您设备的详细情况报告给开发者。',
-          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'LoliSync',
+          'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? '同步',
           'loliSync.stopSyncingQuestion' => TranslationOverrides.string(_root.$meta, 'loliSync.stopSyncingQuestion', {}) ?? '要停止同步吗？',
           'loliSync.stopServerQuestion' => TranslationOverrides.string(_root.$meta, 'loliSync.stopServerQuestion', {}) ?? '要停止服务器吗？',
           'loliSync.noConnection' => TranslationOverrides.string(_root.$meta, 'loliSync.noConnection', {}) ?? '无连接',
           'loliSync.waitingForConnection' => TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? '等待连接…',
           'loliSync.startingServer' => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? '正在启动服务器…',
           'loliSync.keepScreenAwake' => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? '屏幕常亮',
-          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? '已结束LoliSync服务器',
+          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? '已结束同步服务器',
           'loliSync.testError' =>
             ({required int statusCode, required String reasonPhrase}) =>
                 TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
@@ -5055,6 +5144,9 @@ extension on TranslationsZhCn {
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? '跳过',
           'mobileHome.retryAll' =>
             ({required int count}) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? '全部重试 (${count})',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.existingFailedOrCancelledItems' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.existingFailedOrCancelledItems', {}) ?? '已存在，失败或取消的项目',
           'mobileHome.clearAllRetryableItems' => TranslationOverrides.string(_root.$meta, 'mobileHome.clearAllRetryableItems', {}) ?? '清除所有可重试的项目',
@@ -5070,9 +5162,26 @@ extension on TranslationsZhCn {
           'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? '添加新Booru',
           'mediaPreviews.help' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.help', {}) ?? '帮助',
           'mediaPreviews.settings' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.settings', {}) ?? '设置',
-          _ => null,
-        } ??
-        switch (path) {
+          'mediaPreviews.onboardingTitle' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingTitle', {}) ?? '添加第一个图源',
+          'mediaPreviews.onboardingSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.onboardingSubtitle', {}) ?? '要开始浏览，请添加一个图站配置或从备份中恢复',
+          'mediaPreviews.addBooruAction' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruAction', {}) ?? '添加新的图站',
+          'mediaPreviews.addBooruActionSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruActionSubtitle', {}) ?? '通过添加站点的地址和搜索设置以连接图站',
+          'mediaPreviews.restoreBackupAction' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ?? '备份管理与恢复',
+          'mediaPreviews.restoreBackupActionSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupActionSubtitle', {}) ?? '恢复设置，图站，标签页和其他保存的数据',
+          'mediaPreviews.openSettingsAction' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsAction', {}) ?? '打开设置页面',
+          'mediaPreviews.openSettingsActionSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.openSettingsActionSubtitle', {}) ?? '在添加图源前先调整一下应用的行为',
+          'mediaPreviews.helpSectionTitle' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.helpSectionTitle', {}) ?? '需要帮助吗？',
+          'mediaPreviews.booruSourcesArticle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticle', {}) ?? '添加图站的方法与应用的工作原理',
+          'mediaPreviews.booruSourcesArticleSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.booruSourcesArticleSubtitle', {}) ?? '为第一次添加图站的用户提供的说明',
+          'mediaPreviews.backupRestoreArticle' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticle', {}) ?? '从备份文件恢复',
+          'mediaPreviews.backupRestoreArticleSubtitle' =>
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.backupRestoreArticleSubtitle', {}) ?? '为使用过之前版本应用的老用户提供的说明',
           'mediaPreviews.restoringPreviousSession' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoringPreviousSession', {}) ?? '正在恢复到之前的会话…',
           'mediaPreviews.copiedFileURL' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.copiedFileURL', {}) ?? '已复制文件链接到剪贴板！',
@@ -5234,6 +5343,7 @@ extension on TranslationsZhCn {
           'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? '版权',
           'tagType.meta' => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? '元数据',
           'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '物种',
+          'tagType.lore' => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? '背景故事',
           'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? '无/通常的',
           _ => null,
         };
