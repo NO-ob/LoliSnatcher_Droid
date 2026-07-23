@@ -19,7 +19,6 @@
     "enable": "Etkinleştir",
     "disable": "Devre Dışı Bırak",
     "add": "Ekle",
-    "exclude": "Hariç tut",
     "edit": "Düzenle",
     "remove": "Kaldır",
     "save": "Kaydet",
@@ -71,14 +70,6 @@
     "username": "Kullanıcı adı",
     "favourites": "Favoriler",
     "downloads": "İndirilen",
-    "secondsShort": "s",
-    "minutesShort": "d",
-    "hoursShort": "s",
-    "daysShort": "g",
-    "leaveThisPageQuestion": "Bu sayfadan ayrıl?",
-    "pageWillCloseAutomatically": "Bu sayfa otomatikman kapanacak",
-    "stay": "Kal",
-    "leaveNow": "Hemen çık",
     "validationErrors": {
         "required": "Lütfen bir değer gir",
         "invalid": "Lütfen geçerli bir değer gir",
@@ -126,8 +117,6 @@
         "tabsRestored": "Sekmeler geri yüklendi",
         "restoredTabsCount(param=count)": {
             "one": "Önceki oturumdan ${count} sekme geri yüklendi",
-            "few": "Önceki oturumdan ${count} sekme geri yüklendi",
-            "many": "Önceki oturumdan ${count} sekme geri yüklendi",
             "other": "Önceki oturumdan ${count} sekme geri yüklendi"
         },
         "someRestoredTabsHadIssues": "Geri yüklenen bazı sekmelerde bilinmeyen booru'lar veya bozuk karakterler vardı.",
@@ -136,15 +125,11 @@
         "tabsMerged": "Sekmeler birleştirildi",
         "addedTabsCount(param=count)": {
             "one": "${count} yeni sekme eklendi",
-            "few": "${count} yeni sekme eklendi",
-            "many": "${count} yeni sekme eklendi",
             "other": "${count} yeni sekme eklendi"
         },
         "tabsReplaced": "Sekmeler değiştirildi",
         "receivedTabsCount(param=count)": {
             "one": "${count} sekme alındı",
-            "few": "${count} sekme alındı",
-            "many": "${count} sekme alındı",
             "other": "${count} sekme alındı"
         }
     },
@@ -164,26 +149,18 @@
         "itemsSnatched": "İndirilen ögeler",
         "snatchedCount(param=count)": {
             "one": "İndirilen: ${count} öge",
-            "few": "İndirilen: ${count} öge",
-            "many": "İndirilen: ${count} öge",
             "other": "İndirilen: ${count} öge"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} dosya zaten indirilmiş",
-            "few": "${count} dosya zaten indirilmiş",
-            "many": "${count} dosya zaten indirilmiş",
             "other": "${count} dosya zaten indirilmiş"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "${count} dosya indirilemedi",
-            "few": "${count} dosya indirilemedi",
-            "many": "${count} dosya indirilemedi",
             "other": "${count} dosya indirilemedi"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} dosya iptal edildi",
-            "few": "${count} dosya iptal edildi",
-            "many": "${count} dosya iptal edildi",
             "other": "${count} dosya iptal edildi"
         },
         "snatchingImages": "Görseller indiriliyor",
@@ -191,8 +168,6 @@
         "addedItemToQueue": "Öge İndirme kuyruğuna eklendi",
         "addedItemsToQueue(param=count)": {
             "one": "${count} öge indirme kuyruğuna eklendi",
-            "few": "${count} öge indirme kuyruğuna eklendi",
-            "many": "${count} öge indirme kuyruğuna eklendi",
             "other": "${count} öge indirme kuyruğuna eklendi"
         }
     },
@@ -237,11 +212,6 @@
         "sortMode": "Sekmeleri sırala",
         "help": "Yardım",
         "deleteTabs": "Sekmeleri sil",
-        "deleteDuplicateTabs": "Kopya sekmeleri sil",
-        "deleteDuplicateTabsQuestion": "Kopya sekmeler bulundu. Her grupta kalmasını istediğin sekmeleri seç:",
-        "keepFirstDuplicateTabs": "İlki kalsın",
-        "keepLastDuplicateTabs": "Sonuncu kalsın",
-        "skipDuplicateTabDelete": "Atla",
         "shuffleTabs": "Sekmeleri karıştır",
         "tabRandomlyShuffled": "Sekmeler rastgele karıştırıldı",
         "tabOrderSaved": "Sekme sırası kaydedildi",
@@ -283,8 +253,6 @@
         "reversed": "(tersten)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "${count} sekmeyi silmek istediğine emin misin?",
-            "few": "${count} sekmeyi silmek istediğine emin misin?",
-            "many": "${count} sekmeyi silmek istediğine emin misin?",
             "other": "${count} sekmeyi silmek istediğine emin misin?"
         },
         "filters": {
@@ -314,7 +282,12 @@
             "pleaseEnterValidTabNumber": "Lütfen geçerli bir sekme numarası gir",
             "moveTo(param=formattedNumber)": "Şuraya taşı: #${formattedNumber: String}",
             "preview": "Önizleme:"
-        }
+        },
+        "deleteDuplicateTabs": "Kopya sekmeleri sil",
+        "deleteDuplicateTabsQuestion": "Kopya sekmeler bulundu. Her grupta kalmasını istediğin sekmeleri seç:",
+        "keepFirstDuplicateTabs": "İlki kalsın",
+        "keepLastDuplicateTabs": "Sonuncu kalsın",
+        "skipDuplicateTabDelete": "Atla"
     },
     "history": {
         "searchHistory": "Arama geçmişi",
@@ -334,24 +307,17 @@
         "deleteHistoryEntries": "Geçmiş girdilerini sil",
         "deleteItemsConfirm(param=count)": {
             "one": "${count} ögeyi silmek istediğine emin misin?",
-            "few": "${count} ögeyi silmek istediğine emin misin?",
-            "many": "${count} ögeyi silmek istediğine emin misin?",
             "other": "${count} ögeyi silmek istediğine emin misin?"
         },
         "clearSelection": "Seçimi temizle",
         "deleteItems(param=count)": {
             "one": "${count} ögeyi sil",
-            "few": "${count} ögeyi sil",
-            "many": "${count} ögeyi sil",
             "other": "${count} ögeyi sil"
         }
     },
     "webview": {
         "title": "Webview",
         "notSupportedOnDevice": "Bu cihazda desteklenmiyor",
-        "captcha": "Captcha",
-        "captchaCheckDescription": "Olası bir captcha algılandı, lütfen bunu çöz ve bitirdikten sonra geri dön",
-        "captchaCompleted": "Captcha tamamlandı",
         "navigation": {
             "enterUrlLabel": "Bir URL gir",
             "enterCustomUrl": "Özel URL gir",
@@ -370,7 +336,10 @@
             "history": "Geçmiş",
             "noBackHistoryItem": "Geri gidilecek geçmiş ögesi yok",
             "noForwardHistoryItem": "İleri gidilecek geçmiş ögesi yok"
-        }
+        },
+        "captcha": "Captcha",
+        "captchaCheckDescription": "Olası bir captcha algılandı, lütfen bunu çöz ve bitirdikten sonra geri dön",
+        "captchaCompleted": "Captcha tamamlandı"
     },
     "settings": {
         "title": "Ayarlar",
@@ -849,7 +818,6 @@
             "videoCacheNoteEnable": "[Not]: Videolar yalnızca 'Medyayı Önbelleğe Al' etkinleştirilirse önbelleğe alınır.",
             "videoCacheWarningDesktop": "[Uyarı]: Masaüstünde Akış modu bazı Booru'lar için hatalı çalışabilir.",
             "deleteCacheAfter": "Şu süreden sonra önbelleği sil:",
-            "neverDeleteDuration": "Asla",
             "cacheSizeLimit": "Önbellek boyutu sınırı (GB)",
             "maximumTotalCacheSize": "Maksimum toplam önbellek boyutu",
             "cacheStats": "Önbellek istatistikleri:",
@@ -869,7 +837,8 @@
             "clearedCacheCompletely": "Önbellek tamamen temizlendi",
             "appRestartRequired": "Uygulamanın yeniden başlatılması gerekebilir!",
             "errorExclamation": "Hata!",
-            "notAvailableForPlatform": "Şu anda bu platform için mevcut değil"
+            "notAvailableForPlatform": "Şu anda bu platform için mevcut değil",
+            "neverDeleteDuration": "Asla"
         },
         "itemFilters": {
             "title": "Filtreler",
@@ -1065,8 +1034,6 @@
         "makeUnstaleable": "Eskimez yap",
         "deleteTags(param=count)": {
             "one": "${count} etiketi sil",
-            "few": "${count} etiketi sil",
-            "many": "${count} etiketi sil",
             "other": "${count} etiketi sil"
         },
         "deleteTagsTitle": "Etiketleri sil",
@@ -1105,7 +1072,6 @@
         "addedNewTab": "Yeni sekme eklendi:",
         "id": "ID",
         "postURL": "Gönderi URL'si",
-        "uploader": "Yükleyen",
         "posted": "Paylaşılma",
         "details": "Detaylar",
         "filename": "Dosya adı",
@@ -1121,8 +1087,8 @@
         "removeFromSearch": "Aramadan kaldır",
         "addToSearch": "Aramaya ekle",
         "addedToSearchBar": "Arama çubuğuna eklendi:",
-        "excludeFromSearch": "Aramadan Hariç Tut",
-        "exclusionAddedToSearchBar": "Arama çubuğuna hariç tutma eklendi:",
+        "addToSearchExclude": "Aramaya Ekle (Hariç Tut)",
+        "addedToSearchBarExclude": "Arama çubuğuna eklendi (Hariç Tut):",
         "addToMarked": "İşaretlenenlere ekle",
         "addToHidden": "Gizlenenlere ekle",
         "removeFromMarked": "İşaretlenenlerden kaldır",
@@ -1144,7 +1110,10 @@
         "relatedTabs": "İlgili sekmeler",
         "tabsWithOnlyTag": "Sadece bu etiketi içeren sekmeler",
         "tabsWithOnlyTagDifferentBooru": "Sadece bu etiketi içeren ama farklı booru'daki sekmeler",
-        "tabsContainingTag": "Bu etiketi kapsayan sekmeler"
+        "tabsContainingTag": "Bu etiketi kapsayan sekmeler",
+        "excludeFromSearch": "Aramadan Hariç Tut",
+        "exclusionAddedToSearchBar": "Arama çubuğuna hariç tutma eklendi:",
+        "uploader": "Yükleyen"
     },
     "pinnedTags": {
         "pinnedTags": "Sabitlenmiş etiketler",
@@ -1226,6 +1195,8 @@
         "addNewBooru": "Yeni Booru ekle",
         "help": "Yardım",
         "settings": "Ayarlar",
+        "restoringPreviousSession": "Önceki oturum geri yükleniyor…",
+        "copiedFileURL": "Dosya URL'si panoya kopyalandı!",
         "onboardingTitle": "İlk kaynağını ayarla",
         "onboardingSubtitle": "Gezinmeye başlamak için bir booru yapılandırması ekle veya bir yedeği geri yükle",
         "addBooruAction": "Yeni booru ekle",
@@ -1238,9 +1209,7 @@
         "booruSourcesArticle": "Booru yapılandırması nasıl eklenir ve nasıl çalışır",
         "booruSourcesArticleSubtitle": "İlk booru yapılandırmasını kuran kullanıcılar için talimatlar",
         "backupRestoreArticle": "Yedekten veri geri yükleme",
-        "backupRestoreArticleSubtitle": "Önceki bir uygulamadan/sürümden geçiş yapan kullanıcılar için talimatlar",
-        "restoringPreviousSession": "Önceki oturum geri yükleniyor…",
-        "copiedFileURL": "Dosya URL'si panoya kopyalandı!"
+        "backupRestoreArticleSubtitle": "Önceki bir uygulamadan/sürümden geçiş yapan kullanıcılar için talimatlar"
     },
     "viewer": {
         "tutorial": {
@@ -1301,8 +1270,6 @@
         "loadingFileMessage": "Bu biraz zaman alabilir, lütfen bekle…",
         "sources(param=count)": {
             "one": "Kaynak",
-            "few": "Kaynaklar",
-            "many": "Kaynaklar",
             "other": "Kaynaklar"
         }
     },
@@ -1371,8 +1338,6 @@
             "loadingPage(param=pageNum)": "Sayfa #${pageNum: int} yükleniyor…",
             "startedAgo(param=seconds)": {
                 "one": "${seconds} saniye önce başladı",
-                "few": "${seconds} saniye önce başladı",
-                "many": "${seconds} saniye önce başladı",
                 "other": "${seconds} saniye önce başladı"
             },
             "tapToRetryIfStuck": "İstek takılmış veya çok uzun sürmüş gibi görünüyorsa tekrar denemek için dokun",
@@ -1388,7 +1353,16 @@
         "copyright": "Telif Hakkı",
         "meta": "Meta",
         "species": "Tür",
-        "lore": "Bilgi",
-        "none": "Yok/Genel"
-    }
+        "none": "Yok/Genel",
+        "lore": "Bilgi"
+    },
+    "exclude": "Hariç tut",
+    "secondsShort": "s",
+    "minutesShort": "d",
+    "hoursShort": "s",
+    "daysShort": "g",
+    "leaveThisPageQuestion": "Bu sayfadan ayrıl?",
+    "pageWillCloseAutomatically": "Bu sayfa otomatikman kapanacak",
+    "stay": "Kal",
+    "leaveNow": "Hemen çık"
 }
