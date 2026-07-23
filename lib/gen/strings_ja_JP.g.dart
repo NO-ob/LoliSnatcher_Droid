@@ -1573,11 +1573,11 @@ class _Translations$tagType$ja_JP extends Translations$tagType$en {
   @override
   String get meta => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'メタ';
   @override
-  String get species => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '種';
+  String get species => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '種族';
   @override
-  String get lore => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? '伝承';
+  String get lore => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? '設定';
   @override
-  String get none => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'なし/一般';
+  String get none => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'なし / 一般';
 }
 
 // Path: tabs.filters
@@ -1769,9 +1769,9 @@ class _Translations$settings$booru$ja_JP extends Translations$settings$booru$en 
   @override
   String get changeTo => TranslationOverrides.string(_root.$meta, 'settings.booru.changeTo', {}) ?? 'このBooruに変更: ';
   @override
-  String get keepCurrentBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.keepCurrentBooru', {}) ?? '[いいえ] をタップ: ';
+  String get keepCurrentBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.keepCurrentBooru', {}) ?? '[いいえ] をタップ(保持): ';
   @override
-  String get changeToNewBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.changeToNewBooru', {}) ?? '[はい] をタップすると: ';
+  String get changeToNewBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.changeToNewBooru', {}) ?? '[はい] をタップ(変更): ';
   @override
   String get booruConfigLinkCopied =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.booruConfigLinkCopied', {}) ?? 'Booruの設定リンクがクリップボードにコピーされました';
@@ -2966,7 +2966,7 @@ class _Translations$settings$sync$ja_JP extends Translations$settings$sync$en {
   @override
   String get sendSettings => TranslationOverrides.string(_root.$meta, 'settings.sync.sendSettings', {}) ?? '設定を送信';
   @override
-  String get sendBooruConfigs => TranslationOverrides.string(_root.$meta, 'settings.sync.sendBooruConfigs', {}) ?? 'Booru 設定を送信';
+  String get sendBooruConfigs => TranslationOverrides.string(_root.$meta, 'settings.sync.sendBooruConfigs', {}) ?? 'Booru設定を送信';
   @override
   String configsCount({required String count}) =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.configsCount', {'count': count}) ?? '設定: ${count}';
@@ -3035,7 +3035,7 @@ class _Translations$settings$sync$ja_JP extends Translations$settings$sync$en {
   String get serverPortPlaceholder =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.serverPortPlaceholder', {}) ?? '(空の場合はデフォルトで\'8080\'になります)';
   @override
-  String get startReceiverServer => TranslationOverrides.string(_root.$meta, 'settings.sync.startReceiverServer', {}) ?? 'レシーバーサーバーを開始';
+  String get startReceiverServer => TranslationOverrides.string(_root.$meta, 'settings.sync.startReceiverServer', {}) ?? '受信サーバーを開始';
 }
 
 // Path: settings.about
@@ -4185,8 +4185,8 @@ extension on TranslationsJaJp {
           'settings.booru.changeDefaultBooru' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.changeDefaultBooru', {}) ?? 'デフォルトのBooruを変更しますか？',
           'settings.booru.changeTo' => TranslationOverrides.string(_root.$meta, 'settings.booru.changeTo', {}) ?? 'このBooruに変更: ',
-          'settings.booru.keepCurrentBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.keepCurrentBooru', {}) ?? '[いいえ] をタップ: ',
-          'settings.booru.changeToNewBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.changeToNewBooru', {}) ?? '[はい] をタップすると: ',
+          'settings.booru.keepCurrentBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.keepCurrentBooru', {}) ?? '[いいえ] をタップ(保持): ',
+          'settings.booru.changeToNewBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.changeToNewBooru', {}) ?? '[はい] をタップ(変更): ',
           'settings.booru.booruConfigLinkCopied' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.booruConfigLinkCopied', {}) ?? 'Booruの設定リンクがクリップボードにコピーされました',
           'settings.booru.noBooruSelected' => TranslationOverrides.string(_root.$meta, 'settings.booru.noBooruSelected', {}) ?? 'Booruが未選択です！',
@@ -5018,7 +5018,7 @@ extension on TranslationsJaJp {
           'settings.sync.syncSnatchedFromHelpText4' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText4', {}) ?? '履歴の順序: 古いもの (0) から新しい順 (X)',
           'settings.sync.sendSettings' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendSettings', {}) ?? '設定を送信',
-          'settings.sync.sendBooruConfigs' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendBooruConfigs', {}) ?? 'Booru 設定を送信',
+          'settings.sync.sendBooruConfigs' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendBooruConfigs', {}) ?? 'Booru設定を送信',
           'settings.sync.configsCount' =>
             ({required String count}) => TranslationOverrides.string(_root.$meta, 'settings.sync.configsCount', {'count': count}) ?? '設定: ${count}',
           'settings.sync.sendTabs' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendTabs', {}) ?? 'タブを送信',
@@ -5064,7 +5064,7 @@ extension on TranslationsJaJp {
           'settings.sync.serverPort' => TranslationOverrides.string(_root.$meta, 'settings.sync.serverPort', {}) ?? 'サーバーポート',
           'settings.sync.serverPortPlaceholder' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.serverPortPlaceholder', {}) ?? '(空の場合はデフォルトで\'8080\'になります)',
-          'settings.sync.startReceiverServer' => TranslationOverrides.string(_root.$meta, 'settings.sync.startReceiverServer', {}) ?? 'レシーバーサーバーを開始',
+          'settings.sync.startReceiverServer' => TranslationOverrides.string(_root.$meta, 'settings.sync.startReceiverServer', {}) ?? '受信サーバーを開始',
           'settings.about.title' => TranslationOverrides.string(_root.$meta, 'settings.about.title', {}) ?? 'このアプリについて',
           'settings.about.appDescription' =>
             TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ??
@@ -5579,9 +5579,9 @@ extension on TranslationsJaJp {
           'tagType.character' => TranslationOverrides.string(_root.$meta, 'tagType.character', {}) ?? 'キャラクター',
           'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'コピーライト / シリーズ',
           'tagType.meta' => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'メタ',
-          'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '種',
-          'tagType.lore' => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? '伝承',
-          'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'なし/一般',
+          'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? '種族',
+          'tagType.lore' => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? '設定',
+          'tagType.none' => TranslationOverrides.string(_root.$meta, 'tagType.none', {}) ?? 'なし / 一般',
           _ => null,
         };
   }
