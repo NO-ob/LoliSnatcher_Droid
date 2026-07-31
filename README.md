@@ -5,7 +5,7 @@
 
   [![GitHub Release](https://img.shields.io/github/v/release/NO-ob/LoliSnatcher_Droid)](https://github.com/NO-ob/LoliSnatcher_Droid/releases)
   [![GitHub Downloads](https://img.shields.io/github/downloads/NO-ob/LoliSnatcher_Droid/total)](https://github.com/NO-ob/LoliSnatcher_Droid/releases)
-  [![Google Play](https://img.shields.io/badge/Google%20Play-Available-green?logo=google-play)](https://play.google.com/store/apps/details?id=com.noaisu.play.losn)
+  [![Google Play](https://img.shields.io/badge/Google%20Play-Download-green?logo=google-play)](https://play.google.com/store/apps/details?id=com.noaisu.play.losn)
   [![Discord](https://img.shields.io/badge/Discord-Join-blue?logo=discord&logoColor=white)](https://discord.gg/yD47ANdEXW)
   [![License](https://img.shields.io/github/license/NO-ob/LoliSnatcher_Droid)](https://www.gnu.org/licenses/agpl-3.0.html)
 </div>
