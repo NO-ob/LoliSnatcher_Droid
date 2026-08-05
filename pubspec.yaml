@@ -6,7 +6,7 @@ version: 2.5.2+5218 # remember to update the values in constants.dart->updateInf
 
 environment:
   sdk: ">=3.12.2 <4.0.0"
-  flutter: 3.44.6
+  flutter: 3.44.8
 
 dependencies:
   flutter:
@@ -26,8 +26,8 @@ dependencies:
   country_flags: ^4.1.2
   crypto: ^3.0.7
   device_info_plus: ^13.2.0
-  dio: ^5.10.0
-  dio_http2_adapter: ^2.7.1
+  dio: ^5.11.0
+  dio_http2_adapter: ^2.8.0
   duration: ^4.0.3
   dynamic_color: ^1.8.1
   equatable: ^2.1.0
@@ -58,7 +58,7 @@ dependencies:
     git:
       url: https://github.com/NANI-SORE/getx.git
       ref: 1c5917ce8bd4aa024e83ff2c52d4b19ba6c1a29e # master - forked to fix import error
-  google_fonts: ^8.2.0
+  google_fonts: ^8.2.1
   html: ^0.15.6
   http_proxy: # ^1.2.2
     git:
@@ -77,7 +77,7 @@ dependencies:
   media_kit: ^1.2.6
   media_kit_video: ^2.0.1
   media_kit_libs_video: ^1.0.7
-  native_dio_adapter: ^1.6.0 # TODO use this for http3, probably should rewrite http client use to reduce amount of created clients
+  native_dio_adapter: ^1.8.0 # TODO use this for http3, probably should rewrite http client use to reduce amount of created clients
   path_provider: ^2.1.6
   permission_handler: ^12.0.3
   photo_view:
@@ -91,16 +91,16 @@ dependencies:
       ref: b84b371347ab4f13374c2709becaf247aec354e4 # master - forked to change IME composing style
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
-  share_plus: ^13.2.1 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
+  share_plus: ^13.3.0 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
   slang_flutter: ^4.18.0
   slang: ^4.18.0
   sqflite_common_ffi: ^2.4.2
   sqflite: ^2.4.3
-  sqlite3: ^3.4.0
-  talker_dio_logger: ^5.1.19
-  talker_flutter: ^5.1.19
-  talker_logger: ^5.1.19
-  talker: ^5.1.19
+  sqlite3: ^3.5.1
+  talker_dio_logger: ^5.1.20
+  talker_flutter: ^5.1.20
+  talker_logger: ^5.1.20
+  talker: ^5.1.20
   url_launcher: ^6.3.2
   uuid: ^4.6.0
   video_player: ^2.13.0
@@ -110,10 +110,10 @@ dependencies:
 
 
 dependency_overrides:
-  android_intent_plus: ^6.0.0
+  android_intent_plus: ^6.1.0
   material_color_utilities: ^0.13.0 # flutter_test conflict
   meta: ^1.19.0 # flutter_test and image conflict
-  share_plus: ^13.2.1 # alice conflict
+  share_plus: ^13.3.0 # alice conflict
   xml: ^7.0.1 # image conflict
 
 
@@ -121,7 +121,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^2.15.2
+  build_runner: ^2.16.0
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
 
