@@ -6,7 +6,7 @@ version: 2.5.2+5218 # remember to update the values in constants.dart->updateInf
 
 environment:
   sdk: ">=3.12.2 <4.0.0"
-  flutter: 3.44.8
+  flutter: 3.44.9
 
 dependencies:
   flutter:
@@ -29,7 +29,7 @@ dependencies:
   dio: ^5.11.0
   dio_http2_adapter: ^2.8.0
   duration: ^4.0.3
-  dynamic_color: ^1.8.1
+  dynamic_color: ^1.9.0
   equatable: ^2.1.0
   external_video_player_launcher: ^0.0.3
   fading_edge_scrollview: ^4.1.1
@@ -45,7 +45,7 @@ dependencies:
   flutter_inappwebview: ^6.2.0-beta.3
   flutter_keyboard_visibility: ^6.0.0
   flutter_linkify: ^6.0.0
-  flutter_secure_storage: ^10.3.1
+  flutter_secure_storage: ^11.0.0
   flutter_socks_proxy:
     git:
       url: https://github.com/jiangtian616/socks_proxy
@@ -79,7 +79,7 @@ dependencies:
   media_kit_libs_video: ^1.0.7
   native_dio_adapter: ^1.8.0 # TODO use this for http3, probably should rewrite http client use to reduce amount of created clients
   path_provider: ^2.1.6
-  permission_handler: ^12.0.3
+  permission_handler: ^13.0.0
   photo_view:
     git:
       url: https://github.com/NANI-SORE/photo_view.git
@@ -92,8 +92,8 @@ dependencies:
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.8
   share_plus: ^13.3.0 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
-  slang_flutter: ^4.18.0
-  slang: ^4.18.0
+  slang_flutter: ^4.19.0
+  slang: ^4.19.0
   sqflite_common_ffi: ^2.4.2
   sqflite: ^2.4.3
   sqlite3: ^3.5.1
