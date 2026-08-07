@@ -1,7 +1,5 @@
 // ignore_for_file: prefer_asserts_with_message
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -78,15 +76,11 @@ class CustomSliverPersistentHeader extends StatelessWidget {
 class CustomFloatingHeader extends StatefulWidget {
   const CustomFloatingHeader({
     required this.child,
-    required this.shrinkOffset,
-    required this.overlapsContent,
     this.onVisibilityChanged,
     super.key,
   });
 
   final Widget child;
-  final double shrinkOffset;
-  final bool overlapsContent;
   final ValueChanged<bool>? onVisibilityChanged;
 
   @override
@@ -95,13 +89,8 @@ class CustomFloatingHeader extends StatefulWidget {
 }
 
 class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
-  static const int _directionChangeDebounceMs = 120;
-  static const Duration _snapSettleDelay = Duration(milliseconds: 180);
-
   ScrollPosition? _position;
   ScrollDirection _lastUserScrollDirection = ScrollDirection.idle;
-  int _lastUserScrollDirectionChangedAt = 0;
-  Timer? _deferredSnapTimer;
 
   @override
   void didChangeDependencies() {
@@ -116,17 +105,7 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
   }
 
   @override
-  void didUpdateWidget(CustomFloatingHeader oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // print('didUpdateWidget: ${widget.overlapsContent} ${widget.shrinkOffset}');
-    if (widget.overlapsContent != oldWidget.overlapsContent || widget.shrinkOffset != oldWidget.shrinkOffset) {
-      widget.onVisibilityChanged?.call(widget.overlapsContent || widget.shrinkOffset == 0);
-    }
-  }
-
-  @override
   void dispose() {
-    _deferredSnapTimer?.cancel();
     if (_position != null) {
       _position!.isScrollingNotifier.removeListener(_isScrollingListener);
     }
@@ -137,25 +116,12 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
     return context.findAncestorRenderObjectOfType<RenderSliverFloatingPersistentHeader>();
   }
 
-  bool _setLastUserScrollDirection(
-    ScrollDirection direction, {
-    bool debounce = true,
-  }) {
+  bool _setLastUserScrollDirection(ScrollDirection direction) {
     if (direction == ScrollDirection.idle) {
       return false;
     }
 
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final bool directionChanged = _lastUserScrollDirection != direction;
-    final bool shouldIgnoreDirectionChange =
-        debounce && directionChanged && now - _lastUserScrollDirectionChangedAt < _directionChangeDebounceMs;
-
-    if (shouldIgnoreDirectionChange) {
-      return false;
-    }
-
     _lastUserScrollDirection = direction;
-    _lastUserScrollDirectionChangedAt = now;
     return true;
   }
 
@@ -168,29 +134,13 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
     header?.maybeStartSnapAnimation(direction);
   }
 
-  void _scheduleSnap(ScrollDirection direction) {
-    _deferredSnapTimer?.cancel();
-    _deferredSnapTimer = Timer(_snapSettleDelay, () {
-      if (!mounted) {
-        return;
-      }
-
-      if (_position?.isScrollingNotifier.value == true) {
-        return;
-      }
-
-      _startSnap(direction);
-    });
-  }
-
   void _snapOrDefer(ScrollDirection direction) {
     final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
-    _setLastUserScrollDirection(direction, debounce: false);
+    _setLastUserScrollDirection(direction);
     header?.updateScrollStartDirection(direction);
 
     if (_position?.isScrollingNotifier.value == true) {
       header?.maybeStopSnapAnimation(direction);
-      _scheduleSnap(direction);
     } else {
       _startSnap(direction);
     }
@@ -205,8 +155,6 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
     header?.updateScrollStartDirection(direction);
     header?.maybeStopSnapAnimation(direction);
 
-    _scheduleSnap(direction);
-
     widget.onVisibilityChanged?.call(direction == ScrollDirection.forward);
   }
 
@@ -215,25 +163,21 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
       return;
     }
 
-    _scheduleSnap(_lastUserScrollDirection);
+    _startSnap(_lastUserScrollDirection);
   }
 
   void show() {
     assert(_position != null);
 
-    if (widget.shrinkOffset != 0) {
-      _snapOrDefer(ScrollDirection.forward);
-      widget.onVisibilityChanged?.call(true);
-    }
+    _snapOrDefer(ScrollDirection.forward);
+    widget.onVisibilityChanged?.call(true);
   }
 
   void hide() {
     assert(_position != null);
 
-    if (widget.shrinkOffset == 0) {
-      _snapOrDefer(ScrollDirection.reverse);
-      widget.onVisibilityChanged?.call(false);
-    }
+    _snapOrDefer(ScrollDirection.reverse);
+    widget.onVisibilityChanged?.call(false);
   }
 
   void _isScrollingListener() {
@@ -242,14 +186,12 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
     final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
     if (_position!.isScrollingNotifier.value) {
       final direction = _position!.userScrollDirection;
-      _setLastUserScrollDirection(direction);
-      header?.updateScrollStartDirection(_lastUserScrollDirection);
-      header?.maybeStopSnapAnimation(_lastUserScrollDirection);
-      _deferredSnapTimer?.cancel();
-      // widget.onVisibilityChanged?.call(_position!.userScrollDirection == ScrollDirection.forward);
+      if (_setLastUserScrollDirection(direction)) {
+        header?.updateScrollStartDirection(direction);
+        header?.maybeStopSnapAnimation(direction);
+      }
     } else if (_lastUserScrollDirection != ScrollDirection.idle) {
-      _scheduleSnap(_lastUserScrollDirection);
-      // widget.onVisibilityChanged?.call(_position!.userScrollDirection == ScrollDirection.forward);
+      _startSnap(_lastUserScrollDirection);
     }
   }
 
@@ -315,8 +257,6 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
             ? CustomFloatingHeader(
                 key: headerKey,
                 onVisibilityChanged: onHeaderVisiblityChanged,
-                shrinkOffset: shrinkOffset,
-                overlapsContent: overlapsContent,
                 child: sliverPersistentHeaderRenderObjectWidget.delegate.build(
                   this,
                   shrinkOffset,

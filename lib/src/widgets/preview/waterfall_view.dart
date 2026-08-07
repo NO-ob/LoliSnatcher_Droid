@@ -32,7 +32,6 @@ class WaterfallView extends StatefulWidget {
 
 class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  static const int _floatingBarsDirectionDebounceMs = 120;
 
   final SearchHandler searchHandler = SearchHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
@@ -48,8 +47,6 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   bool get isMobile => settingsHandler.appMode.value.isMobile;
 
   final ValueNotifier<bool> isActive = ValueNotifier(true);
-  ScrollDirection lastFloatingBarsDirection = ScrollDirection.idle;
-  int lastFloatingBarsDirectionChangedAt = 0;
 
   Timer? viewedItemCleanupTimer;
   int viewedItemCleanupCount = 0;
@@ -234,33 +231,16 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   void syncFloatingBarsWithScroll(ScrollNotification notification) {
-    if (!PlatformExt.isDesktop) {
+    if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
       return;
     }
 
-    double? scrollDelta;
-    if (notification is ScrollUpdateNotification) {
-      scrollDelta = notification.scrollDelta;
-    } else if (notification is OverscrollNotification) {
-      scrollDelta = notification.overscroll;
-    }
-
+    final scrollDelta = notification is ScrollUpdateNotification ? notification.scrollDelta : null;
     if (scrollDelta == null || scrollDelta == 0) {
       return;
     }
 
     final direction = scrollDelta > 0 ? ScrollDirection.reverse : ScrollDirection.forward;
-    final now = DateTime.now().millisecondsSinceEpoch;
-    final bool directionChanged = lastFloatingBarsDirection != direction;
-    final bool shouldIgnoreDirectionChange =
-        directionChanged && now - lastFloatingBarsDirectionChangedAt < _floatingBarsDirectionDebounceMs;
-
-    if (shouldIgnoreDirectionChange) {
-      return;
-    }
-
-    lastFloatingBarsDirection = direction;
-    lastFloatingBarsDirectionChangedAt = now;
     navigationHandler.floatingHeaderKey.currentState?.handleUserScrollDirection(direction);
 
     if (direction == ScrollDirection.reverse) {
@@ -271,10 +251,6 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   void settleFloatingBarsAfterScroll() {
-    if (!PlatformExt.isDesktop) {
-      return;
-    }
-
     navigationHandler.floatingHeaderKey.currentState?.settleUserScrollDirection();
   }
 

@@ -13,12 +13,10 @@ import 'package:lolisnatcher/src/widgets/common/html.dart';
 class WaterfallErrorButtons extends StatefulWidget {
   const WaterfallErrorButtons({
     required this.animation,
-    required this.showSearchBar,
     super.key,
   });
 
   final Animation<double> animation;
-  final bool showSearchBar;
 
   @override
   State<WaterfallErrorButtons> createState() => _WaterfallErrorButtonsState();
@@ -32,7 +30,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
   Timer? checkInterval;
   bool isCollapsed = false;
 
-  double get animValue => widget.showSearchBar ? widget.animation.value : 1;
+  double get animValue => widget.animation.value;
   double get reverseAnimValue => 1 - animValue;
 
   @override
