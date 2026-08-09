@@ -216,29 +216,37 @@ class ImageWriter {
   ) async* {
     int snatchedCounter = 1;
     final List<BooruItem> existsList = [], failedList = [], cancelledList = [];
+    bool skipColldown = false;
     for (int i = 0; i < snatched.length; i++) {
       bool retryCurrent = false;
-      await Future.delayed(Duration(milliseconds: cooldown), () async {
-        final snatchResult = await write(
-          snatched.elementAt(i),
-          booru,
-          onProgress,
-          ignoreExists,
-          onCancelTokenCreate,
-        );
-        if (snatchResult == null) {
-          existsList.add(snatched[i]);
-        } else if (snatchResult is! String) {
-          if (snatchResult is DioException && CancelToken.isCancel(snatchResult)) {
-            retryCurrent = onRetryCurrent?.call() ?? false;
-            if (!retryCurrent) {
-              cancelledList.add(snatched[i]);
-            }
-          } else {
-            failedList.add(snatched[i]);
+
+      if (skipColldown) {
+        skipColldown = false;
+      } else {
+        await Future.delayed(Duration(milliseconds: cooldown));
+      }
+
+      final snatchResult = await write(
+        snatched.elementAt(i),
+        booru,
+        onProgress,
+        ignoreExists,
+        onCancelTokenCreate,
+      );
+      if (snatchResult == null) {
+        existsList.add(snatched[i]);
+        skipColldown = true;
+      } else if (snatchResult is! String) {
+        if (snatchResult is DioException && CancelToken.isCancel(snatchResult)) {
+          retryCurrent = onRetryCurrent?.call() ?? false;
+          if (!retryCurrent) {
+            cancelledList.add(snatched[i]);
           }
+        } else {
+          failedList.add(snatched[i]);
         }
-      });
+      }
+
       if (retryCurrent) {
         i--;
         continue;
