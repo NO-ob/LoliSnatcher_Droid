@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,157 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
+
+@immutable
+class _BooruFaviconCacheKey {
+  const _BooruFaviconCacheKey({
+    required this.url,
+    required this.baseUrl,
+    required this.booruName,
+    required this.booruType,
+    required this.apiKey,
+    required this.userId,
+    required this.pixelSize,
+  });
+
+  factory _BooruFaviconCacheKey.fromWidget(BooruFavicon widget) {
+    final baseUrl = widget.booru?.baseURL?.trim() ?? '';
+    return _BooruFaviconCacheKey(
+      url: (widget.booru?.faviconURL ?? widget.customFaviconUrl ?? '').trim(),
+      baseUrl: baseUrl.endsWith('/') ? baseUrl.substring(0, baseUrl.length - 1) : baseUrl,
+      booruName: widget.booru?.name?.trim() ?? '',
+      booruType: widget.booru?.type?.name ?? '',
+      apiKey: widget.booru?.apiKey ?? '',
+      userId: widget.booru?.userID ?? '',
+      pixelSize: (widget.size * 5).round(),
+    );
+  }
+
+  final String url;
+  final String baseUrl;
+  final String booruName;
+  final String booruType;
+  final String apiKey;
+  final String userId;
+  final int pixelSize;
+
+  bool get isAvif => url.toLowerCase().contains('.avif');
+
+  @override
+  bool operator ==(Object other) {
+    return other is _BooruFaviconCacheKey &&
+        other.url == url &&
+        other.baseUrl == baseUrl &&
+        other.booruName == booruName &&
+        other.booruType == booruType &&
+        other.apiKey == apiKey &&
+        other.userId == userId &&
+        other.pixelSize == pixelSize;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    url,
+    baseUrl,
+    booruName,
+    booruType,
+    apiKey,
+    userId,
+    pixelSize,
+  );
+}
+
+/// Shares favicon providers between every instance that renders the same
+/// booru. Flutter's image cache can then reuse one download, decode, and image
+/// stream instead of repeating that work for each tab row.
+class _BooruFaviconProviderCache {
+  static const int _maximumEntries = 64;
+  static final LinkedHashMap<_BooruFaviconCacheKey, Future<ImageProvider>> _providers =
+      LinkedHashMap<_BooruFaviconCacheKey, Future<ImageProvider>>();
+
+  static Future<ImageProvider> obtain(_BooruFaviconCacheKey key, Booru? booru) {
+    final cached = _providers.remove(key);
+    if (cached != null) {
+      // Reinsert to keep the map in least-recently-used order.
+      _providers[key] = cached;
+      return cached;
+    }
+
+    final created = _createProvider(key, booru);
+    _providers[key] = created;
+    unawaited(
+      created.then<void>(
+        (_) {},
+        onError: (Object _, StackTrace _) {
+          if (identical(_providers[key], created)) {
+            _providers.remove(key);
+          }
+        },
+      ),
+    );
+
+    while (_providers.length > _maximumEntries) {
+      _providers.remove(_providers.keys.first);
+    }
+    return created;
+  }
+
+  static int get length => _providers.length;
+
+  static void clear() => _providers.clear();
+
+  static Future<ImageProvider> _createProvider(_BooruFaviconCacheKey key, Booru? booru) async {
+    final headers = await Tools.getFileCustomHeaders(booru);
+    final ImageProvider provider = key.isAvif
+        ? CustomNetworkAvifImage(
+            key.url,
+            withCache: true,
+            headers: headers,
+            cacheFolder: 'favicons',
+            fileNameExtras: 'favicon_',
+            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
+          )
+        : CustomNetworkImage(
+            key.url,
+            withCache: true,
+            headers: headers,
+            cacheFolder: 'favicons',
+            fileNameExtras: 'favicon_',
+            sendTimeout: const Duration(seconds: 5),
+            receiveTimeout: const Duration(seconds: 5),
+          );
+    return ResizeImage(
+      provider,
+      width: key.pixelSize,
+      height: key.pixelSize,
+    );
+  }
+
+  static void forget(_BooruFaviconCacheKey? key) {
+    if (key != null) {
+      _providers.remove(key);
+    }
+  }
+
+  static Future<void> evict(
+    _BooruFaviconCacheKey? key, {
+    ImageProvider? fallbackProvider,
+  }) async {
+    final cached = key == null ? null : _providers.remove(key);
+    ImageProvider? cachedProvider;
+    if (cached != null) {
+      try {
+        cachedProvider = await cached;
+      } catch (_) {}
+    }
+
+    await cachedProvider?.evict();
+    if (fallbackProvider != null && !identical(fallbackProvider, cachedProvider)) {
+      await fallbackProvider.evict();
+    }
+  }
+}
 
 class BooruFavicon extends StatefulWidget {
   const BooruFavicon(
@@ -29,94 +181,100 @@ class BooruFavicon extends StatefulWidget {
 
   static const double defaultSize = 20;
 
+  @visibleForTesting
+  static Future<ImageProvider> debugCachedProviderFor(
+    Booru? booru, {
+    double size = defaultSize,
+    String? customFaviconUrl,
+  }) {
+    final widget = BooruFavicon(
+      booru,
+      size: size,
+      customFaviconUrl: customFaviconUrl,
+    );
+    return _BooruFaviconProviderCache.obtain(
+      _BooruFaviconCacheKey.fromWidget(widget),
+      booru,
+    );
+  }
+
+  @visibleForTesting
+  static int get debugCachedProviderCount => _BooruFaviconProviderCache.length;
+
+  @visibleForTesting
+  static void debugClearProviderCache() => _BooruFaviconProviderCache.clear();
+
   @override
   State<BooruFavicon> createState() => _BooruFaviconState();
 }
 
 class _BooruFaviconState extends State<BooruFavicon> {
   bool isIcon = false, isFailed = false, isLoaded = false, manualReloadTapped = false;
-  CancelToken? cancelToken;
   ImageProvider? mainProvider;
   ImageStream? imageStream;
   late ImageStreamListener imageListener;
+  _BooruFaviconCacheKey? activeCacheKey;
+  int loadGeneration = 0;
   String? errorCode;
 
   double get size => widget.size;
 
   @override
   void didUpdateWidget(BooruFavicon oldWidget) {
-    // force redraw on tab change
+    // Switch providers only when the image identity changes. Color-only parent
+    // rebuilds keep the already-resolved shared provider.
     if (oldWidget.booru?.faviconURL != widget.booru?.faviconURL ||
-        oldWidget.customFaviconUrl != widget.customFaviconUrl) {
+        oldWidget.booru?.baseURL != widget.booru?.baseURL ||
+        oldWidget.booru?.name != widget.booru?.name ||
+        oldWidget.booru?.type != widget.booru?.type ||
+        oldWidget.booru?.apiKey != widget.booru?.apiKey ||
+        oldWidget.booru?.userID != widget.booru?.userID ||
+        oldWidget.customFaviconUrl != widget.customFaviconUrl ||
+        oldWidget.size != widget.size) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        restartLoading();
+        if (mounted) {
+          unawaited(restartLoading());
+        }
       });
     }
     super.didUpdateWidget(oldWidget);
   }
 
-  Future<ImageProvider> getImageProvider() async {
-    cancelToken ??= CancelToken();
-    final String url = widget.booru?.faviconURL ?? widget.customFaviconUrl ?? '';
-    final bool isAvif = url.contains('.avif');
-    return ResizeImage(
-      isAvif
-          ? CustomNetworkAvifImage(
-              url,
-              withCache: true,
-              headers: await Tools.getFileCustomHeaders(widget.booru),
-              cacheFolder: 'favicons',
-              fileNameExtras: 'favicon_',
-              cancelToken: cancelToken,
-              sendTimeout: const Duration(seconds: 5),
-              receiveTimeout: const Duration(seconds: 5),
-              onError: onError,
-            )
-          : CustomNetworkImage(
-              url,
-              withCache: true,
-              headers: await Tools.getFileCustomHeaders(widget.booru),
-              cacheFolder: 'favicons',
-              fileNameExtras: 'favicon_',
-              cancelToken: cancelToken,
-              sendTimeout: const Duration(seconds: 5),
-              receiveTimeout: const Duration(seconds: 5),
-              onError: onError,
-            ),
-      width: (size * 5).toInt(),
-      height: (size * 5).toInt(),
-    );
-  }
-
-  Future<void> onError(Object error) async {
+  Future<void> onError(
+    Object error, {
+    _BooruFaviconCacheKey? cacheKey,
+  }) async {
     //// Error handling
     if (error is DioException && CancelToken.isCancel(error)) {
       //
     } else {
-      if (error is Exception && (error as dynamic).message == 'Invalid image data') {
-        final provider = (mainProvider! as ResizeImage).imageProvider;
-        switch (provider) {
-          case CustomNetworkImage _:
-            await provider.deleteCacheFile();
-            break;
-          case CustomNetworkAvifImage _:
-            await provider.deleteCacheFile();
-            break;
+      final failedCacheKey = cacheKey ?? activeCacheKey;
+      _BooruFaviconProviderCache.forget(failedCacheKey);
+
+      if (error.toString().contains('Invalid image data') && mainProvider is ResizeImage) {
+        final imageProvider = (mainProvider! as ResizeImage).imageProvider;
+        if (imageProvider is CustomNetworkImage) {
+          await imageProvider.deleteCacheFile();
+        } else if (imageProvider is CustomNetworkAvifImage) {
+          await imageProvider.deleteCacheFile();
         }
-        disposables();
+        _removeImageListener();
       }
       if (error is DioException &&
           error.response != null &&
           Tools.isGoodStatusCode(error.response!.statusCode) == false) {
         if (manualReloadTapped && (error.response!.statusCode == 403 || error.response!.statusCode == 503)) {
           await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
-          unawaited(restartLoading());
+          if (mounted && failedCacheKey == activeCacheKey) {
+            unawaited(restartLoading(evictSharedProvider: true));
+          }
           manualReloadTapped = false;
         }
         errorCode = error.response!.statusCode.toString();
       }
 
       isFailed = true;
+      isLoaded = false;
       Future.delayed(const Duration(milliseconds: 300), updateState);
     }
   }
@@ -125,24 +283,38 @@ class _BooruFaviconState extends State<BooruFavicon> {
   void initState() {
     super.initState();
     imageListener = ImageStreamListener((imageInfo, syncCall) {});
-    restartLoading();
+    unawaited(restartLoading());
   }
 
   void updateState() {
     if (mounted) setState(() {});
   }
 
-  Future<void> restartLoading() async {
-    if (mounted) {
-      await mainProvider?.evict();
+  Future<void> restartLoading({bool evictSharedProvider = false}) async {
+    final generation = ++loadGeneration;
+    final previousProvider = mainProvider;
+    final previousCacheKey = activeCacheKey;
+    _removeImageListener();
+    mainProvider = null;
+    activeCacheKey = null;
+
+    if (evictSharedProvider) {
+      await _BooruFaviconProviderCache.evict(
+        previousCacheKey,
+        fallbackProvider: previousProvider,
+      );
     }
-    disposables();
+
+    if (!mounted || generation != loadGeneration) {
+      return;
+    }
 
     isIcon =
         widget.booru?.type?.isFavouritesOrDownloads == true ||
         (widget.booru?.type == null && widget.customFaviconUrl == null);
 
     isFailed = false;
+    isLoaded = false;
     errorCode = null;
 
     updateState();
@@ -151,19 +323,42 @@ class _BooruFaviconState extends State<BooruFavicon> {
       isLoaded = true;
       updateState();
     } else {
-      mainProvider ??= await getImageProvider();
-
-      imageStream?.removeListener(imageListener);
+      final cacheKey = _BooruFaviconCacheKey.fromWidget(widget);
+      activeCacheKey = cacheKey;
+      try {
+        final provider = await _BooruFaviconProviderCache.obtain(cacheKey, widget.booru);
+        if (!mounted || generation != loadGeneration) {
+          return;
+        }
+        mainProvider = provider;
+      } catch (e, s) {
+        if (!mounted || generation != loadGeneration) {
+          return;
+        }
+        Logger.Inst().log(
+          'Failed to create favicon provider: ${cacheKey.url}',
+          'Favicon',
+          'build',
+          LogTypes.imageLoadingError,
+          s: s,
+        );
+        await onError(e, cacheKey: cacheKey);
+        return;
+      }
 
       imageStream = mainProvider!.resolve(ImageConfiguration.empty);
       imageListener = ImageStreamListener(
         (imageInfo, syncCall) {
           isLoaded = true;
+          manualReloadTapped = false;
           if (!syncCall) {
             updateState();
           }
         },
         onError: (e, s) {
+          if (!mounted || generation != loadGeneration) {
+            return;
+          }
           Logger.Inst().log(
             'Failed to load favicon: ${widget.booru?.faviconURL ?? widget.customFaviconUrl}',
             'Favicon',
@@ -171,7 +366,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
             LogTypes.imageLoadingError,
             s: s,
           );
-          onError(e);
+          unawaited(onError(e, cacheKey: cacheKey));
         },
       );
       imageStream?.addListener(imageListener);
@@ -182,21 +377,17 @@ class _BooruFaviconState extends State<BooruFavicon> {
 
   @override
   void dispose() {
-    disposables();
+    loadGeneration++;
+    _removeImageListener();
+    mainProvider = null;
+    activeCacheKey = null;
     super.dispose();
   }
 
-  void disposables() {
+  void _removeImageListener() {
     imageStream?.removeListener(imageListener);
     imageStream = null;
     imageListener = ImageStreamListener((imageInfo, syncCall) {});
-
-    mainProvider = null;
-
-    if (!(cancelToken != null && cancelToken!.isCancelled)) {
-      cancelToken?.cancel();
-    }
-    cancelToken = null;
   }
 
   @override
@@ -228,6 +419,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
               fit: BoxFit.fill,
               filterQuality: FilterQuality.medium,
               isAntiAlias: true,
+              gaplessPlayback: true,
               errorBuilder: (_, _, _) {
                 return FaviconError(
                   iconSize: size,
@@ -235,7 +427,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
                   code: errorCode,
                   onRestart: () {
                     manualReloadTapped = true;
-                    restartLoading();
+                    unawaited(restartLoading(evictSharedProvider: true));
                   },
                 );
               },
@@ -247,7 +439,7 @@ class _BooruFaviconState extends State<BooruFavicon> {
               code: errorCode,
               onRestart: () {
                 manualReloadTapped = true;
-                restartLoading();
+                unawaited(restartLoading(evictSharedProvider: true));
               },
             ),
           //
