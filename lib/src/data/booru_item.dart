@@ -10,6 +10,10 @@ import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
+double? _sanitizeAspectRatio(double? value) {
+  return value != null && value.isFinite && value > 0 ? value : null;
+}
+
 // ignore: must_be_immutable
 class BooruItem extends Equatable {
   BooruItem({
@@ -92,13 +96,19 @@ class BooruItem extends Equatable {
   bool? hasNotes, hasComments;
   double? fileWidth;
   double? fileHeight;
-  double? fileAspectRatio;
+  double? _fileAspectRatio;
+  double? get fileAspectRatio => _fileAspectRatio;
+  set fileAspectRatio(double? value) => _fileAspectRatio = _sanitizeAspectRatio(value);
   double? sampleWidth;
   double? sampleHeight;
-  double? sampleAspectRatio;
+  double? _sampleAspectRatio;
+  double? get sampleAspectRatio => _sampleAspectRatio;
+  set sampleAspectRatio(double? value) => _sampleAspectRatio = _sanitizeAspectRatio(value);
   double? previewWidth;
   double? previewHeight;
-  double? previewAspectRatio;
+  double? _previewAspectRatio;
+  double? get previewAspectRatio => _previewAspectRatio;
+  set previewAspectRatio(double? value) => _previewAspectRatio = _sanitizeAspectRatio(value);
   int? fileSize;
 
   List<Tag>? _cachedMetadataTags;
