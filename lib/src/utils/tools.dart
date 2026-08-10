@@ -78,7 +78,11 @@ class Tools {
 
     final int queryLastIndex = fileURL.lastIndexOf('?'); // if has GET query parameters
     final int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
-    final String fileExt = fileURL.substring(fileURL.lastIndexOf('.') + 1, lastIndex);
+    final String fileURLWithQueryParameters = fileURL.substring(0, lastIndex);
+    final String fileExt = fileURLWithQueryParameters.substring(
+      fileURLWithQueryParameters.lastIndexOf('.') + 1,
+      lastIndex,
+    );
     return fileExt;
   }
 
