@@ -16,6 +16,11 @@ analyzer:
 
   exclude:
     - lib/generated_plugin_registrant.dart
+    - build/**
+    - android/**
+    - ios/**
+    - windows/**
+    - linux/**
 
 formatter:
   page_width: 120
@@ -41,7 +46,6 @@ linter:
     avoid_init_to_null: true
     avoid_js_rounded_ints: true
     avoid_print: false
-    avoid_private_typedef_functions: true
     avoid_relative_lib_imports: true
     avoid_renaming_method_parameters: true
     avoid_return_types_on_setters: true
@@ -101,7 +105,6 @@ linter:
     noop_primitive_operations: true
     null_check_on_nullable_type_parameter: true
     null_closures: true
-    one_member_abstracts: true
     only_throw_errors: true
     overridden_fields: true
     package_names: true
@@ -155,7 +158,6 @@ linter:
     type_annotate_public_apis: true
     type_init_formals: true
     unawaited_futures: true
-    unnecessary_await_in_return: true
     unnecessary_brace_in_string_interps: true
     unnecessary_breaks: false # fluter/dart doesn't have case fallthrough in switches after dart 3.0
     unnecessary_const: true

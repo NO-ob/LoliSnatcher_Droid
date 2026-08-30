@@ -49,7 +49,7 @@ class Constants {
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.5.2',
     buildNumber: 5218,
-    title: '2.5.2 - New onboarding and small fixes',
+    title: '2.5.2 Hotfix 1',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.losn',
@@ -69,6 +69,17 @@ A minor update that adds a new onboarding screen, adds fullscreen video zooming 
 [Known issues]:
 - On Gelbooru, images may blink/flicker and/or fail with various error codes (503, 429, 404...), which may be fixed by trying to load the image again. This is probably caused by their aggressive rate limiting rules. As a temporary workaround until they lift the restrictions, set [Interface - Preview quality] to [Thumbnail] and [Boorus and Search - Items fetched per page] to 20 to reduce flicker and the chance of being rate limited
 - German translations are incorrect and will be fixed in a future release after a new contributor is able to update them
+
+-------------------
+
+Hotfix 1 - 2.5.2+5219 (?)
+- Update dependencies
+- Possible fix for main appbar and bottom search bar constantly reappearing when it is not supposed to
+- Skip download cooldown if file already exists (#401)
+- Keep animating gifs when reduce motion system setting is enabled (#402)
+- Favicon caching improvements
+- Fix file url parsing for some sites
+- Fix possible layout bug in comments when image has broken ratio data
 
 -------------------
 

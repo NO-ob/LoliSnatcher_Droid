@@ -218,7 +218,7 @@ class NetworkImageLoader {
 
         try {
           await _commitCacheFile(tempFile, cacheFilePath);
-          return File(cacheFilePath).readAsBytes();
+          return await File(cacheFilePath).readAsBytes();
         } catch (_) {
           try {
             await tempFile.delete();
@@ -377,7 +377,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
       final fixedBytes = await NetworkImageLoader.tryFixGifSpeed(key.url, bytes);
 
       final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(fixedBytes);
-      return decode(buffer);
+      return await decode(buffer);
     } catch (e) {
       if (onError != null) {
         onError?.call(e);
