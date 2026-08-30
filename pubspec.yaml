@@ -56,7 +56,7 @@ dependencies:
   get_it: ^9.2.1
   get: ^5.0.0-release-candidate-9.3.3 # TODO - MOVE TO A DIFFERENT STATE MANAGEMENT SOLUTIONS
   google_fonts: ^8.2.1
-  html: ^0.15.7
+  html: 0.15.6 # pin reason: flutter_html 3.0.0 imports a query-selector API removed in html 0.15.7
   http_proxy: # ^1.2.2
     git:
       url: https://github.com/NANI-SORE/http_proxy.git
