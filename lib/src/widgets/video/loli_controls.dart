@@ -60,11 +60,11 @@ class _LoliControlsState extends State<LoliControls> {
   Timer? _doubleTapHideTimer, longTapSpeedChangeDelayTimer, pointerCountCheckTimer;
   static const double _longTapBasePlaybackSpeed = 2;
   static const double _longTapMinPlaybackSpeed = 0.2;
-  static const double _longTapMaxPlaybackSpeed = 4;
+  static final double _longTapMaxPlaybackSpeed = Platform.isIOS ? 2.5 : 4;
   static const double _longTapSlowdownDeadZone = 24;
   static const double _longTapSpeedChangeTolerance = 0.05;
   static const double _longTapMinReverseSpeed = 1;
-  static const double _longTapMaxReverseSpeed = 4;
+  static final double _longTapMaxReverseSpeed = Platform.isIOS ? 2.5 : 4;
   static const double _longTapReverseSpeedChangeTolerance = 0.1;
   static const Duration _longTapSpeedChangeDebounce = Duration(milliseconds: 200);
   static const Duration _longTapReverseTick = Duration(milliseconds: 100);
