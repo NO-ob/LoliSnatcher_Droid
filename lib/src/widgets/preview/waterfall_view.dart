@@ -31,6 +31,8 @@ class WaterfallView extends StatefulWidget {
 }
 
 class _WaterfallViewState extends State<WaterfallView> with RouteAware {
+  static const int _floatingBarsDirectionDebounceMs = 120;
+
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   final SearchHandler searchHandler = SearchHandler.instance;
@@ -41,12 +43,17 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   bool scrollDone = true;
 
   Orientation currentOrientation = Orientation.portrait;
+  // Nested viewers replace ViewerHandler.current, so retain the page shown by
+  // the root gallery for scroll restoration while they are open.
+  int? _rootViewerIndex;
 
   bool isStaggered = false;
 
   bool get isMobile => settingsHandler.appMode.value.isMobile;
 
   final ValueNotifier<bool> isActive = ValueNotifier(true);
+  ScrollDirection _lastFloatingBarsDirection = ScrollDirection.idle;
+  int _lastFloatingBarsDirectionChangedAt = 0;
 
   Timer? viewedItemCleanupTimer;
   int viewedItemCleanupCount = 0;
@@ -139,6 +146,8 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
           ),
         );
       }
+
+      _showFloatingBars();
     });
 
     // check if grid type changed when changing tab
@@ -176,6 +185,14 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
           searchHandler.gridScrollController.offset + (settingsHandler.volumeButtonsScrollSpeed * dir),
           -20,
         );
+        if (offset <= searchHandler.gridScrollController.position.minScrollExtent + 0.5) {
+          _showFloatingBars();
+        } else {
+          _updateFloatingBars(
+            dir > 0 ? ScrollDirection.reverse : ScrollDirection.forward,
+            debounce: false,
+          );
+        }
         await searchHandler.gridScrollController.animateTo(
           offset,
           duration: const Duration(milliseconds: 200),
@@ -231,16 +248,39 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   void syncFloatingBarsWithScroll(ScrollNotification notification) {
-    if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
+    if (notification.depth != 0 ||
+        notification.metrics.axis != Axis.vertical ||
+        !searchHandler.gridScrollController.hasClients) {
       return;
     }
 
-    final scrollDelta = notification is ScrollUpdateNotification ? notification.scrollDelta : null;
-    if (scrollDelta == null || scrollDelta == 0) {
+    if (_isAtScrollStart(notification.metrics)) {
+      _showFloatingBars();
       return;
     }
 
-    final direction = scrollDelta > 0 ? ScrollDirection.reverse : ScrollDirection.forward;
+    // Scroll deltas also include position restoration, layout corrections, and
+    // driven animations. userScrollDirection stays idle for those while still
+    // covering touch drags and pointer-wheel scrolling.
+    _updateFloatingBars(searchHandler.gridScrollController.position.userScrollDirection);
+  }
+
+  void _updateFloatingBars(
+    ScrollDirection direction, {
+    bool debounce = true,
+  }) {
+    if (direction == ScrollDirection.idle) {
+      return;
+    }
+
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final directionChanged = _lastFloatingBarsDirection != direction;
+    if (debounce && directionChanged && now - _lastFloatingBarsDirectionChangedAt < _floatingBarsDirectionDebounceMs) {
+      return;
+    }
+
+    _lastFloatingBarsDirection = direction;
+    _lastFloatingBarsDirectionChangedAt = now;
     navigationHandler.floatingHeaderKey.currentState?.handleUserScrollDirection(direction);
 
     if (direction == ScrollDirection.reverse) {
@@ -250,7 +290,25 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
     }
   }
 
-  void settleFloatingBarsAfterScroll() {
+  bool _isAtScrollStart(ScrollMetrics metrics) {
+    return metrics.pixels <= metrics.minScrollExtent + 0.5;
+  }
+
+  void _showFloatingBars() {
+    _lastFloatingBarsDirection = ScrollDirection.forward;
+    _lastFloatingBarsDirectionChangedAt = DateTime.now().millisecondsSinceEpoch;
+    navigationHandler.floatingHeaderKey.currentState?.show();
+    navigationHandler.bottomBarKey.currentState?.show();
+  }
+
+  void settleFloatingBarsAfterScroll(ScrollNotification notification) {
+    if (notification.depth == 0 &&
+        notification.metrics.axis == Axis.vertical &&
+        _isAtScrollStart(notification.metrics)) {
+      _showFloatingBars();
+      return;
+    }
+
     navigationHandler.floatingHeaderKey.currentState?.settleUserScrollDirection();
   }
 
@@ -267,6 +325,8 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
   }
 
   void onViewerPageChanged(int index) {
+    _rootViewerIndex = index;
+
     final currentFetched = searchHandler.currentFetchedOrNull;
     if (currentFetched == null || index >= currentFetched.length) return;
     viewedItems.add(currentFetched[index]);
@@ -298,6 +358,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
 
       isActive.value = false;
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
+      _rootViewerIndex = index;
 
       final viewerKey = GlobalKey(debugLabel: 'viewer-main');
       ViewerHandler.instance.addViewer(viewerKey);
@@ -326,6 +387,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
         ),
       );
 
+      _rootViewerIndex = null;
       viewerHandler.dropCurrent();
 
       viewedItemCleanupTimer = Timer.periodic(
@@ -413,9 +475,12 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
         final currentFetched = searchHandler.currentFetchedOrNull;
         if (currentFetched == null) return;
 
-        final itemIndex = currentFetched.indexWhere(
-          (item) => item.key == viewerHandler.current.value?.key,
-        );
+        final rootViewerIndex = _rootViewerIndex;
+        final itemIndex = rootViewerIndex != null && rootViewerIndex >= 0 && rootViewerIndex < currentFetched.length
+            ? rootViewerIndex
+            : currentFetched.indexWhere(
+                (item) => item.key == viewerHandler.current.value?.key,
+              );
         if (itemIndex != -1) {
           searchHandler.gridScrollController.scrollToIndex(
             itemIndex,
@@ -573,12 +638,14 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
                             ? const SizedBox.shrink()
                             : WaterfallScrollButtons(
                                 onTap: (bool forward) {
-                                  if (forward) {
-                                    navigationHandler.floatingHeaderKey.currentState?.hide();
-                                    navigationHandler.bottomBarKey.currentState?.hide();
+                                  final controller = searchHandler.gridScrollController;
+                                  if (controller.hasClients && _isAtScrollStart(controller.position)) {
+                                    _showFloatingBars();
                                   } else {
-                                    navigationHandler.floatingHeaderKey.currentState?.show();
-                                    navigationHandler.bottomBarKey.currentState?.show();
+                                    _updateFloatingBars(
+                                      forward ? ScrollDirection.reverse : ScrollDirection.forward,
+                                      debounce: false,
+                                    );
                                   }
                                   // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
                                 },
@@ -617,7 +684,7 @@ class _WaterfallViewState extends State<WaterfallView> with RouteAware {
               }
             }
             if (notif is ScrollEndNotification) {
-              settleFloatingBarsAfterScroll();
+              settleFloatingBarsAfterScroll(notif);
               searchHandler.sendToScrollStream(notif);
             }
             return true;
