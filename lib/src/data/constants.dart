@@ -71,14 +71,15 @@ A minor update that adds a new onboarding screen, adds fullscreen video zooming 
 
 -------------------
 
-Hotfix 1 - 2.5.2+5219 (?)
+Hotfix 1 - 2.5.2+5219 (xx.xx.2026):
 - Update dependencies
-- Possible fix for main appbar and bottom search bar constantly reappearing when it is not supposed to
+- Possible fix for main appbar and bottom search bar constantly reappearing when not supposed to
 - Skip download cooldown if file already exists (#401)
 - Keep animating gifs when reduce motion system setting is enabled (#402)
 - Favicon caching improvements
 - Fix file url parsing for some sites
 - Fix possible layout bug in comments when image has broken ratio data
+- Fix manually selected video speed resetting on any interaction
 
 -------------------
 
