@@ -73,7 +73,7 @@ class _LoliControlsState extends State<LoliControls> {
   bool longTapReversing = false;
   double longTapReverseSpeed = _longTapMinReverseSpeed;
   int pointerCount = 0;
-  bool speedSetManually = false;
+  double manuallySelectedPlaybackSpeed = 1;
   TapDownDetails? _doubleTapInfo;
   int _lastDoubleTapAmount = 0;
   int _lastDoubleTapSide = 0;
@@ -166,7 +166,7 @@ class _LoliControlsState extends State<LoliControls> {
     controller.setPlaybackSpeed(1);
     doubleTapped = false;
     holdingDown = false;
-    speedSetManually = false;
+    manuallySelectedPlaybackSpeed = 1;
     _doubleTapExtraMessage = '';
     longTapPlaybackSpeed = _longTapBasePlaybackSpeed;
     longTapReversing = false;
@@ -583,7 +583,7 @@ class _LoliControlsState extends State<LoliControls> {
         if (chosenSpeed != null) {
           await controller.setPlaybackSpeed(chosenSpeed);
           setState(() {
-            speedSetManually = chosenSpeed != 1;
+            manuallySelectedPlaybackSpeed = chosenSpeed;
           });
         }
 
@@ -597,6 +597,7 @@ class _LoliControlsState extends State<LoliControls> {
         }
 
         await controller.setPlaybackSpeed(1);
+        manuallySelectedPlaybackSpeed = 1;
 
         if (_latestValue.isPlaying) {
           _startHideTimer();
@@ -771,9 +772,9 @@ class _LoliControlsState extends State<LoliControls> {
         if (holdingDown && pointerCount != 1) {
           onHitAreaLongPressUp();
         }
-        if (pointerCount == 0 && !speedSetManually) {
-          // reset speed when there are no fingers detected and it wasn't set through dialog
-          // required because video controller wrongly reports that speed is reset and speed may not reset properly if it was changed during buffering
+        if (pointerCount == 0 && manuallySelectedPlaybackSpeed == 1) {
+          // Reset speed when there are no fingers detected and no custom speed was selected.
+          // Required because video controller wrongly reports that speed is reset and speed may not reset properly if it was changed during buffering.
           controller.setPlaybackSpeed(1);
         }
       },
@@ -1010,7 +1011,6 @@ class _LoliControlsState extends State<LoliControls> {
       _doubleTapHideTimer?.cancel();
       doubleTapped = false;
       holdingDown = true;
-      speedSetManually = false;
       longTapPlaybackSpeed = _longTapBasePlaybackSpeed;
       _stopLongTapReverse();
       _doubleTapExtraMessage = '${longTapPlaybackSpeed.toStringAsFixed(1)}x';
@@ -1039,7 +1039,6 @@ class _LoliControlsState extends State<LoliControls> {
         longTapPlaybackSpeed = _longTapMinPlaybackSpeed;
         doubleTapped = false;
         holdingDown = true;
-        speedSetManually = false;
         _doubleTapExtraMessage = '-${longTapReverseSpeed.toStringAsFixed(1)}x';
         _lastDoubleTapSide = -1;
         _startLongTapReverse();
@@ -1058,7 +1057,6 @@ class _LoliControlsState extends State<LoliControls> {
       // update ui value immediately, real speed change will happen in a timer below
       doubleTapped = false;
       holdingDown = true;
-      speedSetManually = false;
       _doubleTapExtraMessage = '${longTapPlaybackSpeed.toStringAsFixed(1)}x';
       _lastDoubleTapSide = 1;
 
@@ -1159,10 +1157,8 @@ class _LoliControlsState extends State<LoliControls> {
       holdingDown = false;
       longTapPlaybackSpeed = _longTapBasePlaybackSpeed;
       longTapReverseSpeed = _longTapMinReverseSpeed;
-      if (!speedSetManually) {
-        controller.setPlaybackSpeed(1);
-        _cancelAndRestartTimer();
-      }
+      controller.setPlaybackSpeed(manuallySelectedPlaybackSpeed);
+      _cancelAndRestartTimer();
     });
   }
 
