@@ -57,6 +57,15 @@ class MainActivity: FlutterFragmentActivity() {
 
     private val activeFiles = mutableMapOf<Uri, OutputStream?>()
 
+    // url_launcher starts ACTION_VIEW intents through this Activity. Without
+    // NEW_TASK, Android may place the external Activity in LoliSnatcher's task.
+    override fun startActivity(intent: Intent) {
+        if (intent.action == Intent.ACTION_VIEW) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        super.startActivity(intent)
+    }
+
     @SuppressLint("WrongThread")
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -70,12 +79,16 @@ class MainActivity: FlutterFragmentActivity() {
                         val text = call.argument<String>("text")
                         val title = call.argument<String>("title")
                         if (text != null) {
-                            val shareTextIntent = Intent.createChooser(Intent().apply {
+                            val shareTextTarget = Intent().apply {
                                 action = Intent.ACTION_SEND
                                 putExtra(Intent.EXTRA_TEXT, text)
                                 // putExtra(Intent.EXTRA_TITLE, title)
                                 type = "text/plain"
-                            }, null)
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            val shareTextIntent = Intent.createChooser(shareTextTarget, null).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
                             startActivity(shareTextIntent)
                             result.success(true)
                         } else {
@@ -88,15 +101,18 @@ class MainActivity: FlutterFragmentActivity() {
                         val text = call.argument<String>("text")
                         if (path != null && mimeType != null) {
                             val contentUri = FileProvider.getUriForFile(applicationContext, BuildConfig.APPLICATION_ID + ".fileprovider", File(path))
-                            val shareFileIntent = Intent.createChooser(Intent().apply {
+                            val shareFileTarget = Intent().apply {
                                 action = Intent.ACTION_SEND
                                 type = mimeType
                                 putExtra(Intent.EXTRA_STREAM, contentUri)
-                                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
                                 if (text != null) {
                                     putExtra(Intent.EXTRA_TEXT, text)
                                 }
-                            }, null)
+                            }
+                            val shareFileIntent = Intent.createChooser(shareFileTarget, null).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
 
                             val resInfoList: List<ResolveInfo> = applicationContext.packageManager.queryIntentActivities(shareFileIntent, PackageManager.MATCH_DEFAULT_ONLY)
                             for (resolveInfo in resInfoList) {
