@@ -179,17 +179,22 @@ class _LoliControlsState extends State<LoliControls> {
     _initTimer?.cancel();
     _showAfterExpandCollapseTimer?.cancel();
     bufferingDisplayTimer?.cancel();
+    bufferingDisplayTimer = null;
+    displayBufferingIndicator = false;
     pointerCountCheckTimer?.cancel();
   }
 
   @override
   void didChangeDependencies() {
     final ChewieController? oldController = _chewieController;
-    _chewieController = ChewieController.of(context);
-    controller = chewieController.videoPlayerController;
+    final ChewieController newController = ChewieController.of(context);
 
-    if (oldController != chewieController) {
-      _dispose();
+    if (oldController != newController) {
+      if (oldController != null) {
+        _dispose();
+      }
+      _chewieController = newController;
+      controller = newController.videoPlayerController;
       _initialize();
     }
 
@@ -843,42 +848,18 @@ class _LoliControlsState extends State<LoliControls> {
   }
 
   void bufferingTimerTimeout() {
-    displayBufferingIndicator = true;
-    if (mounted) {
-      setState(() {});
-    }
+    bufferingDisplayTimer = null;
+    if (!mounted) return;
+
+    setState(() {
+      displayBufferingIndicator = getIsBuffering();
+    });
   }
 
-  /// Gets the current buffering state of the video player.
-  ///
-  /// For Android, it will use a workaround due to a [bug](https://github.com/flutter/flutter/issues/165149)
-  /// affecting the `video_player` plugin, preventing it from getting the
-  /// actual buffering state. This currently results in the `VideoPlayerController` always buffering,
-  /// thus breaking UI elements.
-  ///
-  /// For this, the actual buffer position is used to determine if the video is
-  /// buffering or not. See Issue [#912](https://github.com/fluttercommunity/chewie/pull/912) for more details.
   bool getIsBuffering() {
     final VideoPlayerValue value = controller.value;
 
-    if (Platform.isAndroid) {
-      if (value.isBuffering) {
-        // -> Check if we actually buffer, as android has a bug preventing to
-        //    get the correct buffering state from this single bool.
-        final int position = value.position.inMilliseconds;
-        // Special case, if the video is finished, we don't want to show the
-        // buffering indicator anymore
-        if (position >= value.duration.inMilliseconds) {
-          return false;
-        } else {
-          final int buffer = value.buffered.lastOrNull?.end.inMilliseconds ?? -1;
-          return position >= buffer;
-        }
-      } else {
-        // -> No buffering
-        return false;
-      }
-    }
+    if (value.hasError || value.isCompleted) return false;
 
     return value.isBuffering;
   }
@@ -890,16 +871,20 @@ class _LoliControlsState extends State<LoliControls> {
 
     if (chewieController.progressIndicatorDelay != null) {
       if (isBuffering) {
-        bufferingDisplayTimer ??= Timer(
-          chewieController.progressIndicatorDelay!,
-          bufferingTimerTimeout,
-        );
+        if (!displayBufferingIndicator) {
+          bufferingDisplayTimer ??= Timer(
+            chewieController.progressIndicatorDelay!,
+            bufferingTimerTimeout,
+          );
+        }
       } else {
         bufferingDisplayTimer?.cancel();
         bufferingDisplayTimer = null;
         displayBufferingIndicator = false;
       }
     } else {
+      bufferingDisplayTimer?.cancel();
+      bufferingDisplayTimer = null;
       displayBufferingIndicator = isBuffering;
     }
 
