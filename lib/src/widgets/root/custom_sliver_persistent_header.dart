@@ -95,21 +95,7 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_position != null) {
-      _position!.isScrollingNotifier.removeListener(_isScrollingListener);
-    }
     _position = Scrollable.maybeOf(context)?.position;
-    if (_position != null) {
-      _position!.isScrollingNotifier.addListener(_isScrollingListener);
-    }
-  }
-
-  @override
-  void dispose() {
-    if (_position != null) {
-      _position!.isScrollingNotifier.removeListener(_isScrollingListener);
-    }
-    super.dispose();
   }
 
   RenderSliverFloatingPersistentHeader? _headerRenderer() {
@@ -151,10 +137,7 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
       return;
     }
 
-    final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
-    header?.updateScrollStartDirection(direction);
-    header?.maybeStopSnapAnimation(direction);
-
+    _snapOrDefer(direction);
     widget.onVisibilityChanged?.call(direction == ScrollDirection.forward);
   }
 
@@ -180,19 +163,10 @@ class CustomFloatingHeaderState extends State<CustomFloatingHeader> {
     widget.onVisibilityChanged?.call(false);
   }
 
-  void _isScrollingListener() {
-    assert(_position != null);
-
-    final RenderSliverFloatingPersistentHeader? header = _headerRenderer();
-    if (_position!.isScrollingNotifier.value) {
-      final direction = _position!.userScrollDirection;
-      if (_setLastUserScrollDirection(direction)) {
-        header?.updateScrollStartDirection(direction);
-        header?.maybeStopSnapAnimation(direction);
-      }
-    } else if (_lastUserScrollDirection != ScrollDirection.idle) {
-      _startSnap(_lastUserScrollDirection);
-    }
+  // WaterfallView owns primary scroll start/end notifications, so snapping is
+  // stopped and settled once, after its direction debounce has been resolved.
+  void handleScrollStart() {
+    _headerRenderer()?.maybeStopSnapAnimation(_lastUserScrollDirection);
   }
 
   @override
