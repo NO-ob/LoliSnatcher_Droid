@@ -17,7 +17,7 @@ dependencies:
   app_links: ^7.2.1
   auto_size_text_plus: ^3.0.2
   calendar_date_picker2: ^3.0.0
-  chewie: ^1.15.0
+  chewie: ^1.16.2
   clipboard: # ^3.0.14
     git:
       url: https://github.com/dongfengweixiao/flutter_clipboard.git
@@ -26,8 +26,8 @@ dependencies:
   country_flags: ^4.1.2
   crypto: ^3.0.7
   device_info_plus: ^13.2.0
-  dio: ^5.11.0
-  dio_http2_adapter: ^2.8.0
+  dio: ^5.11.1
+  dio_http2_adapter: ^2.9.0
   duration: ^4.0.3
   dynamic_color: ^1.9.0
   equatable: ^2.1.0
@@ -76,7 +76,7 @@ dependencies:
   media_kit_libs_video: ^1.0.7
   native_dio_adapter: ^1.8.0 # TODO use this for http3, probably should rewrite http client use to reduce amount of created clients
   path_provider: ^2.1.6
-  permission_handler: ^13.0.1
+  permission_handler: ^13.0.2
   photo_view:
     git:
       url: https://github.com/NANI-SORE/photo_view.git
@@ -90,7 +90,7 @@ dependencies:
   scrollable_positioned_list: ^0.3.8
   share_plus: ^13.3.0 # not used directly, but is part of some deps (i.e. alice) # TODO move to this instead of our native share code?
   slang_flutter: ^4.19.0
-  slang: ^4.19.0
+  slang: ^4.19.1
   sqflite_common_ffi: ^2.4.2
   sqflite: ^2.4.3
   sqlite3: ^3.5.2
@@ -118,7 +118,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: ^2.16.0
+  build_runner: ^2.16.1
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
 
