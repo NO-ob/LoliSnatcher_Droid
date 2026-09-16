@@ -183,14 +183,26 @@ class SearchHandler {
   }
 
   void removeTabs(List<SearchTab> tabsToRemove) {
+    if (tabs.isEmpty || tabsToRemove.isEmpty) return;
     final curTab = currentTab;
-    final totalTabs = total;
+    final fallbackBooru = currentBooru;
+    final removed = tabsToRemove.toSet();
+    final remaining = tabs.where((tab) => !removed.contains(tab)).toList();
+    if (remaining.length == tabs.length) return;
 
-    for (final tab in tabsToRemove) {
-      tabs.value.remove(tab);
-    }
+    if (remaining.isEmpty) {
+      final SettingsHandler settingsHandler = SettingsHandler.instance;
+      final String defaultText = fallbackBooru.defTags?.isNotEmpty == true
+          ? fallbackBooru.defTags!
+          : settingsHandler.defTags;
+      final SearchTab newTab = SearchTab(fallbackBooru, null, defaultText);
+      // Publish a nonempty list, with a valid index even for synchronous listeners.
+      index.value = 0;
+      tabs.value = [newTab];
+      tabId.value = newTab.id;
+      Tools.forceClearMemoryCache(withLive: true);
+      changeTabIndex(0);
 
-    if (totalTabs == tabsToRemove.length) {
       final context = NavigationHandler.instance.navContext;
       FlashElements.showSnackbar(
         title: Text(context.loc.searchHandler.removedLastTab, style: const TextStyle(fontSize: 20)),
@@ -204,19 +216,15 @@ class SearchHandler {
         leadingIconColor: Colors.yellow,
         sideColor: Colors.yellow,
       );
-
-      final SettingsHandler settingsHandler = SettingsHandler.instance;
-      final String defaultText = currentBooru.defTags?.isNotEmpty == true
-          ? currentBooru.defTags!
-          : settingsHandler.defTags;
-      searchTextController.text = defaultText;
-
-      final SearchTab newTab = SearchTab(currentBooru, null, defaultText);
-      tabs.value[0] = newTab;
-      changeTabIndex(0);
     } else {
-      final newIndex = tabs.value.indexWhere((t) => t.id == curTab.id);
-      changeTabIndex(newIndex == -1 ? total - 1 : newIndex);
+      final preservedIndex = remaining.indexWhere((tab) => tab.id == curTab.id);
+      final newIndex = preservedIndex == -1 ? remaining.length - 1 : preservedIndex;
+      final selectionChanged = newIndex != currentIndex || remaining[newIndex].id != curTab.id;
+      index.value = newIndex;
+      tabs.value = remaining;
+      tabId.value = remaining[newIndex].id;
+      if (selectionChanged) Tools.forceClearMemoryCache(withLive: true);
+      changeTabIndex(newIndex);
     }
   }
 
