@@ -12,6 +12,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/services/database_backup_service.dart';
 import 'package:lolisnatcher/src/utils/content_policy.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -34,6 +35,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
 
   bool inProgress = false;
   int progress = 0, total = 0;
+  final databaseBackupService = const DatabaseBackupService();
 
   void createInitialTabIfNeeded() {
     if (searchHandler.tabs.isNotEmpty || settingsHandler.booruList.isEmpty) {
@@ -53,11 +55,147 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
     unawaited(searchHandler.runSearch());
   }
 
-  Future<void> restoreDbAccessAfterFailedRestore() async {
+  Future<void> _reopenDatabase() async {
     if (settingsHandler.dbHandler.db == null && settingsHandler.dbEnabled) {
-      await settingsHandler.loadDatabase((_) {});
+      final file = File('${await ServiceHandler.getConfigDir()}store.db');
+      if (!await file.exists() || !await settingsHandler.loadDatabase((_) {})) {
+        await settingsHandler.dbHandler.closeDb();
+        throw StateError('Unable to reopen database after restore');
+      }
     }
-    searchHandler.canBackup.value = true;
+  }
+
+  Future<bool> _hasRecoveryFiles(Directory? recovery) async {
+    if (recovery == null) return false;
+    try {
+      return !(await recovery.list().isEmpty);
+    } catch (e, s) {
+      Logger.Inst().log(e.toString(), 'BackupRestorePage', 'inspectDatabaseRecovery', LogTypes.exception, s: s);
+      // An unreadable directory may still contain the only recoverable copy.
+      return true;
+    }
+  }
+
+  Future<void> _removeStagingDirectory(Directory? directory) async {
+    if (directory == null) return;
+    try {
+      await directory.delete(recursive: true);
+    } catch (e, s) {
+      // Cleanup must not turn a successful restore into a reported failure.
+      Logger.Inst().log(e.toString(), 'BackupRestorePage', 'cleanupDatabaseStaging', LogTypes.exception, s: s);
+    }
+  }
+
+  Future<void> backupDatabase() async {
+    if (inProgress) return;
+    setState(() => inProgress = true);
+    Directory? staging;
+    try {
+      final source = File('${await ServiceHandler.getConfigDir()}store.db');
+      if (!await source.exists()) {
+        showSnackbar(context.loc.settings.backupAndRestore.databaseFileNotFound, isError: true);
+        return;
+      }
+      final overwriteExisting = await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db');
+      if (overwriteExisting && !await detectedDuplicateFile('store.db', deleteExisting: false)) {
+        showSnackbar(context.loc.settings.backupAndRestore.backupCancelled, isError: true);
+        return;
+      }
+      staging = await Directory(await ServiceHandler.getCacheDir()).createTemp('database-backup-');
+      final snapshot = File('${staging.path}/store.db');
+      await databaseBackupService.createSnapshot(source, snapshot, database: settingsHandler.dbHandler.db);
+      await databaseBackupService.validate(snapshot);
+      if (overwriteExisting && !await ServiceHandler.deleteFileFromSAFDirectory(backupPath, 'store.db')) {
+        throw const FileSystemException('Unable to replace existing database backup');
+      }
+      final copied = await ServiceHandler.copyFileToSafDir(
+        staging.path,
+        'store.db',
+        backupPath,
+        'application/x-sqlite3',
+      );
+      if (!copied) throw const FileSystemException('Unable to export database snapshot');
+      showSnackbar(context.loc.settings.backupAndRestore.databaseBackedUp, isError: false);
+    } catch (e, s) {
+      showSnackbar(context.loc.settings.backupAndRestore.backupDatabaseError, isError: true);
+      Logger.Inst().log(e.toString(), 'BackupRestorePage', 'backupDatabase', LogTypes.exception, s: s);
+    } finally {
+      await _removeStagingDirectory(staging);
+      inProgress = false;
+      if (mounted) setState(() {});
+    }
+  }
+
+  Future<void> restoreDatabase() async {
+    if (inProgress || !await confirmRestore(context.loc.settings.backupAndRestore.restoreDatabase)) return;
+    if (!mounted || inProgress) return;
+    setState(() => inProgress = true);
+    final previousCanBackup = searchHandler.canBackup.value;
+    Directory? staging;
+    Directory? recovery;
+    bool closedDatabase = false;
+    bool installed = false;
+    try {
+      if (!await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
+        showSnackbar(context.loc.settings.backupAndRestore.backupFileNotFound, isError: true);
+        return;
+      }
+      final configDir = await ServiceHandler.getConfigDir();
+      // Stage on the same filesystem so installation uses renames, not a
+      // potentially partial copy over the live database.
+      staging = await Directory(configDir).createTemp('.database-restore-');
+      final staged = File('${staging.path}/store.db');
+      if (!await ServiceHandler.copySafFileToDir(backupPath, 'store.db', staging.path)) {
+        throw const FileSystemException('Unable to stage database restore');
+      }
+      await databaseBackupService.validate(staged);
+      recovery = await Directory('${staging.path}/original').create();
+      searchHandler.canBackup.value = false;
+      closedDatabase = true;
+      await settingsHandler.dbHandler.closeDb();
+      await databaseBackupService.install(
+        staged,
+        File('${configDir}store.db'),
+        recovery,
+        reopen: _reopenDatabase,
+        close: settingsHandler.dbHandler.closeDb,
+      );
+      installed = true;
+      showSnackbar(context.loc.settings.backupAndRestore.databaseRestored, isError: false);
+      await Future.delayed(const Duration(seconds: 3));
+      unawaited(ServiceHandler.restartApp());
+    } catch (e, s) {
+      showSnackbar(context.loc.settings.backupAndRestore.restoreDatabaseError, isError: true);
+      Logger.Inst().log(e.toString(), 'BackupRestorePage', 'restoreDatabase', LogTypes.exception, s: s);
+      // A nonempty recovery directory means rollback itself failed. Preserve
+      // those files and avoid opening/creating an incomplete live database.
+      final recoveryPending = await _hasRecoveryFiles(recovery);
+      if (recoveryPending) {
+        Logger.Inst().log(
+          'Original database retained for recovery at ${recovery!.path}',
+          'BackupRestorePage',
+          'restoreDatabase',
+          LogTypes.exception,
+        );
+      }
+      if (closedDatabase && !recoveryPending) {
+        try {
+          await _reopenDatabase();
+        } catch (e, s) {
+          Logger.Inst().log(e.toString(), 'BackupRestorePage', 'reopenDatabase', LogTypes.exception, s: s);
+        }
+      }
+    } finally {
+      if (installed || !await _hasRecoveryFiles(recovery)) {
+        await _removeStagingDirectory(staging);
+      }
+      if (!installed) {
+        searchHandler.canBackup.value =
+            previousCanBackup && (!settingsHandler.dbEnabled || settingsHandler.dbHandler.db != null);
+      }
+      inProgress = false;
+      if (mounted) setState(() {});
+    }
   }
 
   @override
@@ -110,7 +248,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
     );
   }
 
-  Future<bool> detectedDuplicateFile(String fileName) async {
+  Future<bool> detectedDuplicateFile(String fileName, {bool deleteExisting = true}) async {
     final bool? res = await showDialog(
       context: context,
       builder: (context) {
@@ -123,10 +261,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
               child: Text(context.loc.no),
             ),
             ElevatedButton(
-              onPressed: () async {
-                Navigator.of(context).pop(true);
-                await ServiceHandler.deleteFileFromSAFDirectory(backupPath, fileName);
-              },
+              onPressed: () => Navigator.of(context).pop(true),
               child: Text(context.loc.yes),
             ),
           ],
@@ -134,7 +269,8 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       },
     );
 
-    return res ?? false;
+    if (res != true) return false;
+    return !deleteExisting || await ServiceHandler.deleteFileFromSAFDirectory(backupPath, fileName);
   }
 
   Future<bool> confirmRestore(String title) async {
@@ -359,61 +495,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     SettingsButton(
                       name: context.loc.settings.backupAndRestore.backupDatabase,
                       icon: const Icon(Icons.list_alt),
-                      action: () async {
-                        inProgress = true;
-                        setState(() {});
-                        try {
-                          final File file = File('${await ServiceHandler.getConfigDir()}store.db');
-                          if (!await file.exists()) {
-                            showSnackbar(
-                              context.loc.settings.backupAndRestore.databaseFileNotFound,
-                              isError: true,
-                            );
-                            inProgress = false;
-                            setState(() {});
-                            return;
-                          }
-                          if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
-                            final bool res = await detectedDuplicateFile('store.db');
-                            if (!res) {
-                              showSnackbar(
-                                context.loc.settings.backupAndRestore.backupCancelled,
-                                isError: true,
-                              );
-                              inProgress = false;
-                              setState(() {});
-                              return;
-                            }
-                          }
-
-                          // WAL mode keeps store.db in a consistent readable state
-                          // at all times, so we can copy it safely while it's open.
-                          await ServiceHandler.copyFileToSafDir(
-                            await ServiceHandler.getConfigDir(),
-                            'store.db',
-                            backupPath,
-                            'application/x-sqlite3',
-                          );
-                          showSnackbar(
-                            context.loc.settings.backupAndRestore.databaseBackedUp,
-                            isError: false,
-                          );
-                        } catch (e, s) {
-                          showSnackbar(
-                            context.loc.settings.backupAndRestore.backupDatabaseError,
-                            isError: true,
-                          );
-                          Logger.Inst().log(
-                            e.toString(),
-                            'BackupRestorePage',
-                            'backupDatabase',
-                            LogTypes.exception,
-                            s: s,
-                          );
-                        }
-                        inProgress = false;
-                        setState(() {});
-                      },
+                      action: backupDatabase,
                     ),
                     if (settingsHandler.isDebug.value)
                       SettingsButton(
@@ -616,92 +698,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       icon: const Icon(Icons.list_alt),
                       trailingIcon: const Icon(Icons.looks_3),
                       subtitle: Text('store.db (${context.loc.settings.backupAndRestore.restoreDatabaseInfo})'),
-                      action: () async {
-                        final bool res = await confirmRestore(context.loc.settings.backupAndRestore.restoreDatabase);
-                        if (!res) return;
-
-                        inProgress = true;
-                        setState(() {});
-                        try {
-                          final fileExists = await ServiceHandler.existsFileFromSAFDirectory(
-                            backupPath,
-                            'store.db',
-                          );
-                          if (!fileExists) {
-                            showSnackbar(
-                              context.loc.settings.backupAndRestore.backupFileNotFound,
-                              isError: true,
-                            );
-                            inProgress = false;
-                            setState(() {});
-                            return;
-                          }
-
-                          // disable backupping while restoring the db
-                          searchHandler.canBackup.value = false;
-
-                          final String configDir = await ServiceHandler.getConfigDir();
-
-                          // Close the DB before overwriting the file on disk.
-                          await settingsHandler.dbHandler.closeDb();
-
-                          // Delete stale WAL/SHM sidecars before copying.
-                          for (final suffix in ['-wal', '-shm']) {
-                            final sidecar = File('${configDir}store.db$suffix');
-                            if (await sidecar.exists()) await sidecar.delete();
-                          }
-
-                          final bool res = await ServiceHandler.copySafFileToDir(
-                            backupPath,
-                            'store.db',
-                            configDir,
-                          );
-
-                          if (!res) {
-                            showSnackbar(
-                              context.loc.settings.backupAndRestore.restoreDatabaseError,
-                              isError: true,
-                            );
-                            await restoreDbAccessAfterFailedRestore();
-                            inProgress = false;
-                            setState(() {});
-                            return;
-                          }
-
-                          final File newFile = File('${configDir}store.db');
-                          if (!(await newFile.exists())) {
-                            showSnackbar(
-                              context.loc.settings.backupAndRestore.restoreDatabaseError,
-                              isError: true,
-                            );
-                            await restoreDbAccessAfterFailedRestore();
-                            inProgress = false;
-                            setState(() {});
-                            return;
-                          }
-                          showSnackbar(
-                            context.loc.settings.backupAndRestore.databaseRestored,
-                            isError: false,
-                          );
-                          await Future.delayed(const Duration(seconds: 3));
-                          unawaited(ServiceHandler.restartApp());
-                        } catch (e, s) {
-                          showSnackbar(
-                            context.loc.settings.backupAndRestore.restoreDatabaseError,
-                            isError: true,
-                          );
-                          Logger.Inst().log(
-                            e.toString(),
-                            'BackupRestorePage',
-                            'restoreDatabase',
-                            LogTypes.exception,
-                            s: s,
-                          );
-                          await restoreDbAccessAfterFailedRestore();
-                        }
-                        inProgress = false;
-                        setState(() {});
-                      },
+                      action: restoreDatabase,
                     ),
                     if (settingsHandler.isDebug.value)
                       SettingsButton(
