@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
+
 import 'strings.g.dart';
 
 // Path: <root>
@@ -20,7 +21,7 @@ class TranslationsPtBr extends Translations with BaseTranslations<AppLocale, Tra
     PluralResolver? cardinalResolver,
     PluralResolver? ordinalResolver,
     TranslationMetadata<AppLocale, Translations>? meta,
-  }) : $meta =
+  }) : _meta =
            meta ??
            TranslationMetadata(
              locale: AppLocale.ptBr,
@@ -29,17 +30,17 @@ class TranslationsPtBr extends Translations with BaseTranslations<AppLocale, Tra
              ordinalResolver: ordinalResolver,
            ),
        super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-    super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-    $meta.setFlatMapFunction(_flatMapFunction);
+    _meta.setFlatMapFunction(_flatMapFunction);
   }
 
   /// Metadata for the translations of <pt-BR>.
+  final TranslationMetadata<AppLocale, Translations> _meta;
   @override
-  final TranslationMetadata<AppLocale, Translations> $meta;
+  TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
   /// Access flat map
   @override
-  dynamic operator [](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+  dynamic operator [](String key) => _meta.getTranslation(key) ?? super[key];
 
   late final TranslationsPtBr _root = this; // ignore: unused_field
 
@@ -1584,12 +1585,12 @@ extension on TranslationsPtBr {
         TranslationOverrides.string(_root.$meta, 'validationErrors.invalidNumber', {}) ?? 'Por favor, insira um número',
       'validationErrors.invalidNumericValue' =>
         TranslationOverrides.string(_root.$meta, 'validationErrors.invalidNumericValue', {}) ?? 'Por favor, insira um valor numérico válido',
-      'validationErrors.tooSmall' =>
-        ({required double min}) =>
-            TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Por favor, insira um valor maior que ${min}',
-      'validationErrors.tooBig' =>
-        ({required double max}) =>
-            TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Por favor, insira um valor menor que ${max}',
+      'validationErrors.tooSmall' => ({
+        required double min,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Por favor, insira um valor maior que ${min}',
+      'validationErrors.tooBig' => ({
+        required double max,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Por favor, insira um valor menor que ${max}',
       'validationErrors.rangeError' =>
         ({required double min, required double max}) =>
             TranslationOverrides.string(_root.$meta, 'validationErrors.rangeError', {'min': min, 'max': max}) ??
@@ -1618,8 +1619,9 @@ extension on TranslationsPtBr {
       'permissions.pleaseSetStorageDirectoryAgain' =>
         TranslationOverrides.string(_root.$meta, 'permissions.pleaseSetStorageDirectoryAgain', {}) ??
             'Por favor, defina o diretório de armazenamento novamente para conceder acesso ao app',
-      'permissions.currentPath' =>
-        ({required String path}) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Caminho atual: ${path}',
+      'permissions.currentPath' => ({
+        required String path,
+      }) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Caminho atual: ${path}',
       'permissions.setDirectory' => TranslationOverrides.string(_root.$meta, 'permissions.setDirectory', {}) ?? 'Definir diretório',
       'permissions.currentlyNotAvailableForThisPlatform' =>
         TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ?? 'Não disponível nesta plataforma',
@@ -1894,9 +1896,9 @@ extension on TranslationsPtBr {
       'tabs.move.outOfRange' => TranslationOverrides.string(_root.$meta, 'tabs.move.outOfRange', {}) ?? 'Fora do intervalo',
       'tabs.move.pleaseEnterValidTabNumber' =>
         TranslationOverrides.string(_root.$meta, 'tabs.move.pleaseEnterValidTabNumber', {}) ?? 'Por favor, digite um número de aba válido',
-      'tabs.move.moveTo' =>
-        ({required String formattedNumber}) =>
-            TranslationOverrides.string(_root.$meta, 'tabs.move.moveTo', {'formattedNumber': formattedNumber}) ?? 'Mover para #${formattedNumber}',
+      'tabs.move.moveTo' => ({
+        required String formattedNumber,
+      }) => TranslationOverrides.string(_root.$meta, 'tabs.move.moveTo', {'formattedNumber': formattedNumber}) ?? 'Mover para #${formattedNumber}',
       'tabs.move.preview' => TranslationOverrides.string(_root.$meta, 'tabs.move.preview', {}) ?? 'Prévia:',
       'history.searchHistory' => TranslationOverrides.string(_root.$meta, 'history.searchHistory', {}) ?? 'Search history',
       'history.searchHistoryIsEmpty' =>
@@ -1906,15 +1908,17 @@ extension on TranslationsPtBr {
       'history.searchHistoryRequiresDatabase' =>
         TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ??
             'Ative o banco de dados nas configurações para o histórico de busca',
-      'history.lastSearch' =>
-        ({required String search}) => TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Última busca: ${search}',
-      'history.lastSearchWithDate' =>
-        ({required String date}) =>
-            TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Última busca em: ${date}',
+      'history.lastSearch' => ({
+        required String search,
+      }) => TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Última busca: ${search}',
+      'history.lastSearchWithDate' => ({
+        required String date,
+      }) => TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Última busca em: ${date}',
       'history.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Tipo de Booru desconhecido!',
-      'history.unknownBooru' =>
-        ({required String name, required String type}) =>
-            TranslationOverrides.string(_root.$meta, 'history.unknownBooru', {'name': name, 'type': type}) ?? 'Booru desconhecido (${name}-${type})',
+      'history.unknownBooru' => ({
+        required String name,
+        required String type,
+      }) => TranslationOverrides.string(_root.$meta, 'history.unknownBooru', {'name': name, 'type': type}) ?? 'Booru desconhecido (${name}-${type})',
       'history.open' => TranslationOverrides.string(_root.$meta, 'history.open', {}) ?? 'Abrir',
       'history.openInNewTab' => TranslationOverrides.string(_root.$meta, 'history.openInNewTab', {}) ?? 'Abrir em uma nova aba',
       'history.removeFromFavourites' => TranslationOverrides.string(_root.$meta, 'history.removeFromFavourites', {}) ?? 'Remover dos favoritos',
@@ -1923,8 +1927,9 @@ extension on TranslationsPtBr {
       'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Digite uma URL',
       'webview.navigation.enterCustomUrl' =>
         TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Digite uma URL personalizada',
-      'webview.navigation.navigateTo' =>
-        ({required String url}) => TranslationOverrides.string(_root.$meta, 'webview.navigation.navigateTo', {'url': url}) ?? 'Navegar para ${url}',
+      'webview.navigation.navigateTo' => ({
+        required String url,
+      }) => TranslationOverrides.string(_root.$meta, 'webview.navigation.navigateTo', {'url': url}) ?? 'Navegar para ${url}',
       'webview.navigation.listCookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.listCookies', {}) ?? 'Listar cookies',
       'webview.navigation.clearCookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.clearCookies', {}) ?? 'Limpar cookies',
       'webview.navigation.cookiesGone' => TranslationOverrides.string(_root.$meta, 'webview.navigation.cookiesGone', {}) ?? 'Cookies limpos',
@@ -1979,9 +1984,7 @@ extension on TranslationsPtBr {
       'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Booru Editor',
       'settings.booruEditor.testBooruFailedTitle' =>
         TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'O teste do Booru falhou',
-      'settings.booruEditor.testBooruFailedMsg' =>
-        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
-            'Os parâmetros de configuração podem estar incorretos, o Booru não permite acesso por API, a solicitação não retornou dados ou houve um erro de rede.',
+      'settings.booruEditor.testBooruFailedMsg' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ?? 'Os parâmetros de configuração podem estar incorretos, o Booru não permite acesso por API, a solicitação não retornou dados ou houve um erro de rede.',
       'settings.booruEditor.saveBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Salvar Booru',
       'settings.booruEditor.runningTest' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Executando teste...',
       'settings.booruEditor.booruConfigExistsError' =>
@@ -2012,9 +2015,7 @@ extension on TranslationsPtBr {
       'settings.booruEditor.accessKeyFailedMsg' =>
         TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedMsg', {}) ??
             'Você tem a janela de solicitação aberta no Hydrus?',
-      'settings.booruEditor.hydrusInstructions' =>
-        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.hydrusInstructions', {}) ??
-            'Para obter a chave Hydrus, você precisa abrir a caixa de diálogo de solicitação no cliente Hydrus: Serviços > Revisar serviços > API do cliente > Adicionar > Da solicitação de API',
+      'settings.booruEditor.hydrusInstructions' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.hydrusInstructions', {}) ?? 'Para obter a chave Hydrus, você precisa abrir a caixa de diálogo de solicitação no cliente Hydrus: Serviços > Revisar serviços > API do cliente > Adicionar > Da solicitação de API',
       'settings.booruEditor.getHydrusApiKey' =>
         TranslationOverrides.string(_root.$meta, 'settings.booruEditor.getHydrusApiKey', {}) ?? 'Obter chave de API do Hydrus',
       'settings.booruEditor.booruName' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Nome do Booru',
@@ -2049,9 +2050,7 @@ extension on TranslationsPtBr {
             'Usar o modo Desktop? Pode causar problemas em dispositivos móveis. [INTERFACE DESCONTINUADA]',
       'settings.interface.appUIModeHelpMobile' =>
         TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpMobile', {}) ?? '- Mobile - Interface dispositivos móveis',
-      'settings.interface.appUIModeHelpWarning' =>
-        TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpWarning', {}) ??
-            '[Aviso]: Não defina o Modo de Interface para Desktop em um celular, pois isso pode danificar o aplicativo e você poderá ter que apagar todas as suas configurações, incluindo as configurações do Booru.',
+      'settings.interface.appUIModeHelpWarning' => TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpWarning', {}) ?? '[Aviso]: Não defina o Modo de Interface para Desktop em um celular, pois isso pode danificar o aplicativo e você poderá ter que apagar todas as suas configurações, incluindo as configurações do Booru.',
       'settings.interface.previewDisplayFallbackHelp' =>
         TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayFallbackHelp', {}) ??
             'Isso será usado quando a opção Mosaico não for possível',
@@ -2159,13 +2158,11 @@ extension on TranslationsPtBr {
         TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayNameDescription', {}) ?? 'Mude como o nome do app aparece nos seus apps',
       'settings.cache.appRestartRequired' =>
         TranslationOverrides.string(_root.$meta, 'settings.cache.appRestartRequired', {}) ?? 'Pode ser necessário reiniciar o app!',
-      'settings.about.appDescription' =>
-        TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ??
-            'LoliSnatcher é de código aberto e licenciado com GPLv3. O código-fonte está disponível no GitHub. Por favor, reporte qualquer problema ou pedido de funcionalidade na seção "issues" no repositório.',
+      'settings.about.appDescription' => TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ?? 'LoliSnatcher é de código aberto e licenciado com GPLv3. O código-fonte está disponível no GitHub. Por favor, reporte qualquer problema ou pedido de funcionalidade na seção "issues" no repositório.',
       'settings.about.appOnGitHub' => TranslationOverrides.string(_root.$meta, 'settings.about.appOnGitHub', {}) ?? 'LoliSnatcher no Github',
-      'tagsFiltersDialogs.addNewFilter' =>
-        ({required String type}) =>
-            TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.addNewFilter', {'type': type}) ?? '[Adicionar novo filtro de ${type}]',
+      'tagsFiltersDialogs.addNewFilter' => ({
+        required String type,
+      }) => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.addNewFilter', {'type': type}) ?? '[Adicionar novo filtro de ${type}]',
       'tagsManager.addTag' => TranslationOverrides.string(_root.$meta, 'tagsManager.addTag', {}) ?? 'Adicionar tag',
       'tagsManager.add' => TranslationOverrides.string(_root.$meta, 'tagsManager.add', {}) ?? 'adicionar',
       'tagsManager.addedATab' => TranslationOverrides.string(_root.$meta, 'tagsManager.addedATab', {}) ?? 'Uma aba adicionada',

@@ -131,6 +131,12 @@ class AGNPHHandler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    // agn.ph tags can be browsed on the gallery page
+    return '${booru.baseURL}/gallery/tags?search=${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   List parseTagSuggestionsList(dynamic response) {
     final parsedResponse = XmlDocument.parse(response.data);
     return parsedResponse.findAllElements('tag').toList();

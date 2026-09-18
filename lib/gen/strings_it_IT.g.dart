@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
+
 import 'strings.g.dart';
 
 // Path: <root>
@@ -20,7 +21,7 @@ class TranslationsItIt extends Translations with BaseTranslations<AppLocale, Tra
     PluralResolver? cardinalResolver,
     PluralResolver? ordinalResolver,
     TranslationMetadata<AppLocale, Translations>? meta,
-  }) : $meta =
+  }) : _meta =
            meta ??
            TranslationMetadata(
              locale: AppLocale.itIt,
@@ -29,17 +30,17 @@ class TranslationsItIt extends Translations with BaseTranslations<AppLocale, Tra
              ordinalResolver: ordinalResolver,
            ),
        super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-    super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-    $meta.setFlatMapFunction(_flatMapFunction);
+    _meta.setFlatMapFunction(_flatMapFunction);
   }
 
   /// Metadata for the translations of <it-IT>.
+  final TranslationMetadata<AppLocale, Translations> _meta;
   @override
-  final TranslationMetadata<AppLocale, Translations> $meta;
+  TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
   /// Access flat map
   @override
-  dynamic operator [](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+  dynamic operator [](String key) => _meta.getTranslation(key) ?? super[key];
 
   late final TranslationsItIt _root = this; // ignore: unused_field
 
@@ -620,12 +621,12 @@ extension on TranslationsItIt {
       'validationErrors.invalidNumber' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalidNumber', {}) ?? 'Inserisci un numero',
       'validationErrors.invalidNumericValue' =>
         TranslationOverrides.string(_root.$meta, 'validationErrors.invalidNumericValue', {}) ?? 'Inserisci un valore numerico valido',
-      'validationErrors.tooSmall' =>
-        ({required double min}) =>
-            TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Inserisci un valore maggiore di ${min}',
-      'validationErrors.tooBig' =>
-        ({required double max}) =>
-            TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Inserisci un valore minore di ${max}',
+      'validationErrors.tooSmall' => ({
+        required double min,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Inserisci un valore maggiore di ${min}',
+      'validationErrors.tooBig' => ({
+        required double max,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Inserisci un valore minore di ${max}',
       'validationErrors.rangeError' =>
         ({required double min, required double max}) =>
             TranslationOverrides.string(_root.$meta, 'validationErrors.rangeError', {'min': min, 'max': max}) ??
@@ -652,9 +653,9 @@ extension on TranslationsItIt {
       'permissions.pleaseSetStorageDirectoryAgain' =>
         TranslationOverrides.string(_root.$meta, 'permissions.pleaseSetStorageDirectoryAgain', {}) ??
             'Seleziona nuovamente la cartella per garantire l\'accesso all\'app',
-      'permissions.currentPath' =>
-        ({required String path}) =>
-            TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Percorso attuale: ${path}',
+      'permissions.currentPath' => ({
+        required String path,
+      }) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Percorso attuale: ${path}',
       'permissions.setDirectory' => TranslationOverrides.string(_root.$meta, 'permissions.setDirectory', {}) ?? 'Imposta cartella',
       'permissions.currentlyNotAvailableForThisPlatform' =>
         TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ?? 'Non disponibile su questa piattaforma',

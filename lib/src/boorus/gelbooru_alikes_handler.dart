@@ -153,6 +153,11 @@ class GelbooruAlikesHandler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    return '$baseURL/index.php?page=wiki&s=list&search=${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   List parseTagSuggestionsList(dynamic response) {
     return ((response.data is String && response.data?.startsWith('<?xml') == true)
             ? XmlDocument.parse(response.data).findAllElements('tag').toList()

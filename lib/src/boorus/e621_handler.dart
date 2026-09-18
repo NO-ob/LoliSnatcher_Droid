@@ -125,6 +125,11 @@ class e621Handler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    return '${booru.baseURL}/wiki_pages/show_or_new?title=${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   Map<String, String> getHeaders() {
     final String? userName = booru.userID?.isNotEmpty == true ? booru.userID : null;
     final String? apiKey = booru.apiKey?.isNotEmpty == true ? booru.apiKey : null;

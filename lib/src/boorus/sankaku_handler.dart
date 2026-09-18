@@ -291,6 +291,11 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    return '$baseUrl/wiki?tags=${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   List parseTagSuggestionsList(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse;

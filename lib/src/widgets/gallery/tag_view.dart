@@ -1353,6 +1353,21 @@ Future<void> showTagDialog({
                           },
                         ),
                         //
+                        if (handler.makeTagWikiURL(tag) != null)
+                          ListTile(
+                            leading: Icon(
+                              Icons.menu_book_rounded,
+                              color: Theme.of(context).iconTheme.color,
+                            ),
+                            title: Text(context.loc.tagView.openWiki),
+                            onTap: () async {
+                              final url = handler.makeTagWikiURL(tag);
+                              if (url == null) return;
+                              await launchUrlString(url, mode: LaunchMode.externalApplication);
+                              if (context.mounted) Navigator.of(context).pop();
+                            },
+                          ),
+                        //
                         if (isInSearch)
                           ListTile(
                             leading: Icon(

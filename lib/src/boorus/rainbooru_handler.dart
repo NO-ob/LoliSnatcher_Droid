@@ -90,6 +90,11 @@ class RainbooruHandler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    return 'https://twibooru.org/tags/${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   List parseTagSuggestionsList(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse;

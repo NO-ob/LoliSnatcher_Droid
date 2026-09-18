@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
+
 import 'strings.g.dart';
 
 // Path: <root>
@@ -20,7 +21,7 @@ class TranslationsNlNl extends Translations with BaseTranslations<AppLocale, Tra
     PluralResolver? cardinalResolver,
     PluralResolver? ordinalResolver,
     TranslationMetadata<AppLocale, Translations>? meta,
-  }) : $meta =
+  }) : _meta =
            meta ??
            TranslationMetadata(
              locale: AppLocale.nlNl,
@@ -29,17 +30,17 @@ class TranslationsNlNl extends Translations with BaseTranslations<AppLocale, Tra
              ordinalResolver: ordinalResolver,
            ),
        super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-    super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-    $meta.setFlatMapFunction(_flatMapFunction);
+    _meta.setFlatMapFunction(_flatMapFunction);
   }
 
   /// Metadata for the translations of <nl-NL>.
+  final TranslationMetadata<AppLocale, Translations> _meta;
   @override
-  final TranslationMetadata<AppLocale, Translations> $meta;
+  TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
   /// Access flat map
   @override
-  dynamic operator [](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+  dynamic operator [](String key) => _meta.getTranslation(key) ?? super[key];
 
   late final TranslationsNlNl _root = this; // ignore: unused_field
 
@@ -1263,12 +1264,12 @@ extension on TranslationsNlNl {
         TranslationOverrides.string(_root.$meta, 'validationErrors.invalidNumber', {}) ?? 'Voer alstublieft een nummer in',
       'validationErrors.invalidNumericValue' =>
         TranslationOverrides.string(_root.$meta, 'validationErrors.invalidNumericValue', {}) ?? 'Voer alstublieft een geldig nummer in',
-      'validationErrors.tooSmall' =>
-        ({required double min}) =>
-            TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Voer alstublieft een waarde in groter dan ${min}',
-      'validationErrors.tooBig' =>
-        ({required double max}) =>
-            TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Voer alstublieft een waarde in kleiner dan ${max}',
+      'validationErrors.tooSmall' => ({
+        required double min,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Voer alstublieft een waarde in groter dan ${min}',
+      'validationErrors.tooBig' => ({
+        required double max,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Voer alstublieft een waarde in kleiner dan ${max}',
       'validationErrors.rangeError' =>
         ({required double min, required double max}) =>
             TranslationOverrides.string(_root.$meta, 'validationErrors.rangeError', {'min': min, 'max': max}) ??
@@ -1297,8 +1298,9 @@ extension on TranslationsNlNl {
       'permissions.pleaseSetStorageDirectoryAgain' =>
         TranslationOverrides.string(_root.$meta, 'permissions.pleaseSetStorageDirectoryAgain', {}) ??
             'Stel de alternatieve opslaglocatie opnieuw in om de app toegang te kunnen verlenen',
-      'permissions.currentPath' =>
-        ({required String path}) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Huidig pad: ${path}',
+      'permissions.currentPath' => ({
+        required String path,
+      }) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Huidig pad: ${path}',
       'permissions.setDirectory' => TranslationOverrides.string(_root.$meta, 'permissions.setDirectory', {}) ?? 'Instellen locatie',
       'permissions.currentlyNotAvailableForThisPlatform' =>
         TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ?? 'Niet beschikbaar op dit platform',
@@ -1539,16 +1541,17 @@ extension on TranslationsNlNl {
       'history.searchHistoryIsEmpty' => TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsEmpty', {}) ?? 'Zoekgeschiedenis is leeg',
       'history.searchHistoryIsDisabled' =>
         TranslationOverrides.string(_root.$meta, 'history.searchHistoryIsDisabled', {}) ?? 'Zoekgeschiedenis is uitgeschakeld',
-      'history.lastSearch' =>
-        ({required String search}) =>
-            TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Laatste zoekopdracht: ${search}',
-      'history.lastSearchWithDate' =>
-        ({required String date}) =>
-            TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Laatste zoekopdracht: ${date}',
+      'history.lastSearch' => ({
+        required String search,
+      }) => TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Laatste zoekopdracht: ${search}',
+      'history.lastSearchWithDate' => ({
+        required String date,
+      }) => TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Laatste zoekopdracht: ${date}',
       'history.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Onbekend Booru type!',
-      'history.unknownBooru' =>
-        ({required String name, required String type}) =>
-            TranslationOverrides.string(_root.$meta, 'history.unknownBooru', {'name': name, 'type': type}) ?? 'Onbekende booru (${name}-${type})',
+      'history.unknownBooru' => ({
+        required String name,
+        required String type,
+      }) => TranslationOverrides.string(_root.$meta, 'history.unknownBooru', {'name': name, 'type': type}) ?? 'Onbekende booru (${name}-${type})',
       'history.open' => TranslationOverrides.string(_root.$meta, 'history.open', {}) ?? 'Open',
       'history.openInNewTab' => TranslationOverrides.string(_root.$meta, 'history.openInNewTab', {}) ?? 'Open in nieuw tabblad',
       'history.removeFromFavourites' => TranslationOverrides.string(_root.$meta, 'history.removeFromFavourites', {}) ?? 'Verwijder uit favorieten',

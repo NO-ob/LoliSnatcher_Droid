@@ -145,6 +145,11 @@ class IdolSankakuHandler extends SankakuHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    return '$baseUrl/wiki?tags=${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   String makeCommentsURL(String postID, int pageNum) {
     // EXAMPLE: https://iapi.sankakucomplex.com/comment/index.json?post_id=$post_id
     return '$baseUrl/comment/index.json?post_id=$postID';

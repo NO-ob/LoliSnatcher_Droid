@@ -118,6 +118,11 @@ class BooruOnRailsHandler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    return '${booru.baseURL}/tags/${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   List parseTagSuggestionsList(dynamic response) {
     final List<dynamic> parsedResponse = response.data['tags'];
     return parsedResponse;
