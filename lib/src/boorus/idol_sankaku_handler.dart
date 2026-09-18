@@ -146,7 +146,8 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   String? makeTagWikiURL(String tag) {
-    return '$baseUrl/wiki?tags=${Uri.encodeComponent(tag)}';
+    // Idol Sankaku has tag detail pages (/tags/$tag) but no per-tag wiki pages.
+    return null;
   }
 
   @override

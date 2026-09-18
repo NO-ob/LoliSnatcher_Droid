@@ -292,7 +292,8 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String? makeTagWikiURL(String tag) {
-    return '$baseUrl/wiki?tags=${Uri.encodeComponent(tag)}';
+    // Sankaku has tag detail pages (/tags/$tag) but no per-tag wiki pages.
+    return null;
   }
 
   @override

@@ -116,7 +116,7 @@ class PhilomenaHandler extends BooruHandler {
 
   @override
   String? makeTagWikiURL(String tag) {
-    return '${booru.baseURL}/wiki_pages/${Uri.encodeComponent(tag)}';
+    return '${booru.baseURL}/tags/${Uri.encodeComponent(tag)}';
   }
 
   @override
