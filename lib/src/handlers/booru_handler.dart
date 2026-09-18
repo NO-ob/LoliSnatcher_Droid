@@ -510,6 +510,11 @@ abstract class BooruHandler {
     return '';
   }
 
+  /// [SHOULD BE OVERRIDDEN]
+  String? makeTagWikiURL(String tag) {
+    return null;
+  }
+
   ////////////////////////////////////////////////////////////////////////
 
   bool get hasCommentsSupport => false;

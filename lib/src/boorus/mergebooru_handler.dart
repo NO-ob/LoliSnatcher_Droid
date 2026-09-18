@@ -39,6 +39,15 @@ class MergebooruHandler extends BooruHandler {
       booruHandlers.firstWhereOrNull((e) => e.metatagsCheatSheetLink != null)?.metatagsCheatSheetLink;
 
   @override
+  String? makeTagWikiURL(String tag) {
+    // For merge booru, delegate to the first child handler that has a wiki URL.
+    // Use that child's baseURL (which may differ from the merge's) for the link.
+    final handlerWithWiki = booruHandlers.firstWhereOrNull((e) => e.makeTagWikiURL(tag) != null);
+    if (handlerWithWiki == null) return null;
+    return handlerWithWiki.makeTagWikiURL(tag);
+  }
+
+  @override
   List<MetaTag> availableMetaTags() {
     final List<MetaTag> tags = [];
     for (int i = 0; i < booruHandlers.length; i++) {

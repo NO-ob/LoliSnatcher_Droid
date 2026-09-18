@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
+
 import 'strings.g.dart';
 
 // Path: <root>
@@ -20,7 +21,7 @@ class TranslationsFrFr extends Translations with BaseTranslations<AppLocale, Tra
     PluralResolver? cardinalResolver,
     PluralResolver? ordinalResolver,
     TranslationMetadata<AppLocale, Translations>? meta,
-  }) : $meta =
+  }) : _meta =
            meta ??
            TranslationMetadata(
              locale: AppLocale.frFr,
@@ -29,17 +30,17 @@ class TranslationsFrFr extends Translations with BaseTranslations<AppLocale, Tra
              ordinalResolver: ordinalResolver,
            ),
        super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-    super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-    $meta.setFlatMapFunction(_flatMapFunction);
+    _meta.setFlatMapFunction(_flatMapFunction);
   }
 
   /// Metadata for the translations of <fr-FR>.
+  final TranslationMetadata<AppLocale, Translations> _meta;
   @override
-  final TranslationMetadata<AppLocale, Translations> $meta;
+  TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
   /// Access flat map
   @override
-  dynamic operator [](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+  dynamic operator [](String key) => _meta.getTranslation(key) ?? super[key];
 
   late final TranslationsFrFr _root = this; // ignore: unused_field
 
@@ -969,9 +970,7 @@ extension on TranslationsFrFr {
       'settings.language.title' => TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Langue',
       'settings.language.helpUsTranslate' =>
         TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Aidez-nous à traduire',
-      'settings.language.visitForDetails' =>
-        TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-            'Visitez <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> pour plus de détails ou appuyez sur l\'image ci-dessous pour accéder à POEditor',
+      'settings.language.visitForDetails' => TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ?? 'Visitez <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> pour plus de détails ou appuyez sur l\'image ci-dessous pour accéder à POEditor',
       'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Boorus et Recherche',
       'settings.interface.title' => TranslationOverrides.string(_root.$meta, 'settings.interface.title', {}) ?? 'Interface',
       'settings.theme.title' => TranslationOverrides.string(_root.$meta, 'settings.theme.title', {}) ?? 'Thèmes',

@@ -115,6 +115,11 @@ class PhilomenaHandler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    return '${booru.baseURL}/tags/${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   List parseTagSuggestionsList(dynamic response) {
     final Map<String, dynamic> parsedResponse = response.data;
     return parsedResponse['tags'];

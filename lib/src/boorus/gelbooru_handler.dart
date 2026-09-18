@@ -178,6 +178,11 @@ class GelbooruHandler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    return '${booru.baseURL}/index.php?page=wiki&s=list&search=${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   List parseTagSuggestionsList(dynamic response) {
     final parsedResponse = response.data is List ? response.data : response.data['tag'] ?? [];
     return parsedResponse;

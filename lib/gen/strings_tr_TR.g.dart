@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
+
 import 'strings.g.dart';
 
 // Path: <root>
@@ -20,7 +21,7 @@ class TranslationsTrTr extends Translations with BaseTranslations<AppLocale, Tra
     PluralResolver? cardinalResolver,
     PluralResolver? ordinalResolver,
     TranslationMetadata<AppLocale, Translations>? meta,
-  }) : $meta =
+  }) : _meta =
            meta ??
            TranslationMetadata(
              locale: AppLocale.trTr,
@@ -29,17 +30,17 @@ class TranslationsTrTr extends Translations with BaseTranslations<AppLocale, Tra
              ordinalResolver: ordinalResolver,
            ),
        super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-    super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-    $meta.setFlatMapFunction(_flatMapFunction);
+    _meta.setFlatMapFunction(_flatMapFunction);
   }
 
   /// Metadata for the translations of <tr-TR>.
+  final TranslationMetadata<AppLocale, Translations> _meta;
   @override
-  final TranslationMetadata<AppLocale, Translations> $meta;
+  TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
   /// Access flat map
   @override
-  dynamic operator [](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+  dynamic operator [](String key) => _meta.getTranslation(key) ?? super[key];
 
   late final TranslationsTrTr _root = this; // ignore: unused_field
 
@@ -4072,8 +4073,9 @@ extension on TranslationsTrTr {
           'permissions.pleaseSetStorageDirectoryAgain' =>
             TranslationOverrides.string(_root.$meta, 'permissions.pleaseSetStorageDirectoryAgain', {}) ??
                 'Uygulamaya erişim izni vermek için lütfen depolama dizinini tekrar ayarla',
-          'permissions.currentPath' =>
-            ({required String path}) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Mevcut yol: ${path}',
+          'permissions.currentPath' => ({
+            required String path,
+          }) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Mevcut yol: ${path}',
           'permissions.setDirectory' => TranslationOverrides.string(_root.$meta, 'permissions.setDirectory', {}) ?? 'Dizin ayarla',
           'permissions.currentlyNotAvailableForThisPlatform' =>
             TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ?? 'Bu platformda kullanılamıyor',
@@ -4370,12 +4372,12 @@ extension on TranslationsTrTr {
           'history.searchHistoryRequiresDatabase' =>
             TranslationOverrides.string(_root.$meta, 'history.searchHistoryRequiresDatabase', {}) ??
                 'Arama geçmişi için ayarlardan veritabanını etkinleştir',
-          'history.lastSearch' =>
-            ({required String search}) =>
-                TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Son arama: ${search}',
-          'history.lastSearchWithDate' =>
-            ({required String date}) =>
-                TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Son arama: ${date}',
+          'history.lastSearch' => ({
+            required String search,
+          }) => TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Son arama: ${search}',
+          'history.lastSearchWithDate' => ({
+            required String date,
+          }) => TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Son arama: ${date}',
           'history.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Bilinmeyen Booru türü!',
           'history.unknownBooru' =>
             ({required String name, required String type}) =>
@@ -4419,9 +4421,9 @@ extension on TranslationsTrTr {
           'webview.captchaCompleted' => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? 'Captcha tamamlandı',
           'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Bir URL gir',
           'webview.navigation.enterCustomUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Özel URL gir',
-          'webview.navigation.navigateTo' =>
-            ({required String url}) =>
-                TranslationOverrides.string(_root.$meta, 'webview.navigation.navigateTo', {'url': url}) ?? 'Şu adrese git: ${url}',
+          'webview.navigation.navigateTo' => ({
+            required String url,
+          }) => TranslationOverrides.string(_root.$meta, 'webview.navigation.navigateTo', {'url': url}) ?? 'Şu adrese git: ${url}',
           'webview.navigation.listCookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.listCookies', {}) ?? 'Çerezleri listele',
           'webview.navigation.clearCookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.clearCookies', {}) ?? 'Çerezleri temizle',
           'webview.navigation.cookiesGone' =>
@@ -4447,9 +4449,7 @@ extension on TranslationsTrTr {
           'settings.language.system' => TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'Sistem',
           'settings.language.helpUsTranslate' =>
             TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Çeviriye katkıda bulun',
-          'settings.language.visitForDetails' =>
-            TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ??
-                'Detaylar için <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> adresini ziyaret et veya POEditor\'e gitmek için aşağıdaki görsele dokun',
+          'settings.language.visitForDetails' => TranslationOverrides.string(_root.$meta, 'settings.language.visitForDetails', {}) ?? 'Detaylar için <a href=\'https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/CONTRIBUTING.md#localization--translations\'>github</a> adresini ziyaret et veya POEditor\'e gitmek için aşağıdaki görsele dokun',
           'settings.booru.title' => TranslationOverrides.string(_root.$meta, 'settings.booru.title', {}) ?? 'Booru\'lar ve arama',
           'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Varsayılan etiketler',
           'settings.booru.itemsPerPage' =>
@@ -4469,9 +4469,7 @@ extension on TranslationsTrTr {
                 TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgDesktop', {'booruName': booruName}) ??
                 '${booruName} yapılandırma bağlantısını panoya kopyala.\n\nGiriş bilgileri/API anahtarı dahil edilsin mi?',
           'settings.booru.booruSharing' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Booru paylaşımı',
-          'settings.booru.booruSharingMsgAndroid' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ??
-                'Android 12 ve üzeri sürümlerde Booru yapılandırma bağlantılarını uygulamada otomatik olarak açmak için:\n1) Sistem uygulama bağlantısı varsayılan ayarlarını açmak için aşağıdaki butona dokun\n2) «Bağlantı ekle» kısmına dokun ve mevcut tüm seçenekleri seç',
+          'settings.booru.booruSharingMsgAndroid' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ?? 'Android 12 ve üzeri sürümlerde Booru yapılandırma bağlantılarını uygulamada otomatik olarak açmak için:\n1) Sistem uygulama bağlantısı varsayılan ayarlarını açmak için aşağıdaki butona dokun\n2) «Bağlantı ekle» kısmına dokun ve mevcut tüm seçenekleri seç',
           'settings.booru.addedBoorus' => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Eklenen Booru\'lar',
           'settings.booru.editBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.editBooru', {}) ?? 'Booru yapılandırmasını düzenle',
           'settings.booru.importBooru' =>
@@ -4502,9 +4500,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.booru.cantDeleteThisBooru', {}) ?? 'Bu Booru silinemez!',
           'settings.booru.removeRelatedTabsFirst' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Önce ilgili sekmeleri kaldır',
-          'settings.booru.sourceLimitNotice' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ??
-                'Kaynak kurulumunun işleyişi aşağıdaki uyumluluk ayarlarına bağlı olarak değişebilir. İçerikler harici siteler tarafından sağlanır ve uygulamanın kontrolü dışındadır.',
+          'settings.booru.sourceLimitNotice' => TranslationOverrides.string(_root.$meta, 'settings.booru.sourceLimitNotice', {}) ?? 'Kaynak kurulumunun işleyişi aşağıdaki uyumluluk ayarlarına bağlı olarak değişebilir. İçerikler harici siteler tarafından sağlanır ve uygulamanın kontrolü dışındadır.',
           'settings.booru.advanced' => TranslationOverrides.string(_root.$meta, 'settings.booru.advanced', {}) ?? 'Gelişmiş',
           'settings.booru.expandedSourceCompatibility' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibility', {}) ?? 'Kaynak kurulum uyumluluğu',
@@ -4512,16 +4508,13 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilitySubtitle', {}) ??
                 'Kaynak uyumluluk ayarlarının işleyişini düzenle',
           'settings.booru.expandedSourceCompatibilityConfirm' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ??
-                'Bunu değiştirmek kaynakların çalışma şeklini etkileyebilir. İçerikler harici siteler tarafından barındırılıp sağlanır ve uygulamanın kontrolünde değildir. Devam edilsin mi?',
+            TranslationOverrides.string(_root.$meta, 'settings.booru.expandedSourceCompatibilityConfirm', {}) ?? 'Bunu değiştirmek kaynakların çalışma şeklini etkileyebilir. İçerikler harici siteler tarafından barındırılıp sağlanır ve uygulamanın kontrolünde değildir. Devam edilsin mi?',
           'settings.booru.sourceUnavailableCurrentSettings' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.sourceUnavailableCurrentSettings', {}) ?? 'Bu site kullanılamıyor.',
           'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Booru Düzenleyici',
           'settings.booruEditor.testBooruFailedTitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booru testi başarısız',
-          'settings.booruEditor.testBooruFailedMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ??
-                'Yapılandırma parametreleri hatalı olabilir, booru API erişimine izin vermiyor olabilir, istek veri döndürmedi veya bir ağ hatası oluştu.',
+          'settings.booruEditor.testBooruFailedMsg' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedMsg', {}) ?? 'Yapılandırma parametreleri hatalı olabilir, booru API erişimine izin vermiyor olabilir, istek veri döndürmedi veya bir ağ hatası oluştu.',
           'settings.booruEditor.saveBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Booru\'yu Kaydet',
           'settings.booruEditor.runningTest' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Test çalıştırılıyor…',
@@ -4551,9 +4544,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedTitle', {}) ?? 'Erişim anahtarı alınamadı',
           'settings.booruEditor.accessKeyFailedMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedMsg', {}) ?? 'Hydrus\'ta istek penceresi açık mı?',
-          'settings.booruEditor.hydrusInstructions' =>
-            TranslationOverrides.string(_root.$meta, 'settings.booruEditor.hydrusInstructions', {}) ??
-                'Hydrus anahtarını almak için Hydrus istemcisinde istek penceresini açman gerekir: Hizmetler > Hizmetleri incele > İstemci API > Ekle > API isteğinden (Services > Review services > Client API > Add > From API request)',
+          'settings.booruEditor.hydrusInstructions' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.hydrusInstructions', {}) ?? 'Hydrus anahtarını almak için Hydrus istemcisinde istek penceresini açman gerekir: Hizmetler > Hizmetleri incele > İstemci API > Ekle > API isteğinden (Services > Review services > Client API > Add > From API request)',
           'settings.booruEditor.getHydrusApiKey' =>
             TranslationOverrides.string(_root.$meta, 'settings.booruEditor.getHydrusApiKey', {}) ?? 'Hydrus API anahtarını al',
           'settings.booruEditor.booruName' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Booru adı',
@@ -4593,9 +4584,7 @@ extension on TranslationsTrTr {
           'settings.interface.appUIModeHelpDesktop' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpDesktop', {}) ??
                 '- Masaüstü: Ahoviewer Tarzı Arayüz (ESKİDİ, YENİDEN DÜZENLENMELİ)',
-          'settings.interface.appUIModeHelpWarning' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpWarning', {}) ??
-                '[Uyarı]: Bir telefonda Arayüz Modunu Masaüstü olarak ayarlama, uygulamayı bozabilirsin ve booru yapılandırmaları dahil tüm ayarlarını sıfırlamak zorunda kalabilirsin.',
+          'settings.interface.appUIModeHelpWarning' => TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpWarning', {}) ?? '[Uyarı]: Bir telefonda Arayüz Modunu Masaüstü olarak ayarlama, uygulamayı bozabilirsin ve booru yapılandırmaları dahil tüm ayarlarını sıfırlamak zorunda kalabilirsin.',
           'settings.interface.handSide' => TranslationOverrides.string(_root.$meta, 'settings.interface.handSide', {}) ?? 'El kullanımı',
           'settings.interface.handSideHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.handSideHelp', {}) ?? 'Arayüz ögelerinin konumunu seçilen ele göre ayarlar',
@@ -4872,9 +4861,7 @@ extension on TranslationsTrTr {
           'settings.video.title' => TranslationOverrides.string(_root.$meta, 'settings.video.title', {}) ?? 'Video',
           'settings.video.disableVideos' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.disableVideos', {}) ?? 'Videoları devre dışı bırak',
-          'settings.video.disableVideosHelp' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.disableVideosHelp', {}) ??
-                'Video yüklemeye çalışırken çöken düşük donanımlı cihazlar için kullanışlıdır. Bunun yerine videoyu harici bir oynatıcıda veya tarayıcıda izleme seçeneği sunar.',
+          'settings.video.disableVideosHelp' => TranslationOverrides.string(_root.$meta, 'settings.video.disableVideosHelp', {}) ?? 'Video yüklemeye çalışırken çöken düşük donanımlı cihazlar için kullanışlıdır. Bunun yerine videoyu harici bir oynatıcıda veya tarayıcıda izleme seçeneği sunar.',
           'settings.video.autoplayVideos' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.autoplayVideos', {}) ?? 'Videoları otomatik oynat',
           'settings.video.startVideosMuted' =>
@@ -4888,9 +4875,7 @@ extension on TranslationsTrTr {
           'settings.video.backendDefault' => TranslationOverrides.string(_root.$meta, 'settings.video.backendDefault', {}) ?? 'Varsayılan',
           'settings.video.backendMPV' => TranslationOverrides.string(_root.$meta, 'settings.video.backendMPV', {}) ?? 'MPV',
           'settings.video.backendMDK' => TranslationOverrides.string(_root.$meta, 'settings.video.backendMDK', {}) ?? 'MDK',
-          'settings.video.backendDefaultHelp' =>
-            TranslationOverrides.string(_root.$meta, 'settings.video.backendDefaultHelp', {}) ??
-                'Exoplayer tabanlıdır. En iyi cihaz uyumluluğuna sahiptir ancak 4K videolarda, bazı kodeklerde veya eski cihazlarda sorun yaşatabilir',
+          'settings.video.backendDefaultHelp' => TranslationOverrides.string(_root.$meta, 'settings.video.backendDefaultHelp', {}) ?? 'Exoplayer tabanlıdır. En iyi cihaz uyumluluğuna sahiptir ancak 4K videolarda, bazı kodeklerde veya eski cihazlarda sorun yaşatabilir',
           'settings.video.backendMPVHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.backendMPVHelp', {}) ??
                 'Libmpv tabanlıdır, bazı kodek/cihaz sorunlarını çözmeye yardımcı olabilecek gelişmiş ayarlara sahiptir\n[ÇÖKMELERE NEDEN OLABİLİR]',
@@ -4986,9 +4971,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfo', {}) ?? 'Favorileri kaydeder ve İndirilen ögeleri izler',
           'settings.database.databaseInfoSnatch' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ?? 'İndirilen ögeler yeniden indirilmez',
-          'settings.database.indexingInfo' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.indexingInfo', {}) ??
-                'Veritabanı aramalarını hızlandırır ancak daha fazla disk alanı kullanır (2 kata kadar).\n\nDizin oluşturulurken sayfadan ayrılma veya uygulamayı kapatma.',
+          'settings.database.indexingInfo' => TranslationOverrides.string(_root.$meta, 'settings.database.indexingInfo', {}) ?? 'Veritabanı aramalarını hızlandırır ancak daha fazla disk alanı kullanır (2 kata kadar).\n\nDizin oluşturulurken sayfadan ayrılma veya uygulamayı kapatma.',
           'settings.database.createIndexesDebug' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.createIndexesDebug', {}) ?? 'Dizinleri Oluştur [Hata Ayıklama]',
           'settings.database.dropIndexesDebug' =>
@@ -5064,19 +5047,19 @@ extension on TranslationsTrTr {
                 'Güncellenemeyen ögeler veritabanından kaldırılacak',
           'settings.database.updateSankakuUrls' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? 'Sankaku URL\'lerini güncelle',
-          'settings.database.updating' =>
-            ({required int count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? '${count} öge güncelleniyor:',
-          'settings.database.left' =>
-            ({required int count}) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Kalan: ${count}',
-          'settings.database.done' =>
-            ({required int count}) => TranslationOverrides.string(_root.$meta, 'settings.database.done', {'count': count}) ?? 'Tamamlanan: ${count}',
-          'settings.database.failedSkipped' =>
-            ({required int count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.database.failedSkipped', {'count': count}) ?? 'Başarısız/Atlanan: ${count}',
-          'settings.database.sankakuRateLimitWarning' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.sankakuRateLimitWarning', {}) ??
-                '\'Başarısız\' sayısının sürekli arttığını görürsen durdur ve daha sonra tekrar dene: İstek sınırına ulaşmış olabilirsin veya Sankaku IP adresinden gelen istekleri engelliyor olabilir.',
+          'settings.database.updating' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? '${count} öge güncelleniyor:',
+          'settings.database.left' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Kalan: ${count}',
+          'settings.database.done' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.database.done', {'count': count}) ?? 'Tamamlanan: ${count}',
+          'settings.database.failedSkipped' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.database.failedSkipped', {'count': count}) ?? 'Başarısız/Atlanan: ${count}',
+          'settings.database.sankakuRateLimitWarning' => TranslationOverrides.string(_root.$meta, 'settings.database.sankakuRateLimitWarning', {}) ?? '\'Başarısız\' sayısının sürekli arttığını görürsen durdur ve daha sonra tekrar dene: İstek sınırına ulaşmış olabilirsin veya Sankaku IP adresinden gelen istekleri engelliyor olabilir.',
           'settings.database.skipCurrentItem' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.skipCurrentItem', {}) ?? 'Şu anki ögeyi atlamak için buraya bas',
           'settings.database.useIfStuck' =>
@@ -5100,8 +5083,7 @@ extension on TranslationsTrTr {
                 TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedMsg', {'fileName': fileName}) ??
                 '${fileName} dosyası zaten mevcut. Üzerine yazmak istiyor musun? Hayır dersen yedekleme iptal edilecek.',
           'settings.backupAndRestore.androidOnlyFeatureMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.androidOnlyFeatureMsg', {}) ??
-                'Bu özellik yalnızca Android\'de mevcuttur. Masaüstü sürümlerinde dosyaları sistemine göre uygulamanın veri klasörüne kopyalayıp yapıştırabilirsin',
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.androidOnlyFeatureMsg', {}) ?? 'Bu özellik yalnızca Android\'de mevcuttur. Masaüstü sürümlerinde dosyaları sistemine göre uygulamanın veri klasörüne kopyalayıp yapıştırabilirsin',
           'settings.backupAndRestore.selectBackupDir' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.selectBackupDir', {}) ?? 'Yedekleme dizinini seç',
           'settings.backupAndRestore.failedToGetBackupPath' =>
@@ -5164,9 +5146,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupTags', {}) ?? 'Etiketleri yedekle',
           'settings.backupAndRestore.restoreTags' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTags', {}) ?? 'Etiketleri geri yükle',
-          'settings.backupAndRestore.restoreTagsInfo' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTagsInfo', {}) ??
-                'Çok fazla etiketin varsa biraz zaman alabilir. Eğer veritabanı geri yüklemesi yaptıysan buna gerek yoktur çünkü zaten veritabanına dahildir',
+          'settings.backupAndRestore.restoreTagsInfo' => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTagsInfo', {}) ?? 'Çok fazla etiketin varsa biraz zaman alabilir. Eğer veritabanı geri yüklemesi yaptıysan buna gerek yoktur çünkü zaten veritabanına dahildir',
           'settings.backupAndRestore.tagsBackedUp' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.tagsBackedUp', {}) ?? 'Etiketler tags.json dosyasına yedeklendi',
           'settings.backupAndRestore.tagsRestored' =>
@@ -5202,9 +5182,9 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.network.customUserAgentTitle', {}) ?? 'Özel Kullanıcı Kimliği (User-Agent)',
           'settings.network.keepEmptyForDefault' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.keepEmptyForDefault', {}) ?? 'Varsayılan değeri kullanmak için boş bırak',
-          'settings.network.defaultUserAgent' =>
-            ({required String agent}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.network.defaultUserAgent', {'agent': agent}) ?? 'Varsayılan: ${agent}',
+          'settings.network.defaultUserAgent' => ({
+            required String agent,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.network.defaultUserAgent', {'agent': agent}) ?? 'Varsayılan: ${agent}',
           'settings.network.userAgentUsedOnRequests' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.userAgentUsedOnRequests', {}) ??
                 'Çoğu booru isteği ve web görünümü için kullanılır',
@@ -5217,9 +5197,9 @@ extension on TranslationsTrTr {
           'settings.network.selectBooruToClearCookies' =>
             TranslationOverrides.string(_root.$meta, 'settings.network.selectBooruToClearCookies', {}) ??
                 'Çerezlerini temizlemek için bir booru seç veya hepsini temizlemek için boş bırak',
-          'settings.network.cookiesFor' =>
-            ({required String booruName}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.network.cookiesFor', {'booruName': booruName}) ?? '${booruName} için çerezler:',
+          'settings.network.cookiesFor' => ({
+            required String booruName,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.network.cookiesFor', {'booruName': booruName}) ?? '${booruName} için çerezler:',
           'settings.network.cookieDeleted' =>
             ({required String cookieName}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.network.cookieDeleted', {'cookieName': cookieName}) ??
@@ -5261,9 +5241,7 @@ extension on TranslationsTrTr {
                 'Uygulama adının başlatıcıda nasıl görüneceğini değiştir',
           'settings.privacy.appAliasChanged' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChanged', {}) ?? 'Uygulama adı değiştirildi',
-          'settings.privacy.appAliasRestartHint' =>
-            TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasRestartHint', {}) ??
-                'Uygulama adı değişikliği uygulama yeniden başlatıldıktan sonra geçerli olacaktır. Bazı başlatıcılar için ek süre veya sistemin yeniden başlatılması gerekebilir.',
+          'settings.privacy.appAliasRestartHint' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasRestartHint', {}) ?? 'Uygulama adı değişikliği uygulama yeniden başlatıldıktan sonra geçerli olacaktır. Bazı başlatıcılar için ek süre veya sistemin yeniden başlatılması gerekebilir.',
           'settings.privacy.appAliasChangeFailed' =>
             TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChangeFailed', {}) ??
                 'Uygulama adı değiştirilemedi: Lütfen tekrar dene.',
@@ -5289,9 +5267,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.performance.autoplayVideos', {}) ?? 'Videoları otomatik oynat',
           'settings.performance.disableVideos' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.disableVideos', {}) ?? 'Videoları devre dışı bırak',
-          'settings.performance.disableVideosHelp' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.disableVideosHelp', {}) ??
-                'Videoları yüklemeye çalışırken çöken düşük donanımlı cihazlar için kullanışlıdır: Bunun yerine videoyu harici bir oynatıcıda veya tarayıcıda izleme seçeneği sunar.',
+          'settings.performance.disableVideosHelp' => TranslationOverrides.string(_root.$meta, 'settings.performance.disableVideosHelp', {}) ?? 'Videoları yüklemeye çalışırken çöken düşük donanımlı cihazlar için kullanışlıdır: Bunun yerine videoyu harici bir oynatıcıda veya tarayıcıda izleme seçeneği sunar.',
           'settings.cache.title' => TranslationOverrides.string(_root.$meta, 'settings.cache.title', {}) ?? 'İndirme ve önbelleğe alma',
           'settings.cache.snatchQuality' => TranslationOverrides.string(_root.$meta, 'settings.cache.snatchQuality', {}) ?? 'İndirme kalitesi',
           'settings.cache.snatchCooldown' =>
@@ -5312,8 +5288,9 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.cache.requiresCustomStorageDirectory', {}) ?? 'Özel dizin gerektirir',
           'settings.cache.setStorageDirectory' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.setStorageDirectory', {}) ?? 'Depolama dizinini ayarla',
-          'settings.cache.currentPath' =>
-            ({required String path}) => TranslationOverrides.string(_root.$meta, 'settings.cache.currentPath', {'path': path}) ?? 'Mevcut: ${path}',
+          'settings.cache.currentPath' => ({
+            required String path,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.cache.currentPath', {'path': path}) ?? 'Mevcut: ${path}',
           'settings.cache.resetStorageDirectory' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.resetStorageDirectory', {}) ?? 'Depolama dizinini sıfırla',
           'settings.cache.cachePreviews' =>
@@ -5347,12 +5324,13 @@ extension on TranslationsTrTr {
           'settings.cache.cacheStats' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheStats', {}) ?? 'Önbellek istatistikleri:',
           'settings.cache.loading' => TranslationOverrides.string(_root.$meta, 'settings.cache.loading', {}) ?? 'Yükleniyor…',
           'settings.cache.empty' => TranslationOverrides.string(_root.$meta, 'settings.cache.empty', {}) ?? 'Boş',
-          'settings.cache.inFilesPlural' =>
-            ({required String size, required int count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, ${count} dosya',
-          'settings.cache.inFileSingular' =>
-            ({required String size}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 dosya',
+          'settings.cache.inFilesPlural' => ({
+            required String size,
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, ${count} dosya',
+          'settings.cache.inFileSingular' => ({
+            required String size,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 dosya',
           'settings.cache.cacheTypeTotal' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeTotal', {}) ?? 'Toplam',
           'settings.cache.cacheTypeFavicons' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeFavicons', {}) ?? 'Favicon\'lar',
           'settings.cache.cacheTypeThumbnails' =>
@@ -5361,9 +5339,9 @@ extension on TranslationsTrTr {
           'settings.cache.cacheTypeMedia' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeMedia', {}) ?? 'Medya',
           'settings.cache.cacheTypeWebView' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheTypeWebView', {}) ?? 'Webview',
           'settings.cache.cacheCleared' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheCleared', {}) ?? 'Önbellek temizlendi',
-          'settings.cache.clearedCacheType' =>
-            ({required String type}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.cache.clearedCacheType', {'type': type}) ?? '${type} önbelleği temizlendi',
+          'settings.cache.clearedCacheType' => ({
+            required String type,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.cache.clearedCacheType', {'type': type}) ?? '${type} önbelleği temizlendi',
           'settings.cache.clearAllCache' => TranslationOverrides.string(_root.$meta, 'settings.cache.clearAllCache', {}) ?? 'Tüm önbelleği temizle',
           'settings.cache.clearedCacheCompletely' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.clearedCacheCompletely', {}) ?? 'Önbellek tamamen temizlendi',
@@ -5416,16 +5394,14 @@ extension on TranslationsTrTr {
           'settings.sync.portPlaceholder' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.portPlaceholder', {}) ?? 'Ana Makine Portu (örn. 7777)',
           'settings.sync.sendFavourites' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendFavourites', {}) ?? 'Favorileri gönder',
-          'settings.sync.favouritesCount' =>
-            ({required String count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.sync.favouritesCount', {'count': count}) ?? 'Favoriler: ${count}',
+          'settings.sync.favouritesCount' => ({
+            required String count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.sync.favouritesCount', {'count': count}) ?? 'Favoriler: ${count}',
           'settings.sync.sendFavouritesLegacy' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.sendFavouritesLegacy', {}) ?? 'Favorileri gönder (Eski Sürüm)',
           'settings.sync.syncFavsFrom' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFrom', {}) ?? 'Favorileri şuradan senkronize et: #…',
-          'settings.sync.syncFavsFromHelpText1' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText1', {}) ??
-                'Senkronizasyonun nereden başlayacağını belirlemeni sağlar: tüm favorilerini daha önce senkronize ettiysen ve sadece en yeni ögeleri senkronize etmek istiyorsan kullanışlıdır',
+          'settings.sync.syncFavsFromHelpText1' => TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText1', {}) ?? 'Senkronizasyonun nereden başlayacağını belirlemeni sağlar: tüm favorilerini daha önce senkronize ettiysen ve sadece en yeni ögeleri senkronize etmek istiyorsan kullanışlıdır',
           'settings.sync.syncFavsFromHelpText2' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText2', {}) ?? 'Baştan başlamak istiyorsan bu alanı boş bırak',
           'settings.sync.syncFavsFromHelpText3' =>
@@ -5435,14 +5411,12 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText4', {}) ?? 'Favori sırası: En eskiden (0) en yeniye (X)',
           'settings.sync.sendSnatchedHistory' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.sendSnatchedHistory', {}) ?? 'İndirme geçmişini gönder',
-          'settings.sync.snatchedCount' =>
-            ({required String count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.sync.snatchedCount', {'count': count}) ?? 'İndirilen: ${count}',
+          'settings.sync.snatchedCount' => ({
+            required String count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.sync.snatchedCount', {'count': count}) ?? 'İndirilen: ${count}',
           'settings.sync.syncSnatchedFrom' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFrom', {}) ?? 'İndirilenleri şuradan senkronize et: #…',
-          'settings.sync.syncSnatchedFromHelpText1' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText1', {}) ??
-                'Senkronizasyonun nereden başlayacağını belirlemeni sağlar: tüm indirme geçmişini daha önce senkronize ettiysen ve sadece en yeni ögeleri senkronize etmek istiyorsan kullanışlıdır',
+          'settings.sync.syncSnatchedFromHelpText1' => TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText1', {}) ?? 'Senkronizasyonun nereden başlayacağını belirlemeni sağlar: tüm indirme geçmişini daha önce senkronize ettiysen ve sadece en yeni ögeleri senkronize etmek istiyorsan kullanışlıdır',
           'settings.sync.syncSnatchedFromHelpText2' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncSnatchedFromHelpText2', {}) ??
                 'Baştan başlamak istiyorsan bu alanı boş bırak',
@@ -5454,26 +5428,24 @@ extension on TranslationsTrTr {
           'settings.sync.sendSettings' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendSettings', {}) ?? 'Ayarları gönder',
           'settings.sync.sendBooruConfigs' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.sendBooruConfigs', {}) ?? 'Booru yapılandırmalarını gönder',
-          'settings.sync.configsCount' =>
-            ({required String count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.sync.configsCount', {'count': count}) ?? 'Yapılandırmalar: ${count}',
+          'settings.sync.configsCount' => ({
+            required String count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.sync.configsCount', {'count': count}) ?? 'Yapılandırmalar: ${count}',
           'settings.sync.sendTabs' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendTabs', {}) ?? 'Sekmeleri gönder',
-          'settings.sync.tabsCount' =>
-            ({required String count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.sync.tabsCount', {'count': count}) ?? 'Sekmeler: ${count}',
+          'settings.sync.tabsCount' => ({
+            required String count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.sync.tabsCount', {'count': count}) ?? 'Sekmeler: ${count}',
           'settings.sync.tabsSyncMode' => TranslationOverrides.string(_root.$meta, 'settings.sync.tabsSyncMode', {}) ?? 'Sekme senkronizasyon modu',
-          'settings.sync.tabsSyncModeMerge' =>
-            TranslationOverrides.string(_root.$meta, 'settings.sync.tabsSyncModeMerge', {}) ??
-                'Birleştir: Bu cihazdaki sekmeleri diğer cihazdakilerle birleştirir: bilinmeyen booru\'lara sahip sekmeler ve zaten mevcut olan sekmeler yok sayılır',
+          'settings.sync.tabsSyncModeMerge' => TranslationOverrides.string(_root.$meta, 'settings.sync.tabsSyncModeMerge', {}) ?? 'Birleştir: Bu cihazdaki sekmeleri diğer cihazdakilerle birleştirir: bilinmeyen booru\'lara sahip sekmeler ve zaten mevcut olan sekmeler yok sayılır',
           'settings.sync.tabsSyncModeReplace' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.tabsSyncModeReplace', {}) ??
                 'Değiştir: Diğer cihazdaki sekmeleri tamamen bu cihazdaki sekmelerle değiştirir',
           'settings.sync.merge' => TranslationOverrides.string(_root.$meta, 'settings.sync.merge', {}) ?? 'Birleştir',
           'settings.sync.replace' => TranslationOverrides.string(_root.$meta, 'settings.sync.replace', {}) ?? 'Değiştir',
           'settings.sync.sendTags' => TranslationOverrides.string(_root.$meta, 'settings.sync.sendTags', {}) ?? 'Etiketleri gönder',
-          'settings.sync.tagsCount' =>
-            ({required String count}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.sync.tagsCount', {'count': count}) ?? 'Etiketler: ${count}',
+          'settings.sync.tagsCount' => ({
+            required String count,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.sync.tagsCount', {'count': count}) ?? 'Etiketler: ${count}',
           'settings.sync.tagsSyncMode' => TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncMode', {}) ?? 'Etiket senkronizasyon modu',
           'settings.sync.tagsSyncModePreferTypeIfNone' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModePreferTypeIfNone', {}) ??
@@ -5500,24 +5472,20 @@ extension on TranslationsTrTr {
                 'Veri almak için sunucuyu başlat. Güvenlik için halka açık Wi-Fi ağlarından kaçın',
           'settings.sync.availableNetworkInterfaces' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.availableNetworkInterfaces', {}) ?? 'Kullanılabilir ağ arayüzleri',
-          'settings.sync.selectedInterfaceIP' =>
-            ({required String ip}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.sync.selectedInterfaceIP', {'ip': ip}) ?? 'Seçilen arayüz IP\'si: ${ip}',
+          'settings.sync.selectedInterfaceIP' => ({
+            required String ip,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.sync.selectedInterfaceIP', {'ip': ip}) ?? 'Seçilen arayüz IP\'si: ${ip}',
           'settings.sync.serverPort' => TranslationOverrides.string(_root.$meta, 'settings.sync.serverPort', {}) ?? 'Sunucu portu',
           'settings.sync.serverPortPlaceholder' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.serverPortPlaceholder', {}) ?? '(boş bırakılırsa varsayılan \'8080\' olur)',
           'settings.sync.startReceiverServer' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.startReceiverServer', {}) ?? 'Alıcı sunucusunu başlat',
           'settings.about.title' => TranslationOverrides.string(_root.$meta, 'settings.about.title', {}) ?? 'Hakkında',
-          'settings.about.appDescription' =>
-            TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ??
-                'LoliSnatcher açık kaynaklıdır ve GPLv3 ile lisanslanmıştır: Kaynak kodu GitHub\'da mevcuttur. Lütfen karşılaştığın sorunları veya özellik isteklerini repo\'nun issues kısmından bildir.',
+          'settings.about.appDescription' => TranslationOverrides.string(_root.$meta, 'settings.about.appDescription', {}) ?? 'LoliSnatcher açık kaynaklıdır ve GPLv3 ile lisanslanmıştır: Kaynak kodu GitHub\'da mevcuttur. Lütfen karşılaştığın sorunları veya özellik isteklerini repo\'nun issues kısmından bildir.',
           'settings.about.appOnGitHub' => TranslationOverrides.string(_root.$meta, 'settings.about.appOnGitHub', {}) ?? 'GitHub\'da LoliSnatcher',
           'settings.about.contact' => TranslationOverrides.string(_root.$meta, 'settings.about.contact', {}) ?? 'İletişim',
           'settings.about.emailCopied' => TranslationOverrides.string(_root.$meta, 'settings.about.emailCopied', {}) ?? 'E-mail panoya kopyalandı',
-          'settings.about.logoArtistThanks' =>
-            TranslationOverrides.string(_root.$meta, 'settings.about.logoArtistThanks', {}) ??
-                'Uygulama logosu için eserini kullanmamıza izin veren Showers-U\'ya koca bir teşekkürler: Lütfen Pixiv üzerinden ona göz atmayı unutma',
+          'settings.about.logoArtistThanks' => TranslationOverrides.string(_root.$meta, 'settings.about.logoArtistThanks', {}) ?? 'Uygulama logosu için eserini kullanmamıza izin veren Showers-U\'ya koca bir teşekkürler: Lütfen Pixiv üzerinden ona göz atmayı unutma',
           'settings.about.developers' => TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? 'Geliştiriciler',
           'settings.about.localizers' => TranslationOverrides.string(_root.$meta, 'settings.about.localizers', {}) ?? 'Yerelleştirme Uzmanları',
           'settings.about.releases' => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'Sürümler',
@@ -5574,17 +5542,17 @@ extension on TranslationsTrTr {
           'settings.debug.enableDragScrollOnListsDesktopOnly' =>
             TranslationOverrides.string(_root.$meta, 'settings.debug.enableDragScrollOnListsDesktopOnly', {}) ??
                 'Listelerde sürükleyerek kaydırmayı etkinleştir [Yalnızca Masaüstü]',
-          'settings.debug.animationSpeed' =>
-            ({required double speed}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.debug.animationSpeed', {'speed': speed}) ?? 'Animasyon hızı (${speed})',
+          'settings.debug.animationSpeed' => ({
+            required double speed,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.debug.animationSpeed', {'speed': speed}) ?? 'Animasyon hızı (${speed})',
           'settings.debug.tagsManager' => TranslationOverrides.string(_root.$meta, 'settings.debug.tagsManager', {}) ?? 'Etiket Yöneticisi',
           'settings.debug.resolution' =>
             ({required String width, required String height}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.debug.resolution', {'width': width, 'height': height}) ??
                 'Çözünürlük: ${width}x${height}',
-          'settings.debug.pixelRatio' =>
-            ({required String ratio}) =>
-                TranslationOverrides.string(_root.$meta, 'settings.debug.pixelRatio', {'ratio': ratio}) ?? 'Piksel oranı: ${ratio}',
+          'settings.debug.pixelRatio' => ({
+            required String ratio,
+          }) => TranslationOverrides.string(_root.$meta, 'settings.debug.pixelRatio', {'ratio': ratio}) ?? 'Piksel oranı: ${ratio}',
           'settings.debug.logger' => TranslationOverrides.string(_root.$meta, 'settings.debug.logger', {}) ?? 'Kayıtlar',
           'settings.debug.webview' => TranslationOverrides.string(_root.$meta, 'settings.debug.webview', {}) ?? 'Web görünümü (Webview)',
           'settings.debug.deleteAllCookies' => TranslationOverrides.string(_root.$meta, 'settings.debug.deleteAllCookies', {}) ?? 'Tüm çerezleri sil',
@@ -5632,24 +5600,24 @@ extension on TranslationsTrTr {
           'pageChanger.delayBetweenLoadings' =>
             TranslationOverrides.string(_root.$meta, 'pageChanger.delayBetweenLoadings', {}) ?? 'Yüklemeler arası gecikme (ms)',
           'pageChanger.delayInMs' => TranslationOverrides.string(_root.$meta, 'pageChanger.delayInMs', {}) ?? 'ms cinsinden gecikme',
-          'pageChanger.currentPage' =>
-            ({required int number}) =>
-                TranslationOverrides.string(_root.$meta, 'pageChanger.currentPage', {'number': number}) ?? 'Mevcut sayfa #${number}',
-          'pageChanger.possibleMaxPage' =>
-            ({required int number}) =>
-                TranslationOverrides.string(_root.$meta, 'pageChanger.possibleMaxPage', {'number': number}) ?? 'Olası maks. sayfa #~${number}',
+          'pageChanger.currentPage' => ({
+            required int number,
+          }) => TranslationOverrides.string(_root.$meta, 'pageChanger.currentPage', {'number': number}) ?? 'Mevcut sayfa #${number}',
+          'pageChanger.possibleMaxPage' => ({
+            required int number,
+          }) => TranslationOverrides.string(_root.$meta, 'pageChanger.possibleMaxPage', {'number': number}) ?? 'Olası maks. sayfa #~${number}',
           'pageChanger.searchCurrentlyRunning' =>
             TranslationOverrides.string(_root.$meta, 'pageChanger.searchCurrentlyRunning', {}) ?? 'Arama şu an devam ediyor!',
           'pageChanger.jumpToPage' => TranslationOverrides.string(_root.$meta, 'pageChanger.jumpToPage', {}) ?? 'Sayfaya atla',
           'pageChanger.searchUntilPage' => TranslationOverrides.string(_root.$meta, 'pageChanger.searchUntilPage', {}) ?? 'Sayfaya kadar ara',
           'pageChanger.stopSearching' => TranslationOverrides.string(_root.$meta, 'pageChanger.stopSearching', {}) ?? 'Aramayı durdur',
           'tagsFiltersDialogs.emptyInput' => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.emptyInput', {}) ?? 'Boş girdi!',
-          'tagsFiltersDialogs.addNewFilter' =>
-            ({required String type}) =>
-                TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.addNewFilter', {'type': type}) ?? '[Yeni ${type} filtresi ekle]',
-          'tagsFiltersDialogs.newTagFilter' =>
-            ({required String type}) =>
-                TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.newTagFilter', {'type': type}) ?? 'Yeni ${type} etiket filtresi',
+          'tagsFiltersDialogs.addNewFilter' => ({
+            required String type,
+          }) => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.addNewFilter', {'type': type}) ?? '[Yeni ${type} filtresi ekle]',
+          'tagsFiltersDialogs.newTagFilter' => ({
+            required String type,
+          }) => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.newTagFilter', {'type': type}) ?? 'Yeni ${type} etiket filtresi',
           'tagsFiltersDialogs.newFilter' => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.newFilter', {}) ?? 'Yeni filtre',
           'tagsFiltersDialogs.editFilter' => TranslationOverrides.string(_root.$meta, 'tagsFiltersDialogs.editFilter', {}) ?? 'Filtreyi düzenle',
           'tagsManager.title' => TranslationOverrides.string(_root.$meta, 'tagsManager.title', {}) ?? 'Etiketler',
@@ -5698,19 +5666,21 @@ extension on TranslationsTrTr {
             ({required int statusCode, required String reasonPhrase}) =>
                 TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
                 'Test hatası: ${statusCode} ${reasonPhrase}',
-          'loliSync.testErrorException' =>
-            ({required String error}) =>
-                TranslationOverrides.string(_root.$meta, 'loliSync.testErrorException', {'error': error}) ?? 'Test hatası: ${error}',
+          'loliSync.testErrorException' => ({
+            required String error,
+          }) => TranslationOverrides.string(_root.$meta, 'loliSync.testErrorException', {'error': error}) ?? 'Test hatası: ${error}',
           'loliSync.testSuccess' => TranslationOverrides.string(_root.$meta, 'loliSync.testSuccess', {}) ?? 'Test isteği olumlu yanıt aldı',
           'loliSync.testSuccessMessage' =>
             TranslationOverrides.string(_root.$meta, 'loliSync.testSuccessMessage', {}) ?? 'Diğer cihazda bir \'Test\' mesajı görünmelidir',
           'imageSearch.title' => TranslationOverrides.string(_root.$meta, 'imageSearch.title', {}) ?? 'Görsel arama',
           'tagView.tags' => TranslationOverrides.string(_root.$meta, 'tagView.tags', {}) ?? 'Etiketler',
           'tagView.comments' => TranslationOverrides.string(_root.$meta, 'tagView.comments', {}) ?? 'Yorumlar',
-          'tagView.showNotes' =>
-            ({required int count}) => TranslationOverrides.string(_root.$meta, 'tagView.showNotes', {'count': count}) ?? 'Notları göster (${count})',
-          'tagView.hideNotes' =>
-            ({required int count}) => TranslationOverrides.string(_root.$meta, 'tagView.hideNotes', {'count': count}) ?? 'Notları gizle (${count})',
+          'tagView.showNotes' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'tagView.showNotes', {'count': count}) ?? 'Notları göster (${count})',
+          'tagView.hideNotes' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'tagView.hideNotes', {'count': count}) ?? 'Notları gizle (${count})',
           'tagView.loadNotes' => TranslationOverrides.string(_root.$meta, 'tagView.loadNotes', {}) ?? 'Notları yükle',
           'tagView.thisTagAlreadyInSearch' =>
             TranslationOverrides.string(_root.$meta, 'tagView.thisTagAlreadyInSearch', {}) ?? 'Bu etiket zaten mevcut arama sorgusunda:',
@@ -5768,15 +5738,16 @@ extension on TranslationsTrTr {
           'pinnedTags.unpinTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinTag', {}) ?? 'Sabitlemeyi kaldır',
           'pinnedTags.pin' => TranslationOverrides.string(_root.$meta, 'pinnedTags.pin', {}) ?? 'Sabitle',
           'pinnedTags.unpin' => TranslationOverrides.string(_root.$meta, 'pinnedTags.unpin', {}) ?? 'Kaldır',
-          'pinnedTags.pinQuestion' =>
-            ({required String tag}) =>
-                TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? '«${tag}» hızlı erişime sabitlensin mi?',
+          'pinnedTags.pinQuestion' => ({
+            required String tag,
+          }) => TranslationOverrides.string(_root.$meta, 'pinnedTags.pinQuestion', {'tag': tag}) ?? '«${tag}» hızlı erişime sabitlensin mi?',
           'pinnedTags.unpinQuestion' =>
             ({required String tag}) =>
                 TranslationOverrides.string(_root.$meta, 'pinnedTags.unpinQuestion', {'tag': tag}) ??
                 '«${tag}» sabitlenmiş etiketlerden kaldırılsın mı?',
-          'pinnedTags.onlyForBooru' =>
-            ({required String name}) => TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Sadece ${name} için',
+          'pinnedTags.onlyForBooru' => ({
+            required String name,
+          }) => TranslationOverrides.string(_root.$meta, 'pinnedTags.onlyForBooru', {'name': name}) ?? 'Sadece ${name} için',
           'pinnedTags.labelsOptional' => TranslationOverrides.string(_root.$meta, 'pinnedTags.labelsOptional', {}) ?? 'Etiketler (isteğe bağlı)',
           'pinnedTags.typeAndPressAdd' =>
             TranslationOverrides.string(_root.$meta, 'pinnedTags.typeAndPressAdd', {}) ?? 'Bir etiket dahil etmek için yaz ve Ekle butonuna bas',
@@ -5817,9 +5788,9 @@ extension on TranslationsTrTr {
           'searchBar.noSuggestionsFound' => TranslationOverrides.string(_root.$meta, 'searchBar.noSuggestionsFound', {}) ?? 'Öneri bulunamadı',
           'searchBar.tagSuggestionsNotAvailable' =>
             TranslationOverrides.string(_root.$meta, 'searchBar.tagSuggestionsNotAvailable', {}) ?? 'Bu booru için etiket önerileri kullanılamıyor',
-          'searchBar.copiedTagToClipboard' =>
-            ({required String tag}) =>
-                TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? '«${tag}» panoya kopyalandı',
+          'searchBar.copiedTagToClipboard' => ({
+            required String tag,
+          }) => TranslationOverrides.string(_root.$meta, 'searchBar.copiedTagToClipboard', {'tag': tag}) ?? '«${tag}» panoya kopyalandı',
           'searchBar.prefix' => TranslationOverrides.string(_root.$meta, 'searchBar.prefix', {}) ?? 'Önek',
           'searchBar.exclude' => TranslationOverrides.string(_root.$meta, 'searchBar.exclude', {}) ?? 'Hariç tut (—)',
           'searchBar.booruNumberPrefix' => TranslationOverrides.string(_root.$meta, 'searchBar.booruNumberPrefix', {}) ?? 'Booru (N#)',
@@ -5845,9 +5816,9 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Kullanıcı tarafından iptal edildi',
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Yine de kaydet',
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'Atla',
-          'mobileHome.retryAll' =>
-            ({required int count}) =>
-                TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Hepsini tekrar dene (${count})',
+          'mobileHome.retryAll' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Hepsini tekrar dene (${count})',
           _ => null,
         } ??
         switch (path) {
@@ -5961,9 +5932,10 @@ extension on TranslationsTrTr {
           'viewer.appBar.selectTags' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.selectTags', {}) ?? 'Etiketleri seç',
           'viewer.notes.note' => TranslationOverrides.string(_root.$meta, 'viewer.notes.note', {}) ?? 'Not',
           'viewer.notes.notes' => TranslationOverrides.string(_root.$meta, 'viewer.notes.notes', {}) ?? 'Notlar',
-          'viewer.notes.coordinates' =>
-            ({required int posX, required int posY}) =>
-                TranslationOverrides.string(_root.$meta, 'viewer.notes.coordinates', {'posX': posX, 'posY': posY}) ?? 'X:${posX}, Y:${posY}',
+          'viewer.notes.coordinates' => ({
+            required int posX,
+            required int posY,
+          }) => TranslationOverrides.string(_root.$meta, 'viewer.notes.coordinates', {'posX': posX, 'posY': posY}) ?? 'X:${posX}, Y:${posY}',
           'common.selectABooru' => TranslationOverrides.string(_root.$meta, 'common.selectABooru', {}) ?? 'Bir booru seç',
           'common.booruItemCopiedToClipboard' =>
             TranslationOverrides.string(_root.$meta, 'common.booruItemCopiedToClipboard', {}) ?? 'Booru ögesi panoya kopyalandı',
@@ -6005,9 +5977,9 @@ extension on TranslationsTrTr {
           'media.loading.restartLoading' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.restartLoading', {}) ?? 'Yüklemeyi yeniden başlat',
           'media.loading.stopLoading' => TranslationOverrides.string(_root.$meta, 'media.loading.stopLoading', {}) ?? 'Yüklemeyi durdur',
-          'media.loading.startedSecondsAgo' =>
-            ({required int seconds}) =>
-                TranslationOverrides.string(_root.$meta, 'media.loading.startedSecondsAgo', {'seconds': seconds}) ?? '${seconds} sn önce başladı',
+          'media.loading.startedSecondsAgo' => ({
+            required int seconds,
+          }) => TranslationOverrides.string(_root.$meta, 'media.loading.startedSecondsAgo', {'seconds': seconds}) ?? '${seconds} sn önce başladı',
           'media.loading.stopReasons.stoppedByUser' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.stoppedByUser', {}) ?? 'Kullanıcı tarafından durduruldu',
           'media.loading.stopReasons.loadingError' =>
@@ -6019,10 +5991,12 @@ extension on TranslationsTrTr {
           'media.loading.stopReasons.videoError' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.stopReasons.videoError', {}) ?? 'Video hatası',
           'media.loading.fileIsZeroBytes' => TranslationOverrides.string(_root.$meta, 'media.loading.fileIsZeroBytes', {}) ?? 'Dosya sıfır bayt',
-          'media.loading.fileSize' =>
-            ({required String size}) => TranslationOverrides.string(_root.$meta, 'media.loading.fileSize', {'size': size}) ?? 'Dosya boyutu: ${size}',
-          'media.loading.sizeLimit' =>
-            ({required String limit}) => TranslationOverrides.string(_root.$meta, 'media.loading.sizeLimit', {'limit': limit}) ?? 'Limit: ${limit}',
+          'media.loading.fileSize' => ({
+            required String size,
+          }) => TranslationOverrides.string(_root.$meta, 'media.loading.fileSize', {'size': size}) ?? 'Dosya boyutu: ${size}',
+          'media.loading.sizeLimit' => ({
+            required String limit,
+          }) => TranslationOverrides.string(_root.$meta, 'media.loading.sizeLimit', {'limit': limit}) ?? 'Limit: ${limit}',
           'media.loading.tryChangingVideoBackend' =>
             TranslationOverrides.string(_root.$meta, 'media.loading.tryChangingVideoBackend', {}) ??
                 'Sık sık oynatma sorunu mu yaşıyorsun? [Ayarlar > Video > Video oynatıcı altyapısı] kısmını değiştirmeyi dene',
@@ -6045,14 +6019,18 @@ extension on TranslationsTrTr {
             ({required String fileExt}) =>
                 TranslationOverrides.string(_root.$meta, 'media.video.unknownFileFormat', {'fileExt': fileExt}) ??
                 'Bilinmeyen dosya formatı (.${fileExt}): tarayıcıda açmak için buraya dokun',
-          'imageStats.live' =>
-            ({required int count}) => TranslationOverrides.string(_root.$meta, 'imageStats.live', {'count': count}) ?? 'Aktif: ${count}',
-          'imageStats.pending' =>
-            ({required int count}) => TranslationOverrides.string(_root.$meta, 'imageStats.pending', {'count': count}) ?? 'Bekleyen: ${count}',
-          'imageStats.total' =>
-            ({required int count}) => TranslationOverrides.string(_root.$meta, 'imageStats.total', {'count': count}) ?? 'Toplam: ${count}',
-          'imageStats.size' =>
-            ({required String size}) => TranslationOverrides.string(_root.$meta, 'imageStats.size', {'size': size}) ?? 'Boyut: ${size}',
+          'imageStats.live' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'imageStats.live', {'count': count}) ?? 'Aktif: ${count}',
+          'imageStats.pending' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'imageStats.pending', {'count': count}) ?? 'Bekleyen: ${count}',
+          'imageStats.total' => ({
+            required int count,
+          }) => TranslationOverrides.string(_root.$meta, 'imageStats.total', {'count': count}) ?? 'Toplam: ${count}',
+          'imageStats.size' => ({
+            required String size,
+          }) => TranslationOverrides.string(_root.$meta, 'imageStats.size', {'size': size}) ?? 'Boyut: ${size}',
           'imageStats.max' => ({required String max}) => TranslationOverrides.string(_root.$meta, 'imageStats.max', {'max': max}) ?? 'Maks.: ${max}',
           'preview.error.noResults' => TranslationOverrides.string(_root.$meta, 'preview.error.noResults', {}) ?? 'Sonuç yok',
           'preview.error.noResultsSubtitle' =>
@@ -6063,9 +6041,9 @@ extension on TranslationsTrTr {
             ({required int pageNum}) =>
                 TranslationOverrides.string(_root.$meta, 'preview.error.reachedEndSubtitle', {'pageNum': pageNum}) ??
                 'Yüklenen sayfa sayısı: ${pageNum}\nSon sayfayı yeniden yüklemek için buraya dokun',
-          'preview.error.loadingPage' =>
-            ({required int pageNum}) =>
-                TranslationOverrides.string(_root.$meta, 'preview.error.loadingPage', {'pageNum': pageNum}) ?? 'Sayfa #${pageNum} yükleniyor…',
+          'preview.error.loadingPage' => ({
+            required int pageNum,
+          }) => TranslationOverrides.string(_root.$meta, 'preview.error.loadingPage', {'pageNum': pageNum}) ?? 'Sayfa #${pageNum} yükleniyor…',
           'preview.error.startedAgo' =>
             ({required num seconds}) =>
                 TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??

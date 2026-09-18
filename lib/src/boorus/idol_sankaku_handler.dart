@@ -145,6 +145,12 @@ class IdolSankakuHandler extends SankakuHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    // Idol Sankaku has tag detail pages (/tags/$tag) but no per-tag wiki pages.
+    return null;
+  }
+
+  @override
   String makeCommentsURL(String postID, int pageNum) {
     // EXAMPLE: https://iapi.sankakucomplex.com/comment/index.json?post_id=$post_id
     return '$baseUrl/comment/index.json?post_id=$postID';

@@ -291,6 +291,12 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    // Sankaku has tag detail pages (/tags/$tag) but no per-tag wiki pages.
+    return null;
+  }
+
+  @override
   List parseTagSuggestionsList(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse;

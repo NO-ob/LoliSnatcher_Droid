@@ -180,6 +180,11 @@ class DanbooruHandler extends BooruHandler {
   }
 
   @override
+  String? makeTagWikiURL(String tag) {
+    return '${booru.baseURL}/wiki_pages/${Uri.encodeComponent(tag)}';
+  }
+
+  @override
   String makeCommentsURL(String postID, int pageNum) {
     // EXAMPLE: https://danbooru.donmai.us/comments.json?search[post_id]=4916722&group_by=comment&only=id,created_at,post_id,creator,body,score
     return '${booru.baseURL}/comments.json?search[post_id]=$postID&group_by=comment&only=id,created_at,post_id,creator,body,score';
