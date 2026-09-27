@@ -385,10 +385,12 @@ class MainActivity: FlutterFragmentActivity() {
                                 methodResult = result
                                 requestDirectoryAccess()
                             } else {
+                                var testFile: DocumentFile? = null
                                 try {
                                     val cr = this.contentResolver
                                     val docFile: DocumentFile? = DocumentFile.fromTreeUri(applicationContext, Uri.parse(uri))
                                     val newFile = docFile?.createFile("text/*", "testpersist")
+                                    testFile = newFile
                                     if (newFile == null) {
                                         result.error("FILE_NOT_FOUND", "File not found", null)
                                     } else {
@@ -397,15 +399,19 @@ class MainActivity: FlutterFragmentActivity() {
                                         if (stream == null) {
                                             result.error("IO_ERROR", "IO error", null)
                                         } else {
-                                            stream.write(output.toByteArray())
-                                            stream.close()
-                                            newFile.delete()
+                                            stream.use { it.write(output.toByteArray()) }
                                             result.success("ok")
                                         }
                                     }
                                 } catch (e: Exception) {
                                     Log.e("MainActivity", "Error testing SAF", e)
                                     result.error("ERROR", "Error testing SAF", null)
+                                } finally {
+                                    try {
+                                        testFile?.delete()
+                                    } catch (e: Exception) {
+                                        Log.e("MainActivity", "Error cleaning up SAF test file", e)
+                                    }
                                 }
                             }
                         } else {
