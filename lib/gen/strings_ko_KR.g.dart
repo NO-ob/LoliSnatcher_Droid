@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
+
 import 'strings.g.dart';
 
 // Path: <root>
@@ -20,7 +21,7 @@ class TranslationsKoKr extends Translations with BaseTranslations<AppLocale, Tra
     PluralResolver? cardinalResolver,
     PluralResolver? ordinalResolver,
     TranslationMetadata<AppLocale, Translations>? meta,
-  }) : $meta =
+  }) : _meta =
            meta ??
            TranslationMetadata(
              locale: AppLocale.koKr,
@@ -29,17 +30,17 @@ class TranslationsKoKr extends Translations with BaseTranslations<AppLocale, Tra
              ordinalResolver: ordinalResolver,
            ),
        super(cardinalResolver: cardinalResolver, ordinalResolver: ordinalResolver) {
-    super.$meta.setFlatMapFunction($meta.getTranslation); // copy base translations to super.$meta
-    $meta.setFlatMapFunction(_flatMapFunction);
+    _meta.setFlatMapFunction(_flatMapFunction);
   }
 
   /// Metadata for the translations of <ko-KR>.
+  final TranslationMetadata<AppLocale, Translations> _meta;
   @override
-  final TranslationMetadata<AppLocale, Translations> $meta;
+  TranslationMetadata<AppLocale, Translations> get $meta => _meta;
 
   /// Access flat map
   @override
-  dynamic operator [](String key) => $meta.getTranslation(key) ?? super.$meta.getTranslation(key);
+  dynamic operator [](String key) => _meta.getTranslation(key) ?? super[key];
 
   late final TranslationsKoKr _root = this; // ignore: unused_field
 
@@ -680,13 +681,16 @@ extension on TranslationsKoKr {
       'validationErrors.invalidNumber' => TranslationOverrides.string(_root.$meta, 'validationErrors.invalidNumber', {}) ?? '숫자를 입력하세요',
       'validationErrors.invalidNumericValue' =>
         TranslationOverrides.string(_root.$meta, 'validationErrors.invalidNumericValue', {}) ?? '유효한 수 형식의 값을 입력하세요',
-      'validationErrors.tooSmall' =>
-        ({required double min}) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? '${min}보다 큰 값을 입력하세요',
-      'validationErrors.tooBig' =>
-        ({required double max}) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? '${max}보다 작은 값을 입력하세요',
-      'validationErrors.rangeError' =>
-        ({required double min, required double max}) =>
-            TranslationOverrides.string(_root.$meta, 'validationErrors.rangeError', {'min': min, 'max': max}) ?? '${min}과 ${max} 사이의 값을 입력하세요',
+      'validationErrors.tooSmall' => ({
+        required double min,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? '${min}보다 큰 값을 입력하세요',
+      'validationErrors.tooBig' => ({
+        required double max,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? '${max}보다 작은 값을 입력하세요',
+      'validationErrors.rangeError' => ({
+        required double min,
+        required double max,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.rangeError', {'min': min, 'max': max}) ?? '${min}과 ${max} 사이의 값을 입력하세요',
       'validationErrors.greaterThanOrEqualZero' =>
         TranslationOverrides.string(_root.$meta, 'validationErrors.greaterThanOrEqualZero', {}) ?? '0보다 크거나 작은 값을 입력하세요',
       'validationErrors.lessThan4' => TranslationOverrides.string(_root.$meta, 'validationErrors.lessThan4', {}) ?? '4보다 작은 값을 입력하세요',
@@ -705,8 +709,9 @@ extension on TranslationsKoKr {
         TranslationOverrides.string(_root.$meta, 'permissions.noAccessToCustomStorageDirectory', {}) ?? '커스텀 저장 디렉토리에 접근할 수 없습니다',
       'permissions.pleaseSetStorageDirectoryAgain' =>
         TranslationOverrides.string(_root.$meta, 'permissions.pleaseSetStorageDirectoryAgain', {}) ?? '저장할 디렉토리를 다시 설정하고 앱이 접근할 수 있도록 허용하세요',
-      'permissions.currentPath' =>
-        ({required String path}) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? '현재 경로: ${path}',
+      'permissions.currentPath' => ({
+        required String path,
+      }) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? '현재 경로: ${path}',
       'permissions.setDirectory' => TranslationOverrides.string(_root.$meta, 'permissions.setDirectory', {}) ?? '디렉토리 설정하기',
       'permissions.currentlyNotAvailableForThisPlatform' =>
         TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ?? '이 플랫폼에서 지원하지 않음',
@@ -718,9 +723,9 @@ extension on TranslationsKoKr {
       'authentication.noBiometricHardwareAvailable' =>
         TranslationOverrides.string(_root.$meta, 'authentication.noBiometricHardwareAvailable', {}) ?? '사용 가능한 생체 인식 기기가 없습니다',
       'authentication.temporaryLockout' => TranslationOverrides.string(_root.$meta, 'authentication.temporaryLockout', {}) ?? '임시 폐쇄',
-      'authentication.somethingWentWrong' =>
-        ({required String error}) =>
-            TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ?? '인증 중 다음의 오류가 발생했습니다: ${error}',
+      'authentication.somethingWentWrong' => ({
+        required String error,
+      }) => TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ?? '인증 중 다음의 오류가 발생했습니다: ${error}',
       'searchHandler.removedLastTab' => TranslationOverrides.string(_root.$meta, 'searchHandler.removedLastTab', {}) ?? '마지막 탭 제거됨',
       'searchHandler.resettingSearchToDefaultTags' =>
         TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? '기본 태그로 초기화',
