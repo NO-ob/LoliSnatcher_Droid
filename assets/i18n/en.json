@@ -102,6 +102,9 @@
         "restoringTabs": "Restoring tabs…"
     },
     "permissions": {
+        "localNetworkRequired": "Local network access is required to open this address. Allow Nearby devices permission, then retry.",
+        "localNetworkExplanationTitle": "Local network access",
+        "localNetworkExplanation": "To open local booru servers or sync with another device, the app needs access to your local network. Android will show this as a “Nearby devices” permission request.",
         "noAccessToCustomStorageDirectory": "No access to custom storage directory",
         "pleaseSetStorageDirectoryAgain": "Please set storage directory again to grant the app access to it",
         "currentPath(param=path)": "Current path: ${path: String}",

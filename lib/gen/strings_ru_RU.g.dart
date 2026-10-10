@@ -352,6 +352,17 @@ class _Translations$permissions$ru_RU extends Translations$permissions$en {
 
   // Translations
   @override
+  String get localNetworkRequired =>
+      TranslationOverrides.string(_root.$meta, 'permissions.localNetworkRequired', {}) ??
+      'Для открытия этого адреса нужен доступ к локальной сети. Разреши доступ к устройствам поблизости и повтори попытку.';
+  @override
+  String get localNetworkExplanationTitle =>
+      TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanationTitle', {}) ?? 'Доступ к локальной сети';
+  @override
+  String get localNetworkExplanation =>
+      TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanation', {}) ??
+      'Для открытия локальных серверов и синхронизации с другими устройствами нужен доступ к твоей локальной сети. Для этого нужно дать разрешение использовать «Устройства поблизости».';
+  @override
   String get noAccessToCustomStorageDirectory =>
       TranslationOverrides.string(_root.$meta, 'permissions.noAccessToCustomStorageDirectory', {}) ?? 'Нет доступа к выбранной папке хранилища';
   @override
@@ -4083,6 +4094,12 @@ extension on TranslationsRuRu {
           'init.loadingBoorus' => TranslationOverrides.string(_root.$meta, 'init.loadingBoorus', {}) ?? 'Загрузка конфигов сайтов…',
           'init.loadingTags' => TranslationOverrides.string(_root.$meta, 'init.loadingTags', {}) ?? 'Загрузка тегов…',
           'init.restoringTabs' => TranslationOverrides.string(_root.$meta, 'init.restoringTabs', {}) ?? 'Восстановление вкладок…',
+          'permissions.localNetworkRequired' =>
+            TranslationOverrides.string(_root.$meta, 'permissions.localNetworkRequired', {}) ??
+                'Для открытия этого адреса нужен доступ к локальной сети. Разреши доступ к устройствам поблизости и повтори попытку.',
+          'permissions.localNetworkExplanationTitle' =>
+            TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanationTitle', {}) ?? 'Доступ к локальной сети',
+          'permissions.localNetworkExplanation' => TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanation', {}) ?? 'Для открытия локальных серверов и синхронизации с другими устройствами нужен доступ к твоей локальной сети. Для этого нужно дать разрешение использовать «Устройства поблизости».',
           'permissions.noAccessToCustomStorageDirectory' =>
             TranslationOverrides.string(_root.$meta, 'permissions.noAccessToCustomStorageDirectory', {}) ?? 'Нет доступа к выбранной папке хранилища',
           'permissions.pleaseSetStorageDirectoryAgain' =>
@@ -4879,14 +4896,14 @@ extension on TranslationsRuRu {
             TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.hydrus', {}) ?? 'Hydrus',
           'settings.video.title' => TranslationOverrides.string(_root.$meta, 'settings.video.title', {}) ?? 'Видео',
           'settings.video.disableVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.disableVideos', {}) ?? 'Отключить видео',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.disableVideosHelp' => TranslationOverrides.string(_root.$meta, 'settings.video.disableVideosHelp', {}) ?? 'Полезно на слабых устройствах, которые вылетают при попытке загрузить видео. Даёт возможность просмотреть видео во внешнем плеере или браузере.',
           'settings.video.autoplayVideos' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.autoplayVideos', {}) ?? 'Автовоспроизведение видео',
           'settings.video.startVideosMuted' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.startVideosMuted', {}) ?? 'Запускать видео без звука',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.experimental' => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '[Экспериментально]',
           'settings.video.videoPlayerBackend' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? 'Движок видеоплеера',
@@ -5827,14 +5844,14 @@ extension on TranslationsRuRu {
           'mobileHome.fileAlreadyExists' => TranslationOverrides.string(_root.$meta, 'mobileHome.fileAlreadyExists', {}) ?? 'Файл уже существует',
           'mobileHome.failedToDownload' => TranslationOverrides.string(_root.$meta, 'mobileHome.failedToDownload', {}) ?? 'Не удалось загрузить',
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Отменено пользователем',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Сохранить в любом случае',
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'Пропустить',
           'mobileHome.retryAll' => ({
             required int count,
           }) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Повторить все (${count})',
-          _ => null,
-        } ??
-        switch (path) {
           'mobileHome.existingFailedOrCancelledItems' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.existingFailedOrCancelledItems', {}) ??
                 'Скачанные ранее, неудачные или отменённые элементы',

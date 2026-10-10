@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/services/local_network_permission.dart';
 import 'package:lolisnatcher/src/utils/clipboard.dart';
 import 'package:lolisnatcher/src/utils/content_policy.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
@@ -616,6 +617,10 @@ class _BooruEditState extends State<BooruEdit> {
     );
     if (!ContentPolicy.isBooruAllowed(testBooru)) {
       showSourceUnavailableMessage();
+      return false;
+    }
+
+    if (!await LocalNetworkPermission.ensureForUrl(booruURLController.text, retry: true)) {
       return false;
     }
 

@@ -60,7 +60,7 @@ dependencies:
   http_proxy: # ^1.2.2
     git:
       url: https://github.com/NANI-SORE/http_proxy.git
-      ref: 36a202ceec982d199acdcd717ce85436372f447d # master - forked to fix build errors and remove allowing all bad certs
+      ref: 2b0f6fc11c87b4eb95d5e0bc5e11630ccc9296b5 # master - forked to fix build errors and remove allowing all bad certs
   huge_listview: ^2.0.12
   image: ^4.10.1
   intl: ^0.20.3
@@ -74,7 +74,6 @@ dependencies:
   media_kit: ^1.2.6
   media_kit_video: ^2.0.1
   media_kit_libs_video: ^1.0.7
-  native_dio_adapter: ^1.8.0 # TODO use this for http3, probably should rewrite http client use to reduce amount of created clients
   path_provider: ^2.1.6
   permission_handler: ^13.0.2
   photo_view:

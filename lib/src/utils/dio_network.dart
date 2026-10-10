@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/services/local_network_permission.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -34,6 +35,23 @@ class DioNetwork {
     // dio.options.connectTimeout = Duration(seconds: 10);
     // dio.options.receiveTimeout = Duration(seconds: 30);
     // dio.options.sendTimeout = Duration(seconds: 10);
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          if (!await LocalNetworkPermission.ensureForUrl(options.uri.toString())) {
+            handler.reject(
+              DioException(
+                requestOptions: options,
+                error: 'Local network permission denied',
+              ),
+            );
+            return;
+          }
+          handler.next(options);
+        },
+      ),
+    );
 
     if (!skipLogging) {
       dio.interceptors.add(Logger.dioInterceptor!);

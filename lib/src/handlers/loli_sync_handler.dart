@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/pages/loli_sync_page.dart';
+import 'package:lolisnatcher/src/services/local_network_permission.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
@@ -27,6 +28,10 @@ class LoliSync {
   bool syncKilled = false;
 
   Stream<String> startServer(String? ipOverride, String? portOverride) async* {
+    if (!await LocalNetworkPermission.request(retry: true)) {
+      yield NavigationHandler.instance.navContext.loc.permissions.localNetworkRequired;
+      return;
+    }
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     final String newIp = ipOverride ?? await ServiceHandler.getIP();
@@ -511,6 +516,10 @@ class LoliSync {
     TabsMode tabsMode,
     TagsMode tagsMode,
   ) async* {
+    if (!await LocalNetworkPermission.request(retry: true)) {
+      yield NavigationHandler.instance.navContext.loc.permissions.localNetworkRequired;
+      return;
+    }
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
     final TagHandler tagHandler = TagHandler.instance;

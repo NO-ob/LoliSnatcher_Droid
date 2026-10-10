@@ -3,6 +3,7 @@ import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.util.Base64
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -48,25 +49,22 @@ val packageName = if (dartEnvVars["LS_IS_STORE"] == "true") {
 } else {
     "com.noaisu.loliSnatcher"
 }
+val androidApiLevel = 37
 println("packageName=$packageName")
-println("compileSdk=${flutter.compileSdkVersion}")
+println("compileSdk=$androidApiLevel")
 println("ndkVersion=${flutter.ndkVersion}")
 println("minSdkVersion=${flutter.minSdkVersion}")
-println("targetSdkVersion=${flutter.targetSdkVersion}")
+println("targetSdkVersion=$androidApiLevel")
 
 android {
     namespace = "com.noaisu.loliSnatcher"
 
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = androidApiLevel
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     sourceSets {
@@ -78,7 +76,7 @@ android {
     defaultConfig {
         applicationId = packageName
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = androidApiLevel
         versionCode = flutterVersionCode.toInt()
         versionName = flutterVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -129,6 +127,12 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 

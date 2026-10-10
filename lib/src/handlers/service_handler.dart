@@ -55,6 +55,26 @@ class ServiceHandler {
     return result;
   }
 
+  static Future<bool> requestLocalNetworkPermission() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      return await platform.invokeMethod<bool>('requestLocalNetworkPermission') ?? false;
+    } catch (e, s) {
+      log(e, s: s);
+      return false;
+    }
+  }
+
+  static Future<bool> hasLocalNetworkPermission() async {
+    if (!Platform.isAndroid) return true;
+    try {
+      return await platform.invokeMethod<bool>('hasLocalNetworkPermission') ?? false;
+    } catch (e, s) {
+      log(e, s: s);
+      return false;
+    }
+  }
+
   // Gets main storage dir
   static Future<String> getExtDir() async {
     String result = '';
@@ -346,8 +366,7 @@ class ServiceHandler {
     String result = '';
     try {
       if (Platform.isAndroid) {
-        result =
-            "${await platform.invokeMethod("getPicturesPath")}/LoliSnatcher/"; // "${await getExtDir()}/Pictures/LoliSnatcher/";
+        result = "${await platform.invokeMethod("getPicturesPath")}/LoliSnatcher/"; // "${await getExtDir()}/Pictures/LoliSnatcher/";
       } else if (Platform.isLinux) {
         result = '${await getExtDir()}/Pictures/LoliSnatcher/';
       } else if (Platform.isWindows) {

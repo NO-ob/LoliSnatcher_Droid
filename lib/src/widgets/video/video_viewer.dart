@@ -20,6 +20,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/services/dio_downloader.dart';
+import 'package:lolisnatcher/src/services/local_network_permission.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -649,6 +650,16 @@ class VideoViewerState extends State<VideoViewer> {
       );
     } else {
       // Otherwise load from network
+      if (!await LocalNetworkPermission.ensureForUrl(widget.booruItem.fileURL)) {
+        if (_isCurrentLoad(loadGeneration)) {
+          stopLoading(
+            reason: ViewerStopReason.videoError,
+            details: context.loc.permissions.localNetworkRequired,
+          );
+        }
+        return;
+      }
+      if (!_isCurrentLoad(loadGeneration)) return;
       videoController.value = VideoPlayerController.networkUrl(
         Uri.parse(widget.booruItem.fileURL),
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,

@@ -415,6 +415,20 @@ class Translations$permissions$en {
 
   // Translations
 
+  /// en: 'Local network access is required to open this address. Allow Nearby devices permission, then retry.'
+  String get localNetworkRequired =>
+      TranslationOverrides.string(_root.$meta, 'permissions.localNetworkRequired', {}) ??
+      'Local network access is required to open this address. Allow Nearby devices permission, then retry.';
+
+  /// en: 'Local network access'
+  String get localNetworkExplanationTitle =>
+      TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanationTitle', {}) ?? 'Local network access';
+
+  /// en: 'To open local booru servers or sync with another device, the app needs access to your local network. Android will show this as a “Nearby devices” permission request.'
+  String get localNetworkExplanation =>
+      TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanation', {}) ??
+      'To open local booru servers or sync with another device, the app needs access to your local network. Android will show this as a “Nearby devices” permission request.';
+
   /// en: 'No access to custom storage directory'
   String get noAccessToCustomStorageDirectory =>
       TranslationOverrides.string(_root.$meta, 'permissions.noAccessToCustomStorageDirectory', {}) ?? 'No access to custom storage directory';
@@ -5086,6 +5100,12 @@ extension on Translations {
           'init.loadingBoorus' => TranslationOverrides.string(_root.$meta, 'init.loadingBoorus', {}) ?? 'Loading boorus…',
           'init.loadingTags' => TranslationOverrides.string(_root.$meta, 'init.loadingTags', {}) ?? 'Loading tags…',
           'init.restoringTabs' => TranslationOverrides.string(_root.$meta, 'init.restoringTabs', {}) ?? 'Restoring tabs…',
+          'permissions.localNetworkRequired' =>
+            TranslationOverrides.string(_root.$meta, 'permissions.localNetworkRequired', {}) ??
+                'Local network access is required to open this address. Allow Nearby devices permission, then retry.',
+          'permissions.localNetworkExplanationTitle' =>
+            TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanationTitle', {}) ?? 'Local network access',
+          'permissions.localNetworkExplanation' => TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanation', {}) ?? 'To open local booru servers or sync with another device, the app needs access to your local network. Android will show this as a “Nearby devices” permission request.',
           'permissions.noAccessToCustomStorageDirectory' =>
             TranslationOverrides.string(_root.$meta, 'permissions.noAccessToCustomStorageDirectory', {}) ?? 'No access to custom storage directory',
           'permissions.pleaseSetStorageDirectoryAgain' =>
@@ -5850,15 +5870,15 @@ extension on Translations {
             TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.hydrus', {}) ?? 'Hydrus',
           'settings.video.title' => TranslationOverrides.string(_root.$meta, 'settings.video.title', {}) ?? 'Video',
           'settings.video.disableVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.disableVideos', {}) ?? 'Disable videos',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.disableVideosHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.disableVideosHelp', {}) ??
                 'Useful on low end devices that crash when trying to load videos. Gives options to view video in external player or browser instead.',
           'settings.video.autoplayVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.autoplayVideos', {}) ?? 'Autoplay videos',
           'settings.video.startVideosMuted' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.startVideosMuted', {}) ?? 'Start videos muted',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.experimental' => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '[Experimental]',
           'settings.video.videoPlayerBackend' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? 'Video player backend',
@@ -6781,14 +6801,14 @@ extension on Translations {
           'mobileHome.fileAlreadyExists' => TranslationOverrides.string(_root.$meta, 'mobileHome.fileAlreadyExists', {}) ?? 'File already exists',
           'mobileHome.failedToDownload' => TranslationOverrides.string(_root.$meta, 'mobileHome.failedToDownload', {}) ?? 'Failed to download',
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Cancelled by user',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Save anyway',
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'Skip',
           'mobileHome.retryAll' => ({
             required int count,
           }) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Retry all (${count})',
-          _ => null,
-        } ??
-        switch (path) {
           'mobileHome.existingFailedOrCancelledItems' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.existingFailedOrCancelledItems', {}) ?? 'Existing, failed or cancelled items',
           'mobileHome.clearAllRetryableItems' =>
