@@ -208,19 +208,31 @@ class ShimmieHtmlHandler extends BooruHandler {
     try {
       final current = responseItem as Element;
       final img = current.firstChild!.firstChild!;
-      final imgData = img.attributes['title']!.split('\n');
-      final resSizeDate = imgData[1].split(' // ');
-      final res = resSizeDate[0].trim().split('x');
-      final size = Tools.parseFormattedBytes(resSizeDate[1].trim());
+      final imgData = [img.attributes['title'], img.attributes['alt']]
+          .whereType<String>()
+          .map((value) => value.split('\n'))
+          .firstWhere(
+            (lines) => lines.length > 1 && lines[1].contains(' // '),
+            orElse: () => [],
+          );
+      final resSizeDate = imgData.length > 1 ? imgData[1].split(' // ') : <String>[];
+      final res = resSizeDate.isNotEmpty ? resSizeDate[0].trim().split('x') : <String>[];
+      final size = resSizeDate.length > 1 ? Tools.parseFormattedBytes(resSizeDate[1].trim()) : 0;
       // final date = resSizeDate[2]; // TODO
 
       final String id = current.attributes['data-post-id']!;
-      final String fileExt = current.attributes['data-ext']!;
+      final String fileExt =
+          current.attributes['data-ext'] ??
+          switch (current.attributes['data-mime']?.split('/').last) {
+            'jpeg' => 'jpg',
+            final String ext => ext,
+            _ => throw const FormatException('Missing Shimmie file extension and MIME type'),
+          };
       final String thumbURL = img.attributes['src']!;
       final double? thumbWidth = double.tryParse(img.attributes['width'] ?? '');
       final double? thumbHeight = double.tryParse(img.attributes['height'] ?? '');
-      final double? fileWidth = double.tryParse(res[0]);
-      final double? fileHeight = double.tryParse(res[1]);
+      final double? fileWidth = res.isNotEmpty ? double.tryParse(res[0]) : null;
+      final double? fileHeight = res.length > 1 ? double.tryParse(res[1]) : null;
       String fileURL = current.children[2].attributes['href']!; // "File only" link
       fileURL = '$fileURL${fileURL.contains('?') ? '&' : '?'}file_ext=$fileExt';
       final List<String> tags = current.attributes['data-tags']?.split(' ') ?? [];
