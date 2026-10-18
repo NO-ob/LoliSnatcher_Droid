@@ -85,7 +85,7 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
       children: [
         SettingsDropdown(
           value: locale,
-          items: [
+          items: const [
             null,
             ...AppLocaleExt.allowedValues,
           ],
@@ -103,7 +103,7 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
           },
           title: context.loc.settings.language.title,
           itemBuilder: (e) {
-            final usedLocale = e ?? AppLocaleUtils.findDeviceLocale();
+            final usedLocale = e ?? AppLocaleExt.findDeviceLocale();
 
             return Row(
               mainAxisSize: MainAxisSize.min,
@@ -120,14 +120,14 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
                   children: [
                     Text(
                       e != null
-                          ? (e == AppLocale.en ? '${e.localeName} (${e.localeCode})' : e.localeName)
+                          ? (e == .en ? '${e.localeName} (${e.localeCode})' : e.localeName)
                           : context.loc.settings.language.system,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (e != AppLocale.en)
+                    if (e != .en)
                       Text(
                         '${usedLocale.englishName} (${usedLocale.localeCode})',
                         style: const TextStyle(
@@ -141,7 +141,7 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
             );
           },
           selectedItemBuilder: (e) {
-            final usedLocale = e ?? AppLocaleUtils.findDeviceLocale();
+            final usedLocale = e ?? AppLocaleExt.findDeviceLocale();
 
             return Row(
               mainAxisSize: MainAxisSize.min,
@@ -158,14 +158,14 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
                   children: [
                     Text(
                       e != null
-                          ? (e == AppLocale.en ? '${e.localeName} (${e.localeCode})' : e.localeName)
+                          ? (e == .en ? '${e.localeName} (${e.localeCode})' : e.localeName)
                           : context.loc.settings.language.system,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (e != AppLocale.en)
+                    if (e != .en)
                       Text(
                         '${usedLocale.englishName} (${usedLocale.localeCode})',
                         style: const TextStyle(
@@ -182,7 +182,7 @@ class _LanguageDropdownState extends State<LanguageDropdown> {
         //
         Builder(
           builder: (context) {
-            final usedLocale = locale ?? AppLocaleUtils.findDeviceLocale();
+            final usedLocale = locale ?? AppLocaleExt.findDeviceLocale();
 
             return AnimatedSize(
               duration: const Duration(milliseconds: 300),
@@ -235,13 +235,19 @@ Widget buildFlag(BuildContext context, AppLocale? locale) {
   );
   Widget? secondFlag;
   switch (locale) {
-    case AppLocale.en:
+    case .en:
       firstFlag = CountryFlag.fromLanguageCode(
         'en-us',
         theme: flagTheme,
       );
       secondFlag = CountryFlag.fromLanguageCode(
         'en',
+        theme: flagTheme,
+      );
+      break;
+    case .ptBr:
+      firstFlag = CountryFlag.fromLanguageCode(
+        'pt-br',
         theme: flagTheme,
       );
       break;
@@ -273,18 +279,32 @@ extension AppLocaleExt on AppLocale {
     return LocaleSettings.instance.translationMap[this]?.localeName ?? 'Loading...';
   }
 
-  static List<AppLocale> get allowedValues => [
+  static const List<AppLocale> allowedValues = [
     // Other languages are disabled until they reach at least 80% of completion
+    // Enable a language explicitly here; generated locales are not automatically available.
     // en and ru first, others in alphabetical order
     //
-    /* English */ AppLocale.en,
-    /* Russian */ AppLocale.ruRu,
-    //
-    /* Chinese */ AppLocale.zhCn,
-    /* German */ AppLocale.deDe,
-    /* Japanese */ AppLocale.jaJp,
-    /* Turkish */ AppLocale.trTr,
+    .en, // English
+    .ruRu, // Russian
+    // ** //
+    .zhCn, // Chinese
+    .deDe, // German
+    .jaJp, // Japanese
+    .ptBr, // Portuguese (Brasil)
+    .trTr, // Turkish
   ];
+
+  static List<Locale> get supportedLocales => allowedValues.map((locale) => locale.flutterLocale).toList();
+
+  static AppLocale findDeviceLocale() {
+    for (final locale in WidgetsBinding.instance.platformDispatcher.locales) {
+      final resolved = AppLocaleUtils.parse(locale.toLanguageTag());
+      if (allowedValues.contains(resolved) && (resolved != .en || locale.languageCode == 'en')) {
+        return resolved;
+      }
+    }
+    return .en;
+  }
 
   String get englishName {
     switch (this) {
@@ -327,6 +347,8 @@ extension AppLocaleExt on AppLocale {
         return 'Rin Kusu, Moddimation';
       case .jaJp:
         return 'stardust248397';
+      case .ptBr:
+        return 'oppon_, lev';
       case .trTr:
         return 'kyomoe';
       //

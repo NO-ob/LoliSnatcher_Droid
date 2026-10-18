@@ -46,9 +46,9 @@ class Constants {
 
   // TODO don't forget to update on every new release
   static const UpdateInfo updateInfo = UpdateInfo(
-    versionName: '2.5.2',
-    buildNumber: 5219,
-    title: '2.5.2 Hotfix 1',
+    versionName: '2.5.3',
+    buildNumber: 5220,
+    title: '2.5.3',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.losn',
@@ -66,8 +66,20 @@ A minor update that adds a new onboarding screen, adds fullscreen video zooming 
 -------------------
 
 [Known issues]:
-- On Gelbooru, images may blink/flicker and/or fail with various error codes (503, 429, 404...), which may be fixed by trying to load the image again. This is probably caused by their aggressive rate limiting rules. As a temporary workaround until they lift the restrictions, set [Interface - Preview quality] to [Thumbnail] and [Boorus and Search - Items fetched per page] to 20 to reduce flicker and the chance of being rate limited
+- On Gelbooru, images may blink/flicker and/or fail with various error codes (503, 429, 404...), which may be fixed by trying to load the image again. This is probably caused by their aggressive rate limiting rules. As a temporary workaround, set [Interface - Preview quality] to [Thumbnail] and [Boorus and Search - Items fetched per page] to 20 to reduce flicker and the chance of being rate limited
 - Some German translations are incorrect and will be fixed in a future release after a new contributor is able to update them
+
+-------------------
+
+Hotfix 2 - 2.5.3+5220(18.10.2026):
+- Fix parsing of some sites
+- Added a prompt asking for permission for Nearby devices, this is required for devices running Android 17 and above to open local network servers or use sync features
+- Clear temppersist file which was used to test folder access permissions
+- Added Portuguese (Brazil) translation (Thanks to oppon_)
+- Fixed incomplete locales being used when using system locale
+- Database backup stability improvements
+- Fixed possible crash when removing all tabs
+- Update dependencies
 
 -------------------
 

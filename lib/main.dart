@@ -36,6 +36,7 @@ import 'package:lolisnatcher/src/pages/init_home_page.dart';
 import 'package:lolisnatcher/src/pages/lockscreen_page.dart';
 import 'package:lolisnatcher/src/pages/mobile_home_page.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
+import 'package:lolisnatcher/src/pages/settings/language_page.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -92,7 +93,7 @@ class MainApp extends StatefulWidget {
   State<MainApp> createState() => _MainAppState();
 }
 
-class _MainAppState extends State<MainApp> {
+class _MainAppState extends State<MainApp> with WidgetsBindingObserver {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
   final SnatchHandler snatchHandler = SnatchHandler.instance;
@@ -106,6 +107,7 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     super.initState();
 
+    WidgetsBinding.instance.addObserver(this);
     HardwareKeyboard.instance.addHandler(handleGlobalKeyEvent);
     initHandlers();
   }
@@ -156,6 +158,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     HardwareKeyboard.instance.removeHandler(handleGlobalKeyEvent);
     settingsHandler.isDebug.removeListener(devOverlayListener);
     NotifyHandler.unregister();
@@ -168,6 +171,13 @@ class _MainAppState extends State<MainApp> {
     SecureStorageHandler.unregister();
     SettingsHandler.unregister();
     super.dispose();
+  }
+
+  @override
+  void didChangeLocales(List<Locale>? locales) {
+    if (locales != null && settingsHandler.locale.value == null) {
+      unawaited(settingsHandler.setLocale(null));
+    }
   }
 
   void updateState() {
@@ -243,7 +253,7 @@ class _MainAppState extends State<MainApp> {
                     ],
                     home: const Home(),
                     locale: TranslationProvider.of(context).flutterLocale,
-                    supportedLocales: AppLocaleUtils.supportedLocales,
+                    supportedLocales: AppLocaleExt.supportedLocales,
                     localizationsDelegates: GlobalMaterialLocalizations.delegates,
                     builder: (_, child) => Stack(
                       children: [

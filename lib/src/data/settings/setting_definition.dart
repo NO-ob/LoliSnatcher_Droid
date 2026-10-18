@@ -324,7 +324,7 @@ class LocaleSetting extends SettingDefinition<AppLocale?> {
   const LocaleSetting({
     required super.key,
     super.defaultValue,
-  }) : super(type: 'locale', options: AppLocale.values);
+  }) : super(type: 'locale', options: AppLocaleExt.allowedValues);
 
   @override
   AppLocale? getValue(dynamic holder) => throw UnimplementedError();

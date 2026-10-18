@@ -2367,11 +2367,10 @@ class SettingsHandler {
   }
 
   Future<void> setLocale(AppLocale? locale) async {
-    if (locale == null) {
-      await LocaleSettings.useDeviceLocale();
-    } else {
-      await LocaleSettings.setLocale(locale);
-    }
+    final enabledLocale = AppLocaleExt.allowedValues.contains(locale) ? locale : null;
+    this.locale.value = enabledLocale;
+    // Device changes are handled by MainApp so they also respect the allowlist.
+    await LocaleSettings.setLocale(enabledLocale ?? AppLocaleExt.findDeviceLocale());
   }
 
   Future<void> initialize() async {
