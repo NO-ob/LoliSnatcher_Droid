@@ -75,7 +75,10 @@ Hotfix 2 - 2.5.3+5220(18.10.2026):
 - Fix parsing of some sites
 - Added a prompt asking for permission for Nearby devices, this is required for devices running Android 17 and above to open local network servers or use sync features
 - Clear testpersist file which was used to test if app still has access to custom folder
-- Added Portuguese (Brazil) translation (Thanks to restartxx. lev)
+- Added Italian translation (Thanks to ThugThief, Stickcampo)
+- Added Portuguese (Brazil) translation (Thanks to restartxx, lev)
+- Added Serbian translation (Thanks to Dušan)
+- Added Spanish (Mexico) translation (Thanks to ThugThief, LangFlaggot)
 - Fixed incomplete locales being used when using system locale
 - Database backup stability improvements
 - Fixed possible crash when removing all tabs

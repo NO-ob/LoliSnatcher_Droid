@@ -289,9 +289,11 @@ extension AppLocaleExt on AppLocale {
     // ** //
     .zhCn, // Chinese
     .deDe, // German
+    .itIt, // Italian
     .jaJp, // Japanese
     .ptBr, // Portuguese (Brasil)
     .srRs, // Serbian
+    .esMx, // Spanish (Mexico)
     .trTr, // Turkish
   ];
 
@@ -348,10 +350,16 @@ extension AppLocaleExt on AppLocale {
         return 'RnJ4';
       case .deDe:
         return 'Rin Kusu, Moddimation';
+      case .itIt:
+        return 'ThugThief, Stickcampo';
       case .jaJp:
         return 'stardust248397';
       case .ptBr:
         return 'restartxx, lev';
+      case .srRs:
+        return 'Dušan';
+      case .esMx:
+        return 'ThugThief, LangFlaggot';
       case .trTr:
         return 'kyomoe';
       //
