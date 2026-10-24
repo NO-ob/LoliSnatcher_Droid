@@ -71,13 +71,13 @@ A minor update with new languages and some fixes while we work on a big update.
 -------------------
 
 Release - 2.5.3+5220 (24.10.2026):
-- Fixed parsing issues on some sites
-- Added a prompt requesting Nearby devices permission, which is required on Android 17 and later to access local network servers or use sync features
-- Added cleanup of the testpersist file used to check whether the app still has access to a custom folder
 - Added Italian translation (thanks to ThugThief, Stickcampo)
 - Added Portuguese (Brazil) translation (thanks to restartxx, lev)
 - Added Serbian translation (thanks to Dušan)
 - Added Spanish (Mexico) translation (thanks to ThugThief, LangFlaggot)
+- Fixed parsing issues on some sites
+- Added a prompt requesting Nearby devices permission, which is required on Android 17 and later to access local network servers or use sync features
+- Added cleanup of the testpersist file used to check whether the app still has access to a custom folder
 - Fixed incomplete translations being used when following the system language
 - Improved database backup stability
 - Fixed a potential crash when removing all tabs
