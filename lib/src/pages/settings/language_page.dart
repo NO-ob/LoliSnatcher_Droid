@@ -251,6 +251,12 @@ Widget buildFlag(BuildContext context, AppLocale? locale) {
         theme: flagTheme,
       );
       break;
+    case .esMx:
+      firstFlag = CountryFlag.fromLanguageCode(
+        'es-mx',
+        theme: flagTheme,
+      );
+      break;
     default:
       break;
   }
