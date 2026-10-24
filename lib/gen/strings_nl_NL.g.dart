@@ -256,8 +256,8 @@ class _Translations$validationErrors$nl_NL extends Translations$validationErrors
   String tooSmall({required double min}) =>
       TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Voer alstublieft een waarde in groter dan ${min}';
   @override
-  String tooBig({required double min}) =>
-      TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'min': min}) ?? 'Voer alstublieft een waarde in kleiner dan ${min}';
+  String tooBig({required double max}) =>
+      TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Voer alstublieft een waarde in kleiner dan ${max}';
   @override
   String rangeError({required double min, required double max}) =>
       TranslationOverrides.string(_root.$meta, 'validationErrors.rangeError', {'min': min, 'max': max}) ??
@@ -1609,8 +1609,8 @@ extension on TranslationsNlNl {
         required double min,
       }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Voer alstublieft een waarde in groter dan ${min}',
       'validationErrors.tooBig' => ({
-        required double min,
-      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'min': min}) ?? 'Voer alstublieft een waarde in kleiner dan ${min}',
+        required double max,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Voer alstublieft een waarde in kleiner dan ${max}',
       'validationErrors.rangeError' =>
         ({required double min, required double max}) =>
             TranslationOverrides.string(_root.$meta, 'validationErrors.rangeError', {'min': min, 'max': max}) ??

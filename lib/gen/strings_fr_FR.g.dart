@@ -305,7 +305,8 @@ class _Translations$permissions$fr_FR extends Translations$permissions$en {
       TranslationOverrides.string(_root.$meta, 'permissions.pleaseSetStorageDirectoryAgain', {}) ??
       'Veuillez redéfinir le répertoire de stockage pour autoriser l\'application à y accéder';
   @override
-  String get currentPath => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {}) ?? 'Chemin actuel:';
+  String currentPath({required String path}) =>
+      TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Chemin actuel: ${path}';
   @override
   String get setDirectory => TranslationOverrides.string(_root.$meta, 'permissions.setDirectory', {}) ?? 'Définir le répertoire';
   @override
@@ -336,9 +337,9 @@ class _Translations$authentication$fr_FR extends Translations$authentication$en 
   @override
   String get temporaryLockout => TranslationOverrides.string(_root.$meta, 'authentication.temporaryLockout', {}) ?? 'Verrouillage temporaire';
   @override
-  String get somethingWentWrong =>
-      TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {}) ??
-      'Quelque-chose s\'est mal passé durant l\'authentification:';
+  String somethingWentWrong({required String error}) =>
+      TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ??
+      'Quelque-chose s\'est mal passé durant l\'authentification: ${error}';
 }
 
 // Path: searchHandler
@@ -1206,7 +1207,9 @@ extension on TranslationsFrFr {
       'permissions.pleaseSetStorageDirectoryAgain' =>
         TranslationOverrides.string(_root.$meta, 'permissions.pleaseSetStorageDirectoryAgain', {}) ??
             'Veuillez redéfinir le répertoire de stockage pour autoriser l\'application à y accéder',
-      'permissions.currentPath' => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {}) ?? 'Chemin actuel:',
+      'permissions.currentPath' => ({
+        required String path,
+      }) => TranslationOverrides.string(_root.$meta, 'permissions.currentPath', {'path': path}) ?? 'Chemin actuel: ${path}',
       'permissions.setDirectory' => TranslationOverrides.string(_root.$meta, 'permissions.setDirectory', {}) ?? 'Définir le répertoire',
       'permissions.currentlyNotAvailableForThisPlatform' =>
         TranslationOverrides.string(_root.$meta, 'permissions.currentlyNotAvailableForThisPlatform', {}) ?? 'Non disponible sur cette plateforme',
@@ -1222,8 +1225,9 @@ extension on TranslationsFrFr {
       'authentication.temporaryLockout' =>
         TranslationOverrides.string(_root.$meta, 'authentication.temporaryLockout', {}) ?? 'Verrouillage temporaire',
       'authentication.somethingWentWrong' =>
-        TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {}) ??
-            'Quelque-chose s\'est mal passé durant l\'authentification:',
+        ({required String error}) =>
+            TranslationOverrides.string(_root.$meta, 'authentication.somethingWentWrong', {'error': error}) ??
+            'Quelque-chose s\'est mal passé durant l\'authentification: ${error}',
       'searchHandler.removedLastTab' => TranslationOverrides.string(_root.$meta, 'searchHandler.removedLastTab', {}) ?? 'Onglet précédent supprimé',
       'searchHandler.resettingSearchToDefaultTags' =>
         TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Réinitialisation des tags par défaut',

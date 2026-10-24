@@ -291,6 +291,7 @@ extension AppLocaleExt on AppLocale {
     .deDe, // German
     .jaJp, // Japanese
     .ptBr, // Portuguese (Brasil)
+    .srRs, // Serbian
     .trTr, // Turkish
   ];
 
@@ -330,6 +331,8 @@ extension AppLocaleExt on AppLocale {
         return 'Polish';
       case .ptBr:
         return 'Portuguese (Brazil)';
+      case .srRs:
+        return 'Serbian';
       case .esEs:
         return 'Spanish';
       case .esMx:

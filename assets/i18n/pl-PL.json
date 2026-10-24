@@ -308,7 +308,7 @@
         "searchHistoryIsDisabled": "Historia wyłączona",
         "searchHistoryRequiresDatabase": "Włącz bazę danych w ustawieniach dla historii",
         "lastSearch(param=search)": "Ostatnie wyszukanie: ${search: String}",
-        "lastSearchWithDate(param=date)": "Ostatnie wyszukanie: ${search: String}",
+        "lastSearchWithDate(param=date)": "Ostatnie wyszukanie: ${date: String}",
         "unknownBooruType": "Nieznany typ Booru!",
         "unknownBooru(param=name, param=type)": "Nieznane (${name: String}-${type: String})",
         "open": "Otwórz",

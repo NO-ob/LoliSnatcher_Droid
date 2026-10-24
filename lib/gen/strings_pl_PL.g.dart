@@ -727,8 +727,8 @@ class _Translations$history$pl_PL extends Translations$history$en {
   String lastSearch({required String search}) =>
       TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Ostatnie wyszukanie: ${search}';
   @override
-  String lastSearchWithDate({required String search}) =>
-      TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'search': search}) ?? 'Ostatnie wyszukanie: ${search}';
+  String lastSearchWithDate({required String date}) =>
+      TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Ostatnie wyszukanie: ${date}';
   @override
   String get unknownBooruType => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Nieznany typ Booru!';
   @override
@@ -1659,8 +1659,8 @@ extension on TranslationsPlPl {
         required String search,
       }) => TranslationOverrides.string(_root.$meta, 'history.lastSearch', {'search': search}) ?? 'Ostatnie wyszukanie: ${search}',
       'history.lastSearchWithDate' => ({
-        required String search,
-      }) => TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'search': search}) ?? 'Ostatnie wyszukanie: ${search}',
+        required String date,
+      }) => TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Ostatnie wyszukanie: ${date}',
       'history.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Nieznany typ Booru!',
       'history.unknownBooru' => ({
         required String name,

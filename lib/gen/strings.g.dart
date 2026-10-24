@@ -3,8 +3,8 @@
 /// Source: assets/i18n
 /// To regenerate, run: `dart run slang`
 ///
-/// Locales: 14
-/// Strings: 12365 (883 per locale)
+/// Locales: 15
+/// Strings: 12367 (824 per locale)
 
 // coverage:ignore-file
 // ignore_for_file: type=lint, unused_import
@@ -27,6 +27,7 @@ import 'strings_nl_NL.g.dart' deferred as l_nl_NL;
 import 'strings_pl_PL.g.dart' deferred as l_pl_PL;
 import 'strings_pt_BR.g.dart' deferred as l_pt_BR;
 import 'strings_ru_RU.g.dart' deferred as l_ru_RU;
+import 'strings_sr_RS.g.dart' deferred as l_sr_RS;
 import 'strings_tr_TR.g.dart' deferred as l_tr_TR;
 import 'strings_zh_CN.g.dart' deferred as l_zh_CN;
 part 'strings_en.g.dart';
@@ -70,6 +71,7 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
   plPl(languageCode: 'pl', countryCode: 'PL'),
   ptBr(languageCode: 'pt', countryCode: 'BR'),
   ruRu(languageCode: 'ru', countryCode: 'RU'),
+  srRs(languageCode: 'sr', countryCode: 'RS'),
   trTr(languageCode: 'tr', countryCode: 'TR'),
   zhCn(languageCode: 'zh', countryCode: 'CN');
 
@@ -176,6 +178,13 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
           cardinalResolver: cardinalResolver,
           ordinalResolver: ordinalResolver,
         );
+      case AppLocale.srRs:
+        await l_sr_RS.loadLibrary();
+        return l_sr_RS.TranslationsSrRs(
+          overrides: overrides,
+          cardinalResolver: cardinalResolver,
+          ordinalResolver: ordinalResolver,
+        );
       case AppLocale.trTr:
         await l_tr_TR.loadLibrary();
         return l_tr_TR.TranslationsTrTr(
@@ -268,6 +277,12 @@ enum AppLocale with BaseAppLocale<AppLocale, Translations> {
         );
       case AppLocale.ruRu:
         return l_ru_RU.TranslationsRuRu(
+          overrides: overrides,
+          cardinalResolver: cardinalResolver,
+          ordinalResolver: ordinalResolver,
+        );
+      case AppLocale.srRs:
+        return l_sr_RS.TranslationsSrRs(
           overrides: overrides,
           cardinalResolver: cardinalResolver,
           ordinalResolver: ordinalResolver,

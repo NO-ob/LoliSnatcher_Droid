@@ -74,7 +74,7 @@
         "invalidNumber": "Voer alstublieft een nummer in",
         "invalidNumericValue": "Voer alstublieft een geldig nummer in",
         "tooSmall(param=min)": "Voer alstublieft een waarde in groter dan ${min: double}",
-        "tooBig(param=max)": "Voer alstublieft een waarde in kleiner dan ${min: double}",
+        "tooBig(param=max)": "Voer alstublieft een waarde in kleiner dan ${max: double}",
         "rangeError(param=min, param=max)": "Voer alstublieft een waarde in tussen ${min: double} en ${max: double}",
         "greaterThanOrEqualZero": "Voer alstublieft een waarde in groter of gelijk aan nul",
         "lessThan4": "Voer alstublieft een waarde in lager dan vier",

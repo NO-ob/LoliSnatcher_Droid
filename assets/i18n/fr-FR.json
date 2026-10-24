@@ -95,7 +95,7 @@
     "permissions": {
         "noAccessToCustomStorageDirectory": "Aucun accès au répertoire de stockage personnalisé",
         "pleaseSetStorageDirectoryAgain": "Veuillez redéfinir le répertoire de stockage pour autoriser l'application à y accéder",
-        "currentPath(param=path)": "Chemin actuel:",
+        "currentPath(param=path)": "Chemin actuel: ${path: String}",
         "setDirectory": "Définir le répertoire",
         "currentlyNotAvailableForThisPlatform": "Non disponible sur cette plateforme",
         "resetDirectory": "Réinitialiser le répertoire",
@@ -105,7 +105,7 @@
         "pleaseAuthenticateToUseTheApp": "Veuillez vous authentifier pour utiliser l'application",
         "noBiometricHardwareAvailable": "Aucun matériel biométrique disponible",
         "temporaryLockout": "Verrouillage temporaire",
-        "somethingWentWrong(param=error)": "Quelque-chose s'est mal passé durant l'authentification:"
+        "somethingWentWrong(param=error)": "Quelque-chose s'est mal passé durant l'authentification: ${error: String}"
     },
     "searchHandler": {
         "removedLastTab": "Onglet précédent supprimé",
