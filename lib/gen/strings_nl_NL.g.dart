@@ -177,7 +177,7 @@ class TranslationsNlNl extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get type => TranslationOverrides.string(_root.$meta, 'type', {}) ?? 'Type';
   @override
-  String get name => TranslationOverrides.string(_root.$meta, 'name', {}) ?? 'Naam\n';
+  String get name => TranslationOverrides.string(_root.$meta, 'name', {}) ?? 'Naam';
   @override
   String get address => TranslationOverrides.string(_root.$meta, 'address', {}) ?? 'Adres';
   @override
@@ -217,6 +217,8 @@ class TranslationsNlNl extends Translations with BaseTranslations<AppLocale, Tra
   @override
   late final _Translations$tagView$nl_NL tagView = _Translations$tagView$nl_NL._(_root);
   @override
+  late final _Translations$pinnedTags$nl_NL pinnedTags = _Translations$pinnedTags$nl_NL._(_root);
+  @override
   late final _Translations$mobileHome$nl_NL mobileHome = _Translations$mobileHome$nl_NL._(_root);
   @override
   late final _Translations$desktopHome$nl_NL desktopHome = _Translations$desktopHome$nl_NL._(_root);
@@ -230,6 +232,8 @@ class TranslationsNlNl extends Translations with BaseTranslations<AppLocale, Tra
   late final _Translations$common$nl_NL common = _Translations$common$nl_NL._(_root);
   @override
   late final _Translations$media$nl_NL media = _Translations$media$nl_NL._(_root);
+  @override
+  late final _Translations$tagType$nl_NL tagType = _Translations$tagType$nl_NL._(_root);
 }
 
 // Path: validationErrors
@@ -252,8 +256,8 @@ class _Translations$validationErrors$nl_NL extends Translations$validationErrors
   String tooSmall({required double min}) =>
       TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Voer alstublieft een waarde in groter dan ${min}';
   @override
-  String tooBig({required double max}) =>
-      TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Voer alstublieft een waarde in kleiner dan ${max}';
+  String tooBig({required double min}) =>
+      TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'min': min}) ?? 'Voer alstublieft een waarde in kleiner dan ${min}';
   @override
   String rangeError({required double min, required double max}) =>
       TranslationOverrides.string(_root.$meta, 'validationErrors.rangeError', {'min': min, 'max': max}) ??
@@ -642,9 +646,18 @@ class _Translations$tabs$nl_NL extends Translations$tabs$en {
   @override
   String get deleteSelectedTabs => TranslationOverrides.string(_root.$meta, 'tabs.deleteSelectedTabs', {}) ?? 'Wis geselecteerde tabbladen';
   @override
+  String get specialFilters => TranslationOverrides.string(_root.$meta, 'tabs.specialFilters', {}) ?? 'Speciale filters:';
+  @override
+  String get notLoadedItalic =>
+      TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? 'Tabbladen met schuine text zijn niet geladen';
+  @override
+  String get noTabsFound => TranslationOverrides.string(_root.$meta, 'tabs.noTabsFound', {}) ?? 'Tabbladen niet gevonde';
+  @override
   String get copy => TranslationOverrides.string(_root.$meta, 'tabs.copy', {}) ?? 'Kopieer';
   @override
   String get moveAction => TranslationOverrides.string(_root.$meta, 'tabs.moveAction', {}) ?? 'Verplaats';
+  @override
+  String get remove => TranslationOverrides.string(_root.$meta, 'tabs.remove', {}) ?? 'Wis';
   @override
   String get shuffle => TranslationOverrides.string(_root.$meta, 'tabs.shuffle', {}) ?? 'Husselen';
   @override
@@ -743,23 +756,37 @@ class _Translations$settings$nl_NL extends Translations$settings$en {
 
   // Translations
   @override
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.title', {}) ?? 'Instellingen';
+  @override
+  late final _Translations$settings$language$nl_NL language = _Translations$settings$language$nl_NL._(_root);
+  @override
   late final _Translations$settings$booru$nl_NL booru = _Translations$settings$booru$nl_NL._(_root);
   @override
   late final _Translations$settings$booruEditor$nl_NL booruEditor = _Translations$settings$booruEditor$nl_NL._(_root);
+  @override
+  late final _Translations$settings$interface$nl_NL interface = _Translations$settings$interface$nl_NL._(_root);
   @override
   late final _Translations$settings$theme$nl_NL theme = _Translations$settings$theme$nl_NL._(_root);
   @override
   late final _Translations$settings$viewer$nl_NL viewer = _Translations$settings$viewer$nl_NL._(_root);
   @override
+  late final _Translations$settings$video$nl_NL video = _Translations$settings$video$nl_NL._(_root);
+  @override
   late final _Translations$settings$database$nl_NL database = _Translations$settings$database$nl_NL._(_root);
   @override
+  late final _Translations$settings$backupAndRestore$nl_NL backupAndRestore = _Translations$settings$backupAndRestore$nl_NL._(_root);
+  @override
   late final _Translations$settings$network$nl_NL network = _Translations$settings$network$nl_NL._(_root);
+  @override
+  late final _Translations$settings$privacy$nl_NL privacy = _Translations$settings$privacy$nl_NL._(_root);
   @override
   late final _Translations$settings$cache$nl_NL cache = _Translations$settings$cache$nl_NL._(_root);
   @override
   late final _Translations$settings$itemFilters$nl_NL itemFilters = _Translations$settings$itemFilters$nl_NL._(_root);
   @override
   late final _Translations$settings$debug$nl_NL debug = _Translations$settings$debug$nl_NL._(_root);
+  @override
+  late final _Translations$settings$dirPicker$nl_NL dirPicker = _Translations$settings$dirPicker$nl_NL._(_root);
 }
 
 // Path: pageChanger
@@ -784,6 +811,8 @@ class _Translations$tagsManager$nl_NL extends Translations$tagsManager$en {
   final TranslationsNlNl _root; // ignore: unused_field
 
   // Translations
+  @override
+  String get addTag => TranslationOverrides.string(_root.$meta, 'tagsManager.addTag', {}) ?? 'Label toevoegen';
   @override
   String get add => TranslationOverrides.string(_root.$meta, 'tagsManager.add', {}) ?? 'Toevoegen';
   @override
@@ -814,10 +843,31 @@ class _Translations$tagView$nl_NL extends Translations$tagView$en {
   @override
   String get addedNewTab => TranslationOverrides.string(_root.$meta, 'tagView.addedNewTab', {}) ?? 'Tabblad toegevoegd:';
   @override
+  String get addToSearch => TranslationOverrides.string(_root.$meta, 'tagView.addToSearch', {}) ?? 'Aan zoeken toevoegen';
+  @override
   String get addedToSearchBar => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Aan zoekbalk toegevoegd:';
+  @override
+  String get addToMarked => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'Aan gemarkeerd toevoegen';
+  @override
+  String get addToHidden => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? 'Aan verborgen toevoegen';
   @override
   String get failedToLoadPreviewPage =>
       TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreviewPage', {}) ?? 'Voorbeeld pagina mislukt te laden';
+}
+
+// Path: pinnedTags
+class _Translations$pinnedTags$nl_NL extends Translations$pinnedTags$en {
+  _Translations$pinnedTags$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
+
+  final TranslationsNlNl _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get all => TranslationOverrides.string(_root.$meta, 'pinnedTags.all', {}) ?? 'Alle';
+  @override
+  String get addTagManually => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? 'Label handmatig toevoegen';
+  @override
+  String get addPinnedTag => TranslationOverrides.string(_root.$meta, 'pinnedTags.addPinnedTag', {}) ?? 'Vastgepinde labels toevoegen';
 }
 
 // Path: mobileHome
@@ -904,6 +954,17 @@ class _Translations$media$nl_NL extends Translations$media$en {
   late final _Translations$media$video$nl_NL video = _Translations$media$video$nl_NL._(_root);
 }
 
+// Path: tagType
+class _Translations$tagType$nl_NL extends Translations$tagType$en {
+  _Translations$tagType$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
+
+  final TranslationsNlNl _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get artist => TranslationOverrides.string(_root.$meta, 'tagType.artist', {}) ?? 'Artiest';
+}
+
 // Path: tabs.filters
 class _Translations$tabs$filters$nl_NL extends Translations$tabs$filters$en {
   _Translations$tabs$filters$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
@@ -975,7 +1036,42 @@ class _Translations$webview$navigation$nl_NL extends Translations$webview$naviga
 
   // Translations
   @override
+  String get enterUrlLabel => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Voer een URL in';
+  @override
   String get enterCustomUrl => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Voer aangepaste URL in';
+  @override
+  String get listCookies => TranslationOverrides.string(_root.$meta, 'webview.navigation.listCookies', {}) ?? 'Lijst met cookies';
+  @override
+  String get clearCookies => TranslationOverrides.string(_root.$meta, 'webview.navigation.clearCookies', {}) ?? 'Leeg cookies';
+  @override
+  String get getFavicon => TranslationOverrides.string(_root.$meta, 'webview.navigation.getFavicon', {}) ?? 'Krijg favicon';
+  @override
+  String get noFaviconFound => TranslationOverrides.string(_root.$meta, 'webview.navigation.noFaviconFound', {}) ?? 'Favicon niet gevonden';
+  @override
+  String get textAboveSelectable =>
+      TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(bovenstaande tekst is selecteerbar)';
+  @override
+  String get copyUrl => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'Kopieer URL';
+  @override
+  String get copiedUrlToClipboard =>
+      TranslationOverrides.string(_root.$meta, 'webview.navigation.copiedUrlToClipboard', {}) ?? 'URL naar klembord gekopieerd';
+  @override
+  String get history => TranslationOverrides.string(_root.$meta, 'webview.navigation.history', {}) ?? 'Geschiedenis';
+}
+
+// Path: settings.language
+class _Translations$settings$language$nl_NL extends Translations$settings$language$en {
+  _Translations$settings$language$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
+
+  final TranslationsNlNl _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Taal';
+  @override
+  String get system => TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'Systeem';
+  @override
+  String get helpUsTranslate => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help ons vertalen';
 }
 
 // Path: settings.booru
@@ -986,13 +1082,26 @@ class _Translations$settings$booru$nl_NL extends Translations$settings$booru$en 
 
   // Translations
   @override
+  String get defaultTags => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Standaard labels';
+  @override
   String get itemsPerPage => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Items downloaded per pagina';
   @override
   String get itemsPerPageTip => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPageTip', {}) ?? 'Soms zullen boorus dit weigeren';
   @override
   String get addBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.addBooru', {}) ?? 'Booru configuratie toevoegen';
   @override
+  String get shareBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooru', {}) ?? 'Deel Booru configuratie';
+  @override
+  String get booruSharing => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Booru delen';
+  @override
   String get addedBoorus => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Boorus toegevoegd';
+  @override
+  String get editBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.editBooru', {}) ?? 'Bewerk Booru configuratie';
+  @override
+  String get importBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.importBooru', {}) ?? 'Importeer Booru configuratie van klembord';
+  @override
+  String get onlyLSURLsSupported =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.onlyLSURLsSupported', {}) ?? 'Alleen loli.snatcher URLs worden ondersteund';
   @override
   String get deleteBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooru', {}) ?? 'Wis Booru configuratie';
   @override
@@ -1002,8 +1111,30 @@ class _Translations$settings$booru$nl_NL extends Translations$settings$booru$en 
   @override
   String get booruDeleted => TranslationOverrides.string(_root.$meta, 'settings.booru.booruDeleted', {}) ?? 'Booru configuratie gewist';
   @override
+  String get booruDropdownInfo =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.booruDropdownInfo', {}) ??
+      'Na het opslaan wordt de geselecteerde booru de standaard booru.\n\nDe standaard booru verschijnt als eerste in dropdown-menu\'s';
+  @override
+  String get changeDefaultBooru => TranslationOverrides.string(_root.$meta, 'settings.booru.changeDefaultBooru', {}) ?? 'Verander standaard Booru?';
+  @override
+  String get changeTo => TranslationOverrides.string(_root.$meta, 'settings.booru.changeTo', {}) ?? 'Verander naar: ';
+  @override
+  String get keepCurrentBooru =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.keepCurrentBooru', {}) ?? 'Druk op [nee] om de huidige te behouden: ';
+  @override
+  String get changeToNewBooru =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.changeToNewBooru', {}) ?? 'Druk op [ja] om te veranderen naar: ';
+  @override
+  String get booruConfigLinkCopied =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.booruConfigLinkCopied', {}) ?? 'Booru configuratielink naar klembord gekopieerd';
+  @override
+  String get noBooruSelected => TranslationOverrides.string(_root.$meta, 'settings.booru.noBooruSelected', {}) ?? 'Geen Booru geselecteerd!';
+  @override
   String get cantDeleteThisBooru =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.cantDeleteThisBooru', {}) ?? 'Kan deze Booru niet wissen!';
+  @override
+  String get removeRelatedTabsFirst =>
+      TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Wis gerelateerde tabbladen eerst';
 }
 
 // Path: settings.booruEditor
@@ -1014,6 +1145,36 @@ class _Translations$settings$booruEditor$nl_NL extends Translations$settings$boo
 
   // Translations
   @override
+  String get title => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Booru-bewerker';
+  @override
+  String get testBooruFailedTitle =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booru test mislukt';
+  @override
+  String get saveBooru => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Sla Booru op';
+  @override
+  String get runningTest => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Test lopende…';
+  @override
+  String get booruConfigExistsError =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigExistsError', {}) ?? 'Deze Booru configuratie bestaat al';
+  @override
+  String get booruSameNameExistsError =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruSameNameExistsError', {}) ??
+      'Een Booru configuratie met dezelfde naam bestaat al';
+  @override
+  String get booruSameUrlExistsError =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruSameUrlExistsError', {}) ??
+      'Een Booru configuratie met dezelfde URL bestaat al';
+  @override
+  String get thisBooruConfigWontBeAdded =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.thisBooruConfigWontBeAdded', {}) ??
+      'Deze booru configuratie zal niet worden toegevoegd';
+  @override
+  String get booruConfigSaved =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigSaved', {}) ?? 'Booru configuratie opgeslagen';
+  @override
+  String get failedVerifyApiHydrus =>
+      TranslationOverrides.string(_root.$meta, 'settings.booruEditor.failedVerifyApiHydrus', {}) ?? 'Verifiëren van API toegang tot Hydrus mislukt';
+  @override
   String get accessKeyRequestedTitle =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyRequestedTitle', {}) ?? 'Toegangssleutel aangevraagd';
   @override
@@ -1022,6 +1183,31 @@ class _Translations$settings$booruEditor$nl_NL extends Translations$settings$boo
   @override
   String get accessKeyFailedMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedMsg', {}) ?? 'Heeft u het aanvraagscherm open in Hydrus?';
+  @override
+  String get booruName => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Booru naam';
+  @override
+  String get booruNameRequired => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruNameRequired', {}) ?? 'Booru naam is vereist!';
+  @override
+  String get booruUrl => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrl', {}) ?? 'Booru URL';
+  @override
+  String get booruUrlRequired => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrlRequired', {}) ?? 'Booru URL is vereist!';
+  @override
+  String get booruType => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru type';
+  @override
+  String get booruDefTags => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Standaard labels';
+}
+
+// Path: settings.interface
+class _Translations$settings$interface$nl_NL extends Translations$settings$interface$en {
+  _Translations$settings$interface$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
+
+  final TranslationsNlNl _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get appUIMode => TranslationOverrides.string(_root.$meta, 'settings.interface.appUIMode', {}) ?? 'App UI modus';
+  @override
+  String get appUIModeWarningTitle => TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeWarningTitle', {}) ?? 'App UI modus';
 }
 
 // Path: settings.theme
@@ -1031,6 +1217,8 @@ class _Translations$settings$theme$nl_NL extends Translations$settings$theme$en 
   final TranslationsNlNl _root; // ignore: unused_field
 
   // Translations
+  @override
+  String get android12PlusOnly => TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Alleen voor Android 12+';
   @override
   String get setCustomMascot => TranslationOverrides.string(_root.$meta, 'settings.theme.setCustomMascot', {}) ?? 'Stel aangepaste mascotte in';
   @override
@@ -1059,8 +1247,37 @@ class _Translations$settings$viewer$nl_NL extends Translations$settings$viewer$e
   String get changePageButtonsPosition =>
       TranslationOverrides.string(_root.$meta, 'settings.viewer.changePageButtonsPosition', {}) ?? 'Verplaats positie van knoppen op pagina';
   @override
+  String get shareActionsFileURL =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionsFileURL', {}) ??
+      '- Bestand URL - deelt een directe link met het originele bestand (dit werkt mogelijk niet op alle websites)';
+  @override
+  String get shareActionsPostURLFileURLFileWithTags =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionsPostURLFileURLFileWithTags', {}) ??
+      '- Bericht URL/Bestand URL/Bestand met labels - deelt de URL/Bestand en labels die te selecteren zijn';
+  @override
+  String get shareActionsFile =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionsFile', {}) ??
+      '- Bestand - deelt het bestand zelf, dit kan even duren om te laden, voortgang zal worden laten zien op de knop om te delen';
+  @override
+  String get shareActionsHydrus =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionsHydrus', {}) ??
+      '- Hydrus - om te plaatsen en importeren wordt de url naar Hydrus verzonden';
+  @override
   String get usingCustomAnimation =>
       TranslationOverrides.string(_root.$meta, 'settings.viewer.usingCustomAnimation', {}) ?? 'Aangepaste animatie van toepassing';
+  @override
+  late final _Translations$settings$viewer$shareActionValues$nl_NL shareActionValues = _Translations$settings$viewer$shareActionValues$nl_NL._(_root);
+}
+
+// Path: settings.video
+class _Translations$settings$video$nl_NL extends Translations$settings$video$en {
+  _Translations$settings$video$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
+
+  final TranslationsNlNl _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get autoplayVideos => TranslationOverrides.string(_root.$meta, 'settings.video.autoplayVideos', {}) ?? 'Video';
 }
 
 // Path: settings.database
@@ -1084,6 +1301,62 @@ class _Translations$settings$database$nl_NL extends Translations$settings$databa
   String get deleteDatabaseConfirm => TranslationOverrides.string(_root.$meta, 'settings.database.deleteDatabaseConfirm', {}) ?? 'Wis database?';
   @override
   String get databaseDeleted => TranslationOverrides.string(_root.$meta, 'settings.database.databaseDeleted', {}) ?? 'Database gewist!';
+  @override
+  String get appRestartRequired =>
+      TranslationOverrides.string(_root.$meta, 'settings.database.appRestartRequired', {}) ?? 'De app moet opnieuw opgestart worden!';
+  @override
+  String get appRestartMayBeRequired =>
+      TranslationOverrides.string(_root.$meta, 'settings.database.appRestartMayBeRequired', {}) ?? 'De app moet mogelijk opnieuw opgestart worden!';
+}
+
+// Path: settings.backupAndRestore
+class _Translations$settings$backupAndRestore$nl_NL extends Translations$settings$backupAndRestore$en {
+  _Translations$settings$backupAndRestore$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
+
+  final TranslationsNlNl _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get duplicateFileDetectedTitle =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedTitle', {}) ?? 'Dubbel bestand gedetecteerd!';
+  @override
+  String get failedToGetBackupPath =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.failedToGetBackupPath', {}) ?? 'Pad naar reservekopie ophalen mislukt';
+  @override
+  String get restoreInfoMsg =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreInfoMsg', {}) ?? 'Bestanden moeten in de bron map staan';
+  @override
+  String get backupSettingsError =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupSettingsError', {}) ?? 'Reservekopie van instellingen maken mislukt';
+  @override
+  String get restoreSettingsError =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreSettingsError', {}) ?? 'Instelling herstellen mislukt';
+  @override
+  String get backupBoorusError =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorusError', {}) ?? 'Reservekopie van boorus maken mislukt';
+  @override
+  String get restoreBoorusError =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorusError', {}) ?? 'Boorus herstellen mislukt';
+  @override
+  String get backupDatabaseError =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDatabaseError', {}) ?? 'Reserverkopie van database maken mislukt';
+  @override
+  String get restoreDatabaseError =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabaseError', {}) ?? 'Database herstellen mislukt';
+  @override
+  String get databaseFileNotFound =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseFileNotFound', {}) ??
+      'Database bestand kon niet gevonden of gelezen worden!';
+  @override
+  String get backupTagsError =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupTagsError', {}) ?? 'Reserverkopie van labels maken mislukt';
+  @override
+  String get restoreTagsError =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTagsError', {}) ?? 'Labels herstellen mislukt';
+  @override
+  String get tagsFileNotFound =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.tagsFileNotFound', {}) ??
+      'Bestand met labels kon niet gevonden of gelezen worden!';
 }
 
 // Path: settings.network
@@ -1097,6 +1370,28 @@ class _Translations$settings$network$nl_NL extends Translations$settings$network
   String get allCookiesDeleted => TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? 'Alle cookies verwijderd';
 }
 
+// Path: settings.privacy
+class _Translations$settings$privacy$nl_NL extends Translations$settings$privacy$en {
+  _Translations$settings$privacy$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
+
+  final TranslationsNlNl _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get autoLockAfter => TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'Achteraf automatisch vergrendelen';
+  @override
+  String get autoLockAfterTip =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? 'in seconden, 0 om uit te schakelen';
+  @override
+  String get appDisplayName => TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'App weergavenaam';
+  @override
+  String get appAliasChanged => TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChanged', {}) ?? 'App naam veranderd';
+  @override
+  String get appAliasChangeFailed =>
+      TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChangeFailed', {}) ??
+      'App-naam veranderen mislukt. Probeer alstublieft opnieuw';
+}
+
 // Path: settings.cache
 class _Translations$settings$cache$nl_NL extends Translations$settings$cache$en {
   _Translations$settings$cache$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
@@ -1108,6 +1403,9 @@ class _Translations$settings$cache$nl_NL extends Translations$settings$cache$en 
   String get deleteCacheAfter => TranslationOverrides.string(_root.$meta, 'settings.cache.deleteCacheAfter', {}) ?? 'Wis tijdelijk geheugen na:';
   @override
   String get neverDeleteDuration => TranslationOverrides.string(_root.$meta, 'settings.cache.neverDeleteDuration', {}) ?? 'Nooit';
+  @override
+  String get appRestartRequired =>
+      TranslationOverrides.string(_root.$meta, 'settings.cache.appRestartRequired', {}) ?? 'De app moet mogelijk opnieuw opgestart worden!';
 }
 
 // Path: settings.itemFilters
@@ -1153,7 +1451,22 @@ class _Translations$settings$debug$nl_NL extends Translations$settings$debug$en 
 
   // Translations
   @override
+  String get alreadyEnabledSnackbarMsg =>
+      TranslationOverrides.string(_root.$meta, 'settings.debug.alreadyEnabledSnackbarMsg', {}) ?? 'Debug modus is al geactiveerd!';
+  @override
   String get deleteAllCookies => TranslationOverrides.string(_root.$meta, 'settings.debug.deleteAllCookies', {}) ?? 'Wis alle cookies';
+}
+
+// Path: settings.dirPicker
+class _Translations$settings$dirPicker$nl_NL extends Translations$settings$dirPicker$en {
+  _Translations$settings$dirPicker$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
+
+  final TranslationsNlNl _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get failedToCreateDirectory =>
+      TranslationOverrides.string(_root.$meta, 'settings.dirPicker.failedToCreateDirectory', {}) ?? 'Map aanmaken mislukt';
 }
 
 // Path: viewer.appBar
@@ -1163,6 +1476,14 @@ class _Translations$viewer$appBar$nl_NL extends Translations$viewer$appBar$en {
   final TranslationsNlNl _root; // ignore: unused_field
 
   // Translations
+  @override
+  String get alreadyDownloadingThisFile =>
+      TranslationOverrides.string(_root.$meta, 'viewer.appBar.alreadyDownloadingThisFile', {}) ??
+      'Het huidige gedeelde bestand wordt al gedownload, wil je dit stoppen?';
+  @override
+  String get alreadyDownloadingFile =>
+      TranslationOverrides.string(_root.$meta, 'viewer.appBar.alreadyDownloadingFile', {}) ??
+      'Het huidige gedeelde bestand wordt al gedownload, wil je dit stoppen en een nieuw bestand delen?';
   @override
   String get abort => TranslationOverrides.string(_root.$meta, 'viewer.appBar.abort', {}) ?? 'Afbreken';
 }
@@ -1178,6 +1499,26 @@ class _Translations$media$video$nl_NL extends Translations$media$video$en {
   String get failedToLoadItemData => TranslationOverrides.string(_root.$meta, 'media.video.failedToLoadItemData', {}) ?? 'Kon item data niet laden';
   @override
   String get loadingItemData => TranslationOverrides.string(_root.$meta, 'media.video.loadingItemData', {}) ?? 'Item data laden…';
+}
+
+// Path: settings.viewer.shareActionValues
+class _Translations$settings$viewer$shareActionValues$nl_NL extends Translations$settings$viewer$shareActionValues$en {
+  _Translations$settings$viewer$shareActionValues$nl_NL._(TranslationsNlNl root) : this._root = root, super.internal(root);
+
+  final TranslationsNlNl _root; // ignore: unused_field
+
+  // Translations
+  @override
+  String get ask => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.ask', {}) ?? 'Vraag';
+  @override
+  String get fileUrl => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrl', {}) ?? 'Bestand URL';
+  @override
+  String get fileUrlWithTags =>
+      TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrlWithTags', {}) ?? 'Bestand URL met labels';
+  @override
+  String get file => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.file', {}) ?? 'Bestand';
+  @override
+  String get fileWithTags => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileWithTags', {}) ?? 'Bestand met labels';
 }
 
 /// The flat map containing all translations for locale <nl-NL>.
@@ -1252,7 +1593,7 @@ extension on TranslationsNlNl {
       'pageNumber' => TranslationOverrides.string(_root.$meta, 'pageNumber', {}) ?? 'Pagina #',
       'tags' => TranslationOverrides.string(_root.$meta, 'tags', {}) ?? 'Labels',
       'type' => TranslationOverrides.string(_root.$meta, 'type', {}) ?? 'Type',
-      'name' => TranslationOverrides.string(_root.$meta, 'name', {}) ?? 'Naam\n',
+      'name' => TranslationOverrides.string(_root.$meta, 'name', {}) ?? 'Naam',
       'address' => TranslationOverrides.string(_root.$meta, 'address', {}) ?? 'Adres',
       'username' => TranslationOverrides.string(_root.$meta, 'username', {}) ?? 'Gebruikersnaam',
       'favourites' => TranslationOverrides.string(_root.$meta, 'favourites', {}) ?? 'Favorieten',
@@ -1268,8 +1609,8 @@ extension on TranslationsNlNl {
         required double min,
       }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooSmall', {'min': min}) ?? 'Voer alstublieft een waarde in groter dan ${min}',
       'validationErrors.tooBig' => ({
-        required double max,
-      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'max': max}) ?? 'Voer alstublieft een waarde in kleiner dan ${max}',
+        required double min,
+      }) => TranslationOverrides.string(_root.$meta, 'validationErrors.tooBig', {'min': min}) ?? 'Voer alstublieft een waarde in kleiner dan ${min}',
       'validationErrors.rangeError' =>
         ({required double min, required double max}) =>
             TranslationOverrides.string(_root.$meta, 'validationErrors.rangeError', {'min': min, 'max': max}) ??
@@ -1496,8 +1837,13 @@ extension on TranslationsNlNl {
         TranslationOverrides.string(_root.$meta, 'tabs.sortAlphabeticallyReversed', {}) ?? 'Sorteer alfabetisch (omgekeerd)',
       'tabs.onTheBottomOfPage' => TranslationOverrides.string(_root.$meta, 'tabs.onTheBottomOfPage', {}) ?? 'Beneden de pagina: ',
       'tabs.deleteSelectedTabs' => TranslationOverrides.string(_root.$meta, 'tabs.deleteSelectedTabs', {}) ?? 'Wis geselecteerde tabbladen',
+      'tabs.specialFilters' => TranslationOverrides.string(_root.$meta, 'tabs.specialFilters', {}) ?? 'Speciale filters:',
+      'tabs.notLoadedItalic' =>
+        TranslationOverrides.string(_root.$meta, 'tabs.notLoadedItalic', {}) ?? 'Tabbladen met schuine text zijn niet geladen',
+      'tabs.noTabsFound' => TranslationOverrides.string(_root.$meta, 'tabs.noTabsFound', {}) ?? 'Tabbladen niet gevonde',
       'tabs.copy' => TranslationOverrides.string(_root.$meta, 'tabs.copy', {}) ?? 'Kopieer',
       'tabs.moveAction' => TranslationOverrides.string(_root.$meta, 'tabs.moveAction', {}) ?? 'Verplaats',
+      'tabs.remove' => TranslationOverrides.string(_root.$meta, 'tabs.remove', {}) ?? 'Wis',
       'tabs.shuffle' => TranslationOverrides.string(_root.$meta, 'tabs.shuffle', {}) ?? 'Husselen',
       'tabs.sort' => TranslationOverrides.string(_root.$meta, 'tabs.sort', {}) ?? 'Sorteer',
       'tabs.byBooru' => TranslationOverrides.string(_root.$meta, 'tabs.byBooru', {}) ?? 'Van booru',
@@ -1571,26 +1917,99 @@ extension on TranslationsNlNl {
               many: 'Wis ${count} items',
               other: 'Wis ${count} items',
             ),
+      'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Voer een URL in',
       'webview.navigation.enterCustomUrl' =>
         TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Voer aangepaste URL in',
+      'webview.navigation.listCookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.listCookies', {}) ?? 'Lijst met cookies',
+      'webview.navigation.clearCookies' => TranslationOverrides.string(_root.$meta, 'webview.navigation.clearCookies', {}) ?? 'Leeg cookies',
+      'webview.navigation.getFavicon' => TranslationOverrides.string(_root.$meta, 'webview.navigation.getFavicon', {}) ?? 'Krijg favicon',
+      'webview.navigation.noFaviconFound' =>
+        TranslationOverrides.string(_root.$meta, 'webview.navigation.noFaviconFound', {}) ?? 'Favicon niet gevonden',
+      'webview.navigation.textAboveSelectable' =>
+        TranslationOverrides.string(_root.$meta, 'webview.navigation.textAboveSelectable', {}) ?? '(bovenstaande tekst is selecteerbar)',
+      'webview.navigation.copyUrl' => TranslationOverrides.string(_root.$meta, 'webview.navigation.copyUrl', {}) ?? 'Kopieer URL',
+      'webview.navigation.copiedUrlToClipboard' =>
+        TranslationOverrides.string(_root.$meta, 'webview.navigation.copiedUrlToClipboard', {}) ?? 'URL naar klembord gekopieerd',
+      'webview.navigation.history' => TranslationOverrides.string(_root.$meta, 'webview.navigation.history', {}) ?? 'Geschiedenis',
+      'settings.title' => TranslationOverrides.string(_root.$meta, 'settings.title', {}) ?? 'Instellingen',
+      'settings.language.title' => TranslationOverrides.string(_root.$meta, 'settings.language.title', {}) ?? 'Taal',
+      'settings.language.system' => TranslationOverrides.string(_root.$meta, 'settings.language.system', {}) ?? 'Systeem',
+      'settings.language.helpUsTranslate' => TranslationOverrides.string(_root.$meta, 'settings.language.helpUsTranslate', {}) ?? 'Help ons vertalen',
+      'settings.booru.defaultTags' => TranslationOverrides.string(_root.$meta, 'settings.booru.defaultTags', {}) ?? 'Standaard labels',
       'settings.booru.itemsPerPage' => TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPage', {}) ?? 'Items downloaded per pagina',
       'settings.booru.itemsPerPageTip' =>
         TranslationOverrides.string(_root.$meta, 'settings.booru.itemsPerPageTip', {}) ?? 'Soms zullen boorus dit weigeren',
       'settings.booru.addBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.addBooru', {}) ?? 'Booru configuratie toevoegen',
+      'settings.booru.shareBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooru', {}) ?? 'Deel Booru configuratie',
+      'settings.booru.booruSharing' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Booru delen',
       'settings.booru.addedBoorus' => TranslationOverrides.string(_root.$meta, 'settings.booru.addedBoorus', {}) ?? 'Boorus toegevoegd',
+      'settings.booru.editBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.editBooru', {}) ?? 'Bewerk Booru configuratie',
+      'settings.booru.importBooru' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.importBooru', {}) ?? 'Importeer Booru configuratie van klembord',
+      'settings.booru.onlyLSURLsSupported' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.onlyLSURLsSupported', {}) ?? 'Alleen loli.snatcher URLs worden ondersteund',
       'settings.booru.deleteBooru' => TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooru', {}) ?? 'Wis Booru configuratie',
       'settings.booru.deleteBooruError' =>
         TranslationOverrides.string(_root.$meta, 'settings.booru.deleteBooruError', {}) ??
             'Er ging iets mis tijdens het wissen van een Booru configuratie!',
       'settings.booru.booruDeleted' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruDeleted', {}) ?? 'Booru configuratie gewist',
+      'settings.booru.booruDropdownInfo' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.booruDropdownInfo', {}) ??
+            'Na het opslaan wordt de geselecteerde booru de standaard booru.\n\nDe standaard booru verschijnt als eerste in dropdown-menu\'s',
+      'settings.booru.changeDefaultBooru' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.changeDefaultBooru', {}) ?? 'Verander standaard Booru?',
+      'settings.booru.changeTo' => TranslationOverrides.string(_root.$meta, 'settings.booru.changeTo', {}) ?? 'Verander naar: ',
+      'settings.booru.keepCurrentBooru' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.keepCurrentBooru', {}) ?? 'Druk op [nee] om de huidige te behouden: ',
+      'settings.booru.changeToNewBooru' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.changeToNewBooru', {}) ?? 'Druk op [ja] om te veranderen naar: ',
+      'settings.booru.booruConfigLinkCopied' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.booruConfigLinkCopied', {}) ?? 'Booru configuratielink naar klembord gekopieerd',
+      'settings.booru.noBooruSelected' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.noBooruSelected', {}) ?? 'Geen Booru geselecteerd!',
       'settings.booru.cantDeleteThisBooru' =>
         TranslationOverrides.string(_root.$meta, 'settings.booru.cantDeleteThisBooru', {}) ?? 'Kan deze Booru niet wissen!',
+      'settings.booru.removeRelatedTabsFirst' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booru.removeRelatedTabsFirst', {}) ?? 'Wis gerelateerde tabbladen eerst',
+      'settings.booruEditor.title' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.title', {}) ?? 'Booru-bewerker',
+      'settings.booruEditor.testBooruFailedTitle' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.testBooruFailedTitle', {}) ?? 'Booru test mislukt',
+      'settings.booruEditor.saveBooru' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.saveBooru', {}) ?? 'Sla Booru op',
+      'settings.booruEditor.runningTest' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.runningTest', {}) ?? 'Test lopende…',
+      'settings.booruEditor.booruConfigExistsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigExistsError', {}) ?? 'Deze Booru configuratie bestaat al',
+      'settings.booruEditor.booruSameNameExistsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruSameNameExistsError', {}) ??
+            'Een Booru configuratie met dezelfde naam bestaat al',
+      'settings.booruEditor.booruSameUrlExistsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruSameUrlExistsError', {}) ??
+            'Een Booru configuratie met dezelfde URL bestaat al',
+      'settings.booruEditor.thisBooruConfigWontBeAdded' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.thisBooruConfigWontBeAdded', {}) ??
+            'Deze booru configuratie zal niet worden toegevoegd',
+      'settings.booruEditor.booruConfigSaved' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruConfigSaved', {}) ?? 'Booru configuratie opgeslagen',
+      'settings.booruEditor.failedVerifyApiHydrus' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.failedVerifyApiHydrus', {}) ?? 'Verifiëren van API toegang tot Hydrus mislukt',
       'settings.booruEditor.accessKeyRequestedTitle' =>
         TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyRequestedTitle', {}) ?? 'Toegangssleutel aangevraagd',
       'settings.booruEditor.accessKeyFailedTitle' =>
         TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedTitle', {}) ?? 'Toegangssleutel ophalen mislukt',
       'settings.booruEditor.accessKeyFailedMsg' =>
         TranslationOverrides.string(_root.$meta, 'settings.booruEditor.accessKeyFailedMsg', {}) ?? 'Heeft u het aanvraagscherm open in Hydrus?',
+      'settings.booruEditor.booruName' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruName', {}) ?? 'Booru naam',
+      'settings.booruEditor.booruNameRequired' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruNameRequired', {}) ?? 'Booru naam is vereist!',
+      'settings.booruEditor.booruUrl' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrl', {}) ?? 'Booru URL',
+      'settings.booruEditor.booruUrlRequired' =>
+        TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruUrlRequired', {}) ?? 'Booru URL is vereist!',
+      'settings.booruEditor.booruType' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruType', {}) ?? 'Booru type',
+      'settings.booruEditor.booruDefTags' => TranslationOverrides.string(_root.$meta, 'settings.booruEditor.booruDefTags', {}) ?? 'Standaard labels',
+      'settings.interface.appUIMode' => TranslationOverrides.string(_root.$meta, 'settings.interface.appUIMode', {}) ?? 'App UI modus',
+      'settings.interface.appUIModeWarningTitle' =>
+        TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeWarningTitle', {}) ?? 'App UI modus',
+      'settings.theme.android12PlusOnly' =>
+        TranslationOverrides.string(_root.$meta, 'settings.theme.android12PlusOnly', {}) ?? 'Alleen voor Android 12+',
       'settings.theme.setCustomMascot' =>
         TranslationOverrides.string(_root.$meta, 'settings.theme.setCustomMascot', {}) ?? 'Stel aangepaste mascotte in',
       'settings.theme.removeCustomMascot' =>
@@ -1603,8 +2022,29 @@ extension on TranslationsNlNl {
         TranslationOverrides.string(_root.$meta, 'settings.theme.customFontHint', {}) ?? 'Doorzoek lettertypen op fonts.google.com',
       'settings.viewer.changePageButtonsPosition' =>
         TranslationOverrides.string(_root.$meta, 'settings.viewer.changePageButtonsPosition', {}) ?? 'Verplaats positie van knoppen op pagina',
+      'settings.viewer.shareActionsFileURL' =>
+        TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionsFileURL', {}) ??
+            '- Bestand URL - deelt een directe link met het originele bestand (dit werkt mogelijk niet op alle websites)',
+      'settings.viewer.shareActionsPostURLFileURLFileWithTags' =>
+        TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionsPostURLFileURLFileWithTags', {}) ??
+            '- Bericht URL/Bestand URL/Bestand met labels - deelt de URL/Bestand en labels die te selecteren zijn',
+      'settings.viewer.shareActionsFile' =>
+        TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionsFile', {}) ??
+            '- Bestand - deelt het bestand zelf, dit kan even duren om te laden, voortgang zal worden laten zien op de knop om te delen',
+      'settings.viewer.shareActionsHydrus' =>
+        TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionsHydrus', {}) ??
+            '- Hydrus - om te plaatsen en importeren wordt de url naar Hydrus verzonden',
       'settings.viewer.usingCustomAnimation' =>
         TranslationOverrides.string(_root.$meta, 'settings.viewer.usingCustomAnimation', {}) ?? 'Aangepaste animatie van toepassing',
+      'settings.viewer.shareActionValues.ask' => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.ask', {}) ?? 'Vraag',
+      'settings.viewer.shareActionValues.fileUrl' =>
+        TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrl', {}) ?? 'Bestand URL',
+      'settings.viewer.shareActionValues.fileUrlWithTags' =>
+        TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileUrlWithTags', {}) ?? 'Bestand URL met labels',
+      'settings.viewer.shareActionValues.file' => TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.file', {}) ?? 'Bestand',
+      'settings.viewer.shareActionValues.fileWithTags' =>
+        TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.fileWithTags', {}) ?? 'Bestand met labels',
+      'settings.video.autoplayVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.autoplayVideos', {}) ?? 'Video',
       'settings.database.searchQuery' => TranslationOverrides.string(_root.$meta, 'settings.database.searchQuery', {}) ?? 'Zoekopdracht',
       'settings.database.searchQueryOptional' =>
         TranslationOverrides.string(_root.$meta, 'settings.database.searchQueryOptional', {}) ?? '(optioneel, kan het proces trager maken)',
@@ -1614,11 +2054,55 @@ extension on TranslationsNlNl {
       'settings.database.deleteDatabaseConfirm' =>
         TranslationOverrides.string(_root.$meta, 'settings.database.deleteDatabaseConfirm', {}) ?? 'Wis database?',
       'settings.database.databaseDeleted' => TranslationOverrides.string(_root.$meta, 'settings.database.databaseDeleted', {}) ?? 'Database gewist!',
+      'settings.database.appRestartRequired' =>
+        TranslationOverrides.string(_root.$meta, 'settings.database.appRestartRequired', {}) ?? 'De app moet opnieuw opgestart worden!',
+      'settings.database.appRestartMayBeRequired' =>
+        TranslationOverrides.string(_root.$meta, 'settings.database.appRestartMayBeRequired', {}) ?? 'De app moet mogelijk opnieuw opgestart worden!',
+      'settings.backupAndRestore.duplicateFileDetectedTitle' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedTitle', {}) ?? 'Dubbel bestand gedetecteerd!',
+      'settings.backupAndRestore.failedToGetBackupPath' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.failedToGetBackupPath', {}) ?? 'Pad naar reservekopie ophalen mislukt',
+      'settings.backupAndRestore.restoreInfoMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreInfoMsg', {}) ?? 'Bestanden moeten in de bron map staan',
+      'settings.backupAndRestore.backupSettingsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupSettingsError', {}) ??
+            'Reservekopie van instellingen maken mislukt',
+      'settings.backupAndRestore.restoreSettingsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreSettingsError', {}) ?? 'Instelling herstellen mislukt',
+      'settings.backupAndRestore.backupBoorusError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorusError', {}) ?? 'Reservekopie van boorus maken mislukt',
+      'settings.backupAndRestore.restoreBoorusError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorusError', {}) ?? 'Boorus herstellen mislukt',
+      'settings.backupAndRestore.backupDatabaseError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDatabaseError', {}) ?? 'Reserverkopie van database maken mislukt',
+      'settings.backupAndRestore.restoreDatabaseError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreDatabaseError', {}) ?? 'Database herstellen mislukt',
+      'settings.backupAndRestore.databaseFileNotFound' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.databaseFileNotFound', {}) ??
+            'Database bestand kon niet gevonden of gelezen worden!',
+      'settings.backupAndRestore.backupTagsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupTagsError', {}) ?? 'Reserverkopie van labels maken mislukt',
+      'settings.backupAndRestore.restoreTagsError' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreTagsError', {}) ?? 'Labels herstellen mislukt',
+      'settings.backupAndRestore.tagsFileNotFound' =>
+        TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.tagsFileNotFound', {}) ??
+            'Bestand met labels kon niet gevonden of gelezen worden!',
       'settings.network.allCookiesDeleted' =>
         TranslationOverrides.string(_root.$meta, 'settings.network.allCookiesDeleted', {}) ?? 'Alle cookies verwijderd',
+      'settings.privacy.autoLockAfter' =>
+        TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfter', {}) ?? 'Achteraf automatisch vergrendelen',
+      'settings.privacy.autoLockAfterTip' =>
+        TranslationOverrides.string(_root.$meta, 'settings.privacy.autoLockAfterTip', {}) ?? 'in seconden, 0 om uit te schakelen',
+      'settings.privacy.appDisplayName' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appDisplayName', {}) ?? 'App weergavenaam',
+      'settings.privacy.appAliasChanged' => TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChanged', {}) ?? 'App naam veranderd',
+      'settings.privacy.appAliasChangeFailed' =>
+        TranslationOverrides.string(_root.$meta, 'settings.privacy.appAliasChangeFailed', {}) ??
+            'App-naam veranderen mislukt. Probeer alstublieft opnieuw',
       'settings.cache.deleteCacheAfter' =>
         TranslationOverrides.string(_root.$meta, 'settings.cache.deleteCacheAfter', {}) ?? 'Wis tijdelijk geheugen na:',
       'settings.cache.neverDeleteDuration' => TranslationOverrides.string(_root.$meta, 'settings.cache.neverDeleteDuration', {}) ?? 'Nooit',
+      'settings.cache.appRestartRequired' =>
+        TranslationOverrides.string(_root.$meta, 'settings.cache.appRestartRequired', {}) ?? 'De app moet mogelijk opnieuw opgestart worden!',
       'settings.itemFilters.title' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.title', {}) ?? 'Filters',
       'settings.itemFilters.hidden' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.hidden', {}) ?? 'Verborgen',
       'settings.itemFilters.marked' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.marked', {}) ?? 'Gemarkeerd',
@@ -1639,10 +2123,15 @@ extension on TranslationsNlNl {
       'settings.itemFilters.removeSnatched' =>
         TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'Verwijder gedownloade items',
       'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Verwijder AI items',
+      'settings.debug.alreadyEnabledSnackbarMsg' =>
+        TranslationOverrides.string(_root.$meta, 'settings.debug.alreadyEnabledSnackbarMsg', {}) ?? 'Debug modus is al geactiveerd!',
       'settings.debug.deleteAllCookies' => TranslationOverrides.string(_root.$meta, 'settings.debug.deleteAllCookies', {}) ?? 'Wis alle cookies',
+      'settings.dirPicker.failedToCreateDirectory' =>
+        TranslationOverrides.string(_root.$meta, 'settings.dirPicker.failedToCreateDirectory', {}) ?? 'Map aanmaken mislukt',
       'pageChanger.jumpToPage' => TranslationOverrides.string(_root.$meta, 'pageChanger.jumpToPage', {}) ?? 'Spring naar pagina',
       'pageChanger.searchUntilPage' => TranslationOverrides.string(_root.$meta, 'pageChanger.searchUntilPage', {}) ?? 'Zoek tot pagina',
       'pageChanger.stopSearching' => TranslationOverrides.string(_root.$meta, 'pageChanger.stopSearching', {}) ?? 'Stop met zoeken',
+      'tagsManager.addTag' => TranslationOverrides.string(_root.$meta, 'tagsManager.addTag', {}) ?? 'Label toevoegen',
       'tagsManager.add' => TranslationOverrides.string(_root.$meta, 'tagsManager.add', {}) ?? 'Toevoegen',
       'tagsManager.addedATab' => TranslationOverrides.string(_root.$meta, 'tagsManager.addedATab', {}) ?? 'Tabblad toegevoegd',
       'tagsManager.addATab' => TranslationOverrides.string(_root.$meta, 'tagsManager.addATab', {}) ?? 'Tabblad toevoegen',
@@ -1658,9 +2147,15 @@ extension on TranslationsNlNl {
             ),
       'tagsManager.deleteTagsTitle' => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? 'Wis labels',
       'tagView.addedNewTab' => TranslationOverrides.string(_root.$meta, 'tagView.addedNewTab', {}) ?? 'Tabblad toegevoegd:',
+      'tagView.addToSearch' => TranslationOverrides.string(_root.$meta, 'tagView.addToSearch', {}) ?? 'Aan zoeken toevoegen',
       'tagView.addedToSearchBar' => TranslationOverrides.string(_root.$meta, 'tagView.addedToSearchBar', {}) ?? 'Aan zoekbalk toegevoegd:',
+      'tagView.addToMarked' => TranslationOverrides.string(_root.$meta, 'tagView.addToMarked', {}) ?? 'Aan gemarkeerd toevoegen',
+      'tagView.addToHidden' => TranslationOverrides.string(_root.$meta, 'tagView.addToHidden', {}) ?? 'Aan verborgen toevoegen',
       'tagView.failedToLoadPreviewPage' =>
         TranslationOverrides.string(_root.$meta, 'tagView.failedToLoadPreviewPage', {}) ?? 'Voorbeeld pagina mislukt te laden',
+      'pinnedTags.all' => TranslationOverrides.string(_root.$meta, 'pinnedTags.all', {}) ?? 'Alle',
+      'pinnedTags.addTagManually' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addTagManually', {}) ?? 'Label handmatig toevoegen',
+      'pinnedTags.addPinnedTag' => TranslationOverrides.string(_root.$meta, 'pinnedTags.addPinnedTag', {}) ?? 'Vastgepinde labels toevoegen',
       'mobileHome.clearAllRetryableItems' =>
         TranslationOverrides.string(_root.$meta, 'mobileHome.clearAllRetryableItems', {}) ?? 'Maak alle items voor een nieuwe poging vrij',
       'desktopHome.addBoorusInSettings' =>
@@ -1669,12 +2164,19 @@ extension on TranslationsNlNl {
       'galleryView.noItems' => TranslationOverrides.string(_root.$meta, 'galleryView.noItems', {}) ?? 'Geen items',
       'galleryView.noItemSelected' => TranslationOverrides.string(_root.$meta, 'galleryView.noItemSelected', {}) ?? 'Geen item geselecteerd',
       'mediaPreviews.addNewBooru' => TranslationOverrides.string(_root.$meta, 'mediaPreviews.addNewBooru', {}) ?? 'New Booru toevoegen',
+      'viewer.appBar.alreadyDownloadingThisFile' =>
+        TranslationOverrides.string(_root.$meta, 'viewer.appBar.alreadyDownloadingThisFile', {}) ??
+            'Het huidige gedeelde bestand wordt al gedownload, wil je dit stoppen?',
+      'viewer.appBar.alreadyDownloadingFile' =>
+        TranslationOverrides.string(_root.$meta, 'viewer.appBar.alreadyDownloadingFile', {}) ??
+            'Het huidige gedeelde bestand wordt al gedownload, wil je dit stoppen en een nieuw bestand delen?',
       'viewer.appBar.abort' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.abort', {}) ?? 'Afbreken',
       'common.booruItemCopiedToClipboard' =>
         TranslationOverrides.string(_root.$meta, 'common.booruItemCopiedToClipboard', {}) ?? 'Booru item gekopieerd naar klembord',
       'media.video.failedToLoadItemData' =>
         TranslationOverrides.string(_root.$meta, 'media.video.failedToLoadItemData', {}) ?? 'Kon item data niet laden',
       'media.video.loadingItemData' => TranslationOverrides.string(_root.$meta, 'media.video.loadingItemData', {}) ?? 'Item data laden…',
+      'tagType.artist' => TranslationOverrides.string(_root.$meta, 'tagType.artist', {}) ?? 'Artiest',
       _ => null,
     };
   }

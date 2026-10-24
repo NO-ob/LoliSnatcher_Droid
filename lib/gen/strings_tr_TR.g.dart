@@ -1664,7 +1664,7 @@ class _Translations$tabs$filters$tr_TR extends Translations$tabs$filters$en {
   @override
   String get title => TranslationOverrides.string(_root.$meta, 'tabs.filters.title', {}) ?? 'Sekme Filtreleri';
   @override
-  String get all => TranslationOverrides.string(_root.$meta, 'tabs.filters.all', {}) ?? 'Hepsi';
+  String get all => TranslationOverrides.string(_root.$meta, 'tabs.filters.all', {}) ?? 'Tümü';
   @override
   String get notLoaded => TranslationOverrides.string(_root.$meta, 'tabs.filters.notLoaded', {}) ?? 'Yüklenmedi';
   @override
@@ -3278,7 +3278,7 @@ class _Translations$settings$about$tr_TR extends Translations$settings$about$en 
   @override
   String get developers => TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? 'Geliştiriciler';
   @override
-  String get localizers => TranslationOverrides.string(_root.$meta, 'settings.about.localizers', {}) ?? 'Yerelleştirme Uzmanları';
+  String get localizers => TranslationOverrides.string(_root.$meta, 'settings.about.localizers', {}) ?? 'Çeviri:';
   @override
   String get releases => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'Sürümler';
   @override
@@ -4341,7 +4341,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'tabs.filters.checkDuplicatesOnSameBooru', {}) ?? 'Aynı Booru üzerindeki kopyaları kontrol et',
           'tabs.filters.emptySearchQuery' => TranslationOverrides.string(_root.$meta, 'tabs.filters.emptySearchQuery', {}) ?? 'Boş arama sorgusu',
           'tabs.filters.title' => TranslationOverrides.string(_root.$meta, 'tabs.filters.title', {}) ?? 'Sekme Filtreleri',
-          'tabs.filters.all' => TranslationOverrides.string(_root.$meta, 'tabs.filters.all', {}) ?? 'Hepsi',
+          'tabs.filters.all' => TranslationOverrides.string(_root.$meta, 'tabs.filters.all', {}) ?? 'Tümü',
           'tabs.filters.notLoaded' => TranslationOverrides.string(_root.$meta, 'tabs.filters.notLoaded', {}) ?? 'Yüklenmedi',
           'tabs.filters.enabled' => TranslationOverrides.string(_root.$meta, 'tabs.filters.enabled', {}) ?? 'Etkin',
           'tabs.filters.disabled' => TranslationOverrides.string(_root.$meta, 'tabs.filters.disabled', {}) ?? 'Devre dışı',
@@ -5487,7 +5487,7 @@ extension on TranslationsTrTr {
           'settings.about.emailCopied' => TranslationOverrides.string(_root.$meta, 'settings.about.emailCopied', {}) ?? 'E-mail panoya kopyalandı',
           'settings.about.logoArtistThanks' => TranslationOverrides.string(_root.$meta, 'settings.about.logoArtistThanks', {}) ?? 'Uygulama logosu için eserini kullanmamıza izin veren Showers-U\'ya koca bir teşekkürler: Lütfen Pixiv üzerinden ona göz atmayı unutma',
           'settings.about.developers' => TranslationOverrides.string(_root.$meta, 'settings.about.developers', {}) ?? 'Geliştiriciler',
-          'settings.about.localizers' => TranslationOverrides.string(_root.$meta, 'settings.about.localizers', {}) ?? 'Yerelleştirme Uzmanları',
+          'settings.about.localizers' => TranslationOverrides.string(_root.$meta, 'settings.about.localizers', {}) ?? 'Çeviri:',
           'settings.about.releases' => TranslationOverrides.string(_root.$meta, 'settings.about.releases', {}) ?? 'Sürümler',
           'settings.about.releasesMsg' =>
             TranslationOverrides.string(_root.$meta, 'settings.about.releasesMsg', {}) ??

@@ -19,6 +19,7 @@
     "enable": "Activar",
     "disable": "Desactivar",
     "add": "Añadir",
+    "exclude": "Excluir",
     "edit": "Editar",
     "remove": "Quitar",
     "save": "Guardar",
@@ -70,6 +71,14 @@
     "username": "Nombre de usuario",
     "favourites": "Favoritos",
     "downloads": "Descargas",
+    "secondsShort": "s",
+    "minutesShort": "m",
+    "hoursShort": "h",
+    "daysShort": "d",
+    "leaveThisPageQuestion": "Salir de esta pagina?",
+    "pageWillCloseAutomatically": "Esta pagina se cerrara automaticamente",
+    "stay": "Permanecer",
+    "leaveNow": "Salir",
     "validationErrors": {
         "required": "Por favor ingrese un valor",
         "invalid": "Por favor ingrese un valor válido",
@@ -99,10 +108,7 @@
         "setDirectory": "Elegir ruta",
         "currentlyNotAvailableForThisPlatform": "No disponible en esta plataforma",
         "resetDirectory": "Reiniciar la carpeta",
-        "afterResetFilesWillBeSavedToDefaultDirectory": "Los archivos se guardarán en la ruta predeterminada después del reinicio",
-        "localNetworkRequired": "",
-        "localNetworkExplanationTitle": "",
-        "localNetworkExplanation": ""
+        "afterResetFilesWillBeSavedToDefaultDirectory": "Los archivos se guardarán en la ruta predeterminada después del reinicio"
     },
     "authentication": {
         "pleaseAuthenticateToUseTheApp": "Por favor autentíquese para usar la app",
@@ -120,6 +126,7 @@
         "tabsRestored": "Pestañas restauradas",
         "restoredTabsCount(param=count)": {
             "one": " ${count} pestaña de la sesión anterior restaurada",
+            "few": " ${count} pestañas de la sesión anterior restauradas",
             "many": " ${count} pestañas de la sesión anterior restauradas",
             "other": " ${count} pestañas de la sesión anterior restauradas"
         },
@@ -129,12 +136,14 @@
         "tabsMerged": "Pestañas fusionadas",
         "addedTabsCount(param=count)": {
             "one": "Se agregaron ${count} nuevas pesta",
+            "few": "Añadidas ${count} nuevas pestañas",
             "many": "Añadidas ${count} nuevas pestañas",
             "other": "Añadidas ${count} nuevas pestañas"
         },
         "tabsReplaced": "Pestañas reemplazadas",
         "receivedTabsCount(param=count)": {
             "one": "Recibida ${count} pestaña",
+            "few": "Recibidas ${count} pestañas",
             "many": "Recibidas ${count} pestañas",
             "other": "Recibidas ${count} pestañas"
         }
@@ -155,21 +164,25 @@
         "itemsSnatched": "Artículos descargados",
         "snatchedCount(param=count)": {
             "one": "Descargado: ${count} articulo",
+            "few": "Descargados: ${count} articulos",
             "many": "Descargados: ${count} articulos",
             "other": "Descargados: ${count} articulos"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} archivo ya fue descargado",
+            "few": "${count} archivos ya fueron descargados",
             "many": "${count} archivos ya fueron descargados",
             "other": "${count} archivos ya fueron descargados"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "Falló la descarga de ${count} archivo",
+            "few": "Falló la descarga de ${count} archivos",
             "many": "Falló la descarga de ${count} archivos",
             "other": "Falló la descarga de ${count} archivos"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} archivo cancelado",
+            "few": "${count} archivos cancelados",
             "many": "${count} archivos cancelados",
             "other": "${count} archivos cancelados"
         },
@@ -178,6 +191,7 @@
         "addedItemToQueue": "Artículo agregado a la cola de descarga",
         "addedItemsToQueue(param=count)": {
             "one": "Se agregó ${count} artículo a la cola de descargas",
+            "few": "Se agregaron ${count} artículos a la cola de descargas",
             "many": "Se agregaron ${count} artículos a la cola de descargas",
             "other": "Se agregaron ${count} artículos a la cola de descargas"
         }
@@ -223,6 +237,11 @@
         "sortMode": "Ordenar pestañas",
         "help": "Ayuda",
         "deleteTabs": "Borrar pestañas",
+        "deleteDuplicateTabs": "Borrar pestañas duplicadas",
+        "deleteDuplicateTabsQuestion": "Pestañas duplicadas encontradas. Selecciona que pestañas quieres conservar en cada grupo:",
+        "keepFirstDuplicateTabs": "Mantener primero",
+        "keepLastDuplicateTabs": "Mantener al final",
+        "skipDuplicateTabDelete": "Saltar",
         "shuffleTabs": "Revolver pestañas",
         "tabRandomlyShuffled": "Pestañas revueltas aleatoriamente",
         "tabOrderSaved": "Orden de pestañas guardado",
@@ -264,6 +283,7 @@
         "reversed": "(al revés)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "¿Seguro que quieres borrar ${count} pestaña?",
+            "few": "¿Seguro que quieres borrar ${count} pestañas?",
             "many": "¿Seguro que quieres borrar ${count} pestañas?",
             "other": "¿Seguro que quieres borrar ${count} pestañas?"
         },
@@ -294,12 +314,7 @@
             "pleaseEnterValidTabNumber": "Por favor ingrese un número válido de pestaña",
             "moveTo(param=formattedNumber)": "Mover a #${formattedNumber: String}",
             "preview": "Vista previa:"
-        },
-        "deleteDuplicateTabs": "Borrar pestañas duplicadas",
-        "deleteDuplicateTabsQuestion": "Pestañas duplicadas encontradas. Selecciona que pestañas quieres conservar en cada grupo:",
-        "keepFirstDuplicateTabs": "Mantener primero",
-        "keepLastDuplicateTabs": "Mantener al final",
-        "skipDuplicateTabDelete": "Saltar"
+        }
     },
     "history": {
         "searchHistory": "Historial de búsqueda",
@@ -319,12 +334,14 @@
         "deleteHistoryEntries": "Borrar articulos del historial",
         "deleteItemsConfirm(param=count)": {
             "one": "Seguro que quieres borrar ${count} articulo?",
+            "few": "Seguro que quieres borrar ${count} articulos?",
             "many": "Seguro que quieres borrar ${count} articulos?",
             "other": "Seguro que quieres borrar ${count} articulos?"
         },
         "clearSelection": "Borrar seleccion",
         "deleteItems(param=count)": {
             "one": "Borrar ${count} articulo",
+            "few": "Borrar ${count} articulos",
             "many": "Borrar ${count} articulos",
             "other": "Borrar ${count} articulos"
         }
@@ -332,6 +349,9 @@
     "webview": {
         "title": "Vista web",
         "notSupportedOnDevice": "No compatible con este dispositivo",
+        "captcha": "Captcha",
+        "captchaCheckDescription": "Posible captcha detectada, regresa ya que este resuelta",
+        "captchaCompleted": "Captcha completada",
         "navigation": {
             "enterUrlLabel": "Ingresa un URL",
             "enterCustomUrl": "Ingresa un URL personalizado",
@@ -350,10 +370,7 @@
             "history": "Historial",
             "noBackHistoryItem": "No hay articulos anteriores en el historial",
             "noForwardHistoryItem": "No hay articulos siguientes en el historial"
-        },
-        "captcha": "Captcha",
-        "captchaCheckDescription": "Posible captcha detectada, regresa ya que este resuelta",
-        "captchaCompleted": "Captcha completada"
+        }
     },
     "settings": {
         "title": "Configuracion",
@@ -832,6 +849,7 @@
             "videoCacheNoteEnable": "[Nota]: los videos solo se cachearan si 'Media en el cache' esta habilitado.\n",
             "videoCacheWarningDesktop": "[Advertencia]: En la aplicacion de escritorio, el modo de Stream puede no funcionar correctamente para algunas boorus.",
             "deleteCacheAfter": "Borrar cache despues de:",
+            "neverDeleteDuration": "Nunca",
             "cacheSizeLimit": "Limitar tamaño del cache (en GB)",
             "maximumTotalCacheSize": "Maximo tamaño del cache",
             "cacheStats": "Stadisticas del cache:",
@@ -851,8 +869,7 @@
             "clearedCacheCompletely": "Cache completamente limpiado",
             "appRestartRequired": "Puede que tengas que reiniciar la app!",
             "errorExclamation": "Error!",
-            "notAvailableForPlatform": "No disponible en esta plataforma",
-            "neverDeleteDuration": "Nunca"
+            "notAvailableForPlatform": "No disponible en esta plataforma"
         },
         "itemFilters": {
             "title": "Filtros",
@@ -1048,6 +1065,7 @@
         "makeUnstaleable": "Hacer inobsolescente",
         "deleteTags(param=count)": {
             "one": "Borrar ${count} tag",
+            "few": "Borrar ${count} tags",
             "many": "Borrar ${count} tags",
             "other": "Borrar ${count} tags"
         },
@@ -1087,6 +1105,7 @@
         "addedNewTab": "Nueva pestaña agregada:",
         "id": "ID",
         "postURL": "URL del post:",
+        "uploader": "Subir",
         "posted": "Posteado",
         "details": "Detalles",
         "filename": "Nombre de archivo",
@@ -1102,8 +1121,8 @@
         "removeFromSearch": "Quitar de Busqueda",
         "addToSearch": "Agregar a Busqueda",
         "addedToSearchBar": "Agregado a la barra de busqueda:",
-        "addToSearchExclude": "Agregar a Busqueda (Excluir)",
-        "addedToSearchBarExclude": "Agregado a la barra de busqueda (Excluir):",
+        "excludeFromSearch": "Excluir de la busqueda",
+        "exclusionAddedToSearchBar": "Termino excluido de la busqueda",
         "addToMarked": "Agregar a Marcado",
         "addToHidden": "Agregar a Oculto",
         "removeFromMarked": "Quitar de Marcado",
@@ -1125,10 +1144,7 @@
         "relatedTabs": "Pestañas relacionadas",
         "tabsWithOnlyTag": "Pestañas con solo este tag",
         "tabsWithOnlyTagDifferentBooru": "Pestañas con solo este tag pero en un booru diferente",
-        "tabsContainingTag": "Pestañas con este tag",
-        "excludeFromSearch": "Excluir de la busqueda",
-        "exclusionAddedToSearchBar": "Termino excluido de la busqueda",
-        "uploader": "Subir"
+        "tabsContainingTag": "Pestañas con este tag"
     },
     "pinnedTags": {
         "pinnedTags": "Tags fijados",
@@ -1210,8 +1226,6 @@
         "addNewBooru": "Agregar nueva booru",
         "help": "Ayuda",
         "settings": "Configuracion",
-        "restoringPreviousSession": "Restaurando la sesion pasada…",
-        "copiedFileURL": "URL del archivo copiado a portapapeles!",
         "onboardingTitle": "Configura tu primera fuente",
         "onboardingSubtitle": "Añade una configuración Booru o restablece una copia de seguridad para empezar a explorar",
         "addBooruAction": "Añadir Booru nuevo",
@@ -1224,7 +1238,9 @@
         "booruSourcesArticle": "Como añadir una configuración Booru y como funcionan",
         "booruSourcesArticleSubtitle": "Instrucciones para usuarios configurando su primer booru",
         "backupRestoreArticle": "Restaurar datos desde una copia de seguridad",
-        "backupRestoreArticleSubtitle": "Instrucciones para usuarios migrando desde una app/versión previa"
+        "backupRestoreArticleSubtitle": "Instrucciones para usuarios migrando desde una app/versión previa",
+        "restoringPreviousSession": "Restaurando la sesion pasada…",
+        "copiedFileURL": "URL del archivo copiado a portapapeles!"
     },
     "viewer": {
         "tutorial": {
@@ -1285,6 +1301,7 @@
         "loadingFileMessage": "Esto puede tardar…",
         "sources(param=count)": {
             "one": "Fuente",
+            "few": "Fuentes",
             "many": "Fuentes",
             "other": "Fuentes"
         }
@@ -1354,6 +1371,7 @@
             "loadingPage(param=pageNum)": "Cargando pagina #${pageNum: int}…",
             "startedAgo(param=seconds)": {
                 "one": "Empezo hace ${seconds} segundo",
+                "few": "Empezo hace ${seconds} segundos",
                 "many": "Empezo hace ${seconds} segundos",
                 "other": "Empezo hace ${seconds} segundos"
             },
@@ -1370,16 +1388,7 @@
         "copyright": "Copyright",
         "meta": "Meta",
         "species": "Especies",
-        "none": "Nada/General",
-        "lore": "Lore"
-    },
-    "exclude": "Excluir",
-    "secondsShort": "s",
-    "minutesShort": "m",
-    "hoursShort": "h",
-    "daysShort": "d",
-    "leaveThisPageQuestion": "Salir de esta pagina?",
-    "pageWillCloseAutomatically": "Esta pagina se cerrara automaticamente",
-    "stay": "Permanecer",
-    "leaveNow": "Salir"
+        "lore": "Lore",
+        "none": "Nada/General"
+    }
 }

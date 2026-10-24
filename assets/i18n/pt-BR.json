@@ -19,6 +19,7 @@
     "enable": "Habilitar",
     "disable": "Desabilitar",
     "add": "Adicionar",
+    "exclude": "Excluir",
     "edit": "Editar",
     "remove": "Remover",
     "save": "Salvar",
@@ -70,6 +71,14 @@
     "username": "Nome de Usuário",
     "favourites": "Favoritos",
     "downloads": "Downloads",
+    "secondsShort": "s",
+    "minutesShort": "m",
+    "hoursShort": "h",
+    "daysShort": "d",
+    "leaveThisPageQuestion": "Sair desta página?",
+    "pageWillCloseAutomatically": "Esta página será fechada automaticamente",
+    "stay": "Ficar",
+    "leaveNow": "Sair agora",
     "validationErrors": {
         "required": "Por favor, insira um valor",
         "invalid": "Por favor, insira um valor válido",
@@ -99,10 +108,7 @@
         "setDirectory": "Definir diretório",
         "currentlyNotAvailableForThisPlatform": "Não disponível nesta plataforma",
         "resetDirectory": "Redefinir diretório",
-        "afterResetFilesWillBeSavedToDefaultDirectory": "Arquivos serão salvos no diretório padrão após a redefinição",
-        "localNetworkRequired": "",
-        "localNetworkExplanationTitle": "",
-        "localNetworkExplanation": ""
+        "afterResetFilesWillBeSavedToDefaultDirectory": "Arquivos serão salvos no diretório padrão após a redefinição"
     },
     "authentication": {
         "pleaseAuthenticateToUseTheApp": "Por favor, autentique-se para usar o aplicativo",
@@ -120,6 +126,7 @@
         "tabsRestored": "Abas restauradas",
         "restoredTabsCount(param=count)": {
             "one": "${count} aba restaurada da sessão anterior",
+            "few": "${count} abas restauradas da sessão anterior",
             "many": "${count} abas restauradas da sessão anterior",
             "other": "${count} abas restauradas da sessão anterior"
         },
@@ -129,12 +136,14 @@
         "tabsMerged": "Abas mescladas",
         "addedTabsCount(param=count)": {
             "one": "${count} nova aba adicionada",
+            "few": "${count} novas abas adicionadas",
             "many": "${count} novas abas adicionadas",
             "other": "${count} novas abas adicionadas"
         },
         "tabsReplaced": "Abas substituídas",
         "receivedTabsCount(param=count)": {
             "one": "${count} aba recebida",
+            "few": "${count} abas recebidas",
             "many": "${count} abas recebidas",
             "other": "${count} abas recebidas"
         }
@@ -155,21 +164,25 @@
         "itemsSnatched": "Item baixado",
         "snatchedCount(param=count)": {
             "one": "Baixado: ${count} item",
+            "few": "Baixados: ${count} itens",
             "many": "Baixados: ${count} itens",
             "other": "Baixados: ${count} itens"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} arquivo já foi baixado",
+            "few": "${count} arquivos já foram baixados",
             "many": "${count} arquivos já foram baixados",
             "other": "${count} arquivos já foram baixados"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "Falha ao baixar ${count} arquivo",
+            "few": "Falha ao baixar ${count} arquivos",
             "many": "Falha ao baixar ${count} arquivos",
             "other": "Falha ao baixar ${count} arquivos"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} arquivo cancelado",
+            "few": "${count} arquivos cancelados",
             "many": "${count} arquivos cancelados",
             "other": "${count} arquivos cancelados"
         },
@@ -178,6 +191,7 @@
         "addedItemToQueue": "Item adicionado à fila de download",
         "addedItemsToQueue(param=count)": {
             "one": "${count} item adicionado a fila de download",
+            "few": "${count} itens adicionados a fila de download",
             "many": "${count} itens adicionados a fila de download",
             "other": "${count} itens adicionados a fila de download"
         }
@@ -223,6 +237,11 @@
         "sortMode": "Ordenar abas",
         "help": "Ajuda",
         "deleteTabs": "Apagar abas",
+        "deleteDuplicateTabs": "Excluir abas duplicadas",
+        "deleteDuplicateTabsQuestion": "Abas duplicadas encontradas. Selecione as abas que deseja manter em cada grupo:",
+        "keepFirstDuplicateTabs": "Manter a primeira",
+        "keepLastDuplicateTabs": "Manter a última",
+        "skipDuplicateTabDelete": "Pular",
         "shuffleTabs": "Embaralhar abas",
         "tabRandomlyShuffled": "Abas embaralhadas aleatoriamente",
         "tabOrderSaved": "Ordem das abas salva",
@@ -264,6 +283,7 @@
         "reversed": "(invertida)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "Você tem certeza de que quer deletar ${count} aba?",
+            "few": "Você tem certeza de que quer deletar ${count} abas?",
             "many": "Você tem certeza de que quer deletar ${count} abas?",
             "other": "Você tem certeza de que quer deletar ${count} abas?"
         },
@@ -294,12 +314,7 @@
             "pleaseEnterValidTabNumber": "Por favor, digite um número de aba válido",
             "moveTo(param=formattedNumber)": "Mover para #${formattedNumber: String}",
             "preview": "Prévia:"
-        },
-        "deleteDuplicateTabs": "Excluir abas duplicadas",
-        "deleteDuplicateTabsQuestion": "Abas duplicadas encontradas. Selecione as abas que deseja manter em cada grupo:",
-        "keepFirstDuplicateTabs": "Manter a primeira",
-        "keepLastDuplicateTabs": "Manter a última",
-        "skipDuplicateTabDelete": "Pular"
+        }
     },
     "history": {
         "searchHistory": "Search history",
@@ -319,12 +334,14 @@
         "deleteHistoryEntries": "Excluir itens do histórico",
         "deleteItemsConfirm(param=count)": {
             "one": "Tem certeza de que deseja excluir ${count} item?",
+            "few": "Tem certeza de que deseja excluir ${count} itens?",
             "many": "Tem certeza de que deseja excluir ${count} itens?",
             "other": "Tem certeza de que deseja excluir ${count} itens?"
         },
         "clearSelection": "Limpar seleção",
         "deleteItems(param=count)": {
             "one": "Excluir ${count} item",
+            "few": "Excluir ${count} itens",
             "many": "Excluir ${count} itens",
             "other": "Excluir ${count} itens"
         }
@@ -332,6 +349,9 @@
     "webview": {
         "title": "Webview",
         "notSupportedOnDevice": "Não supordado nesse dispositivo",
+        "captcha": "Captcha",
+        "captchaCheckDescription": "Possível CAPTCHA detectado! Por favor, resolva-o e retorne após concluir)",
+        "captchaCompleted": "Captcha completado",
         "navigation": {
             "enterUrlLabel": "Digite uma URL",
             "enterCustomUrl": "Digite uma URL personalizada",
@@ -350,10 +370,7 @@
             "history": "Histórico",
             "noBackHistoryItem": "Nenhum item no histórico para voltar",
             "noForwardHistoryItem": "Nenhum item no histórico para avançar"
-        },
-        "captcha": "Captcha",
-        "captchaCheckDescription": "Possível CAPTCHA detectado! Por favor, resolva-o e retorne após concluir)",
-        "captchaCompleted": "Captcha completado"
+        }
     },
     "settings": {
         "title": "Configurações",
@@ -832,6 +849,7 @@
             "videoCacheNoteEnable": "[Nota]: Os vídeos só serão salvos em cache se \"Cache de mídia\" estiver ativado.",
             "videoCacheWarningDesktop": "[Aviso]: No desktop, o modo Streaming pode não funcionar corretamente em alguns Boorus.",
             "deleteCacheAfter": "Limpar cache após:",
+            "neverDeleteDuration": "Nunca",
             "cacheSizeLimit": "Limite de tamanho do cache (em GB)",
             "maximumTotalCacheSize": "Tamanho máximo total do cache",
             "cacheStats": "Estatus do cache:",
@@ -851,8 +869,7 @@
             "clearedCacheCompletely": "Cache totalmente limpo",
             "appRestartRequired": "Pode ser necessário reiniciar o app!",
             "errorExclamation": "Erro!",
-            "notAvailableForPlatform": "Não disponível para esta plataforma no momento",
-            "neverDeleteDuration": "Nunca"
+            "notAvailableForPlatform": "Não disponível para esta plataforma no momento"
         },
         "itemFilters": {
             "title": "Filtros",
@@ -1048,6 +1065,7 @@
         "makeUnstaleable": "Tornar inexpirável",
         "deleteTags(param=count)": {
             "one": "Excluir ${count} tag",
+            "few": "Excluir ${count} tags",
             "many": "Excluir ${count} tags",
             "other": "Excluir ${count} tags"
         },
@@ -1087,6 +1105,7 @@
         "addedNewTab": "Nova aba adicionada",
         "id": "ID",
         "postURL": "URL do post",
+        "uploader": "Uploader",
         "posted": "Postado",
         "details": "Detalhes",
         "filename": "Nome do arquivo",
@@ -1102,8 +1121,8 @@
         "removeFromSearch": "Remover da Pesquisa",
         "addToSearch": "Adicionar à pesquisa",
         "addedToSearchBar": "Adicionada a barra de pesquisa",
-        "addToSearchExclude": "Adicionar à busca (Excluir)",
-        "addedToSearchBarExclude": "Adicionado à barra de busca (Excluir):",
+        "excludeFromSearch": "Excluir da busca",
+        "exclusionAddedToSearchBar": "Exclusão adicionada à barra de busca:",
         "addToMarked": "Adicionar aos marcados",
         "addToHidden": "Adicionar aos Ocultos",
         "removeFromMarked": "Remover dos Marcados",
@@ -1125,10 +1144,7 @@
         "relatedTabs": "Abas relacionadas",
         "tabsWithOnlyTag": "Abas apenas com esta tag",
         "tabsWithOnlyTagDifferentBooru": "Abas apenas com esta tag, mas em outro booru",
-        "tabsContainingTag": "Abas contendo esta tag",
-        "excludeFromSearch": "Excluir da busca",
-        "exclusionAddedToSearchBar": "Exclusão adicionada à barra de busca:",
-        "uploader": "Uploader"
+        "tabsContainingTag": "Abas contendo esta tag"
     },
     "pinnedTags": {
         "pinnedTags": "Tags fixadas",
@@ -1210,8 +1226,6 @@
         "addNewBooru": "Adicionar novo Booru",
         "help": "Ajuda",
         "settings": "Configurações",
-        "restoringPreviousSession": "Restaurando sessão anterior…",
-        "copiedFileURL": "URL do arquivo copiada para a área de transferência!",
         "onboardingTitle": "Configure sua primeira fonte",
         "onboardingSubtitle": "Adicione uma configuração de booru ou restaure um backup para começar a navegar",
         "addBooruAction": "Adicionar novo booru",
@@ -1224,7 +1238,9 @@
         "booruSourcesArticle": "Como adicionar uma configuração de booru e como elas funcionam",
         "booruSourcesArticleSubtitle": "Instruções para usuários que estão criando sua primeira configuração de booru",
         "backupRestoreArticle": "Restaurando dados de um backup",
-        "backupRestoreArticleSubtitle": "Instruções para usuários que estão migrando de um app/versão anterior"
+        "backupRestoreArticleSubtitle": "Instruções para usuários que estão migrando de um app/versão anterior",
+        "restoringPreviousSession": "Restaurando sessão anterior…",
+        "copiedFileURL": "URL do arquivo copiada para a área de transferência!"
     },
     "viewer": {
         "tutorial": {
@@ -1285,6 +1301,7 @@
         "loadingFileMessage": "Isso pode levar algum tempo, aguarde…",
         "sources(param=count)": {
             "one": "Fonte",
+            "few": "Fontes",
             "many": "Fontes",
             "other": "Fontes"
         }
@@ -1354,6 +1371,7 @@
             "loadingPage(param=pageNum)": "Carregando página #${pageNum: int}…",
             "startedAgo(param=seconds)": {
                 "one": "Iniciado há ${seconds} segundo",
+                "few": "Iniciado há ${seconds} segundos",
                 "many": "Iniciado há ${seconds} segundos",
                 "other": "Iniciado há ${seconds} segundos"
             },
@@ -1370,16 +1388,7 @@
         "copyright": "Direitos autorais",
         "meta": "Meta",
         "species": "Espécie",
-        "none": "Nenhum/Geral",
-        "lore": "Lore"
-    },
-    "exclude": "Excluir",
-    "secondsShort": "s",
-    "minutesShort": "m",
-    "hoursShort": "h",
-    "daysShort": "d",
-    "leaveThisPageQuestion": "Sair desta página?",
-    "pageWillCloseAutomatically": "Esta página será fechada automaticamente",
-    "stay": "Ficar",
-    "leaveNow": "Sair agora"
+        "lore": "Lore",
+        "none": "Nenhum/Geral"
+    }
 }
