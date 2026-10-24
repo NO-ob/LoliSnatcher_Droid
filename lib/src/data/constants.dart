@@ -48,7 +48,7 @@ class Constants {
   static const UpdateInfo updateInfo = UpdateInfo(
     versionName: '2.5.3',
     buildNumber: 5220,
-    title: '2.5.3',
+    title: '2.5.3 - Languages and fixes',
     isInStore: true,
     isImportant: false,
     storePackage: 'com.noaisu.play.losn',
@@ -61,30 +61,32 @@ If you encounter any issues or have suggestions, please post them on GitHub Issu
 [WE NEED YOUR HELP]: We are looking for volunteers to help translate the app into other languages. For details, visit our GitHub page or ask on our Discord server.
 
 
-A minor update that adds a new onboarding screen, adds fullscreen video zooming and fixes some issues.
+A minor update with new languages and some fixes while we work on a big update.
 
 -------------------
 
 [Known issues]:
 - On Gelbooru, images may blink/flicker and/or fail with various error codes (503, 429, 404...), which may be fixed by trying to load the image again. This is probably caused by their aggressive rate limiting rules. As a temporary workaround, set [Interface - Preview quality] to [Thumbnail] and [Boorus and Search - Items fetched per page] to 20 to reduce flicker and the chance of being rate limited
-- Some German translations are incorrect and will be fixed in a future release after a new contributor is able to update them
 
 -------------------
 
-Hotfix 2 - 2.5.3+5220(18.10.2026):
-- Fix parsing of some sites
-- Added a prompt asking for permission for Nearby devices, this is required for devices running Android 17 and above to open local network servers or use sync features
-- Clear testpersist file which was used to test if app still has access to custom folder
-- Added Italian translation (Thanks to ThugThief, Stickcampo)
-- Added Portuguese (Brazil) translation (Thanks to restartxx, lev)
-- Added Serbian translation (Thanks to Dušan)
-- Added Spanish (Mexico) translation (Thanks to ThugThief, LangFlaggot)
-- Fixed incomplete locales being used when using system locale
-- Database backup stability improvements
-- Fixed possible crash when removing all tabs
-- Update dependencies
+Release - 2.5.3+5220 (24.10.2026):
+- Fixed parsing issues on some sites
+- Added a prompt requesting Nearby devices permission, which is required on Android 17 and later to access local network servers or use sync features
+- Added cleanup of the testpersist file used to check whether the app still has access to a custom folder
+- Added Italian translation (thanks to ThugThief, Stickcampo)
+- Added Portuguese (Brazil) translation (thanks to restartxx, lev)
+- Added Serbian translation (thanks to Dušan)
+- Added Spanish (Mexico) translation (thanks to ThugThief, LangFlaggot)
+- Fixed incomplete translations being used when following the system language
+- Improved database backup stability
+- Fixed a potential crash when removing all tabs
+- Updated dependencies
 
 -------------------
+-------------------
+
+Previous changes: 
 
 Hotfix 1 - 2.5.2+5219 (10.09.2026):
 - Update dependencies
