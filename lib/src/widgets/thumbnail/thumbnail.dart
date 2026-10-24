@@ -24,7 +24,7 @@ import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 
-class Thumbnail extends StatefulWidget {
+class Thumbnail extends StatelessWidget {
   const Thumbnail({
     required this.item,
     this.booru,
@@ -41,10 +41,49 @@ class Thumbnail extends StatefulWidget {
   final bool useHero;
 
   @override
-  State<Thumbnail> createState() => _ThumbnailState();
+  Widget build(BuildContext context) {
+    // Hero flights must own their loading state instead of sharing the source's notifiers.
+    final Widget child = _ThumbnailImage(
+      item: item,
+      booru: booru,
+      isStandalone: isStandalone,
+    );
+
+    if (isStandalone && useHero) {
+      final settingsHandler = SettingsHandler.instance;
+      return HeroMode(
+        enabled: settingsHandler.enableHeroTransitions && !settingsHandler.shitDevice,
+        child: Hero(
+          tag: 'imageHero${item.hashCode}',
+          placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
+            // Keep the image visible in the grid behind the gallery.
+            return child;
+          },
+          child: child,
+        ),
+      );
+    }
+
+    return child;
+  }
 }
 
-class _ThumbnailState extends State<Thumbnail> {
+class _ThumbnailImage extends StatefulWidget {
+  const _ThumbnailImage({
+    required this.item,
+    required this.booru,
+    required this.isStandalone,
+  });
+
+  final BooruItem item;
+  final Booru? booru;
+  final bool isStandalone;
+
+  @override
+  State<_ThumbnailImage> createState() => _ThumbnailState();
+}
+
+class _ThumbnailState extends State<_ThumbnailImage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   final ValueNotifier<int> total = ValueNotifier(0), received = ValueNotifier(0), startedAt = ValueNotifier(0);
@@ -83,7 +122,7 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   @override
-  void didUpdateWidget(Thumbnail oldWidget) {
+  void didUpdateWidget(_ThumbnailImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     // force redraw on tab change
     if (oldWidget.item != widget.item) {
@@ -378,6 +417,12 @@ class _ThumbnailState extends State<Thumbnail> {
 
     disposables();
 
+    // Reset providers only during reloads; disposal must not notify descendants.
+    if (widget.isStandalone) {
+      mainProvider.value = null;
+      extraProvider.value = null;
+    }
+
     total.value = 0;
     received.value = 0;
     startedAt.value = 0;
@@ -464,9 +509,7 @@ class _ThumbnailState extends State<Thumbnail> {
     // evict from memory cache only when in grid
     if (widget.isStandalone) {
       mainProvider.value?.evict();
-      mainProvider.value = null;
       extraProvider.value?.evict();
-      extraProvider.value = null;
     }
 
     debounceLoading?.cancel();
@@ -514,7 +557,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
   @override
   Widget build(BuildContext context) {
-    Widget imageStack = LayoutBuilder(
+    final Widget imageStack = LayoutBuilder(
       builder: (context, constraints) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
@@ -765,27 +808,10 @@ class _ThumbnailState extends State<Thumbnail> {
       },
     );
 
-    imageStack = Material(
+    return Material(
       color: Colors.transparent,
       child: imageStack,
     );
-
-    if (widget.isStandalone && widget.useHero) {
-      return HeroMode(
-        enabled: settingsHandler.enableHeroTransitions && !settingsHandler.shitDevice,
-        child: Hero(
-          tag: 'imageHero${widget.item.hashCode}',
-          placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
-            // keep building the image since the images can be visible in the
-            // background of the image gallery
-            return child;
-          },
-          child: imageStack,
-        ),
-      );
-    } else {
-      return imageStack;
-    }
   }
 }
 
