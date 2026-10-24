@@ -74,8 +74,8 @@ A minor update that adds a new onboarding screen, adds fullscreen video zooming 
 Hotfix 2 - 2.5.3+5220(18.10.2026):
 - Fix parsing of some sites
 - Added a prompt asking for permission for Nearby devices, this is required for devices running Android 17 and above to open local network servers or use sync features
-- Clear temppersist file which was used to test folder access permissions
-- Added Portuguese (Brazil) translation (Thanks to oppon_)
+- Clear testpersist file which was used to test if app still has access to custom folder
+- Added Portuguese (Brazil) translation (Thanks to restartxx. lev)
 - Fixed incomplete locales being used when using system locale
 - Database backup stability improvements
 - Fixed possible crash when removing all tabs

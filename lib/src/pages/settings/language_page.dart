@@ -348,7 +348,7 @@ extension AppLocaleExt on AppLocale {
       case .jaJp:
         return 'stardust248397';
       case .ptBr:
-        return 'oppon_, lev';
+        return 'restartxx, lev';
       case .trTr:
         return 'kyomoe';
       //
