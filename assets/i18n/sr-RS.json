@@ -19,6 +19,7 @@
     "enable": "Omogući",
     "disable": "Onemogući",
     "add": "Dodaj",
+    "exclude": "Izuzmi",
     "edit": "Uredi",
     "remove": "Ukloni",
     "save": "Sačuvaj",
@@ -70,6 +71,14 @@
     "username": "Korisničko ime",
     "favourites": "Omiljeno",
     "downloads": "Preuzimanja",
+    "secondsShort": "s",
+    "minutesShort": "m",
+    "hoursShort": "h",
+    "daysShort": "d",
+    "leaveThisPageQuestion": "Napustiti ovu stranicu?",
+    "pageWillCloseAutomatically": "Ova stranica će se automatski zatvoriti",
+    "stay": "Ostani",
+    "leaveNow": "Napusti odmah",
     "validationErrors": {
         "required": "Unesite vrednost",
         "invalid": "Unesite važeću vrednost",
@@ -99,10 +108,7 @@
         "setDirectory": "Postavi direktorijum",
         "currentlyNotAvailableForThisPlatform": "Nije dostupno na ovoj platformi",
         "resetDirectory": "Resetuj direktorijum",
-        "afterResetFilesWillBeSavedToDefaultDirectory": "Nakon resetovanja, datoteke će se čuvati u podrazumevanom direktorijumu",
-        "localNetworkRequired": "",
-        "localNetworkExplanationTitle": "",
-        "localNetworkExplanation": ""
+        "afterResetFilesWillBeSavedToDefaultDirectory": "Nakon resetovanja, datoteke će se čuvati u podrazumevanom direktorijumu"
     },
     "authentication": {
         "pleaseAuthenticateToUseTheApp": "Potvrdite identitet da biste koristili aplikaciju",
@@ -121,6 +127,7 @@
         "restoredTabsCount(param=count)": {
             "one": "Vraćena je ${count} kartica iz prethodne sesije",
             "few": "Vraćeno je ${count} kartica iz prethodne sesije",
+            "many": "Vraćeno je ${count} kartica iz prethodne sesije",
             "other": "Vraćeno je ${count} kartica iz prethodne sesije"
         },
         "someRestoredTabsHadIssues": "Neke vraćene kartice su imale nepoznate booru sajtove ili neispravne znakove.",
@@ -130,12 +137,14 @@
         "addedTabsCount(param=count)": {
             "one": "Dodata je ${count} nova kartica",
             "few": "Dodato je ${count} novih kartica",
+            "many": "Dodato je ${count} novih kartica",
             "other": "Dodato je ${count} novih kartica"
         },
         "tabsReplaced": "Kartice su zamenjene",
         "receivedTabsCount(param=count)": {
             "one": "Primljena je ${count} kartica",
             "few": "Primljeno je ${count} kartica",
+            "many": "Primljeno je ${count} kartica",
             "other": "Primljeno je ${count} kartica"
         }
     },
@@ -156,21 +165,25 @@
         "snatchedCount(param=count)": {
             "one": "Preuzeta: ${count} stavka",
             "few": "Preuzeto: ${count} stavki",
+            "many": "Preuzeto: ${count} stavki",
             "other": "Preuzeto: ${count} stavki"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} datoteka je već preuzeta",
             "few": "${count} datoteka je već preuzeto",
+            "many": "${count} datoteka je već preuzeto",
             "other": "${count} datoteka je već preuzeto"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "Preuzimanje ${count} datoteke nije uspelo",
             "few": "Preuzimanje ${count} datoteka nije uspelo",
+            "many": "Preuzimanje ${count} datoteka nije uspelo",
             "other": "Preuzimanje ${count} datoteka nije uspelo"
         },
         "cancelledFiles(param=count)": {
             "one": "Otkazana je ${count} datoteka",
             "few": "Otkazano je ${count} datoteka",
+            "many": "Otkazano je ${count} datoteka",
             "other": "Otkazano je ${count} datoteka"
         },
         "snatchingImages": "Preuzimanje slika",
@@ -179,6 +192,7 @@
         "addedItemsToQueue(param=count)": {
             "one": "Dodata je ${count} stavka u red za preuzimanje",
             "few": "Dodato je ${count} stavki u red za preuzimanje",
+            "many": "Dodato je ${count} stavki u red za preuzimanje",
             "other": "Dodato je ${count} stavki u red za preuzimanje"
         }
     },
@@ -223,6 +237,11 @@
         "sortMode": "Sortiraj kartice",
         "help": "Pomoć",
         "deleteTabs": "Obriši kartice",
+        "deleteDuplicateTabs": "Obriši duplirane kartice",
+        "deleteDuplicateTabsQuestion": "Pronađene su duplirane kartice. Izaberite kartice koje želite da zadržite u svakoj grupi:",
+        "keepFirstDuplicateTabs": "Zadrži prvu",
+        "keepLastDuplicateTabs": "Zadrži poslednju",
+        "skipDuplicateTabDelete": "Preskoči",
         "shuffleTabs": "Promešaj kartice",
         "tabRandomlyShuffled": "Kartica je nasumično promešana",
         "tabOrderSaved": "Redosled kartica je sačuvan",
@@ -265,6 +284,7 @@
         "areYouSureDeleteTabs(param=count)": {
             "one": "Da li ste sigurni da želite da obrišete ${count} karticu?",
             "few": "Da li ste sigurni da želite da obrišete ${count} kartica?",
+            "many": "Da li ste sigurni da želite da obrišete ${count} kartica?",
             "other": "Da li ste sigurni da želite da obrišete ${count} kartica?"
         },
         "filters": {
@@ -294,12 +314,7 @@
             "pleaseEnterValidTabNumber": "Unesite važeći broj kartice",
             "moveTo(param=formattedNumber)": "Premesti na #${formattedNumber: String}",
             "preview": "Pregled:"
-        },
-        "deleteDuplicateTabs": "Obriši duplirane kartice",
-        "deleteDuplicateTabsQuestion": "Pronađene su duplirane kartice. Izaberite kartice koje želite da zadržite u svakoj grupi:",
-        "keepFirstDuplicateTabs": "Zadrži prvu",
-        "keepLastDuplicateTabs": "Zadrži poslednju",
-        "skipDuplicateTabDelete": "Preskoči"
+        }
     },
     "history": {
         "searchHistory": "Istorija pretrage",
@@ -320,18 +335,23 @@
         "deleteItemsConfirm(param=count)": {
             "one": "Da li ste sigurni da želite da obrišete ${count} stavku?",
             "few": "Da li ste sigurni da želite da obrišete ${count} stavki?",
+            "many": "Da li ste sigurni da želite da obrišete ${count} stavki?",
             "other": "Da li ste sigurni da želite da obrišete ${count} stavki?"
         },
         "clearSelection": "Poništi izbor",
         "deleteItems(param=count)": {
             "one": "Obriši ${count} stavku",
             "few": "Obriši ${count} stavki",
+            "many": "Obriši ${count} stavki",
             "other": "Obriši ${count} stavki"
         }
     },
     "webview": {
         "title": "Webview",
         "notSupportedOnDevice": "Nije podržano na ovom uređaju",
+        "captcha": "Captcha",
+        "captchaCheckDescription": "Otkrivena je moguća Captcha, rešite je i vratite se kada završite",
+        "captchaCompleted": "Captcha je završena",
         "navigation": {
             "enterUrlLabel": "Unesite URL",
             "enterCustomUrl": "Unesite prilagođeni URL",
@@ -350,10 +370,7 @@
             "history": "Istorija",
             "noBackHistoryItem": "Nema prethodne stavke u istoriji",
             "noForwardHistoryItem": "Nema sledeće stavke u istoriji"
-        },
-        "captcha": "Captcha",
-        "captchaCheckDescription": "Otkrivena je moguća Captcha, rešite je i vratite se kada završite",
-        "captchaCompleted": "Captcha je završena"
+        }
     },
     "settings": {
         "title": "Podešavanja",
@@ -832,6 +849,7 @@
             "videoCacheNoteEnable": "[Napomena]: Video zapisi će se keširati samo ako je opcija 'Keširaj medije' omogućena.",
             "videoCacheWarningDesktop": "[Upozorenje]: Na računaru režim strimovanja može raditi nepravilno za pojedine Booru sajtove.",
             "deleteCacheAfter": "Obriši keš nakon:",
+            "neverDeleteDuration": "Nikada",
             "cacheSizeLimit": "Ograničenje veličine keša (u GB)",
             "maximumTotalCacheSize": "Maksimalna ukupna veličina keša",
             "cacheStats": "Statistika keša:",
@@ -851,8 +869,7 @@
             "clearedCacheCompletely": "Keš je potpuno obrisan",
             "appRestartRequired": "Možda je potrebno ponovno pokretanje aplikacije!",
             "errorExclamation": "Greška!",
-            "notAvailableForPlatform": "Trenutno nije dostupno za ovu platformu",
-            "neverDeleteDuration": "Nikada"
+            "notAvailableForPlatform": "Trenutno nije dostupno za ovu platformu"
         },
         "itemFilters": {
             "title": "Filteri",
@@ -1049,6 +1066,7 @@
         "deleteTags(param=count)": {
             "one": "Obriši ${count} oznaku",
             "few": "Obriši ${count} oznaku",
+            "many": "Obriši ${count} oznaku",
             "other": "Obriši ${count} oznaku"
         },
         "deleteTagsTitle": "Obriši oznake",
@@ -1087,6 +1105,7 @@
         "addedNewTab": "Dodata nova kartica:",
         "id": "ID",
         "postURL": "URL objave",
+        "uploader": "Otpremalac",
         "posted": "Objavljeno",
         "details": "Detalji",
         "filename": "Naziv datoteke",
@@ -1102,8 +1121,8 @@
         "removeFromSearch": "Ukloni iz pretrage",
         "addToSearch": "Dodaj u pretragu",
         "addedToSearchBar": "Dodato u traku za pretragu:",
-        "addToSearchExclude": "Dodaj u pretragu (Izuzmi)",
-        "addedToSearchBarExclude": "Dodato u traku za pretragu (Izuzmi):",
+        "excludeFromSearch": "Izuzmi iz pretrage",
+        "exclusionAddedToSearchBar": "Dodato izuzimanje u traku za pretragu:",
         "addToMarked": "Dodaj u označeno",
         "addToHidden": "Dodaj u skriveno",
         "removeFromMarked": "Ukloni iz označenog",
@@ -1125,10 +1144,7 @@
         "relatedTabs": "Povezane kartice",
         "tabsWithOnlyTag": "Kartice koje sadrže samo ovu oznaku",
         "tabsWithOnlyTagDifferentBooru": "Kartice koje sadrže samo ovu oznaku ali na drugom Booru-u",
-        "tabsContainingTag": "Kartice koje sadrže ovu oznaku",
-        "excludeFromSearch": "Izuzmi iz pretrage",
-        "exclusionAddedToSearchBar": "Dodato izuzimanje u traku za pretragu:",
-        "uploader": "Otpremalac"
+        "tabsContainingTag": "Kartice koje sadrže ovu oznaku"
     },
     "pinnedTags": {
         "pinnedTags": "Zakačene oznake",
@@ -1210,8 +1226,6 @@
         "addNewBooru": "Dodaj novi Booru",
         "help": "Pomoć",
         "settings": "Podešavanja",
-        "restoringPreviousSession": "Vraćanje prethodne sesije…",
-        "copiedFileURL": "URL datoteke je kopiran u privremenu memoriju!",
         "onboardingTitle": "Podesite svoj prvi izvor",
         "onboardingSubtitle": "Dodajte booru konfiguraciju ili vratite rezervnu kopiju da biste započeli pregledanje",
         "addBooruAction": "Dodaj novi booru",
@@ -1224,7 +1238,9 @@
         "booruSourcesArticle": "Kako dodati booru konfiguraciju i kako one funkcionišu",
         "booruSourcesArticleSubtitle": "Uputstva za korisnike koji podešavaju svoju prvu booru konfiguraciju",
         "backupRestoreArticle": "Vraćanje podataka iz rezervne kopije",
-        "backupRestoreArticleSubtitle": "Uputstva za korisnike koji prelaze sa prethodne aplikacije ili verzije"
+        "backupRestoreArticleSubtitle": "Uputstva za korisnike koji prelaze sa prethodne aplikacije ili verzije",
+        "restoringPreviousSession": "Vraćanje prethodne sesije…",
+        "copiedFileURL": "URL datoteke je kopiran u privremenu memoriju!"
     },
     "viewer": {
         "tutorial": {
@@ -1286,6 +1302,7 @@
         "sources(param=count)": {
             "one": "Izvor",
             "few": "Izvori",
+            "many": "Izvori",
             "other": "Izvori"
         }
     },
@@ -1355,6 +1372,7 @@
             "startedAgo(param=seconds)": {
                 "one": "Započeto pre ${seconds} sekundu",
                 "few": "Započeto pre ${seconds} sekunde",
+                "many": "Započeto pre ${seconds} sekundi",
                 "other": "Započeto pre ${seconds} sekundi"
             },
             "tapToRetryIfStuck": "Dodirnite da biste pokušali ponovo ako zahtev deluje zaglavljeno ili predugo traje",
@@ -1370,16 +1388,7 @@
         "copyright": "Autorska prava",
         "meta": "Meta",
         "species": "Vrsta",
-        "none": "Nijedno/Opšte",
-        "lore": "Lore"
-    },
-    "exclude": "Izuzmi",
-    "secondsShort": "s",
-    "minutesShort": "m",
-    "hoursShort": "h",
-    "daysShort": "d",
-    "leaveThisPageQuestion": "Napustiti ovu stranicu?",
-    "pageWillCloseAutomatically": "Ova stranica će se automatski zatvoriti",
-    "stay": "Ostani",
-    "leaveNow": "Napusti odmah"
+        "lore": "Lore",
+        "none": "Nijedno/Opšte"
+    }
 }
