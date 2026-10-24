@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 
@@ -371,10 +372,9 @@ class _Translations$searchHandler$fr_FR extends Translations$searchHandler$en {
   @override
   String restoredTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
         count,
         one: '${count} onglet a été restauré de la session précédente',
-        few: 'Des onglets ont été restaurés de la session précédente',
         many: 'Plusieurs onglets ont été restaurés de la session précédente',
         other: 'Des onglets ont été restaurés de la session précédente',
       );
@@ -392,10 +392,9 @@ class _Translations$searchHandler$fr_FR extends Translations$searchHandler$en {
   @override
   String addedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
         count,
         one: 'Plusieurs nouveaux onglets ajoutés ',
-        few: 'Plusieurs nouveaux onglets ajoutés ',
         many: '${count} nouveaux onglets ajoutés ',
         other: 'Plusieurs nouveaux onglets ajoutés ',
       );
@@ -404,10 +403,9 @@ class _Translations$searchHandler$fr_FR extends Translations$searchHandler$en {
   @override
   String receivedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
         count,
         one: '${count} onglet reçu ',
-        few: '${count} onglets reçus',
         many: '${count} onglets reçus',
         other: '${count} onglets reçus',
       );
@@ -452,40 +450,36 @@ class _Translations$snatcher$fr_FR extends Translations$snatcher$en {
   @override
   String snatchedCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
         count,
         one: 'Récupéré: ${count} objet',
-        few: 'Récupéré: ${count} objets',
         many: 'Récupéré: ${count} objets',
         other: 'Récupéré: ${count} objets',
       );
   @override
   String filesAlreadySnatched({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
         count,
         one: '${count} fichier déjà récupéré',
-        few: '${count} fichiers déjà récupérés',
         many: '${count} fichiers déjà récupérés',
         other: '${count} fichiers déjà récupérés',
       );
   @override
   String failedToSnatchFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
         count,
         one: 'Échec de la récupération de ${count} fichier',
-        few: 'Échec de la récupération de ${count} fichiers',
         many: 'Échec de la récupération de ${count} fichiers',
         other: 'Échec de la récupération de ${count} fichiers',
       );
   @override
   String cancelledFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
         count,
         one: '${count} fichier annulé',
-        few: '${count} fichiers annulés',
         many: '${count} fichiers annulés',
         other: '${count} fichiers annulés',
       );
@@ -1244,10 +1238,9 @@ extension on TranslationsFrFr {
       'searchHandler.restoredTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
               count,
               one: '${count} onglet a été restauré de la session précédente',
-              few: 'Des onglets ont été restaurés de la session précédente',
               many: 'Plusieurs onglets ont été restaurés de la session précédente',
               other: 'Des onglets ont été restaurés de la session précédente',
             ),
@@ -1262,10 +1255,9 @@ extension on TranslationsFrFr {
       'searchHandler.addedTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
               count,
               one: 'Plusieurs nouveaux onglets ajoutés ',
-              few: 'Plusieurs nouveaux onglets ajoutés ',
               many: '${count} nouveaux onglets ajoutés ',
               other: 'Plusieurs nouveaux onglets ajoutés ',
             ),
@@ -1273,10 +1265,9 @@ extension on TranslationsFrFr {
       'searchHandler.receivedTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
               count,
               one: '${count} onglet reçu ',
-              few: '${count} onglets reçus',
               many: '${count} onglets reçus',
               other: '${count} onglets reçus',
             ),
@@ -1300,40 +1291,36 @@ extension on TranslationsFrFr {
       'snatcher.snatchedCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
               count,
               one: 'Récupéré: ${count} objet',
-              few: 'Récupéré: ${count} objets',
               many: 'Récupéré: ${count} objets',
               other: 'Récupéré: ${count} objets',
             ),
       'snatcher.filesAlreadySnatched' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
               count,
               one: '${count} fichier déjà récupéré',
-              few: '${count} fichiers déjà récupérés',
               many: '${count} fichiers déjà récupérés',
               other: '${count} fichiers déjà récupérés',
             ),
       'snatcher.failedToSnatchFiles' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
               count,
               one: 'Échec de la récupération de ${count} fichier',
-              few: 'Échec de la récupération de ${count} fichiers',
               many: 'Échec de la récupération de ${count} fichiers',
               other: 'Échec de la récupération de ${count} fichiers',
             ),
       'snatcher.cancelledFiles' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('fr'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('fr_FR'))(
               count,
               one: '${count} fichier annulé',
-              few: '${count} fichiers annulés',
               many: '${count} fichiers annulés',
               other: '${count} fichiers annulés',
             ),

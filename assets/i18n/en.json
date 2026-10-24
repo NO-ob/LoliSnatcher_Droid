@@ -129,8 +129,6 @@
         "tabsRestored": "Tabs restored",
         "restoredTabsCount(param=count)": {
             "one": "Restored ${count} tab from previous session",
-            "few": "Restored ${count} tabs from previous session",
-            "many": "Restored ${count} tabs from previous session",
             "other": "Restored ${count} tabs from previous session"
         },
         "someRestoredTabsHadIssues": "Some restored tabs had unknown boorus or broken characters.",
@@ -139,15 +137,11 @@
         "tabsMerged": "Tabs merged",
         "addedTabsCount(param=count)": {
             "one": "Added ${count} new tab",
-            "few": "Added ${count} new tabs",
-            "many": "Added ${count} new tabs",
             "other": "Added ${count} new tabs"
         },
         "tabsReplaced": "Tabs replaced",
         "receivedTabsCount(param=count)": {
             "one": "Received ${count} tab",
-            "few": "Received ${count} tabs",
-            "many": "Received ${count} tabs",
             "other": "Received ${count} tabs"
         }
     },
@@ -167,26 +161,18 @@
         "itemsSnatched": "Items snatched",
         "snatchedCount(param=count)": {
             "one": "Snatched: ${count} item",
-            "few": "Snatched: ${count} items",
-            "many": "Snatched: ${count} items",
             "other": "Snatched: ${count} items"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} file was already snatched",
-            "few": "${count} files were already snatched",
-            "many": "${count} files were already snatched",
             "other": "${count} files were already snatched"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "Failed to snatch ${count} file",
-            "few": "Failed to snatch ${count} files",
-            "many": "Failed to snatch ${count} files",
             "other": "Failed to snatch ${count} files"
         },
         "cancelledFiles(param=count)": {
             "one": "Cancelled ${count} file",
-            "few": "Cancelled ${count} files",
-            "many": "Cancelled ${count} files",
             "other": "Cancelled ${count} files"
         },
         "snatchingImages": "Snatching images",
@@ -194,8 +180,6 @@
         "addedItemToQueue": "Added item to snatch queue",
         "addedItemsToQueue(param=count)": {
             "one": "Added ${count} item to snatch queue",
-            "few": "Added ${count} items to snatch queue",
-            "many": "Added ${count} items to snatch queue",
             "other": "Added ${count} items to snatch queue"
         }
     },
@@ -246,7 +230,7 @@
         "keepLastDuplicateTabs": "Keep last",
         "skipDuplicateTabDelete": "Skip",
         "shuffleTabs": "Shuffle tabs",
-        "tabRandomlyShuffled": "Tab randomly shuffled",
+        "tabRandomlyShuffled": "Tabs randomly shuffled",
         "tabOrderSaved": "Tab order saved",
         "scrollToCurrent": "Scroll to current tab",
         "scrollToTop": "Scroll to top",
@@ -286,8 +270,6 @@
         "reversed": "(reversed)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "Are you sure you want to delete ${count} tab?",
-            "few": "Are you sure you want to delete ${count} tabs?",
-            "many": "Are you sure you want to delete ${count} tabs?",
             "other": "Are you sure you want to delete ${count} tabs?"
         },
         "filters": {
@@ -337,15 +319,11 @@
         "deleteHistoryEntries": "Delete history entries",
         "deleteItemsConfirm(param=count)": {
             "one": "Are you sure you want to delete ${count} item?",
-            "few": "Are you sure you want to delete ${count} items?",
-            "many": "Are you sure you want to delete ${count} items?",
             "other": "Are you sure you want to delete ${count} items?"
         },
         "clearSelection": "Clear selection",
         "deleteItems(param=count)": {
             "one": "Delete ${count} item",
-            "few": "Delete ${count} items",
-            "many": "Delete ${count} items",
             "other": "Delete ${count} items"
         }
     },
@@ -704,9 +682,9 @@
             "deleteDatabaseConfirm": "Delete database?",
             "databaseDeleted": "Database deleted!",
             "appRestartRequired": "An app restart is required!",
-            "clearSnatchedItems": "Clear snatched items",
-            "clearAllSnatchedConfirm": "Clear all snatched items?",
-            "snatchedItemsCleared": "Snatched items cleared",
+            "clearSnatchedItems": "Clear download history",
+            "clearAllSnatchedConfirm": "Clear all download history?",
+            "snatchedItemsCleared": "Download history cleared",
             "appRestartMayBeRequired": "An app restart may be required!",
             "clearFavouritedItems": "Clear favourited items",
             "clearAllFavouritedConfirm": "Clear all favourited items?",
@@ -723,7 +701,7 @@
             "failedItemsPurgeStartedTitle": "Failed item purge started",
             "failedItemsPurgeInfo": "Items that failed to update will be removed from the database",
             "updateSankakuUrls": "Update Sankaku URLs",
-            "updating(param=count)": "Updating ${count: int} items:",
+            "updating(param=count)": "Updating items: ${count: int}",
             "left(param=count)": "Left: ${count: int}",
             "done(param=count)": "Done: ${count: int}",
             "failedSkipped(param=count)": "Failed/Skipped: ${count: int}",
@@ -858,7 +836,7 @@
             "cacheStats": "Cache stats:",
             "loading": "Loading…",
             "empty": "Empty",
-            "inFilesPlural(param=size, param=count)": "${size: String}, ${count: int} files",
+            "inFilesPlural(param=size, param=count)": "${size: String}, files: ${count: int}",
             "inFileSingular(param=size)": "${size: String}, 1 file",
             "cacheTypeTotal": "Total",
             "cacheTypeFavicons": "Favicons",
@@ -884,9 +862,9 @@
             "noFiltersAdded": "No filters added",
             "removeHidden": "Completely hide items which match Hidden filters",
             "removeMarked": "Completely hide items which match Marked filters",
-            "removeFavourited": "Remove favourited items",
-            "removeSnatched": "Remove snatched items",
-            "removeAI": "Remove AI items"
+            "removeFavourited": "Hide favourited items",
+            "removeSnatched": "Hide downloaded items",
+            "removeAI": "Hide AI-tagged items"
         },
         "sync": {
             "title": "Sync",
@@ -908,7 +886,7 @@
             "syncFavsFromHelpText1": "Allows to set from where the sync should start from, useful if you already synced all your favourites before and want to sync only the newest items",
             "syncFavsFromHelpText2": "If you want to sync from the beginning leave this field blank",
             "syncFavsFromHelpText3": "Example: You have X amount of favourites, set this field to 100, sync will start from item #100 and go until it reaches X",
-            "syncFavsFromHelpText4": "Order of snatched: From oldest (0) to newest (X)",
+            "syncFavsFromHelpText4": "Order of favourites: From oldest (0) to newest (X)",
             "sendSnatchedHistory": "Send snatched history",
             "snatchedCount(param=count)": "Snatched: ${count: String}",
             "syncSnatchedFrom": "Sync snatched from #…",
@@ -929,7 +907,7 @@
             "sendTags": "Send tags",
             "tagsCount(param=count)": "Tags: ${count: String}",
             "tagsSyncMode": "Tags sync mode",
-            "tagsSyncModePreferTypeIfNone": "Preserve type: If the tag exists with a tag type on the other device and it doesn't on this device it will be skipped",
+            "tagsSyncModePreferTypeIfNone": "Preserve type: Do not overwrite an existing known tag type with an unknown type during import",
             "tagsSyncModeOverwrite": "Overwrite: All tags will be added, if a tag and tag type exists on the other device it will be overwritten",
             "preferTypeIfNone": "Preserve type",
             "overwrite": "Overwrite",
@@ -1068,8 +1046,6 @@
         "makeUnstaleable": "Make unstaleable",
         "deleteTags(param=count)": {
             "one": "Delete ${count} tag",
-            "few": "Delete ${count} tags",
-            "many": "Delete ${count} tags",
             "other": "Delete ${count} tags"
         },
         "deleteTagsTitle": "Delete tags",
@@ -1304,8 +1280,6 @@
         "loadingFileMessage": "This can take some time, please wait…",
         "sources(param=count)": {
             "one": "Source",
-            "few": "Sources",
-            "many": "Sources",
             "other": "Sources"
         }
     },
@@ -1374,8 +1348,6 @@
             "loadingPage(param=pageNum)": "Loading page #${pageNum: int}…",
             "startedAgo(param=seconds)": {
                 "one": "Started ${seconds} second ago",
-                "few": "Started ${seconds} seconds ago",
-                "many": "Started ${seconds} seconds ago",
                 "other": "Started ${seconds} seconds ago"
             },
             "tapToRetryIfStuck": "Tap to retry if request seems stuck or taking too long",

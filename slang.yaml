@@ -8,6 +8,8 @@ string_interpolation: dart
 timestamp: false
 translate_var: loc
 translation_overrides: true
+imports:
+  - package:lolisnatcher/src/utils/localization_plural_rules.dart
 format:
   enabled: true
   width: 150

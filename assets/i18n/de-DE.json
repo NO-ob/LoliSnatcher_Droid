@@ -126,8 +126,6 @@
         "tabsRestored": "Tabs wiederhergestellt",
         "restoredTabsCount(param=count)": {
             "one": "${count} Tab aus vorheriger Sitzung wiederhergestellt",
-            "few": "${count} Tabs aus vorheriger Sitzung wiederhergestellt",
-            "many": "${count} Tabs aus vorheriger Sitzung wiederhergestellt",
             "other": "${count} Tabs aus vorheriger Sitzung wiederhergestellt"
         },
         "someRestoredTabsHadIssues": "Einige wiederhergestellte Tabs enthielten unbekannte Boorus oder Zeichen.",
@@ -136,15 +134,11 @@
         "tabsMerged": "Tabs zusammengeführt",
         "addedTabsCount(param=count)": {
             "one": "${count} neue Tabs hinzugefügt",
-            "few": "${count} neue Tabs hinzugefügt",
-            "many": "${count} neue Tabs hinzugefügt",
             "other": "${count} neue Tabs hinzugefügt"
         },
         "tabsReplaced": "Tabs ersetzt",
         "receivedTabsCount(param=count)": {
             "one": "${count} Tab erhalten",
-            "few": "${count} Tabs erhalten",
-            "many": "${count} Tabs erhalten",
             "other": "${count} Tabs erhalten"
         }
     },
@@ -164,26 +158,18 @@
         "itemsSnatched": "Heruntergeladene Dateien",
         "snatchedCount(param=count)": {
             "one": "Heruntergeladen: ${count} Datei",
-            "few": "Heruntergeladen: ${count} Dateien",
-            "many": "Heruntergeladen: ${count} Dateien",
             "other": "Heruntergeladen: ${count} Dateien"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} Datei wurde bereits heruntergeladen",
-            "few": "${count} Dateien wurden bereits heruntergeladen",
-            "many": "${count} Dateien wurden bereits heruntergeladen",
             "other": "${count} Dateien wurden bereits heruntergeladen"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "Fehler beim Herunterladen von ${count} Datei",
-            "few": "Fehler beim Herunterladen von ${count} Dateien",
-            "many": "Fehler beim Herunterladen von ${count} Dateien",
             "other": "Fehler beim Herunterladen von ${count} Dateien"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} Datei abgebrochen",
-            "few": "${count} Dateien abgebrochen",
-            "many": "${count} Dateien abgebrochen",
             "other": "${count} Dateien abgebrochen"
         },
         "snatchingImages": "Bilder herunterladen",
@@ -191,8 +177,6 @@
         "addedItemToQueue": "Datei zu Downloads hinzugefügt",
         "addedItemsToQueue(param=count)": {
             "one": "${count} Datei zu Downloads hinzugefügt",
-            "few": "${count} Dateien zu Downloads hinzugefügt",
-            "many": "${count} Dateien zu Downloads hinzugefügt",
             "other": "${count} Dateien zu Downloads hinzugefügt"
         }
     },
@@ -283,8 +267,6 @@
         "reversed": "(invertiert)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "Bist du sicher, dass du ${count} Tab löschen willst?",
-            "few": "Bist du sicher, dass du ${count} Tabs löschen willst?",
-            "many": "Bist du sicher, dass du ${count} Tabs löschen willst?",
             "other": "Bist du sicher, dass du ${count} Tabs löschen willst?"
         },
         "filters": {
@@ -334,15 +316,11 @@
         "deleteHistoryEntries": "Lösche Verlaufseinträge",
         "deleteItemsConfirm(param=count)": {
             "one": "${count} Eintrag wirklich löschen?",
-            "few": "${count} Einträge wirklich löschen?",
-            "many": "${count} Einträge wirklich löschen?",
             "other": "${count} Einträge wirklich löschen?"
         },
         "clearSelection": "Auswahl entfernen",
         "deleteItems(param=count)": {
             "one": "Lösche ${count} Eintrag",
-            "few": "Lösche ${count} Einträge",
-            "many": "Lösche ${count} Einträge",
             "other": "Lösche ${count} Einträge"
         }
     },
@@ -720,7 +698,7 @@
             "failedItemsPurgeStartedTitle": "Entfernen fehlgeschlagener Posts gestartet",
             "failedItemsPurgeInfo": "Posts, bei denen die Aktualisierung fehlschlägt, werden von der Datenbank entfernt",
             "updateSankakuUrls": "Sankaku-URLs aktualisieren",
-            "updating(param=count)": "Aktualisiere ${count: int} Posts:",
+            "updating(param=count)": "Elemente werden aktualisiert: ${count: int}",
             "left(param=count)": "Verbleibend: ${count: int}",
             "done(param=count)": "Abgeschlossen: ${count: int}",
             "failedSkipped(param=count)": "Fehlgeschlagen/Übersprungen: ${count: int}",
@@ -855,7 +833,7 @@
             "cacheStats": "Cache-Statistik:",
             "loading": "Laden...",
             "empty": "Leer",
-            "inFilesPlural(param=size, param=count)": "${size: String}, ${count: int} Dateien",
+            "inFilesPlural(param=size, param=count)": "${size: String}, Dateien: ${count: int}",
             "inFileSingular(param=size)": "${size: String}, 1 Datei",
             "cacheTypeTotal": "Gesamt",
             "cacheTypeFavicons": "Favicons",
@@ -1065,8 +1043,6 @@
         "makeUnstaleable": "Nicht ablaufbar machen",
         "deleteTags(param=count)": {
             "one": "${count} Tag löschen",
-            "few": "${count} Tags löschen",
-            "many": "${count} Tags löschen",
             "other": "${count} Tags löschen"
         },
         "deleteTagsTitle": "Tags löschen",
@@ -1301,8 +1277,6 @@
         "loadingFileMessage": "Dies kann dauern, bitte warten...",
         "sources(param=count)": {
             "one": "Quelle",
-            "few": "Quellen",
-            "many": "Quellen",
             "other": "Quellen"
         }
     },
@@ -1371,8 +1345,6 @@
             "loadingPage(param=pageNum)": "Lade Seite #${pageNum: int}...",
             "startedAgo(param=seconds)": {
                 "one": "Vor ${seconds} Sekunde gestartet",
-                "few": "Vor ${seconds} Sekunden gestartet",
-                "many": "Vor ${seconds} Sekunden gestartet",
                 "other": "Vor ${seconds} Sekunden gestartet"
             },
             "tapToRetryIfStuck": "Zum Wiederholen antippen, wenn Anfrage festhängt oder zu lange braucht",

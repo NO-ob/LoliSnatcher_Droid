@@ -125,9 +125,6 @@
         "appFixedRatingAutomatically": "评级已自动修正。请在以后的搜索中使用正确的评级",
         "tabsRestored": "标签页已恢复",
         "restoredTabsCount(param=count)": {
-            "one": "从上次会话中恢复了 ${count} 个标签页",
-            "few": "从上次会话中恢复了 ${count} 个标签页",
-            "many": "从上次会话中恢复了 ${count} 个标签页",
             "other": "从上次会话中恢复了 ${count} 个标签页"
         },
         "someRestoredTabsHadIssues": "一些恢复的标签页中有未知的booru或损坏的字符。",
@@ -135,16 +132,10 @@
         "listOfBrokenTabs": "损坏的标签页列表：",
         "tabsMerged": "标签页已合并",
         "addedTabsCount(param=count)": {
-            "one": "已添加 ${count} 个新标签页",
-            "few": "添加了 ${count} 个新标签页",
-            "many": "添加了 ${count} 个新标签页",
             "other": "添加了 ${count} 个新标签页"
         },
         "tabsReplaced": "标签页已替换",
         "receivedTabsCount(param=count)": {
-            "one": "接收了 ${count} 个标签页",
-            "few": "接收了 ${count} 个标签页",
-            "many": "接收了 ${count} 个标签页",
             "other": "接收了 ${count} 个标签页"
         }
     },
@@ -163,36 +154,21 @@
         "startingNextQueueItem": "开始下载下一项…",
         "itemsSnatched": "项目已下载",
         "snatchedCount(param=count)": {
-            "one": "已下载：${count} 个项目",
-            "few": "已下载：${count} 个项目",
-            "many": "已下载：${count} 个项目",
             "other": "已下载：${count} 个项目"
         },
         "filesAlreadySnatched(param=count)": {
-            "one": "${count} 个文件之前已下载过",
-            "few": "${count} 个文件之前已下载过",
-            "many": "${count} 个文件之前已下载过",
             "other": "${count} 个文件之前已下载过"
         },
         "failedToSnatchFiles(param=count)": {
-            "one": "${count} 个文件下载失败",
-            "few": "${count} 个文件下载失败",
-            "many": "${count} 个文件下载失败",
             "other": "${count} 个文件下载失败"
         },
         "cancelledFiles(param=count)": {
-            "one": "已取消 ${count} 个文件下载",
-            "few": "已取消 ${count} 个文件下载",
-            "many": "已取消 ${count} 个文件下载",
             "other": "已取消 ${count} 个文件下载"
         },
         "snatchingImages": "正在下载图片",
         "doNotCloseApp": "不要关闭应用！",
         "addedItemToQueue": "添加项目到下载队列",
         "addedItemsToQueue(param=count)": {
-            "one": "已添加 ${count} 个项目到下载队列",
-            "few": "已添加 ${count} 个项目到下载队列",
-            "many": "已添加 ${count} 个项目到下载队列",
             "other": "已添加 ${count} 个项目到下载队列"
         }
     },
@@ -282,9 +258,6 @@
         "alphabetically": "按名称排序",
         "reversed": "（反向）",
         "areYouSureDeleteTabs(param=count)": {
-            "one": "确认要删除 ${count} 个标签页吗？",
-            "few": "确认要删除 ${count} 个标签页吗？",
-            "many": "确认要删除 ${count} 个标签页吗？",
             "other": "确认要删除 ${count} 个标签页吗？"
         },
         "filters": {
@@ -333,16 +306,10 @@
         "delete": "删除",
         "deleteHistoryEntries": "删除历史记录",
         "deleteItemsConfirm(param=count)": {
-            "one": "确定要删除 ${count} 个项目吗？",
-            "few": "确定要删除 ${count} 个项目吗？",
-            "many": "确定要删除 ${count} 个项目吗？",
             "other": "确定要删除 ${count} 个项目吗？"
         },
         "clearSelection": "清除选择",
         "deleteItems(param=count)": {
-            "one": "删除 ${count} 个项目",
-            "few": "删除 ${count} 个项目",
-            "many": "删除 ${count} 个项目",
             "other": "删除 ${count} 个项目"
         }
     },
@@ -720,7 +687,7 @@
             "failedItemsPurgeStartedTitle": "已开始清除失败条目",
             "failedItemsPurgeInfo": "更新失败的项目将会从数据库中移除",
             "updateSankakuUrls": "更新Sankaku链接",
-            "updating(param=count)": "正在更新 ${count: int} 个项目：",
+            "updating(param=count)": "正在更新项目: ${count: int}",
             "left(param=count)": "剩余：${count: int}",
             "done(param=count)": "已完成：${count: int}",
             "failedSkipped(param=count)": "失败/已跳过：${count: int}",
@@ -855,7 +822,7 @@
             "cacheStats": "缓存统计：",
             "loading": "加载中…",
             "empty": "空的",
-            "inFilesPlural(param=size, param=count)": "${size: String}, ${count: int} 个文件",
+            "inFilesPlural(param=size, param=count)": "${size: String}, 文件数: ${count: int}",
             "inFileSingular(param=size)": "${size: String}, 1个文件",
             "cacheTypeTotal": "总计",
             "cacheTypeFavicons": "网站图标",
@@ -1064,9 +1031,6 @@
         "resetStale": "重置过期时间",
         "makeUnstaleable": "设置为永不过期",
         "deleteTags(param=count)": {
-            "one": "删除 ${count} 个标签",
-            "few": "删除 ${count} 个标签",
-            "many": "删除 ${count} 个标签",
             "other": "删除 ${count} 个标签"
         },
         "deleteTagsTitle": "删除标签",
@@ -1300,9 +1264,6 @@
         "loadingFile": "正在加载文件",
         "loadingFileMessage": "可能需要一些时间，请稍等",
         "sources(param=count)": {
-            "one": "来源",
-            "few": "来源",
-            "many": "来源",
             "other": "来源"
         }
     },
@@ -1370,9 +1331,6 @@
             "reachedEndSubtitle(param=pageNum)": "已加载页数: ${pageNum: int}\n点此重新加载最后一页",
             "loadingPage(param=pageNum)": "正在加载第 ${pageNum: int} 页…",
             "startedAgo(param=seconds)": {
-                "one": "在 ${seconds} 秒前开始",
-                "few": "在 ${seconds} 秒前开始",
-                "many": "在 ${seconds} 秒前开始",
                 "other": "在 ${seconds} 秒前开始"
             },
             "tapToRetryIfStuck": "如果感觉卡住了或者太慢可以点击重试",

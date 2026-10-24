@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 
@@ -407,11 +408,8 @@ class _Translations$searchHandler$zh_CN extends Translations$searchHandler$en {
   @override
   String restoredTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '从上次会话中恢复了 ${count} 个标签页',
-        few: '从上次会话中恢复了 ${count} 个标签页',
-        many: '从上次会话中恢复了 ${count} 个标签页',
         other: '从上次会话中恢复了 ${count} 个标签页',
       );
   @override
@@ -427,11 +425,8 @@ class _Translations$searchHandler$zh_CN extends Translations$searchHandler$en {
   @override
   String addedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '已添加 ${count} 个新标签页',
-        few: '添加了 ${count} 个新标签页',
-        many: '添加了 ${count} 个新标签页',
         other: '添加了 ${count} 个新标签页',
       );
   @override
@@ -439,11 +434,8 @@ class _Translations$searchHandler$zh_CN extends Translations$searchHandler$en {
   @override
   String receivedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '接收了 ${count} 个标签页',
-        few: '接收了 ${count} 个标签页',
-        many: '接收了 ${count} 个标签页',
         other: '接收了 ${count} 个标签页',
       );
 }
@@ -484,41 +476,29 @@ class _Translations$snatcher$zh_CN extends Translations$snatcher$en {
   @override
   String snatchedCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '已下载：${count} 个项目',
-        few: '已下载：${count} 个项目',
-        many: '已下载：${count} 个项目',
         other: '已下载：${count} 个项目',
       );
   @override
   String filesAlreadySnatched({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '${count} 个文件之前已下载过',
-        few: '${count} 个文件之前已下载过',
-        many: '${count} 个文件之前已下载过',
         other: '${count} 个文件之前已下载过',
       );
   @override
   String failedToSnatchFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '${count} 个文件下载失败',
-        few: '${count} 个文件下载失败',
-        many: '${count} 个文件下载失败',
         other: '${count} 个文件下载失败',
       );
   @override
   String cancelledFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '已取消 ${count} 个文件下载',
-        few: '已取消 ${count} 个文件下载',
-        many: '已取消 ${count} 个文件下载',
         other: '已取消 ${count} 个文件下载',
       );
   @override
@@ -530,11 +510,8 @@ class _Translations$snatcher$zh_CN extends Translations$snatcher$en {
   @override
   String addedItemsToQueue({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '已添加 ${count} 个项目到下载队列',
-        few: '已添加 ${count} 个项目到下载队列',
-        many: '已添加 ${count} 个项目到下载队列',
         other: '已添加 ${count} 个项目到下载队列',
       );
 }
@@ -731,11 +708,8 @@ class _Translations$tabs$zh_CN extends Translations$tabs$en {
   @override
   String areYouSureDeleteTabs({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '确认要删除 ${count} 个标签页吗？',
-        few: '确认要删除 ${count} 个标签页吗？',
-        many: '确认要删除 ${count} 个标签页吗？',
         other: '确认要删除 ${count} 个标签页吗？',
       );
   @override
@@ -788,11 +762,8 @@ class _Translations$history$zh_CN extends Translations$history$en {
   @override
   String deleteItemsConfirm({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '确定要删除 ${count} 个项目吗？',
-        few: '确定要删除 ${count} 个项目吗？',
-        many: '确定要删除 ${count} 个项目吗？',
         other: '确定要删除 ${count} 个项目吗？',
       );
   @override
@@ -800,11 +771,8 @@ class _Translations$history$zh_CN extends Translations$history$en {
   @override
   String deleteItems({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '删除 ${count} 个项目',
-        few: '删除 ${count} 个项目',
-        many: '删除 ${count} 个项目',
         other: '删除 ${count} 个项目',
       );
 }
@@ -993,11 +961,8 @@ class _Translations$tagsManager$zh_CN extends Translations$tagsManager$en {
   @override
   String deleteTags({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '删除 ${count} 个标签',
-        few: '删除 ${count} 个标签',
-        many: '删除 ${count} 个标签',
         other: '删除 ${count} 个标签',
       );
   @override
@@ -1457,11 +1422,8 @@ class _Translations$gallery$zh_CN extends Translations$gallery$en {
   @override
   String sources({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         count,
-        one: '来源',
-        few: '来源',
-        many: '来源',
         other: '来源',
       );
 }
@@ -2391,7 +2353,7 @@ class _Translations$settings$database$zh_CN extends Translations$settings$databa
   String get updateSankakuUrls => TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? '更新Sankaku链接';
   @override
   String updating({required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? '正在更新 ${count} 个项目：';
+      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? '正在更新项目: ${count}';
   @override
   String left({required int count}) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? '剩余：${count}';
   @override
@@ -2727,7 +2689,7 @@ class _Translations$settings$cache$zh_CN extends Translations$settings$cache$en 
   String get empty => TranslationOverrides.string(_root.$meta, 'settings.cache.empty', {}) ?? '空的';
   @override
   String inFilesPlural({required String size, required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, ${count} 个文件';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, 文件数: ${count}';
   @override
   String inFileSingular({required String size}) =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1个文件';
@@ -3347,11 +3309,8 @@ class _Translations$preview$error$zh_CN extends Translations$preview$error$en {
   @override
   String startedAgo({required num seconds}) =>
       TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
         seconds,
-        one: '在 ${seconds} 秒前开始',
-        few: '在 ${seconds} 秒前开始',
-        many: '在 ${seconds} 秒前开始',
         other: '在 ${seconds} 秒前开始',
       );
   @override
@@ -3724,11 +3683,8 @@ extension on TranslationsZhCn {
           'searchHandler.restoredTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '从上次会话中恢复了 ${count} 个标签页',
-                  few: '从上次会话中恢复了 ${count} 个标签页',
-                  many: '从上次会话中恢复了 ${count} 个标签页',
                   other: '从上次会话中恢复了 ${count} 个标签页',
                 ),
           'searchHandler.someRestoredTabsHadIssues' =>
@@ -3740,22 +3696,16 @@ extension on TranslationsZhCn {
           'searchHandler.addedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '已添加 ${count} 个新标签页',
-                  few: '添加了 ${count} 个新标签页',
-                  many: '添加了 ${count} 个新标签页',
                   other: '添加了 ${count} 个新标签页',
                 ),
           'searchHandler.tabsReplaced' => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsReplaced', {}) ?? '标签页已替换',
           'searchHandler.receivedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '接收了 ${count} 个标签页',
-                  few: '接收了 ${count} 个标签页',
-                  many: '接收了 ${count} 个标签页',
                   other: '接收了 ${count} 个标签页',
                 ),
           'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? '下载器',
@@ -3774,41 +3724,29 @@ extension on TranslationsZhCn {
           'snatcher.snatchedCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '已下载：${count} 个项目',
-                  few: '已下载：${count} 个项目',
-                  many: '已下载：${count} 个项目',
                   other: '已下载：${count} 个项目',
                 ),
           'snatcher.filesAlreadySnatched' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '${count} 个文件之前已下载过',
-                  few: '${count} 个文件之前已下载过',
-                  many: '${count} 个文件之前已下载过',
                   other: '${count} 个文件之前已下载过',
                 ),
           'snatcher.failedToSnatchFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '${count} 个文件下载失败',
-                  few: '${count} 个文件下载失败',
-                  many: '${count} 个文件下载失败',
                   other: '${count} 个文件下载失败',
                 ),
           'snatcher.cancelledFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '已取消 ${count} 个文件下载',
-                  few: '已取消 ${count} 个文件下载',
-                  many: '已取消 ${count} 个文件下载',
                   other: '已取消 ${count} 个文件下载',
                 ),
           'snatcher.snatchingImages' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingImages', {}) ?? '正在下载图片',
@@ -3817,11 +3755,8 @@ extension on TranslationsZhCn {
           'snatcher.addedItemsToQueue' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '已添加 ${count} 个项目到下载队列',
-                  few: '已添加 ${count} 个项目到下载队列',
-                  many: '已添加 ${count} 个项目到下载队列',
                   other: '已添加 ${count} 个项目到下载队列',
                 ),
           'multibooru.title' => TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? '多站',
@@ -3912,11 +3847,8 @@ extension on TranslationsZhCn {
           'tabs.areYouSureDeleteTabs' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '确认要删除 ${count} 个标签页吗？',
-                  few: '确认要删除 ${count} 个标签页吗？',
-                  many: '确认要删除 ${count} 个标签页吗？',
                   other: '确认要删除 ${count} 个标签页吗？',
                 ),
           'tabs.filters.loaded' => TranslationOverrides.string(_root.$meta, 'tabs.filters.loaded', {}) ?? '已加载',
@@ -3973,22 +3905,16 @@ extension on TranslationsZhCn {
           'history.deleteItemsConfirm' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '确定要删除 ${count} 个项目吗？',
-                  few: '确定要删除 ${count} 个项目吗？',
-                  many: '确定要删除 ${count} 个项目吗？',
                   other: '确定要删除 ${count} 个项目吗？',
                 ),
           'history.clearSelection' => TranslationOverrides.string(_root.$meta, 'history.clearSelection', {}) ?? '清除选择',
           'history.deleteItems' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '删除 ${count} 个项目',
-                  few: '删除 ${count} 个项目',
-                  many: '删除 ${count} 个项目',
                   other: '删除 ${count} 个项目',
                 ),
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? '网页模式',
@@ -4515,7 +4441,7 @@ extension on TranslationsZhCn {
             TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? '更新Sankaku链接',
           'settings.database.updating' => ({
             required int count,
-          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? '正在更新 ${count} 个项目：',
+          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? '正在更新项目: ${count}',
           'settings.database.left' => ({
             required int count,
           }) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? '剩余：${count}',
@@ -4747,7 +4673,7 @@ extension on TranslationsZhCn {
           'settings.cache.inFilesPlural' => ({
             required String size,
             required int count,
-          }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, ${count} 个文件',
+          }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, 文件数: ${count}',
           'settings.cache.inFileSingular' => ({
             required String size,
           }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1个文件',
@@ -5012,11 +4938,8 @@ extension on TranslationsZhCn {
           'tagsManager.deleteTags' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '删除 ${count} 个标签',
-                  few: '删除 ${count} 个标签',
-                  many: '删除 ${count} 个标签',
                   other: '删除 ${count} 个标签',
                 ),
           'tagsManager.deleteTagsTitle' => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? '删除标签',
@@ -5272,11 +5195,8 @@ extension on TranslationsZhCn {
           'gallery.sources' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   count,
-                  one: '来源',
-                  few: '来源',
-                  many: '来源',
                   other: '来源',
                 ),
           'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? '下载',
@@ -5359,11 +5279,8 @@ extension on TranslationsZhCn {
           'preview.error.startedAgo' =>
             ({required num seconds}) =>
                 TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('zh'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('zh_CN'))(
                   seconds,
-                  one: '在 ${seconds} 秒前开始',
-                  few: '在 ${seconds} 秒前开始',
-                  many: '在 ${seconds} 秒前开始',
                   other: '在 ${seconds} 秒前开始',
                 ),
           'preview.error.tapToRetryIfStuck' => TranslationOverrides.string(_root.$meta, 'preview.error.tapToRetryIfStuck', {}) ?? '如果感觉卡住了或者太慢可以点击重试',

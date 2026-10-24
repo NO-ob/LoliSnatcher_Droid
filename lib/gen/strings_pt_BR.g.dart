@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 
@@ -426,10 +427,9 @@ class _Translations$searchHandler$pt_BR extends Translations$searchHandler$en {
   @override
   String restoredTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: '${count} aba restaurada da sessão anterior',
-        few: '${count} abas restauradas da sessão anterior',
         many: '${count} abas restauradas da sessão anterior',
         other: '${count} abas restauradas da sessão anterior',
       );
@@ -447,10 +447,9 @@ class _Translations$searchHandler$pt_BR extends Translations$searchHandler$en {
   @override
   String addedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: '${count} nova aba adicionada',
-        few: '${count} novas abas adicionadas',
         many: '${count} novas abas adicionadas',
         other: '${count} novas abas adicionadas',
       );
@@ -459,10 +458,9 @@ class _Translations$searchHandler$pt_BR extends Translations$searchHandler$en {
   @override
   String receivedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: '${count} aba recebida',
-        few: '${count} abas recebidas',
         many: '${count} abas recebidas',
         other: '${count} abas recebidas',
       );
@@ -508,40 +506,36 @@ class _Translations$snatcher$pt_BR extends Translations$snatcher$en {
   @override
   String snatchedCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: 'Baixado: ${count} item',
-        few: 'Baixados: ${count} itens',
         many: 'Baixados: ${count} itens',
         other: 'Baixados: ${count} itens',
       );
   @override
   String filesAlreadySnatched({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: '${count} arquivo já foi baixado',
-        few: '${count} arquivos já foram baixados',
         many: '${count} arquivos já foram baixados',
         other: '${count} arquivos já foram baixados',
       );
   @override
   String failedToSnatchFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: 'Falha ao baixar ${count} arquivo',
-        few: 'Falha ao baixar ${count} arquivos',
         many: 'Falha ao baixar ${count} arquivos',
         other: 'Falha ao baixar ${count} arquivos',
       );
   @override
   String cancelledFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: '${count} arquivo cancelado',
-        few: '${count} arquivos cancelados',
         many: '${count} arquivos cancelados',
         other: '${count} arquivos cancelados',
       );
@@ -554,10 +548,9 @@ class _Translations$snatcher$pt_BR extends Translations$snatcher$en {
   @override
   String addedItemsToQueue({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: '${count} item adicionado a fila de download',
-        few: '${count} itens adicionados a fila de download',
         many: '${count} itens adicionados a fila de download',
         other: '${count} itens adicionados a fila de download',
       );
@@ -774,10 +767,9 @@ class _Translations$tabs$pt_BR extends Translations$tabs$en {
   @override
   String areYouSureDeleteTabs({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: 'Você tem certeza de que quer deletar ${count} aba?',
-        few: 'Você tem certeza de que quer deletar ${count} abas?',
         many: 'Você tem certeza de que quer deletar ${count} abas?',
         other: 'Você tem certeza de que quer deletar ${count} abas?',
       );
@@ -834,10 +826,9 @@ class _Translations$history$pt_BR extends Translations$history$en {
   @override
   String deleteItemsConfirm({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: 'Tem certeza de que deseja excluir ${count} item?',
-        few: 'Tem certeza de que deseja excluir ${count} itens?',
         many: 'Tem certeza de que deseja excluir ${count} itens?',
         other: 'Tem certeza de que deseja excluir ${count} itens?',
       );
@@ -846,10 +837,9 @@ class _Translations$history$pt_BR extends Translations$history$en {
   @override
   String deleteItems({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: 'Excluir ${count} item',
-        few: 'Excluir ${count} itens',
         many: 'Excluir ${count} itens',
         other: 'Excluir ${count} itens',
       );
@@ -1044,10 +1034,9 @@ class _Translations$tagsManager$pt_BR extends Translations$tagsManager$en {
   @override
   String deleteTags({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: 'Excluir ${count} tag',
-        few: 'Excluir ${count} tags',
         many: 'Excluir ${count} tags',
         other: 'Excluir ${count} tags',
       );
@@ -1547,10 +1536,9 @@ class _Translations$gallery$pt_BR extends Translations$gallery$en {
   @override
   String sources({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         count,
         one: 'Fonte',
-        few: 'Fontes',
         many: 'Fontes',
         other: 'Fontes',
       );
@@ -2635,7 +2623,7 @@ class _Translations$settings$database$pt_BR extends Translations$settings$databa
   String get updateSankakuUrls => TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? 'Atualizar URLs do Sankaku';
   @override
   String updating({required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Atualizando ${count} itens:';
+      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Atualizando itens: ${count}';
   @override
   String left({required int count}) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Restantes: ${count}';
   @override
@@ -3046,7 +3034,7 @@ class _Translations$settings$cache$pt_BR extends Translations$settings$cache$en 
   String get empty => TranslationOverrides.string(_root.$meta, 'settings.cache.empty', {}) ?? 'Vazio';
   @override
   String inFilesPlural({required String size, required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, ${count} arquivos';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, arquivos: ${count}';
   @override
   String inFileSingular({required String size}) =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 arquivo';
@@ -3744,10 +3732,9 @@ class _Translations$preview$error$pt_BR extends Translations$preview$error$en {
   @override
   String startedAgo({required num seconds}) =>
       TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
         seconds,
         one: 'Iniciado há ${seconds} segundo',
-        few: 'Iniciado há ${seconds} segundos',
         many: 'Iniciado há ${seconds} segundos',
         other: 'Iniciado há ${seconds} segundos',
       );
@@ -4152,10 +4139,9 @@ extension on TranslationsPtBr {
           'searchHandler.restoredTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: '${count} aba restaurada da sessão anterior',
-                  few: '${count} abas restauradas da sessão anterior',
                   many: '${count} abas restauradas da sessão anterior',
                   other: '${count} abas restauradas da sessão anterior',
                 ),
@@ -4171,10 +4157,9 @@ extension on TranslationsPtBr {
           'searchHandler.addedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: '${count} nova aba adicionada',
-                  few: '${count} novas abas adicionadas',
                   many: '${count} novas abas adicionadas',
                   other: '${count} novas abas adicionadas',
                 ),
@@ -4182,10 +4167,9 @@ extension on TranslationsPtBr {
           'searchHandler.receivedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: '${count} aba recebida',
-                  few: '${count} abas recebidas',
                   many: '${count} abas recebidas',
                   other: '${count} abas recebidas',
                 ),
@@ -4209,40 +4193,36 @@ extension on TranslationsPtBr {
           'snatcher.snatchedCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: 'Baixado: ${count} item',
-                  few: 'Baixados: ${count} itens',
                   many: 'Baixados: ${count} itens',
                   other: 'Baixados: ${count} itens',
                 ),
           'snatcher.filesAlreadySnatched' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: '${count} arquivo já foi baixado',
-                  few: '${count} arquivos já foram baixados',
                   many: '${count} arquivos já foram baixados',
                   other: '${count} arquivos já foram baixados',
                 ),
           'snatcher.failedToSnatchFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: 'Falha ao baixar ${count} arquivo',
-                  few: 'Falha ao baixar ${count} arquivos',
                   many: 'Falha ao baixar ${count} arquivos',
                   other: 'Falha ao baixar ${count} arquivos',
                 ),
           'snatcher.cancelledFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: '${count} arquivo cancelado',
-                  few: '${count} arquivos cancelados',
                   many: '${count} arquivos cancelados',
                   other: '${count} arquivos cancelados',
                 ),
@@ -4253,10 +4233,9 @@ extension on TranslationsPtBr {
           'snatcher.addedItemsToQueue' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: '${count} item adicionado a fila de download',
-                  few: '${count} itens adicionados a fila de download',
                   many: '${count} itens adicionados a fila de download',
                   other: '${count} itens adicionados a fila de download',
                 ),
@@ -4369,10 +4348,9 @@ extension on TranslationsPtBr {
           'tabs.areYouSureDeleteTabs' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: 'Você tem certeza de que quer deletar ${count} aba?',
-                  few: 'Você tem certeza de que quer deletar ${count} abas?',
                   many: 'Você tem certeza de que quer deletar ${count} abas?',
                   other: 'Você tem certeza de que quer deletar ${count} abas?',
                 ),
@@ -4439,10 +4417,9 @@ extension on TranslationsPtBr {
           'history.deleteItemsConfirm' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: 'Tem certeza de que deseja excluir ${count} item?',
-                  few: 'Tem certeza de que deseja excluir ${count} itens?',
                   many: 'Tem certeza de que deseja excluir ${count} itens?',
                   other: 'Tem certeza de que deseja excluir ${count} itens?',
                 ),
@@ -4450,10 +4427,9 @@ extension on TranslationsPtBr {
           'history.deleteItems' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: 'Excluir ${count} item',
-                  few: 'Excluir ${count} itens',
                   many: 'Excluir ${count} itens',
                   other: 'Excluir ${count} itens',
                 ),
@@ -5099,7 +5075,7 @@ extension on TranslationsPtBr {
             TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? 'Atualizar URLs do Sankaku',
           'settings.database.updating' => ({
             required int count,
-          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Atualizando ${count} itens:',
+          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Atualizando itens: ${count}',
           'settings.database.left' => ({
             required int count,
           }) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Restantes: ${count}',
@@ -5379,7 +5355,7 @@ extension on TranslationsPtBr {
           'settings.cache.inFilesPlural' =>
             ({required String size, required int count}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ??
-                '${size}, ${count} arquivos',
+                '${size}, arquivos: ${count}',
           'settings.cache.inFileSingular' => ({
             required String size,
           }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 arquivo',
@@ -5702,10 +5678,9 @@ extension on TranslationsPtBr {
           'tagsManager.deleteTags' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: 'Excluir ${count} tag',
-                  few: 'Excluir ${count} tags',
                   many: 'Excluir ${count} tags',
                   other: 'Excluir ${count} tags',
                 ),
@@ -6012,10 +5987,9 @@ extension on TranslationsPtBr {
           'gallery.sources' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   count,
                   one: 'Fonte',
-                  few: 'Fontes',
                   many: 'Fontes',
                   other: 'Fontes',
                 ),
@@ -6112,10 +6086,9 @@ extension on TranslationsPtBr {
           'preview.error.startedAgo' =>
             ({required num seconds}) =>
                 TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pt'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pt_BR'))(
                   seconds,
                   one: 'Iniciado há ${seconds} segundo',
-                  few: 'Iniciado há ${seconds} segundos',
                   many: 'Iniciado há ${seconds} segundos',
                   other: 'Iniciado há ${seconds} segundos',
                 ),

@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 
@@ -423,11 +424,9 @@ class _Translations$searchHandler$de_DE extends Translations$searchHandler$en {
   @override
   String restoredTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: '${count} Tab aus vorheriger Sitzung wiederhergestellt',
-        few: '${count} Tabs aus vorheriger Sitzung wiederhergestellt',
-        many: '${count} Tabs aus vorheriger Sitzung wiederhergestellt',
         other: '${count} Tabs aus vorheriger Sitzung wiederhergestellt',
       );
   @override
@@ -445,11 +444,9 @@ class _Translations$searchHandler$de_DE extends Translations$searchHandler$en {
   @override
   String addedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: '${count} neue Tabs hinzugefügt',
-        few: '${count} neue Tabs hinzugefügt',
-        many: '${count} neue Tabs hinzugefügt',
         other: '${count} neue Tabs hinzugefügt',
       );
   @override
@@ -457,11 +454,9 @@ class _Translations$searchHandler$de_DE extends Translations$searchHandler$en {
   @override
   String receivedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: '${count} Tab erhalten',
-        few: '${count} Tabs erhalten',
-        many: '${count} Tabs erhalten',
         other: '${count} Tabs erhalten',
       );
 }
@@ -506,41 +501,33 @@ class _Translations$snatcher$de_DE extends Translations$snatcher$en {
   @override
   String snatchedCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: 'Heruntergeladen: ${count} Datei',
-        few: 'Heruntergeladen: ${count} Dateien',
-        many: 'Heruntergeladen: ${count} Dateien',
         other: 'Heruntergeladen: ${count} Dateien',
       );
   @override
   String filesAlreadySnatched({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: '${count} Datei wurde bereits heruntergeladen',
-        few: '${count} Dateien wurden bereits heruntergeladen',
-        many: '${count} Dateien wurden bereits heruntergeladen',
         other: '${count} Dateien wurden bereits heruntergeladen',
       );
   @override
   String failedToSnatchFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: 'Fehler beim Herunterladen von ${count} Datei',
-        few: 'Fehler beim Herunterladen von ${count} Dateien',
-        many: 'Fehler beim Herunterladen von ${count} Dateien',
         other: 'Fehler beim Herunterladen von ${count} Dateien',
       );
   @override
   String cancelledFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: '${count} Datei abgebrochen',
-        few: '${count} Dateien abgebrochen',
-        many: '${count} Dateien abgebrochen',
         other: '${count} Dateien abgebrochen',
       );
   @override
@@ -552,11 +539,9 @@ class _Translations$snatcher$de_DE extends Translations$snatcher$en {
   @override
   String addedItemsToQueue({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: '${count} Datei zu Downloads hinzugefügt',
-        few: '${count} Dateien zu Downloads hinzugefügt',
-        many: '${count} Dateien zu Downloads hinzugefügt',
         other: '${count} Dateien zu Downloads hinzugefügt',
       );
 }
@@ -768,11 +753,9 @@ class _Translations$tabs$de_DE extends Translations$tabs$en {
   @override
   String areYouSureDeleteTabs({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: 'Bist du sicher, dass du ${count} Tab löschen willst?',
-        few: 'Bist du sicher, dass du ${count} Tabs löschen willst?',
-        many: 'Bist du sicher, dass du ${count} Tabs löschen willst?',
         other: 'Bist du sicher, dass du ${count} Tabs löschen willst?',
       );
   @override
@@ -827,11 +810,9 @@ class _Translations$history$de_DE extends Translations$history$en {
   @override
   String deleteItemsConfirm({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: '${count} Eintrag wirklich löschen?',
-        few: '${count} Einträge wirklich löschen?',
-        many: '${count} Einträge wirklich löschen?',
         other: '${count} Einträge wirklich löschen?',
       );
   @override
@@ -839,11 +820,9 @@ class _Translations$history$de_DE extends Translations$history$en {
   @override
   String deleteItems({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: 'Lösche ${count} Eintrag',
-        few: 'Lösche ${count} Einträge',
-        many: 'Lösche ${count} Einträge',
         other: 'Lösche ${count} Einträge',
       );
 }
@@ -1037,11 +1016,9 @@ class _Translations$tagsManager$de_DE extends Translations$tagsManager$en {
   @override
   String deleteTags({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: '${count} Tag löschen',
-        few: '${count} Tags löschen',
-        many: '${count} Tags löschen',
         other: '${count} Tags löschen',
       );
   @override
@@ -1540,11 +1517,9 @@ class _Translations$gallery$de_DE extends Translations$gallery$en {
   @override
   String sources({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         count,
         one: 'Quelle',
-        few: 'Quellen',
-        many: 'Quellen',
         other: 'Quellen',
       );
 }
@@ -2629,7 +2604,7 @@ class _Translations$settings$database$de_DE extends Translations$settings$databa
   String get updateSankakuUrls => TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? 'Sankaku-URLs aktualisieren';
   @override
   String updating({required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Aktualisiere ${count} Posts:';
+      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Elemente werden aktualisiert: ${count}';
   @override
   String left({required int count}) =>
       TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Verbleibend: ${count}';
@@ -3045,7 +3020,7 @@ class _Translations$settings$cache$de_DE extends Translations$settings$cache$en 
   String get empty => TranslationOverrides.string(_root.$meta, 'settings.cache.empty', {}) ?? 'Leer';
   @override
   String inFilesPlural({required String size, required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, ${count} Dateien';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, Dateien: ${count}';
   @override
   String inFileSingular({required String size}) =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 Datei';
@@ -3744,11 +3719,9 @@ class _Translations$preview$error$de_DE extends Translations$preview$error$en {
   @override
   String startedAgo({required num seconds}) =>
       TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
         seconds,
         one: 'Vor ${seconds} Sekunde gestartet',
-        few: 'Vor ${seconds} Sekunden gestartet',
-        many: 'Vor ${seconds} Sekunden gestartet',
         other: 'Vor ${seconds} Sekunden gestartet',
       );
   @override
@@ -4147,11 +4120,9 @@ extension on TranslationsDeDe {
           'searchHandler.restoredTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: '${count} Tab aus vorheriger Sitzung wiederhergestellt',
-                  few: '${count} Tabs aus vorheriger Sitzung wiederhergestellt',
-                  many: '${count} Tabs aus vorheriger Sitzung wiederhergestellt',
                   other: '${count} Tabs aus vorheriger Sitzung wiederhergestellt',
                 ),
           'searchHandler.someRestoredTabsHadIssues' =>
@@ -4166,22 +4137,18 @@ extension on TranslationsDeDe {
           'searchHandler.addedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: '${count} neue Tabs hinzugefügt',
-                  few: '${count} neue Tabs hinzugefügt',
-                  many: '${count} neue Tabs hinzugefügt',
                   other: '${count} neue Tabs hinzugefügt',
                 ),
           'searchHandler.tabsReplaced' => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsReplaced', {}) ?? 'Tabs ersetzt',
           'searchHandler.receivedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: '${count} Tab erhalten',
-                  few: '${count} Tabs erhalten',
-                  many: '${count} Tabs erhalten',
                   other: '${count} Tabs erhalten',
                 ),
           'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Downloader',
@@ -4205,41 +4172,33 @@ extension on TranslationsDeDe {
           'snatcher.snatchedCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: 'Heruntergeladen: ${count} Datei',
-                  few: 'Heruntergeladen: ${count} Dateien',
-                  many: 'Heruntergeladen: ${count} Dateien',
                   other: 'Heruntergeladen: ${count} Dateien',
                 ),
           'snatcher.filesAlreadySnatched' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: '${count} Datei wurde bereits heruntergeladen',
-                  few: '${count} Dateien wurden bereits heruntergeladen',
-                  many: '${count} Dateien wurden bereits heruntergeladen',
                   other: '${count} Dateien wurden bereits heruntergeladen',
                 ),
           'snatcher.failedToSnatchFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: 'Fehler beim Herunterladen von ${count} Datei',
-                  few: 'Fehler beim Herunterladen von ${count} Dateien',
-                  many: 'Fehler beim Herunterladen von ${count} Dateien',
                   other: 'Fehler beim Herunterladen von ${count} Dateien',
                 ),
           'snatcher.cancelledFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: '${count} Datei abgebrochen',
-                  few: '${count} Dateien abgebrochen',
-                  many: '${count} Dateien abgebrochen',
                   other: '${count} Dateien abgebrochen',
                 ),
           'snatcher.snatchingImages' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingImages', {}) ?? 'Bilder herunterladen',
@@ -4249,11 +4208,9 @@ extension on TranslationsDeDe {
           'snatcher.addedItemsToQueue' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: '${count} Datei zu Downloads hinzugefügt',
-                  few: '${count} Dateien zu Downloads hinzugefügt',
-                  many: '${count} Dateien zu Downloads hinzugefügt',
                   other: '${count} Dateien zu Downloads hinzugefügt',
                 ),
           'multibooru.title' => TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? 'Multibooru',
@@ -4362,11 +4319,9 @@ extension on TranslationsDeDe {
           'tabs.areYouSureDeleteTabs' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: 'Bist du sicher, dass du ${count} Tab löschen willst?',
-                  few: 'Bist du sicher, dass du ${count} Tabs löschen willst?',
-                  many: 'Bist du sicher, dass du ${count} Tabs löschen willst?',
                   other: 'Bist du sicher, dass du ${count} Tabs löschen willst?',
                 ),
           'tabs.filters.loaded' => TranslationOverrides.string(_root.$meta, 'tabs.filters.loaded', {}) ?? 'Geladen',
@@ -4430,22 +4385,18 @@ extension on TranslationsDeDe {
           'history.deleteItemsConfirm' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: '${count} Eintrag wirklich löschen?',
-                  few: '${count} Einträge wirklich löschen?',
-                  many: '${count} Einträge wirklich löschen?',
                   other: '${count} Einträge wirklich löschen?',
                 ),
           'history.clearSelection' => TranslationOverrides.string(_root.$meta, 'history.clearSelection', {}) ?? 'Auswahl entfernen',
           'history.deleteItems' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: 'Lösche ${count} Eintrag',
-                  few: 'Lösche ${count} Einträge',
-                  many: 'Lösche ${count} Einträge',
                   other: 'Lösche ${count} Einträge',
                 ),
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Webansicht',
@@ -5091,7 +5042,7 @@ extension on TranslationsDeDe {
             TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? 'Sankaku-URLs aktualisieren',
           'settings.database.updating' => ({
             required int count,
-          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Aktualisiere ${count} Posts:',
+          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Elemente werden aktualisiert: ${count}',
           'settings.database.left' => ({
             required int count,
           }) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Verbleibend: ${count}',
@@ -5380,7 +5331,7 @@ extension on TranslationsDeDe {
           'settings.cache.inFilesPlural' =>
             ({required String size, required int count}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ??
-                '${size}, ${count} Dateien',
+                '${size}, Dateien: ${count}',
           'settings.cache.inFileSingular' => ({
             required String size,
           }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 Datei',
@@ -5695,11 +5646,9 @@ extension on TranslationsDeDe {
           'tagsManager.deleteTags' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: '${count} Tag löschen',
-                  few: '${count} Tags löschen',
-                  many: '${count} Tags löschen',
                   other: '${count} Tags löschen',
                 ),
           'tagsManager.deleteTagsTitle' => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? 'Tags löschen',
@@ -6010,11 +5959,9 @@ extension on TranslationsDeDe {
           'gallery.sources' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   count,
                   one: 'Quelle',
-                  few: 'Quellen',
-                  many: 'Quellen',
                   other: 'Quellen',
                 ),
           'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'Herunterladen',
@@ -6107,11 +6054,9 @@ extension on TranslationsDeDe {
           'preview.error.startedAgo' =>
             ({required num seconds}) =>
                 TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('de'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('de_DE'))(
                   seconds,
                   one: 'Vor ${seconds} Sekunde gestartet',
-                  few: 'Vor ${seconds} Sekunden gestartet',
-                  many: 'Vor ${seconds} Sekunden gestartet',
                   other: 'Vor ${seconds} Sekunden gestartet',
                 ),
           'preview.error.tapToRetryIfStuck' =>

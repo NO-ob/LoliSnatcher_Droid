@@ -117,7 +117,6 @@
         "tabsRestored": "Pestañas restauradas",
         "restoredTabsCount(param=count)": {
             "one": "${count} pestaña restaurada de la sesión previa",
-            "few": "${count} pestañas restauradas de la sesión previa",
             "many": "${count} pestañas restauradas de la sesión previa",
             "other": "${count} pestañas restauradas de la sesión previa"
         },
@@ -127,14 +126,12 @@
         "tabsMerged": "Pestañas fusionadas",
         "addedTabsCount(param=count)": {
             "one": "Se han añadido ${count} nuevas pestañas",
-            "few": "Se han añadido ${count} nuevas pestañas",
             "many": "Se han añadido ${count} nuevas pestañas",
             "other": "Se han añadido ${count} nuevas pestañas"
         },
         "tabsReplaced": "Pestañas reemplazadas",
         "receivedTabsCount(param=count)": {
             "one": "${count} pestaña recibida",
-            "few": "${count} pestañas recibidas",
             "many": "${count} pestañas recibidas",
             "other": "${count} pestañas recibidas"
         }
@@ -155,25 +152,21 @@
         "itemsSnatched": "Elementos descargados",
         "snatchedCount(param=count)": {
             "one": "${count} elemento descargado",
-            "few": "${count} elementos descargados",
             "many": "${count} elementos descargados",
             "other": "${count} elementos descargados"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} archivo ha sido descargado anteriormente",
-            "few": "${count} archivos han sido descargados anteriormente",
             "many": "${count} archivos han sido descargados anteriormente",
             "other": "${count} archivos han sido descargados anteriormente"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "${count} archivo ha fallado su descarga",
-            "few": "${count} archivo han fallado sus descargas",
             "many": "${count} archivo han fallado sus descargas",
             "other": "${count} archivo han fallado sus descargas"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} archivo cancelado",
-            "few": "${count} archivos cancelados",
             "many": "{count} archivos cancelados",
             "other": "${count} archivos cancelados"
         },
@@ -182,7 +175,6 @@
         "addedItemToQueue": "Elemento añadido a la cola de descargas",
         "addedItemsToQueue(param=count)": {
             "one": "${count} elemento añadido a la cola de descargas",
-            "few": "${count} elementos añadidos a la cola de descargas",
             "many": "${count} elementos añadidos a la cola de descargas",
             "other": "${count} elementos añadidos a la cola de descargas"
         }

@@ -4,13 +4,14 @@
 /// To regenerate, run: `dart run slang`
 ///
 /// Locales: 15
-/// Strings: 13569 (904 per locale)
+/// Strings: 13312 (887 per locale)
 
 // coverage:ignore-file
 // ignore_for_file: type=lint, unused_import
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 import 'package:slang_flutter/slang_flutter.dart';

@@ -114,8 +114,6 @@
         "tabsRestored": "Tabbladen hersteld",
         "restoredTabsCount(param=count)": {
             "one": "${count} tabblad hersteld van vorige sessie",
-            "few": "${count} tabbladen hersteld van vorige sessie",
-            "many": "${count} tabbladen hersteld van vorige sessie",
             "other": "${count} tabbladen hersteld van vorige sessie"
         },
         "someRestoredTabsHadIssues": "Sommige herstelde tabbladen hadden onbekende boorus of gebroken karakters.",
@@ -124,15 +122,11 @@
         "tabsMerged": "Tabbladen samengevoegd",
         "addedTabsCount(param=count)": {
             "one": "${count} nieuwe tabbladen toegevoegd",
-            "few": "${count} nieuwe tabbladen toegevoegd",
-            "many": "${count} nieuwe tabbladen toegevoegd",
             "other": "${count} nieuwe tabbladen toegevoegd"
         },
         "tabsReplaced": "Tabbladen vervangen",
         "receivedTabsCount(param=count)": {
             "one": "${count} tabblad ontvangen",
-            "few": "${count} tabbladen ontvangen",
-            "many": "${count} tabbladen ontvangen",
             "other": "${count} tabbladen ontvangen"
         }
     },
@@ -152,26 +146,18 @@
         "itemsSnatched": "Items gedownload",
         "snatchedCount(param=count)": {
             "one": "Gedownload: ${count} item",
-            "few": "Gedownload: ${count} items",
-            "many": "Gedownload: ${count} items",
             "other": "Gedownload: ${count} items"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} bestand is al gedownload",
-            "few": "${count} bestanden zijn al gedownload",
-            "many": "${count} bestanden zijn al gedownload",
             "other": "${count} bestanden zijn al gedownload"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "${count} bestand downloaden mislukt",
-            "few": "${count} bestanden downloaden mislukt",
-            "many": "${count} bestanden downloaden mislukt",
             "other": "${count} bestanden downloaden mislukt"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} bestand geannuleerd",
-            "few": "${count} bestanden geannuleerd",
-            "many": "${count} bestanden geannuleerd",
             "other": "${count} bestanden geannuleerd"
         },
         "snatchingImages": "Afbeeldingen downloaden",
@@ -179,8 +165,6 @@
         "addedItemToQueue": "Item toegevoegd aan downloadwachtrij",
         "addedItemsToQueue(param=count)": {
             "one": "${count} item toegevoegd aan downloadwachtrij ",
-            "few": "${count} items toegevoegd aan downloadwachtrij",
-            "many": "${count} items toegevoegd aan downloadwachtrij",
             "other": "${count} items toegevoegd aan downloadwachtrij"
         }
     },
@@ -248,8 +232,6 @@
         "reversed": "(omgekeerd)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "Weet u zeker u wilt ${count} tabblad wissen?",
-            "few": "Weet u zeker u wilt ${count} tabbladen wissen?",
-            "many": "Weet u zeker u wilt ${count} tabbladen wissen?",
             "other": "Weet u zeker u wilt ${count} tabbladen wissen?"
         },
         "filters": {
@@ -296,8 +278,6 @@
         "clearSelection": "Leeg selectie",
         "deleteItems(param=count)": {
             "one": "Wis ${count} item",
-            "few": "Wis ${count} items",
-            "many": "Wis ${count} items",
             "other": "Wis ${count} items"
         }
     },
@@ -471,8 +451,6 @@
         "addATab": "Tabblad toevoegen",
         "deleteTags(param=count)": {
             "one": "Wis ${count} label",
-            "few": "Wis ${count} labels",
-            "many": "Wis ${count} labels",
             "other": "Wis ${count} labels"
         },
         "deleteTagsTitle": "Wis labels"

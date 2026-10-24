@@ -434,8 +434,7 @@
             "shareActionsNoteIfFileSavedInCache": "[Uwaga]: Plik zostanie załadowany z pamięci podręcznej, jeśli tam jest. Inaczej zostanie pobrany ponownie.",
             "shareActionsTip": "[Wskazówka]: Menu akcji Udostępniania otworzysz przytrzymując przycisk Udostępnij.",
             "useVolumeButtonsForScrolling": "Używaj przycisków głośności do przewijania",
-            "volumeButtonsScrolling": "Przewijanie przyciskami głośności",
-            "volumeButtonsVolumeDown": " "
+            "volumeButtonsScrolling": "Przewijanie przyciskami głośności"
         },
         "database": {
             "searchQuery": "Szukane zapytanie",

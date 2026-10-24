@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 
@@ -133,11 +134,11 @@ class TranslationsSrRs extends Translations with BaseTranslations<AppLocale, Tra
   @override
   String get failedToOpenLink => TranslationOverrides.string(_root.$meta, 'failedToOpenLink', {}) ?? 'Otvaranje veze nije uspelo';
   @override
-  String get apiKey => TranslationOverrides.string(_root.$meta, 'apiKey', {}) ?? 'API Key';
+  String get apiKey => TranslationOverrides.string(_root.$meta, 'apiKey', {}) ?? 'API ključ';
   @override
-  String get userId => TranslationOverrides.string(_root.$meta, 'userId', {}) ?? 'User ID';
+  String get userId => TranslationOverrides.string(_root.$meta, 'userId', {}) ?? 'ID korisnika';
   @override
-  String get login => TranslationOverrides.string(_root.$meta, 'login', {}) ?? 'Prijava';
+  String get login => TranslationOverrides.string(_root.$meta, 'login', {}) ?? 'Korisničko ime';
   @override
   String get password => TranslationOverrides.string(_root.$meta, 'password', {}) ?? 'Lozinka';
   @override
@@ -350,6 +351,17 @@ class _Translations$permissions$sr_RS extends Translations$permissions$en {
 
   // Translations
   @override
+  String get localNetworkRequired =>
+      TranslationOverrides.string(_root.$meta, 'permissions.localNetworkRequired', {}) ??
+      'Za otvaranje ove adrese potreban je pristup lokalnoj mreži. Odobrite dozvolu „Uređaji u blizini“, pa pokušajte ponovo.';
+  @override
+  String get localNetworkExplanationTitle =>
+      TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanationTitle', {}) ?? 'Pristup lokalnoj mreži';
+  @override
+  String get localNetworkExplanation =>
+      TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanation', {}) ??
+      'Za otvaranje lokalnih booru servera ili sinhronizaciju sa drugim uređajem, aplikaciji je potreban pristup vašoj lokalnoj mreži. Android će prikazati zahtev za dozvolu „Uređaji u blizini“.';
+  @override
   String get noAccessToCustomStorageDirectory =>
       TranslationOverrides.string(_root.$meta, 'permissions.noAccessToCustomStorageDirectory', {}) ??
       'Nema pristupa prilagođenom direktorijumu za skladištenje';
@@ -410,7 +422,7 @@ class _Translations$searchHandler$sr_RS extends Translations$searchHandler$en {
   @override
   String get uoh => TranslationOverrides.string(_root.$meta, 'searchHandler.uoh', {}) ?? 'UOOOOOOOHHH';
   @override
-  String get ratingsChanged => TranslationOverrides.string(_root.$meta, 'searchHandler.ratingsChanged', {}) ?? 'Ocene su promenjene';
+  String get ratingsChanged => TranslationOverrides.string(_root.$meta, 'searchHandler.ratingsChanged', {}) ?? 'Kategorije sadržaja su promenjene';
   @override
   String ratingsChangedMessage({required String booruType}) =>
       TranslationOverrides.string(_root.$meta, 'searchHandler.ratingsChangedMessage', {'booruType': booruType}) ??
@@ -418,17 +430,16 @@ class _Translations$searchHandler$sr_RS extends Translations$searchHandler$en {
   @override
   String get appFixedRatingAutomatically =>
       TranslationOverrides.string(_root.$meta, 'searchHandler.appFixedRatingAutomatically', {}) ??
-      'Ocena je automatski ispravljena. Koristite ispravnu ocenu u budućim pretragama';
+      'Kategorija sadržaja je automatski ispravljena. Koristite ispravnu kategoriju sadržaja u budućim pretragama';
   @override
   String get tabsRestored => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsRestored', {}) ?? 'Kartice su vraćene';
   @override
   String restoredTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Vraćena je ${count} kartica iz prethodne sesije',
-        few: 'Vraćeno je ${count} kartica iz prethodne sesije',
-        many: 'Vraćeno je ${count} kartica iz prethodne sesije',
+        few: 'Vraćene su ${count} kartice iz prethodne sesije',
         other: 'Vraćeno je ${count} kartica iz prethodne sesije',
       );
   @override
@@ -446,11 +457,10 @@ class _Translations$searchHandler$sr_RS extends Translations$searchHandler$en {
   @override
   String addedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Dodata je ${count} nova kartica',
-        few: 'Dodato je ${count} novih kartica',
-        many: 'Dodato je ${count} novih kartica',
+        few: 'Dodate su ${count} nove kartice',
         other: 'Dodato je ${count} novih kartica',
       );
   @override
@@ -458,11 +468,10 @@ class _Translations$searchHandler$sr_RS extends Translations$searchHandler$en {
   @override
   String receivedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Primljena je ${count} kartica',
-        few: 'Primljeno je ${count} kartica',
-        many: 'Primljeno je ${count} kartica',
+        few: 'Primljene su ${count} kartice',
         other: 'Primljeno je ${count} kartica',
       );
 }
@@ -475,7 +484,7 @@ class _Translations$snatcher$sr_RS extends Translations$snatcher$en {
 
   // Translations
   @override
-  String get title => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Snatcher';
+  String get title => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Preuzimanje';
   @override
   String get snatchingHistory => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingHistory', {}) ?? 'Istorija preuzimanja';
   @override
@@ -507,41 +516,37 @@ class _Translations$snatcher$sr_RS extends Translations$snatcher$en {
   @override
   String snatchedCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Preuzeta: ${count} stavka',
-        few: 'Preuzeto: ${count} stavki',
-        many: 'Preuzeto: ${count} stavki',
+        few: 'Preuzete: ${count} stavke',
         other: 'Preuzeto: ${count} stavki',
       );
   @override
   String filesAlreadySnatched({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: '${count} datoteka je već preuzeta',
-        few: '${count} datoteka je već preuzeto',
-        many: '${count} datoteka je već preuzeto',
+        few: '${count} datoteke su već preuzete',
         other: '${count} datoteka je već preuzeto',
       );
   @override
   String failedToSnatchFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Preuzimanje ${count} datoteke nije uspelo',
-        few: 'Preuzimanje ${count} datoteka nije uspelo',
-        many: 'Preuzimanje ${count} datoteka nije uspelo',
+        few: 'Preuzimanje ${count} datoteke nije uspelo',
         other: 'Preuzimanje ${count} datoteka nije uspelo',
       );
   @override
   String cancelledFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Otkazana je ${count} datoteka',
-        few: 'Otkazano je ${count} datoteka',
-        many: 'Otkazano je ${count} datoteka',
+        few: 'Otkazane su ${count} datoteke',
         other: 'Otkazano je ${count} datoteka',
       );
   @override
@@ -553,11 +558,10 @@ class _Translations$snatcher$sr_RS extends Translations$snatcher$en {
   @override
   String addedItemsToQueue({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Dodata je ${count} stavka u red za preuzimanje',
-        few: 'Dodato je ${count} stavki u red za preuzimanje',
-        many: 'Dodato je ${count} stavki u red za preuzimanje',
+        few: 'Dodate su ${count} stavke u red za preuzimanje',
         other: 'Dodato je ${count} stavki u red za preuzimanje',
       );
 }
@@ -600,7 +604,7 @@ class _Translations$hydrus$sr_RS extends Translations$hydrus$en {
       TranslationOverrides.string(_root.$meta, 'hydrus.apiPermissionsRequired', {}) ??
       'Možda niste dali odgovarajuće API dozvole, ovo se može izmeniti u Review Services';
   @override
-  String get addTagsToFile => TranslationOverrides.string(_root.$meta, 'hydrus.addTagsToFile', {}) ?? 'Dodaj oznake u datoteku';
+  String get addTagsToFile => TranslationOverrides.string(_root.$meta, 'hydrus.addTagsToFile', {}) ?? 'Dodaj oznake datoteci';
   @override
   String get addUrls => TranslationOverrides.string(_root.$meta, 'hydrus.addUrls', {}) ?? 'Dodaj URL-ove';
 }
@@ -682,7 +686,7 @@ class _Translations$tabs$sr_RS extends Translations$tabs$en {
   @override
   String get shuffleTabs => TranslationOverrides.string(_root.$meta, 'tabs.shuffleTabs', {}) ?? 'Promešaj kartice';
   @override
-  String get tabRandomlyShuffled => TranslationOverrides.string(_root.$meta, 'tabs.tabRandomlyShuffled', {}) ?? 'Kartica je nasumično promešana';
+  String get tabRandomlyShuffled => TranslationOverrides.string(_root.$meta, 'tabs.tabRandomlyShuffled', {}) ?? 'Kartice su nasumično promešane';
   @override
   String get tabOrderSaved => TranslationOverrides.string(_root.$meta, 'tabs.tabOrderSaved', {}) ?? 'Redosled kartica je sačuvan';
   @override
@@ -768,7 +772,7 @@ class _Translations$tabs$sr_RS extends Translations$tabs$en {
   String get saveTabsInCurrentOrder =>
       TranslationOverrides.string(_root.$meta, 'tabs.saveTabsInCurrentOrder', {}) ?? 'Sačuvati kartice u trenutnom redosledu sortiranja?';
   @override
-  String get byBooru => TranslationOverrides.string(_root.$meta, 'tabs.byBooru', {}) ?? 'Po Booru-u';
+  String get byBooru => TranslationOverrides.string(_root.$meta, 'tabs.byBooru', {}) ?? 'Po booru sajtu';
   @override
   String get alphabetically => TranslationOverrides.string(_root.$meta, 'tabs.alphabetically', {}) ?? 'Abecedno';
   @override
@@ -776,11 +780,10 @@ class _Translations$tabs$sr_RS extends Translations$tabs$en {
   @override
   String areYouSureDeleteTabs({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Da li ste sigurni da želite da obrišete ${count} karticu?',
-        few: 'Da li ste sigurni da želite da obrišete ${count} kartica?',
-        many: 'Da li ste sigurni da želite da obrišete ${count} kartica?',
+        few: 'Da li ste sigurni da želite da obrišete ${count} kartice?',
         other: 'Da li ste sigurni da želite da obrišete ${count} kartica?',
       );
   @override
@@ -814,7 +817,7 @@ class _Translations$history$sr_RS extends Translations$history$en {
   String lastSearchWithDate({required String date}) =>
       TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Poslednja pretraga: ${date}';
   @override
-  String get unknownBooruType => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Nepoznat Booru tip!';
+  String get unknownBooruType => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Nepoznat tip booru sajta!';
   @override
   String unknownBooru({required String name, required String type}) =>
       TranslationOverrides.string(_root.$meta, 'history.unknownBooru', {'name': name, 'type': type}) ?? 'Nepoznat booru (${name}-${type})';
@@ -835,11 +838,10 @@ class _Translations$history$sr_RS extends Translations$history$en {
   @override
   String deleteItemsConfirm({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Da li ste sigurni da želite da obrišete ${count} stavku?',
-        few: 'Da li ste sigurni da želite da obrišete ${count} stavki?',
-        many: 'Da li ste sigurni da želite da obrišete ${count} stavki?',
+        few: 'Da li ste sigurni da želite da obrišete ${count} stavke?',
         other: 'Da li ste sigurni da želite da obrišete ${count} stavki?',
       );
   @override
@@ -847,11 +849,10 @@ class _Translations$history$sr_RS extends Translations$history$en {
   @override
   String deleteItems({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Obriši ${count} stavku',
-        few: 'Obriši ${count} stavki',
-        many: 'Obriši ${count} stavki',
+        few: 'Obriši ${count} stavke',
         other: 'Obriši ${count} stavki',
       );
 }
@@ -874,7 +875,7 @@ class _Translations$webview$sr_RS extends Translations$webview$en {
       TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
       'Otkrivena je moguća Captcha, rešite je i vratite se kada završite';
   @override
-  String get captchaCompleted => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? 'Captcha je završena';
+  String get captchaCompleted => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? 'Captcha je rešena';
   @override
   late final _Translations$webview$navigation$sr_RS navigation = _Translations$webview$navigation$sr_RS._(_root);
 }
@@ -1045,12 +1046,11 @@ class _Translations$tagsManager$sr_RS extends Translations$tagsManager$en {
   @override
   String deleteTags({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Obriši ${count} oznaku',
-        few: 'Obriši ${count} oznaku',
-        many: 'Obriši ${count} oznaku',
-        other: 'Obriši ${count} oznaku',
+        few: 'Obriši ${count} oznake',
+        other: 'Obriši ${count} oznaka',
       );
   @override
   String get deleteTagsTitle => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? 'Obriši oznake';
@@ -1068,7 +1068,7 @@ class _Translations$lockscreen$sr_RS extends Translations$lockscreen$en {
   @override
   String get tapToAuthenticate => TranslationOverrides.string(_root.$meta, 'lockscreen.tapToAuthenticate', {}) ?? 'Dodirnite za potvrdu identiteta';
   @override
-  String get devUnlock => TranslationOverrides.string(_root.$meta, 'lockscreen.devUnlock', {}) ?? 'DEV UNLOCK';
+  String get devUnlock => TranslationOverrides.string(_root.$meta, 'lockscreen.devUnlock', {}) ?? 'OTKLJUČAJ ZA TESTIRANJE';
   @override
   String get testingMessage =>
       TranslationOverrides.string(_root.$meta, 'lockscreen.testingMessage', {}) ??
@@ -1099,7 +1099,7 @@ class _Translations$loliSync$sr_RS extends Translations$loliSync$en {
   @override
   String get keepScreenAwake => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'Drži ekran uključenim';
   @override
-  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Server za sinhronizaciju je prekinut';
+  String get serverKilled => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Server za sinhronizaciju je zaustavljen';
   @override
   String testError({required int statusCode, required String reasonPhrase}) =>
       TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
@@ -1108,7 +1108,7 @@ class _Translations$loliSync$sr_RS extends Translations$loliSync$en {
   String testErrorException({required String error}) =>
       TranslationOverrides.string(_root.$meta, 'loliSync.testErrorException', {'error': error}) ?? 'Greška pri testiranju: ${error}';
   @override
-  String get testSuccess => TranslationOverrides.string(_root.$meta, 'loliSync.testSuccess', {}) ?? 'Test zahtev je primio pozitivan odgovor';
+  String get testSuccess => TranslationOverrides.string(_root.$meta, 'loliSync.testSuccess', {}) ?? 'Probni zahtev je dobio pozitivan odgovor';
   @override
   String get testSuccessMessage =>
       TranslationOverrides.string(_root.$meta, 'loliSync.testSuccessMessage', {}) ?? 'Na drugom uređaju bi trebalo da se pojavi poruka \'Test\'';
@@ -1175,9 +1175,9 @@ class _Translations$tagView$sr_RS extends Translations$tagView$en {
   @override
   String get md5 => TranslationOverrides.string(_root.$meta, 'tagView.md5', {}) ?? 'MD5';
   @override
-  String get rating => TranslationOverrides.string(_root.$meta, 'tagView.rating', {}) ?? 'Ocena';
+  String get rating => TranslationOverrides.string(_root.$meta, 'tagView.rating', {}) ?? 'Kategorija sadržaja';
   @override
-  String get score => TranslationOverrides.string(_root.$meta, 'tagView.score', {}) ?? 'Rezultat';
+  String get score => TranslationOverrides.string(_root.$meta, 'tagView.score', {}) ?? 'Broj poena';
   @override
   String get noTagsFound => TranslationOverrides.string(_root.$meta, 'tagView.noTagsFound', {}) ?? 'Nisu pronađene oznake';
   @override
@@ -1348,13 +1348,13 @@ class _Translations$searchBar$sr_RS extends Translations$searchBar$en {
   @override
   String get metatags => TranslationOverrides.string(_root.$meta, 'searchBar.metatags', {}) ?? 'Metaoznake';
   @override
-  String get freeMetatags => TranslationOverrides.string(_root.$meta, 'searchBar.freeMetatags', {}) ?? 'Besplatne metaoznake';
+  String get freeMetatags => TranslationOverrides.string(_root.$meta, 'searchBar.freeMetatags', {}) ?? 'Metaoznake van limita';
   @override
   String get freeMetatagsDescription =>
       TranslationOverrides.string(_root.$meta, 'searchBar.freeMetatagsDescription', {}) ??
-      'Besplatne metaoznake se ne računaju u ograničenja pretrage po oznakama';
+      'Ove metaoznake se ne računaju u ograničenje broja oznaka u pretrazi';
   @override
-  String get free => TranslationOverrides.string(_root.$meta, 'searchBar.free', {}) ?? 'Besplatno';
+  String get free => TranslationOverrides.string(_root.$meta, 'searchBar.free', {}) ?? 'Van limita';
   @override
   String get single => TranslationOverrides.string(_root.$meta, 'searchBar.single', {}) ?? 'Pojedinačno';
   @override
@@ -1412,7 +1412,7 @@ class _Translations$desktopHome$sr_RS extends Translations$desktopHome$en {
 
   // Translations
   @override
-  String get snatcher => TranslationOverrides.string(_root.$meta, 'desktopHome.snatcher', {}) ?? 'Snatcher';
+  String get snatcher => TranslationOverrides.string(_root.$meta, 'desktopHome.snatcher', {}) ?? 'Preuzimanje';
   @override
   String get addBoorusInSettings =>
       TranslationOverrides.string(_root.$meta, 'desktopHome.addBoorusInSettings', {}) ?? 'Dodajte booru sajtove u podešavanjima';
@@ -1469,7 +1469,7 @@ class _Translations$mediaPreviews$sr_RS extends Translations$mediaPreviews$en {
       'Povežite sajt dodavanjem njegovog URL-a i podešavanja pretrage';
   @override
   String get restoreBackupAction =>
-      TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ?? 'Vrati ili upravljaj rezervnim kopijama';
+      TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ?? 'Vrati podatke iz rezervne kopije ili upravljaj kopijama';
   @override
   String get restoreBackupActionSubtitle =>
       TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupActionSubtitle', {}) ??
@@ -1551,11 +1551,10 @@ class _Translations$gallery$sr_RS extends Translations$gallery$en {
   @override
   String sources({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         count,
         one: 'Izvor',
         few: 'Izvori',
-        many: 'Izvori',
         other: 'Izvori',
       );
 }
@@ -1612,7 +1611,7 @@ class _Translations$imageStats$sr_RS extends Translations$imageStats$en {
 
   // Translations
   @override
-  String live({required int count}) => TranslationOverrides.string(_root.$meta, 'imageStats.live', {'count': count}) ?? 'Uživo: ${count}';
+  String live({required int count}) => TranslationOverrides.string(_root.$meta, 'imageStats.live', {'count': count}) ?? 'Aktivne slike: ${count}';
   @override
   String pending({required int count}) => TranslationOverrides.string(_root.$meta, 'imageStats.pending', {'count': count}) ?? 'Na čekanju: ${count}';
   @override
@@ -1646,7 +1645,7 @@ class _Translations$tagType$sr_RS extends Translations$tagType$en {
   @override
   String get character => TranslationOverrides.string(_root.$meta, 'tagType.character', {}) ?? 'Lik';
   @override
-  String get copyright => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Autorska prava';
+  String get copyright => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Franšiza';
   @override
   String get meta => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'Meta';
   @override
@@ -1821,11 +1820,11 @@ class _Translations$settings$booru$sr_RS extends Translations$settings$booru$en 
   @override
   String shareBooruDialogMsgMobile({required String booruName}) =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgMobile', {'booruName': booruName}) ??
-      'Podelite konfiguraciju za ${booruName} kao link.\n\nUključiti prijavu / API ključ?';
+      'Podelite konfiguraciju za ${booruName} kao link.\n\nUključiti korisničko ime / API ključ?';
   @override
   String shareBooruDialogMsgDesktop({required String booruName}) =>
       TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgDesktop', {'booruName': booruName}) ??
-      'Kopirajte link konfiguracije za ${booruName} u privremenu memoriju.\n\nUključiti prijavu / API ključ?';
+      'Kopirajte link konfiguracije za ${booruName} u privremenu memoriju.\n\nUključiti korisničko ime / API ključ?';
   @override
   String get booruSharing => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Deljenje Booru konfiguracija';
   @override
@@ -2025,7 +2024,7 @@ class _Translations$settings$interface$sr_RS extends Translations$settings$inter
       TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpWarning', {}) ??
       '[Upozorenje]: Nemojte postavljati režim interfejsa na Desktop na telefonu jer možete pokvariti aplikaciju i možda ćete morati da obrišete sva podešavanja, uključujući Booru konfiguracije.';
   @override
-  String get handSide => TranslationOverrides.string(_root.$meta, 'settings.interface.handSide', {}) ?? 'Strana ruke';
+  String get handSide => TranslationOverrides.string(_root.$meta, 'settings.interface.handSide', {}) ?? 'Dominantna ruka';
   @override
   String get handSideHelp =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.handSideHelp', {}) ?? 'Prilagođava pozicije elemenata interfejsa izabranoj strani';
@@ -2047,7 +2046,7 @@ class _Translations$settings$interface$sr_RS extends Translations$settings$inter
   @override
   String get disableVibrationSubtitle =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.disableVibrationSubtitle', {}) ??
-      'I dalje se može javiti pri nekim radnjama čak i kada je onemogućeno';
+      'Vibracija se i dalje može javiti pri nekim radnjama, čak i kada je onemogućena';
   @override
   String get usePredictiveBack =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.usePredictiveBack', {}) ?? 'Prediktivni pokret za nazad';
@@ -2065,14 +2064,14 @@ class _Translations$settings$interface$sr_RS extends Translations$settings$inter
   @override
   String get previewQualityHelpSample =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpSample', {}) ??
-      ' - Sample - Srednja rezolucija, aplikacija će takođe učitati Thumbnail kvalitet kao čuvar mesta dok se učitava viši kvalitet';
+      ' - Umanjena slika - Srednja rezolucija; aplikacija će prikazati minijaturu dok se učitava slika višeg kvaliteta';
   @override
   String get previewQualityHelpThumbnail =>
-      TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpThumbnail', {}) ?? ' - Thumbnail - Niska rezolucija';
+      TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpThumbnail', {}) ?? ' - Minijatura - Niska rezolucija';
   @override
   String get previewQualityHelpNote =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpNote', {}) ??
-      '[Napomena]: Sample kvalitet može primetno smanjiti performanse, posebno ako imate previše kolona u mreži pregleda';
+      '[Napomena]: Opcija „Umanjena slika“ može primetno smanjiti performanse, posebno ako imate previše kolona u mreži pregleda';
   @override
   String get previewDisplay => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplay', {}) ?? 'Prikaz pregleda';
   @override
@@ -2081,7 +2080,7 @@ class _Translations$settings$interface$sr_RS extends Translations$settings$inter
   @override
   String get previewDisplayFallbackHelp =>
       TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayFallbackHelp', {}) ??
-      'Ovo će se koristiti kada opcija Staggered nije moguća';
+      'Ovo će se koristiti kada stepenasti raspored nije moguć';
   @override
   String get dontScaleImages => TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImages', {}) ?? 'Ne skaliraj slike';
   @override
@@ -2176,7 +2175,7 @@ class _Translations$settings$theme$sr_RS extends Translations$settings$theme$en 
   @override
   String get halloween => TranslationOverrides.string(_root.$meta, 'settings.theme.halloween', {}) ?? 'Noć veštica';
   @override
-  String get custom => TranslationOverrides.string(_root.$meta, 'settings.theme.custom', {}) ?? 'Prilagođeno';
+  String get custom => TranslationOverrides.string(_root.$meta, 'settings.theme.custom', {}) ?? 'Prilagođena';
   @override
   String get selectColor => TranslationOverrides.string(_root.$meta, 'settings.theme.selectColor', {}) ?? 'Izaberite boju';
   @override
@@ -2187,12 +2186,12 @@ class _Translations$settings$theme$sr_RS extends Translations$settings$theme$en 
   @override
   String get fontFamily => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? 'Font';
   @override
-  String get systemDefault => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Sistemski podrazumevano';
+  String get systemDefault => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Podrazumevani sistemski font';
   @override
   String get viewMoreFonts => TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? 'Prikaži više fontova';
   @override
   String get fontPreviewText =>
-      TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ?? 'Brza smeđa lisica preskače lenjog psa';
+      TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ?? 'Ljubazni fenjerdžija čađavog lica hoće da mi pokaže štos.';
   @override
   String get customFont => TranslationOverrides.string(_root.$meta, 'settings.theme.customFont', {}) ?? 'Prilagođeni font';
   @override
@@ -2541,9 +2540,11 @@ class _Translations$settings$database$sr_RS extends Translations$settings$databa
       TranslationOverrides.string(_root.$meta, 'settings.database.indexingInfo', {}) ??
       'Ubrzava pretragu baze podataka, ali koristi više prostora na disku (do 2x).\n\nNemojte napuštati stranicu niti zatvarati aplikaciju tokom indeksiranja.';
   @override
-  String get createIndexesDebug => TranslationOverrides.string(_root.$meta, 'settings.database.createIndexesDebug', {}) ?? 'Kreiraj indekse [Debug]';
+  String get createIndexesDebug =>
+      TranslationOverrides.string(_root.$meta, 'settings.database.createIndexesDebug', {}) ?? 'Kreiraj indekse [Otklanjanje grešaka]';
   @override
-  String get dropIndexesDebug => TranslationOverrides.string(_root.$meta, 'settings.database.dropIndexesDebug', {}) ?? 'Ukloni indekse [Debug]';
+  String get dropIndexesDebug =>
+      TranslationOverrides.string(_root.$meta, 'settings.database.dropIndexesDebug', {}) ?? 'Ukloni indekse [Otklanjanje grešaka]';
   @override
   String get searchHistoryInfo =>
       TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryInfo', {}) ?? 'Zahteva da baza podataka bude omogućena.';
@@ -2574,13 +2575,14 @@ class _Translations$settings$database$sr_RS extends Translations$settings$databa
   String get appRestartRequired =>
       TranslationOverrides.string(_root.$meta, 'settings.database.appRestartRequired', {}) ?? 'Potrebno je ponovno pokretanje aplikacije!';
   @override
-  String get clearSnatchedItems => TranslationOverrides.string(_root.$meta, 'settings.database.clearSnatchedItems', {}) ?? 'Obriši preuzete stavke';
+  String get clearSnatchedItems =>
+      TranslationOverrides.string(_root.$meta, 'settings.database.clearSnatchedItems', {}) ?? 'Obriši istoriju preuzimanja';
   @override
   String get clearAllSnatchedConfirm =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.clearAllSnatchedConfirm', {}) ?? 'Obrisati sve preuzete stavke?';
+      TranslationOverrides.string(_root.$meta, 'settings.database.clearAllSnatchedConfirm', {}) ?? 'Obrisati celu istoriju preuzimanja?';
   @override
   String get snatchedItemsCleared =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.snatchedItemsCleared', {}) ?? 'Preuzete stavke su obrisane';
+      TranslationOverrides.string(_root.$meta, 'settings.database.snatchedItemsCleared', {}) ?? 'Istorija preuzimanja je obrisana';
   @override
   String get appRestartMayBeRequired =>
       TranslationOverrides.string(_root.$meta, 'settings.database.appRestartMayBeRequired', {}) ??
@@ -2635,7 +2637,7 @@ class _Translations$settings$database$sr_RS extends Translations$settings$databa
   String get updateSankakuUrls => TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? 'Ažuriraj Sankaku URL-ove';
   @override
   String updating({required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Ažuriranje ${count} stavki:';
+      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Ažuriranje stavki: ${count}';
   @override
   String left({required int count}) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Preostalo: ${count}';
   @override
@@ -2660,7 +2662,8 @@ class _Translations$settings$database$sr_RS extends Translations$settings$databa
       TranslationOverrides.string(_root.$meta, 'settings.database.purgeFailedItems', {'count': count}) ?? 'Očisti neuspele stavke (${count})';
   @override
   String retryFailedItems({required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.retryFailedItems', {'count': count}) ?? 'Ponovo pokušaj neuspele stavke (${count})';
+      TranslationOverrides.string(_root.$meta, 'settings.database.retryFailedItems', {'count': count}) ??
+      'Ponovo ažuriraj stavke čije ažuriranje nije uspelo (${count})';
 }
 
 // Path: settings.backupAndRestore
@@ -2682,7 +2685,7 @@ class _Translations$settings$backupAndRestore$sr_RS extends Translations$setting
   @override
   String get androidOnlyFeatureMsg =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.androidOnlyFeatureMsg', {}) ??
-      'Ova funkcija je dostupna samo na Android-u, u verzijama za Desktop možete jednostavno kopirati/nalepiti datoteke iz/u fasciklu podataka aplikacije, zavisno od vašeg sistema';
+      'Ova funkcija je dostupna samo na Androidu. U verzijama za računare možete kopirati i nalepiti datoteke iz fascikle podataka aplikacije ili u nju, u zavisnosti od vašeg sistema.';
   @override
   String get selectBackupDir =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.selectBackupDir', {}) ?? 'Izaberite direktorijum rezervne kopije';
@@ -2724,23 +2727,26 @@ class _Translations$settings$backupAndRestore$sr_RS extends Translations$setting
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.resetBackupDir', {}) ?? 'Resetuj direktorijum rezervne kopije';
   @override
   String get backupBoorus =>
-      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorus', {}) ?? 'Napravi rezervnu kopiju Booru sajtova';
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorus', {}) ?? 'Napravi rezervnu kopiju podešavanja booru sajtova';
   @override
-  String get restoreBoorus => TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorus', {}) ?? 'Vrati Booru sajtove';
+  String get restoreBoorus =>
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorus', {}) ?? 'Vrati podešavanja booru sajtova';
   @override
   String get boorusBackedUp =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusBackedUp', {}) ??
-      'Rezervna kopija Booru sajtova je sačuvana u boorus.json';
+      'Rezervna kopija podešavanja booru sajtova je sačuvana u boorus.json';
   @override
   String get boorusRestored =>
-      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusRestored', {}) ?? 'Booru sajtovi su vraćeni iz rezervne kopije';
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusRestored', {}) ??
+      'Podešavanja booru sajtova su vraćena iz rezervne kopije';
   @override
   String get backupBoorusError =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorusError', {}) ??
-      'Pravljenje rezervne kopije Booru sajtova nije uspelo';
+      'Pravljenje rezervne kopije podešavanja booru sajtova nije uspelo';
   @override
   String get restoreBoorusError =>
-      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorusError', {}) ?? 'Vraćanje Booru sajtova nije uspelo';
+      TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorusError', {}) ??
+      'Vraćanje podešavanja booru sajtova nije uspelo';
   @override
   String get backupDatabase =>
       TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDatabase', {}) ?? 'Napravi rezervnu kopiju baze podataka';
@@ -2960,7 +2966,8 @@ class _Translations$settings$performance$sr_RS extends Translations$settings$per
       TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
       'Postavlja optimalna podešavanja za ove opcije (možete ih kasnije zasebno promeniti):';
   @override
-  String get autoplayVideos => TranslationOverrides.string(_root.$meta, 'settings.performance.autoplayVideos', {}) ?? 'Automatska reprodukcija videa';
+  String get autoplayVideos =>
+      TranslationOverrides.string(_root.$meta, 'settings.performance.autoplayVideos', {}) ?? 'Automatski reprodukuj video zapise';
   @override
   String get disableVideos => TranslationOverrides.string(_root.$meta, 'settings.performance.disableVideos', {}) ?? 'Onemogući video zapise';
   @override
@@ -3026,11 +3033,11 @@ class _Translations$settings$cache$sr_RS extends Translations$settings$cache$en 
   @override
   String get videoCacheModeCache =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.videoCacheModeCache', {}) ??
-      '- Keš - Čuva datoteku u skladištu uređaja, reprodukuje tek kada se preuzimanje završi';
+      '- Keširanje - Čuva datoteku u skladištu uređaja, reprodukuje tek kada se preuzimanje završi';
   @override
   String get videoCacheModeStreamCache =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.videoCacheModeStreamCache', {}) ??
-      '- Strimovanje+keš - Kombinacija oba, ali trenutno dovodi do dvostrukog preuzimanja';
+      '- Strimovanje+keširanje - Kombinacija oba, ali trenutno dovodi do dvostrukog preuzimanja';
   @override
   String get videoCacheNoteEnable =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.videoCacheNoteEnable', {}) ??
@@ -3056,7 +3063,7 @@ class _Translations$settings$cache$sr_RS extends Translations$settings$cache$en 
   String get empty => TranslationOverrides.string(_root.$meta, 'settings.cache.empty', {}) ?? 'Prazno';
   @override
   String inFilesPlural({required String size, required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, ${count} datoteka';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, broj datoteka: ${count}';
   @override
   String inFileSingular({required String size}) =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 datoteka';
@@ -3124,11 +3131,11 @@ class _Translations$settings$itemFilters$sr_RS extends Translations$settings$ite
       TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeMarked', {}) ??
       'Potpuno sakrij stavke koje odgovaraju označenim filterima';
   @override
-  String get removeFavourited => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? 'Ukloni omiljene stavke';
+  String get removeFavourited => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? 'Sakrij omiljene stavke';
   @override
-  String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'Ukloni preuzete stavke';
+  String get removeSnatched => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'Sakrij preuzete stavke';
   @override
-  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Ukloni AI stavke';
+  String get removeAI => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Sakrij stavke označene kao AI';
 }
 
 // Path: settings.sync
@@ -3194,7 +3201,7 @@ class _Translations$settings$sync$sr_RS extends Translations$settings$sync$en {
   @override
   String get syncFavsFromHelpText4 =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText4', {}) ??
-      'Redosled preuzetih: od najstarijih (0) do najnovijih (X)';
+      'Redosled omiljenih stavki: od najstarijih (0) do najnovijih (X)';
   @override
   String get sendSnatchedHistory =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.sendSnatchedHistory', {}) ?? 'Pošalji istoriju preuzimanja';
@@ -3255,7 +3262,7 @@ class _Translations$settings$sync$sr_RS extends Translations$settings$sync$en {
   @override
   String get tagsSyncModePreferTypeIfNone =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModePreferTypeIfNone', {}) ??
-      'Sačuvaj tip: Ako oznaka postoji sa tipom oznake na drugom uređaju, a ne postoji na ovom uređaju, biće preskočena';
+      'Sačuvaj postojeći tip: Pri uvozu ne prepisuj postojeći poznati tip oznake nepoznatim tipom.';
   @override
   String get tagsSyncModeOverwrite =>
       TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModeOverwrite', {}) ??
@@ -3434,7 +3441,7 @@ class _Translations$settings$debug$sr_RS extends Translations$settings$debug$en 
   @override
   String get blurImagesAndMuteVideosDevOnly =>
       TranslationOverrides.string(_root.$meta, 'settings.debug.blurImagesAndMuteVideosDevOnly', {}) ??
-      'Zamućenje slika + utišavanje videa [Samo DEV]';
+      'Zamuti slike + isključi zvuk videa [samo za programere]';
   @override
   String get enableDragScrollOnListsDesktopOnly =>
       TranslationOverrides.string(_root.$meta, 'settings.debug.enableDragScrollOnListsDesktopOnly', {}) ??
@@ -3576,9 +3583,9 @@ class _Translations$viewer$appBar$sr_RS extends Translations$viewer$appBar$en {
   @override
   String get reloadWithScaling => TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Ponovo učitaj sa skaliranjem';
   @override
-  String get loadSampleQuality => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Učitaj kvalitet uzorka';
+  String get loadSampleQuality => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Učitaj umanjenu sliku';
   @override
-  String get loadHighQuality => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Učitaj visoki kvalitet';
+  String get loadHighQuality => TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Učitaj sliku visokog kvaliteta';
   @override
   String get dropSnatchedStatus => TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'Ukloni status preuzeto';
   @override
@@ -3607,7 +3614,7 @@ class _Translations$viewer$appBar$sr_RS extends Translations$viewer$appBar$en {
   @override
   String get alreadyDownloadingFile =>
       TranslationOverrides.string(_root.$meta, 'viewer.appBar.alreadyDownloadingFile', {}) ??
-      'Datoteka se već preuzima radi deljenja, želite li da prekinete trenutnu datoteku i podelite novu?';
+      'Datoteka se već preuzima radi deljenja. Želite li da prekinete trenutno preuzimanje i podelite novu datoteku?';
   @override
   String get current => TranslationOverrides.string(_root.$meta, 'viewer.appBar.current', {}) ?? 'Trenutno:';
   @override
@@ -3755,11 +3762,10 @@ class _Translations$preview$error$sr_RS extends Translations$preview$error$en {
   @override
   String startedAgo({required num seconds}) =>
       TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
         seconds,
         one: 'Započeto pre ${seconds} sekundu',
         few: 'Započeto pre ${seconds} sekunde',
-        many: 'Započeto pre ${seconds} sekundi',
         other: 'Započeto pre ${seconds} sekundi',
       );
   @override
@@ -3788,9 +3794,9 @@ class _Translations$settings$interface$previewQualityValues$sr_RS extends Transl
 
   // Translations
   @override
-  String get thumbnail => TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.thumbnail', {}) ?? 'Thumbnail';
+  String get thumbnail => TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.thumbnail', {}) ?? 'Minijatura';
   @override
-  String get sample => TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.sample', {}) ?? 'Sample';
+  String get sample => TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.sample', {}) ?? 'Umanjena slika';
 }
 
 // Path: settings.interface.previewDisplayModeValues
@@ -3805,7 +3811,8 @@ class _Translations$settings$interface$previewDisplayModeValues$sr_RS extends Tr
   @override
   String get rectangle => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.rectangle', {}) ?? 'Pravougaonik';
   @override
-  String get staggered => TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Staggered';
+  String get staggered =>
+      TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Stepenasti raspored';
 }
 
 // Path: settings.interface.appModeValues
@@ -3816,7 +3823,7 @@ class _Translations$settings$interface$appModeValues$sr_RS extends Translations$
 
   // Translations
   @override
-  String get desktop => TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.desktop', {}) ?? 'Desktop';
+  String get desktop => TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.desktop', {}) ?? 'Za računar';
   @override
   String get mobile => TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.mobile', {}) ?? 'Mobilni';
 }
@@ -3842,7 +3849,7 @@ class _Translations$settings$viewer$imageQualityValues$sr_RS extends Translation
 
   // Translations
   @override
-  String get sample => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? 'Uzorak';
+  String get sample => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? 'Umanjena slika';
   @override
   String get fullRes => TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.fullRes', {}) ?? 'Original';
 }
@@ -4045,9 +4052,9 @@ extension on TranslationsSrRs {
           'invalidUrl' => TranslationOverrides.string(_root.$meta, 'invalidUrl', {}) ?? 'Nevažeći URL!',
           'clipboardIsEmpty' => TranslationOverrides.string(_root.$meta, 'clipboardIsEmpty', {}) ?? 'Privremena memorija je prazna!',
           'failedToOpenLink' => TranslationOverrides.string(_root.$meta, 'failedToOpenLink', {}) ?? 'Otvaranje veze nije uspelo',
-          'apiKey' => TranslationOverrides.string(_root.$meta, 'apiKey', {}) ?? 'API Key',
-          'userId' => TranslationOverrides.string(_root.$meta, 'userId', {}) ?? 'User ID',
-          'login' => TranslationOverrides.string(_root.$meta, 'login', {}) ?? 'Prijava',
+          'apiKey' => TranslationOverrides.string(_root.$meta, 'apiKey', {}) ?? 'API ključ',
+          'userId' => TranslationOverrides.string(_root.$meta, 'userId', {}) ?? 'ID korisnika',
+          'login' => TranslationOverrides.string(_root.$meta, 'login', {}) ?? 'Korisničko ime',
           'password' => TranslationOverrides.string(_root.$meta, 'password', {}) ?? 'Lozinka',
           'pause' => TranslationOverrides.string(_root.$meta, 'pause', {}) ?? 'Pauziraj',
           'resume' => TranslationOverrides.string(_root.$meta, 'resume', {}) ?? 'Nastavi',
@@ -4116,6 +4123,12 @@ extension on TranslationsSrRs {
           'init.loadingBoorus' => TranslationOverrides.string(_root.$meta, 'init.loadingBoorus', {}) ?? 'Učitavanje booru sajtova…',
           'init.loadingTags' => TranslationOverrides.string(_root.$meta, 'init.loadingTags', {}) ?? 'Učitavanje oznaka…',
           'init.restoringTabs' => TranslationOverrides.string(_root.$meta, 'init.restoringTabs', {}) ?? 'Vraćanje kartica…',
+          'permissions.localNetworkRequired' =>
+            TranslationOverrides.string(_root.$meta, 'permissions.localNetworkRequired', {}) ??
+                'Za otvaranje ove adrese potreban je pristup lokalnoj mreži. Odobrite dozvolu „Uređaji u blizini“, pa pokušajte ponovo.',
+          'permissions.localNetworkExplanationTitle' =>
+            TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanationTitle', {}) ?? 'Pristup lokalnoj mreži',
+          'permissions.localNetworkExplanation' => TranslationOverrides.string(_root.$meta, 'permissions.localNetworkExplanation', {}) ?? 'Za otvaranje lokalnih booru servera ili sinhronizaciju sa drugim uređajem, aplikaciji je potreban pristup vašoj lokalnoj mreži. Android će prikazati zahtev za dozvolu „Uređaji u blizini“.',
           'permissions.noAccessToCustomStorageDirectory' =>
             TranslationOverrides.string(_root.$meta, 'permissions.noAccessToCustomStorageDirectory', {}) ??
                 'Nema pristupa prilagođenom direktorijumu za skladištenje',
@@ -4148,23 +4161,23 @@ extension on TranslationsSrRs {
           'searchHandler.resettingSearchToDefaultTags' =>
             TranslationOverrides.string(_root.$meta, 'searchHandler.resettingSearchToDefaultTags', {}) ?? 'Vraćanje na podrazumevane oznake',
           'searchHandler.uoh' => TranslationOverrides.string(_root.$meta, 'searchHandler.uoh', {}) ?? 'UOOOOOOOHHH',
-          'searchHandler.ratingsChanged' => TranslationOverrides.string(_root.$meta, 'searchHandler.ratingsChanged', {}) ?? 'Ocene su promenjene',
+          'searchHandler.ratingsChanged' =>
+            TranslationOverrides.string(_root.$meta, 'searchHandler.ratingsChanged', {}) ?? 'Kategorije sadržaja su promenjene',
           'searchHandler.ratingsChangedMessage' =>
             ({required String booruType}) =>
                 TranslationOverrides.string(_root.$meta, 'searchHandler.ratingsChangedMessage', {'booruType': booruType}) ??
                 'Na ${booruType} [rating:safe] je sada zamenjen sa [rating:general] i [rating:sensitive]',
           'searchHandler.appFixedRatingAutomatically' =>
             TranslationOverrides.string(_root.$meta, 'searchHandler.appFixedRatingAutomatically', {}) ??
-                'Ocena je automatski ispravljena. Koristite ispravnu ocenu u budućim pretragama',
+                'Kategorija sadržaja je automatski ispravljena. Koristite ispravnu kategoriju sadržaja u budućim pretragama',
           'searchHandler.tabsRestored' => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsRestored', {}) ?? 'Kartice su vraćene',
           'searchHandler.restoredTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Vraćena je ${count} kartica iz prethodne sesije',
-                  few: 'Vraćeno je ${count} kartica iz prethodne sesije',
-                  many: 'Vraćeno je ${count} kartica iz prethodne sesije',
+                  few: 'Vraćene su ${count} kartice iz prethodne sesije',
                   other: 'Vraćeno je ${count} kartica iz prethodne sesije',
                 ),
           'searchHandler.someRestoredTabsHadIssues' =>
@@ -4179,25 +4192,23 @@ extension on TranslationsSrRs {
           'searchHandler.addedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Dodata je ${count} nova kartica',
-                  few: 'Dodato je ${count} novih kartica',
-                  many: 'Dodato je ${count} novih kartica',
+                  few: 'Dodate su ${count} nove kartice',
                   other: 'Dodato je ${count} novih kartica',
                 ),
           'searchHandler.tabsReplaced' => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsReplaced', {}) ?? 'Kartice su zamenjene',
           'searchHandler.receivedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Primljena je ${count} kartica',
-                  few: 'Primljeno je ${count} kartica',
-                  many: 'Primljeno je ${count} kartica',
+                  few: 'Primljene su ${count} kartice',
                   other: 'Primljeno je ${count} kartica',
                 ),
-          'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Snatcher',
+          'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Preuzimanje',
           'snatcher.snatchingHistory' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingHistory', {}) ?? 'Istorija preuzimanja',
           'snatcher.enterTags' => TranslationOverrides.string(_root.$meta, 'snatcher.enterTags', {}) ?? 'Unesite oznake',
           'snatcher.amount' => TranslationOverrides.string(_root.$meta, 'snatcher.amount', {}) ?? 'Količina',
@@ -4218,41 +4229,37 @@ extension on TranslationsSrRs {
           'snatcher.snatchedCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Preuzeta: ${count} stavka',
-                  few: 'Preuzeto: ${count} stavki',
-                  many: 'Preuzeto: ${count} stavki',
+                  few: 'Preuzete: ${count} stavke',
                   other: 'Preuzeto: ${count} stavki',
                 ),
           'snatcher.filesAlreadySnatched' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: '${count} datoteka je već preuzeta',
-                  few: '${count} datoteka je već preuzeto',
-                  many: '${count} datoteka je već preuzeto',
+                  few: '${count} datoteke su već preuzete',
                   other: '${count} datoteka je već preuzeto',
                 ),
           'snatcher.failedToSnatchFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Preuzimanje ${count} datoteke nije uspelo',
-                  few: 'Preuzimanje ${count} datoteka nije uspelo',
-                  many: 'Preuzimanje ${count} datoteka nije uspelo',
+                  few: 'Preuzimanje ${count} datoteke nije uspelo',
                   other: 'Preuzimanje ${count} datoteka nije uspelo',
                 ),
           'snatcher.cancelledFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Otkazana je ${count} datoteka',
-                  few: 'Otkazano je ${count} datoteka',
-                  many: 'Otkazano je ${count} datoteka',
+                  few: 'Otkazane su ${count} datoteke',
                   other: 'Otkazano je ${count} datoteka',
                 ),
           'snatcher.snatchingImages' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingImages', {}) ?? 'Preuzimanje slika',
@@ -4262,11 +4269,10 @@ extension on TranslationsSrRs {
           'snatcher.addedItemsToQueue' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Dodata je ${count} stavka u red za preuzimanje',
-                  few: 'Dodato je ${count} stavki u red za preuzimanje',
-                  many: 'Dodato je ${count} stavki u red za preuzimanje',
+                  few: 'Dodate su ${count} stavke u red za preuzimanje',
                   other: 'Dodato je ${count} stavki u red za preuzimanje',
                 ),
           'multibooru.title' => TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? 'Multibooru',
@@ -4284,7 +4290,7 @@ extension on TranslationsSrRs {
           'hydrus.apiPermissionsRequired' =>
             TranslationOverrides.string(_root.$meta, 'hydrus.apiPermissionsRequired', {}) ??
                 'Možda niste dali odgovarajuće API dozvole, ovo se može izmeniti u Review Services',
-          'hydrus.addTagsToFile' => TranslationOverrides.string(_root.$meta, 'hydrus.addTagsToFile', {}) ?? 'Dodaj oznake u datoteku',
+          'hydrus.addTagsToFile' => TranslationOverrides.string(_root.$meta, 'hydrus.addTagsToFile', {}) ?? 'Dodaj oznake datoteci',
           'hydrus.addUrls' => TranslationOverrides.string(_root.$meta, 'hydrus.addUrls', {}) ?? 'Dodaj URL-ove',
           'tabs.tab' => TranslationOverrides.string(_root.$meta, 'tabs.tab', {}) ?? 'Kartica',
           'tabs.addBoorusInSettings' =>
@@ -4323,7 +4329,7 @@ extension on TranslationsSrRs {
           'tabs.keepLastDuplicateTabs' => TranslationOverrides.string(_root.$meta, 'tabs.keepLastDuplicateTabs', {}) ?? 'Zadrži poslednju',
           'tabs.skipDuplicateTabDelete' => TranslationOverrides.string(_root.$meta, 'tabs.skipDuplicateTabDelete', {}) ?? 'Preskoči',
           'tabs.shuffleTabs' => TranslationOverrides.string(_root.$meta, 'tabs.shuffleTabs', {}) ?? 'Promešaj kartice',
-          'tabs.tabRandomlyShuffled' => TranslationOverrides.string(_root.$meta, 'tabs.tabRandomlyShuffled', {}) ?? 'Kartica je nasumično promešana',
+          'tabs.tabRandomlyShuffled' => TranslationOverrides.string(_root.$meta, 'tabs.tabRandomlyShuffled', {}) ?? 'Kartice su nasumično promešane',
           'tabs.tabOrderSaved' => TranslationOverrides.string(_root.$meta, 'tabs.tabOrderSaved', {}) ?? 'Redosled kartica je sačuvan',
           'tabs.scrollToCurrent' => TranslationOverrides.string(_root.$meta, 'tabs.scrollToCurrent', {}) ?? 'Pomeri do trenutne kartice',
           'tabs.scrollToTop' => TranslationOverrides.string(_root.$meta, 'tabs.scrollToTop', {}) ?? 'Pomeri na vrh',
@@ -4374,17 +4380,16 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'tabs.shuffleTabsQuestion', {}) ?? 'Nasumično promešati redosled kartica?',
           'tabs.saveTabsInCurrentOrder' =>
             TranslationOverrides.string(_root.$meta, 'tabs.saveTabsInCurrentOrder', {}) ?? 'Sačuvati kartice u trenutnom redosledu sortiranja?',
-          'tabs.byBooru' => TranslationOverrides.string(_root.$meta, 'tabs.byBooru', {}) ?? 'Po Booru-u',
+          'tabs.byBooru' => TranslationOverrides.string(_root.$meta, 'tabs.byBooru', {}) ?? 'Po booru sajtu',
           'tabs.alphabetically' => TranslationOverrides.string(_root.$meta, 'tabs.alphabetically', {}) ?? 'Abecedno',
           'tabs.reversed' => TranslationOverrides.string(_root.$meta, 'tabs.reversed', {}) ?? '(obrnuto)',
           'tabs.areYouSureDeleteTabs' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Da li ste sigurni da želite da obrišete ${count} karticu?',
-                  few: 'Da li ste sigurni da želite da obrišete ${count} kartica?',
-                  many: 'Da li ste sigurni da želite da obrišete ${count} kartica?',
+                  few: 'Da li ste sigurni da želite da obrišete ${count} kartice?',
                   other: 'Da li ste sigurni da želite da obrišete ${count} kartica?',
                 ),
           'tabs.filters.loaded' => TranslationOverrides.string(_root.$meta, 'tabs.filters.loaded', {}) ?? 'Učitano',
@@ -4434,7 +4439,7 @@ extension on TranslationsSrRs {
           'history.lastSearchWithDate' => ({
             required String date,
           }) => TranslationOverrides.string(_root.$meta, 'history.lastSearchWithDate', {'date': date}) ?? 'Poslednja pretraga: ${date}',
-          'history.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Nepoznat Booru tip!',
+          'history.unknownBooruType' => TranslationOverrides.string(_root.$meta, 'history.unknownBooruType', {}) ?? 'Nepoznat tip booru sajta!',
           'history.unknownBooru' => ({
             required String name,
             required String type,
@@ -4449,22 +4454,20 @@ extension on TranslationsSrRs {
           'history.deleteItemsConfirm' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Da li ste sigurni da želite da obrišete ${count} stavku?',
-                  few: 'Da li ste sigurni da želite da obrišete ${count} stavki?',
-                  many: 'Da li ste sigurni da želite da obrišete ${count} stavki?',
+                  few: 'Da li ste sigurni da želite da obrišete ${count} stavke?',
                   other: 'Da li ste sigurni da želite da obrišete ${count} stavki?',
                 ),
           'history.clearSelection' => TranslationOverrides.string(_root.$meta, 'history.clearSelection', {}) ?? 'Poništi izbor',
           'history.deleteItems' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Obriši ${count} stavku',
-                  few: 'Obriši ${count} stavki',
-                  many: 'Obriši ${count} stavki',
+                  few: 'Obriši ${count} stavke',
                   other: 'Obriši ${count} stavki',
                 ),
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Webview',
@@ -4474,7 +4477,7 @@ extension on TranslationsSrRs {
           'webview.captchaCheckDescription' =>
             TranslationOverrides.string(_root.$meta, 'webview.captchaCheckDescription', {}) ??
                 'Otkrivena je moguća Captcha, rešite je i vratite se kada završite',
-          'webview.captchaCompleted' => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? 'Captcha je završena',
+          'webview.captchaCompleted' => TranslationOverrides.string(_root.$meta, 'webview.captchaCompleted', {}) ?? 'Captcha je rešena',
           'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Unesite URL',
           'webview.navigation.enterCustomUrl' =>
             TranslationOverrides.string(_root.$meta, 'webview.navigation.enterCustomUrl', {}) ?? 'Unesite prilagođeni URL',
@@ -4520,11 +4523,11 @@ extension on TranslationsSrRs {
           'settings.booru.shareBooruDialogMsgMobile' =>
             ({required String booruName}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgMobile', {'booruName': booruName}) ??
-                'Podelite konfiguraciju za ${booruName} kao link.\n\nUključiti prijavu / API ključ?',
+                'Podelite konfiguraciju za ${booruName} kao link.\n\nUključiti korisničko ime / API ključ?',
           'settings.booru.shareBooruDialogMsgDesktop' =>
             ({required String booruName}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.booru.shareBooruDialogMsgDesktop', {'booruName': booruName}) ??
-                'Kopirajte link konfiguracije za ${booruName} u privremenu memoriju.\n\nUključiti prijavu / API ključ?',
+                'Kopirajte link konfiguracije za ${booruName} u privremenu memoriju.\n\nUključiti korisničko ime / API ključ?',
           'settings.booru.booruSharing' =>
             TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharing', {}) ?? 'Deljenje Booru konfiguracija',
           'settings.booru.booruSharingMsgAndroid' => TranslationOverrides.string(_root.$meta, 'settings.booru.booruSharingMsgAndroid', {}) ?? 'Kako automatski otvarati linkove Booru konfiguracija u aplikaciji na Androidu 12 i novijim:\n1) Dodirnite dugme ispod da biste otvorili sistemska podešavanja za podrazumevane linkove aplikacije\n2) Dodirnite «Dodaj link» i izaberite sve dostupne opcije',
@@ -4646,7 +4649,7 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpDesktop', {}) ??
                 '- Desktop - Interfejs u stilu Ahoviewer-a [ZASTARELO, POTREBNA PRERADA]',
           'settings.interface.appUIModeHelpWarning' => TranslationOverrides.string(_root.$meta, 'settings.interface.appUIModeHelpWarning', {}) ?? '[Upozorenje]: Nemojte postavljati režim interfejsa na Desktop na telefonu jer možete pokvariti aplikaciju i možda ćete morati da obrišete sva podešavanja, uključujući Booru konfiguracije.',
-          'settings.interface.handSide' => TranslationOverrides.string(_root.$meta, 'settings.interface.handSide', {}) ?? 'Strana ruke',
+          'settings.interface.handSide' => TranslationOverrides.string(_root.$meta, 'settings.interface.handSide', {}) ?? 'Dominantna ruka',
           'settings.interface.handSideHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.handSideHelp', {}) ??
                 'Prilagođava pozicije elemenata interfejsa izabranoj strani',
@@ -4665,7 +4668,7 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'settings.interface.disableVibration', {}) ?? 'Onemogući vibraciju',
           'settings.interface.disableVibrationSubtitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.disableVibrationSubtitle', {}) ??
-                'I dalje se može javiti pri nekim radnjama čak i kada je onemogućeno',
+                'Vibracija se i dalje može javiti pri nekim radnjama, čak i kada je onemogućena',
           'settings.interface.usePredictiveBack' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.usePredictiveBack', {}) ?? 'Prediktivni pokret za nazad',
           'settings.interface.previewColumnsPortrait' =>
@@ -4678,19 +4681,19 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelp', {}) ?? 'Menja rezoluciju slika u mreži pregleda',
           'settings.interface.previewQualityHelpSample' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpSample', {}) ??
-                ' - Sample - Srednja rezolucija, aplikacija će takođe učitati Thumbnail kvalitet kao čuvar mesta dok se učitava viši kvalitet',
+                ' - Umanjena slika - Srednja rezolucija; aplikacija će prikazati minijaturu dok se učitava slika višeg kvaliteta',
           'settings.interface.previewQualityHelpThumbnail' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpThumbnail', {}) ?? ' - Thumbnail - Niska rezolucija',
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpThumbnail', {}) ?? ' - Minijatura - Niska rezolucija',
           'settings.interface.previewQualityHelpNote' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityHelpNote', {}) ??
-                '[Napomena]: Sample kvalitet može primetno smanjiti performanse, posebno ako imate previše kolona u mreži pregleda',
+                '[Napomena]: Opcija „Umanjena slika“ može primetno smanjiti performanse, posebno ako imate previše kolona u mreži pregleda',
           'settings.interface.previewDisplay' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplay', {}) ?? 'Prikaz pregleda',
           'settings.interface.previewDisplayFallback' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayFallback', {}) ?? 'Rezervni prikaz pregleda',
           'settings.interface.previewDisplayFallbackHelp' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayFallbackHelp', {}) ??
-                'Ovo će se koristiti kada opcija Staggered nije moguća',
+                'Ovo će se koristiti kada stepenasti raspored nije moguć',
           'settings.interface.dontScaleImages' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.dontScaleImages', {}) ?? 'Ne skaliraj slike',
           'settings.interface.dontScaleImagesSubtitle' =>
@@ -4714,17 +4717,17 @@ extension on TranslationsSrRs {
           'settings.interface.scrollModifier' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.scrollModifier', {}) ?? 'Modifikator pomeranja',
           'settings.interface.previewQualityValues.thumbnail' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.thumbnail', {}) ?? 'Thumbnail',
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.thumbnail', {}) ?? 'Minijatura',
           'settings.interface.previewQualityValues.sample' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.sample', {}) ?? 'Sample',
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewQualityValues.sample', {}) ?? 'Umanjena slika',
           'settings.interface.previewDisplayModeValues.square' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.square', {}) ?? 'Kvadrat',
           'settings.interface.previewDisplayModeValues.rectangle' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.rectangle', {}) ?? 'Pravougaonik',
           'settings.interface.previewDisplayModeValues.staggered' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Staggered',
+            TranslationOverrides.string(_root.$meta, 'settings.interface.previewDisplayModeValues.staggered', {}) ?? 'Stepenasti raspored',
           'settings.interface.appModeValues.desktop' =>
-            TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.desktop', {}) ?? 'Desktop',
+            TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.desktop', {}) ?? 'Za računar',
           'settings.interface.appModeValues.mobile' =>
             TranslationOverrides.string(_root.$meta, 'settings.interface.appModeValues.mobile', {}) ?? 'Mobilni',
           'settings.interface.handSideValues.left' =>
@@ -4759,16 +4762,18 @@ extension on TranslationsSrRs {
           'settings.theme.red' => TranslationOverrides.string(_root.$meta, 'settings.theme.red', {}) ?? 'Crvena',
           'settings.theme.green' => TranslationOverrides.string(_root.$meta, 'settings.theme.green', {}) ?? 'Zelena',
           'settings.theme.halloween' => TranslationOverrides.string(_root.$meta, 'settings.theme.halloween', {}) ?? 'Noć veštica',
-          'settings.theme.custom' => TranslationOverrides.string(_root.$meta, 'settings.theme.custom', {}) ?? 'Prilagođeno',
+          'settings.theme.custom' => TranslationOverrides.string(_root.$meta, 'settings.theme.custom', {}) ?? 'Prilagođena',
           'settings.theme.selectColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.selectColor', {}) ?? 'Izaberite boju',
           'settings.theme.selectedColor' => TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColor', {}) ?? 'Izabrana boja',
           'settings.theme.selectedColorAndShades' =>
             TranslationOverrides.string(_root.$meta, 'settings.theme.selectedColorAndShades', {}) ?? 'Izabrana boja i njene nijanse',
           'settings.theme.fontFamily' => TranslationOverrides.string(_root.$meta, 'settings.theme.fontFamily', {}) ?? 'Font',
-          'settings.theme.systemDefault' => TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Sistemski podrazumevano',
+          'settings.theme.systemDefault' =>
+            TranslationOverrides.string(_root.$meta, 'settings.theme.systemDefault', {}) ?? 'Podrazumevani sistemski font',
           'settings.theme.viewMoreFonts' => TranslationOverrides.string(_root.$meta, 'settings.theme.viewMoreFonts', {}) ?? 'Prikaži više fontova',
           'settings.theme.fontPreviewText' =>
-            TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ?? 'Brza smeđa lisica preskače lenjog psa',
+            TranslationOverrides.string(_root.$meta, 'settings.theme.fontPreviewText', {}) ??
+                'Ljubazni fenjerdžija čađavog lica hoće da mi pokaže štos.',
           'settings.theme.customFont' => TranslationOverrides.string(_root.$meta, 'settings.theme.customFont', {}) ?? 'Prilagođeni font',
           'settings.theme.customFontSubtitle' =>
             TranslationOverrides.string(_root.$meta, 'settings.theme.customFontSubtitle', {}) ?? 'Unesite naziv bilo kog Google fonta',
@@ -4888,7 +4893,7 @@ extension on TranslationsSrRs {
           'settings.viewer.kannaLoadingGif' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.kannaLoadingGif', {}) ?? 'Kanna GIF za učitavanje',
           'settings.viewer.imageQualityValues.sample' =>
-            TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? 'Uzorak',
+            TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.sample', {}) ?? 'Umanjena slika',
           'settings.viewer.imageQualityValues.fullRes' =>
             TranslationOverrides.string(_root.$meta, 'settings.viewer.imageQualityValues.fullRes', {}) ?? 'Original',
           'settings.viewer.scrollDirectionValues.horizontal' =>
@@ -4922,14 +4927,14 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'settings.viewer.shareActionValues.hydrus', {}) ?? 'Hydrus',
           'settings.video.title' => TranslationOverrides.string(_root.$meta, 'settings.video.title', {}) ?? 'Video',
           'settings.video.disableVideos' => TranslationOverrides.string(_root.$meta, 'settings.video.disableVideos', {}) ?? 'Onemogući video zapise',
+          _ => null,
+        } ??
+        switch (path) {
           'settings.video.disableVideosHelp' => TranslationOverrides.string(_root.$meta, 'settings.video.disableVideosHelp', {}) ?? 'Korisno na slabijim uređajima koji se ruše prilikom pokušaja učitavanja video zapisa. Pruža opcije za gledanje video zapisa u spoljnom plejeru ili pregledaču.',
           'settings.video.autoplayVideos' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.autoplayVideos', {}) ?? 'Automatski reprodukuj video zapise',
           'settings.video.startVideosMuted' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.startVideosMuted', {}) ?? 'Pokreni video zapise bez zvuka',
-          _ => null,
-        } ??
-        switch (path) {
           'settings.video.experimental' => TranslationOverrides.string(_root.$meta, 'settings.video.experimental', {}) ?? '[Eksperimentalno]',
           'settings.video.videoPlayerBackend' =>
             TranslationOverrides.string(_root.$meta, 'settings.video.videoPlayerBackend', {}) ?? 'Pozadinski sistem video plejera',
@@ -5033,9 +5038,9 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'settings.database.databaseInfoSnatch', {}) ?? 'Preuzete stavke se neće ponovo preuzimati',
           'settings.database.indexingInfo' => TranslationOverrides.string(_root.$meta, 'settings.database.indexingInfo', {}) ?? 'Ubrzava pretragu baze podataka, ali koristi više prostora na disku (do 2x).\n\nNemojte napuštati stranicu niti zatvarati aplikaciju tokom indeksiranja.',
           'settings.database.createIndexesDebug' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.createIndexesDebug', {}) ?? 'Kreiraj indekse [Debug]',
+            TranslationOverrides.string(_root.$meta, 'settings.database.createIndexesDebug', {}) ?? 'Kreiraj indekse [Otklanjanje grešaka]',
           'settings.database.dropIndexesDebug' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.dropIndexesDebug', {}) ?? 'Ukloni indekse [Debug]',
+            TranslationOverrides.string(_root.$meta, 'settings.database.dropIndexesDebug', {}) ?? 'Ukloni indekse [Otklanjanje grešaka]',
           'settings.database.searchHistoryInfo' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.searchHistoryInfo', {}) ?? 'Zahteva da baza podataka bude omogućena.',
           'settings.database.searchHistoryRecords' =>
@@ -5061,11 +5066,11 @@ extension on TranslationsSrRs {
           'settings.database.appRestartRequired' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.appRestartRequired', {}) ?? 'Potrebno je ponovno pokretanje aplikacije!',
           'settings.database.clearSnatchedItems' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.clearSnatchedItems', {}) ?? 'Obriši preuzete stavke',
+            TranslationOverrides.string(_root.$meta, 'settings.database.clearSnatchedItems', {}) ?? 'Obriši istoriju preuzimanja',
           'settings.database.clearAllSnatchedConfirm' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.clearAllSnatchedConfirm', {}) ?? 'Obrisati sve preuzete stavke?',
+            TranslationOverrides.string(_root.$meta, 'settings.database.clearAllSnatchedConfirm', {}) ?? 'Obrisati celu istoriju preuzimanja?',
           'settings.database.snatchedItemsCleared' =>
-            TranslationOverrides.string(_root.$meta, 'settings.database.snatchedItemsCleared', {}) ?? 'Preuzete stavke su obrisane',
+            TranslationOverrides.string(_root.$meta, 'settings.database.snatchedItemsCleared', {}) ?? 'Istorija preuzimanja je obrisana',
           'settings.database.appRestartMayBeRequired' =>
             TranslationOverrides.string(_root.$meta, 'settings.database.appRestartMayBeRequired', {}) ??
                 'Možda će biti potrebno ponovno pokretanje aplikacije!',
@@ -5106,7 +5111,7 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? 'Ažuriraj Sankaku URL-ove',
           'settings.database.updating' => ({
             required int count,
-          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Ažuriranje ${count} stavki:',
+          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Ažuriranje stavki: ${count}',
           'settings.database.left' => ({
             required int count,
           }) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Preostalo: ${count}',
@@ -5130,7 +5135,7 @@ extension on TranslationsSrRs {
           'settings.database.retryFailedItems' =>
             ({required int count}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.database.retryFailedItems', {'count': count}) ??
-                'Ponovo pokušaj neuspele stavke (${count})',
+                'Ponovo ažuriraj stavke čije ažuriranje nije uspelo (${count})',
           'settings.backupAndRestore.title' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.title', {}) ?? 'Rezervna kopija i vraćanje',
           'settings.backupAndRestore.duplicateFileDetectedTitle' =>
@@ -5140,7 +5145,7 @@ extension on TranslationsSrRs {
                 TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.duplicateFileDetectedMsg', {'fileName': fileName}) ??
                 'Datoteka ${fileName} već postoji. Želite li da je prepišete? Ako izaberete ne, kreiranje rezervne kopije biće otkazano.',
           'settings.backupAndRestore.androidOnlyFeatureMsg' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.androidOnlyFeatureMsg', {}) ?? 'Ova funkcija je dostupna samo na Android-u, u verzijama za Desktop možete jednostavno kopirati/nalepiti datoteke iz/u fasciklu podataka aplikacije, zavisno od vašeg sistema',
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.androidOnlyFeatureMsg', {}) ?? 'Ova funkcija je dostupna samo na Androidu. U verzijama za računare možete kopirati i nalepiti datoteke iz fascikle podataka aplikacije ili u nju, u zavisnosti od vašeg sistema.',
           'settings.backupAndRestore.selectBackupDir' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.selectBackupDir', {}) ?? 'Izaberite direktorijum rezervne kopije',
           'settings.backupAndRestore.failedToGetBackupPath' =>
@@ -5171,19 +5176,22 @@ extension on TranslationsSrRs {
           'settings.backupAndRestore.resetBackupDir' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.resetBackupDir', {}) ?? 'Resetuj direktorijum rezervne kopije',
           'settings.backupAndRestore.backupBoorus' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorus', {}) ?? 'Napravi rezervnu kopiju Booru sajtova',
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorus', {}) ??
+                'Napravi rezervnu kopiju podešavanja booru sajtova',
           'settings.backupAndRestore.restoreBoorus' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorus', {}) ?? 'Vrati Booru sajtove',
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorus', {}) ?? 'Vrati podešavanja booru sajtova',
           'settings.backupAndRestore.boorusBackedUp' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusBackedUp', {}) ??
-                'Rezervna kopija Booru sajtova je sačuvana u boorus.json',
+                'Rezervna kopija podešavanja booru sajtova je sačuvana u boorus.json',
           'settings.backupAndRestore.boorusRestored' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusRestored', {}) ?? 'Booru sajtovi su vraćeni iz rezervne kopije',
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.boorusRestored', {}) ??
+                'Podešavanja booru sajtova su vraćena iz rezervne kopije',
           'settings.backupAndRestore.backupBoorusError' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupBoorusError', {}) ??
-                'Pravljenje rezervne kopije Booru sajtova nije uspelo',
+                'Pravljenje rezervne kopije podešavanja booru sajtova nije uspelo',
           'settings.backupAndRestore.restoreBoorusError' =>
-            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorusError', {}) ?? 'Vraćanje Booru sajtova nije uspelo',
+            TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.restoreBoorusError', {}) ??
+                'Vraćanje podešavanja booru sajtova nije uspelo',
           'settings.backupAndRestore.backupDatabase' =>
             TranslationOverrides.string(_root.$meta, 'settings.backupAndRestore.backupDatabase', {}) ?? 'Napravi rezervnu kopiju baze podataka',
           'settings.backupAndRestore.restoreDatabase' =>
@@ -5329,7 +5337,7 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'settings.performance.lowPerformanceModeDialogSetsOptimal', {}) ??
                 'Postavlja optimalna podešavanja za ove opcije (možete ih kasnije zasebno promeniti):',
           'settings.performance.autoplayVideos' =>
-            TranslationOverrides.string(_root.$meta, 'settings.performance.autoplayVideos', {}) ?? 'Automatska reprodukcija videa',
+            TranslationOverrides.string(_root.$meta, 'settings.performance.autoplayVideos', {}) ?? 'Automatski reprodukuj video zapise',
           'settings.performance.disableVideos' =>
             TranslationOverrides.string(_root.$meta, 'settings.performance.disableVideos', {}) ?? 'Onemogući video zapise',
           'settings.performance.disableVideosHelp' => TranslationOverrides.string(_root.$meta, 'settings.performance.disableVideosHelp', {}) ?? 'Korisno na slabijim uređajima koji se ruše pri pokušaju učitavanja videa. Daje opcije za gledanje videa u spoljnom plejeru ili pregledaču.',
@@ -5370,10 +5378,10 @@ extension on TranslationsSrRs {
                 '- Strimovanje - Ne keširaj, započni reprodukciju što je pre moguće',
           'settings.cache.videoCacheModeCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.videoCacheModeCache', {}) ??
-                '- Keš - Čuva datoteku u skladištu uređaja, reprodukuje tek kada se preuzimanje završi',
+                '- Keširanje - Čuva datoteku u skladištu uređaja, reprodukuje tek kada se preuzimanje završi',
           'settings.cache.videoCacheModeStreamCache' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.videoCacheModeStreamCache', {}) ??
-                '- Strimovanje+keš - Kombinacija oba, ali trenutno dovodi do dvostrukog preuzimanja',
+                '- Strimovanje+keširanje - Kombinacija oba, ali trenutno dovodi do dvostrukog preuzimanja',
           'settings.cache.videoCacheNoteEnable' =>
             TranslationOverrides.string(_root.$meta, 'settings.cache.videoCacheNoteEnable', {}) ??
                 '[Napomena]: Video zapisi će se keširati samo ako je opcija \'Keširaj medije\' omogućena.',
@@ -5392,7 +5400,7 @@ extension on TranslationsSrRs {
           'settings.cache.inFilesPlural' =>
             ({required String size, required int count}) =>
                 TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ??
-                '${size}, ${count} datoteka',
+                '${size}, broj datoteka: ${count}',
           'settings.cache.inFileSingular' => ({
             required String size,
           }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 datoteka',
@@ -5434,10 +5442,11 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeMarked', {}) ??
                 'Potpuno sakrij stavke koje odgovaraju označenim filterima',
           'settings.itemFilters.removeFavourited' =>
-            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? 'Ukloni omiljene stavke',
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeFavourited', {}) ?? 'Sakrij omiljene stavke',
           'settings.itemFilters.removeSnatched' =>
-            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'Ukloni preuzete stavke',
-          'settings.itemFilters.removeAI' => TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Ukloni AI stavke',
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeSnatched', {}) ?? 'Sakrij preuzete stavke',
+          'settings.itemFilters.removeAI' =>
+            TranslationOverrides.string(_root.$meta, 'settings.itemFilters.removeAI', {}) ?? 'Sakrij stavke označene kao AI',
           'settings.sync.title' => TranslationOverrides.string(_root.$meta, 'settings.sync.title', {}) ?? 'Sinhronizacija',
           'settings.sync.dbError' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.dbError', {}) ?? 'Baza podataka mora biti omogućena za korišćenje sinhronizacije',
@@ -5475,7 +5484,7 @@ extension on TranslationsSrRs {
                 'Primer: Imate X omiljenih stavki, postavite ovo polje na 100, sinhronizacija će početi od stavke #100 i trajati dok ne stigne do X',
           'settings.sync.syncFavsFromHelpText4' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.syncFavsFromHelpText4', {}) ??
-                'Redosled preuzetih: od najstarijih (0) do najnovijih (X)',
+                'Redosled omiljenih stavki: od najstarijih (0) do najnovijih (X)',
           'settings.sync.sendSnatchedHistory' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.sendSnatchedHistory', {}) ?? 'Pošalji istoriju preuzimanja',
           'settings.sync.snatchedCount' => ({
@@ -5518,7 +5527,7 @@ extension on TranslationsSrRs {
           'settings.sync.tagsSyncMode' => TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncMode', {}) ?? 'Režim sinhronizacije oznaka',
           'settings.sync.tagsSyncModePreferTypeIfNone' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModePreferTypeIfNone', {}) ??
-                'Sačuvaj tip: Ako oznaka postoji sa tipom oznake na drugom uređaju, a ne postoji na ovom uređaju, biće preskočena',
+                'Sačuvaj postojeći tip: Pri uvozu ne prepisuj postojeći poznati tip oznake nepoznatim tipom.',
           'settings.sync.tagsSyncModeOverwrite' =>
             TranslationOverrides.string(_root.$meta, 'settings.sync.tagsSyncModeOverwrite', {}) ??
                 'Prepiši: Sve oznake će biti dodate, ako oznaka i tip oznake postoje na drugom uređaju biće prepisani',
@@ -5607,7 +5616,7 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'settings.debug.showVideoStats', {}) ?? 'Prikaži statistiku video zapisa',
           'settings.debug.blurImagesAndMuteVideosDevOnly' =>
             TranslationOverrides.string(_root.$meta, 'settings.debug.blurImagesAndMuteVideosDevOnly', {}) ??
-                'Zamućenje slika + utišavanje videa [Samo DEV]',
+                'Zamuti slike + isključi zvuk videa [samo za programere]',
           'settings.debug.enableDragScrollOnListsDesktopOnly' =>
             TranslationOverrides.string(_root.$meta, 'settings.debug.enableDragScrollOnListsDesktopOnly', {}) ??
                 'Omogući pomeranje prevlačenjem na listama [Samo za desktop]',
@@ -5707,18 +5716,17 @@ extension on TranslationsSrRs {
           'tagsManager.deleteTags' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Obriši ${count} oznaku',
-                  few: 'Obriši ${count} oznaku',
-                  many: 'Obriši ${count} oznaku',
-                  other: 'Obriši ${count} oznaku',
+                  few: 'Obriši ${count} oznake',
+                  other: 'Obriši ${count} oznaka',
                 ),
           'tagsManager.deleteTagsTitle' => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? 'Obriši oznake',
           'tagsManager.clearSelection' => TranslationOverrides.string(_root.$meta, 'tagsManager.clearSelection', {}) ?? 'Poništi izbor',
           'lockscreen.tapToAuthenticate' =>
             TranslationOverrides.string(_root.$meta, 'lockscreen.tapToAuthenticate', {}) ?? 'Dodirnite za potvrdu identiteta',
-          'lockscreen.devUnlock' => TranslationOverrides.string(_root.$meta, 'lockscreen.devUnlock', {}) ?? 'DEV UNLOCK',
+          'lockscreen.devUnlock' => TranslationOverrides.string(_root.$meta, 'lockscreen.devUnlock', {}) ?? 'OTKLJUČAJ ZA TESTIRANJE',
           'lockscreen.testingMessage' => TranslationOverrides.string(_root.$meta, 'lockscreen.testingMessage', {}) ?? '[TESTIRANJE]: Pritisnite ovo ako ne možete da otključate aplikaciju na uobičajen način. Prijavite programeru uz detalje o svom uređaju.',
           'loliSync.title' => TranslationOverrides.string(_root.$meta, 'loliSync.title', {}) ?? 'Sinhronizacija',
           'loliSync.stopSyncingQuestion' =>
@@ -5729,7 +5737,8 @@ extension on TranslationsSrRs {
           'loliSync.waitingForConnection' => TranslationOverrides.string(_root.$meta, 'loliSync.waitingForConnection', {}) ?? 'Čekanje na vezu…',
           'loliSync.startingServer' => TranslationOverrides.string(_root.$meta, 'loliSync.startingServer', {}) ?? 'Pokretanje servera…',
           'loliSync.keepScreenAwake' => TranslationOverrides.string(_root.$meta, 'loliSync.keepScreenAwake', {}) ?? 'Drži ekran uključenim',
-          'loliSync.serverKilled' => TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Server za sinhronizaciju je prekinut',
+          'loliSync.serverKilled' =>
+            TranslationOverrides.string(_root.$meta, 'loliSync.serverKilled', {}) ?? 'Server za sinhronizaciju je zaustavljen',
           'loliSync.testError' =>
             ({required int statusCode, required String reasonPhrase}) =>
                 TranslationOverrides.string(_root.$meta, 'loliSync.testError', {'statusCode': statusCode, 'reasonPhrase': reasonPhrase}) ??
@@ -5737,7 +5746,8 @@ extension on TranslationsSrRs {
           'loliSync.testErrorException' => ({
             required String error,
           }) => TranslationOverrides.string(_root.$meta, 'loliSync.testErrorException', {'error': error}) ?? 'Greška pri testiranju: ${error}',
-          'loliSync.testSuccess' => TranslationOverrides.string(_root.$meta, 'loliSync.testSuccess', {}) ?? 'Test zahtev je primio pozitivan odgovor',
+          'loliSync.testSuccess' =>
+            TranslationOverrides.string(_root.$meta, 'loliSync.testSuccess', {}) ?? 'Probni zahtev je dobio pozitivan odgovor',
           'loliSync.testSuccessMessage' =>
             TranslationOverrides.string(_root.$meta, 'loliSync.testSuccessMessage', {}) ??
                 'Na drugom uređaju bi trebalo da se pojavi poruka \'Test\'',
@@ -5767,8 +5777,8 @@ extension on TranslationsSrRs {
           'tagView.resolution' => TranslationOverrides.string(_root.$meta, 'tagView.resolution', {}) ?? 'Rezolucija',
           'tagView.size' => TranslationOverrides.string(_root.$meta, 'tagView.size', {}) ?? 'Veličina',
           'tagView.md5' => TranslationOverrides.string(_root.$meta, 'tagView.md5', {}) ?? 'MD5',
-          'tagView.rating' => TranslationOverrides.string(_root.$meta, 'tagView.rating', {}) ?? 'Ocena',
-          'tagView.score' => TranslationOverrides.string(_root.$meta, 'tagView.score', {}) ?? 'Rezultat',
+          'tagView.rating' => TranslationOverrides.string(_root.$meta, 'tagView.rating', {}) ?? 'Kategorija sadržaja',
+          'tagView.score' => TranslationOverrides.string(_root.$meta, 'tagView.score', {}) ?? 'Broj poena',
           'tagView.noTagsFound' => TranslationOverrides.string(_root.$meta, 'tagView.noTagsFound', {}) ?? 'Nisu pronađene oznake',
           'tagView.copy' => TranslationOverrides.string(_root.$meta, 'tagView.copy', {}) ?? 'Kopiraj',
           'tagView.removeFromSearch' => TranslationOverrides.string(_root.$meta, 'tagView.removeFromSearch', {}) ?? 'Ukloni iz pretrage',
@@ -5868,11 +5878,11 @@ extension on TranslationsSrRs {
           'searchBar.exclude' => TranslationOverrides.string(_root.$meta, 'searchBar.exclude', {}) ?? 'Izuzmi (—)',
           'searchBar.booruNumberPrefix' => TranslationOverrides.string(_root.$meta, 'searchBar.booruNumberPrefix', {}) ?? 'Booru (N#)',
           'searchBar.metatags' => TranslationOverrides.string(_root.$meta, 'searchBar.metatags', {}) ?? 'Metaoznake',
-          'searchBar.freeMetatags' => TranslationOverrides.string(_root.$meta, 'searchBar.freeMetatags', {}) ?? 'Besplatne metaoznake',
+          'searchBar.freeMetatags' => TranslationOverrides.string(_root.$meta, 'searchBar.freeMetatags', {}) ?? 'Metaoznake van limita',
           'searchBar.freeMetatagsDescription' =>
             TranslationOverrides.string(_root.$meta, 'searchBar.freeMetatagsDescription', {}) ??
-                'Besplatne metaoznake se ne računaju u ograničenja pretrage po oznakama',
-          'searchBar.free' => TranslationOverrides.string(_root.$meta, 'searchBar.free', {}) ?? 'Besplatno',
+                'Ove metaoznake se ne računaju u ograničenje broja oznaka u pretrazi',
+          'searchBar.free' => TranslationOverrides.string(_root.$meta, 'searchBar.free', {}) ?? 'Van limita',
           'searchBar.single' => TranslationOverrides.string(_root.$meta, 'searchBar.single', {}) ?? 'Pojedinačno',
           'searchBar.range' => TranslationOverrides.string(_root.$meta, 'searchBar.range', {}) ?? 'Opseg',
           'searchBar.popular' => TranslationOverrides.string(_root.$meta, 'searchBar.popular', {}) ?? 'Popularno',
@@ -5886,19 +5896,19 @@ extension on TranslationsSrRs {
           'mobileHome.fileAlreadyExists' => TranslationOverrides.string(_root.$meta, 'mobileHome.fileAlreadyExists', {}) ?? 'Datoteka već postoji',
           'mobileHome.failedToDownload' => TranslationOverrides.string(_root.$meta, 'mobileHome.failedToDownload', {}) ?? 'Preuzimanje nije uspelo',
           'mobileHome.cancelledByUser' => TranslationOverrides.string(_root.$meta, 'mobileHome.cancelledByUser', {}) ?? 'Otkazao korisnik',
+          _ => null,
+        } ??
+        switch (path) {
           'mobileHome.saveAnyway' => TranslationOverrides.string(_root.$meta, 'mobileHome.saveAnyway', {}) ?? 'Ipak sačuvaj',
           'mobileHome.skip' => TranslationOverrides.string(_root.$meta, 'mobileHome.skip', {}) ?? 'Preskoči',
           'mobileHome.retryAll' => ({
             required int count,
           }) => TranslationOverrides.string(_root.$meta, 'mobileHome.retryAll', {'count': count}) ?? 'Pokušaj ponovo za sve (${count})',
-          _ => null,
-        } ??
-        switch (path) {
           'mobileHome.existingFailedOrCancelledItems' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.existingFailedOrCancelledItems', {}) ?? 'Postojeće, neuspele ili otkazane stavke',
           'mobileHome.clearAllRetryableItems' =>
             TranslationOverrides.string(_root.$meta, 'mobileHome.clearAllRetryableItems', {}) ?? 'Očisti sve stavke koje se mogu ponoviti',
-          'desktopHome.snatcher' => TranslationOverrides.string(_root.$meta, 'desktopHome.snatcher', {}) ?? 'Snatcher',
+          'desktopHome.snatcher' => TranslationOverrides.string(_root.$meta, 'desktopHome.snatcher', {}) ?? 'Preuzimanje',
           'desktopHome.addBoorusInSettings' =>
             TranslationOverrides.string(_root.$meta, 'desktopHome.addBoorusInSettings', {}) ?? 'Dodajte booru sajtove u podešavanjima',
           'desktopHome.settings' => TranslationOverrides.string(_root.$meta, 'desktopHome.settings', {}) ?? 'Podešavanja',
@@ -5924,7 +5934,8 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.addBooruActionSubtitle', {}) ??
                 'Povežite sajt dodavanjem njegovog URL-a i podešavanja pretrage',
           'mediaPreviews.restoreBackupAction' =>
-            TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ?? 'Vrati ili upravljaj rezervnim kopijama',
+            TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupAction', {}) ??
+                'Vrati podatke iz rezervne kopije ili upravljaj kopijama',
           'mediaPreviews.restoreBackupActionSubtitle' =>
             TranslationOverrides.string(_root.$meta, 'mediaPreviews.restoreBackupActionSubtitle', {}) ??
                 'Vratite podešavanja, booru sajtove, kartice i sačuvane podatke',
@@ -5968,9 +5979,9 @@ extension on TranslationsSrRs {
           'viewer.appBar.reloadWithScaling' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.reloadWithScaling', {}) ?? 'Ponovo učitaj sa skaliranjem',
           'viewer.appBar.loadSampleQuality' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Učitaj kvalitet uzorka',
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadSampleQuality', {}) ?? 'Učitaj umanjenu sliku',
           'viewer.appBar.loadHighQuality' =>
-            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Učitaj visoki kvalitet',
+            TranslationOverrides.string(_root.$meta, 'viewer.appBar.loadHighQuality', {}) ?? 'Učitaj sliku visokog kvaliteta',
           'viewer.appBar.dropSnatchedStatus' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.dropSnatchedStatus', {}) ?? 'Ukloni status preuzeto',
           'viewer.appBar.setSnatchedStatus' =>
@@ -5990,7 +6001,7 @@ extension on TranslationsSrRs {
                 'Ova datoteka se već preuzima radi deljenja, želite li da prekinete?',
           'viewer.appBar.alreadyDownloadingFile' =>
             TranslationOverrides.string(_root.$meta, 'viewer.appBar.alreadyDownloadingFile', {}) ??
-                'Datoteka se već preuzima radi deljenja, želite li da prekinete trenutnu datoteku i podelite novu?',
+                'Datoteka se već preuzima radi deljenja. Želite li da prekinete trenutno preuzimanje i podelite novu datoteku?',
           'viewer.appBar.current' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.current', {}) ?? 'Trenutno:',
           'viewer.appBar.kNew' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.kNew', {}) ?? 'Novo:',
           'viewer.appBar.shareNew' => TranslationOverrides.string(_root.$meta, 'viewer.appBar.shareNew', {}) ?? 'Podeli novo',
@@ -6025,11 +6036,10 @@ extension on TranslationsSrRs {
           'gallery.sources' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   count,
                   one: 'Izvor',
                   few: 'Izvori',
-                  many: 'Izvori',
                   other: 'Izvori',
                 ),
           'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'Preuzmi',
@@ -6102,7 +6112,7 @@ extension on TranslationsSrRs {
                 'Nepoznat format datoteke (.${fileExt}), dodirnite ovde da biste otvorili u pregledaču',
           'imageStats.live' => ({
             required int count,
-          }) => TranslationOverrides.string(_root.$meta, 'imageStats.live', {'count': count}) ?? 'Uživo: ${count}',
+          }) => TranslationOverrides.string(_root.$meta, 'imageStats.live', {'count': count}) ?? 'Aktivne slike: ${count}',
           'imageStats.pending' => ({
             required int count,
           }) => TranslationOverrides.string(_root.$meta, 'imageStats.pending', {'count': count}) ?? 'Na čekanju: ${count}',
@@ -6128,11 +6138,10 @@ extension on TranslationsSrRs {
           'preview.error.startedAgo' =>
             ({required num seconds}) =>
                 TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('sr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('sr_RS'))(
                   seconds,
                   one: 'Započeto pre ${seconds} sekundu',
                   few: 'Započeto pre ${seconds} sekunde',
-                  many: 'Započeto pre ${seconds} sekundi',
                   other: 'Započeto pre ${seconds} sekundi',
                 ),
           'preview.error.tapToRetryIfStuck' =>
@@ -6150,7 +6159,7 @@ extension on TranslationsSrRs {
             TranslationOverrides.string(_root.$meta, 'preview.error.tapToRetry', {}) ?? 'Dodirnite ovde da biste pokušali ponovo',
           'tagType.artist' => TranslationOverrides.string(_root.$meta, 'tagType.artist', {}) ?? 'Umetnik',
           'tagType.character' => TranslationOverrides.string(_root.$meta, 'tagType.character', {}) ?? 'Lik',
-          'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Autorska prava',
+          'tagType.copyright' => TranslationOverrides.string(_root.$meta, 'tagType.copyright', {}) ?? 'Franšiza',
           'tagType.meta' => TranslationOverrides.string(_root.$meta, 'tagType.meta', {}) ?? 'Meta',
           'tagType.species' => TranslationOverrides.string(_root.$meta, 'tagType.species', {}) ?? 'Vrsta',
           'tagType.lore' => TranslationOverrides.string(_root.$meta, 'tagType.lore', {}) ?? 'Lore',

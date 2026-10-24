@@ -1,13 +1,9 @@
-# Check if fvm is installed
-fvmAvailalble=false
-if command -v fvm &> /dev/null; then
-	fvmAvailalble=true
-fi
+#!/usr/bin/env bash
+set -e
 
-# This script will generate dart localization files from assets/i18n/<locale>.json files and watch for changes until stopped
-
-if [ "$fvmAvailalble" = true ]; then
-    fvm dart run slang watch
+# Use the same generator and plural adaptation as a normal localization build.
+if command -v fvm >/dev/null 2>&1; then
+    exec fvm dart run ./loc_build.dart --watch
 else
-    dart run slang watch
+    exec dart run ./loc_build.dart --watch
 fi

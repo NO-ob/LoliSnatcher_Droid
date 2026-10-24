@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 
@@ -382,11 +383,9 @@ class _Translations$searchHandler$nl_NL extends Translations$searchHandler$en {
   @override
   String restoredTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: '${count} tabblad hersteld van vorige sessie',
-        few: '${count} tabbladen hersteld van vorige sessie',
-        many: '${count} tabbladen hersteld van vorige sessie',
         other: '${count} tabbladen hersteld van vorige sessie',
       );
   @override
@@ -403,11 +402,9 @@ class _Translations$searchHandler$nl_NL extends Translations$searchHandler$en {
   @override
   String addedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: '${count} nieuwe tabbladen toegevoegd',
-        few: '${count} nieuwe tabbladen toegevoegd',
-        many: '${count} nieuwe tabbladen toegevoegd',
         other: '${count} nieuwe tabbladen toegevoegd',
       );
   @override
@@ -415,11 +412,9 @@ class _Translations$searchHandler$nl_NL extends Translations$searchHandler$en {
   @override
   String receivedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: '${count} tabblad ontvangen',
-        few: '${count} tabbladen ontvangen',
-        many: '${count} tabbladen ontvangen',
         other: '${count} tabbladen ontvangen',
       );
 }
@@ -464,41 +459,33 @@ class _Translations$snatcher$nl_NL extends Translations$snatcher$en {
   @override
   String snatchedCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: 'Gedownload: ${count} item',
-        few: 'Gedownload: ${count} items',
-        many: 'Gedownload: ${count} items',
         other: 'Gedownload: ${count} items',
       );
   @override
   String filesAlreadySnatched({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: '${count} bestand is al gedownload',
-        few: '${count} bestanden zijn al gedownload',
-        many: '${count} bestanden zijn al gedownload',
         other: '${count} bestanden zijn al gedownload',
       );
   @override
   String failedToSnatchFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: '${count} bestand downloaden mislukt',
-        few: '${count} bestanden downloaden mislukt',
-        many: '${count} bestanden downloaden mislukt',
         other: '${count} bestanden downloaden mislukt',
       );
   @override
   String cancelledFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: '${count} bestand geannuleerd',
-        few: '${count} bestanden geannuleerd',
-        many: '${count} bestanden geannuleerd',
         other: '${count} bestanden geannuleerd',
       );
   @override
@@ -510,11 +497,9 @@ class _Translations$snatcher$nl_NL extends Translations$snatcher$en {
   @override
   String addedItemsToQueue({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: '${count} item toegevoegd aan downloadwachtrij ',
-        few: '${count} items toegevoegd aan downloadwachtrij',
-        many: '${count} items toegevoegd aan downloadwachtrij',
         other: '${count} items toegevoegd aan downloadwachtrij',
       );
 }
@@ -671,11 +656,9 @@ class _Translations$tabs$nl_NL extends Translations$tabs$en {
   @override
   String areYouSureDeleteTabs({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: 'Weet u zeker u wilt ${count} tabblad wissen?',
-        few: 'Weet u zeker u wilt ${count} tabbladen wissen?',
-        many: 'Weet u zeker u wilt ${count} tabbladen wissen?',
         other: 'Weet u zeker u wilt ${count} tabbladen wissen?',
       );
   @override
@@ -728,11 +711,9 @@ class _Translations$history$nl_NL extends Translations$history$en {
   @override
   String deleteItems({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: 'Wis ${count} item',
-        few: 'Wis ${count} items',
-        many: 'Wis ${count} items',
         other: 'Wis ${count} items',
       );
 }
@@ -822,11 +803,9 @@ class _Translations$tagsManager$nl_NL extends Translations$tagsManager$en {
   @override
   String deleteTags({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
         count,
         one: 'Wis ${count} label',
-        few: 'Wis ${count} labels',
-        many: 'Wis ${count} labels',
         other: 'Wis ${count} labels',
       );
   @override
@@ -1675,11 +1654,9 @@ extension on TranslationsNlNl {
       'searchHandler.restoredTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: '${count} tabblad hersteld van vorige sessie',
-              few: '${count} tabbladen hersteld van vorige sessie',
-              many: '${count} tabbladen hersteld van vorige sessie',
               other: '${count} tabbladen hersteld van vorige sessie',
             ),
       'searchHandler.someRestoredTabsHadIssues' =>
@@ -1693,22 +1670,18 @@ extension on TranslationsNlNl {
       'searchHandler.addedTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: '${count} nieuwe tabbladen toegevoegd',
-              few: '${count} nieuwe tabbladen toegevoegd',
-              many: '${count} nieuwe tabbladen toegevoegd',
               other: '${count} nieuwe tabbladen toegevoegd',
             ),
       'searchHandler.tabsReplaced' => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsReplaced', {}) ?? 'Tabbladen vervangen',
       'searchHandler.receivedTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: '${count} tabblad ontvangen',
-              few: '${count} tabbladen ontvangen',
-              many: '${count} tabbladen ontvangen',
               other: '${count} tabbladen ontvangen',
             ),
       'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'Downloader',
@@ -1731,41 +1704,33 @@ extension on TranslationsNlNl {
       'snatcher.snatchedCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: 'Gedownload: ${count} item',
-              few: 'Gedownload: ${count} items',
-              many: 'Gedownload: ${count} items',
               other: 'Gedownload: ${count} items',
             ),
       'snatcher.filesAlreadySnatched' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: '${count} bestand is al gedownload',
-              few: '${count} bestanden zijn al gedownload',
-              many: '${count} bestanden zijn al gedownload',
               other: '${count} bestanden zijn al gedownload',
             ),
       'snatcher.failedToSnatchFiles' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: '${count} bestand downloaden mislukt',
-              few: '${count} bestanden downloaden mislukt',
-              many: '${count} bestanden downloaden mislukt',
               other: '${count} bestanden downloaden mislukt',
             ),
       'snatcher.cancelledFiles' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: '${count} bestand geannuleerd',
-              few: '${count} bestanden geannuleerd',
-              many: '${count} bestanden geannuleerd',
               other: '${count} bestanden geannuleerd',
             ),
       'snatcher.snatchingImages' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingImages', {}) ?? 'Afbeeldingen downloaden',
@@ -1775,11 +1740,9 @@ extension on TranslationsNlNl {
       'snatcher.addedItemsToQueue' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: '${count} item toegevoegd aan downloadwachtrij ',
-              few: '${count} items toegevoegd aan downloadwachtrij',
-              many: '${count} items toegevoegd aan downloadwachtrij',
               other: '${count} items toegevoegd aan downloadwachtrij',
             ),
       'multibooru.multibooruMode' => TranslationOverrides.string(_root.$meta, 'multibooru.multibooruMode', {}) ?? 'Multibooru-modus',
@@ -1852,11 +1815,9 @@ extension on TranslationsNlNl {
       'tabs.areYouSureDeleteTabs' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: 'Weet u zeker u wilt ${count} tabblad wissen?',
-              few: 'Weet u zeker u wilt ${count} tabbladen wissen?',
-              many: 'Weet u zeker u wilt ${count} tabbladen wissen?',
               other: 'Weet u zeker u wilt ${count} tabbladen wissen?',
             ),
       'tabs.filters.loaded' => TranslationOverrides.string(_root.$meta, 'tabs.filters.loaded', {}) ?? 'Geladen',
@@ -1910,11 +1871,9 @@ extension on TranslationsNlNl {
       'history.deleteItems' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: 'Wis ${count} item',
-              few: 'Wis ${count} items',
-              many: 'Wis ${count} items',
               other: 'Wis ${count} items',
             ),
       'webview.navigation.enterUrlLabel' => TranslationOverrides.string(_root.$meta, 'webview.navigation.enterUrlLabel', {}) ?? 'Voer een URL in',
@@ -2138,11 +2097,9 @@ extension on TranslationsNlNl {
       'tagsManager.deleteTags' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('nl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('nl_NL'))(
               count,
               one: 'Wis ${count} label',
-              few: 'Wis ${count} labels',
-              many: 'Wis ${count} labels',
               other: 'Wis ${count} labels',
             ),
       'tagsManager.deleteTagsTitle' => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? 'Wis labels',

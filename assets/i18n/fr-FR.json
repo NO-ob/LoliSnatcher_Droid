@@ -117,7 +117,6 @@
         "tabsRestored": "Onglets restaurés",
         "restoredTabsCount(param=count)": {
             "one": "${count} onglet a été restauré de la session précédente",
-            "few": "Des onglets ont été restaurés de la session précédente",
             "many": "Plusieurs onglets ont été restaurés de la session précédente",
             "other": "Des onglets ont été restaurés de la session précédente"
         },
@@ -127,14 +126,12 @@
         "tabsMerged": "Onglets fusionnés",
         "addedTabsCount(param=count)": {
             "one": "Plusieurs nouveaux onglets ajoutés ",
-            "few": "Plusieurs nouveaux onglets ajoutés ",
             "many": "${count} nouveaux onglets ajoutés ",
             "other": "Plusieurs nouveaux onglets ajoutés "
         },
         "tabsReplaced": "Onglets remplacés",
         "receivedTabsCount(param=count)": {
             "one": "${count} onglet reçu ",
-            "few": "${count} onglets reçus",
             "many": "${count} onglets reçus",
             "other": "${count} onglets reçus"
         }
@@ -155,25 +152,21 @@
         "itemsSnatched": "Objets récupérés",
         "snatchedCount(param=count)": {
             "one": "Récupéré: ${count} objet",
-            "few": "Récupéré: ${count} objets",
             "many": "Récupéré: ${count} objets",
             "other": "Récupéré: ${count} objets"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} fichier déjà récupéré",
-            "few": "${count} fichiers déjà récupérés",
             "many": "${count} fichiers déjà récupérés",
             "other": "${count} fichiers déjà récupérés"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "Échec de la récupération de ${count} fichier",
-            "few": "Échec de la récupération de ${count} fichiers",
             "many": "Échec de la récupération de ${count} fichiers",
             "other": "Échec de la récupération de ${count} fichiers"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} fichier annulé",
-            "few": "${count} fichiers annulés",
             "many": "${count} fichiers annulés",
             "other": "${count} fichiers annulés"
         },

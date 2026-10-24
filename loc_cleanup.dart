@@ -1,145 +1,80 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
-// Configuration: Set to true if you want to keep keys that are in target files
-// but missing from en.json (they will be pushed to the bottom of the file).
-const bool keepDeprecatedKeys = false;
+import 'package:path/path.dart' as p;
 
-void main() async {
-  const directoryPath = 'assets/i18n';
-  final dir = Directory(directoryPath);
+import 'lib/src/utils/localization_plural_rules.dart';
 
-  if (!dir.existsSync()) {
-    print('Directory $directoryPath does not exist.');
+const _pluralOrder = ['zero', 'one', 'two', 'few', 'many', 'other'];
+
+Future<void> main(List<String> args) async {
+  if (args.any((arg) => arg != '--check')) {
+    stderr.writeln('Usage: loc_cleanup.dart [--check]');
+    exitCode = 64;
     return;
   }
-
-  final enFile = File('$directoryPath/en.json');
-  if (!enFile.existsSync()) {
-    print('en.json not found in $directoryPath.');
-    return;
-  }
-
-  final String enContent = await enFile.readAsString();
-  final Map<String, dynamic> masterMap = jsonDecode(enContent);
-
+  final checkOnly = args.contains('--check');
+  final directory = Directory(p.join('assets', 'i18n'));
+  final masterFile = File(p.join(directory.path, 'en.json'));
+  final master = jsonDecode(await masterFile.readAsString()) as Map<String, dynamic>;
   const encoder = JsonEncoder.withIndent('    ');
 
-  final files = dir.listSync().whereType<File>().where((file) {
-    return file.path.endsWith('.json') && !file.path.endsWith('en.json');
-  });
-
-  for (final file in files) {
-    print('Cleaning up ${file.path}...');
-    final String content = await file.readAsString();
-
-    Map<String, dynamic> targetMap;
+  for (final file in directory.listSync().whereType<File>().where((file) => p.extension(file.path) == '.json')) {
+    // Slang analyze writes _missing_translations_*.json and
+    // _unused_translations.json here; these are reports, not locale sources.
+    if (p.basename(file.path).startsWith('_')) continue;
+    final locale = p.basenameWithoutExtension(file.path);
+    final categories = LocalizationPluralRules.categoriesFor(locale);
+    final content = await file.readAsString();
+    final Map<String, dynamic> target;
     try {
-      targetMap = jsonDecode(content);
-    } catch (e) {
-      print('Skipping ${file.path}: Invalid JSON.');
+      final decoded = jsonDecode(content);
+      if (decoded is! Map<String, dynamic>) throw const FormatException('Expected a translation object');
+      target = decoded;
+    } on FormatException catch (error) {
+      stderr.writeln('Invalid JSON in ${file.path}: $error');
+      exitCode = 65;
       continue;
     }
-
-    final cleanedMap = _cleanAndSort(masterMap, targetMap);
-    await file.writeAsString(encoder.convert(cleanedMap));
+    final cleaned = _cleanAndSort(master, target, categories);
+    final output = '${encoder.convert(cleaned)}\n';
+    if (content == output) continue;
+    if (checkOnly) {
+      stdout.writeln('Cleanup needed: ${file.path}');
+      if (exitCode == 0) exitCode = 1;
+    } else {
+      await file.writeAsString(output);
+      stdout.writeln('Cleaned ${file.path}');
+    }
   }
-
-  print('Cleanup finished.');
 }
 
-bool _isPluralMap(Map map) {
-  const pluralKeys = ['zero', 'one', 'two', 'few', 'many', 'other'];
-  if (map.isEmpty) return false;
+bool _isPluralMap(Map<String, dynamic> value) => value.isNotEmpty && value.keys.every(_pluralOrder.contains);
 
-  for (final key in map.keys) {
-    if (!pluralKeys.contains(key.toString())) return false;
-  }
-  return true;
-}
-
-Map<String, dynamic> _cleanAndSort(Map master, Map target) {
-  final Map<String, dynamic> result = {};
-
-  for (final key in master.keys) {
-    final keyStr = key.toString();
-
-    if (target.containsKey(key)) {
-      final masterValue = master[key];
-      final targetValue = target[key];
-
-      if (masterValue is Map && targetValue is Map) {
-        if (_isPluralMap(masterValue)) {
-          final Map<String, dynamic> pluralResult = {};
-          const pluralOrder = ['zero', 'one', 'two', 'few', 'many', 'other'];
-
-          final targetOther = targetValue['other'];
-          final hasOther = targetOther != null && targetOther != '';
-
-          for (final pk in pluralOrder) {
-            final tVal = targetValue[pk];
-
-            if (tVal != null && tVal != '') {
-              pluralResult[pk] = tVal;
-            } else if (hasOther) {
-              // Target is missing the key, but we have 'other' to use as a base.
-              // Enforce the standard 'one', 'few', 'many', 'other' set.
-              // Also restore 'zero' or 'two' if they existed in the master en.json.
-              if (['one', 'few', 'many', 'other'].contains(pk) || masterValue.containsKey(pk)) {
-                pluralResult[pk] = targetOther;
-              }
-            }
-          }
-
-          if (pluralResult.isNotEmpty) {
-            result[keyStr] = pluralResult;
-          }
-        } else {
-          final nestedResult = _cleanAndSort(masterValue, targetValue);
-          if (nestedResult.isNotEmpty) {
-            result[keyStr] = nestedResult;
-          }
-        }
+Map<String, dynamic> _cleanAndSort(Map<String, dynamic> master, Map<String, dynamic> target, Set<String> categories) {
+  final result = <String, dynamic>{};
+  for (final entry in master.entries) {
+    final value = target[entry.key];
+    if (entry.value is Map<String, dynamic> && value is Map<String, dynamic>) {
+      final masterValue = entry.value as Map<String, dynamic>;
+      final Map<String, dynamic> nested;
+      if (_isPluralMap(masterValue)) {
+        // Additional categories may be valid even when absent from English.
+        // Keep real translations only, never clones of another category.
+        nested = {
+          for (final category in _pluralOrder)
+            if (categories.contains(category) &&
+                value[category] is String &&
+                (value[category] as String).trim().isNotEmpty)
+              category: value[category],
+        };
+        if (!nested.containsKey('other')) continue;
       } else {
-        if (targetValue != '') {
-          result[keyStr] = targetValue;
-        }
+        nested = _cleanAndSort(masterValue, value, categories);
       }
-    }
-  }
-
-  if (keepDeprecatedKeys) {
-    for (final key in target.keys) {
-      final keyStr = key.toString();
-      if (!master.containsKey(key)) {
-        final targetValue = target[key];
-
-        if (targetValue is Map) {
-          final cleanedOrphan = _filterEmptyStrings(targetValue);
-          if (cleanedOrphan.isNotEmpty) {
-            result[keyStr] = cleanedOrphan;
-          }
-        } else if (targetValue != '') {
-          result[keyStr] = targetValue;
-        }
-      }
-    }
-  }
-
-  return result;
-}
-
-Map<String, dynamic> _filterEmptyStrings(Map target) {
-  final Map<String, dynamic> result = {};
-  for (final key in target.keys) {
-    final value = target[key];
-    final keyStr = key.toString();
-
-    if (value is Map) {
-      final nested = _filterEmptyStrings(value);
-      if (nested.isNotEmpty) result[keyStr] = nested;
-    } else if (value != '') {
-      result[keyStr] = value;
+      if (nested.isNotEmpty) result[entry.key] = nested;
+    } else if (entry.value is String && value is String && value.trim().isNotEmpty) {
+      result[entry.key] = value;
     }
   }
   return result;

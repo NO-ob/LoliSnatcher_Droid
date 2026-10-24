@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 
@@ -423,11 +424,9 @@ class _Translations$searchHandler$tr_TR extends Translations$searchHandler$en {
   @override
   String restoredTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: 'Önceki oturumdan ${count} sekme geri yüklendi',
-        few: 'Önceki oturumdan ${count} sekme geri yüklendi',
-        many: 'Önceki oturumdan ${count} sekme geri yüklendi',
         other: 'Önceki oturumdan ${count} sekme geri yüklendi',
       );
   @override
@@ -445,11 +444,9 @@ class _Translations$searchHandler$tr_TR extends Translations$searchHandler$en {
   @override
   String addedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} yeni sekme eklendi',
-        few: '${count} yeni sekme eklendi',
-        many: '${count} yeni sekme eklendi',
         other: '${count} yeni sekme eklendi',
       );
   @override
@@ -457,11 +454,9 @@ class _Translations$searchHandler$tr_TR extends Translations$searchHandler$en {
   @override
   String receivedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} sekme alındı',
-        few: '${count} sekme alındı',
-        many: '${count} sekme alındı',
         other: '${count} sekme alındı',
       );
 }
@@ -504,41 +499,33 @@ class _Translations$snatcher$tr_TR extends Translations$snatcher$en {
   @override
   String snatchedCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: 'İndirilen: ${count} öge',
-        few: 'İndirilen: ${count} öge',
-        many: 'İndirilen: ${count} öge',
         other: 'İndirilen: ${count} öge',
       );
   @override
   String filesAlreadySnatched({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} dosya zaten indirilmiş',
-        few: '${count} dosya zaten indirilmiş',
-        many: '${count} dosya zaten indirilmiş',
         other: '${count} dosya zaten indirilmiş',
       );
   @override
   String failedToSnatchFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} dosya indirilemedi',
-        few: '${count} dosya indirilemedi',
-        many: '${count} dosya indirilemedi',
         other: '${count} dosya indirilemedi',
       );
   @override
   String cancelledFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} dosya iptal edildi',
-        few: '${count} dosya iptal edildi',
-        many: '${count} dosya iptal edildi',
         other: '${count} dosya iptal edildi',
       );
   @override
@@ -550,11 +537,9 @@ class _Translations$snatcher$tr_TR extends Translations$snatcher$en {
   @override
   String addedItemsToQueue({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} öge indirme kuyruğuna eklendi',
-        few: '${count} öge indirme kuyruğuna eklendi',
-        many: '${count} öge indirme kuyruğuna eklendi',
         other: '${count} öge indirme kuyruğuna eklendi',
       );
 }
@@ -765,11 +750,9 @@ class _Translations$tabs$tr_TR extends Translations$tabs$en {
   @override
   String areYouSureDeleteTabs({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} sekmeyi silmek istediğine emin misin?',
-        few: '${count} sekmeyi silmek istediğine emin misin?',
-        many: '${count} sekmeyi silmek istediğine emin misin?',
         other: '${count} sekmeyi silmek istediğine emin misin?',
       );
   @override
@@ -823,11 +806,9 @@ class _Translations$history$tr_TR extends Translations$history$en {
   @override
   String deleteItemsConfirm({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} ögeyi silmek istediğine emin misin?',
-        few: '${count} ögeyi silmek istediğine emin misin?',
-        many: '${count} ögeyi silmek istediğine emin misin?',
         other: '${count} ögeyi silmek istediğine emin misin?',
       );
   @override
@@ -835,11 +816,9 @@ class _Translations$history$tr_TR extends Translations$history$en {
   @override
   String deleteItems({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} ögeyi sil',
-        few: '${count} ögeyi sil',
-        many: '${count} ögeyi sil',
         other: '${count} ögeyi sil',
       );
 }
@@ -1034,11 +1013,9 @@ class _Translations$tagsManager$tr_TR extends Translations$tagsManager$en {
   @override
   String deleteTags({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: '${count} etiketi sil',
-        few: '${count} etiketi sil',
-        many: '${count} etiketi sil',
         other: '${count} etiketi sil',
       );
   @override
@@ -1535,11 +1512,9 @@ class _Translations$gallery$tr_TR extends Translations$gallery$en {
   @override
   String sources({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         count,
         one: 'Kaynak',
-        few: 'Kaynaklar',
-        many: 'Kaynaklar',
         other: 'Kaynaklar',
       );
 }
@@ -2607,7 +2582,7 @@ class _Translations$settings$database$tr_TR extends Translations$settings$databa
       TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? 'Sankaku URL\'lerini güncelle';
   @override
   String updating({required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? '${count} öge güncelleniyor:';
+      TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Öğeler güncelleniyor: ${count}';
   @override
   String left({required int count}) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Kalan: ${count}';
   @override
@@ -3012,7 +2987,7 @@ class _Translations$settings$cache$tr_TR extends Translations$settings$cache$en 
   String get empty => TranslationOverrides.string(_root.$meta, 'settings.cache.empty', {}) ?? 'Boş';
   @override
   String inFilesPlural({required String size, required int count}) =>
-      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, ${count} dosya';
+      TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, dosya sayısı: ${count}';
   @override
   String inFileSingular({required String size}) =>
       TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 dosya';
@@ -3703,11 +3678,9 @@ class _Translations$preview$error$tr_TR extends Translations$preview$error$en {
   @override
   String startedAgo({required num seconds}) =>
       TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
         seconds,
         one: '${seconds} saniye önce başladı',
-        few: '${seconds} saniye önce başladı',
-        many: '${seconds} saniye önce başladı',
         other: '${seconds} saniye önce başladı',
       );
   @override
@@ -4111,11 +4084,9 @@ extension on TranslationsTrTr {
           'searchHandler.restoredTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: 'Önceki oturumdan ${count} sekme geri yüklendi',
-                  few: 'Önceki oturumdan ${count} sekme geri yüklendi',
-                  many: 'Önceki oturumdan ${count} sekme geri yüklendi',
                   other: 'Önceki oturumdan ${count} sekme geri yüklendi',
                 ),
           'searchHandler.someRestoredTabsHadIssues' =>
@@ -4130,22 +4101,18 @@ extension on TranslationsTrTr {
           'searchHandler.addedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} yeni sekme eklendi',
-                  few: '${count} yeni sekme eklendi',
-                  many: '${count} yeni sekme eklendi',
                   other: '${count} yeni sekme eklendi',
                 ),
           'searchHandler.tabsReplaced' => TranslationOverrides.string(_root.$meta, 'searchHandler.tabsReplaced', {}) ?? 'Sekmeler değiştirildi',
           'searchHandler.receivedTabsCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} sekme alındı',
-                  few: '${count} sekme alındı',
-                  many: '${count} sekme alındı',
                   other: '${count} sekme alındı',
                 ),
           'snatcher.title' => TranslationOverrides.string(_root.$meta, 'snatcher.title', {}) ?? 'İndirme Yöneticisi',
@@ -4168,41 +4135,33 @@ extension on TranslationsTrTr {
           'snatcher.snatchedCount' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: 'İndirilen: ${count} öge',
-                  few: 'İndirilen: ${count} öge',
-                  many: 'İndirilen: ${count} öge',
                   other: 'İndirilen: ${count} öge',
                 ),
           'snatcher.filesAlreadySnatched' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} dosya zaten indirilmiş',
-                  few: '${count} dosya zaten indirilmiş',
-                  many: '${count} dosya zaten indirilmiş',
                   other: '${count} dosya zaten indirilmiş',
                 ),
           'snatcher.failedToSnatchFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} dosya indirilemedi',
-                  few: '${count} dosya indirilemedi',
-                  many: '${count} dosya indirilemedi',
                   other: '${count} dosya indirilemedi',
                 ),
           'snatcher.cancelledFiles' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} dosya iptal edildi',
-                  few: '${count} dosya iptal edildi',
-                  many: '${count} dosya iptal edildi',
                   other: '${count} dosya iptal edildi',
                 ),
           'snatcher.snatchingImages' => TranslationOverrides.string(_root.$meta, 'snatcher.snatchingImages', {}) ?? 'Görseller indiriliyor',
@@ -4211,11 +4170,9 @@ extension on TranslationsTrTr {
           'snatcher.addedItemsToQueue' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} öge indirme kuyruğuna eklendi',
-                  few: '${count} öge indirme kuyruğuna eklendi',
-                  many: '${count} öge indirme kuyruğuna eklendi',
                   other: '${count} öge indirme kuyruğuna eklendi',
                 ),
           'multibooru.title' => TranslationOverrides.string(_root.$meta, 'multibooru.title', {}) ?? 'Multibooru',
@@ -4326,11 +4283,9 @@ extension on TranslationsTrTr {
           'tabs.areYouSureDeleteTabs' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} sekmeyi silmek istediğine emin misin?',
-                  few: '${count} sekmeyi silmek istediğine emin misin?',
-                  many: '${count} sekmeyi silmek istediğine emin misin?',
                   other: '${count} sekmeyi silmek istediğine emin misin?',
                 ),
           'tabs.filters.loaded' => TranslationOverrides.string(_root.$meta, 'tabs.filters.loaded', {}) ?? 'Yüklendi',
@@ -4393,22 +4348,18 @@ extension on TranslationsTrTr {
           'history.deleteItemsConfirm' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItemsConfirm', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} ögeyi silmek istediğine emin misin?',
-                  few: '${count} ögeyi silmek istediğine emin misin?',
-                  many: '${count} ögeyi silmek istediğine emin misin?',
                   other: '${count} ögeyi silmek istediğine emin misin?',
                 ),
           'history.clearSelection' => TranslationOverrides.string(_root.$meta, 'history.clearSelection', {}) ?? 'Seçimi temizle',
           'history.deleteItems' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'history.deleteItems', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} ögeyi sil',
-                  few: '${count} ögeyi sil',
-                  many: '${count} ögeyi sil',
                   other: '${count} ögeyi sil',
                 ),
           'webview.title' => TranslationOverrides.string(_root.$meta, 'webview.title', {}) ?? 'Webview',
@@ -5049,7 +5000,7 @@ extension on TranslationsTrTr {
             TranslationOverrides.string(_root.$meta, 'settings.database.updateSankakuUrls', {}) ?? 'Sankaku URL\'lerini güncelle',
           'settings.database.updating' => ({
             required int count,
-          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? '${count} öge güncelleniyor:',
+          }) => TranslationOverrides.string(_root.$meta, 'settings.database.updating', {'count': count}) ?? 'Öğeler güncelleniyor: ${count}',
           'settings.database.left' => ({
             required int count,
           }) => TranslationOverrides.string(_root.$meta, 'settings.database.left', {'count': count}) ?? 'Kalan: ${count}',
@@ -5324,10 +5275,10 @@ extension on TranslationsTrTr {
           'settings.cache.cacheStats' => TranslationOverrides.string(_root.$meta, 'settings.cache.cacheStats', {}) ?? 'Önbellek istatistikleri:',
           'settings.cache.loading' => TranslationOverrides.string(_root.$meta, 'settings.cache.loading', {}) ?? 'Yükleniyor…',
           'settings.cache.empty' => TranslationOverrides.string(_root.$meta, 'settings.cache.empty', {}) ?? 'Boş',
-          'settings.cache.inFilesPlural' => ({
-            required String size,
-            required int count,
-          }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ?? '${size}, ${count} dosya',
+          'settings.cache.inFilesPlural' =>
+            ({required String size, required int count}) =>
+                TranslationOverrides.string(_root.$meta, 'settings.cache.inFilesPlural', {'size': size, 'count': count}) ??
+                '${size}, dosya sayısı: ${count}',
           'settings.cache.inFileSingular' => ({
             required String size,
           }) => TranslationOverrides.string(_root.$meta, 'settings.cache.inFileSingular', {'size': size}) ?? '${size}, 1 dosya',
@@ -5638,11 +5589,9 @@ extension on TranslationsTrTr {
           'tagsManager.deleteTags' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'tagsManager.deleteTags', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: '${count} etiketi sil',
-                  few: '${count} etiketi sil',
-                  many: '${count} etiketi sil',
                   other: '${count} etiketi sil',
                 ),
           'tagsManager.deleteTagsTitle' => TranslationOverrides.string(_root.$meta, 'tagsManager.deleteTagsTitle', {}) ?? 'Etiketleri sil',
@@ -5947,11 +5896,9 @@ extension on TranslationsTrTr {
           'gallery.sources' =>
             ({required num count}) =>
                 TranslationOverrides.plural(_root.$meta, 'gallery.sources', {'count': count}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   count,
                   one: 'Kaynak',
-                  few: 'Kaynaklar',
-                  many: 'Kaynaklar',
                   other: 'Kaynaklar',
                 ),
           'galleryButtons.snatch' => TranslationOverrides.string(_root.$meta, 'galleryButtons.snatch', {}) ?? 'İndir',
@@ -6047,11 +5994,9 @@ extension on TranslationsTrTr {
           'preview.error.startedAgo' =>
             ({required num seconds}) =>
                 TranslationOverrides.plural(_root.$meta, 'preview.error.startedAgo', {'seconds': seconds}) ??
-                (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('tr'))(
+                (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('tr_TR'))(
                   seconds,
                   one: '${seconds} saniye önce başladı',
-                  few: '${seconds} saniye önce başladı',
-                  many: '${seconds} saniye önce başladı',
                   other: '${seconds} saniye önce başladı',
                 ),
           'preview.error.tapToRetryIfStuck' =>

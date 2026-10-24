@@ -78,7 +78,17 @@ Translation files are located in `assets/i18n/`:
 2. Copy the structure from `en.json` and translate all strings
 3. Register the locale in the app configuration
 4. Run `dart run ./loc_build.dart` to regenerate types
-5. Add your language it in `AppLocaleExt - allowedValues` function inside `lib\src\pages\settings\language_page.dart`
+5. Add your language in `AppLocaleExt - allowedValues` function inside `lib\src\pages\settings\language_page.dart`
+
+Leave untranslated entries absent rather than adding empty strings, so English
+fallback remains available.
+
+Always generate through `loc_build.dart`, rather
+than invoking Slang directly. The wrapper adapts generated plural calls to the
+existing `intl` rules while preserving English grammar in fallback messages.
+When adding a language, add its cardinal categories to
+`LocalizationPluralRules.categories` as well. `loc_cleanup.dart --check` reports
+whether cleanup would change any source files without writing them.
 
 ## Reporting Bugs
 

@@ -126,7 +126,6 @@
         "tabsRestored": "Abas restauradas",
         "restoredTabsCount(param=count)": {
             "one": "${count} aba restaurada da sessão anterior",
-            "few": "${count} abas restauradas da sessão anterior",
             "many": "${count} abas restauradas da sessão anterior",
             "other": "${count} abas restauradas da sessão anterior"
         },
@@ -136,14 +135,12 @@
         "tabsMerged": "Abas mescladas",
         "addedTabsCount(param=count)": {
             "one": "${count} nova aba adicionada",
-            "few": "${count} novas abas adicionadas",
             "many": "${count} novas abas adicionadas",
             "other": "${count} novas abas adicionadas"
         },
         "tabsReplaced": "Abas substituídas",
         "receivedTabsCount(param=count)": {
             "one": "${count} aba recebida",
-            "few": "${count} abas recebidas",
             "many": "${count} abas recebidas",
             "other": "${count} abas recebidas"
         }
@@ -164,25 +161,21 @@
         "itemsSnatched": "Item baixado",
         "snatchedCount(param=count)": {
             "one": "Baixado: ${count} item",
-            "few": "Baixados: ${count} itens",
             "many": "Baixados: ${count} itens",
             "other": "Baixados: ${count} itens"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} arquivo já foi baixado",
-            "few": "${count} arquivos já foram baixados",
             "many": "${count} arquivos já foram baixados",
             "other": "${count} arquivos já foram baixados"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "Falha ao baixar ${count} arquivo",
-            "few": "Falha ao baixar ${count} arquivos",
             "many": "Falha ao baixar ${count} arquivos",
             "other": "Falha ao baixar ${count} arquivos"
         },
         "cancelledFiles(param=count)": {
             "one": "${count} arquivo cancelado",
-            "few": "${count} arquivos cancelados",
             "many": "${count} arquivos cancelados",
             "other": "${count} arquivos cancelados"
         },
@@ -191,7 +184,6 @@
         "addedItemToQueue": "Item adicionado à fila de download",
         "addedItemsToQueue(param=count)": {
             "one": "${count} item adicionado a fila de download",
-            "few": "${count} itens adicionados a fila de download",
             "many": "${count} itens adicionados a fila de download",
             "other": "${count} itens adicionados a fila de download"
         }
@@ -283,7 +275,6 @@
         "reversed": "(invertida)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "Você tem certeza de que quer deletar ${count} aba?",
-            "few": "Você tem certeza de que quer deletar ${count} abas?",
             "many": "Você tem certeza de que quer deletar ${count} abas?",
             "other": "Você tem certeza de que quer deletar ${count} abas?"
         },
@@ -334,14 +325,12 @@
         "deleteHistoryEntries": "Excluir itens do histórico",
         "deleteItemsConfirm(param=count)": {
             "one": "Tem certeza de que deseja excluir ${count} item?",
-            "few": "Tem certeza de que deseja excluir ${count} itens?",
             "many": "Tem certeza de que deseja excluir ${count} itens?",
             "other": "Tem certeza de que deseja excluir ${count} itens?"
         },
         "clearSelection": "Limpar seleção",
         "deleteItems(param=count)": {
             "one": "Excluir ${count} item",
-            "few": "Excluir ${count} itens",
             "many": "Excluir ${count} itens",
             "other": "Excluir ${count} itens"
         }
@@ -720,7 +709,7 @@
             "failedItemsPurgeStartedTitle": "Limpeza de itens com falha iniciada",
             "failedItemsPurgeInfo": "Itens que falharem ao atualizar serão removidos do banco de dados",
             "updateSankakuUrls": "Atualizar URLs do Sankaku",
-            "updating(param=count)": "Atualizando ${count: int} itens:",
+            "updating(param=count)": "Atualizando itens: ${count: int}",
             "left(param=count)": "Restantes: ${count: int}",
             "done(param=count)": "Concluídos: ${count: int}",
             "failedSkipped(param=count)": "Falhas/Pulados: ${count: int}",
@@ -855,7 +844,7 @@
             "cacheStats": "Estatus do cache:",
             "loading": "Carregando…",
             "empty": "Vazio",
-            "inFilesPlural(param=size, param=count)": "${size: String}, ${count: int} arquivos",
+            "inFilesPlural(param=size, param=count)": "${size: String}, arquivos: ${count: int}",
             "inFileSingular(param=size)": "${size: String}, 1 arquivo",
             "cacheTypeTotal": "Total",
             "cacheTypeFavicons": "Favicons",
@@ -1065,7 +1054,6 @@
         "makeUnstaleable": "Tornar inexpirável",
         "deleteTags(param=count)": {
             "one": "Excluir ${count} tag",
-            "few": "Excluir ${count} tags",
             "many": "Excluir ${count} tags",
             "other": "Excluir ${count} tags"
         },
@@ -1301,7 +1289,6 @@
         "loadingFileMessage": "Isso pode levar algum tempo, aguarde…",
         "sources(param=count)": {
             "one": "Fonte",
-            "few": "Fontes",
             "many": "Fontes",
             "other": "Fontes"
         }
@@ -1371,7 +1358,6 @@
             "loadingPage(param=pageNum)": "Carregando página #${pageNum: int}…",
             "startedAgo(param=seconds)": {
                 "one": "Iniciado há ${seconds} segundo",
-                "few": "Iniciado há ${seconds} segundos",
                 "many": "Iniciado há ${seconds} segundos",
                 "other": "Iniciado há ${seconds} segundos"
             },

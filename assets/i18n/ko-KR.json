@@ -110,9 +110,6 @@
         "ratingsChangedMessage(param=booruType)": "${booruType: String}에서는 [rating:safe]가 [rating:general]과 [rating:sensitive]로 대체됩니다",
         "tabsRestored": "탭 복구됨",
         "restoredTabsCount(param=count)": {
-            "one": "이전 세션에서 ${count}개의 탭 복구됨",
-            "few": "이전 세션에서 ${count}개의 탭 복구됨",
-            "many": "이전 세션에서 ${count}개의 탭 복구됨",
             "other": "이전 세션에서 ${count}개의 탭 복구됨"
         },
         "someRestoredTabsHadIssues": "일부 복구된 탭 중 알 수 없는 보루나 깨진 글자를 가진 탭이 있습니다.",
@@ -120,16 +117,10 @@
         "listOfBrokenTabs": "깨진 탭 목록:",
         "tabsMerged": "탭 합쳐짐",
         "addedTabsCount(param=count)": {
-            "one": "${count}개의 새 탭 생성됨",
-            "few": "${count}개의 새 탭 생성됨",
-            "many": "${count}개의 새 탭 생성됨",
             "other": "${count}개의 새 탭 생성됨"
         },
         "tabsReplaced": "탭 대체됨",
         "receivedTabsCount(param=count)": {
-            "one": "${count}개의 탭 받음",
-            "few": "${count}개의 탭 받음",
-            "many": "${count}개의 탭 받음",
             "other": "${count}개의 탭 받음"
         }
     },
@@ -148,36 +139,21 @@
         "startingNextQueueItem": "다음 대기열 항목 시작 중…",
         "itemsSnatched": "항목 스내칭됨",
         "snatchedCount(param=count)": {
-            "one": "${count}개 항목 스내칭됨",
-            "few": "${count}개 항목 스내칭됨",
-            "many": "${count}개 항목 스내칭됨",
             "other": "${count}개 항목 스내칭됨"
         },
         "filesAlreadySnatched(param=count)": {
-            "one": "${count}개의 항목이 이미 스내칭되었습니다",
-            "few": "${count}개의 항목이 이미 스내칭되었습니다",
-            "many": "${count}개의 항목이 이미 스내칭되었습니다",
             "other": "${count}개의 항목이 이미 스내칭되었습니다"
         },
         "failedToSnatchFiles(param=count)": {
-            "one": "${count}개의 파일을 스내칭하는 데에 실패했습니다",
-            "few": "${count}개의 파일을 스내칭하는 데에 실패했습니다",
-            "many": "${count}개의 파일을 스내칭하는 데에 실패했습니다",
             "other": "${count}개의 파일을 스내칭하는 데에 실패했습니다"
         },
         "cancelledFiles(param=count)": {
-            "one": "${count}개의 파일을 취소했습니다",
-            "few": "${count}개의 파일을 취소했습니다",
-            "many": "${count}개의 파일을 취소했습니다",
             "other": "${count}개의 파일을 취소했습니다"
         },
         "snatchingImages": "이미지 스내칭하기",
         "doNotCloseApp": "앱을 닫지 마세요!",
         "addedItemToQueue": "항목이 스내칭 대기열에 추가됨",
         "addedItemsToQueue(param=count)": {
-            "one": "${count}개의 항목이 스내칭 대기열에 추가됨",
-            "few": "${count}개의 항목이 스내칭 대기열에 추가됨",
-            "many": "${count}개의 항목이 스내칭 대기열에 추가됨",
             "other": "${count}개의 항목이 스내칭 대기열에 추가됨"
         }
     },

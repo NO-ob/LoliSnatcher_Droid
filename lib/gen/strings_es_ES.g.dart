@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 
@@ -358,10 +359,9 @@ class Translations$searchHandler$es_ES extends Translations$searchHandler$en {
   @override
   String restoredTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
         count,
         one: '${count} pestaña restaurada de la sesión previa',
-        few: '${count} pestañas restauradas de la sesión previa',
         many: '${count} pestañas restauradas de la sesión previa',
         other: '${count} pestañas restauradas de la sesión previa',
       );
@@ -380,10 +380,9 @@ class Translations$searchHandler$es_ES extends Translations$searchHandler$en {
   @override
   String addedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
         count,
         one: 'Se han añadido ${count} nuevas pestañas',
-        few: 'Se han añadido ${count} nuevas pestañas',
         many: 'Se han añadido ${count} nuevas pestañas',
         other: 'Se han añadido ${count} nuevas pestañas',
       );
@@ -392,10 +391,9 @@ class Translations$searchHandler$es_ES extends Translations$searchHandler$en {
   @override
   String receivedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
         count,
         one: '${count} pestaña recibida',
-        few: '${count} pestañas recibidas',
         many: '${count} pestañas recibidas',
         other: '${count} pestañas recibidas',
       );
@@ -441,40 +439,36 @@ class Translations$snatcher$es_ES extends Translations$snatcher$en {
   @override
   String snatchedCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
         count,
         one: '${count} elemento descargado',
-        few: '${count} elementos descargados',
         many: '${count} elementos descargados',
         other: '${count} elementos descargados',
       );
   @override
   String filesAlreadySnatched({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
         count,
         one: '${count} archivo ha sido descargado anteriormente',
-        few: '${count} archivos han sido descargados anteriormente',
         many: '${count} archivos han sido descargados anteriormente',
         other: '${count} archivos han sido descargados anteriormente',
       );
   @override
   String failedToSnatchFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
         count,
         one: '${count} archivo ha fallado su descarga',
-        few: '${count} archivo han fallado sus descargas',
         many: '${count} archivo han fallado sus descargas',
         other: '${count} archivo han fallado sus descargas',
       );
   @override
   String cancelledFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
         count,
         one: '${count} archivo cancelado',
-        few: '${count} archivos cancelados',
         many: '{count} archivos cancelados',
         other: '${count} archivos cancelados',
       );
@@ -488,10 +482,9 @@ class Translations$snatcher$es_ES extends Translations$snatcher$en {
   @override
   String addedItemsToQueue({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
         count,
         one: '${count} elemento añadido a la cola de descargas',
-        few: '${count} elementos añadidos a la cola de descargas',
         many: '${count} elementos añadidos a la cola de descargas',
         other: '${count} elementos añadidos a la cola de descargas',
       );
@@ -1017,10 +1010,9 @@ extension on TranslationsEsEs {
       'searchHandler.restoredTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
               count,
               one: '${count} pestaña restaurada de la sesión previa',
-              few: '${count} pestañas restauradas de la sesión previa',
               many: '${count} pestañas restauradas de la sesión previa',
               other: '${count} pestañas restauradas de la sesión previa',
             ),
@@ -1035,10 +1027,9 @@ extension on TranslationsEsEs {
       'searchHandler.addedTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
               count,
               one: 'Se han añadido ${count} nuevas pestañas',
-              few: 'Se han añadido ${count} nuevas pestañas',
               many: 'Se han añadido ${count} nuevas pestañas',
               other: 'Se han añadido ${count} nuevas pestañas',
             ),
@@ -1046,10 +1037,9 @@ extension on TranslationsEsEs {
       'searchHandler.receivedTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
               count,
               one: '${count} pestaña recibida',
-              few: '${count} pestañas recibidas',
               many: '${count} pestañas recibidas',
               other: '${count} pestañas recibidas',
             ),
@@ -1074,40 +1064,36 @@ extension on TranslationsEsEs {
       'snatcher.snatchedCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
               count,
               one: '${count} elemento descargado',
-              few: '${count} elementos descargados',
               many: '${count} elementos descargados',
               other: '${count} elementos descargados',
             ),
       'snatcher.filesAlreadySnatched' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
               count,
               one: '${count} archivo ha sido descargado anteriormente',
-              few: '${count} archivos han sido descargados anteriormente',
               many: '${count} archivos han sido descargados anteriormente',
               other: '${count} archivos han sido descargados anteriormente',
             ),
       'snatcher.failedToSnatchFiles' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
               count,
               one: '${count} archivo ha fallado su descarga',
-              few: '${count} archivo han fallado sus descargas',
               many: '${count} archivo han fallado sus descargas',
               other: '${count} archivo han fallado sus descargas',
             ),
       'snatcher.cancelledFiles' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
               count,
               one: '${count} archivo cancelado',
-              few: '${count} archivos cancelados',
               many: '{count} archivos cancelados',
               other: '${count} archivos cancelados',
             ),
@@ -1118,10 +1104,9 @@ extension on TranslationsEsEs {
       'snatcher.addedItemsToQueue' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('es'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('es_ES'))(
               count,
               one: '${count} elemento añadido a la cola de descargas',
-              few: '${count} elementos añadidos a la cola de descargas',
               many: '${count} elementos añadidos a la cola de descargas',
               other: '${count} elementos añadidos a la cola de descargas',
             ),

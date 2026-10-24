@@ -41,9 +41,9 @@
     "invalidUrl": "Nevažeći URL!",
     "clipboardIsEmpty": "Privremena memorija je prazna!",
     "failedToOpenLink": "Otvaranje veze nije uspelo",
-    "apiKey": "API Key",
-    "userId": "User ID",
-    "login": "Prijava",
+    "apiKey": "API ključ",
+    "userId": "ID korisnika",
+    "login": "Korisničko ime",
     "password": "Lozinka",
     "pause": "Pauziraj",
     "resume": "Nastavi",
@@ -102,6 +102,9 @@
         "restoringTabs": "Vraćanje kartica…"
     },
     "permissions": {
+        "localNetworkRequired": "Za otvaranje ove adrese potreban je pristup lokalnoj mreži. Odobrite dozvolu „Uređaji u blizini“, pa pokušajte ponovo.",
+        "localNetworkExplanationTitle": "Pristup lokalnoj mreži",
+        "localNetworkExplanation": "Za otvaranje lokalnih booru servera ili sinhronizaciju sa drugim uređajem, aplikaciji je potreban pristup vašoj lokalnoj mreži. Android će prikazati zahtev za dozvolu „Uređaji u blizini“.",
         "noAccessToCustomStorageDirectory": "Nema pristupa prilagođenom direktorijumu za skladištenje",
         "pleaseSetStorageDirectoryAgain": "Ponovo postavite direktorijum za skladištenje kako biste aplikaciji omogućili pristup",
         "currentPath(param=path)": "Trenutna putanja: ${path: String}",
@@ -120,14 +123,13 @@
         "removedLastTab": "Poslednja kartica je uklonjena",
         "resettingSearchToDefaultTags": "Vraćanje na podrazumevane oznake",
         "uoh": "UOOOOOOOHHH",
-        "ratingsChanged": "Ocene su promenjene",
+        "ratingsChanged": "Kategorije sadržaja su promenjene",
         "ratingsChangedMessage(param=booruType)": "Na ${booruType: String} [rating:safe] je sada zamenjen sa [rating:general] i [rating:sensitive]",
-        "appFixedRatingAutomatically": "Ocena je automatski ispravljena. Koristite ispravnu ocenu u budućim pretragama",
+        "appFixedRatingAutomatically": "Kategorija sadržaja je automatski ispravljena. Koristite ispravnu kategoriju sadržaja u budućim pretragama",
         "tabsRestored": "Kartice su vraćene",
         "restoredTabsCount(param=count)": {
             "one": "Vraćena je ${count} kartica iz prethodne sesije",
-            "few": "Vraćeno je ${count} kartica iz prethodne sesije",
-            "many": "Vraćeno je ${count} kartica iz prethodne sesije",
+            "few": "Vraćene su ${count} kartice iz prethodne sesije",
             "other": "Vraćeno je ${count} kartica iz prethodne sesije"
         },
         "someRestoredTabsHadIssues": "Neke vraćene kartice su imale nepoznate booru sajtove ili neispravne znakove.",
@@ -136,20 +138,18 @@
         "tabsMerged": "Kartice su spojene",
         "addedTabsCount(param=count)": {
             "one": "Dodata je ${count} nova kartica",
-            "few": "Dodato je ${count} novih kartica",
-            "many": "Dodato je ${count} novih kartica",
+            "few": "Dodate su ${count} nove kartice",
             "other": "Dodato je ${count} novih kartica"
         },
         "tabsReplaced": "Kartice su zamenjene",
         "receivedTabsCount(param=count)": {
             "one": "Primljena je ${count} kartica",
-            "few": "Primljeno je ${count} kartica",
-            "many": "Primljeno je ${count} kartica",
+            "few": "Primljene su ${count} kartice",
             "other": "Primljeno je ${count} kartica"
         }
     },
     "snatcher": {
-        "title": "Snatcher",
+        "title": "Preuzimanje",
         "snatchingHistory": "Istorija preuzimanja",
         "enterTags": "Unesite oznake",
         "amount": "Količina",
@@ -164,26 +164,22 @@
         "itemsSnatched": "Preuzete stavke",
         "snatchedCount(param=count)": {
             "one": "Preuzeta: ${count} stavka",
-            "few": "Preuzeto: ${count} stavki",
-            "many": "Preuzeto: ${count} stavki",
+            "few": "Preuzete: ${count} stavke",
             "other": "Preuzeto: ${count} stavki"
         },
         "filesAlreadySnatched(param=count)": {
             "one": "${count} datoteka je već preuzeta",
-            "few": "${count} datoteka je već preuzeto",
-            "many": "${count} datoteka je već preuzeto",
+            "few": "${count} datoteke su već preuzete",
             "other": "${count} datoteka je već preuzeto"
         },
         "failedToSnatchFiles(param=count)": {
             "one": "Preuzimanje ${count} datoteke nije uspelo",
-            "few": "Preuzimanje ${count} datoteka nije uspelo",
-            "many": "Preuzimanje ${count} datoteka nije uspelo",
+            "few": "Preuzimanje ${count} datoteke nije uspelo",
             "other": "Preuzimanje ${count} datoteka nije uspelo"
         },
         "cancelledFiles(param=count)": {
             "one": "Otkazana je ${count} datoteka",
-            "few": "Otkazano je ${count} datoteka",
-            "many": "Otkazano je ${count} datoteka",
+            "few": "Otkazane su ${count} datoteke",
             "other": "Otkazano je ${count} datoteka"
         },
         "snatchingImages": "Preuzimanje slika",
@@ -191,8 +187,7 @@
         "addedItemToQueue": "Stavka je dodata u red za preuzimanje",
         "addedItemsToQueue(param=count)": {
             "one": "Dodata je ${count} stavka u red za preuzimanje",
-            "few": "Dodato je ${count} stavki u red za preuzimanje",
-            "many": "Dodato je ${count} stavki u red za preuzimanje",
+            "few": "Dodate su ${count} stavke u red za preuzimanje",
             "other": "Dodato je ${count} stavki u red za preuzimanje"
         }
     },
@@ -207,7 +202,7 @@
     "hydrus": {
         "importError": "Došlo je do greške prilikom uvoza u Hydrus",
         "apiPermissionsRequired": "Možda niste dali odgovarajuće API dozvole, ovo se može izmeniti u Review Services",
-        "addTagsToFile": "Dodaj oznake u datoteku",
+        "addTagsToFile": "Dodaj oznake datoteci",
         "addUrls": "Dodaj URL-ove"
     },
     "tabs": {
@@ -243,7 +238,7 @@
         "keepLastDuplicateTabs": "Zadrži poslednju",
         "skipDuplicateTabDelete": "Preskoči",
         "shuffleTabs": "Promešaj kartice",
-        "tabRandomlyShuffled": "Kartica je nasumično promešana",
+        "tabRandomlyShuffled": "Kartice su nasumično promešane",
         "tabOrderSaved": "Redosled kartica je sačuvan",
         "scrollToCurrent": "Pomeri do trenutne kartice",
         "scrollToTop": "Pomeri na vrh",
@@ -278,13 +273,12 @@
         "sort": "Sortiraj",
         "shuffleTabsQuestion": "Nasumično promešati redosled kartica?",
         "saveTabsInCurrentOrder": "Sačuvati kartice u trenutnom redosledu sortiranja?",
-        "byBooru": "Po Booru-u",
+        "byBooru": "Po booru sajtu",
         "alphabetically": "Abecedno",
         "reversed": "(obrnuto)",
         "areYouSureDeleteTabs(param=count)": {
             "one": "Da li ste sigurni da želite da obrišete ${count} karticu?",
-            "few": "Da li ste sigurni da želite da obrišete ${count} kartica?",
-            "many": "Da li ste sigurni da želite da obrišete ${count} kartica?",
+            "few": "Da li ste sigurni da želite da obrišete ${count} kartice?",
             "other": "Da li ste sigurni da želite da obrišete ${count} kartica?"
         },
         "filters": {
@@ -323,7 +317,7 @@
         "searchHistoryRequiresDatabase": "Omogućite bazu podataka u podešavanjima za istoriju pretrage",
         "lastSearch(param=search)": "Poslednja pretraga: ${search: String}",
         "lastSearchWithDate(param=date)": "Poslednja pretraga: ${date: String}",
-        "unknownBooruType": "Nepoznat Booru tip!",
+        "unknownBooruType": "Nepoznat tip booru sajta!",
         "unknownBooru(param=name, param=type)": "Nepoznat booru (${name: String}-${type: String})",
         "open": "Otvori",
         "openInNewTab": "Otvori u novoj kartici",
@@ -334,15 +328,13 @@
         "deleteHistoryEntries": "Obriši stavke istorije",
         "deleteItemsConfirm(param=count)": {
             "one": "Da li ste sigurni da želite da obrišete ${count} stavku?",
-            "few": "Da li ste sigurni da želite da obrišete ${count} stavki?",
-            "many": "Da li ste sigurni da želite da obrišete ${count} stavki?",
+            "few": "Da li ste sigurni da želite da obrišete ${count} stavke?",
             "other": "Da li ste sigurni da želite da obrišete ${count} stavki?"
         },
         "clearSelection": "Poništi izbor",
         "deleteItems(param=count)": {
             "one": "Obriši ${count} stavku",
-            "few": "Obriši ${count} stavki",
-            "many": "Obriši ${count} stavki",
+            "few": "Obriši ${count} stavke",
             "other": "Obriši ${count} stavki"
         }
     },
@@ -351,7 +343,7 @@
         "notSupportedOnDevice": "Nije podržano na ovom uređaju",
         "captcha": "Captcha",
         "captchaCheckDescription": "Otkrivena je moguća Captcha, rešite je i vratite se kada završite",
-        "captchaCompleted": "Captcha je završena",
+        "captchaCompleted": "Captcha je rešena",
         "navigation": {
             "enterUrlLabel": "Unesite URL",
             "enterCustomUrl": "Unesite prilagođeni URL",
@@ -388,8 +380,8 @@
             "itemsPerPagePlaceholder": "10-100",
             "addBooru": "Dodaj Booru konfiguraciju",
             "shareBooru": "Podeli Booru konfiguraciju",
-            "shareBooruDialogMsgMobile(param=booruName)": "Podelite konfiguraciju za ${booruName: String} kao link.\n\nUključiti prijavu / API ključ?",
-            "shareBooruDialogMsgDesktop(param=booruName)": "Kopirajte link konfiguracije za ${booruName: String} u privremenu memoriju.\n\nUključiti prijavu / API ključ?",
+            "shareBooruDialogMsgMobile(param=booruName)": "Podelite konfiguraciju za ${booruName: String} kao link.\n\nUključiti korisničko ime / API ključ?",
+            "shareBooruDialogMsgDesktop(param=booruName)": "Kopirajte link konfiguracije za ${booruName: String} u privremenu memoriju.\n\nUključiti korisničko ime / API ključ?",
             "booruSharing": "Deljenje Booru konfiguracija",
             "booruSharingMsgAndroid": "Kako automatski otvarati linkove Booru konfiguracija u aplikaciji na Androidu 12 i novijim:\n1) Dodirnite dugme ispod da biste otvorili sistemska podešavanja za podrazumevane linkove aplikacije\n2) Dodirnite «Dodaj link» i izaberite sve dostupne opcije",
             "addedBoorus": "Dodati Booru sajtovi",
@@ -455,25 +447,25 @@
             "appUIModeHelpMobile": "- Mobile - Uobičajeni interfejs za mobilne uređaje",
             "appUIModeHelpDesktop": "- Desktop - Interfejs u stilu Ahoviewer-a [ZASTARELO, POTREBNA PRERADA]",
             "appUIModeHelpWarning": "[Upozorenje]: Nemojte postavljati režim interfejsa na Desktop na telefonu jer možete pokvariti aplikaciju i možda ćete morati da obrišete sva podešavanja, uključujući Booru konfiguracije.",
-            "handSide": "Strana ruke",
+            "handSide": "Dominantna ruka",
             "handSideHelp": "Prilagođava pozicije elemenata interfejsa izabranoj strani",
             "showSearchBarInPreviewGrid": "Prikaži traku za pretragu u mreži pregleda",
             "moveInputToTopInSearchView": "Premesti polje za unos na vrh u prikazu pretrage",
             "searchViewQuickActionsPanel": "Panel brzih radnji u prikazu pretrage",
             "searchViewInputAutofocus": "Automatski fokus na unos u prikazu pretrage",
             "disableVibration": "Onemogući vibraciju",
-            "disableVibrationSubtitle": "I dalje se može javiti pri nekim radnjama čak i kada je onemogućeno",
+            "disableVibrationSubtitle": "Vibracija se i dalje može javiti pri nekim radnjama, čak i kada je onemogućena",
             "usePredictiveBack": "Prediktivni pokret za nazad",
             "previewColumnsPortrait": "Kolone pregleda (uspravno)",
             "previewColumnsLandscape": "Kolone pregleda (položeno)",
             "previewQuality": "Kvalitet pregleda",
             "previewQualityHelp": "Menja rezoluciju slika u mreži pregleda",
-            "previewQualityHelpSample": " - Sample - Srednja rezolucija, aplikacija će takođe učitati Thumbnail kvalitet kao čuvar mesta dok se učitava viši kvalitet",
-            "previewQualityHelpThumbnail": " - Thumbnail - Niska rezolucija",
-            "previewQualityHelpNote": "[Napomena]: Sample kvalitet može primetno smanjiti performanse, posebno ako imate previše kolona u mreži pregleda",
+            "previewQualityHelpSample": " - Umanjena slika - Srednja rezolucija; aplikacija će prikazati minijaturu dok se učitava slika višeg kvaliteta",
+            "previewQualityHelpThumbnail": " - Minijatura - Niska rezolucija",
+            "previewQualityHelpNote": "[Napomena]: Opcija „Umanjena slika“ može primetno smanjiti performanse, posebno ako imate previše kolona u mreži pregleda",
             "previewDisplay": "Prikaz pregleda",
             "previewDisplayFallback": "Rezervni prikaz pregleda",
-            "previewDisplayFallbackHelp": "Ovo će se koristiti kada opcija Staggered nije moguća",
+            "previewDisplayFallbackHelp": "Ovo će se koristiti kada stepenasti raspored nije moguć",
             "dontScaleImages": "Ne skaliraj slike",
             "dontScaleImagesSubtitle": "Može smanjiti performanse",
             "dontScaleImagesWarningTitle": "Upozorenje",
@@ -485,16 +477,16 @@
             "mouseWheelScrollModifier": "Modifikator pomeranja točkićem miša",
             "scrollModifier": "Modifikator pomeranja",
             "previewQualityValues": {
-                "thumbnail": "Thumbnail",
-                "sample": "Sample"
+                "thumbnail": "Minijatura",
+                "sample": "Umanjena slika"
             },
             "previewDisplayModeValues": {
                 "square": "Kvadrat",
                 "rectangle": "Pravougaonik",
-                "staggered": "Staggered"
+                "staggered": "Stepenasti raspored"
             },
             "appModeValues": {
-                "desktop": "Desktop",
+                "desktop": "Za računar",
                 "mobile": "Mobilni"
             },
             "handSideValues": {
@@ -525,14 +517,14 @@
             "red": "Crvena",
             "green": "Zelena",
             "halloween": "Noć veštica",
-            "custom": "Prilagođeno",
+            "custom": "Prilagođena",
             "selectColor": "Izaberite boju",
             "selectedColor": "Izabrana boja",
             "selectedColorAndShades": "Izabrana boja i njene nijanse",
             "fontFamily": "Font",
-            "systemDefault": "Sistemski podrazumevano",
+            "systemDefault": "Podrazumevani sistemski font",
             "viewMoreFonts": "Prikaži više fontova",
-            "fontPreviewText": "Brza smeđa lisica preskače lenjog psa",
+            "fontPreviewText": "Ljubazni fenjerdžija čađavog lica hoće da mi pokaže štos.",
             "customFont": "Prilagođeni font",
             "customFontSubtitle": "Unesite naziv bilo kog Google fonta",
             "fontName": "Naziv fonta",
@@ -593,7 +585,7 @@
             "usingCustomAnimation": "Koristi se prilagođena animacija",
             "kannaLoadingGif": "Kanna GIF za učitavanje",
             "imageQualityValues": {
-                "sample": "Uzorak",
+                "sample": "Umanjena slika",
                 "fullRes": "Original"
             },
             "scrollDirectionValues": {
@@ -689,8 +681,8 @@
             "databaseInfo": "Čuva omiljene stavke i prati preuzete stavke",
             "databaseInfoSnatch": "Preuzete stavke se neće ponovo preuzimati",
             "indexingInfo": "Ubrzava pretragu baze podataka, ali koristi više prostora na disku (do 2x).\n\nNemojte napuštati stranicu niti zatvarati aplikaciju tokom indeksiranja.",
-            "createIndexesDebug": "Kreiraj indekse [Debug]",
-            "dropIndexesDebug": "Ukloni indekse [Debug]",
+            "createIndexesDebug": "Kreiraj indekse [Otklanjanje grešaka]",
+            "dropIndexesDebug": "Ukloni indekse [Otklanjanje grešaka]",
             "searchHistoryInfo": "Zahteva da baza podataka bude omogućena.",
             "searchHistoryRecords(param=limit)": "Čuva poslednjih ${limit: int} pretraga",
             "searchHistoryTapInfo": "Dodirnite unos za radnje (Obriši, Omiljeno…)",
@@ -701,9 +693,9 @@
             "deleteDatabaseConfirm": "Obrisati bazu podataka?",
             "databaseDeleted": "Baza podataka je obrisana!",
             "appRestartRequired": "Potrebno je ponovno pokretanje aplikacije!",
-            "clearSnatchedItems": "Obriši preuzete stavke",
-            "clearAllSnatchedConfirm": "Obrisati sve preuzete stavke?",
-            "snatchedItemsCleared": "Preuzete stavke su obrisane",
+            "clearSnatchedItems": "Obriši istoriju preuzimanja",
+            "clearAllSnatchedConfirm": "Obrisati celu istoriju preuzimanja?",
+            "snatchedItemsCleared": "Istorija preuzimanja je obrisana",
             "appRestartMayBeRequired": "Možda će biti potrebno ponovno pokretanje aplikacije!",
             "clearFavouritedItems": "Obriši omiljene stavke",
             "clearAllFavouritedConfirm": "Obrisati sve omiljene stavke?",
@@ -720,7 +712,7 @@
             "failedItemsPurgeStartedTitle": "Čišćenje neuspelih stavki je započeto",
             "failedItemsPurgeInfo": "Stavke koje nisu uspele da se ažuriraju biće uklonjene iz baze podataka",
             "updateSankakuUrls": "Ažuriraj Sankaku URL-ove",
-            "updating(param=count)": "Ažuriranje ${count: int} stavki:",
+            "updating(param=count)": "Ažuriranje stavki: ${count: int}",
             "left(param=count)": "Preostalo: ${count: int}",
             "done(param=count)": "Završeno: ${count: int}",
             "failedSkipped(param=count)": "Neuspelo/preskočeno: ${count: int}",
@@ -729,13 +721,13 @@
             "useIfStuck": "Koristite ako izgleda da se stavka zaglavila",
             "pressToStop": "Pritisnite ovde da zaustavite",
             "purgeFailedItems(param=count)": "Očisti neuspele stavke (${count: int})",
-            "retryFailedItems(param=count)": "Ponovo pokušaj neuspele stavke (${count: int})"
+            "retryFailedItems(param=count)": "Ponovo ažuriraj stavke čije ažuriranje nije uspelo (${count: int})"
         },
         "backupAndRestore": {
             "title": "Rezervna kopija i vraćanje",
             "duplicateFileDetectedTitle": "Otkriven je duplikat datoteke!",
             "duplicateFileDetectedMsg(param=fileName)": "Datoteka ${fileName: String} već postoji. Želite li da je prepišete? Ako izaberete ne, kreiranje rezervne kopije biće otkazano.",
-            "androidOnlyFeatureMsg": "Ova funkcija je dostupna samo na Android-u, u verzijama za Desktop možete jednostavno kopirati/nalepiti datoteke iz/u fasciklu podataka aplikacije, zavisno od vašeg sistema",
+            "androidOnlyFeatureMsg": "Ova funkcija je dostupna samo na Androidu. U verzijama za računare možete kopirati i nalepiti datoteke iz fascikle podataka aplikacije ili u nju, u zavisnosti od vašeg sistema.",
             "selectBackupDir": "Izaberite direktorijum rezervne kopije",
             "failedToGetBackupPath": "Preuzimanje putanje rezervne kopije nije uspelo",
             "backupPathMsg(param=backupPath)": "Putanja rezervne kopije je: ${backupPath: String}",
@@ -748,12 +740,12 @@
             "backupSettingsError": "Pravljenje rezervne kopije podešavanja nije uspelo",
             "restoreSettingsError": "Vraćanje podešavanja nije uspelo",
             "resetBackupDir": "Resetuj direktorijum rezervne kopije",
-            "backupBoorus": "Napravi rezervnu kopiju Booru sajtova",
-            "restoreBoorus": "Vrati Booru sajtove",
-            "boorusBackedUp": "Rezervna kopija Booru sajtova je sačuvana u boorus.json",
-            "boorusRestored": "Booru sajtovi su vraćeni iz rezervne kopije",
-            "backupBoorusError": "Pravljenje rezervne kopije Booru sajtova nije uspelo",
-            "restoreBoorusError": "Vraćanje Booru sajtova nije uspelo",
+            "backupBoorus": "Napravi rezervnu kopiju podešavanja booru sajtova",
+            "restoreBoorus": "Vrati podešavanja booru sajtova",
+            "boorusBackedUp": "Rezervna kopija podešavanja booru sajtova je sačuvana u boorus.json",
+            "boorusRestored": "Podešavanja booru sajtova su vraćena iz rezervne kopije",
+            "backupBoorusError": "Pravljenje rezervne kopije podešavanja booru sajtova nije uspelo",
+            "restoreBoorusError": "Vraćanje podešavanja booru sajtova nije uspelo",
             "backupDatabase": "Napravi rezervnu kopiju baze podataka",
             "restoreDatabase": "Vrati bazu podataka",
             "restoreDatabaseInfo": "Može potrajati u zavisnosti od veličine baze podataka, aplikacija će se ponovo pokrenuti nakon uspešnog vraćanja",
@@ -821,7 +813,7 @@
             "lowPerformanceModeDialogDisablesDetailed": "- Onemogućava detaljne informacije o napretku učitavanja",
             "lowPerformanceModeDialogDisablesResourceIntensive": "- Onemogućava elemente koji zahtevaju mnogo resursa (zamućenja, animiranu neprozirnost, pojedine animacije…)",
             "lowPerformanceModeDialogSetsOptimal": "Postavlja optimalna podešavanja za ove opcije (možete ih kasnije zasebno promeniti):",
-            "autoplayVideos": "Automatska reprodukcija videa",
+            "autoplayVideos": "Automatski reprodukuj video zapise",
             "disableVideos": "Onemogući video zapise",
             "disableVideosHelp": "Korisno na slabijim uređajima koji se ruše pri pokušaju učitavanja videa. Daje opcije za gledanje videa u spoljnom plejeru ili pregledaču."
         },
@@ -844,8 +836,8 @@
             "videoCacheMode": "Režim keširanja videa",
             "videoCacheModesTitle": "Režimi keširanja videa",
             "videoCacheModeStream": "- Strimovanje - Ne keširaj, započni reprodukciju što je pre moguće",
-            "videoCacheModeCache": "- Keš - Čuva datoteku u skladištu uređaja, reprodukuje tek kada se preuzimanje završi",
-            "videoCacheModeStreamCache": "- Strimovanje+keš - Kombinacija oba, ali trenutno dovodi do dvostrukog preuzimanja",
+            "videoCacheModeCache": "- Keširanje - Čuva datoteku u skladištu uređaja, reprodukuje tek kada se preuzimanje završi",
+            "videoCacheModeStreamCache": "- Strimovanje+keširanje - Kombinacija oba, ali trenutno dovodi do dvostrukog preuzimanja",
             "videoCacheNoteEnable": "[Napomena]: Video zapisi će se keširati samo ako je opcija 'Keširaj medije' omogućena.",
             "videoCacheWarningDesktop": "[Upozorenje]: Na računaru režim strimovanja može raditi nepravilno za pojedine Booru sajtove.",
             "deleteCacheAfter": "Obriši keš nakon:",
@@ -855,7 +847,7 @@
             "cacheStats": "Statistika keša:",
             "loading": "Učitavanje…",
             "empty": "Prazno",
-            "inFilesPlural(param=size, param=count)": "${size: String}, ${count: int} datoteka",
+            "inFilesPlural(param=size, param=count)": "${size: String}, broj datoteka: ${count: int}",
             "inFileSingular(param=size)": "${size: String}, 1 datoteka",
             "cacheTypeTotal": "Ukupno",
             "cacheTypeFavicons": "Favikoni",
@@ -881,9 +873,9 @@
             "noFiltersAdded": "Nema dodatih filtera",
             "removeHidden": "Potpuno sakrij stavke koje odgovaraju skrivenim filterima",
             "removeMarked": "Potpuno sakrij stavke koje odgovaraju označenim filterima",
-            "removeFavourited": "Ukloni omiljene stavke",
-            "removeSnatched": "Ukloni preuzete stavke",
-            "removeAI": "Ukloni AI stavke"
+            "removeFavourited": "Sakrij omiljene stavke",
+            "removeSnatched": "Sakrij preuzete stavke",
+            "removeAI": "Sakrij stavke označene kao AI"
         },
         "sync": {
             "title": "Sinhronizacija",
@@ -905,7 +897,7 @@
             "syncFavsFromHelpText1": "Omogućava podešavanje odakle sinhronizacija treba da počne, što je korisno ako ste ranije već sinhronizovali sve svoje omiljene stavke i želite da sinhronizujete samo najnovije stavke",
             "syncFavsFromHelpText2": "Ako želite da sinhronizujete od početka, ostavite ovo polje prazno",
             "syncFavsFromHelpText3": "Primer: Imate X omiljenih stavki, postavite ovo polje na 100, sinhronizacija će početi od stavke #100 i trajati dok ne stigne do X",
-            "syncFavsFromHelpText4": "Redosled preuzetih: od najstarijih (0) do najnovijih (X)",
+            "syncFavsFromHelpText4": "Redosled omiljenih stavki: od najstarijih (0) do najnovijih (X)",
             "sendSnatchedHistory": "Pošalji istoriju preuzimanja",
             "snatchedCount(param=count)": "Preuzeto: ${count: String}",
             "syncSnatchedFrom": "Sinhronizuj preuzeto od #…",
@@ -926,7 +918,7 @@
             "sendTags": "Pošalji oznake",
             "tagsCount(param=count)": "Oznake: ${count: String}",
             "tagsSyncMode": "Režim sinhronizacije oznaka",
-            "tagsSyncModePreferTypeIfNone": "Sačuvaj tip: Ako oznaka postoji sa tipom oznake na drugom uređaju, a ne postoji na ovom uređaju, biće preskočena",
+            "tagsSyncModePreferTypeIfNone": "Sačuvaj postojeći tip: Pri uvozu ne prepisuj postojeći poznati tip oznake nepoznatim tipom.",
             "tagsSyncModeOverwrite": "Prepiši: Sve oznake će biti dodate, ako oznaka i tip oznake postoje na drugom uređaju biće prepisani",
             "preferTypeIfNone": "Sačuvaj tip",
             "overwrite": "Prepiši",
@@ -988,7 +980,7 @@
             "showFPSGraph": "Prikaži FPS grafikon",
             "showImageStats": "Prikaži statistiku slika",
             "showVideoStats": "Prikaži statistiku video zapisa",
-            "blurImagesAndMuteVideosDevOnly": "Zamućenje slika + utišavanje videa [Samo DEV]",
+            "blurImagesAndMuteVideosDevOnly": "Zamuti slike + isključi zvuk videa [samo za programere]",
             "enableDragScrollOnListsDesktopOnly": "Omogući pomeranje prevlačenjem na listama [Samo za desktop]",
             "animationSpeed(param=speed)": "Brzina animacije (${speed: double})",
             "tagsManager": "Upravljač oznakama",
@@ -1065,16 +1057,15 @@
         "makeUnstaleable": "Onemogući zastarevanje",
         "deleteTags(param=count)": {
             "one": "Obriši ${count} oznaku",
-            "few": "Obriši ${count} oznaku",
-            "many": "Obriši ${count} oznaku",
-            "other": "Obriši ${count} oznaku"
+            "few": "Obriši ${count} oznake",
+            "other": "Obriši ${count} oznaka"
         },
         "deleteTagsTitle": "Obriši oznake",
         "clearSelection": "Poništi izbor"
     },
     "lockscreen": {
         "tapToAuthenticate": "Dodirnite za potvrdu identiteta",
-        "devUnlock": "DEV UNLOCK",
+        "devUnlock": "OTKLJUČAJ ZA TESTIRANJE",
         "testingMessage": "[TESTIRANJE]: Pritisnite ovo ako ne možete da otključate aplikaciju na uobičajen način. Prijavite programeru uz detalje o svom uređaju."
     },
     "loliSync": {
@@ -1085,10 +1076,10 @@
         "waitingForConnection": "Čekanje na vezu…",
         "startingServer": "Pokretanje servera…",
         "keepScreenAwake": "Drži ekran uključenim",
-        "serverKilled": "Server za sinhronizaciju je prekinut",
+        "serverKilled": "Server za sinhronizaciju je zaustavljen",
         "testError(param=statusCode, param=reasonPhrase)": "Greška pri testiranju: ${statusCode: int} ${reasonPhrase: String}",
         "testErrorException(param=error)": "Greška pri testiranju: ${error: String}",
-        "testSuccess": "Test zahtev je primio pozitivan odgovor",
+        "testSuccess": "Probni zahtev je dobio pozitivan odgovor",
         "testSuccessMessage": "Na drugom uređaju bi trebalo da se pojavi poruka 'Test'"
     },
     "imageSearch": {
@@ -1114,8 +1105,8 @@
         "resolution": "Rezolucija",
         "size": "Veličina",
         "md5": "MD5",
-        "rating": "Ocena",
-        "score": "Rezultat",
+        "rating": "Kategorija sadržaja",
+        "score": "Broj poena",
         "noTagsFound": "Nisu pronađene oznake",
         "copy": "Kopiraj",
         "removeFromSearch": "Ukloni iz pretrage",
@@ -1186,9 +1177,9 @@
         "exclude": "Izuzmi (—)",
         "booruNumberPrefix": "Booru (N#)",
         "metatags": "Metaoznake",
-        "freeMetatags": "Besplatne metaoznake",
-        "freeMetatagsDescription": "Besplatne metaoznake se ne računaju u ograničenja pretrage po oznakama",
-        "free": "Besplatno",
+        "freeMetatags": "Metaoznake van limita",
+        "freeMetatagsDescription": "Ove metaoznake se ne računaju u ograničenje broja oznaka u pretrazi",
+        "free": "Van limita",
         "single": "Pojedinačno",
         "range": "Opseg",
         "popular": "Popularno",
@@ -1210,7 +1201,7 @@
         "clearAllRetryableItems": "Očisti sve stavke koje se mogu ponoviti"
     },
     "desktopHome": {
-        "snatcher": "Snatcher",
+        "snatcher": "Preuzimanje",
         "addBoorusInSettings": "Dodajte booru sajtove u podešavanjima",
         "settings": "Podešavanja",
         "save": "Sačuvaj",
@@ -1230,7 +1221,7 @@
         "onboardingSubtitle": "Dodajte booru konfiguraciju ili vratite rezervnu kopiju da biste započeli pregledanje",
         "addBooruAction": "Dodaj novi booru",
         "addBooruActionSubtitle": "Povežite sajt dodavanjem njegovog URL-a i podešavanja pretrage",
-        "restoreBackupAction": "Vrati ili upravljaj rezervnim kopijama",
+        "restoreBackupAction": "Vrati podatke iz rezervne kopije ili upravljaj kopijama",
         "restoreBackupActionSubtitle": "Vratite podešavanja, booru sajtove, kartice i sačuvane podatke",
         "openSettingsAction": "Otvori podešavanja",
         "openSettingsActionSubtitle": "Prilagodite ponašanje aplikacije pre podešavanja izvora",
@@ -1256,8 +1247,8 @@
             "unfavourite": "Ukloni iz omiljenih",
             "deselect": "Poništi izbor",
             "reloadWithScaling": "Ponovo učitaj sa skaliranjem",
-            "loadSampleQuality": "Učitaj kvalitet uzorka",
-            "loadHighQuality": "Učitaj visoki kvalitet",
+            "loadSampleQuality": "Učitaj umanjenu sliku",
+            "loadHighQuality": "Učitaj sliku visokog kvaliteta",
             "dropSnatchedStatus": "Ukloni status preuzeto",
             "setSnatchedStatus": "Postavi status preuzeto",
             "snatch": "Preuzmi",
@@ -1269,7 +1260,7 @@
             "hydrusNotConfigured": "Hydrus nije konfigurisan!",
             "shareFile": "Podeli datoteku",
             "alreadyDownloadingThisFile": "Ova datoteka se već preuzima radi deljenja, želite li da prekinete?",
-            "alreadyDownloadingFile": "Datoteka se već preuzima radi deljenja, želite li da prekinete trenutnu datoteku i podelite novu?",
+            "alreadyDownloadingFile": "Datoteka se već preuzima radi deljenja. Želite li da prekinete trenutno preuzimanje i podelite novu datoteku?",
             "current": "Trenutno:",
             "new": "Novo:",
             "shareNew": "Podeli novo",
@@ -1302,7 +1293,6 @@
         "sources(param=count)": {
             "one": "Izvor",
             "few": "Izvori",
-            "many": "Izvori",
             "other": "Izvori"
         }
     },
@@ -1356,7 +1346,7 @@
         }
     },
     "imageStats": {
-        "live(param=count)": "Uživo: ${count: int}",
+        "live(param=count)": "Aktivne slike: ${count: int}",
         "pending(param=count)": "Na čekanju: ${count: int}",
         "total(param=count)": "Ukupno: ${count: int}",
         "size(param=size)": "Veličina: ${size: String}",
@@ -1372,7 +1362,6 @@
             "startedAgo(param=seconds)": {
                 "one": "Započeto pre ${seconds} sekundu",
                 "few": "Započeto pre ${seconds} sekunde",
-                "many": "Započeto pre ${seconds} sekundi",
                 "other": "Započeto pre ${seconds} sekundi"
             },
             "tapToRetryIfStuck": "Dodirnite da biste pokušali ponovo ako zahtev deluje zaglavljeno ili predugo traje",
@@ -1385,7 +1374,7 @@
     "tagType": {
         "artist": "Umetnik",
         "character": "Lik",
-        "copyright": "Autorska prava",
+        "copyright": "Franšiza",
         "meta": "Meta",
         "species": "Vrsta",
         "lore": "Lore",

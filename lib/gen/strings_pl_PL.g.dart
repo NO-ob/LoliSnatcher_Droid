@@ -6,6 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:lolisnatcher/src/utils/localization_plural_rules.dart';
 import 'package:slang/generated.dart';
 import 'package:slang/overrides.dart';
 
@@ -363,7 +364,7 @@ class _Translations$searchHandler$pl_PL extends Translations$searchHandler$en {
   @override
   String restoredTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
         count,
         one: 'Przywrócono ${count} kartę z poprzedniej sesji',
         few: 'Przywrócono ${count} karty z poprzedniej sesji',
@@ -385,7 +386,7 @@ class _Translations$searchHandler$pl_PL extends Translations$searchHandler$en {
   @override
   String addedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
         count,
         one: 'Dodano ${count} nowych kart',
         few: 'Dodano ${count} nowe karty',
@@ -397,7 +398,7 @@ class _Translations$searchHandler$pl_PL extends Translations$searchHandler$en {
   @override
   String receivedTabsCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
         count,
         one: 'Otrzymano ${count} kartę',
         few: 'Otrzymano ${count} karty',
@@ -444,7 +445,7 @@ class _Translations$snatcher$pl_PL extends Translations$snatcher$en {
   @override
   String snatchedCount({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
         count,
         one: 'Pobrano: ${count} element',
         few: 'Pobrano: ${count} elementy',
@@ -454,7 +455,7 @@ class _Translations$snatcher$pl_PL extends Translations$snatcher$en {
   @override
   String filesAlreadySnatched({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
         count,
         one: '${count} plik był już pobrany',
         few: '${count} pliki były już pobrane',
@@ -464,7 +465,7 @@ class _Translations$snatcher$pl_PL extends Translations$snatcher$en {
   @override
   String failedToSnatchFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
         count,
         one: 'Nie udało się pobrać ${count} pliku',
         few: 'Nie udało się pobrać ${count} pliki',
@@ -474,7 +475,7 @@ class _Translations$snatcher$pl_PL extends Translations$snatcher$en {
   @override
   String cancelledFiles({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
         count,
         one: 'Anulowano ${count} plik',
         few: 'Anulowano ${count} pliki',
@@ -490,7 +491,7 @@ class _Translations$snatcher$pl_PL extends Translations$snatcher$en {
   @override
   String addedItemsToQueue({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
         count,
         one: 'Dodano ${count} element do kolejki pobierania',
         few: 'Dodano ${count} elementy do kolejki pobierania',
@@ -694,7 +695,7 @@ class _Translations$tabs$pl_PL extends Translations$tabs$en {
   @override
   String areYouSureDeleteTabs({required num count}) =>
       TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-      (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+      (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
         count,
         one: 'Czy na pewno chcesz usunąć ${count} kartę?',
         few: 'Czy na pewno chcesz usunąć ${count} karty?',
@@ -1227,8 +1228,6 @@ class _Translations$settings$viewer$pl_PL extends Translations$settings$viewer$e
   @override
   String get volumeButtonsScrolling =>
       TranslationOverrides.string(_root.$meta, 'settings.viewer.volumeButtonsScrolling', {}) ?? 'Przewijanie przyciskami głośności';
-  @override
-  String get volumeButtonsVolumeDown => TranslationOverrides.string(_root.$meta, 'settings.viewer.volumeButtonsVolumeDown', {}) ?? ' ';
 }
 
 // Path: settings.database
@@ -1408,7 +1407,7 @@ extension on TranslationsPlPl {
       'searchHandler.restoredTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.restoredTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
               count,
               one: 'Przywrócono ${count} kartę z poprzedniej sesji',
               few: 'Przywrócono ${count} karty z poprzedniej sesji',
@@ -1427,7 +1426,7 @@ extension on TranslationsPlPl {
       'searchHandler.addedTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.addedTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
               count,
               one: 'Dodano ${count} nowych kart',
               few: 'Dodano ${count} nowe karty',
@@ -1438,7 +1437,7 @@ extension on TranslationsPlPl {
       'searchHandler.receivedTabsCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'searchHandler.receivedTabsCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
               count,
               one: 'Otrzymano ${count} kartę',
               few: 'Otrzymano ${count} karty',
@@ -1465,7 +1464,7 @@ extension on TranslationsPlPl {
       'snatcher.snatchedCount' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.snatchedCount', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
               count,
               one: 'Pobrano: ${count} element',
               few: 'Pobrano: ${count} elementy',
@@ -1475,7 +1474,7 @@ extension on TranslationsPlPl {
       'snatcher.filesAlreadySnatched' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.filesAlreadySnatched', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
               count,
               one: '${count} plik był już pobrany',
               few: '${count} pliki były już pobrane',
@@ -1485,7 +1484,7 @@ extension on TranslationsPlPl {
       'snatcher.failedToSnatchFiles' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.failedToSnatchFiles', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
               count,
               one: 'Nie udało się pobrać ${count} pliku',
               few: 'Nie udało się pobrać ${count} pliki',
@@ -1495,7 +1494,7 @@ extension on TranslationsPlPl {
       'snatcher.cancelledFiles' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.cancelledFiles', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
               count,
               one: 'Anulowano ${count} plik',
               few: 'Anulowano ${count} pliki',
@@ -1509,7 +1508,7 @@ extension on TranslationsPlPl {
       'snatcher.addedItemsToQueue' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'snatcher.addedItemsToQueue', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
               count,
               one: 'Dodano ${count} element do kolejki pobierania',
               few: 'Dodano ${count} elementy do kolejki pobierania',
@@ -1612,7 +1611,7 @@ extension on TranslationsPlPl {
       'tabs.areYouSureDeleteTabs' =>
         ({required num count}) =>
             TranslationOverrides.plural(_root.$meta, 'tabs.areYouSureDeleteTabs', {'count': count}) ??
-            (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('pl'))(
+            (_root.$meta.cardinalResolver ?? LocalizationPluralRules.cardinal('pl_PL'))(
               count,
               one: 'Czy na pewno chcesz usunąć ${count} kartę?',
               few: 'Czy na pewno chcesz usunąć ${count} karty?',
@@ -1850,7 +1849,6 @@ extension on TranslationsPlPl {
         TranslationOverrides.string(_root.$meta, 'settings.viewer.useVolumeButtonsForScrolling', {}) ?? 'Używaj przycisków głośności do przewijania',
       'settings.viewer.volumeButtonsScrolling' =>
         TranslationOverrides.string(_root.$meta, 'settings.viewer.volumeButtonsScrolling', {}) ?? 'Przewijanie przyciskami głośności',
-      'settings.viewer.volumeButtonsVolumeDown' => TranslationOverrides.string(_root.$meta, 'settings.viewer.volumeButtonsVolumeDown', {}) ?? ' ',
       'settings.database.searchQuery' => TranslationOverrides.string(_root.$meta, 'settings.database.searchQuery', {}) ?? 'Szukane zapytanie',
       'settings.database.searchQueryOptional' =>
         TranslationOverrides.string(_root.$meta, 'settings.database.searchQueryOptional', {}) ?? '(opcjonalnie, może spowolnić proces)',
