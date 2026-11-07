@@ -185,10 +185,13 @@ class HybooruHandler extends BooruHandler {
     }
 
     final String fileURL = '$_baseUrl/files/f$sha256$extension';
+    // No medium sample exists. The preview uses the thumbnail, same as HydrusHandler,
+    // so the grid does not download the original.
+    final String thumbnailURL = '$_baseUrl/files/t$sha256.thumbnail';
     return BooruItem(
       fileURL: fileURL,
-      sampleURL: fileURL,
-      thumbnailURL: '$_baseUrl/files/t$sha256.thumbnail',
+      sampleURL: thumbnailURL,
+      thumbnailURL: thumbnailURL,
       tagsList: _tagsFrom(current['tags']),
       postURL: makePostURL(id),
       fileSize: int.tryParse(current['size']?.toString() ?? ''),
