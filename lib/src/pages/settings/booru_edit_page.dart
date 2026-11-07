@@ -190,6 +190,10 @@ class _BooruEditState extends State<BooruEdit> {
       faviconUrl = 'https://agn.ph/skin/Retro/favicon.ico';
     }
 
+    if (selectedBooruType.isHybooru) {
+      faviconUrl = '$url/static/favicon/favicon.ico';
+    }
+
     if (booruURLController.text.contains('rule34.us')) {
       faviconUrl = 'https://rule34.us/favicon.png';
     }

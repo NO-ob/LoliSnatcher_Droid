@@ -9,6 +9,7 @@ import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooru_alikes_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooruv1_handler.dart';
+import 'package:lolisnatcher/src/boorus/hybooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/ink_bunny_handler.dart';
@@ -101,6 +102,9 @@ class BooruHandlerFactory {
           break;
         case BooruType.Hydrus:
           booruHandler = HydrusHandler(booru, limit);
+          break;
+        case BooruType.Hybooru:
+          booruHandler = HybooruHandler(booru, limit);
           break;
         case BooruType.GelbooruV1:
           booruHandler = GelbooruV1Handler(booru, limit);

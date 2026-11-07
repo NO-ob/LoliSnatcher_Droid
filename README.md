@@ -59,6 +59,8 @@
 
 - Hydrus Network
 
+- Hybooru
+
 - Sankaku (Default and Idol)
 
 - rule34.xyz / rule34.world
