@@ -159,6 +159,8 @@ class Tools {
         headers['Referer'] = 'https://rule34.us';
       } else if (uri.host.contains('realbooru.com')) {
         headers['Referer'] = 'https://realbooru.com';
+      } else if (uri.host == 'inkbunny.net' || uri.host.endsWith('.inkbunny.net')) {
+        headers['Referer'] = 'https://inkbunny.net';
       }
     }
 
