@@ -1994,5 +1994,5 @@ packages:
     source: hosted
     version: "3.1.4"
 sdks:
-  dart: ">=3.13.5 <4.0.0"
-  flutter: "3.47.8"
+  dart: ">=3.13.7 <4.0.0"
+  flutter: "3.47.9"
