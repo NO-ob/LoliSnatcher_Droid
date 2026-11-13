@@ -605,9 +605,13 @@ class _BooruEditState extends State<BooruEdit> {
       return false;
     }
 
-    booruFaviconController.text = booruFaviconController.text.trim().isEmpty
-        ? convertSiteUrlToFaviconUrl()
-        : booruFaviconController.text;
+    // Autodetect does not know Hybooru yet, so this is only a placeholder.
+    // A custom URL is kept; the placeholder is replaced once the type is known.
+    final bool faviconWasEmpty = booruFaviconController.text.trim().isEmpty;
+    final String faviconBeforeDetect = convertSiteUrlToFaviconUrl();
+    if (faviconWasEmpty) {
+      booruFaviconController.text = faviconBeforeDetect;
+    }
 
     //Call the booru test
     final Booru testBooru = Booru.withKey(
@@ -636,15 +640,20 @@ class _BooruEditState extends State<BooruEdit> {
     final String errorString = testResults.errorString?.isNotEmpty == true ? testResults.errorString! : '';
 
     isTesting = false;
-    setState(() {});
 
     // If a booru type is returned set the widget state
     if (testBooruType != null) {
       booruType = testBooruType;
       selectedBooruType = testBooruType;
+      final String currentFavicon = booruFaviconController.text.trim();
+      if (faviconWasEmpty || currentFavicon == faviconBeforeDetect) {
+        booruFaviconController.text = convertSiteUrlToFaviconUrl();
+      }
       _lastSuccessfulTestSignature = _testSignature(type: testBooruType);
+      setState(() {});
       return true;
     } else {
+      setState(() {});
       FlashElements.showSnackbar(
         context: context,
         duration: const Duration(seconds: 5),
