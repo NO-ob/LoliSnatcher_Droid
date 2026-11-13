@@ -139,6 +139,7 @@ class MergebooruHandler extends BooruHandler {
           BooruType.Rainbooru,
           BooruType.Szurubooru,
           BooruType.World,
+          BooruType.Hybooru,
         ].any((t) => t == booru.type);
 
         if (innerFetchedIndex < items.length) {

@@ -14,6 +14,7 @@ enum BooruType {
   Gelbooru,
   GelbooruV1,
   Hydrus,
+  Hybooru,
   InkBunny,
   Moebooru,
   NyanPals,
@@ -94,6 +95,7 @@ enum BooruType {
   bool get isGelbooru => this == BooruType.Gelbooru;
   bool get isGelbooruV1 => this == BooruType.GelbooruV1;
   bool get isHydrus => this == BooruType.Hydrus;
+  bool get isHybooru => this == BooruType.Hybooru;
   bool get isInkBunny => this == BooruType.InkBunny;
   bool get isMoebooru => this == BooruType.Moebooru;
   bool get isNyanPals => this == BooruType.NyanPals;
