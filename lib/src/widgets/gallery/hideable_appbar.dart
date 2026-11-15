@@ -217,7 +217,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
     List<GalleryButton> buttonList = [];
     // at least first 4 buttons will show on toolbar
     final int listSplit = max(4, (MediaQuery.sizeOf(context).width / 100).floor());
-    if (listSplit < filteredButtonOrder.length) {
+    // Show a single remaining action directly in place of the overflow menu.
+    if (filteredButtonOrder.length > listSplit + 1) {
       overFlowList = filteredButtonOrder.sublist(listSplit);
       buttonList = filteredButtonOrder.sublist(0, listSplit);
     } else {
