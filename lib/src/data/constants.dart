@@ -71,7 +71,7 @@ A minor update with new languages and some fixes while we work on a big update.
 -------------------
 
 Release - 2.5.3+5220 (24.10.2026):
-- Added Italian translation (thanks to ThugThief, Stickcampo)
+- Added Italian translation (thanks to ThugThief, opDude)
 - Added Portuguese (Brazil) translation (thanks to restartxx, lev)
 - Added Serbian translation (thanks to Dušan)
 - Added Spanish (Mexico) translation (thanks to ThugThief, LangFlaggot)

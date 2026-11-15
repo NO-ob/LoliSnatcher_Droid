@@ -357,7 +357,7 @@ extension AppLocaleExt on AppLocale {
       case .deDe:
         return 'Rin Kusu, Moddimation';
       case .itIt:
-        return 'ThugThief, Stickcampo';
+        return 'ThugThief, opDude';
       case .jaJp:
         return 'stardust248397';
       case .ptBr:
