@@ -1918,7 +1918,10 @@ class _TagContentPreviewState extends State<TagContentPreview> {
     }
     setState(() {});
 
-    await tab!.booruHandler.search(widget.tag, null);
+    final previewTab = tab!;
+    await previewTab.booruHandler.search(widget.tag, null);
+
+    if (!mounted || tab != previewTab) return;
 
     if (tab!.booruHandler.locked && !isLastPage) {
       isLastPage = true;
@@ -1935,6 +1938,8 @@ class _TagContentPreviewState extends State<TagContentPreview> {
     }
 
     Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted || tab != previewTab) return;
+
       loading = false;
       if (mounted) setState(() {});
     });
@@ -2014,368 +2019,402 @@ class _TagContentPreviewState extends State<TagContentPreview> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 200),
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        child: tab == null
-            ? ListTile(
-                leading: Icon(
-                  Icons.search,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-                title: Text(context.loc.tagView.preview),
-                trailing: widget.parentTab == null
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.list),
-                        onPressed: showTagPreviewsListDialog,
+  void closePreview() {
+    setState(() {
+      tab = null;
+      selectedBooru = isSingleBooru ? widget.boorus.first : null;
+      loading = false;
+      isLastPage = false;
+      errorString = '';
+    });
+  }
+
+  void addPreviewTab() {
+    final booru = selectedBooru;
+    if (booru == null) return;
+
+    SearchHandler.instance.addTabByString(widget.tag, customBooru: booru);
+    FlashElements.showSnackbar(
+      context: context,
+      isKeyUnique: true,
+      key: 'added_new_tab',
+      duration: const Duration(seconds: 2),
+      title: Text(context.loc.tagView.addedNewTab, style: const TextStyle(fontSize: 20)),
+      content: Text(widget.tag, style: const TextStyle(fontSize: 16)),
+      leadingIcon: Icons.fiber_new,
+      sideColor: Colors.green,
+      primaryActionBuilder: (context, controller) {
+        return Row(
+          children: [
+            IconButton(
+              tooltip: context.loc.open,
+              onPressed: () {
+                ServiceHandler.vibrate();
+                if (settingsHandler.appMode.value.isMobile) {
+                  Navigator.of(context).popUntil((r) => r.isFirst);
+                }
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  SearchHandler.instance.changeTabIndex(SearchHandler.instance.tabs.length - 1);
+                });
+                controller.dismiss();
+              },
+              icon: Icon(Icons.arrow_forward_rounded, color: Theme.of(context).colorScheme.onSurface),
+            ),
+            const SizedBox(width: 4),
+            IconButton(
+              tooltip: context.loc.close,
+              onPressed: () => controller.dismiss(),
+              icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> addPreviewTabAndSwitch() async {
+    final booru = selectedBooru;
+    final tag = widget.tag;
+    if (booru == null) return;
+
+    await ServiceHandler.vibrate();
+    if (!mounted) return;
+
+    if (settingsHandler.appMode.value.isMobile) {
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SearchHandler.instance.addTabByString(tag, customBooru: booru, switchToNew: true);
+    });
+  }
+
+  Widget buildPreviewHeader(SearchTab? previewTab) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 8, 0),
+      child: Row(
+        children: [
+          Icon(Icons.image_search_rounded, color: theme.colorScheme.onSurfaceVariant, size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              mainAxisSize: .min,
+              crossAxisAlignment: .start,
+              children: [
+                Text(context.loc.tagView.preview, style: theme.textTheme.titleMedium),
+                if (previewTab != null)
+                  Obx(() {
+                    final count = previewTab.booruHandler.totalCount.value;
+                    if (count <= 0) return const SizedBox.shrink();
+
+                    return Text(
+                      context.loc.imageStats.total(count: count),
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    );
+                  }),
+              ],
+            ),
+          ),
+          if (widget.parentTab != null)
+            IconButton(
+              tooltip: context.loc.tagView.tagPreviews,
+              color: theme.colorScheme.onSurfaceVariant,
+              icon: const Icon(Icons.history_rounded),
+              onPressed: showTagPreviewsListDialog,
+            ),
+          if (previewTab != null)
+            IconButton(
+              tooltip: context.loc.close,
+              color: theme.colorScheme.onSurfaceVariant,
+              icon: const Icon(Icons.close_rounded),
+              onPressed: closePreview,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildPreviewControls(SearchTab? previewTab) {
+    final hasTabWithTag = SearchHandler.instance.hasTabWithTag(widget.tag, customBooru: selectedBooru);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 12, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: SettingsBooruDropdown(
+              title: context.loc.booru,
+              placeholder: context.loc.tagView.selectBooruToLoad,
+              value: selectedBooru,
+              items: settingsHandler.booruList,
+              contentPadding: EdgeInsets.zero,
+              onChanged: (value) {
+                selectedBooru = value;
+                loadPreview(refresh: true);
+              },
+              titleAsLabel: true,
+              drawBottomBorder: false,
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton.filledTonal(
+            tooltip: previewTab == null
+                ? context.loc.tagView.preview
+                : MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
+            style: IconButton.styleFrom(
+              foregroundColor: colorScheme.onSecondaryContainer,
+              backgroundColor: colorScheme.secondaryContainer,
+              disabledForegroundColor: colorScheme.onSurface.withValues(alpha: 0.38),
+              disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
+            ),
+            iconSize: 20,
+            onPressed: selectedBooru == null || loading ? null : () => loadPreview(refresh: previewTab != null),
+            icon: Icon(previewTab == null ? Icons.search_rounded : Icons.refresh_rounded),
+          ),
+          const SizedBox(width: 4),
+          IconButton.outlined(
+            tooltip: context.loc.openInNewTab,
+            style: IconButton.styleFrom(
+              foregroundColor: colorScheme.onSurfaceVariant,
+              disabledForegroundColor: colorScheme.onSurface.withValues(alpha: 0.38),
+            ),
+            iconSize: 20,
+            onPressed: selectedBooru == null ? null : addPreviewTab,
+            onLongPress: selectedBooru == null ? null : addPreviewTabAndSwitch,
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.fiber_new),
+                if (selectedBooru != null && hasTabWithTag.hasTagInAnyForm)
+                  Positioned.directional(
+                    textDirection: Directionality.of(context),
+                    top: -2,
+                    end: -2,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: hasTabWithTag.color(context),
+                        border: Border.all(color: colorScheme.onSurface),
                       ),
-                subtitle: isSingleBooru
-                    ? null
-                    : Container(
-                        width: context.mediaSize.width,
-                        margin: const EdgeInsets.only(top: 4),
-                        child: SettingsBooruDropdown(
-                          title: context.loc.booru,
-                          placeholder: context.loc.tagView.selectBooruToLoad,
-                          value: selectedBooru,
-                          items: isSingleBooru ? settingsHandler.booruList : widget.boorus,
-                          contentPadding: EdgeInsets.zero,
-                          onChanged: (value) {
-                            selectedBooru = value;
-                            loadPreview(refresh: true);
-                          },
-                          titleAsLabel: true,
-                          drawBottomBorder: false,
-                        ),
-                      ),
-                onTap: isSingleBooru ? loadPreview : null,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildPreviewMessage({
+    required IconData icon,
+    required String message,
+    bool isLoading = false,
+    bool isError = false,
+    VoidCallback? onAction,
+    String? actionLabel,
+    IconData actionIcon = Icons.refresh_rounded,
+  }) {
+    final theme = Theme.of(context);
+    final color = isError ? theme.colorScheme.onErrorContainer : theme.colorScheme.onSurfaceVariant;
+
+    return Semantics(
+      liveRegion: true,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isError ? theme.colorScheme.errorContainer : theme.colorScheme.surfaceContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisSize: .min,
+          children: [
+            if (isLoading)
+              SizedBox.square(
+                dimension: 24,
+                child: CircularProgressIndicator(strokeWidth: 2, color: color, semanticsLabel: message),
               )
-            : ((tab!.booruHandler.filteredFetched.isEmpty && (loading || errorString.isNotEmpty))
-                  ? ListTile(
-                      leading: Icon(
-                        loading ? Icons.search : Icons.restart_alt,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                      trailing: loading
-                          ? const CircularProgressIndicator()
-                          : (widget.parentTab == null
-                                ? null
-                                : IconButton(
-                                    icon: const Icon(Icons.list),
-                                    onPressed: showTagPreviewsListDialog,
-                                  )),
-                      title: loading
-                          ? Text(context.loc.tagView.previewIsLoading)
-                          : Text(context.loc.tagView.failedToLoadPreview),
-                      subtitle: errorString.isNotEmpty ? Text(context.loc.tagView.tapToTryAgain) : null,
-                      onTap: errorString.isNotEmpty ? () => loadPreview(refresh: true) : null,
-                    )
-                  : Column(
-                      mainAxisSize: .min,
-                      crossAxisAlignment: .start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Row(
-                            mainAxisSize: .min,
-                            children: [
-                              const Icon(Icons.search),
-                              const SizedBox(width: 8),
-                              Obx(() {
-                                final int count = tab!.booruHandler.totalCount.value;
-                                return AnimatedSize(
-                                  duration: const Duration(milliseconds: 200),
-                                  alignment: Alignment.centerLeft,
-                                  child: Column(
-                                    mainAxisSize: .min,
-                                    crossAxisAlignment: .start,
-                                    children: [
-                                      Text(context.loc.tagView.preview),
-                                      if (count > 0)
-                                        Text(
-                                          count.toFormattedString(),
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                            color: Theme.of(
-                                              context,
-                                            ).textTheme.bodySmall!.color!.withValues(alpha: 0.66),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                );
-                              }),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                onPressed: () => loadPreview(refresh: true),
-                                icon: const Icon(Icons.refresh),
-                              ),
-                              const SizedBox(width: 2),
-                              IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    tab = null;
-                                    selectedBooru = null;
-                                  });
-                                },
-                                icon: const Icon(Icons.close),
-                              ),
-                              const Spacer(),
-                              if (widget.parentTab != null)
-                                IconButton(
-                                  icon: const Icon(Icons.list),
-                                  onPressed: showTagPreviewsListDialog,
-                                ),
-                              Builder(
-                                builder: (context) {
-                                  final HasTabWithTagResult hasTabWithTag = SearchHandler.instance.hasTabWithTag(
-                                    widget.tag,
-                                    customBooru: selectedBooru,
-                                  );
+            else
+              Icon(icon, color: color, size: 28),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(color: color),
+            ),
+            if (onAction != null) ...[
+              const SizedBox(height: 4),
+              IconButton(
+                tooltip: actionLabel ?? context.loc.tagView.tryAgain,
+                color: color,
+                iconSize: 20,
+                onPressed: onAction,
+                icon: Icon(actionIcon),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 
-                                  return IconButton(
-                                    icon: Stack(
-                                      children: [
-                                        const Icon(Icons.fiber_new),
-                                        if (hasTabWithTag.hasTagInAnyForm)
-                                          Positioned(
-                                            right: 0,
-                                            top: 0,
-                                            child: Icon(
-                                              Icons.circle,
-                                              size: 6,
-                                              color: hasTabWithTag.color(context),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    onPressed: () {
-                                      SearchHandler.instance.addTabByString(
-                                        widget.tag,
-                                        customBooru: selectedBooru,
-                                      );
+  Widget buildPreviewContent(SearchTab previewTab) {
+    final items = previewTab.booruHandler.filteredFetched;
+    if (items.isEmpty) {
+      if (loading) {
+        return buildPreviewMessage(
+          icon: Icons.search_rounded,
+          message: context.loc.tagView.previewIsLoading,
+          isLoading: true,
+        );
+      }
+      if (errorString.isNotEmpty) {
+        return buildPreviewMessage(
+          icon: Icons.error_outline_rounded,
+          message: context.loc.tagView.failedToLoadPreview,
+          isError: true,
+          onAction: () => loadPreview(refresh: true),
+        );
+      }
+      return buildPreviewMessage(
+        icon: Icons.search_off_rounded,
+        message: context.loc.nothingFound,
+        onAction: isLastPage ? null : loadPreview,
+        actionLabel: MaterialLocalizations.of(context).nextPageTooltip,
+        actionIcon: Icons.navigate_next_rounded,
+      );
+    }
 
-                                      FlashElements.showSnackbar(
-                                        context: context,
-                                        isKeyUnique: true,
-                                        key: 'added_new_tab',
-                                        duration: const Duration(seconds: 2),
-                                        title: Text(
-                                          context.loc.tagView.addedNewTab,
-                                          style: const TextStyle(fontSize: 20),
-                                        ),
-                                        content: Text(widget.tag, style: const TextStyle(fontSize: 16)),
-                                        leadingIcon: Icons.fiber_new,
-                                        sideColor: Colors.green,
-                                        primaryActionBuilder: (context, controller) {
-                                          return Row(
-                                            children: [
-                                              IconButton(
-                                                onPressed: () {
-                                                  ServiceHandler.vibrate();
-                                                  if (settingsHandler.appMode.value.isMobile) {
-                                                    Navigator.of(context).popUntil((r) => r.isFirst); // exit viewer
-                                                  }
-                                                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                                                    SearchHandler.instance.changeTabIndex(
-                                                      SearchHandler.instance.tabs.length - 1,
-                                                    );
-                                                  });
-                                                  controller.dismiss();
-                                                },
-                                                icon: Icon(
-                                                  Icons.arrow_forward_rounded,
-                                                  color: Theme.of(context).colorScheme.onSurface,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 4),
-                                              IconButton(
-                                                onPressed: () => controller.dismiss(),
-                                                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-                                    },
-                                    onLongPress: () async {
-                                      await ServiceHandler.vibrate();
-                                      if (settingsHandler.appMode.value.isMobile) {
-                                        Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
-                                      }
-                                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                                        SearchHandler.instance.addTabByString(
-                                          widget.tag,
-                                          customBooru: selectedBooru,
-                                          switchToNew: true,
-                                        );
-                                      });
-                                    },
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          width: context.mediaSize.width,
-                          height: 60,
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: SettingsBooruDropdown(
-                            title: context.loc.booru,
-                            placeholder: context.loc.tagView.selectBooruToLoad,
-                            value: selectedBooru,
-                            items: settingsHandler.booruList,
-                            contentPadding: EdgeInsets.zero,
-                            onChanged: (value) {
-                              selectedBooru = value;
-                              loadPreview(refresh: true);
-                            },
-                            titleAsLabel: true,
-                            drawBottomBorder: false,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: 180 + 10 + 16, // card + listview paddings
-                          width: MediaQuery.sizeOf(context).width,
-                          child: NotificationListener<ScrollUpdateNotification>(
-                            onNotification: (notif) {
-                              final bool isNotAtStart = notif.metrics.pixels > 0;
-                              final bool isAtOrNearEdge =
-                                  notif.metrics.atEdge ||
-                                  notif.metrics.pixels >
-                                      (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2));
-                              final bool isScreenFilled =
-                                  notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0;
+    return Column(
+      mainAxisSize: .min,
+      children: [
+        SizedBox(
+          height: 206,
+          child: NotificationListener<ScrollUpdateNotification>(
+            onNotification: (notif) {
+              final isNotAtStart = notif.metrics.pixels > 0;
+              final isAtOrNearEdge =
+                  notif.metrics.atEdge ||
+                  notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2));
+              final isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0;
 
-                              if (!loading) {
-                                if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
-                                  loadPreview();
-                                }
-                              }
-
-                              return true;
-                            },
-                            child: Scrollbar(
-                              controller: scrollController,
-                              interactive: true,
-                              thickness: 6,
-                              thumbVisibility: true,
-                              child: Listener(
-                                onPointerSignal: (event) => desktopPointerScroll(scrollController, event),
-                                child: FadingEdgeScrollView.fromScrollView(
-                                  child: ListView.builder(
-                                    controller: scrollController,
-                                    shrinkWrap: true,
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: tab!.booruHandler.filteredFetched.isEmpty
-                                        ? 1
-                                        : tab!.booruHandler.filteredFetched.length +
-                                              ((loading || errorString.isNotEmpty) ? 1 : 0),
-                                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-                                    itemBuilder: (context, index) {
-                                      if (tab!.booruHandler.filteredFetched.isEmpty) {
-                                        return Center(
-                                          child: Column(
-                                            // mainAxisSize: MainAxisSize.max,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              const Kaomoji(
-                                                category: KaomojiCategory.indifference,
-                                                style: TextStyle(fontSize: 24),
-                                              ),
-                                              Text(
-                                                context.loc.nothingFound,
-                                                style: const TextStyle(fontSize: 16),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }
-
-                                      if (loading && index == tab!.booruHandler.filteredFetched.length) {
-                                        return const Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 32),
-                                            child: CircularProgressIndicator(),
-                                          ),
-                                        );
-                                      }
-
-                                      if (errorString.isNotEmpty && index == tab!.booruHandler.filteredFetched.length) {
-                                        return Center(
-                                          child: Container(
-                                            padding: const EdgeInsets.all(16),
-                                            margin: const EdgeInsets.all(16),
-                                            decoration: BoxDecoration(
-                                              color: Theme.of(context).colorScheme.surface,
-                                              border: Border.all(color: Theme.of(context).dividerColor),
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              spacing: 8,
-                                              children: [
-                                                const Icon(
-                                                  Icons.error_outline,
-                                                  size: 30,
-                                                ),
-                                                Text(
-                                                  context.loc.tagView.failedToLoadPreviewPage,
-                                                  style: const TextStyle(fontSize: 16),
-                                                ),
-                                                ElevatedButton(
-                                                  onPressed: () {
-                                                    loadPreview(retry: true);
-                                                  },
-                                                  child: Text(context.loc.tagView.tryAgain),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      }
-
-                                      return Material(
-                                        color: Colors.transparent,
-                                        child: Container(
-                                          padding: const EdgeInsets.only(right: 8),
-                                          height: 180,
-                                          width: 120,
-                                          child: ValueListenableBuilder(
-                                            valueListenable: viewedIndex,
-                                            builder: (context, viewedIndex, _) {
-                                              return ThumbnailCardBuild(
-                                                index: index,
-                                                item: tab!.booruHandler.filteredFetched[index],
-                                                handler: tab!.booruHandler,
-                                                scrollController: scrollController,
-                                                isHighlighted: viewedIndex == index,
-                                                selectable: false,
-                                                onTap: onPreviewTap,
-                                                onDoubleTap: onPreviewDoubleTap,
-                                                // onLongPress: onPreviewLongPress, // TODO use select here somehow?
-                                                onSecondaryTap: onPreviewSecondaryTap,
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
+              if (!loading && (!isScreenFilled || (isNotAtStart && isAtOrNearEdge))) {
+                loadPreview();
+              }
+              return true;
+            },
+            child: Scrollbar(
+              controller: scrollController,
+              interactive: true,
+              thickness: 6,
+              thumbVisibility: true,
+              child: Listener(
+                onPointerSignal: (event) => desktopPointerScroll(scrollController, event),
+                child: FadingEdgeScrollView.fromScrollView(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: items.length + (loading ? 1 : 0),
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                    itemBuilder: (context, index) {
+                      if (index == items.length) {
+                        return SizedBox(
+                          width: 64,
+                          child: Center(
+                            child: SizedBox.square(
+                              dimension: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ),
+                        );
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsetsDirectional.only(end: 8),
+                        child: SizedBox(
+                          width: 112,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: ValueListenableBuilder(
+                              valueListenable: viewedIndex,
+                              builder: (context, viewedIndex, _) {
+                                return ThumbnailCardBuild(
+                                  index: index,
+                                  item: items[index],
+                                  handler: previewTab.booruHandler,
+                                  scrollController: scrollController,
+                                  isHighlighted: viewedIndex == index,
+                                  selectable: false,
+                                  onTap: onPreviewTap,
+                                  onDoubleTap: onPreviewDoubleTap,
+                                  onSecondaryTap: onPreviewSecondaryTap,
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                        const SizedBox(height: 12),
-                      ],
-                    )),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (errorString.isNotEmpty && !loading)
+          buildPreviewMessage(
+            icon: Icons.error_outline_rounded,
+            message: context.loc.tagView.failedToLoadPreviewPage,
+            isError: true,
+            onAction: () => loadPreview(retry: true),
+          )
+        else
+          const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final previewTab = tab;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    // Give dialogs an intrinsic width without measuring the lazy thumbnail list.
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Material(
+          color: colorScheme.surfaceContainerLow,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: colorScheme.outlineVariant),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: AnimatedSize(
+            duration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 200),
+            alignment: Alignment.topCenter,
+            child: Column(
+              mainAxisSize: .min,
+              crossAxisAlignment: .stretch,
+              children: [
+                buildPreviewHeader(previewTab),
+                buildPreviewControls(previewTab),
+                if (previewTab != null) buildPreviewContent(previewTab),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
