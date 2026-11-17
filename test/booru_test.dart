@@ -8,6 +8,7 @@ import 'package:lolisnatcher/src/boorus/e621_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooru_alikes_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooruv1_handler.dart';
+import 'package:lolisnatcher/src/boorus/hybooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/ink_bunny_handler.dart';
 import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
@@ -103,6 +104,30 @@ Future<void> main() async {
         hardFetchedLength: false,
       );
       expect(booruHandler, isA<GelbooruV1Handler>());
+    });
+    test('HybooruHandler', () async {
+      // Tag caching touches SearchHandler, which these handler tests do not register.
+      SettingsHandler.instance.dbEnabled = false;
+      final BooruHandler booruHandler = await testBooru(
+        Booru('hybooru', BooruType.Hybooru, '', 'https://booru.funmaker.moe', ''),
+      );
+      expect(booruHandler, isA<HybooruHandler>());
+      final BooruItem item = booruHandler.fetched.first;
+      expect(item.fileURL, contains('/files/f'));
+      expect(item.thumbnailURL, contains('.thumbnail'));
+      expect((await DioNetwork.head(item.fileURL)).statusCode, equals(200));
+      expect((await DioNetwork.head(item.thumbnailURL)).statusCode, equals(200));
+
+      final loaded = await booruHandler.loadItem(item: item);
+      expect(loaded.failed, equals(false));
+      expect(loaded.item?.tagsList, isNotEmpty);
+
+      final suggestions = await booruHandler.getTagSuggestions('blu');
+      expect(suggestions.isRight(), equals(true));
+      expect(
+        suggestions.fold((error) => 0, (tags) => tags.length),
+        greaterThan(1),
+      );
     });
     test('InkBunnyHandler', () async {
       final BooruHandler booruHandler = await testBooru(
